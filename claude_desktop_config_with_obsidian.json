@@ -1,0 +1,73 @@
+{
+  "mcpServers": {
+    "docker-gateway": {
+      "command": "docker",
+      "args": ["mcp", "gateway", "run"]
+    },
+    "text-editor": {
+      "command": "uvx",
+      "args": ["mcp-text-editor"]
+    },
+    "n8n-mcp": {
+      "command": "/Users/michel/.nvm/versions/node/v20.19.5/bin/node",
+      "args": ["/Users/michel/Documents/MCP_Servers/n8n-mcp/dist/mcp/index.js"],
+      "env": {
+        "MCP_MODE": "stdio",
+        "LOG_LEVEL": "error",
+        "DISABLE_CONSOLE_OUTPUT": "true"
+      }
+    },
+    "mem0": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/michel/Documents/MCP_Servers/mem0-mcp",
+        "run",
+        "main.py",
+        "--stdio"
+      ],
+      "env": {
+        "TRANSPORT": "stdio",
+        "LLM_PROVIDER": "claude",
+        "MEM0_MODE": "local",
+        "MEMORY_STORAGE_PATH": "./mem0_mcp_db",
+        "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2"
+      }
+    },
+    "openrouterai": {
+      "command": "/opt/homebrew/bin/npx",
+      "args": ["-y", "@mcpservers/openrouterai"],
+      "env": {
+        "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
+        "OPENROUTER_API_KEY": "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",
+        "OPENROUTER_DEFAULT_MODEL": "qwen/qwen2.5-vl-32b-instruct:free",
+        "OPENROUTER_MAX_TOKENS": "2048",
+        "OPENROUTER_PROVIDER_QUANTIZATIONS": "fp16,int8",
+        "OPENROUTER_PROVIDER_IGNORE": "openai,anthropic",
+        "MCP_MODE": "stdio"
+      },
+      "timeout": 30000
+    },
+    "obsidian-rag": {
+      "command": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python",
+      "args": ["/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/obsidian_rag_mcp_fixed.py"],
+      "env": {
+        "VAULT_PATH": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel",
+        "LIGHTRAG_DIR": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/lightrag_db"
+      }
+    },
+    "obsidian-mcp": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "--network", "host",
+        "-v", "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel:/vault",
+        "-e", "OBSIDIAN_API_KEY=ca0b5a76021892751c363a853e65f4dfdcea643257b82794e02c5e57d1d2fedc",
+        "-e", "OBSIDIAN_API_URL=https://127.0.0.1:27124",
+        "mcp/obsidian"
+      ]
+    }
+  }
+}

@@ -1,0 +1,40 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone and install LightRAG
+RUN git clone https://github.com/HKUDS/LightRAG.git && \
+    pip install --no-cache-dir -e ./LightRAG
+
+# Install additional dependencies
+RUN pip install --no-cache-dir \
+    flask \
+    requests \
+    ollama
+
+# Copy application files
+COPY lightrag_service.py .
+
+# Create database directory
+RUN mkdir -p /app/lightrag_db /app/vault
+
+# Expose port
+EXPOSE 8001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Run the service
+CMD ["python", "lightrag_service.py"]
+
+
+

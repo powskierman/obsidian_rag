@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+venv_*/
+
+# Logs
+*.log
+Scripts/logs/
+
+# Databases
+chroma_db/
+lightrag_db/
+mem0_db/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+cleanup_analysis.md
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd

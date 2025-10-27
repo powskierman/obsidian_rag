@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # ChromaDB Embedding Service
+  embedding-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.embedding
+    container_name: obsidian-embedding
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma_db:/app/chroma_db:rw
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+
+  # LightRAG Knowledge Graph Service
+  lightrag-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.lightrag
+    container_name: obsidian-lightrag
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./lightrag_db:/app/lightrag_db:rw
+      - "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel:/app/vault:ro"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5-coder:14b}
+      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
+      - LIGHTRAG_DIR=/app/lightrag_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+    depends_on:
+      - embedding-service
+
+  # Streamlit UI
+  streamlit-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: obsidian-ui
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit.log:/app/streamlit.log:rw
+    environment:
+      - PYTHONUNBUFFERED=1
+      - EMBEDDING_SERVICE_URL=http://embedding-service:8000
+      - LIGHTRAG_SERVICE_URL=http://lightrag-service:8001
+      - OLLAMA_HOST=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - rag-network
+    depends_on:
+      - embedding-service
+      - lightrag-service
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  chroma_db:
+  lightrag_db:
+
