@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker logs:*)",
+      "Bash(curl -X POST http://localhost:8001/query -H \"Content-Type: application/json\" -d '{\"\"\"\"query\"\"\"\": \"\"\"\"Matter\"\"\"\", \"\"\"\"mode\"\"\"\": \"\"\"\"global\"\"\"\"}')",
+      "Read(//Users/michel/**)",
+      "Bash(docker exec:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -27,9 +27,21 @@ EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 # Set Ollama host
 os.environ["OLLAMA_HOST"] = OLLAMA_HOST
 
-# Global RAG instance
+# Global RAG instance and event loop
 rag_instance = None
 rag_lock = asyncio.Lock()
+_loop = None
+
+
+def get_or_create_loop():
+    """Get or create a global event loop"""
+    global _loop
+    try:
+        _loop = asyncio.get_event_loop()
+    except RuntimeError:
+        _loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(_loop)
+    return _loop
 
 
 async def get_rag():
@@ -47,11 +59,24 @@ async def get_rag():
                 embedding_func=EmbeddingFunc(
                     embedding_dim=768,
                     func=lambda texts: ollama_embed(
-                        texts, 
+                        texts,
                         embed_model=EMBED_MODEL,
                         host=OLLAMA_HOST
                     )
                 ),
+                # Fix the cosine thresholds for better matching
+                cosine_threshold=0.05,  # Lower threshold for initial filtering
+                cosine_better_than_threshold=0.05,  # Lower threshold for result ranking
+                # Increase retrieval limits
+                top_k=100,  # More entities per query
+                chunk_top_k=50,  # More chunks per query
+                max_total_tokens=60000,  # More context
+                # Reduce async concurrency to avoid event loop conflicts
+                embedding_func_max_async=2,  # Reduce from default 8
+                llm_model_max_async=2,  # Reduce from default 4
+                # Improve chunking
+                chunk_token_size=800,  # Smaller chunks for better matching
+                chunk_overlap_token_size=200,  # More overlap
             )
             await rag_instance.initialize_storages()
             await initialize_pipeline_status()
@@ -125,6 +150,33 @@ def insert_documents():
         return jsonify({"error": str(e)}), 500
 
 
+async def _do_query_async(query_text, mode):
+    """Helper async method for querying"""
+    rag = await get_rag()
+    
+    # Optimized query parameters for faster processing while maintaining quality
+    if mode in ['global', 'hybrid']:
+        # For computationally expensive modes, reduce parameters
+        param = QueryParam(
+            mode=mode,
+            chunk_top_k=50,  # Reduced for faster processing
+            top_k=75,  # Reduced entities for speed
+            max_total_tokens=32000,  # Reduced token limit
+            only_need_context=False
+        )
+    else:
+        # For local/naive modes, can use higher values
+        param = QueryParam(
+            mode=mode,
+            chunk_top_k=100,
+            top_k=150,
+            max_total_tokens=60000,
+            only_need_context=False
+        )
+    result = await rag.aquery(query_text, param=param)
+    return result
+
+
 @app.route('/query', methods=['POST'])
 def query_graph():
     """Query the knowledge graph using LightRAG"""
@@ -141,14 +193,9 @@ def query_graph():
         if mode not in valid_modes:
             return jsonify({"error": f"Invalid mode. Use: {valid_modes}"}), 400
         
-        # Run async query
-        async def do_query():
-            rag = await get_rag()
-            param = QueryParam(mode=mode)
-            result = await rag.aquery(query_text, param=param)
-            return result
-        
-        result = asyncio.run(do_query())
+        # Run async query using asyncio.run (creates a fresh event loop each time)
+        # This avoids the "different event loop" error
+        result = asyncio.run(_do_query_async(query_text, mode))
         
         return jsonify({
             "query": query_text,

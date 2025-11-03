@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
 COPY streamlit_ui_docker.py .
+COPY .streamlit/ .streamlit/
 
 # Expose port
 EXPOSE 8501

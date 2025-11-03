@@ -1,0 +1,318 @@
+================================================================================
+Result 1
+================================================================================
+
+Filename: Install a Specific Version of ESP-IDF.md
+Path: Tech/Electronics/Hardware/ESP/Install a Specific Version of ESP-IDF.md
+Relevance: 166.7%
+
+Content:
+# Port GazeboWx to Home Assistant
+Date: 2024-09-01
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Steps to Port the Code to Home Assistant
+1. Set Up Home Assistant and ESPHome
+Install Home Assistant: Ensure that Home Assistant is installed on your system. It can be on a Raspberry Pi, a virtual machine, or any compatible device.
+Install ESPHome Add-on: In Home Assistant, go to the Add-On Store and install the ESPHome add-on. This will allow you to manage and configure your ESP32 devices directly from Home Assistant
+2. Configure ESPHome for Your ESP32
+```
+esphome:
+  name: gazebo_controller
+  platform: ESP32
+  board: esp32dev
+
+wifi:
+  ssid: "YOUR_WIFI_SSID"
+  password: "YOUR_WIFI_PASSWORD"
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+sensor:
+  - platform: dht
+    pin: GPIO2
+    model: DHT22
+    temperature:
+      name: "Gazebo Temperature"
+    humidity:
+      name: "Gazebo Humidity"
+    update_interval: 60s
+
+================================================================================
+Result 2
+================================================================================
+
+Filename: ESP-IDF MoC.md
+Path: Tech/Electronics/Hardware/ESP/ESP-IDF MoC.md
+Relevance: 105.2%
+
+Content:
+.  Remove existing ESP-IDF directories:
+    
+    -   Delete the `esp` folder in your user directory (e.g. C:\\Users<username>\\esp)
+    -   Delete the `.espressif` folder in your user directory
+    
+3.  Remove ESP-IDF from system PATH:
+    
+    -   Open System Properties > Advanced > Environment Variables
+    -   Remove any ESP-IDF related entries from both User and System variables
+    
+
+## Install Standalone ESP-IDF
+
+1.  Download ESP-IDF from [Standard Toolchain Setup for Linux and macOS - ESP32 - — ESP-IDF Programming Guide v5.3 documentation](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/linux-macos-setup.html)
+    
+2.  Set up environment variables:
+    
+    -   Open a command prompt
+    -   Navigate to your ESP-IDF directory
+    -   Run `export.bat`
+    
+3.  Verify the installation:
+    
+    -   In the same command prompt, run: `idf.py --version`
+        
+    -   It should display the ESP-IDF version
+    
+
+## Install ESP-IDF Extension in VS Code
+
+1
+
+================================================================================
+Result 3
+================================================================================
+
+Filename: ESP-IDF Reinstall.md
+Path: Tech/Electronics/Hardware/ESP/ESP-IDF Reinstall.md
+Relevance: 69.7%
+
+Content:
+3.  Verify the installation:
+    
+    -   In the same command prompt, run: `idf.py --version`
+        
+    -   It should display the ESP-IDF version
+    
+
+## Install ESP-IDF Extension in VS Code
+
+1.  Open Visual Studio Code
+2.  Install the ESP-IDF extension:
+    
+    -   Go to the Extensions view (Ctrl+Shift+X)
+    -   Search for "ESP-IDF"
+    -   Click "Install" on the official Espressif ESP-IDF extension
+    
+3.  Configure the ESP-IDF extension:
+    
+    -   Press Ctrl+Shift+P to open the command palette
+    -   Type "ESP-IDF: Configure ESP-IDF extension" and select it
+    -   Choose "Express"
+    -   Select the same ESP-IDF version you installed standalone
+    -   Set the ESP-IDF directory to where you installed it (e.g. C:\\esp\\esp-idf)
+    -   Set the ESP-IDF tools directory (usually C:\\Espressif)
+    -   Click "Install" and wait for the process to complete
+    
+4
+
+================================================================================
+Result 4
+================================================================================
+
+Filename: esp-idf courses.md
+Path: Tech/Electronics/Hardware/ESP/esp-idf courses.md
+Relevance: 57.1%
+
+Content:
+# esp-idf Monitor
+Date: 2023-09-16
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- Terminate monitor
+	- <Kbd>Ctrl<Kbd>+[
+
+================================================================================
+Result 5
+================================================================================
+
+Filename: Home-Assistant MoC.md
+Path: Tech/Electronics/Software/Home-Assistant/media/Home-Assistant MoC.md
+Relevance: 53.7%
+
+Content:
+ort.sh`
+
+6. Now you can use this specific version of ESP-IDF for your project.
+
+To switch between different versions of ESP-IDF:
+
+1. You can keep multiple versions installed in separate directories.
+2. When you want to use a specific version, navigate to its directory and run the export script:
+
+bash
+
+`cd path/to/esp-idf-version . ./export.sh`
+
+3. This will set up the environment variables for that specific version.
+
+Remember that different versions of ESP-IDF may have different features, APIs, or requirements. Make sure your project is compatible with the version you're using[](https://www.reddit.com/r/esp32/comments/17qqcc3/request_helpdowngrading_esp_idf/)[](https://stackoverflow.com/questions/75819503/running-multiple-versions-of-esp-idf-concurrently).If you're using VSCode with the ESP-IDF extension, you can configure it to use a specific ESP-IDF version in your workspace settings[](https://stackoverflow.com/questions/75819503/running-multiple-versions-of-esp-idf-concurrently).
+
+================================================================================
+Result 6
+================================================================================
+
+Filename: Vscode esp-idf.md
+Path: Tech/Programming-Tools/Visual-Studio-Code/Vscode esp-idf.md
+Relevance: 50.7%
+
+Content:
+er esp-idf projects benefit from compilation in the native arm64 architecture.
+	- We therefore need to have 2 environments installed:
+	- Set environment for x86
+	- $env /usr/bin/arch -x86_64 /bin/zsh
+	- [[Iterm]]
+-
+
+================================================================================
+Result 7
+================================================================================
+
+Filename: ESP-IDF Error Handling.md
+Path: Tech/Electronics/Hardware/ESP/ESP-IDF Error Handling.md
+Relevance: 42.6%
+
+Content:
+ESP-IDF directory to where you installed it (e.g. C:\\esp\\esp-idf)
+    -   Set the ESP-IDF tools directory (usually C:\\Espressif)
+    -   Click "Install" and wait for the process to complete
+    
+4.  Verify the VS Code setup:
+    
+    -   Open a new VS Code window
+    -   Press Ctrl+Shift+P
+    -   Type "ESP-IDF: New project" and create a sample project
+    -   Try building the project using the ESP-IDF extension commands
+
+================================================================================
+Result 8
+================================================================================
+
+Filename: ESP_IDF Troubleshooting.md
+Path: Tech/Electronics/Hardware/ESP/ESP_IDF Troubleshooting.md
+Relevance: 28.4%
+
+Content:
+# Install a Specific Version of ESP-IDF
+Date: 2024-08-19
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+
+#### Steps to use a previous version of ESP-IDF:
+
+1. Determine which version of ESP-IDF you want to use. You can check the available releases on the ESP-IDF GitHub repository: [https://github.com/espressif/esp-idf/releases](https://github.com/espressif/esp-idf/releases)
+2. Clone the specific version of ESP-IDF you want to use. For example, to use v4.3.3:
+
+bash
+
+`git clone -b v4.3.3 --recursive https://github.com/espressif/esp-idf.git esp-idf-v4.3.3`
+
+3. Change to the new ESP-IDF directory:
+
+bash
+
+`cd esp-idf-v4.3.3`
+
+4. Run the installation script:
+
+bash
+
+`./install.sh`
+
+5. Set up the environment variables for this version:
+
+bash
+
+`. ./export.sh`
+
+6. Now you can use this specific version of ESP-IDF for your project.
+
+To switch between different versions of ESP-IDF:
+
+1. You can keep multiple versions installed in separate directories.
+2
+
+================================================================================
+Result 9
+================================================================================
+
+Filename: esp-idf Monitor.md
+Path: Tech/Electronics/Hardware/Nordic/esp-idf Monitor.md
+Relevance: 14.8%
+
+Content:
+al Intelligence. For example, Espressif has released an [OpenAI component](https://docs.espressif.com/projects/esp-iot-solution/en/latest/ai/openai.html), a version of the OpenAI-ESP32 Arduino library. This component and library allow your ESP32-powered project to access OpenAI’s LLMs, with all this entails for its potential applications.
+
+One idea is to build voice-controlled devices. With the onboard microphone and OpenAI’s natural language processing capabilities, you could create a smart home assistant that responds to your commands with context-aware answers. Imagine being able to ask your device to dim the lights, report the current weather, or even explain why a sensor is reading an unusual value—all in natural conversation.
+
+This setup could also take environmental monitoring to the next level. The sensors on the board can gather data like temperature, humidity, or light intensity, while the OpenAI integration turns that raw data into meaningful insights
+
+================================================================================
+Result 10
+================================================================================
+
+Filename: Error building for macOS-x86_64.md
+Path: Tech/Operating Systems/MacOS/Error building for macOS-x86_64.md
+Relevance: 10.2%
+
+Content:
+# ESP-IDF New Project
+Date: 2022-11-16
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [IDF Frontend - idf.py](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-py.html)
+- [ESP32 GPIO with ESP-IDF with LED Blinking example](https://esp32tutorials.com/esp32-gpio-esp-idf-led-blinking-example/)
+- 
+### Notes
+- In VSCode:
+	- <Kbd>CMD-SHFT-P<Kbd> (Palette)
+	- esp-idf new project
+- In esp-idf:
+	- ./install.sh
+	- source export.sh
+	-  cd ..
+- 
+- Build:
+	- cd to project directory
+	- set the correct chip target: 
+		- idf.py --preview set-target esp32c3
+	- Create project
+		- idf.py create-project -p . projectName
+	- Adjust environment
+

@@ -34,7 +34,7 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="obsidian_simple_search",
-            description="Search your Obsidian vault using semantic search. Returns relevant note chunks with citations and relevance scores.",
+            description="Search your Obsidian vault using semantic search. Returns top filenames and relevance scores (2 results max).",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -44,8 +44,8 @@ async def list_tools() -> list[Tool]:
                     },
                     "n_results": {
                         "type": "integer",
-                        "description": "Number of results to return (1-20)",
-                        "default": 10
+                        "description": "Number of results to return (1-3)",
+                        "default": 3
                     }
                 },
                 "required": ["query"]
@@ -95,7 +95,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 async def search_vault(arguments: dict) -> list[TextContent]:
     """Search vault using semantic search"""
     query = arguments.get("query")
-    n_results = arguments.get("n_results", 10)
+    n_results = min(arguments.get("n_results", 3), 3)  # Cap at 3 to prevent overflow
     
     try:
         response = requests.post(
@@ -115,22 +115,17 @@ async def search_vault(arguments: dict) -> list[TextContent]:
             metadatas = results.get('metadatas', [[]])[0]
             distances = results.get('distances', [[]])[0]
             
-            output = f"# 🔍 Vault Search Results: {query}\n\n"
-            output += f"Found {len(documents)} relevant notes:\n\n"
+            # Build concise output - just filenames
+            output = f"Found {len(documents)} notes for '{query}':\n"
             
             for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
                 relevance = (1 - dist) * 100
                 filename = meta.get('filename', 'unknown')
-                filepath = meta.get('filepath', 'unknown')
-                
-                output += f"## {i}. {filename} ({relevance:.0f}% relevant)\n"
-                output += f"**Path:** {filepath}\n\n"
-                output += f"**Content:**\n{doc[:500]}{'...' if len(doc) > 500 else ''}\n\n"
-                output += "---\n\n"
+                output += f"{i}. {filename} ({relevance:.0f}%)\n"
             
             return [TextContent(type="text", text=output)]
         else:
-            return [TextContent(type="text", text=f"Search failed: {response.status_code} - {response.text}")]
+            return [TextContent(type="text", text=f"Search failed: {response.status_code}")]
     
     except Exception as e:
         return [TextContent(type="text", text=f"Search error: {str(e)}")]
@@ -247,6 +242,8 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+
 
 
 

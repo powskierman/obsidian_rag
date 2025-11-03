@@ -219,23 +219,35 @@ if prompt := st.chat_input("Ask about your notes..."):
             else:
                 # Use LightRAG graph search
                 graph_mode = search_mode.replace('graph-', '')
-                with st.spinner(f"🌐 Querying knowledge graph ({graph_mode} mode)..."):
-                    graph_response = requests.post(
-                        f'{LIGHTRAG_SERVICE}/query',
-                        json={
-                            "query": prompt,
-                            "mode": graph_mode
-                        },
-                        timeout=60
-                    )
-                    
-                    if graph_response.status_code != 200:
-                        st.error("Graph query failed")
+                progress_text = f"🌐 Querying knowledge graph ({graph_mode} mode)..."
+                if graph_mode in ['global', 'hybrid']:
+                    progress_text += " This may take several minutes for complex analysis."
+
+                with st.spinner(progress_text):
+                    try:
+                        graph_response = requests.post(
+                            f'{LIGHTRAG_SERVICE}/query',
+                            json={
+                                "query": prompt,
+                                "mode": graph_mode
+                            },
+                            timeout=300  # Increased to 5 minutes for graph processing
+                        )
+
+                        if graph_response.status_code != 200:
+                            st.error("Graph query failed")
+                            st.stop()
+
+                        graph_result = graph_response.json()
+                        context_text = graph_result.get('result', '')
+                        sources_list = [{"filename": "Knowledge Graph", "filepath": "LightRAG", "relevance": 100}]
+
+                    except requests.exceptions.Timeout:
+                        st.error("⏱️ Graph query timed out. Try using 'graph-local' mode for faster results, or simplify your query.")
                         st.stop()
-                    
-                    graph_result = graph_response.json()
-                    context_text = graph_result.get('result', '')
-                    sources_list = [{"filename": "Knowledge Graph", "filepath": "LightRAG", "relevance": 100}]
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"Graph query failed: {str(e)}")
+                        st.stop()
             
             if not context_text or context_text.strip() == "":
                 st.warning("No relevant information found")
