@@ -1,0 +1,28 @@
+---
+title: Bambu AMS LED Status
+source: https://wiki.bambulab.com/en/x1/troubleshooting/ams-led-status
+created: 2024-10-29
+description: This article provides information on how to troubleshoot AMS issues based on the LED lights
+tags:
+  - 3d-printing
+  - bambu
+  - P1S
+  - troubleshooting
+Backlink: "[[Bambu Labs MoC]]"
+---
+
+## ¶ LED status
+
+| **LED status** | **AMS status** |
+| --- | --- |
+| 4 white lights flash in turn | Normal status. No filament in all 4 slots |
+| White light keeps on | Normal status. The slot has a filament inserted and is idle. |
+| White light breathing | Normal status. The slot has filament inserted and is in a busy state (feeding, reading RFID, etc.) |
+| Red light single flashing | Error status. It may be that the slot failed to feed the filament, and the filament is detected by the feeder but not by the filament Hub. The filament is inside the AMS |
+| Red light double flashing | Error status. The slot failed to load or unload the filament. The filament is detected by both the feeder and the filament Hub. The filament is outside the AMS |
+| Red light breathing | Error status. No filaments were inserted into the corresponding slots when printing start. It will return to normal after inserting the filament into the feeder |
+| Red light keeps on | Error status. The filament is not detected by the feeder, but by the Filament Hub. It is possible that the filament is broken inside the Filament Hub |
+| All four slots are flashing red light | Error status. AMS communication is abnormal, and AMS cannot be detected by the printer |
+| The LED light is not on | 1\. When the filament is inserted into the slot, the LED lights of other empty slots without filament are not lit, which is normal;  2\. When all 4 slots are empty, if the LED of one slot is always off, it means that the first stage feeder failed to power on and needs to be checked. |
+
+## ¶

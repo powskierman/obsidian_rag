@@ -1,0 +1,18 @@
+# Code-Sense-Symbols.md
+
+---
+aliases: []
+---
+
+2022-06-25
+# Code-Sense-Symbols
+
+### Backlink
+[[Tech/Programming-Tools/Swift/Swift MOC]]
+
+### Reference
+- [Code sense symbols](https://github.com/ccmoret/XcodeCS)
+- 
+### Notes
+
+-

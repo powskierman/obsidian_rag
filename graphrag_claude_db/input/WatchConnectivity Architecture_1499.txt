@@ -1,0 +1,54 @@
+---
+aliases: []
+tags: []
+---
+# WatchConnectivity Architecture
+Date: 2023-12-29
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+```mermaid TI: "Test"
+graph TD
+WatchApp[Watch App] -->|Requests State| PhoneApp[iPhone App]
+    PhoneApp -->|WebSocket Status| WatchApp
+    PhoneApp -->|State Update| WatchApp
+    WatchApp -->|Sends Command| PhoneApp
+    PhoneApp -->|Processes Command| WebSocket[WebSocket Connection]
+    WebSocket -->|Updates State| PhoneApp
+    PhoneApp -->|Notifies Watch| WatchApp
+```
+
+```mermaid
+    graph TD
+    A[Watch App Starts] --> B{WCSession Available?}
+    B -->|Yes| C[Activate WCSession]
+    B -->|No| D[Display Error]
+    C --> E[Request Initial State]
+    E -->|Request Sent| F[Wait for Response]
+    F --> G[iPhone App Receives Request]
+    G -->|Fetch State| H[GarageSocketManager]
+    H --> I[Process State]
+    I --> J[Send State to Watch]
+    J --> K[Watch App Processes State]
+    K --> L[Update UI with State]
+    L --> M[Button Press]
+    M --> N[Send Command to iPhone]
+    N -->|Command Sent| O[Wait for Confirmation]
+    O --> P[iPhone App Receives Command]
+    P -->|Check WebSocket| Q{WebSocket Connected?}
+    Q -->|Yes| R[Process Command via WebSocket]
+    Q -->|No| S[Attempt to Reconnect WebSocket]
+    S -->|Reconnection Success| R
+    S -->|Reconnection Failure| T[Send Error to Watch]
+    T --> U[Watch Displays Error]
+    R --> V[WebSocket Processes Command]
+    V --> W[Update State]
+    W --> X[Notify Watch of Updated State]
+    X --> Y[Watch Processes State Update]
+    Y --> Z[Update UI with New State]
+```
+![[WatchConnectivity.pdf]]

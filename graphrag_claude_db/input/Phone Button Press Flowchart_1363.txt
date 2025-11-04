@@ -1,0 +1,67 @@
+---
+aliases: 
+tags:
+  - garage
+  - flowchart
+---
+# Phone Button Press Flowchart
+Date: 2023-11-26
+
+### Backlink
+[[Garage Flowcharts]]
+
+### Reference
+-  
+### Notes
+#### Button Actuation Flow
+1. **Press Left Door Button**:
+    
+    - Executes when the `GarageDoorButton` for the left door is pressed.
+    - Code: `GarageDoorButton(action: { webSocketManager.handleEntityAction(entityId: "switch.left_garage_door") })`
+2. **Handle Door Toggle**:
+    
+    - Calls the `handleEntityAction` method in `WebSocketManager`.
+    - Code: `webSocketManager.handleEntityAction(entityId: "switch.left_garage_door")`
+3. **WebSocket Connection Check**:
+    
+    - Checks if the WebSocket is connected.
+    - Code: `if webSocketManager.connectionState == .connected { ... }`
+4. **Send Toggle Command or Attempt Reconnect**:
+    
+    - If connected, sends the toggle command.
+    - Code for sending command: `WebSocketManager.setEntityState(entityId: newState)`
+    - If not connected, attempts to reconnect.
+    - Code for reconnection: `WebSocketManager.establishConnectionIfNeeded()`
+5. **Reconnection Logic**:
+    
+    - Handles the success or failure of reconnection attempts.
+#### Door State Update Flow
+6. **Receive Door State via WebSocket**:
+    
+    - The state is received through a WebSocket message.
+    - Code: This would typically be handled in a WebSocket message listener, but the specific code is not provided in your submission.
+7. **Door State Check**:
+    
+    - Checks the received door state.
+    - Code: The state check would be part of the WebSocket message handling logic.
+8. **Display Door State**:
+    
+    - Updates the UI based on the door state.
+    - Code for Closed State: `GarageDoorButton(isClosed: $webSocketManager.leftDoorClosed, ...)`
+    - Code for Open State: Similar to the above, but with `isClosed` set to `false`.
+    - 
+```mermaid
+graph TD
+    A[Press Left Door Button] --> B["webSocketManager.handleEntityAction('switch.left_garage_door')"]
+    B --> C{"WebSocket Connection Check: 
+    if webSocketManager.connectionState == .connected { ... }"}
+    C -->|Connected| D["WebSocketManager.setEntityState()"]
+    C -->|Not Connected| E["WebSocketManager.establishConnectionIfNeeded()"]
+    E -->|Success| D
+    E -->|Failure| F[End Process]
+
+    G[Receive Door State via WebSocket] --> H{"Door State Check:
+    handleWebSocketEvent(event: String)"}
+    H -->|Closed: Update UI for Closed State| I[" GarageDoorButton(isClosed: $webSocketManager.leftDoorClosed, ...)"]
+    H -->|Open| J["Update UI for Open State"]
+    ```

@@ -1,0 +1,29 @@
+---
+aliases: 
+tags:
+  - garage
+  - flowchart
+---
+# PhoneView Flowchart
+Date: 2023-11-26
+
+### Backlink
+[[Garage Flowcharts]]
+
+### Reference
+-  
+### Notes
+```mermaid
+flowchart TD
+    A[Start: PhoneView] -->|OnAppear| B[Establish WebSocket Connection if Needed]
+    A --> C[Display ConnectionStatusBar]
+    C --> D[Garage Door Buttons Stack]
+    D --> E[Left Garage Door Button]
+    E -->|Action| F[Handle Left Door Action in WebSocketManager]
+    D --> G[Right Garage Door Button]
+    G -->|Action| H[Handle Right Door Action in WebSocketManager]
+    D --> I[Alarm Toggle Button]
+    I -->|On Press| J[Show Alarm Confirmation Dialog]
+    J -- Confirm --> K[Toggle Alarm in WebSocketManager]
+    K --> L[End]
+    ```

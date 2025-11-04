@@ -1,0 +1,21 @@
+# Installing pyenv to non-standard location.md
+
+---
+aliases: []
+tags: []
+---
+# Installing pyenv to non-standard location
+Date: 2022-12-13
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  The PYENV_ROOT is an environment variable that specifies the root directory of pyenv. If you want pyenv to be installed in non-standard location, export PYENV_ROOT explicitly in your shell.
+
+```export PYENV_ROOT="${HOME}/.dotfiles/pyenv"
+export PATH="${PYENV_ROOT}/bin:${PATH}"
+eval "$(pyenv init -)"
+```

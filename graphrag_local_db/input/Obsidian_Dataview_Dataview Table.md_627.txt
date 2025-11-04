@@ -1,0 +1,27 @@
+# Dataview Table.md
+
+---
+aliases:
+tags:
+created: 2022-07-05 14:38
+ContentType: Note
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+```dataview
+TABLE id, updated, highlights, last_highlight AS "Last Highlight"
+FROM "Books"
+SORT last_highlight DESC
+```
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

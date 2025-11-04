@@ -1,0 +1,161 @@
+# Making Connections.md
+
+---
+aliases:
+tags:
+  - obsidian
+  - organisation
+created: 2025-08-27 15:41
+ContentType: tutorial
+Backlink:
+---
+### Main Idea
+- How to organize a vault 
+### References
+- 
+### Notes
+- Here's how to systematically create meaningful connections once your book data is in Obsidian:
+	- Start with Simple Connections
+	- Author Connections:
+		- Create author pages and link books to them:
+	- markdown# Marcus Aurelius
+- #### Examples
+	- Books by this author:
+		- [[Meditations]]	- [[Letters from a Stoic]] (actually Seneca, but related)
+- #### Key themes across works:
+	- Stoic philosophy
+	- Personal discipline
+	- Leadership principles
+- #### Authors with similar ideas:
+	- [[Seneca]]
+	- [[Epictetus]]
+- #### Series/Topic Clustering:
+	- markdown# Stoic Philosophy
+
+- #### Core books:
+	- [[Meditations]] by [[Marcus Aurelius]]
+	- [[Letters from a Stoic]] by [[Seneca]]
+	- [[Discourses]] by [[Epictetus]]
+- #### Modern applications:
+	- [[The Obstacle Is the Way]] by [[Ryan Holiday]]
+	- [[Antifragile]] by [[Nassim Taleb]]
+- #### Concept-Based Connections
+	- Create Concept Notes:
+	- Instead of just linking books, create notes for big ideas:
+		- markdown# Compound Interest
+- #### Books that discuss this:
+	- [[The Compound Effect]] - Dale Carnegie version
+	- [[Atomic Habits]] - habit compounding
+	- [[The Intelligent Investor]] - financial compounding
+	- [[The Power of Moments]] - experience compounding
+- #### Key insights:
+	- Small actions compound over time
+	- Works in finance, habits, relationships, learning
+	- Einstein allegedly called it "8th wonder of the world"
+- #### My synthesis:
+	- The compound principle applies to more than money...
+	- Cross-Topic Connections:
+	- markdown# Decision Making
+- #### Psychology perspective:
+- [[Thinking, Fast and Slow]] - cognitive biases
+- [[Predictably Irrational]] - behavioral economics
+
+- #### Business perspective:
+	- [[Good to Great]] - disciplined decision frameworks
+	- [[The Lean Startup]] - rapid experimentation
+- #### Philosophy perspective:
+	- [[Meditations]] - rational decision making
+	- [[The Art of War]] - strategic thinking
+- #### Common threads:
+	- All emphasize the importance of...
+	- Advanced Connection Strategies
+	Contradiction Maps:
+	- Find books that disagree with each other:
+	- markdown# Happiness: Different Approaches
+- #### Hedonic approach:
+	- [[The How of Happiness]] - pursue positive emotions
+- #### Stoic approach:
+	- [[Meditations]] - happiness through virtue, not emotion
+- #### Flow approach:
+	- [[Flow]] - happiness through engagement
+- #### My take:
+	- Maybe they're all partially right...
+	Evolution of Ideas:
+	- Track how concepts developed:
+	- markdown# Evolution of Management Theory
+	- 1920s: [[The Principles of Scientific Management]] - efficiency focus
+	- 1960s: [[The Human Side of Enterprise]] - people focus  
+	- 1990s: [[Built to Last]] - culture focus
+	- 2000s: [[Good to Great]] - leadership focus
+	- 2010s: [[The Lean Startup]] - agility focus
+- #### Pattern I notice:
+	- Management theory seems to swing between...
+	Personal Application Links:
+	- Connect books to your life:
+	- markdown# My Leadership Development
+- #### Books read:
+	- [[The 7 Habits]] - principle-centered leadership
+	- [[Radical Candor]] - communication style
+	- [[The Culture Code]] - team dynamics
+- #### What I'm implementing:
+	- Weekly one-on-ones (from Radical Candor)
+	- Begin with end in mind (from 7 Habits)
+	- Psychological safety (from Culture Code)
+- #### Results so far:
+	- Team engagement scores improved...
+	- Systematic Connection Building
+	- Weekly Review Process:
+	- 
+- #### New Connections: 
+	- Look at this week's reading and ask "What does this remind me of?"
+	- Strengthen Existing: Add new insights to existing concept notes
+	- Challenge Assumptions: Find books that contradict your current thinking
+- #### Monthly Deep Dive:
+	- Pick one major concept from your reading
+	- Find all books that touch on it
+	- Create a synthesis note
+	- Look for gaps in your understanding
+- #### Quarterly Themes:
+	- Review your reading patterns
+	- Identify emerging themes
+	- Create higher-level connection maps
+	- Plan future reading to fill gaps
+
+- #### Practical Techniques
+	- Use Obsidian Features:
+		- Tags: #psychology #leadership #decision-making
+		- MOCs (Maps of Content): Create index pages for major topics
+		- Dataview queries: Automatically list related books
+		- Graph view: Visualize connections
+		- Random note: Discover forgotten connections
+	- Connection Prompts:
+		"This reminds me of..."
+		"This contradicts what I learned in..."
+		"This author would agree/disagree with..."
+		"I can apply this to my work in..."
+		"This explains why..."
+	- ##### Example Connection Workflow
+		- ###### While Reading:
+		When you encounter an interesting idea, ask: "Where have I seen this before?"
+		Add a quick link: "This concept of psychological safety also appears in [[Team of Teams]]"
+		Make a note to develop this connection later
+				- After Finishing a Book:
+					- Review your highlights
+					- Identify 3-5 key concepts
+					- Check if you have concept notes for these ideas
+					- Either add to existing concept notes or create new ones
+					- Look for books that support or challenge these ideas
+
+		- ###### During Reviews:
+			- Look at your graph view for isolated notes
+			- Find ways to connect orphaned ideas
+			- Strengthen weak connections with more context
+			- Prune connections that don't add value
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

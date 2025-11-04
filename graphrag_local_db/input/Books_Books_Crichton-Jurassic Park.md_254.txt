@@ -1,0 +1,41 @@
+# Crichton-Jurassic Park.md
+
+---
+bookId: "16953"
+title: "Jurassic Park: A Novel"
+author: Michael Crichton
+asin: B007UH4D3G
+lastAnnotatedDate: 2024-08-06
+highlightsCount: 8
+reference: https://www.amazon.com/dp/B007UH4D3G
+kindle_link: kindle://book?action=open&asin=B007UH4D3G
+tags:
+  - book-notes
+  - novel
+---
+![](https://m.media-amazon.com/images/I/81b2mR9dMWL._SY160.jpg)
+## Highlights
+Studies of predator/prey populations in the game parks of Africa and India suggested that, roughly speaking, there was one predatory carnivore for every four hundred herbivores. — location: [800](kindle://book?action=open&asin=B007UH4D3G&location=800) ^ref-57219
+
+---
+a herd of ten thousand duckbills would support only twenty-five tyrannosaurs. — location: [801](kindle://book?action=open&asin=B007UH4D3G&location=801) ^ref-50067
+
+---
+No three-toed lizard has walked on this planet for two hundred million years.” — location: [813](kindle://book?action=open&asin=B007UH4D3G&location=813) ^ref-49551
+
+---
+Crocodiles are basically Triassic animals living in the present. Sharks are Triassic. — location: [842](kindle://book?action=open&asin=B007UH4D3G&location=842) ^ref-46589
+
+---
+all vertebrate embryos are inherently female. We all start life as females. — location: [1873](kindle://book?action=open&asin=B007UH4D3G&location=1873) ^ref-20669
+
+---
+“The mighty tyrannosaurs arose late in dinosaur history. Dinosaurs ruled the earth for a hundred and twenty million years, but there were tyrannosaurs for only the last fifteen million years of that period.” — location: [2465](kindle://book?action=open&asin=B007UH4D3G&location=2465) ^ref-46096
+
+---
+Studies of frogs had shown that amphibians only saw moving things, like insects. If something didn’t move, they literally didn’t see it. — location: [4434](kindle://book?action=open&asin=B007UH4D3G&location=4434) ^ref-11655
+
+---
+Paradigm” was just another word for a model, but as scientists used it the term meant something more, a world view. — location: [6379](kindle://book?action=open&asin=B007UH4D3G&location=6379) ^ref-13237
+
+---

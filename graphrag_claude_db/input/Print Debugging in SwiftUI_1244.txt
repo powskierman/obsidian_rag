@@ -1,0 +1,29 @@
+---
+aliases: 
+tags:
+  - swiftui
+  - print
+  - Debugging
+---
+# Print Debugging in SwiftUI
+Date: 2023-02-07
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Don't print directly in a view.  Use a closure:   
+```
+let _ = print("Update ContentView")
+```
+
+- Since there is no use for print's return type, use an underscore to ignore the value.
+- or:
+```
+	.onAppear {
+                  print("Update ContentView")
+
+              }
+```

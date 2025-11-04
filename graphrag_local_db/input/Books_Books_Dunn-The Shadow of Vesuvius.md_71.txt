@@ -1,0 +1,25 @@
+# Dunn-The Shadow of Vesuvius.md
+
+---
+bookId: "42576"
+title: "The Shadow of Vesuvius: A Life of Pliny"
+author: Daisy Dunn
+asin: B07P768XXN
+lastAnnotatedDate: 2025-02-10
+highlightsCount: 3
+reference: https://www.amazon.com/dp/B07P768XXN
+kindle_link: kindle://book?action=open&asin=B07P768XXN
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/917oAv6Ru6L._SY160.jpg)
+## Highlights
+Unlike so many of the people around him, Pliny did not cry, because even in these dire moments he could reason, and in reasoning, he found something close to belief. — location: [264](kindle://book?action=open&asin=B07P768XXN&location=264) ^ref-37286
+
+---
+Pliny the Younger was an important figure in his own time.2 He survived the Vesuvius disaster to become a lawyer, senator, poet, collector of villas, curator of drains, and personal representative of the emperor overseas. He was also a prolific writer of letters, a couple of which contain his account of the eruption. — location: [287](kindle://book?action=open&asin=B07P768XXN&location=287) ^ref-33049
+
+---
+In around 1500, a complete manuscript containing over three hundred of Pliny the Younger’s letters – far more than de Matociis had known of – was miraculously uncovered in an abbey in Paris. The papyrus dated to the fifth century, making it one of the oldest classical manuscripts ever found (six leaves of it still survive in a library in New York). — location: [293](kindle://book?action=open&asin=B07P768XXN&location=293) ^ref-56699
+
+---

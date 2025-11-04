@@ -1,0 +1,62 @@
+# Derivative Rules.md
+
+---
+aliases: []
+---
+
+2022-02-24
+# [[Derivative]] Rules
+
+### Backlink
+[[derivative MOC]]
+
+### Reference
+
+### Notes
+- - [[constant test]]
+- The [[chain rule]] allows us to find derivatives of [[composition]]s
+- [[quotient rule]] 
+-  The [[power rule]]
+- A [[derivative]] is [[additive]]:
+	- $f(x)=u(x)+v(x)=>f'(x)=u'(x)+v'(x)$
+- [[constant]]s come out the front:
+	- $f(x)=kg(x)=>f'(x)=kg'(x)$
+- [[derivative]] of [[polynomials]]
+	- [[differenciation|differentiate]] each power of $x$
+	- multiply through by [[constant|constants]]
+	- add up the terms
+	- example: $f(x)=x^4-2x^3+5x^2-3x+8$
+		- $f'(x)=4x^3-2(3x^2)+5(2x)-3(1)+0$=$f'(x)= 4x^3-6x^2+10x-3$
+		- $f''(x)=4(3x^2)-6(2x)+10$=$12x^2-12x+10$
+		- $f'''(x)=12(2x)-12=24x$
+		- $f''''(x)=24$
+		- $f'''''(x)=0$
+			- [[differenciation|differentiating]] a quadratic 3 times makes it disappear
+- $y=e^x$
+	- $f(x)=e^x=>f'(x)=e^x$
+		- indestructable property
+	- The [[slope]] of the [[tangent line]] at $y$ intercept is 1
+	- $\lim\limits_{h \to 0}{e^h-1\over h}=1$
+	- ![[Ln.png]]
+- $f(x)=\sin x => f'(x)=\cos x$
+- $f(x)=\cos x => f'(x)=-\sin x$
+	- Also indestructible:
+		- $f(x)=\sin x => f'(x)=\cos x=>f''(x)=-\sin x => f'''(x)=-\cos x=>f''''(x)=\sin x$
+- [[simple harmonic motion]]
+-   [[derivative]] of [[square root]] of $x$
+	- $y=x^2$ so $x=\sqrt y$
+		- $\frac {dy}{dx}=2x$ = $2\sqrt y$
+		- ${\frac {d}{dy}(\sqrt y)}$=$1 \over {2 \sqrt y}$
+		- ${\frac {d}{dx}(\sqrt x)}$=$1 \over {2 \sqrt x}$ so derivative of square root of $x$ is $1 \over {2 \sqrt x}$
+	- Using fractional power notation:
+		-  ${\frac {d}{dx}(x^{1\over 2})}$=$1 \over {2 x^{1 \over 2}}$ = ${1 \over 2} x{^{-{1 \over 2}}}$ so:
+			- ${\frac {d}{dx}(x^{1\over 2})}$= ${1 \over 2} x{^{-{1 \over 2}}}$
+		- Which is consistent with:
+			-  ${\frac {d}{dx}(x^n)}$= $nx{^{n-1}}$
+	- [[derivative]] of cube root of $x$
+		- ${\frac {d}{dx}(x^{1\over 3})}$= ${1 \over 3} x{^{-{2 \over 3}}}$
+- [[derivative]] of $\ln(x)$ is reciprocal of $x$
+	- ${d \over dx}\ln(x)={1\over x}$
+- [[inverse function rule]]
+	- https://en.wikipedia.org/wiki/Inverse_function_rule
+- [[derivative of ln(x)]]

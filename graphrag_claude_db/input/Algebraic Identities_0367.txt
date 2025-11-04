@@ -1,0 +1,93 @@
+---
+aliases:
+tags:
+  - algebra
+  - math
+created: 2022-01-31 18:07
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+# Algebraic Identities
+[[Algebra MOC]]
+
+- ---
+created: 2022-01-20T07:54:53 (UTC -10:00)
+tags: []
+source: https://brilliant.org/wiki/algebraic-identities/
+
+
+ ## Excerpt
+An algebraic identity is an equality that holds for any values of its variables. For example, the identity $a^2+b^2 = a^2+2ab+b^2$.  
+
+Because of this identity, we can replace any instance of $a^2+b^2$ with $a^2+2ab+b^2$ and vice versa.
+
+---
+### Binomial Theorem Identities
+- The following identities are product formulas that are examples of the [[binomial theorem]]
+$$
+\begin{aligned}
+&(x+y)^{2}=x^{2}+2 x y+y^{2} \\
+&(x-y)^{2}=x^{2}-2 x y+y^{2} \\
+&(x+y)^{3}=x^{3}+3 x^{2} y+3 x y^{2}+y^{3} \\
+&(x-y)^{3}=x^{3}-3 x^{2} y+3 x y^{2}-y^{3} \\
+&(x+y)^{4}=x^{4}+4 x^{3} y+6 x^{2} y^{2}+4 x y^{3}+y^{4} \\
+&(x-y)^{4}=x^{4}-4 x^{3} y+6 x^{2} y^{2}-4 x y^{3}+y^{4} .
+\end{aligned}
+$$
+
+
+### [[Factoring]] Identities
+- The following identities are [[factoring]] formulas; more general [[factoring]] formulas are listed in the wiki [Algebraic Manipulation - Identities](https://brilliant.org/wiki/algebraic-manipulation-identities/#algebraic-manipulation-identities-medium "Algebraic Manipulation - Identities"):
+$$
+\begin{aligned}
+&x^{2}-y^{2}=(x+y)(x-y) \\
+&x^{3}-y^{3}=(x-y)\left(x^{2}+x y+y^{2}\right) \\
+&x^{3}+y^{3}=(x+y)\left(x^{2}-x y+y^{2}\right) \\
+&x^{4}-y^{4}=\left(x^{2}-y^{2}\right)\left(x^{2}+y^{2}\right)
+\end{aligned}
+$$
+
+### Three-variable Identities
+The following identities can be derived by some clever [[factoring]] and manipulation of the terms:
+
+$$
+\begin{aligned}
+(x+y)(x+z)(y+z) &=(x+y+z)(x y+x z+y z)-x y z \\
+x^{2}+y^{2}+z^{2} &=(x+y+z)^{2}-2(x y+x z+y z) \\
+x^{3}+y^{3}+z^{3}-3 x y z &=(x+y+z)\left(x^{2}+y^{2}+z^{2}-x y-x z-y z\right) .
+\end{aligned}
+$$
+---
+aliases: 
+tags: 
+created: 2022-01-31 18:07
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- TABLE file.name
+WHERE !file.frontmatter
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

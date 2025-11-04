@@ -1,0 +1,30 @@
+# Hacking-Switches.md
+
+---
+aliases:
+tags:
+created: 2023-01-20 00:48
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  3-way switch
+
+    a.  <https://community.home-assistant.io/t/ks-602f-3-way-switch/126754/11>
+
+    b.  <https://templates.blakadder.com/gosund_SW6.html>
+
+
+https://community.home-assistant.io/t/ks-602f-3-way-switch/126754/11
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

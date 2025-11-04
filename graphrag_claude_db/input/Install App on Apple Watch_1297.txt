@@ -1,0 +1,15 @@
+---
+aliases: []
+---
+# Install App on Apple Watch
+Date: 2022-10-31
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- 
+### Notes
+-  Connect your iPhone to your computer with the USB cable it came with. Xcode communicates with Apple Watch wirelessly via the iPhone. Xcode will download the watchOS device symbols from server and then after a few minutes your watch should be an available device in the Run Destination pop-up. (If you are using a Personal Team for signing you will need to trust it before the app will run on the device.) 

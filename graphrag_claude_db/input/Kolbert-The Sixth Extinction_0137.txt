@@ -1,0 +1,182 @@
+---
+bookId: "61531"
+title: "The Sixth Extinction: An Unnatural History"
+author: Elizabeth Kolbert
+asin: B00EGJE4G2
+lastAnnotatedDate: 2017-08-18
+highlightsCount: 56
+reference: https://www.amazon.com/dp/B00EGJE4G2
+kindle_link: kindle://book?action=open&asin=B00EGJE4G2
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71+1m2HBZNL._SY160.jpg)
+## Highlights
+About thirty million years ago, the proboscidean line that would lead to mastodons split off from the line that would lead to mammoths and elephants. — location: [472](kindle://book?action=open&asin=B00EGJE4G2&location=472) ^ref-15204
+
+---
+Diminishing population density may have made survival less likely for the remaining individuals, a phenomenon that’s known as the Allee effect.) — location: [882](kindle://book?action=open&asin=B00EGJE4G2&location=882) ^ref-33950
+
+---
+Even if all of these species died out at exactly the same moment, it would appear that the white-circle species had vanished much earlier, simply because its remains are rarer. This effect—known as the Signor-Lipps effect, after the scientists who first identified it—tends to “smear out” sudden extinction events, — location: [1256](kindle://book?action=open&asin=B00EGJE4G2&location=1256) ^ref-17098
+
+---
+During the Ordovician, the number of marine families tripled, — location: [1354](kindle://book?action=open&asin=B00EGJE4G2&location=1354) ^ref-50623
+
+---
+Toward the middle of the Ordovician, the first plants began to colonize the land. — location: [1357](kindle://book?action=open&asin=B00EGJE4G2&location=1357) ^ref-2234
+
+---
+At the end of the Ordovician, some 444 million years ago, the oceans emptied out. Something like eighty-five percent of marine species died off. — location: [1359](kindle://book?action=open&asin=B00EGJE4G2&location=1359) ^ref-21700
+
+---
+Graptolites were colonial animals; each individual, known as a zooid, built itself a tiny, tubular shelter, known as a theca, which was attached to its neighbor’s, like a row house. A single graptolite fossil thus represents a whole community, which drifted or more probably swam along as a single entity, feeding off even smaller plankton. — location: [1373](kindle://book?action=open&asin=B00EGJE4G2&location=1373) ^ref-53112
+
+---
+The current theory is that the end-Ordovician extinction was caused by glaciation. — location: [1445](kindle://book?action=open&asin=B00EGJE4G2&location=1445) ^ref-41190
+
+---
+The end-Permian extinction also seems to have been triggered by a change in the climate. But in this case, the change went in the opposite direction. Right at the time of extinction, 252 million years ago, there was a massive release of carbon into the air—so massive that geologists have a hard time even imagining where all the carbon could have come from. Temperatures soared—the seas warmed by as much as eighteen degrees—and the chemistry of the oceans went haywire, as if in an out-of-control aquarium. The water became acidified, and the amount of dissolved oxygen dropped so low that many organisms probably, in effect, suffocated. Reefs collapsed. — location: [1455](kindle://book?action=open&asin=B00EGJE4G2&location=1455) ^ref-29962
+
+---
+(A recent study of pollen and animal remains on Easter Island concluded that it wasn’t humans who deforested the landscape; rather, it was the rats that came along for the ride and then bred unchecked. The native palms couldn’t produce seeds fast enough to keep up with their appetites.) — location: [1498](kindle://book?action=open&asin=B00EGJE4G2&location=1498) ^ref-4921
+
+---
+Ocean acidification played a role in at least two of the Big Five extinctions (the end-Permian and the end-Triassic) and quite possibly it was a major factor in a third (the end-Cretaceous). — location: [1696](kindle://book?action=open&asin=B00EGJE4G2&location=1696) ^ref-65406
+
+---
+although there are several severe episodes of ocean acidification in the record, “no past event perfectly parallels” what is happening right now, owing to “the unprecedented rapidity of CO2 release currently taking place.” — location: [1751](kindle://book?action=open&asin=B00EGJE4G2&location=1751) ^ref-26960
+
+---
+The best explanation anyone has come up with for the end-Permian extinction is a massive burst of vulcanism in what’s now Siberia. But even this spectacular event, which created the formation known as the Siberian Traps, probably released, on an annual basis, less carbon than our cars and factories and power plants. — location: [1754](kindle://book?action=open&asin=B00EGJE4G2&location=1754) ^ref-11914
+
+---
+“It is likely that reefs will be the first major ecosystem in the modern era to become ecologically extinct” — location: [1836](kindle://book?action=open&asin=B00EGJE4G2&location=1836) ^ref-31847
+
+---
+REEFS have come and gone several times in the past, — location: [1993](kindle://book?action=open&asin=B00EGJE4G2&location=1993) ^ref-51579
+
+---
+This extinction shows up in the geologic record as (among other things) a “reef gap”—a period of about ten million years when reefs went missing altogether. Reef gaps also occurred after the late Devonian and the late Triassic extinctions, and in each of these cases it also took millions of years for reef construction to resume. — location: [2001](kindle://book?action=open&asin=B00EGJE4G2&location=2001) ^ref-43374
+
+---
+in some parts of the world, reefs probably will not last long enough for ocean acidification to finish them off. The roster of perils includes, but is not limited to: overfishing, which promotes the growth of algae that compete with corals; agricultural runoff, which also encourages algae growth; deforestation, which leads to siltation and reduces water clarity; and dynamite fishing, whose destructive potential would seem to be self-explanatory. — location: [2006](kindle://book?action=open&asin=B00EGJE4G2&location=2006) ^ref-38902
+
+---
+White-band disease is a bacterial infection that, as the name suggests, produces a band of white necrotic tissue. It afflicts two species of Caribbean coral, Acropora palmata (commonly known as elkhorn coral) and Acropora cervicornis (staghorn coral), which until recently were the dominant reef builders in the region. The disease has so ravaged the two species that both are now listed as “critically endangered” — location: [2009](kindle://book?action=open&asin=B00EGJE4G2&location=2009) ^ref-3218
+
+---
+coral cover in the Caribbean has in recent decades declined by close to eighty percent. — location: [2013](kindle://book?action=open&asin=B00EGJE4G2&location=2013) ^ref-720
+
+---
+A study of more than eight hundred reef-building coral species, published in Science in 2008, found a third of them to be in danger of extinction, largely as a result of rising ocean temperatures. — location: [2023](kindle://book?action=open&asin=B00EGJE4G2&location=2023) ^ref-31103
+
+---
+Canada’s boreal forest is huge; it stretches across almost a billion acres and represents roughly a quarter of all the intact forest that remains on earth. — location: [2146](kindle://book?action=open&asin=B00EGJE4G2&location=2146) ^ref-14367
+
+---
+a general rule, the variety of life is most impoverished at the poles and richest at low latitudes. — location: [2158](kindle://book?action=open&asin=B00EGJE4G2&location=2158) ^ref-44369
+
+---
+For the last forty million years or so, the earth has been in a general cooling phase. — location: [2264](kindle://book?action=open&asin=B00EGJE4G2&location=2264) ^ref-42497
+
+---
+ice ages are initiated by small changes in the earth’s orbit, caused by, among other things, the gravitational tug of Jupiter and Saturn. These changes alter the distribution of sunlight across different latitudes at different times of year. — location: [2275](kindle://book?action=open&asin=B00EGJE4G2&location=2275) ^ref-471
+
+---
+In its magnitude, the temperature change projected for the coming century is roughly the same as the temperature swings of the ice ages. — location: [2292](kindle://book?action=open&asin=B00EGJE4G2&location=2292) ^ref-40039
+
+---
+To find carbon dioxide levels (and therefore, ultimately, global temperatures) higher than today’s requires going back a long way, perhaps as far as the mid-Miocene, fifteen million years ago. It’s quite possible that by the end of this century, CO2 levels could reach a level not seen since the Antarctic palms of the Eocene, some fifty million years ago. — location: [2449](kindle://book?action=open&asin=B00EGJE4G2&location=2449) ^ref-8906
+
+---
+CURRENTLY, about fifty million square miles of land on the planet are ice-free, — location: [2497](kindle://book?action=open&asin=B00EGJE4G2&location=2497) ^ref-15879
+
+---
+people have “directly transformed” more than half of this land—roughly twenty-seven million square miles—mostly by converting it to cropland and pasture, but also by building cities — location: [2499](kindle://book?action=open&asin=B00EGJE4G2&location=2499) ^ref-58661
+
+---
+they divide the world up into “anthromes.” There is an “urban” anthrome that stretches over five hundred thousand square miles, an “irrigated cropland” anthrome (a million square miles), and a “populated forest” (four and a half million square miles). — location: [2505](kindle://book?action=open&asin=B00EGJE4G2&location=2505) ^ref-38997
+
+---
+Smaller areas harbor smaller populations, and smaller populations are more vulnerable to chance. — location: [2568](kindle://book?action=open&asin=B00EGJE4G2&location=2568) ^ref-61543
+
+---
+“A natural corollary to high species diversity is low population density, and that’s a recipe for speciation—isolation by distance,” — location: [2611](kindle://book?action=open&asin=B00EGJE4G2&location=2611) ^ref-59478
+
+---
+From a single species of tree, Luehea seemannii, he had collected beetles belonging to more than 950 species. Figuring that about a fifth of these beetles depended on Luehea seemannii, that other beetles similarly depended on other trees, that beetles represent about forty percent of all insect species, and that there are roughly fifty thousand species of tropical trees, Erwin estimated that the tropics were home to as many as thirty million species of arthropods. — location: [2636](kindle://book?action=open&asin=B00EGJE4G2&location=2636) ^ref-62067
+
+---
+recent estimates suggest there are at least two million tropical insect species and perhaps as many as seven million. — location: [2643](kindle://book?action=open&asin=B00EGJE4G2&location=2643) ^ref-9183
+
+---
+there are only about ten thousand species of birds in the entire world and only fifty-five hundred species of mammals. — location: [2644](kindle://book?action=open&asin=B00EGJE4G2&location=2644) ^ref-5040
+
+---
+Though primary forest continues to decline in the tropics, secondary forest in some regions is on the rise. — location: [2673](kindle://book?action=open&asin=B00EGJE4G2&location=2673) ^ref-23804
+
+---
+During any given twenty-four-hour period, it is estimated that ten thousand different species are being moved around the world just in ballast water. — location: [2810](kindle://book?action=open&asin=B00EGJE4G2&location=2810) ^ref-33444
+
+---
+out of every hundred potential introductions, somewhere between five and fifteen will succeed in establishing themselves. Of these five to fifteen, one will turn out to be the “bullet in the chamber.” — location: [2875](kindle://book?action=open&asin=B00EGJE4G2&location=2875) ^ref-18552
+
+---
+Before Europeans arrived, New England had no earthworms of its own; the region’s worms had all been wiped out by the last glaciation, and even after ten thousand years of relative warmth, North America’s native worms had yet to recolonize the area. — location: [2936](kindle://book?action=open&asin=B00EGJE4G2&location=2936) ^ref-40318
+
+---
+Before humans arrived on the scene, many whole categories of organisms were missing from Hawaii; these included not only rodents but also amphibians, terrestrial reptiles, and ungulates. The islands had no ants, aphids, or mosquitoes. — location: [3022](kindle://book?action=open&asin=B00EGJE4G2&location=3022) ^ref-23526
+
+---
+Sporormiella counts dropped prior to changes in the landscape because the death of the megafauna caused the landscape to change. With no more large herbivores around to eat away at the forest, fuel built up, which led to more frequent and more intense fires. This, in turn, pushed the vegetation toward fire-tolerant species. — location: [3302](kindle://book?action=open&asin=B00EGJE4G2&location=3302) ^ref-30099
+
+---
+moas were probably eliminated in a matter of decades. — location: [3311](kindle://book?action=open&asin=B00EGJE4G2&location=3311) ^ref-11390
+
+---
+even a very small initial population of humans—a hundred or so individuals—could, over the course of a millennium or two, multiply sufficiently to account for pretty much all of the extinctions in the record. — location: [3333](kindle://book?action=open&asin=B00EGJE4G2&location=3333) ^ref-34815
+
+---
+if every band of ten hunters killed off just one diprotodon a year, within about seven hundred years, every diprotodon within several hundred miles would have been gone. — location: [3338](kindle://book?action=open&asin=B00EGJE4G2&location=3338) ^ref-30153
+
+---
+The Neanderthals lived in Europe for at least a hundred thousand years. For the most part, this was a time of cold, and for stretches, it was intensely cold, with ice sheets covering Scandinavia. — location: [3369](kindle://book?action=open&asin=B00EGJE4G2&location=3369) ^ref-40457
+
+---
+Modern humans arrived in Europe around forty thousand years ago, and again and again, the archaeological record shows, as soon as they made their way to a region where Neanderthals were living, the Neanderthals in that region disappeared. — location: [3378](kindle://book?action=open&asin=B00EGJE4G2&location=3378) ^ref-58565
+
+---
+all non-Africans, from the New Guineans to the French to the Han Chinese, carry somewhere between one and four percent Neanderthal DNA. — location: [3508](kindle://book?action=open&asin=B00EGJE4G2&location=3508) ^ref-14705
+
+---
+nonhuman apes are extremely clever. They’re capable of making inferences, of solving complex puzzles, and of understanding what other apes are (and are not) likely to know. — location: [3532](kindle://book?action=open&asin=B00EGJE4G2&location=3532) ^ref-39157
+
+---
+apes seem to lack the impulse toward collective problem-solving that’s so central to human society. — location: [3544](kindle://book?action=open&asin=B00EGJE4G2&location=3544) ^ref-32486
+
+---
+Neanderthals were extremely tough—this is attested to by the thickness of their bones—and were probably capable of beating modern humans to a pulp. — location: [3558](kindle://book?action=open&asin=B00EGJE4G2&location=3558) ^ref-37209
+
+---
+the Neanderthals never seem to have developed projectiles, — location: [3564](kindle://book?action=open&asin=B00EGJE4G2&location=3564) ^ref-51465
+
+---
+Neanderthals must have watched out for one another, which, in turn, implies a capacity for empathy. — location: [3566](kindle://book?action=open&asin=B00EGJE4G2&location=3566) ^ref-7778
+
+---
+contemporary New Guineans carry up to six percent Denisovan DNA. — location: [3609](kindle://book?action=open&asin=B00EGJE4G2&location=3609) ^ref-44629
+
+---
+with the exception of humans, all the great apes today are facing oblivion. — location: [3618](kindle://book?action=open&asin=B00EGJE4G2&location=3618) ^ref-1915
+
+---
+Among the thousands of Neanderthal artifacts that have been unearthed, almost none represent unambiguous attempts at art or adornment, — location: [3659](kindle://book?action=open&asin=B00EGJE4G2&location=3659) ^ref-23999
+
+---
+With the capacity to represent the world in signs and symbols comes the capacity to change it, which, as it happens, is also the capacity to destroy it. A tiny set of genetic variations divides us from the Neanderthals, but that has made all the difference. — location: [3677](kindle://book?action=open&asin=B00EGJE4G2&location=3677) ^ref-53641
+
+---
+It doesn’t much matter whether people care or don’t care. What matters is that people change the world. — location: [3781](kindle://book?action=open&asin=B00EGJE4G2&location=3781) ^ref-14620
+
+---

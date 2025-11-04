@@ -1,0 +1,100 @@
+---
+aliases: 
+tags:
+  - tasmota
+  - Matter
+  - esphome
+  - Halcyon
+---
+# Migrating from EspHome to Matter-enabled Tasmota
+Date: 2024-06-28
+
+### Backlink
+[[]]
+
+### Reference
+- [[../../Projects/Halcyon/Tasmota HVAC]]
+- 
+### Notes
+-  Migrating your ESP32-based climate control system from ESPHome to a Matter-enabled solution using Tasmota involves several steps. Below is a detailed procedure to guide you through the migration:
+
+### Step 1: Flash Tasmota on the ESP32
+1. Use the [Tasmota-Web-Installer](https://tasmota.github.io/install/) with Chrome or Edge.  This is the preferred method.  Or: 
+2. **Download Tasmota Firmware**:
+   - Visit the [Tasmota GitHub page](https://github.com/arendst/Tasmota) and download the appropriate precompiled firmware for your ESP32 device. 
+
+3. **Install Tasmotizer**:
+   - Download and install Tasmotizer, a tool for flashing Tasmota firmware.
+
+4. **Flash the Firmware**:
+   - Connect your ESP32 to your computer via USB.
+   - Open Tasmotizer, select the COM port for your ESP32, choose the Tasmota firmware you downloaded, and click "Tasmotize!".
+
+### Step 2: Configure Tasmota for IR Control
+1. **Connect to the Tasmota Web Interface**:
+   - After flashing, connect to the Wi-Fi network created by your ESP32.
+   - Open a web browser and go to `192.168.4.1` to configure your Wi-Fi settings.
+   - Connect the ESP32 to your home Wi-Fi network.
+
+2. **Configure the IR Transmitter**:
+   - Connect the IR transmitter to the appropriate GPIO pin on the ESP32.
+   - In the Tasmota web interface, go to **Configuration > Configure Module** and set the GPIO pin connected to the IR transmitter to "IRsend".
+
+3. **Set Up the IR Protocol**:
+   - Go to the Tasmota console and enter the commands to configure the IR protocol for your Fujitsu Halcyon system. For example:
+     ```plaintext
+     IRhvac 1
+     IRhvac 3 1 24 0 0 0 0 0 0 0 0
+     ```
+   - Replace the parameters with the appropriate settings for your air conditioner.
+
+### Step 3: Enable Matter in Tasmota
+1. **Update Tasmota to the Latest Version**:
+   - Ensure you are using a Tasmota version that supports Matter.
+
+2. **Enable Matter Protocol**:
+   - In the Tasmota web interface, go to **Configuration > Configure Other** and enable Matter support.
+
+3. **Configure Matter Settings**:
+   - Go to the Tasmota console and configure Matter-specific settings:
+     ```plaintext
+     MatterEnable 1
+     MatterDeviceType 0x0301 # Example device type, change as needed
+     ```
+
+### Step 4: Integrate Tasmota with Home Assistant
+1. **Add Tasmota Device to Home Assistant**:
+   - In Home Assistant, go to **Settings > Integrations** and add the Tasmota integration.
+
+2. **Configure MQTT for Tasmota**:
+   - In the Tasmota web interface, configure the MQTT settings to connect to your Home Assistant MQTT broker.
+
+3. **Set Up Climate Control in Home Assistant**:
+   - In Home Assistant, create a climate entity for your Tasmota device using the MQTT climate platform. Example configuration:
+     ```yaml
+     climate:
+       - platform: mqtt
+         name: "Fujitsu Halcyon"
+         modes:
+           - "off"
+           - "cool"
+           - "heat"
+           - "auto"
+         mode_command_topic: "cmnd/tasmota_ESP32/IRhvac"
+         mode_state_topic: "stat/tasmota_ESP32/IRhvac"
+         current_temperature_topic: "tele/tasmota_ESP32/SENSOR"
+         temperature_command_topic: "cmnd/tasmota_ESP32/IRhvac"
+         temperature_state_topic: "stat/tasmota_ESP32/IRhvac"
+     ```
+
+### Step 5: Test and Fine-Tune
+1. **Verify Functionality**:
+   - Test the IR control to ensure your Fujitsu Halcyon responds correctly to commands from Tasmota.
+
+2. **Adjust Settings**:
+   - Fine-tune the Tasmota and Home Assistant configurations as needed to achieve the desired climate control functionality.
+
+3. **Monitor and Maintain**:
+   - Regularly monitor the performance of your system and make any necessary adjustments.
+
+By following these steps, you should be able to migrate your ESP32-based climate control system from ESPHome to a Matter-enabled solution using Tasmota, allowing for enhanced compatibility and future-proofing your setup.

@@ -1,0 +1,56 @@
+# Counter Flow of Execution.md
+
+---
+aliases: 
+tags:
+  - counter
+  - watch
+  - WatchConnectivity
+---
+# Counter Flow of Execution
+Date: 2023-11-17
+
+### Backlink
+[[WatchConnectivity]]
+
+### Reference
+-   [Sending Data Between watchOS and iOS App Using Watch Connectivity](https://betterprogramming.pub/sending-data-between-watchos-and-ios-apps-cf924e21b3c2)
+- [[Counter Key Classes and Methods]]
+- 
+### Notes
+1.  When you launch the Counter app, the following sequence of events occurs:
+	- App Initialization:
+		- SwiftUI initializes ContentView.
+		- ContentView Loads:
+		- `@StateObject var counter = Counter()` creates an instance of Counter.
+	- Counter Initialization:
+		- `init(session: WCSession = .default)` in Counter is called.
+		- `self.delegate = SessionDelegater(countSubject: subject)` sets up a delegate for WCSession.
+		- `self.session = session` sets the session.
+		- `self.session.delegate = self.delegate` assigns the delegate to the session.
+		- `self.session.activate()` activates the WCSession.
+		- `subject.receive(on: DispatchQueue.main).assign(to: &$count)` binds the subject to the count property.
+	- WCSession Activation:
+		- `self.session.activate()` begins the process of activating the session.
+		- Activation results may vary based on the connection status, but this step is essential for establishing communication between the watch and the iPhone.
+	- ContentView Rendering:
+		- body property in ContentView is invoked.
+		- SwiftUI renders the UI components (Text for displaying the count, Buttons for increment and decrement).
+2. Pressing the Counter Up Button on the Watch
+	- Button Tap:
+		- User taps the increment button in ContentView.
+		- Increment Function Called:
+		- `counter.increment()` is executed.
+	- Counter Class Processes Increment:
+		- `count += 1` increments the count variable.
+		- `session.sendMessage(["count": count], replyHandler: nil) { error in ... }` sends the updated count to the paired iPhone.
+	- Message Sent to iPhone:
+		- The sendMessage method initiates a data transfer to the iPhone via WCSession.
+		- iPhone Receives the Message:
+		- On the iPhone, `session(_:didReceiveMessage:)` in SessionDelegater is triggered.
+		- The count value is extracted and sent to countSubject.
+	- Update the ObservableObject:
+		- `countSubject.send(count)` updates the countSubject in Counter.
+		- Since count is bound to countSubject, it gets updated as well.
+	- UI Update on iPhone:
+		- SwiftUI observes the change in count (due to the @Published wrapper) and updates the ContentView accordingly.

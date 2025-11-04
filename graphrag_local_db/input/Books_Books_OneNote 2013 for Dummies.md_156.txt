@@ -1,0 +1,40 @@
+# OneNote 2013 for Dummies.md
+
+---
+id: 16112604
+updated: 2022-06-18
+title: OneNote 2013 for Dummies
+author: James H. Russell
+highlights: 2
+last_highlight: 2018-04-06
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112604
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51quYs1vjEL._SL500_.jpg)
+
+# About
+Title: [[OneNote 2013 for Dummies]]
+Authors: [[James H. Russell]]
+Category: #books
+Number of Highlights: ==2==
+Readwise URL: https://readwise.io/bookreview/16112604
+Date: [[2022-06-18]]
+Last Highlighted: *2018-04-06*
+
+---
+
+# Highlights
+
+The only place you can make a copy of a notebook is within File Explorer (Windows Explorer in Windows 7 or prior versions) or SkyDrive. ([755](https://readwise.io/to_kindle?action=open&asin=B00DF35VNA&location=755)) %% Color: yellow %% ^334461915
+
+---
+
+Deleted sections and note pages go to the Recycle Bin for that particular notebook, which you can access on the History tab. Files are expunged after 60 days, so you have until then to restore them. To restore a section or page, right-click it and use one of the Move, Merge, or Copy items to move it out of the Recycle Bin. Each notebook has its own Recycle Bin, so if you’re not seeing the item you’re looking for, make sure you’re in the correct notebook. ([837](https://readwise.io/to_kindle?action=open&asin=B00DF35VNA&location=837)) %% Color: yellow %% ^334461916
+
+---

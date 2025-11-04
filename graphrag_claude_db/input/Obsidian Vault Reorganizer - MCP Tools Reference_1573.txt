@@ -1,0 +1,332 @@
+---
+title: Obsidian Vault Reorganizer - MCP Tools Reference
+aliases: [MCP Tools, Obsidian MCP Reference]
+tags: [obsidian, mcp, tools, reference]
+created: 2025-10-25
+related: [Obsidian Vault Reorganizer - Overview, MCP MoC]
+---
+
+### Main Idea
+- Quick reference guide for all Obsidian MCP tools
+- Includes usage examples, parameters, and best practices
+- Organized by importance and use case
+
+### Essential Tools (Most Important)
+
+#### 1. Batch Read Files (CRITICAL!)
+```
+obsidian_batch_get_file_contents(filepaths=[...])
+```
+**Purpose:** Read 10-20 files simultaneously  
+**Returns:** Contents of multiple files with headers  
+**Use for:** Bulk analysis, initial vault scanning  
+**Why critical:** Minimizes API calls, much faster than single reads
+
+**Example:**
+```python
+contents = obsidian_batch_get_file_contents(
+    filepaths=[
+        "note1.md",
+        "Projects/note2.md",
+        "Tech/note3.md"
+    ]
+)
+```
+
+---
+
+#### 2. Complex Search (JsonLogic)
+```
+obsidian_complex_search(query={JsonLogic object})
+```
+**Purpose:** Find notes by metadata using JsonLogic  
+**Returns:** Notes matching complex criteria  
+**Use for:** Metadata filtering, boolean queries, precise searches
+
+**Example - Find notes without frontmatter:**
+```json
+{
+  "and": [
+    {"glob": ["*.md", {"var": "path"}]},
+    {"not": {"regexp": ["^---\\n", {"var": "content"}]}}
+  ]
+}
+```
+
+**Example - Find notes with specific tag:**
+```json
+{"in": ["project", {"var": "frontmatter.tags"}]}
+```
+
+---
+
+#### 3. Semantic Search (RAG)
+```
+obsidian_simple_search(query="...", n_results=10)
+```
+**Purpose:** Find semantically similar notes  
+**Returns:** Relevant notes with relevance scores  
+**Use for:** Backlink discovery, content similarity  
+**Why important:** Better than keyword matching for relationships
+
+**Example:**
+```python
+results = obsidian_simple_search(
+    query="notes about machine learning algorithms",
+    n_results=10
+)
+```
+
+---
+
+#### 4. Patch Content (Most Versatile!)
+```
+obsidian_patch_content(
+    filepath="...",
+    target_type="frontmatter|heading|block",
+    operation="prepend|append|replace",
+    target="...",
+    content="..."
+)
+```
+**Purpose:** Add/update frontmatter, insert at headings  
+**Returns:** Success confirmation  
+**Use for:** All content modifications
+
+**Example - Add frontmatter:**
+```python
+obsidian_patch_content(
+    filepath="note.md",
+    target_type="frontmatter",
+    operation="prepend",
+    content="---\\ntitle: My Note\\ntags: []\\n---\\n"
+)
+```
+
+**Example - Update frontmatter field:**
+```python
+obsidian_patch_content(
+    filepath="note.md",
+    target_type="frontmatter",
+    operation="replace",
+    target="backlinks",
+    content='["[[Note 1]]", "[[Note 2]]"]'
+)
+```
+
+**Example - Insert after heading:**
+```python
+obsidian_patch_content(
+    filepath="note.md",
+    target_type="heading",
+    operation="append",
+    target="## Section",
+    content="\\nNew content here"
+)
+```
+
+---
+
+#### 5. Graph Query
+```
+obsidian_graph_query(query="...")
+```
+**Purpose:** Query knowledge graph relationships  
+**Returns:** Relationship information, backlink counts  
+**Use for:** Finding orphaned notes, understanding connections
+
+**Example:**
+```python
+orphans = obsidian_graph_query(
+    query="find notes with zero backlinks"
+)
+```
+
+---
+
+#### 6. Delete File (USE WITH CAUTION!)
+```
+obsidian_delete_file(filepath="...", confirm=True)
+```
+**Purpose:** Remove files or directories  
+**Returns:** Success confirmation  
+**CRITICAL:** Always requires `confirm=True`
+
+**Example:**
+```python
+obsidian_delete_file(
+    filepath="empty-note.md",
+    confirm=True  # REQUIRED!
+)
+```
+
+---
+
+### Supporting Tools
+
+#### Vault Statistics
+```
+obsidian_vault_stats()
+```
+**Purpose:** Get vault overview  
+**Returns:** Entity counts, relationships  
+**Use for:** Before/after comparison, health check
+
+---
+
+#### List Files in Vault
+```
+obsidian_list_files_in_vault()
+```
+**Purpose:** Get all files in vault root  
+**Returns:** List of files and directories  
+**Use for:** Initial discovery, building inventory
+
+---
+
+#### List Files in Directory
+```
+obsidian_list_files_in_dir(dirpath="...")
+```
+**Purpose:** Get files in specific folder  
+**Returns:** Files in that directory  
+**Use for:** Exploring subfolders
+
+---
+
+#### Get Single File
+```
+obsidian_get_file_contents(filepath="...")
+```
+**Purpose:** Read one file  
+**Returns:** Full file content  
+**Use for:** Individual file reading (prefer batch for multiple)
+
+---
+
+#### Append Content
+```
+obsidian_append_content(filepath="...", content="...")
+```
+**Purpose:** Add content to end of file  
+**Returns:** Success confirmation  
+**Use for:** Simple additions, creating new files
+
+---
+
+#### Get Recent Changes
+```
+obsidian_get_recent_changes(limit=10, days=30)
+```
+**Purpose:** Find recently modified files  
+**Returns:** Recent files with modification dates  
+**Use for:** Finding active notes, recent work
+
+---
+
+#### Get Periodic Note
+```
+obsidian_get_periodic_note(period="daily|weekly|monthly")
+```
+**Purpose:** Get current periodic note  
+**Returns:** Today's/this week's/this month's note  
+**Use for:** Excluding from reorganization
+
+---
+
+### Efficient Workflow Patterns
+
+#### Pattern 1: Bulk Analysis (RECOMMENDED)
+```
+1. obsidian_list_files_in_vault()
+2. Split results into batches of 10-20
+3. obsidian_batch_get_file_contents() for each batch
+4. Analyze in memory
+```
+**Why:** Minimizes API calls, fastest approach
+
+---
+
+#### Pattern 2: Find & Process
+```
+1. obsidian_complex_search() with specific criteria
+2. Get results list
+3. obsidian_batch_get_file_contents() on results
+4. Process and modify
+```
+**Why:** Targeted operations, no wasted reads
+
+---
+
+#### Pattern 3: Frontmatter Update
+```
+1. obsidian_get_file_contents() to read
+2. Analyze and generate new frontmatter
+3. obsidian_patch_content(target_type="frontmatter")
+4. Verify update
+```
+**Why:** Safe, preserves content, targeted changes
+
+---
+
+#### Pattern 4: Backlink Discovery
+```
+1. obsidian_graph_query() to find orphans
+2. For each orphan:
+   a. Extract key concepts
+   b. obsidian_simple_search() with concepts (RAG)
+   c. Rank by relevance
+3. obsidian_patch_content() to add backlinks
+```
+**Why:** Uses semantic search for intelligent linking
+
+---
+
+### References
+- [[Obsidian Vault Reorganizer - Overview]]
+- [[Obsidian Vault Reorganizer - JsonLogic Queries]]
+- [[MCP MoC]]
+
+### Notes
+
+**Performance Tips:**
+1. **Always use batch operations** - `obsidian_batch_get_file_contents()` instead of multiple single reads
+2. **Use complex_search** - Better than filtering in code
+3. **Cache results** - Store analysis to avoid re-reading
+4. **Limit results** - Specify appropriate limits
+5. **Use semantic search for relevance** - RAG mode for backlinks
+
+**Common Mistakes to Avoid:**
+- ❌ Reading files one by one → ✅ Use batch_get_file_contents
+- ❌ Filtering in code → ✅ Use complex_search with JsonLogic
+- ❌ Deleting without confirm → ✅ Always use confirm=True
+- ❌ Forgetting null checks → ✅ Check if frontmatter fields exist
+- ❌ Moving without updating links → ✅ Update wikilinks after moves
+
+**Error Handling:**
+- Connection errors: Check Obsidian is running, MCP enabled
+- File not found: Verify path spelling, file may be moved
+- Permission errors: Close files in other apps, check permissions
+
+### Related Notes
+- [[Obsidian Vault Reorganizer - Complete Workflow]]
+- [[MCP MoC]]
+- [[Claude Code]]
+
+### Questions / Ideas for Further Exploration
+- How to handle very large batch operations (100+ files)?
+- Rate limiting considerations for MCP calls?
+- Caching strategies for repeated vault operations?
+- Error recovery and retry logic?
+
+### To-Do
+- [ ] Test each tool with your vault
+- [ ] Understand batch operation limits
+- [ ] Practice JsonLogic queries
+- [ ] Set up error handling patterns
+- [ ] Document your vault-specific use cases
+
+### Smart Connections Insights
+- These tools work alongside Smart Connections
+- After reorganization, Smart Connections will re-index
+- Use semantic search (RAG) to complement Smart Connections

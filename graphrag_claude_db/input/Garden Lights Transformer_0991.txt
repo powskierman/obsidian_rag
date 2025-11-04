@@ -1,0 +1,26 @@
+---
+aliases: 
+tags:
+  - NH
+  - lights
+  - garden
+  - LM338
+---
+
+2022-06-28
+# Garden Lights Transformer
+
+### Backlink
+[[Projects MOC]]
+
+### Reference
+- /Volumes/Docs/Electronics/Projects/NH/GardenLightsTransformer/
+- [[/Volumes/Docs/Electronics/Projects/NH/GardenLightsTransformer/KBPC5010-datasheet.pdf]]
+
+![Kicad Schematic ](Kicad-schematic-image1.jpeg)
+
+![LM338 Resistor Value Calculation](Kicad-schematic-image2.jpeg)
+![[KBPC5010-datasheet.pdf]]
+
+### Notes
+-  This project entailed converting a 24VAC transformer for incandescent lights to 12VDC for LED conversion.

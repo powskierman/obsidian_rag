@@ -1,0 +1,38 @@
+---
+id: 16131170
+updated: 2022-06-19
+title: SwiftUI by Example
+author: Paul Hudson
+highlights: 2
+last_highlight: 2021-09-13
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16131170
+Updated: 2022-06-19
+%%
+
+![]( https://readwise-assets.s3.amazonaws.com/static/images/default-book-icon-2.dae1dc4d332b.png)
+
+# About
+Title: [[SwiftUI by Example]]
+Authors: [[Paul Hudson]]
+Category: #books
+Number of Highlights: ==2==
+Readwise URL: https://readwise.io/bookreview/16131170
+Date: [[2022-06-19]]
+Last Highlighted: *2021-09-13*
+
+---
+
+# Highlights
+
+pressing Opt-Cmd-P will make your SwiftUI preview update. ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) %% Color: yellow %% ^334747084
+
+---
+
+Highlighted Image: Xcode showing code on one side and the SwiftUI preview area on the other side. ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) %% Color: yellow %% ^334747207
+
+---

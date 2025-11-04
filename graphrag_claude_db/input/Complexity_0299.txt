@@ -1,0 +1,120 @@
+---
+id: 16112737
+updated: 2022-06-18
+title: Complexity
+author: Melanie Mitchell
+highlights: 22
+last_highlight: 2011-03-04
+tags:
+  - book-notes
+  - physics
+"Date added:":
+---
+
+%%
+ID: 16112737
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/519X7azIPML._SL500_.jpg)
+
+# About
+Title: [[Complexity]]
+Authors: [[Melanie Mitchell]]
+Category: #books
+Number of Highlights: ==22==
+Readwise URL: https://readwise.io/bookreview/16112737
+Date: [[2022-06-18]]
+Last Highlighted: *2011-03-04*
+
+---
+
+# Highlights
+
+One class of lymphocytes are called B cells (the B indicates that they develop in the bone marrow) and have a remarkable property: the better the match between a B cell and an invader, the more antibody-secreting daughter cells the B cell creates. ([260](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=260)) %% Color: yellow %% ^334466373
+
+---
+
+T cells (which develop in the thymus) play a key role in regulating the response of B cells. Macrophages roam around looking for substances that have been tagged by antibodies, and they do the actual work of destroying the invaders. ([266](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=266)) %% Color: yellow %% ^334466374
+
+---
+
+Complex collective behavior: All the systems I described above consist of large networks of individual components (ants, B cells, neurons, stock-buyers, Website creators), each typically following relatively simple rules with no central control or leader. It is the collective actions of vast numbers of components that give rise to the complex, hard-to-predict, and changing patterns of behavior that fascinate us. Signaling and information processing: All these systems produce and use information and signals from both their internal and external environments. Adaptation: All these systems adapt—that is, change their behavior to improve their chances of survival or success—through learning or evolutionary processes. ([311](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=311)) %% Color: yellow %% ^334466375
+
+---
+
+definition of the term complex system: a system in which large networks of components with no central control and simple rules of operation give rise to complex collective behavior, sophisticated information processing, and adaptation via learning or evolution. ([317](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=317)) %% Color: yellow %% ^334466376
+
+---
+
+Since simple rules produce complex behavior in hard-to-predict ways, the macroscopic behavior of such systems is sometimes called emergent. Here is an alternative definition of a complex system: a system that exhibits nontrivial emergent and self-organizing behaviors. ([323](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=323)) %% Color: yellow %% ^334466377
+
+---
+
+Mechanics is divided into two areas: kinematics, which describes how things move, and dynamics, which explains why things obey the laws of kinematics. ([393](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=393)) %% Color: yellow %% ^334466378
+
+---
+
+Newton’s famous three laws are as follows: Constant motion: Any object not subject to a force moves with unchanging speed. Inertial mass: When an object is subject to a force, the resulting change in its motion is inversely proportional to its mass. Equal and opposite forces: If object A exerts a force on object B, then object B must exert an equal and opposite force on object A. ([397](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=397)) %% Color: yellow %% ^334466379
+
+---
+
+Newton’s other major achievement was to state a universal law of gravity: the force of gravity between two objects is proportional to the product of their masses divided by the square of the distance between them. ([404](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=404)) %% Color: yellow %% ^334466380
+
+---
+
+The defining idea of chaos is that there are some systems—chaotic systems—in which even minuscule uncertainties in measurements of initial position and momentum can result in huge errors in long-term predictions of these quantities. This is known as “sensitive dependence on initial conditions.” ([419](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=419)) %% Color: yellow %% ^334466381
+
+---
+
+A nonlinear system is one in which the whole is different from the sum of the parts. ([468](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=468)) %% Color: yellow %% ^334466382
+
+---
+
+This kind of regular final behavior (either fixed point or oscillation) is called an “attractor,” since, loosely speaking, any initial condition will eventually be “attracted to it.” ([564](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=564)) %% Color: yellow %% ^334466383
+
+---
+
+So far we have seen three different classes of final behavior (attractors): fixed-point, periodic, and chaotic. ([599](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=599)) %% Color: yellow %% ^334466384
+
+---
+
+In dynamical systems theory, each of these abrupt period doublings is called a bifurcation. This succession of bifurcations culminating in chaos has been called the “period doubling route to chaos.” ([633](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=633)) %% Color: yellow %% ^334466385
+
+---
+
+In summary, changing, hard-to-predict macroscopic behavior is a hallmark of complex systems. Dynamical systems theory provides a mathematical vocabulary for characterizing such behavior in terms of bifurcations, attractors, and universal properties of the ways systems can change. This vocabulary is used extensively by complex systems researchers. ([707](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=707)) %% Color: yellow %% ^334466386
+
+---
+
+Energy is roughly defined as a system’s potential to “do work,” ([752](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=752)) %% Color: yellow %% ^334466387
+
+---
+
+Entropy is a measure of the energy that cannot be converted into additional work. ([760](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=760)) %% Color: yellow %% ^334466388
+
+---
+
+First law: Energy is conserved. The total amount of energy in the universe is constant. Energy can be transformed from one form to another, such as the transformation of stored body energy to kinetic energy of a pushed car plus the heat generated by this action. However, energy can never be created or destroyed. Thus it is said to be “conserved.” Second law: Entropy always increases until it reaches a maximum value. The total entropy of a system will always increase until it reaches its maximum possible value; it will never decrease on its own unless an outside agent works to decrease it. ([764](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=764)) %% Color: yellow %% ^334466389
+
+---
+
+The “future” is defined as the direction of time in which entropy increases. ([776](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=776)) %% Color: yellow %% ^334466390
+
+---
+
+In an earlier section, I defined “entropy” as a measure of the energy that cannot be converted into additional work but is instead transformed into heat. ([846](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=846)) %% Color: yellow %% ^334466391
+
+---
+
+Statistical mechanics proposes that large-scale properties (e.g., heat) emerge from microscopic properties (e.g., the motions of trillions of molecules). ([853](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=853)) %% Color: yellow %% ^334466392
+
+---
+
+In short, classical mechanics attempts to say something about every single microscopic entity (e.g., molecule) by using Newton’s laws. Thermodynamics gives laws of macroscopic entities—heat, energy, and entropy—without acknowledging that any microscopic molecules are the source of these macroscopic entities. Statistical mechanics is a bridge between these two extremes, in that it explains how the behavior of the macroscopic entities arise from statistics of large ensembles of microscopic entities. ([860](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=860)) %% Color: yellow %% ^334466393
+
+---
+
+If I were to give an award for the single best idea anyone has ever had, I’d give it to Darwin, ahead of Newton and Einstein and everyone else. In a single stroke, the idea of evolution by natural selection unifies the realm of life, meaning, and purpose with the realm of space and time, cause and effect, mechanism and physical law. ([1236](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=1236)) %% Color: yellow %% ^334466394
+
+---

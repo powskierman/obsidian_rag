@@ -1,0 +1,18 @@
+# Nil-Coalescing-Operator.md
+
+---
+aliases: []
+---
+
+2022-06-25
+# Nil-Coalescing-Operator
+
+### Backlink
+[[../../../../Programming-Tools/SwiftUI/SwiftUI MoC]]
+
+### Reference
+
+### Notes
+- The *nil-coalescing operator* (a??b) unwraps an optional a if it contains a value, or returns a default value b if a is nil. The expression a is always of an optional type.
+ 
+-

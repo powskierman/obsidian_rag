@@ -1,0 +1,23 @@
+# MacOS-Trackpad-Gestures.md
+
+---
+aliases:
+tags:
+created: 2022-01-01 13:38
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<<[RB-2021-06-24-22.50.13.pdf](RB-2021-06-24-22.50.13.pdf)>>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

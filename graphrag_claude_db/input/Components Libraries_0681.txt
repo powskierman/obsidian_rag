@@ -1,0 +1,19 @@
+---
+aliases: []
+---
+
+2022-03-12
+# Components
+
+### Backlink
+[[Electronics MOC]]
+
+### Reference
+- [Ultralibrarian](https://www.ultralibrarian.com)
+- [Digikey](https://www.digikey.ca)
+-  [[Components Libraries]]
+- 
+
+### Notes
+- [Finding equivalent electronic components](https://www.ultralibrarian.com/2021/07/26/how-to-find-equivalent-electronic-components-ulc)
+- 

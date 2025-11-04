@@ -1,0 +1,28 @@
+---
+aliases: []
+tags: [
+ mcuboot
+ devicetree
+ 
+]
+---
+# undefined reference to `__device_dts_ord_112'
+Date: 2023-07-23
+
+### Backlink
+[[]]
+
+### Reference
+-  Troubleshooting devicetree](https://docs.zephyrproject.org/latest/build/dts/troubleshooting.html)
+- 
+### Notes
+-  To correct this error:
+	- To find the devicetree node you need to check, use the number `<N>` from the linker error.  Search in:
+```
+/Users/michel/nRF52840/mcuboot/boot/zephyr/build/zephyr/include/generated/devicetree_generated.h
+```
+- In this case, the error is related to: 112 /soc/usbd@40027000/cdc-acm-uart
+- The problem is console is first assigned to uart and reassigned to cdc-acm-uart
+- THIS SOLUTION DOES NOT WORK:
+	- The solution is to edit CONFIG_UART_CONSOLE=n in /opt/nordic/ncs/v2.4.0/zephyr/boards/arm/xiao_ble_mcuboot/xiao_ble_mcuboot_defconfig or add the command to the prj.conf file.
+	- If the error persists also add CONFIG_SHELL_BACKEND_SERIAL=n

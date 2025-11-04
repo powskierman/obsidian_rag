@@ -1,0 +1,102 @@
+---
+aliases: 
+tags:
+  - lymphoma
+  - pet
+---
+# PET/CT scan result
+Date: 2024-12-23
+
+### Backlink
+[[../Lymphoma/Lymphoma MoC]]
+
+### Reference
+-  
+### Notes
+- #### ORIGINAL REPORT
+   
+  MICHEL LAPOINTE
+ PT BODY
+ 
+ PET CT OF THE BODY FROM BASE OF BRAIN TO UPPER THIGHS USING F-18 FLUORODEOXYGLUCOSE(299 MBq) WITH LOW DOSE CT FOR LOCALIZATION AND ATTENUATION CORRECTION :
+ 
+ PROVIDED HISTORY AND CLINICAL QUESTION: New finding retroperitoneal mass. Early biopsy results suggest lymphoma
+ 
+ COMPARISON STUDIES: No prior
+ 
+ Blood glucose: 8.4 mmol/L
+ 
+ Reference values (representative SUV Max)
+ Mediastinal blood pool: 3.3
+ Liver: 3.8
+ 
+ FINDINGS: 
+ 
+ Lymph nodes/marrow/spleen
+ 
+ Intensely FDG avid (SUV max 28.9) retroperitoneal lymph node mass extending from the level of the infrarenal abdominal aorta down into the left common iliac region. This measures up to 6.2 x 10.0 cm (series 3/482) axially and 9.1 cm cranially caudally.
+ 
+ No hypermetabolic lymph nodes above the diaphragm.
+ 
+ Spleen is normal in size and metabolic activity.
+ 
+ In the distal right humerus is a intensely FDG avid marrow lesion (SUV max 11.0). Although this extends beyond the field-of-view of the localizer CT can be seen but centrally within the marrow space on the scintigraphic images. The scintigraphic abnormality is approximately 1 cm in axial dimension and extends over a 2 cm length of the humerus.
+ 
+ No additional FDG avid marrow lesions.
+ 
+ 
+ 
+ Other
+ 
+ No FDG abnormality within the head/neck.
+ 
+ No FDG avid abnormalities within the chest. Minor scattered atelectasis or scarring within the lungs. No suspicious pulmonary nodules. No pleural effusions.
+ 
+ No FDG avid abnormalities within the liver, pancreas, adrenal glands, kidneys (with bilateral photopenic renal cysts). Gallbladder is unremarkable.
+ 
+ No suspicious focal FDG uptake superimposed on physiologic activity in the GI tract. Mild uncomplicated diverticulosis.
+ 
+ Bulky prostate.
+ 
+ 
+ 
+ IMPRESSION: 
+ 
+ Bulky retroperitoneal lymph node mass is intensely FDG avid. No additional hypermetabolic lymph nodes.
+ 
+ Small but intensely FDG avid marrow lesion in the distal right humerus in keeping with an additional site of lymphomatous involvement.
+
+[[1st PET/CT scan result interpretation]]
+### What this means:
+- Key Findings
+	1.	Retroperitoneal Lymph Node Mass:
+	![[Pasted image 20241223142746 1.png]]
+	•	A large mass in the retroperitoneal region (the area behind the abdominal cavity) was identified. It is described as intensely FDG avid, meaning it shows a high uptake of the radioactive tracer (FDG), which is common in cancerous or highly active cells.
+	•	The mass measures 6.2 x 10.0 cm axially (width and depth) and 9.1 cm cranio-caudally (height).
+	•	The maximum standardized uptake value (SUV max) is 28.9, which is significantly elevated, indicating high metabolic activity typically seen in lymphoma.
+	2.	Marrow Lesion in the Right Humerus:
+	•	A small but intensely FDG avid lesion was found in the bone marrow of your distal right humerus (upper arm bone). This lesion has an SUV max of 11.0, also suggesting lymphomatous involvement.
+	•	The lesion measures approximately 1 cm in width and extends over a length of 2 cm.
+	3.	Spleen, Other Lymph Nodes, and Organs:
+	•	The spleen appears normal in size and metabolic activity, with no signs of disease.
+	•	No other hypermetabolic lymph nodes were detected above the diaphragm (in areas like the chest or neck).
+	•	Other major organs, including the liver, pancreas, adrenal glands, kidneys, and lungs, show no abnormal FDG uptake or suspicious findings.
+	•	There are minor findings such as mild diverticulosis (a benign condition affecting the colon) and bilateral renal cysts (non-cancerous fluid-filled sacs on the kidneys).
+	4.	Prostate:
+	•	The prostate is described as “bulky,” which may suggest enlargement but does not indicate FDG avidity or malignancy based on this scan.
+Impression
+	•	The findings strongly suggest lymphoma involving:
+	1.	A large retroperitoneal lymph node mass.
+	2.	A secondary site in the bone marrow of the right humerus.
+	•	No other significant areas of disease were detected elsewhere in the body.
+What Does This Mean?
+	•	The PET/CT scan supports a diagnosis of lymphoma, consistent with my biopsy results.
+	•	The retroperitoneal mass is likely the primary site of involvement.
+	•	The lesion in your right humerus indicates that lymphoma has spread to at least one additional site (bone marrow involvement).
+	•	The absence of other FDG avid abnormalities suggests that the disease has not widely spread to other organs or lymph nodes above the diaphragm.
+Next Steps
+	•	Your healthcare team will likely use this information to stage your lymphoma and plan treatment. Staging considers factors such as:
+	•	The size and location of masses.
+	•	Whether multiple sites are involved.
+	•	Whether disease is confined to lymph nodes or has spread to other organs/bone marrow.
+	•	Treatment typically includes chemotherapy, immunotherapy, or radiation, depending on the type and stage of lymphoma.

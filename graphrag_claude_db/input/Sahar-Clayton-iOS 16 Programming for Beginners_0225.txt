@@ -1,0 +1,230 @@
+---
+bookId: "40225"
+title: "iOS 16 Programming for Beginners: Kickstart your iOS app development journey with a hands-on guide to Swift 5.7 and Xcode 14, 7th Edition"
+author: Ahmad Sahar and Craig Clayton
+asin: B0B6CCTLN9
+lastAnnotatedDate: 2023-03-01
+highlightsCount: 72
+reference: https://www.amazon.com/dp/B0B6CCTLN9
+kindle_link: kindle://book?action=open&asin=B0B6CCTLN9
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81alCoZqECL._SY160.jpg)
+## Highlights
+The process of accessing an optional’s value is known as unwrapping the optional. — location: [1163](kindle://book?action=open&asin=B0B6CCTLN9&location=1163) ^ref-37666
+
+---
+make it an optional. To do so, type a question mark after the type annotation — location: [1176](kindle://book?action=open&asin=B0B6CCTLN9&location=1176) ^ref-5396
+
+---
+Note the use of the ?? operator. This means that if spouseName does not contain a value, a default value that you provide will be used instead — location: [1189](kindle://book?action=open&asin=B0B6CCTLN9&location=1189) ^ref-6021
+
+---
+you can’t join a regular String variable to an optional using the + operator. You will need to unwrap the optional first. — location: [1208](kindle://book?action=open&asin=B0B6CCTLN9&location=1208) ^ref-24094
+
+---
+In optional binding, you attempt to assign the value in an optional to a temporary variable (you can name it whatever you like). If the assignment is successful, a block of code is executed. — location: [1229](kindle://book?action=open&asin=B0B6CCTLN9&location=1229) ^ref-57862
+
+---
+Here’s how it works. If spouseName has a value, it will be unwrapped and assigned to a temporary constant, spouseTempVar, and the if statement will return true. The statements between the curly braces will be executed and the constant greeting will then be assigned the value Hello, Nia. — location: [1241](kindle://book?action=open&asin=B0B6CCTLN9&location=1241) ^ref-37973
+
+---
+If spouseName does not have a value, no value can be assigned to spouseTempVar and the if statement will return false. In this case, the statements in the curly braces will not be executed at all. — location: [1245](kindle://book?action=open&asin=B0B6CCTLN9&location=1245) ^ref-55909
+
+---
+The for-in loop will repeat for a known number of — location: [1316](kindle://book?action=open&asin=B0B6CCTLN9&location=1316) ^ref-46819
+
+---
+times, and the while and repeat-while loops will repeat as long as the loop condition is true. — location: [1316](kindle://book?action=open&asin=B0B6CCTLN9&location=1316) ^ref-47425
+
+---
+Swift has three collection types: arrays, which store an ordered list of values; dictionaries, which store an unordered list of key-value pairs; and sets, which store an unordered list of values. — location: [1402](kindle://book?action=open&asin=B0B6CCTLN9&location=1402) ^ref-7156
+
+---
+To find out how many elements there are in an array, use count. — location: [1439](kindle://book?action=open&asin=B0B6CCTLN9&location=1439) ^ref-61623
+
+---
+You can check to see if an array is empty by using isEmpty. — location: [1443](kindle://book?action=open&asin=B0B6CCTLN9&location=1443) ^ref-4932
+
+---
+You can add a new element to the end of an array by using append(_:). — location: [1451](kindle://book?action=open&asin=B0B6CCTLN9&location=1451) ^ref-12755
+
+---
+You can also add a new element to an array with the + operator, — location: [1456](kindle://book?action=open&asin=B0B6CCTLN9&location=1456) ^ref-17219
+
+---
+You can add a new item at a specified index using insert(_:at:). — location: [1457](kindle://book?action=open&asin=B0B6CCTLN9&location=1457) ^ref-37732
+
+---
+You can replace an existing array element by specifying the index and assigning a new value to it. — location: [1472](kindle://book?action=open&asin=B0B6CCTLN9&location=1472) ^ref-41219
+
+---
+You can remove an element from an array by using remove(at:). — location: [1482](kindle://book?action=open&asin=B0B6CCTLN9&location=1482) ^ref-29930
+
+---
+If you’re removing the last item from the array, you can use removeLast() — location: [1487](kindle://book?action=open&asin=B0B6CCTLN9&location=1487) ^ref-32084
+
+---
+A dictionary stores key-value pairs in an unordered list. — location: [1505](kindle://book?action=open&asin=B0B6CCTLN9&location=1505) ^ref-13654
+
+---
+All keys must be of the same type and must be unique. — location: [1507](kindle://book?action=open&asin=B0B6CCTLN9&location=1507) ^ref-54013
+
+---
+To remove an element from a dictionary, assign nil to an existing key. — location: [1559](kindle://book?action=open&asin=B0B6CCTLN9&location=1559) ^ref-46486
+
+---
+Swift allows you to create functions, which let you combine a number of instructions together and execute them by calling a single name. — location: [1694](kindle://book?action=open&asin=B0B6CCTLN9&location=1694) ^ref-50829
+
+---
+You can also create closures, which lets you combine a number of instructions together without a name and assign it to a constant or variable. — location: [1695](kindle://book?action=open&asin=B0B6CCTLN9&location=1695) ^ref-1675
+
+---
+You can add a custom label to the parameter to make the function easier to understand. — location: [1748](kindle://book?action=open&asin=B0B6CCTLN9&location=1748) ^ref-42370
+
+---
+It’s possible to have a function within the body of another function, and these are called nested functions. — location: [1759](kindle://book?action=open&asin=B0B6CCTLN9&location=1759) ^ref-42128
+
+---
+A nested function can use the variables of the enclosing function. — location: [1760](kindle://book?action=open&asin=B0B6CCTLN9&location=1760) ^ref-50567
+
+---
+Functions are first-class types in Swift, so they can be used as parameters and return types. — location: [1782](kindle://book?action=open&asin=B0B6CCTLN9&location=1782) ^ref-5991
+
+---
+a guard statement. This checks to see whether a condition is true; if not, it exits the function. — location: [1829](kindle://book?action=open&asin=B0B6CCTLN9&location=1829) ^ref-63268
+
+---
+The sequence of instructions in a closure is surrounded by curly braces ({ }), and the in keyword separates the arguments and return type from the closure body. — location: [1842](kindle://book?action=open&asin=B0B6CCTLN9&location=1842) ^ref-1820
+
+---
+Closures can be assigned to a constant or variable, — location: [1843](kindle://book?action=open&asin=B0B6CCTLN9&location=1843) ^ref-37322
+
+---
+The map() function then applies this closure to every element in numbersArray. — location: [1858](kindle://book?action=open&asin=B0B6CCTLN9&location=1858) ^ref-43293
+
+---
+Classes and structures allow for the creation of complex objects that can store state and behavior, and enumerations can be used to limit the values that can be assigned to a variable or constant, reducing the chances for error. — location: [1895](kindle://book?action=open&asin=B0B6CCTLN9&location=1895) ^ref-19956
+
+---
+Classes are useful for representing complex objects, — location: [1916](kindle://book?action=open&asin=B0B6CCTLN9&location=1916) ^ref-3832
+
+---
+Variables or constants associated with a class are called properties. — location: [1924](kindle://book?action=open&asin=B0B6CCTLN9&location=1924) ^ref-58652
+
+---
+Functions associated with a class are called methods. — location: [1926](kindle://book?action=open&asin=B0B6CCTLN9&location=1926) ^ref-18654
+
+---
+Convention dictates that class names start with a capital letter. — location: [1945](kindle://book?action=open&asin=B0B6CCTLN9&location=1945) ^ref-55950
+
+---
+You access instance properties and methods by typing a dot after the instance name, followed by the property or method you want. — location: [1956](kindle://book?action=open&asin=B0B6CCTLN9&location=1956) ^ref-54686
+
+---
+It is also possible to assign the values when the instance is being created, and you do this by implementing an initializer in your class declaration. — location: [1975](kindle://book?action=open&asin=B0B6CCTLN9&location=1975) ^ref-46440
+
+---
+An initializer is responsible for ensuring all of the instance properties have valid values when a class is created. — location: [1977](kindle://book?action=open&asin=B0B6CCTLN9&location=1977) ^ref-48210
+
+---
+Note that the self keyword distinguishes the property names from the parameters. For example, self.name refers to the property and name refers to the parameter. — location: [2000](kindle://book?action=open&asin=B0B6CCTLN9&location=2000) ^ref-18876
+
+---
+The override keyword is used here to specify that the description() method implemented here is to be used in place of the superclass implementation. The super keyword is used to call the superclass implementation of description(). — location: [2104](kindle://book?action=open&asin=B0B6CCTLN9&location=2104) ^ref-28777
+
+---
+a structure is very similar to a class. It also has a descriptive name, can contain properties and methods, and you can create instances. — location: [2123](kindle://book?action=open&asin=B0B6CCTLN9&location=2123) ^ref-31489
+
+---
+you did not need to implement an initializer; structures automatically get an initializer for all of their properties, called the memberwise initializer. — location: [2163](kindle://book?action=open&asin=B0B6CCTLN9&location=2163) ^ref-59090
+
+---
+there are two differences between a class and a structure: Structures cannot inherit from another structure — location: [2168](kindle://book?action=open&asin=B0B6CCTLN9&location=2168) ^ref-47552
+
+---
+Classes are reference types, while structures are value types — location: [2170](kindle://book?action=open&asin=B0B6CCTLN9&location=2170) ^ref-39764
+
+---
+Classes are reference types. This means when you assign a class instance to a variable, you are actually storing the memory location of the original instance in the variable, instead of the instance itself. Structures are value types. This means when you assign a structure instance to a variable, that — location: [2173](kindle://book?action=open&asin=B0B6CCTLN9&location=2173) ^ref-43698
+
+---
+instance is copied, and whatever changes you make to the original instance do not affect the copy. — location: [2175](kindle://book?action=open&asin=B0B6CCTLN9&location=2175) ^ref-7910
+
+---
+It is recommended to use structures unless you need something that requires classes, such as subclasses. — location: [2207](kindle://book?action=open&asin=B0B6CCTLN9&location=2207) ^ref-12640
+
+---
+enumerations can contain methods. — location: [2239](kindle://book?action=open&asin=B0B6CCTLN9&location=2239) ^ref-21446
+
+---
+Protocols define a blueprint of methods, properties, and other requirements that can be adopted by a class, structure, or enumeration. — location: [2272](kindle://book?action=open&asin=B0B6CCTLN9&location=2272) ^ref-37082
+
+---
+Extensions enable you to provide new functionality for an existing class, structure, or enumeration. — location: [2273](kindle://book?action=open&asin=B0B6CCTLN9&location=2273) ^ref-26911
+
+---
+Protocols are like blueprints that determine what properties or methods an object should have. — location: [2287](kindle://book?action=open&asin=B0B6CCTLN9&location=2287) ^ref-29112
+
+---
+Just like classes and structures, protocol names start with an uppercase letter. Properties need to be declared using the var keyword. — location: [2294](kindle://book?action=open&asin=B0B6CCTLN9&location=2294) ^ref-4669
+
+---
+you just specify property and method names; the implementation is done within the adopting class, structure, or enumeration. — location: [2296](kindle://book?action=open&asin=B0B6CCTLN9&location=2296) ^ref-40404
+
+---
+Extensions extend an existing class’s capabilities. — location: [2345](kindle://book?action=open&asin=B0B6CCTLN9&location=2345) ^ref-21347
+
+---
+Extensions allow you to provide extra capabilities to an object without modifying the original object definition. You can use them on Apple-provided objects (where you don’t have access to the object definition) or when you wish to segregate your code for readability and ease of maintenance. — location: [2347](kindle://book?action=open&asin=B0B6CCTLN9&location=2347) ^ref-41026
+
+---
+Writing async in front of a let statement when you define a constant, and then writing await when you access the constant, allows parallel execution of asynchronous methods: — location: [2724](kindle://book?action=open&asin=B0B6CCTLN9&location=2724) ^ref-16057
+
+---
+A view is an instance of the UIView class or one of its subclasses. Anything you see on your screen (buttons, text fields, labels, and so on) is a view. — location: [2806](kindle://book?action=open&asin=B0B6CCTLN9&location=2806) ^ref-52024
+
+---
+A stack view is an instance of the UIStackView class, which is a subclass of UIView. It is used to group views together in a horizontal or vertical stack. — location: [2808](kindle://book?action=open&asin=B0B6CCTLN9&location=2808) ^ref-53064
+
+---
+view controller is an instance of the UIViewController class. It determines what a view displays to the user, and what happens when a user interacts with a view. — location: [2811](kindle://book?action=open&asin=B0B6CCTLN9&location=2811) ^ref-27553
+
+---
+A table view controller is an instance of the UITableViewController class, which is a subclass of the UIViewController class. — location: [2814](kindle://book?action=open&asin=B0B6CCTLN9&location=2814) ^ref-27130
+
+---
+A collection view controller is an instance of the UICollectionViewController class, which is a subclass of the UIViewController class. Its view property has a reference to a UICollectionView instance (collection view), which displays a grid of UICollectionViewCell instances (collection view cells). — location: [2822](kindle://book?action=open&asin=B0B6CCTLN9&location=2822) ^ref-4832
+
+---
+A navigation controller is an instance of the UINavigationController class, which is a subclass of the UIViewController class. It has a viewControllers property that holds an array of view controllers. — location: [2829](kindle://book?action=open&asin=B0B6CCTLN9&location=2829) ^ref-44272
+
+---
+A tab bar controller is an instance of the UITabBarController class, which is a subclass of the UIViewController class. It has a viewControllers property that holds an array of view controllers. — location: [2839](kindle://book?action=open&asin=B0B6CCTLN9&location=2839) ^ref-21637
+
+---
+Model-View-Controller (MVC): This is a very common design pattern used in iOS app development. The user interacts with views onscreen. App data is stored in data model objects. Controllers manage the flow of information between views and data model objects. — location: [2847](kindle://book?action=open&asin=B0B6CCTLN9&location=2847) ^ref-49120
+
+---
+A storyboard file contains a visual representation of what the user sees. — location: [2850](kindle://book?action=open&asin=B0B6CCTLN9&location=2850) ^ref-64627
+
+---
+Auto Layout helps you lay out your user interface based on constraints you specify. — location: [2861](kindle://book?action=open&asin=B0B6CCTLN9&location=2861) ^ref-6014
+
+---
+Interface Builder allows you to add and configure scenes. Each scene represents a screen the user will see. — location: [2943](kindle://book?action=open&asin=B0B6CCTLN9&location=2943) ^ref-46188
+
+---
+Model: This handles data storage and representation, and data processing tasks. — location: [4621](kindle://book?action=open&asin=B0B6CCTLN9&location=4621) ^ref-47742
+
+---
+View: This includes all the things that are on the screen that the user can interact with. — location: [4623](kindle://book?action=open&asin=B0B6CCTLN9&location=4623) ^ref-23513
+
+---
+Controller: This manages the flow of information between the model and view. — location: [4624](kindle://book?action=open&asin=B0B6CCTLN9&location=4624) ^ref-48218
+
+---
+The delegate property is assigned to an object that handles user interaction with the collection view. — location: [4645](kindle://book?action=open&asin=B0B6CCTLN9&location=4645) ^ref-34651
+
+---

@@ -1,0 +1,26 @@
+# Info.plist Is Missing in Xcode.md
+
+---
+aliases: []
+tags: [#info.plist]
+---
+# Info.plist Is Missing in Xcode
+Date: 2022-12-28
+
+### Backlink
+[[../../../../Programming-Tools/Xcode/Xcode MOC]]
+
+### Reference
+-  [Info.plist Is Missing in Xcode 13 — Here’s How To Get It Back](https://betterprogramming.pub/info-plist-is-missing-in-xcode-13-heres-how-to-get-it-back-1a7abf3e2514)
+- 
+- 
+### Notes
+-  Info.plist Is Missing in Xcode
+	- First, go to:
+	
+	```
+	Project → Targets → Info → Custom iOS Target Properties
+	```
+	
+	…then edit the properties, just like you would’ve back in `Info.plist`.
+	- The first time, Xcode will automatically generate a new `Info.plist` file that’s semi-synced with `Custom iOS Target Properties`. Xcode will later merge them for you.

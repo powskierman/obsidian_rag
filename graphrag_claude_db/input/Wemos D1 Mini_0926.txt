@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2021-12-30 13:33
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+![Lengt.h Width : 34.2 mm 25.6 mm USER HMOSI HCS TOUT WAKE HSCLK HMISO RXD2 TXD2 tADC@2 GP1016 GP1014 GP1012 GP1013 GP1015 3.3V 01 nini --AESET USB TXDO RXDO GP105 GP104 GPIOO GP102 GND FLASH TXDI MICRO com ](ESP8266-image1.jpeg){width="5.0in" height="6.427083333333333in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

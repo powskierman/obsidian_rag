@@ -1,0 +1,43 @@
+# Melville-Moby Dick.md
+
+---
+bookId: "19382"
+title: "Moby Dick: or, the White Whale"
+author: Herman Melville
+asin: B004TRXX7C
+lastAnnotatedDate: 2016-05-20
+highlightsCount: 9
+reference: https://www.amazon.com/dp/B004TRXX7C
+kindle_link: kindle://book?action=open&asin=B004TRXX7C
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/91NCwpeQihL._SY160.jpg)
+## Highlights
+In this world, shipmates, sin that pays its way can travel freely and without a passport; whereas Virtue, if a pauper, is stopped at all frontiers. — location: [627](kindle://book?action=open&asin=B004TRXX7C&location=627) ^ref-14023
+
+---
+king's head is solemnly oiled at his coronation, even as a head of salad. Can it be, though, that they anoint it with a view of making its interior run well, as they anoint machinery? — location: [1596](kindle://book?action=open&asin=B004TRXX7C&location=1596) ^ref-47721
+
+---
+Gnawed within and scorched without, with the infixed, unrelenting fangs of some incurable idea; — location: [2642](kindle://book?action=open&asin=B004TRXX7C&location=2642) ^ref-11616
+
+---
+Consider all this; and then turn to this green, gentle, and most docile earth; consider them both, the sea and the land; and do you not find a strange analogy to something in yourself? For as this appalling ocean surrounds the verdant land, so in the soul of man there lies one insular Tahiti, full of peace and joy, but encompassed by all the horrors of the half known life. God keep thee! Push not off from that isle, thou canst never return! — location: [3981](kindle://book?action=open&asin=B004TRXX7C&location=3981) ^ref-6614
+
+---
+A large whale's case generally yields about five hundred gallons of sperm, — location: [4888](kindle://book?action=open&asin=B004TRXX7C&location=4888) ^ref-33346
+
+---
+through infancy's unconscious spell, boyhood's thoughtless faith, adolescence' doubt (the common doom), then scepticism, then disbelief, resting at last in manhood's pondering repose of If. But once gone through, we trace the round again; and are infants, boys, and men, and Ifs eternally. — location: [7044](kindle://book?action=open&asin=B004TRXX7C&location=7044) ^ref-4302
+
+---
+In the midst of the personified impersonal, a personality stands here. — location: [7234](kindle://book?action=open&asin=B004TRXX7C&location=7234) ^ref-11297
+
+---
+"What is it, what nameless, inscrutable, unearthly thing is it; what cozening, hidden lord and master, and cruel, remorseless emperor commands me; that against all natural lovings and longings, I so keep pushing, and crowding, and jamming myself on all the time; recklessly making me ready to do what in my own proper, natural heart, I durst not so much as dare? — location: [7724](kindle://book?action=open&asin=B004TRXX7C&location=7724) ^ref-43290
+
+---
+Thinking is, or ought to be, a coolness and a calmness; and our poor hearts throb, and our poor brains beat too much for that. — location: [8011](kindle://book?action=open&asin=B004TRXX7C&location=8011) ^ref-9982
+
+---

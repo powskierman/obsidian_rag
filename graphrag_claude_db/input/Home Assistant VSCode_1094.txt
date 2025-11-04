@@ -1,0 +1,15 @@
+---
+aliases: []
+tags: []
+---
+# Home Assistant VSCode
+Date: 2023-09-24
+
+### Backlink
+[[Home-Assistant MoC]]
+
+### Reference
+-  
+### Notes
+- vscode long-lived access token: 
+	- `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`

@@ -1,0 +1,68 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-22 15:40
+ContentType: Reference
+Backlink: "[[Trigonometry MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- [MathIsFun, Amplitude, etc.](https://www.mathsisfun.com/algebra/amplitude-period-frequency-phase-shift.html)
+
+##### Amplitude, Period, Phase Shift and Frequency
+- The Amplitude (A) is the height from the  to the peak (or to the trough). Or we can measure the height from highest to lowest points and divide that by 2.
+	- The amplitude can be increased by multiplying sin() with a coefficient: $a \sin (bx)$
+		- ex: $3 \sin (bx)$
+- The Period (B) goes from one peak to the next (or from any point to the next matching point):
+	- !
+	- A period of 1 = $2 \pi$, a full rotation around the unit circle
+	- This can be accelerated by adding a coefficient to the variable of the cosine function: $\sin(bx)$ ex: $\sin(3x)={{2 \pi}\over 3}$ so, $2\pi$ is divided by coefficient b
+-  The Phase Shift(C) is how far the function is shifted horizontally from the usual position.
+	- The phase is shifted by adding a coefficient to the amplitude variable:  $a \sin (b(x+c))$
+- !
+- The Vertical Shift (D) is how far the function is shifted vertically from the usual position. 
+	- A vertical shift can be introduced by adding a coefficient to the function:  $a \sin (b(x+c))+d$
+-  !
+- These can all be present within one function
+	- !
+	-  or  ?
+		- $sin(0,x)\ne 0$ For $y = \sin(x)$, the  is _**y**_ **= 0+D** 
+		- $cos(x,0)=0$ The  is at **x=0+C**
+- #### Method to Determine Function from Cartesian Points
+	1. Write A, B, C, D vertically at left margin
+	2. Write cartesian points horizontally at top margin
+	3. Draw 
+	4. Determine  A
+		1. A= to 
+			1. if we have , $y_2-y_1$
+			2. if we have  ${y_2-y_1} \over 2$
+	5. Draw points and function
+	6. Draw midline
+		1. Write D ()
+	7. Is it sine or cosine?
+		1. If sine, x=0; y at 
+			1. If A is positive, curve goes up from ; else down
+		2. If cosine x=0; y at 
+			1. If A is positive, curve goes down from maximum
+				1. If the  point at x equals, 0 is a *maximum* point, we know that a>0
+			2. up from minimum
+				1. If the  point at x=0 is a _minimum_ point, we know that a<0
+	8. Determine period by dividing $2 \pi \over B$
+		1. B = $x_2-x_1$
+		2. If  (we have  and ), multiply B by 4 to determine period
+		3. if  (we have 2 ) multiply B by 2 to determine period
+	9. Determine horizontal shift and add to $x$
+	10. Determine vertical shift by adding D to $y$ at 
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

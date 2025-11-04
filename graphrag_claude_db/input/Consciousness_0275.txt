@@ -1,0 +1,196 @@
+---
+id: 16112731
+updated: 2022-06-18
+title: Consciousness
+author: Christof Koch
+highlights: 41
+last_highlight: 2013-03-10
+tags:
+  - book-notes
+  - psychology
+"Date added:":
+---
+
+%%
+ID: 16112731
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51VKT3B9dNL._SL500_.jpg)
+
+# About
+Title: [[Consciousness]]
+Authors: [[Christof Koch]]
+Category: #books
+Number of Highlights: ==41==
+Readwise URL: https://readwise.io/bookreview/16112731
+Date: [[2022-06-18]]
+Last Highlighted: *2013-03-10*
+
+---
+
+# Highlights
+
+The continuing complexification of brains, to use Teilhard de Chardin’s term, enhanced consciousness until self-consciousness emerged: awareness reflecting upon itself. ([243](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=243)) %% Color: yellow %% ^334466201
+
+---
+
+I foresee a time when humanity’s teeming billions and their computers will be interconnected in a vast matrix—a planetary Übermind. ([248](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=248)) %% Color: yellow %% ^334466202
+
+---
+
+The singular point of view of the conscious, experiencing observer is called the first-person perspective. ([511](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=511)) %% Color: yellow %% ^334466203
+
+---
+
+“There are three powers, three powers alone that are able to conquer and hold captive for ever the conscience of these impotent rebels for their happiness—those forces are miracle, mystery, and authority.” ([582](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=582)) %% Color: yellow %% ^334466204
+
+---
+
+What it feels like to have a particular experience is the quale of that experience: ([586](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=586)) %% Color: yellow %% ^334466205
+
+---
+
+one reason we like to watch movies—they distract us from our overly active self-consciousness, from our daily barrage of worries, anxieties, fears, and doubts. For a few hours, we escape the tyranny of our skull-sized kingdoms. ([815](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=815)) %% Color: yellow %% ^334466206
+
+---
+
+Self-consciousness is part and parcel of consciousness. It is a special form of awareness that is not concerned with the external world, but is directed at internal states, reflections about them, and reflections upon such reflections. This recursiveness makes it a peculiarly powerful mode of thinking. ([822](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=822)) %% Color: yellow %% ^334466207
+
+---
+
+Recently, clinicians recorded the EEG of two classes of severely brain-injured patients, those that remain unconscious and those that recover at least some measure of awareness. They found that the critical difference is the presence or absence of communication between prefrontal regions and temporal, sensory cortical regions in the back. If such feedback is present, consciousness is preserved. If not, it is absent. ([1135](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1135)) %% Color: yellow %% ^334466208
+
+---
+
+The approximately 100,000 neurons packed below each square millimeter of cortex, an area about the size of the letter “o” on this page, are highly heterogeneous. They can be distinguished based on their location, the shape and morphology of their dendrites, the architecture of their synapses, their genetic makeup, their electrophysiologic character, and the places to which they send their axons. It is critical to understand how this tremendous diversity of actors, perhaps up to a thousand neuronal cell types that are the basic building blocks of the central nervous system, contributes to the genesis of qualia. ([1143](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1143)) %% Color: yellow %% ^334466209
+
+---
+
+Attention is evolution’s answer to information overload; it is a consequence of the fact that no brain can process all incoming information. ([1158](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1158)) %% Color: yellow %% ^334466210
+
+---
+
+The history of any scientific concept—energy, atom, gene, cancer, memory—is one of increased differentiation and sophistication until it can be explained in a quantitative and mechanistic manner at a lower, more elemental level. ([1197](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1197)) %% Color: yellow %% ^334466211
+
+---
+
+Let me start by offering a definition of free will: You are free if, under identical circumstances, you could have acted otherwise. ([1898](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1898)) %% Color: yellow %% ^334466212
+
+---
+
+compatibilism, the dominant view in biological, psychological, legal, and medical circles. You are free if you can follow your own desires and preferences. Determinism and free will can coexist. They are compatible with each other. ([1922](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1922)) %% Color: yellow %% ^334466213
+
+---
+
+most of your actions escape conscious introspection and control. Your freedom is restricted by the habits and consistent choices you’ve made in the past. The very riverbed that holds and channels your stream of consciousness is fashioned by the family and the culture you were raised in. The desires and preferences that you “freely” act out appear to be fully determined! ([1952](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1952)) %% Color: yellow %% ^334466214
+
+---
+
+the hallmark of chaos: infinitesimally small perturbations in the equations’ starting points lead to radically different outcomes. ([1994](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=1994)) %% Color: yellow %% ^334466215
+
+---
+
+What breaks down in chaos is not the chain of action and reaction, but predictability. ([2015](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2015)) %% Color: yellow %% ^334466216
+
+---
+
+Our own Milky Way is part of the Virgo supercluster of galaxies, which contains tens of trillions of stars. According to the inflation theory of cosmology, these superclusters, the largest structures in the cosmos, were caused by stochastic quantum fluctuations that occurred an instant after the Big Bang, which formed the universe. Initially, the universe was far smaller than the head of a pin, and in the tight confines of this brew of mass–energy at the beginning of time, things were a bit denser here and somewhat thinner over there. When this baby universe expanded to create space itself, its quantum imprint was amplified to the stupendous and uneven distribution of galaxies observed today. ([2052](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2052)) %% Color: yellow %% ^334466217
+
+---
+
+the collective effect of all these molecules frenetically moving about is to smooth out any quantum indeterminacy, an effect called decoherence. Decoherence implies that the molecules of life can be treated using thoroughly classical, deterministic laws rather than quantum mechanical, probabilistic ones. ([2078](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2078)) %% Color: yellow %% ^334466218
+
+---
+
+The libertarian conception of the mind requires that the mind controls the brain, not that the brain decides capriciously. ([2105](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2105)) %% Color: yellow %% ^334466219
+
+---
+
+the brain decides well before the mind does; the conscious experience of willing a simple act—the sensation of agency or authorship—is secondary to the actual cause. Agency has phenomenal content, or qualia, just as sensory forms of conscious experience do, triggered by cortico-thalamic circuits. Psychological experiments, psychiatric patients, and neurosurgical interventions expose the reality of this aspect of voluntary action. How the decision is formed remains unconscious. Why you choose the way you do is largely opaque to you. ([2306](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2306)) %% Color: yellow %% ^334466220
+
+---
+
+The Jesuits have a nearly 500-year-old spiritual tradition that stresses a twice daily examination of conscience. This is an exercise in self-awareness: the constant internal interrogation sharpens your sensitivity to your actions, desires, and motivations. You earnestly try to identify your faults and struggle to eliminate them. You seek to bring your unconscious motivations into consciousness. This will enable you not only to understand yourself better but also to live a life more in harmony with your character and your long-term goals. ([2318](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2318)) %% Color: yellow %% ^334466221
+
+---
+
+Philosophy is written in this grand book—the universe I say—that is wide open in front of our eyes. But the book cannot be understood unless we first learn to understand the language, and know the characters, in which it is written. It is written in the language of mathematics. —Galileo Galilei, The Assayer (1623) ([2328](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2328)) %% Color: yellow %% ^334466222
+
+---
+
+An emergent property is something expressed by the whole but not necessarily by its individual parts. The system possesses properties that are not manifest in its parts. ([2411](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2411)) %% Color: yellow %% ^334466223
+
+---
+
+The capability of coalitions of neurons to learn from interactions with the environment and with each other is routinely underestimated. Individual neurons are abstrusely complex information processors; the configuration of each neuron’s dendrites, which process the synaptic inputs, and each neuron’s axon, which distributes its output, is unique. The synapses, in turn, are nano-machines, equipped with learning algorithms that modify the strength and dynamics of these neural connections over timescales ranging from seconds to a lifetime. Humans have little direct experience with such vast, complex, and adaptive networks. ([2426](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2426)) %% Color: yellow %% ^334466224
+
+---
+
+It is not the nature of the stuff that the brain is made out of that matters for mind, it is rather the organization of that stuff—the way the parts of the system are hooked up, their causal interactions. A fancier way of stating this is, “Consciousness is substrate-independent.” ([2497](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2497)) %% Color: yellow %% ^334466225
+
+---
+
+information theory is one mathematical formalism that can quantify the causal interactions of the components of any system. It formalizes how much the state of this part over here—a star, an ant, a neuron, or a transistor—influences that part over there and how this influence evolves in time. Information theory exhaustively catalogues and characterizes the interactions among all parts of any composite entity. ([2552](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2552)) %% Color: yellow %% ^334466226
+
+---
+
+Conscious states share a second property; they are highly integrated. Any conscious state is a monad, a unit—it cannot be subdivided into components that are experienced independently. ([2596](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2596)) %% Color: yellow %% ^334466227
+
+---
+
+any conscious system must be a single, integrated entity with a large repertoire of highly differentiated states. ([2606](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2606)) %% Color: yellow %% ^334466228
+
+---
+
+quantity of conscious experience generated by any physical system in a particular state is equal to the amount of integrated information generated by the system in that state above and beyond the information generated by its parts. ([2615](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2615)) %% Color: yellow %% ^334466229
+
+---
+
+Integrated information theory introduces a precise measure capturing the extent of consciousness called Φ, or phi (and pronounced “fi”). Expressed in bits, Φ quantifies the reduction of uncertainty that occurs in a system, above and beyond the information generated independently by its parts, when that system enters a particular state. (Remember, information is the reduction of uncertainty.) ([2632](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2632)) %% Color: yellow %% ^334466230
+
+---
+
+Φ measures how much the network, in its current state, is synergistic, the extent to which the system is more than the sum of its parts. Thus, Φ can also be considered to be a measure of the holism of the network. ([2637](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2637)) %% Color: yellow %% ^334466231
+
+---
+
+The more integrated and differentiated the system is, the more conscious it is. ([2668](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2668)) %% Color: yellow %% ^334466232
+
+---
+
+Synchronous firing of action potentials among neurons is another means of integration. Mind you, if all of the brain’s neurons were to fire in a synchronized manner, as in a grand mal epileptic seizure, integration would be maximal, but differentiation would be minimal. Maximizing Φ is about finding the sweet spot between these two opposing tendencies. ([2670](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2670)) %% Color: yellow %% ^334466233
+
+---
+
+The crystal is the system viewed from within. It is the voice in the head, the light inside the skull. ([2712](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2712)) %% Color: yellow %% ^334466234
+
+---
+
+In humans, awareness is turned in on itself, giving rise to self-awareness. ([2772](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2772)) %% Color: yellow %% ^334466235
+
+---
+
+There may be up to a thousand different subtypes of nerve cells and supporting actors—the glia and astrocytes—within the nervous system. ([2907](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=2907)) %% Color: yellow %% ^334466236
+
+---
+
+One rational explanation is a demiurge, a Supreme Being who always was, is, and will be. Outside of time, this entity created the natural laws and willed the Big Bang into existence. Physics then begat a stable space-time fabric and our universe. After this initial act of creation, the Divine Architect left the cosmos to its own devices, free to evolve by chance and necessity. Eventually, creatures arose from the primeval slime and built temples to praise this Supreme Being. This is the Creator or Divine Providence that the American Declaration of Independence speaks of. Thomas Jefferson and Benjamin Franklin were deists, as a belief in such a naturalistic God is called. ([3158](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=3158)) %% Color: yellow %% ^334466237
+
+---
+
+Take Newton’s law of gravity and Coulomb’s law, which governs the way electrically charged particles attract and repel each other. Both laws have the same form, stating that the forces decay with the square of the distance between any two particles. Only the constant in front of the quadratic decay term differs. Intriguingly, the attraction between two opposite charges must be exactly 10,000 trillion, trillion, trillion times stronger than their mutual gravitational attraction in order for life as we know it to form. A itsy-bitsy more or less and we would not be around. Another cosmic constraint is that the sum of all positively charged particles in the universe must equal the sum of all negatively charged particles; otherwise, electromagnetism would dominate gravity, and stars, galaxies, and planets couldn’t form. The number of electrons must equal the number of protons to within one part in a trillion, trillion, trillion. If the strong nuclear force were slightly stronger or weaker than it actually is, either nothing but hydrogen or no elements heavier than iron would exist. If the universe had expanded too rapidly, protons and neutrons couldn’t have bonded into atomic nuclei. If the initial expansion of the universe had been ever so slightly slower, the fiery brew that made up the early universe would have been too hot for nuclei to have formed. In short, an amazing number of “coincidences” had to occur to give rise to a universe that was stable for a sufficiently long time and diverse enough in chemical elements to support complex, carbon-based life forms. ([3179](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=3179)) %% Color: yellow %% ^334466238
+
+---
+
+Scientists are guided by a heuristic principle of deductive reasoning called Occam’s razor. Named after the fourteenth-century English friar and logician William of Ockham, it states that of two equally good explanations for a phenomenon, the simpler one is more likely to be true. ([3215](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=3215)) %% Color: yellow %% ^334466239
+
+---
+
+I’m cast out into the universe, a glorious, strange, scary, and often lonely place. I strive to discern through its noisy manifestations—its people, dogs, trees, mountains, and stars—the eternal Music of the Spheres. ([3406](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=3406)) %% Color: yellow %% ^334466240
+
+---
+
+the cerebellum due to stroke or other trauma. The main deficits are ataxia, slurred speech, and unsteady ([3545](https://readwise.io/to_kindle?action=open&asin=B007D58OM6&location=3545)) %% Color: yellow %% ^334466241
+
+---

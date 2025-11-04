@@ -1,0 +1,36 @@
+---
+bookId: "1909"
+title: Voyages en Egypte et en Nubie (1er et 2ème voyage) (French Edition)
+author: Giovanni Battista Belzoni and G.B Depping
+asin: B01L5R4SX6
+lastAnnotatedDate: 2017-12-16
+highlightsCount: 7
+reference: https://www.amazon.com/dp/B01L5R4SX6
+kindle_link: kindle://book?action=open&asin=B01L5R4SX6
+tags:
+  - book-notes
+  - history
+---
+![](https://m.media-amazon.com/images/I/91rDnZBNzVL._SY160.jpg)
+## Highlights
+eunuques — location: [648](kindle://book?action=open&asin=B01L5R4SX6&location=648) ^ref-42878
+
+---
+cadi — location: [654](kindle://book?action=open&asin=B01L5R4SX6&location=654) ^ref-58258
+
+---
+fellahs — location: [667](kindle://book?action=open&asin=B01L5R4SX6&location=667) ^ref-26081
+
+---
+propylées — location: [791](kindle://book?action=open&asin=B01L5R4SX6&location=791) ^ref-15086
+
+---
+janissaire, — location: [837](kindle://book?action=open&asin=B01L5R4SX6&location=837) ^ref-17753
+
+---
+firman — location: [838](kindle://book?action=open&asin=B01L5R4SX6&location=838) ^ref-47231
+
+---
+Des — location: [1157](kindle://book?action=open&asin=B01L5R4SX6&location=1157) ^ref-27453
+
+---

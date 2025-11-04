@@ -1,0 +1,35 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-01-29 15:23
+ContentType: Reference
+Backlink: "[[Algebra MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- To solve $ax2+bx+c=0$ by completing the square:
+	- Example: $$x^2−6x-3=0$$
+- Transform the equation so that the constant term $c$ is alone on the right side.
+	- $$x^2-6x=3$$
+- If $a$, the leading coefficient (the coefficient of the $x^2$ term), is not equal to 1, divide both sides by $a$
+- Add the square of half the coefficient of the x-term, $\large({b \over 2a})^2$ to both sides of the equation.
+	- $$x^2-6x+(-3)^2=3+9$$
+- Factor the left side as the square of a binomial.
+	- $$(x-3)^2=12$$
+- Take the square root of both sides.  (Remember: $(x+q)^2=r$ is equivalent to $x+q=±\sqrt r$)
+	- $x-3=\pm\sqrt12$
+- Solve for $x$
+	- $x=3\pm2\sqrt3$
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

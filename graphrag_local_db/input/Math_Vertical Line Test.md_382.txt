@@ -1,0 +1,29 @@
+# Vertical Line Test.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-02-02 11:34
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+[[]]
+
+
+-  For a function to be valid, a vertical line must pass through the curve of a function only once.
+-  If we can pass a horizontal and a vertical line through the graph of the function, it is 
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

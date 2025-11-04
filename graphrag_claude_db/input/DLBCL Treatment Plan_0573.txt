@@ -1,0 +1,46 @@
+---
+aliases:
+tags:
+created: 2025-08-16 10:51
+ContentType: Note
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+```mermaid
+%%{init: {"themeVariables": {"scale": 0.5}} }%%
+flowchart TD
+    A["DHL"] --> B["R-CHOP"]
+    B --> C{"Chemo Resistant?"}
+    C -- No --> D["ASCT"]
+    D --> E["ASCT Long-term Side Effects: 
+        - Infertility
+        - Cataracts
+        - Cardiovascular Complications
+        - Pulmonary Dysfunction
+        - Endocrine Disorders
+        - Neurological Complications
+        - Osteoporosis"]
+    C -- Yes --> F["CAR-T"]
+    F --> G["CAR-T Side Effects:
+	    - CRS
+	    - ICANS
+	    - Tumor Lysis Syndrome"]
+    G --> H{"2nd Line Effective?"}
+    H -- Yes --> I["Monitoring"]
+    H -- No --> J["Bispecific Antibodies"]
+
+    style E text-align:left;
+    style G text-align:left;
+```
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,25 @@
+# CLI Commands.md
+
+---
+aliases: 
+tags:
+  - macos
+created: 2025-06-23 14:05
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- [[system_profiler]]
+- Disable “Downloaded From Internet” Warning
+	- `defaults write com.apple.LaunchServices LSQuarantine -bool false`
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

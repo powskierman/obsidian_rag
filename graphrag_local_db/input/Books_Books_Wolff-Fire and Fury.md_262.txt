@@ -1,0 +1,118 @@
+# Wolff-Fire and Fury.md
+
+---
+bookId: "12035"
+title: "Fire and Fury: Inside the Trump White House"
+author: Michael Wolff
+asin: B077F4WZZY
+lastAnnotatedDate: 2018-02-22
+highlightsCount: 34
+reference: https://www.amazon.com/dp/B077F4WZZY
+kindle_link: kindle://book?action=open&asin=B077F4WZZY
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/716ZzujFrzL._SY160.jpg)
+## Highlights
+His — location: [527](kindle://book?action=open&asin=B077F4WZZY&location=527) ^ref-32581
+
+---
+crypticness. — location: [609](kindle://book?action=open&asin=B077F4WZZY&location=609) ^ref-19945
+
+---
+minders — location: [609](kindle://book?action=open&asin=B077F4WZZY&location=609) ^ref-47348
+
+---
+Anna Wintour, — location: [668](kindle://book?action=open&asin=B077F4WZZY&location=668) ^ref-30215
+
+---
+Fusion — location: [696](kindle://book?action=open&asin=B077F4WZZY&location=696) ^ref-2454
+
+---
+nefarious — location: [783](kindle://book?action=open&asin=B077F4WZZY&location=783) ^ref-45263
+
+---
+peremptory. — location: [804](kindle://book?action=open&asin=B077F4WZZY&location=804) ^ref-6537
+
+---
+consigliere. — location: [1080](kindle://book?action=open&asin=B077F4WZZY&location=1080) ^ref-28870
+
+---
+cosseted — location: [1130](kindle://book?action=open&asin=B077F4WZZY&location=1130) ^ref-16221
+
+---
+The new politics was not the art of the compromise but the art of conflict. — location: [1143](kindle://book?action=open&asin=B077F4WZZY&location=1143) ^ref-28269
+
+---
+petulant. — location: [1288](kindle://book?action=open&asin=B077F4WZZY&location=1288) ^ref-5534
+
+---
+And, — location: [1318](kindle://book?action=open&asin=B077F4WZZY&location=1318) ^ref-50528
+
+---
+He — location: [1543](kindle://book?action=open&asin=B077F4WZZY&location=1543) ^ref-14029
+
+---
+Gorsuch. — location: [1548](kindle://book?action=open&asin=B077F4WZZY&location=1548) ^ref-13868
+
+---
+Even — location: [1594](kindle://book?action=open&asin=B077F4WZZY&location=1594) ^ref-12975
+
+---
+The sound of his own voice, his lack of inhibition, the fact that linear thought and presentation turned out not at all to be necessary, the wonder that this random approach seemed to command, and his own replenishing supply of free association—all this suggested that he was limited only by everyone else’s schedule and attention span. — location: [2409](kindle://book?action=open&asin=B077F4WZZY&location=2409) ^ref-11397
+
+---
+The bureaucratic swamp, the intelligence agencies, the unfair courts, the lying media—they were all lined up against him. — location: [2745](kindle://book?action=open&asin=B077F4WZZY&location=2745) ^ref-55890
+
+---
+how difficult it was for the president to function in a literal, definitional, lawyerly, cause-and-effect political world. — location: [2775](kindle://book?action=open&asin=B077F4WZZY&location=2775) ^ref-64310
+
+---
+Sean Spicer, for one, kept repeating his daily, if not hourly, mantra: “You can’t make this shit up.” — location: [2778](kindle://book?action=open&asin=B077F4WZZY&location=2778) ^ref-53781
+
+---
+The complexity of the Bannon-Mercer problem prompted Trump to consult two contradictory figures: Rupert Murdoch and Roger Ailes. — location: [3085](kindle://book?action=open&asin=B077F4WZZY&location=3085) ^ref-51659
+
+---
+On March 27, the Office of American Innovation was created and Kushner was put in charge. Its stated mission was to reduce federal bureaucracy—that is, to reduce it by creating more of it, a committee to end committees. — location: [3119](kindle://book?action=open&asin=B077F4WZZY&location=3119) ^ref-60942
+
+---
+As Walsh saw it, “Steve believes he is Darth Vader and that Trump is called to the dark side.” — location: [3137](kindle://book?action=open&asin=B077F4WZZY&location=3137) ^ref-50914
+
+---
+“I’ve made stuff up forever, and they always print it,” he bragged. — location: [3706](kindle://book?action=open&asin=B077F4WZZY&location=3706) ^ref-26876
+
+---
+In presidential annals, the firing of FBI director James Comey may be the most consequential move ever made by a modern president acting entirely on his own. — location: [3720](kindle://book?action=open&asin=B077F4WZZY&location=3720) ^ref-60653
+
+---
+The notion of the presidency as an institutional and political concept, with an emphasis on ritual and propriety and semiotic messaging—statesmanship—was quite beyond him. — location: [3775](kindle://book?action=open&asin=B077F4WZZY&location=3775) ^ref-51232
+
+---
+He was the exuberant inverse of everything the right wing found patronizing and gullible and sanctimonious about the left. — location: [3815](kindle://book?action=open&asin=B077F4WZZY&location=3815) ^ref-28167
+
+---
+senior staff believed the president had a problem with reality, and reality was now overwhelming him. — location: [4154](kindle://book?action=open&asin=B077F4WZZY&location=4154) ^ref-19624
+
+---
+Trump believed, offering catnip to deep American ire and resentment, that one man could be bigger than the system. — location: [4219](kindle://book?action=open&asin=B077F4WZZY&location=4219) ^ref-29629
+
+---
+Morning Joe was a ground-zero study in the way the media had overinvested in Trump. He was the whale against which media emotions, self-regard, ego, joie de guerre, career advancement, and desire to be at the center of the story, too, all churned in nearly ecstatic obsession. In reverse regard, the media was the same whale, serving the same function, for Trump. — location: [4241](kindle://book?action=open&asin=B077F4WZZY&location=4241) ^ref-43557
+
+---
+As long as he remained exposed, his family was effectively blocked from most financial sources. Without access to this market, their holdings risked becoming distress debt situations. — location: [4393](kindle://book?action=open&asin=B077F4WZZY&location=4393) ^ref-31351
+
+---
+Political campaigns, substantially based on volunteer help, attract a range of silly, needy, and opportunistic figures. The Trump campaign perhaps scraped lower in the barrel than most. — location: [4606](kindle://book?action=open&asin=B077F4WZZY&location=4606) ^ref-10484
+
+---
+While he wanted a job with the Trump administration, the Mooch specifically wanted one of the jobs that would give him a tax break on the sale of his business. A federal program provides for deferred payment of capital gains in the event of a sale of property to meet ethical requirements. Scaramucci needed a job that would get him a “certificate of divestiture,” which is what an envious Scaramucci knew Gary Cohn had received for the sale of his Goldman stock. — location: [4623](kindle://book?action=open&asin=B077F4WZZY&location=4623) ^ref-43662
+
+---
+the comic-absurd, movielike politician who just says whatever is on his mind. Unmediated. Crazylike. — location: [5047](kindle://book?action=open&asin=B077F4WZZY&location=5047) ^ref-58931
+
+---
+“The president fundamentally wants to be liked” was Katie Walsh’s analysis. “He just fundamentally needs to be liked so badly that it’s always … everything is a struggle for him.” — location: [5155](kindle://book?action=open&asin=B077F4WZZY&location=5155) ^ref-10995
+
+---

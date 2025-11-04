@@ -1,0 +1,38 @@
+# Lumen PnP.md
+
+---
+aliases: 
+tags:
+  - pnp
+---
+# Lumen PnP
+Date: 2024-10-18
+
+### Backlink
+[[Pick and Place MoC]]
+
+### Reference
+- [LumenPnP - $2K](https://www.opulo.io/)
+- 
+### Notes
+## LumenPnP Machine
+
+## Overview
+
+The LumenPnP is designed to automate the process of placing electronic components onto printed circuit boards (PCBs). It uses a combination of cameras, machine vision, and a vacuum pump to accurately place components.
+
+## Features
+
+- **Open Source Software**: The machine runs on modified Marlin firmware, which is commonly used in 3D printers. The modifications for pick-and-place operations have been merged back into the mainline Marlin, making them available for anyone interested in building their own machine
+- **Machine Vision**: The system uses cameras to detect and correct any misalignments in component placement, ensuring high precision.
+- **Component Handling**: The machine can handle up to 100 unique components with automated feeders, making it suitable for complex PCB designs.
+## Building Process
+1. **Hardware Setup**: The LumenPnP uses rails and carriages for high-speed and accurate part placement. The hardware setup involves assembling these components along with cameras and a vacuum pump.
+2. **Software Configuration**: Install and configure the open-source software that controls the machine's operations. This involves setting up the camera system and calibrating it for precise placement.
+3. **Testing and Calibration**: Once assembled, the machine needs to be tested with sample PCBs to ensure that all components are placed accurately.
+
+This project is ideal for those with some experience in electronics and mechanical assembly, as it involves both hardware construction and software configuration. Detailed instructions and community support can be found through open-source platforms where similar projects are shared
+
+1
+
+.

@@ -1,0 +1,23 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-23 13:30
+ContentType: Reference
+Backlink: "[[derivative MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- The Mean Value Theorem says that the  for a smooth  is achieved as an “instantaneous ” at some point within the interval. 
+- So, the secant, whose slope is the average rate of change over the entire interval, has the same slope as the  line to the curve at some point within the interval.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

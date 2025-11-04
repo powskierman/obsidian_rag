@@ -1,0 +1,22 @@
+# Johnson-Wonderland.md
+
+---
+bookId: "21696"
+title: "Wonderland: How Play Made the Modern World"
+author: Steven Johnson
+asin: B01CZCW2PQ
+lastAnnotatedDate: 2016-12-13
+highlightsCount: 2
+reference: https://www.amazon.com/dp/B01CZCW2PQ
+kindle_link: kindle://book?action=open&asin=B01CZCW2PQ
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/91Q8G+pkJhL._SY160.jpg)
+## Highlights
+conjurer — location: [53](kindle://book?action=open&asin=B01CZCW2PQ&location=53) ^ref-15467
+
+---
+Toys and games are the preludes to serious ideas. — location: [59](kindle://book?action=open&asin=B01CZCW2PQ&location=59) ^ref-37151
+
+---

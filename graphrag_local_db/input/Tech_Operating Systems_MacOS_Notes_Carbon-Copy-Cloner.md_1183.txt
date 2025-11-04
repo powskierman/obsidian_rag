@@ -1,0 +1,28 @@
+# Carbon-Copy-Cloner.md
+
+---
+aliases:
+  - ccc
+tags:
+  - ccc
+  - carbon-copy-cloner
+  - backups
+  - license
+---
+
+2022-06-25
+# Carbon-Copy-Cloner
+
+### Backlink
+[[Programming Tools MOC]]
+
+### Reference
+
+### Notes
+- 1.  [Snapshots](https://bombich.com/kb/ccc5/leveraging-snapshots-on-apfs-volumes)
+- [[Backup Strategy]]
+- [[ccc- Recover a file]]
+ CCC6 License:
+	- GAWAE-FA5T2-SFJT8-WK7QU-VXHK4-HHU7X-SSCUV-RL3AC-CQQME-WMKBS-3QKWH-8ADAM-VAQ6Y-48AN4-FRX4
+- CCC7 License:
+	- GAWQE-F9ARU-AXT4G-PDDJE-YBZYK-S2CMG-8WM35-3VLLA-A9KHM-MADVF-2H2FU-26ARC-J6X8L-CBQY8-AD6JF-Q

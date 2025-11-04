@@ -1,0 +1,83 @@
+# Notification Target.md
+
+---
+aliases: 
+tags:
+  - Home-Assistant
+  - Notification
+---
+# Notification Target
+Date: 2024-06-09
+
+### Backlink
+[[../../../Software/Home-Assistant/media/Home-Assistant MoC]]
+
+### Reference
+-  
+### Notes
+-  To set up your iPhone as a notification target in Home Assistant, you need to use the Home Assistant Companion app and configure it to receive notifications. Here are the steps to do this:
+
+#### Step 1: Install the Home Assistant Companion App
+
+1. **Download the Home Assistant Companion app** from the App Store on your iPhone.
+
+2. **Open the app** and log in to your Home Assistant instance using your Home Assistant URL and credentials.
+
+#### Step 2: Configure Notifications in Home Assistant
+
+1. **Open Home Assistant** in a web browser and go to your **Home Assistant dashboard**.
+
+2. **Go to Configuration**:
+   - Click on your profile icon or your initials at the bottom of the sidebar.
+   - Scroll down to the "Companion App" section.
+   - Ensure the "Push ID" is populated. This indicates that the app is registered to receive notifications.
+
+### Step 3: Create a Notification Automation
+
+1. **Create a new automation**:
+   - Go to **Settings**.
+   - Click on **Automations & Scenes**.
+   - Click on the **+ (plus)** icon to create a new automation.
+
+2. **Set up the trigger**:
+   - Choose the trigger type that you want to use (e.g., state, time, etc.).
+
+3. **Set up the action**:
+   - Choose **Call Service** as the action type.
+   - For the service, select `notify.mobile_app_your_iphone_name` (replace `your_iphone_name` with the name of your iPhone as it appears in Home Assistant).
+   - In the service data, define your notification message. For example:
+     ```yaml
+     message: "This is a test notification"
+     title: "Notification Title"
+     ```
+
+4. **Save the automation**.
+
+### Step 4: Test the Notification
+
+1. **Manually trigger the automation** to test if the notification is sent to your iPhone.
+
+2. **Check your iPhone** to ensure the notification is received.
+
+### Example YAML Configuration
+
+Here is an example of an automation in YAML that sends a notification to an iPhone:
+
+```yaml
+alias: Notify iPhone
+description: Sends a test notification to iPhone
+trigger:
+  - platform: state
+    entity_id: binary_sensor.door_window_sensor
+    to: 'on'
+action:
+  - service: notify.mobile_app_your_iphone_name
+    data:
+      message: "The door sensor is triggered!"
+      title: "Home Assistant Alert"
+mode: single
+```
+
+Replace `binary_sensor.door_window_sensor` with your specific sensor entity ID and `your_iphone_name` with your iPhone's name in Home Assistant.
+
+By following these steps, you should be able to set up your iPhone as a notification target in Home Assistant.

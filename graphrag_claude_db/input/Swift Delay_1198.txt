@@ -1,0 +1,22 @@
+---
+aliases: []
+---
+# Swift Delay
+Date: 2022-10-24
+
+### Tags: 
+
+### Backlink
+[[Swift MOC]]
+
+### Reference
+-    DispatchQueue.main.asyncAfter(deadline: .now() + 42.0) {
+        // do stuff 42 seconds later
+    } 
+### Notes
+- To create an execution delay in swift use: 
+	- ```
+	   DispatchQueue.main.asyncAfter(deadline: .now() + 42.0) {
+	        // do stuff 42 seconds later
+	    }
+	```

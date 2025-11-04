@@ -1,0 +1,29 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-18 17:33
+ContentType: Reference
+Backlink: "[[Trigonometry MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- What is the trig formula for midline point (−3,2) and maximum point (−1,6)?
+	![[Shifted Sine.png]]
+1. $f(x)$ is a trigonometric function of the form $f(x)=a \sin⁡(bx+c)+d$ 
+	1. The basic function $\sin(x)$ intersects its midline at $(0,0)(0,0)$, its period is $2 \pi$ units, and its amplitude is 1 unit.
+	2. ![[basic sine.png|600]]
+2. $f$'s period is equal to four times the horizontal distance between the highlighted points: $4⋅2=8$ units. In order to horizontally stretch the period of $\sin⁡(x)$ 8 units, we need to multiply x by ${2\pi}\over 8$=$\pi \over 4$ to obtain $\sin⁡({\pi \over 4}x)$
+	1. $f$'s amplitude is equal to the vertical distance between the highlighted points, which is 5 units. In order to vertically stretch the amplitude of $\sin⁡({\pi \over 4}x)$ 5 units, we multiply by 5 to obtain $5\sin⁡({\pi \over 4}x)$
+	2.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

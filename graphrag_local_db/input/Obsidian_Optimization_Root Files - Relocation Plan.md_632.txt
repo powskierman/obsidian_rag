@@ -1,0 +1,160 @@
+# Root Files - Relocation Plan.md
+
+---
+aliases: [Root File Moves, File Relocation Plan]
+tags: [optimization, action-plan, phase-1]
+created: 2025-10-16 17:45
+ContentType: Action Plan
+Backlink: "[[Vault Optimization Project]]"
+---
+
+### Main Idea
+- Systematic plan for relocating 22 root-level files to their appropriate folders based on content analysis and existing vault structure.
+
+### References
+- [[Vault Optimization Project]]
+- [[Complete Vault Health Report 2025-10-16]]
+
+### Notes
+
+## Root Files Relocation Plan
+
+**Total Files to Move**: 22
+**Estimated Time**: 30-45 minutes
+**Priority**: High (Phase 1 - Quick Wins)
+
+---
+
+## File Relocation Table
+
+| Current Name (Root) | Recommended Destination | Category | Priority |
+|---------------------|------------------------|----------|----------|
+| **Calibre** | `Books/Calibre.md` | Reading Management | High |
+| **Capital Gains** | `Important Documents/Capital Gains.md` | Finance/Tax | High |
+| **Configuring a Home Homekit Device** | `Tech/Electronics/Projects/Homekit/Configuring a Home Homekit Device.md` | Home Automation | High |
+| **excalibrain** | `Obsidian/excalibrain.md` | Obsidian Plugin | High |
+| **Git Merge** | `Tech/Programming-Tools/Git/Git Merge.md` | Version Control | High |
+| **HassFramework Improvements** | `Tech/Programming-Tools/Swift/HassFramework Improvements.md` | iOS Development | High |
+| **HassFramework MoC** | `Tech/Programming-Tools/Swift/HassFramework MoC.md` | iOS Development | High |
+| **HassRestClient Flowchart** | `Tech/Programming-Tools/Flowcharts/HassRestClient Flowchart.md` | Documentation | High |
+| **initializer is inaccessible due to 'private' protection level** | `Tech/Programming-Tools/Swift/Swift - Private Initializer Error.md` | Swift Troubleshooting | High + Rename |
+| **INSPIRe Framework** | `Tech/Programming-Tools/Swift/INSPIRe Framework.md` | iOS Framework | Medium |
+| **Kicad 9.1 - Understanding PCB Design** | `Tech/Electronics/Software/Kicad/Kicad 9.1 - Understanding PCB Design.md` | PCB Design | High |
+| **Lilygo T5-4.7 inch ESP32-S3** | `Tech/Electronics/Hardware/ESP/Lilygo T5-4.7 inch ESP32-S3.md` | Hardware | High |
+| **Maps of Content** | *Keep at Root* OR `Obsidian/Maps of Content.md` | Meta-Organization | Low |
+| **MoCs** | `Obsidian/MoCs.base` | Base Plugin File | Medium |
+| **NH Notes** | `NH/NH Notes.md` | Location-Specific | High |
+| **NH Notes Base** | `NH/NH Notes Base.base` | Base Plugin File | High |
+| **notes without frontmatter** | `Obsidian/notes without frontmatter.md` | Vault Tracking | Medium |
+| **Particle Photon Troubleshooting** | `Tech/Electronics/Hardware/Particle Photon Troubleshooting.md` | IoT Hardware | High |
+| **Photomator MoC** | `Photography/Photomator MoC.md` | Photography Software | High |
+| **Stem cell therapy** | `Medical/Stem cell therapy.md` | Health | High |
+| **T12 Compression Fracture** | `Medical/T12 Compression Fracture.md` | Health | High |
+| **WatchOS Framework** | `Tech/Programming-Tools/SwiftUI/WatchOS Framework.md` | watchOS Development | High |
+
+---
+
+## Execution Strategy
+
+### Batch 1: Medical Files (5 min)
+Move these first as they're clearly categorized:
+- [ ] Stem cell therapy → Medical/
+- [ ] T12 Compression Fracture → Medical/
+
+### Batch 2: Swift/iOS Development (10 min)
+Group related development files:
+- [ ] HassFramework Improvements → Tech/Programming-Tools/Swift/
+- [ ] HassFramework MoC → Tech/Programming-Tools/Swift/
+- [ ] INSPIRe Framework → Tech/Programming-Tools/Swift/
+- [ ] WatchOS Framework → Tech/Programming-Tools/SwiftUI/
+- [ ] initializer is inaccessible... → Tech/Programming-Tools/Swift/ (RENAME first!)
+
+### Batch 3: Electronics/Hardware (10 min)
+Hardware and PCB related:
+- [ ] Kicad 9.1 - Understanding PCB Design → Tech/Electronics/Software/Kicad/
+- [ ] Lilygo T5-4.7 inch ESP32-S3 → Tech/Electronics/Hardware/ESP/
+- [ ] Particle Photon Troubleshooting → Tech/Electronics/Hardware/
+- [ ] Configuring a Home Homekit Device → Tech/Electronics/Projects/Homekit/
+
+### Batch 4: Flowcharts & Documentation (5 min)
+- [ ] HassRestClient Flowchart → Tech/Programming-Tools/Flowcharts/
+
+### Batch 5: Tools & Utilities (5 min)
+- [ ] Git Merge → Tech/Programming-Tools/Git/
+- [ ] Calibre → Books/
+- [ ] Photomator MoC → Photography/
+
+### Batch 6: Obsidian-Specific (5 min)
+- [ ] excalibrain → Obsidian/
+- [ ] notes without frontmatter → Obsidian/
+- [ ] MoCs → Obsidian/
+
+### Batch 7: Location/NH Files (3 min)
+- [ ] NH Notes → NH/
+- [ ] NH Notes Base → NH/
+
+### Batch 8: Finance/Important (2 min)
+- [ ] Capital Gains → Important Documents/
+
+### Keep at Root (Decision Needed):
+- [ ] Maps of Content - Review if this should stay at root or move to Obsidian/
+
+---
+
+## Special Actions Required
+
+### Files Needing Rename:
+1. **"initializer is inaccessible due to 'private' protection level.md"**
+   - Current: Full error message as filename
+   - Recommended: `Swift - Private Initializer Error.md`
+   - Location: `Tech/Programming-Tools/Swift/`
+   - Action: Rename THEN move
+
+### Folders to Create (if needed):
+- `Tech/Electronics/Projects/Homekit/` (if it doesn't exist)
+- `Books/` (if it doesn't exist)
+
+---
+
+## Impact Summary
+
+**Before**:
+- Root-level files: 33
+- Organization score: 72/100
+
+**After** (completing this plan):
+- Root-level files: 5-6 (Home.md, Vault.md, Maps of Content.md, maybe 2-3 MoCs)
+- Organization score: ~82/100
+- Improvement: +10 points
+
+---
+
+### Related Notes
+- [[Vault Optimization Project]]
+- [[Complete Vault Health Report 2025-10-16]]
+- [[Home]]
+
+### Questions / Ideas for Further Exploration
+- Should "Maps of Content" stay at root as a hub, or move to Obsidian/?
+- Consider creating a "Finance/" folder for Capital Gains and future finance notes
+- Should we create a standardized naming convention document after moves are complete?
+
+### To-Do
+- [ ] Execute Batch 1 (Medical files)
+- [ ] Execute Batch 2 (Swift/iOS)
+- [ ] Execute Batch 3 (Electronics)
+- [ ] Execute Batch 4 (Flowcharts)
+- [ ] Execute Batch 5 (Tools)
+- [ ] Execute Batch 6 (Obsidian)
+- [ ] Execute Batch 7 (NH files)
+- [ ] Execute Batch 8 (Finance)
+- [ ] Decide on Maps of Content placement
+- [ ] Update all links that reference moved files
+- [ ] Verify no broken links after moves
+- [ ] Run another health report to measure improvement
+
+### Smart Connections Insights
+- Moving files in batches by category makes the task less overwhelming
+- Priority focuses on files with clear destinations first
+- Some files (like Maps of Content) may benefit from staying at root as navigation hubs
+- Renaming the Swift error file will improve searchability and professionalism

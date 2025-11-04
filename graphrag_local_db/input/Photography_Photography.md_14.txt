@@ -1,0 +1,5 @@
+# Photography.md
+
+---
+sticker: lucide//camera
+---

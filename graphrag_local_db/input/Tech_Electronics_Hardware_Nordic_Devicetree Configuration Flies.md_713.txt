@@ -1,0 +1,17 @@
+# Devicetree Configuration Flies.md
+
+---
+aliases: []
+tags: []
+---
+# Devicetree Configuration Flies
+Date: 2023-07-15
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  An individual board can have a config file that sets specific parameters and devices required by the board:
+	- xiao_ble_defconfig

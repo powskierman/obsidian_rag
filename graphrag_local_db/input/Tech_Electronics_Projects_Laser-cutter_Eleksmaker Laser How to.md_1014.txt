@@ -1,0 +1,126 @@
+# Eleksmaker Laser How to.md
+
+---
+aliases: 
+tags:
+  - laser
+  - eleksmaker
+created: 2025-04-01 12:41
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- ### Table of Contents
+
+## EleksMaker EleksLaser-A3 Pro
+
+## Blog
+
+-   2017 december 18: Improved the smoothness of the X carriage, $110=5000 and $111=5000 for setting the max speed to 5000 mm/min in GRBL
+    
+-   2017 december 13: Added smoke blower and pimped up step drivers current, heat sink installed on Allegro chip
+    
+
+Warning!!! After flashing the Mana SE Arduino clone With GRBL firmware, if you disconnect USB or lost communication with the PC (serial disconnection) the laser fire!!!
+
+The setup order for mise-in-operation must be:
+
+1.  wear the laser protection goggles
+    
+2.  activate the serial communication
+    
+3.  power ON the Mana SE board
+    
+
+For shut-down operation the order must be:
+
+1.  power OFF the Mana SE board
+    
+2.  deactivate the serial communication
+    
+3.  unwear the laser protection goggles
+    
+
+## Power and speed settings
+
+### 2500 mW Laser Diode
+
+#### Vector letters outline / thin outline
+
+| Material | Laser Power (%) | Passes | Cut rate (mm/min) | Example |
+| --- | --- | --- | --- | --- |
+| Plywood | 20 | 1 | 500 | [![](https://itink.it/wiki/lib/exe/fetch.php?w=200&tok=2eafc9&media=en:tinkering:laser:2-5w_laser_vector_letters_outline_plywood_3mm.jpg)](https://itink.it/wiki/lib/exe/detail.php?id=en%3Atinkering%3Alaser%3Aeleksmakera3pro&media=en:tinkering:laser:2-5w_laser_vector_letters_outline_plywood_3mm.jpg "en:tinkering:laser:2-5w_laser_vector_letters_outline_plywood_3mm.jpg") |
+
+#### Vector letters fill path
+
+| Material | Line Distance (mm) | Laser Power (%) | Passes | Cut rate (mm/min) | Example |
+| --- | --- | --- | --- | --- | --- |
+| Plywood | 0.1 | 20 | 1 | 1000 | [![](https://itink.it/wiki/lib/exe/fetch.php?w=200&tok=55bc85&media=en:tinkering:laser:2-5w_laser_vector_letters_fill_path_plywood_3mm.jpg)](https://itink.it/wiki/lib/exe/detail.php?id=en%3Atinkering%3Alaser%3Aeleksmakera3pro&media=en:tinkering:laser:2-5w_laser_vector_letters_fill_path_plywood_3mm.jpg "en:tinkering:laser:2-5w_laser_vector_letters_fill_path_plywood_3mm.jpg") |
+
+#### Cut
+
+| Material | Thickness (mm) | Laser Power (%) | Passes | Cut rate (mm/min) | Example |
+| --- | --- | --- | --- | --- | --- |
+| Plywood | 3 | 50 | 8 | 80 | [![](https://itink.it/wiki/lib/exe/fetch.php?w=200&tok=5ffdaf&media=en:tinkering:laser:2-5w_laser_cut_plywood_3mm.jpg)](https://itink.it/wiki/lib/exe/detail.php?id=en%3Atinkering%3Alaser%3Aeleksmakera3pro&media=en:tinkering:laser:2-5w_laser_cut_plywood_3mm.jpg "en:tinkering:laser:2-5w_laser_cut_plywood_3mm.jpg") |
+
+## GRBL settings
+
+I'm using the machine with GRBL firmware and LaserWeb4 PC frontend instead the original EleksCAM (called somewhere Elek-SCAM ![8-)](https://itink.it/wiki/lib/images/smileys/icon_cool.gif) )
+
+GRBL settings used for LaserWeb and explanation.
+
+This article is related to GRBL v1.1f (2017-08-01) Release
+
+The setup that i've used is based on this useful wiki article: [https://github.com/LaserWeb/LaserWeb4/wiki/2.1-Initial-Configuration-GRBL-1.1](https://github.com/LaserWeb/LaserWeb4/wiki/2.1-Initial-Configuration-GRBL-1.1 "https://github.com/LaserWeb/LaserWeb4/wiki/2.1-Initial-Configuration-GRBL-1.1")
+
+Latest update of the GRBL settings: December, 12 2017
+
+```
+$0=10      ;Step pulse, microseconds
+$1=100      ;Step idle delay, milliseconds
+$3=1       ;X axis direction inverted
+$10=0      ;send work coordinates in statusReport
+$30=255    ;max. S-value for Laser-PWM (is referenced to the LaserWeb PWM MAX S VALUE)
+$31=0      ;min. S-value
+$32=1      ;Laser Mode on
+$100=80   ;steps/mm in X, depending on your pulleys and microsteps
+$101=80   ;steps/mm in Y, depending on your pulleys and microsteps
+$102=80   ;steps/mm in Z, depending on your pulleys and microsteps
+$110=5000 ;max. rate mm/min in X, depending on your system
+$111=5000 ;max. rate mm/min in Y, depending on your system
+$112=2000 ;max. rate mm/min in Z, depending on your system
+$120=400  ;acceleration mm/s^2 in X, depending on your system
+$121=400  ;acceleration mm/s^2 in Y, depending on your system
+$122=400   ;acceleration mm/s^2 in Z, depending on your system
+$130=390   ;max. travel mm in X, depending on your system
+$131=297   ;max. travel mm in Y, depending on your system
+$132=200   ;max. travel mm in Z, depending on your system
+$$         ;to check the actual settings
+```
+
+For a reference, please read [Grbl's $x=val settings and what they mean](https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration#grbls-xval-settings-and-what-they-mean "https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration#grbls-xval-settings-and-what-they-mean") on the official GRBL wiki.
+
+## Hardware settings
+
+The VREF on the Allegro A4988 by factory is 0.6V, i have set the VREF to 0.82V, The motors for now are cool, but i've mounted the heat sinks on the drivers.
+
+[![](https://itink.it/wiki/lib/exe/fetch.php?w=400&tok=49cfa0&media=en:tinkering:laser:allegro_a4988_heat_skink.png)](https://itink.it/wiki/lib/exe/detail.php?id=en%3Atinkering%3Alaser%3Aeleksmakera3pro&media=en:tinkering:laser:allegro_a4988_heat_skink.png "en:tinkering:laser:allegro_a4988_heat_skink.png")
+
+## Hardware modding / improovements
+
+### Smoke blower fan
+
+### Improved the smoothness of the X carriage
+
+## Resources
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

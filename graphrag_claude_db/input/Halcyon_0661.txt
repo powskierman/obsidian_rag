@@ -1,0 +1,33 @@
+---
+aliases: 
+tags:
+  - Halcyon
+---
+
+2022-06-27
+# Halcyon
+
+### Backlink
+[[Projects MOC]]
+
+### Reference
+- [[Fujitsu Halcyon  Manuals]]
+- ![[Halcyon-ESP32-PCB-image1.png|100]]
+-![[ Halcyon-PCB-Circuit-Design-image1.png|200]]
+- ![[Halcyon-PCB-Components-image1.jpeg|200]]
+- ![[Projects-Halcyon-IR-Hardware-Resources-image1.jpeg|200]]
+- 
+### Notes
+-  Halcyon is an ESP32 project to control multiple Fujitsu Halcyon split units.  It features a custom PCB and code.
+- The Kicad PCB files can be found at: /Volumes/Docs/Electronics/Projects/Kicad/ESP32Halcyon
+- The original Blynk project can be found at: /Volumes/Docs/Electronics/Projects/NH/Halcyon/ESP32_IR_Fujitsu9.0 
+	- [[Changes-from-Halcyon-8.2-to-9]]
+- HalcyonHass will eventually replace Halcyon.  
+	- It is based on HomeAssistant as a backend 
+	- It uses the REST API to send data back and forth to the app and control the HVAC.  
+	- The HVAC in turn is controlled by ESPHome's climate implementation
+	- The Watch app can be found at:
+		  `/Users/michel/Documents/SwiftUI Projects/HalcyonWatch`
+	- The phone app can be found at:
+		- `/Users/michel/Documents/SwiftUI Projects/HalcyonIphone`
+- The update procedure is at: [[Update from Blynk to ESPHome with CLI Using PlatformIO]]

@@ -1,0 +1,54 @@
+---
+aliases: 
+tags:
+  - garage
+  - flowchart
+---
+# WatchConnectivityHandler
+Date: 2023-11-26
+
+### Backlink
+[[Garage Flowcharts]]
+
+### Reference
+-  
+### Notes
+```mermaid 
+flowchart TD
+    A[Start] --> B(WatchConnectivityHandler Initialization)
+    B --> C{Is WCSession Supported?}
+    C -- Yes --> D[Setup WCSession]
+    D --> E[Activate Session]
+    C -- No --> F[Log WCSession Not Supported]
+
+    E --> G[Session Activation Completion]
+    G --> H[Log Activation State and Error]
+
+    E --> I[Session Did Become Inactive]
+    I --> J[Log Session Inactive]
+
+    E --> K[Session Did Deactivate]
+    K --> L[Log Session Deactivated]
+    L --> M[Reactivate Session]
+
+    E --> N[Session Reachability Change]
+    N --> O[Log Reachability Status]
+
+    E --> P[Receive Message from Watch]
+    P --> Q[Extract entityId and newState]
+    Q --> R[Forward Command to WebSocketManager]
+
+    S[Update State and Notify Watch] --> T[Update State in WebSocketManager]
+    T --> U{Is Watch Session Reachable?}
+    U -- Yes --> V[Send State to Watch]
+    V --> W[Handle Reply or Error]
+    U -- No --> X[Do Not Send State]
+
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style G fill:#bbf,stroke:#333,stroke-width:2px
+    style I fill:#bbf,stroke:#333,stroke-width:2px
+    style K fill:#bbf,stroke:#333,stroke-width:2px
+    style N fill:#bbf,stroke:#333,stroke-width:2px
+    style P fill:#bbf,stroke:#333,stroke-width:2px
+    style S fill:#f9f,stroke:#333,stroke-width:2px
+    ```

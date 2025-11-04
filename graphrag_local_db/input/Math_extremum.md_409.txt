@@ -1,0 +1,18 @@
+# extremum.md
+
+---
+aliases: [extrema]
+---
+2022-02-16
+# extremum
+### Backlink
+[[Cartesian Plane]]
+
+### Reference
+[[Notes-Maxima-minima.pdf]]
+
+### Notes
+- # Extremum
+- a *local extremum* has the largest or smallest values compared to nearby points
+- an absolute extremum has the largest or smallest $f(x)$ overall 
+-

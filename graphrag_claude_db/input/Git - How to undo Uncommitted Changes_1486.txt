@@ -1,0 +1,33 @@
+---
+aliases: []
+tags:
+  - git
+---
+# Git - How to undo Uncommitted Changes
+Date: 2023-09-14
+
+### Backlink
+[[Git MOC]]
+
+### Reference
+-  
+### Notes
+- Revert to previous commit:
+	- Do a `git status` first
+	- `git reset --hard <commit>`
+- Check which files have uncommitted changes:
+	- `git status`
+	- This will show you any files that have been modified since your last commit.
+- Revert the changes in a specific file:
+	- `git checkout -- <filename>`
+	- This will overwrite the file with the version from your last commit, removing any uncommitted changes.
+- Revert all uncommitted changes:
+	- `git checkout .`
+	- This will revert all files in the current directory and its subdirectories to the last committed version, removing all uncommitted changes.
+- You can also stash your changes instead of reverting, if you think you might want them later:
+	- `git stash`
+	- This temporarily shelves your changes so you can reapply them later if needed.
+- To get your old state back from the stash:
+	- `git stash pop`
+- To delete stash:
+	- `git stash drop`

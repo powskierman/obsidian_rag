@@ -1,0 +1,60 @@
+# SwiftUI MoC.md
+
+---
+aliases: []
+---
+
+2022-06-25
+# SwiftUI MOC
+
+### Backlink
+[[Programming Tools MOC]]
+[Apple SwiftUI Tutorials](https://developer.apple.com/tutorials/swiftui)
+
+
+### Reference
+- [Xcode Help](https://help.apple.com/xcode/mac/11.4/index.html?localePath=en.lproj#/devc8c2a6be1)
+- [[SwiftUI-Concepts]]
+- [[Guiding-Principles]]
+- [[Basic-Structure-of-SwiftUI-App]]
+-  [[New-Project]]
+- [MVVM Architecture)](https://matteomanferdini.com/mvvm-pattern-ios-swift/)
+- [[Views-and-Modifiers]]
+- [[SwiftUI use “some View” for its view type]]
+- [[Simple-types]]
+- [Swift Closures ](https://www.programiz.com/swift-programming/closures)
+- [[Returning Multiple Values from Function]]
+- [[Operators-and-conditions]]
+- [[Nil-Coalescing-Operator]]
+- [[Custom-Alerts]]
+- [[List]]
+- [[Stacks]]
+- [[Property-Wrappers]]
+- [[Modifiers]]
+- [[Gradients]]
+- [[Buttons-and-Images]]
+- [[Colors-and-Frames]]
+- [[Alert-Messages]]
+- [[Device Types]]
+- [SwiftUI tips and tricks](https://www.hackingwithswift.com/quick-start/swiftui/swiftui-tips-and-tricks)
+- [[Swift Delegate]]
+- [[Callbacks, delegates and Closures]]
+- [[SwiftUI Pop up one level]]
+- [[SwiftUI - Binding state to user interface controls]]
+- [[SwiftUI - @EnvironmentObject]]
+- [[SwiftUI - Protocols, @ObservableObject and @Published]]
+- 
+
+### Notes
+- --- 
+-  [[Random]]
+-  Connect to MQTT at startup
+```     
+	.task {
+            client.connect()
+        }
+```
+- [GitHub - SmartHomeThermostat-SwiftUI](https://github.com/AliMert/SmartHomeThermostat-SwiftUI?ref=iosexample.com)
+- [[info.plist]]
+- [[MVC]]
+- [[Converting UIKit to SwiftUI]]

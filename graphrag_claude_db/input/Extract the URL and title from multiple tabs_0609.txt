@@ -1,0 +1,12 @@
+---
+reference: "https://www.ghacks.net/2020/08/30/extract-the-url-and-title-from-multiple-tabs-with-the-copy-selected-tabs-to-clipboard-extension-for-firefox/"
+created: 2025-09-02
+tags:
+  - "obsidian"
+author:
+  - "[[Ashwin]]"
+published: 2020-08-30
+description: "Get the URL and title from multiple tabs with the Copy Selected Tabs to Clipboard extension for Firefox. You can create custom formats to extract the data."
+cover: "https://www.ghacks.net/wp-content/uploads/2020/08/Copy-Selected-Tabs-to-Clipboard-Markdown-List-example.jpg"
+summary: "> The page discusses the **Copy Selected Tabs to Clipboard** extension for Firefox, which allows users to extract and copy the URLs and titles from multiple selected tabs in various formats (such as plain URL, Title and URL, HTML, Markdown, or custom formatting). Once the add-on is installed, users can select multiple tabs, right-click to access the \"Copy to Clipboard\" menu, and then choose the desired output format. The extension supports custom formats and can be configured via its settings. It is open source and aimed at improving productivity for users who want to save, share, or backup tab information efficiently[5][4]."
+---

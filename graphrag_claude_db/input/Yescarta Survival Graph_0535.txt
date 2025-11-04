@@ -1,0 +1,28 @@
+---
+aliases: 
+tags: 
+created: 2025-03-25 17:03
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+```mermaid
+%%{init: {"themeVariables": {"xyChart": {"plotColorPalette": "#00FF00"}}}}%%
+xychart-beta
+title "Kaplan-Meier Survival Curve for Yescarta in Double-Hit DLBCL"
+x-axis "Years" 0 --> 5
+y-axis "Survival Probability (%)" 0 --> 100
+line [100, 80, 70, 62, 54.6, 50]
+
+```
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

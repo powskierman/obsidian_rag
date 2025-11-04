@@ -1,0 +1,19 @@
+# Crawl4AI.md
+
+---
+aliases: 
+tags:
+  - AI
+  - crawler
+---
+# Crawl4AI
+Date: 2025-02-11
+
+### Backlink
+[[AI Tools MoC]]
+
+### Reference
+-  [Github - CrawlAI](https://github.com/unclecode/crawl4ai)
+- [Youtube - Crawl4AI](https://youtu.be/JWfNLF_g_V0?si=M8BqJM1joo59a25e)
+### Notes
+-  Crawl4AI delivers blazing-fast, AI-ready web crawling tailored for LLMs, AI agents, and data pipelines.

@@ -1,0 +1,86 @@
+# Backup.md
+
+---
+aliases:
+tags:
+  - AlwaysuseTARwhenusingBZip2GZipLziporXZ
+created: 2021-12-31 13:14
+ContentType: Reference
+Backlink: "[[Raspberry Pi Camera]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  From MACOS
+
+    a.  Remove SSD from Pi
+
+        i.  Connect to Mac
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Open [ApplePiBaker](https://www.tweaking4all.com/hardware/raspberry-pi/applepi-baker-v2/#AlwaysuseTARwhenusingBZip2GZipLziporXZ)
+
+    b.  Choose disk
+
+        i.  Press compress button
+
+        ii. Backup
+
+```{=html}
+<!-- -->
+```
+1.  From  Os
+
+    a.  MACOS or Windows is preferred method
+
+    b.  [Installation](https://www.youtube.com/watch?v=00ck25k_lgw)
+
+        i.  Install gnome-disk-utility
+
+            1.  Sudo apt install gnome-disk-utility
+
+        ```{=html}
+        <!-- -->
+        ```
+        i.  Install gparted
+
+            1.  Sudo apt install gparted
+
+        ```{=html}
+        <!-- -->
+        ```
+        i.  Install  Imager
+
+        ii. /Preferences/Add Remove software/Raspberry Pi Imager
+
+        iii. Install Pi Apps
+
+             1.  wget -qO- <https://raw.githubusercontent.com/Botspot/pi-apps/master/install> | bash
+
+        ```{=html}
+        <!-- -->
+        ```
+        i.  Install Pi Power Tools from Pi Apps menu
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Backup
+
+        i.  /Accessories/Disks (gnome-disk-utility)
+
+        ii. /Hamburger menu/Create disk image
+
+            1.  Use short name!
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

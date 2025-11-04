@@ -1,0 +1,29 @@
+---
+aliases: []
+---
+# esp32 c3 MoC
+Date: 2022-11-29
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [ESP-C3-32S-Kit - Waveshare Wiki](https://www.waveshare.com/wiki/ESP-C3-32S-Kit) 
+- [esp32-c3 32S Datasheet](https://docs.ai-thinker.com/_media/esp32/docs/esp-c3-32s-kit-v1.0_specification.pdf)
+- [# ESP32c3 with ESP-IDF](https://popolon.org/gblog3/?cat=114&lang=en)
+- [Debugging the ESP32-C3 Device with JTAG](https://visualgdb.com/tutorials/esp32/esp32-c3/)
+- [ESP32-C3-12F – RGB LED](https://www.studiopieters.nl/esp-c3-12f-rgb-led/)
+- 
+### Notes
+- 32SLed is platformio project
+- 32S board only has 2M of flash.  Requires these settings:
+	- Board:  ESP32C3
+	- upload speed: 460800
+	- cpu frequency: 160mhz
+	- flash frequency: 80mhz
+	- flash size 2mb
+	- partition scheme: minimal
+- Was able to upload only with Arduino IDE
+- ![[Pasted image 20221129112048.png]]

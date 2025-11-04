@@ -1,0 +1,16 @@
+---
+aliases: []
+---
+
+2022-07-01
+# Blynk-Server-Setup
+
+### Backlink
+[[Blynk MOC]]
+
+### Reference
+- 1. [Private Local Blynk Server](https://diyprojects.io/blynk-how-to-install-a-private-local-server-on-raspberry-pi-3-unlimited-energy-test-wemos-dht22/#.YaPtMy8r0dg)
+2.  [SSL Certificates](https://github.com/maksimstojkovic/blynk-server-setup#generating-ssl-certificates)
+ 
+### Notes
+-  

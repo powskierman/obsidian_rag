@@ -1,0 +1,20 @@
+---
+aliases: []
+---
+# Dart MoC
+Date: 2022-07-30
+
+### Tags: 
+
+### Backlink
+[[Flutter MoC]]
+
+### Reference
+- [Scaffold class - material library - Dart API](https://api.flutter.dev/flutter/material/Scaffold-class.html) 
+- [Dart Class Diagram Generator - DCDG](https://pub.dev/packages/dcdg)
+- 
+### Notes
+-  To wrap a widget within another: 
+	- click widget
+	- click lightbulb
+	- pick action from dropdown

@@ -1,0 +1,58 @@
+---
+
+kanban-plugin: basic
+
+---
+
+## ESP
+
+- [ ] [[Espressif's Arduino Cores]]
+- [ ] [[ESP8266-OTA-update-procedure]]
+- [ ] [[ESP32-MQTT]]
+- [ ] [[ESP OTA]]
+- [ ] [[Wifi-Manager]]
+- [ ] [[Powering-Esp8266]]
+- [ ] [[Debugging MoC]]
+- [ ] [[Reset-Bricked-Wemos-D1-Mini]]
+- [ ] [[Resetting-ESP-flash-memory-to-factory]]
+- [ ] [[Sketch-too-big-error]]
+- [ ] [[Visual-Micro]]
+- [ ] [[Displays]]
+
+
+## ESP32
+
+- [ ] [[ESP32 Usable Pins]]
+- [ ] [[ESP32-Pinout-Reference]]
+- [ ] [[ESP32-Wroom]]
+- [ ] [[ESP32-Wemos-Lolin32]]
+- [ ] [[ESP32-Dev-Kit-V1]]
+- [ ] [[Dev-Kit-Schematic]]
+- [ ] [[Wemos-Mini32]]
+- [ ] [[TTGO-Micro-32 Pinout]]
+- [ ] [[ESP32-Programmer]]
+- [ ] [ESP32 Pico D4 Datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-pico-d4_datasheet_en.pdf)
+- [ ] [[ESP32 Troubleshooting]]
+- [ ] [[ESP32 Projects]]
+- [ ] ESP32 Usable Pins
+- [ ] [[TTGO T-Display S3 MoC]]
+- [ ] [[LilyGo T-Display S3 MoC]]
+- [ ] [[Lilygo T5 ESP32-s3 MoC]]
+
+
+## ESP8266
+
+- [ ] [[ESP8266]]
+- [ ] [[ESP12-Pins]]
+- [ ] [[ESP8266-Preferred-Pins]]
+- [ ] [[Wemos D1 Mini]]
+- [ ] [[Wemos D1 Mini Pinout]]
+
+
+
+
+%% kanban:settings
+```
+{"kanban-plugin":"basic"}
+```
+%%

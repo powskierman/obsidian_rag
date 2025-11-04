@@ -1,0 +1,22 @@
+# GazeboWX MoC.md
+
+---
+aliases: 
+tags:
+  - gazebo
+  - flowchart
+---
+# GazeboWX MoC
+Date: 2024-09-01
+
+### Backlink
+[[NH MoC]]
+
+### Reference
+-  [[Port GazeboWx to Home Assistant]]
+- [HomeAssistant blueprints automation heating_control](https://github.com/panhans/homeassistant/blob/main/blueprints/automation/panhans/heating_control.yaml)
+### Notes
+- [[thermoX class diagram]]
+- [[ThermoX Flowchart for setup()]]
+- [[ThermoX Sequence Diagram]]
+- [[ThermoX Data Flow Diagram]]

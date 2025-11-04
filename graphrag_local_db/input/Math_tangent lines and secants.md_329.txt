@@ -1,0 +1,18 @@
+# tangent lines and secants.md
+
+---
+aliases: []
+---
+
+2022-02-23
+# [[tangent line]] and [[secant]]
+
+### Backlink
+[[]]
+
+### Reference
+- [[Notes-tangent-lines-and-secants.pdf]]
+- 
+### Notes
+-  Straight lines yield good approximations to smooth curves
+-

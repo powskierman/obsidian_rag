@@ -1,0 +1,16 @@
+---
+aliases: []
+---
+
+2022-06-26
+# Tekpower tp3005P Power Supply
+
+### Backlink
+[[Instruments MOC]]
+
+### Reference
+- [Tekpower TP33005P Manual](Tech/Electronics/Instruments/Power-Supplies/media/tp3005p.pdf) 
+- 
+### Notes
+- 
+-  

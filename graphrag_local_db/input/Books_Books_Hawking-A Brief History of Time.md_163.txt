@@ -1,0 +1,400 @@
+# Hawking-A Brief History of Time.md
+
+---
+bookId: "26247"
+title: A Brief History of Time
+author: Stephen Hawking
+asin: B004WY3D0O
+lastAnnotatedDate: 2016-06-22
+highlightsCount: 128
+reference: https://www.amazon.com/dp/B004WY3D0O
+kindle_link: kindle://book?action=open&asin=B004WY3D0O
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/A1WTURKqwyL._SY160.jpg)
+## Highlights
+the universe is governed by a set of rational laws that we can discover and understand. — location: [63](kindle://book?action=open&asin=B004WY3D0O&location=63) ^ref-42765
+
+---
+A theory is a good theory if it satisfies two requirements. It must accurately describe a large class of observations on the basis of a model that contains only a few arbitrary elements, and it must make definite predictions about the results of future observations. — location: [203](kindle://book?action=open&asin=B004WY3D0O&location=203) ^ref-55263
+
+---
+Today scientists describe the universe in terms of two basic partial theories—the general theory of relativity and quantum mechanics. — location: [236](kindle://book?action=open&asin=B004WY3D0O&location=236) ^ref-53565
+
+---
+This showed that the real effect of a force is always to change the speed of a body, rather than just to set it moving, as was previously thought. It also meant that whenever a body is not acted on by any force, it will keep on moving in a straight line at the same speed. This idea was first stated explicitly in Newton’s Principia Mathematica, published in 1687, and is known as Newton’s first law. — location: [282](kindle://book?action=open&asin=B004WY3D0O&location=282) ^ref-19259
+
+---
+One can now see why all bodies fall at the same rate: a body of twice the weight will have twice the force of gravity pulling it down, but it will also have twice the mass. According to Newton’s second law, these two effects will exactly cancel each other, so the acceleration will be the same in all cases. — location: [294](kindle://book?action=open&asin=B004WY3D0O&location=294) ^ref-56611
+
+---
+The big difference between the ideas of Aristotle and those of Galileo and Newton is that Aristotle believed in a preferred state of rest, which any body would take up if it were not driven by some force or impulse. — location: [301](kindle://book?action=open&asin=B004WY3D0O&location=301) ^ref-54396
+
+---
+The nonexistence of absolute rest therefore meant that one could not give an event an absolute position in space, as Aristotle had believed. — location: [312](kindle://book?action=open&asin=B004WY3D0O&location=312) ^ref-18690
+
+---
+Both Aristotle and Newton believed in absolute time. — location: [319](kindle://book?action=open&asin=B004WY3D0O&location=319) ^ref-47000
+
+---
+Maxwell’s equations predicted that there could be wavelike disturbances in the combined electromagnetic field, and that these would travel at a fixed speed, like ripples on a pond. If the wavelength of these waves (the distance between one wave crest and the next) is a meter or more, they are what we now call radio waves. Shorter wavelengths are known as microwaves (a few centimeters) or infrared (more than a ten-thousandth of a centimeter). Visible light has a wavelength of between only forty and eighty millionths of a centimeter. Even shorter wavelengths are known as ultraviolet, X rays, and gamma rays. — location: [333](kindle://book?action=open&asin=B004WY3D0O&location=333) ^ref-41942
+
+---
+The fundamental postulate of the theory of relativity, as it was called, was that the laws of science should be the same for all freely moving observers, no matter what their speed. This was true for Newton’s laws of motion, but now the idea was extended to include Maxwell’s theory and the speed of light: all observers should measure the same speed of light, no matter how fast they are moving. — location: [354](kindle://book?action=open&asin=B004WY3D0O&location=354) ^ref-16426
+
+---
+Only light, or other waves that have no intrinsic mass, can move at the speed of light. — location: [365](kindle://book?action=open&asin=B004WY3D0O&location=365) ^ref-39774
+
+---
+We must accept that time is not completely separate from and independent of space, but is combined with it to form an object called space-time. — location: [389](kindle://book?action=open&asin=B004WY3D0O&location=389) ^ref-17476
+
+---
+Bodies like the earth are not made to move on curved orbits by a force called gravity; instead, they follow the nearest thing to a straight path in a curved space, which is called a geodesic. — location: [460](kindle://book?action=open&asin=B004WY3D0O&location=460) ^ref-732
+
+---
+In general relativity, bodies always follow straight lines in four-dimensional space-time, but they nevertheless appear to us to move along curved paths in our three-dimensional space. — location: [464](kindle://book?action=open&asin=B004WY3D0O&location=464) ^ref-27657
+
+---
+The mass of the sun curves space-time in such a way that although the earth follows a straight path in four-dimensional space-time, it appears to us to move along a circular orbit in three-dimensional space. In fact, the orbits of the planets predicted by general relativity are almost exactly the same as those predicted by the Newtonian theory of gravity. — location: [469](kindle://book?action=open&asin=B004WY3D0O&location=469) ^ref-26980
+
+---
+general relativity predicts that light should be bent by gravitational fields. — location: [477](kindle://book?action=open&asin=B004WY3D0O&location=477) ^ref-45475
+
+---
+in the general theory of relativity. Space and time are now dynamic quantities: when a body moves, or a force acts, it affects the curvature of space and time—and in turn the structure of space-time affects the way in which bodies move and forces act. — location: [509](kindle://book?action=open&asin=B004WY3D0O&location=509) ^ref-27346
+
+---
+the apparent brightness of a star depends on two factors: how much light it radiates (its luminosity), and how far it is from us. — location: [534](kindle://book?action=open&asin=B004WY3D0O&location=534) ^ref-44477
+
+---
+our galaxy is only one of some hundred thousand million that can be seen using modern telescopes, each galaxy itself containing some hundred thousand million stars. — location: [540](kindle://book?action=open&asin=B004WY3D0O&location=540) ^ref-24420
+
+---
+For the vast majority of stars, there is only one characteristic feature that we can observe—the color of their light. — location: [548](kindle://book?action=open&asin=B004WY3D0O&location=548) ^ref-43871
+
+---
+we can tell a star’s temperature from the spectrum of its light.) — location: [554](kindle://book?action=open&asin=B004WY3D0O&location=554) ^ref-20331
+
+---
+Since we know that each chemical element absorbs a characteristic set of very specific colors, by matching these to those that are missing from a star’s spectrum, we can determine exactly which elements are present in the star’s atmosphere. — location: [555](kindle://book?action=open&asin=B004WY3D0O&location=555) ^ref-19524
+
+---
+visible light consists of fluctuations, or waves, in the electromagnetic field. — location: [560](kindle://book?action=open&asin=B004WY3D0O&location=560) ^ref-51630
+
+---
+Max Planck suggested in 1900 that light, X rays, and other waves could not be emitted at an arbitrary rate, but only in certain packets that he called quanta. Moreover, each quantum had a certain amount of energy that was greater the higher the frequency of the waves, so at a high enough frequency the emission of a single quantum would require more energy than was available. — location: [779](kindle://book?action=open&asin=B004WY3D0O&location=779) ^ref-17625
+
+---
+Werner Heisenberg, formulated his famous uncertainty principle. In order to predict the future position and velocity of a particle, one has to be able to measure its present position and velocity accurately. The obvious way to do this is to shine light on the particle. Some of the waves of light will be scattered by the particle and this will indicate its position. However, one will not be able to determine the position of the particle more accurately than the distance between the wave crests of light, so one needs to use light of a short wavelength in order to measure the position of the particle precisely. Now, by Planck’s quantum hypothesis, one cannot use an arbitrarily small amount of light; one has to use at least one quantum. This quantum will disturb the particle and change its velocity in a way that cannot be predicted. Moreover, the more accurately one measures the position, the shorter the wavelength of the light that one needs and hence the higher the energy of a single quantum. So the velocity of the particle will be disturbed by a larger amount. In other words, the more accurately you try to measure the position of the particle, the less accurately you can measure its speed, and vice versa. — location: [784](kindle://book?action=open&asin=B004WY3D0O&location=784) ^ref-61947
+
+---
+quantum mechanics does not predict a single definite result for an observation. Instead, it predicts a number of different possible outcomes and tells us how likely each of these is. — location: [805](kindle://book?action=open&asin=B004WY3D0O&location=805) ^ref-35951
+
+---
+The only areas of physical science into which quantum mechanics has not yet been properly incorporated are gravity and the large-scale structure of the universe. — location: [815](kindle://book?action=open&asin=B004WY3D0O&location=815) ^ref-44146
+
+---
+quantum mechanics resolved this difficulty. It revealed that an electron orbiting around the nucleus could be thought of as a wave, with a wavelength that depended on its velocity. For certain orbits, the length of the orbit would correspond to a whole number (as opposed to a fractional number) of wavelengths of the electron. For these orbits the wave crest would be in the same position each time round, so the waves would add up: these orbits would correspond to Bohr’s allowed orbits. However, for orbits whose lengths were not a whole number of wavelengths, each wave crest would eventually be canceled out by a trough as the electrons went round; these orbits would not be allowed. — location: [858](kindle://book?action=open&asin=B004WY3D0O&location=858) ^ref-46118
+
+---
+A nice way of visualizing the wave/particle duality is the so-called sum over histories introduced by the American scientist Richard Feynman. In this approach the particle is not supposed to have a single history or path in space-time, as it would in a classical, nonquantum theory. Instead it is supposed to go from A to B by every possible path. With each path there are associated a couple of numbers: one represents the size of a wave and the other represents the position in the cycle (i.e., whether it is at a crest or a trough). The probability of going from A to B is found by adding up the waves for all the paths. — location: [863](kindle://book?action=open&asin=B004WY3D0O&location=863) ^ref-41157
+
+---
+the singularity theorems discussed earlier indicate that the gravitational field should get very strong in at least two situations, black holes and the big bang. In such strong fields the effects of quantum mechanics should be important. — location: [878](kindle://book?action=open&asin=B004WY3D0O&location=878) ^ref-54674
+
+---
+A proton or neutron is made up of three quarks, one of each color. — location: [923](kindle://book?action=open&asin=B004WY3D0O&location=923) ^ref-45475
+
+---
+A proton contains two up quarks and one down quark; a neutron contains two down and one up. — location: [923](kindle://book?action=open&asin=B004WY3D0O&location=923) ^ref-48746
+
+---
+quantum mechanics tells us that all particles are in fact waves, and that the higher the energy of a particle, the smaller the wavelength of the corresponding wave. — location: [928](kindle://book?action=open&asin=B004WY3D0O&location=928) ^ref-10054
+
+---
+The energy that an electron gains from an electric field of one volt is what is known as an electron volt.) — location: [932](kindle://book?action=open&asin=B004WY3D0O&location=932) ^ref-51393
+
+---
+everything in the universe, including light and gravity, can be described in terms of particles. — location: [939](kindle://book?action=open&asin=B004WY3D0O&location=939) ^ref-36481
+
+---
+A particle of spin 0 is like a dot: it looks the same from every direction (Fig. 5.1-i). On the other hand, a particle of spin 1 is like an arrow: it looks different from different directions — location: [942](kindle://book?action=open&asin=B004WY3D0O&location=942) ^ref-53694
+
+---
+A particle of spin 2 is like a double-headed arrow (Fig. 5.1-iii): it looks the same if one turns it round half a revolution (180 degrees). — location: [945](kindle://book?action=open&asin=B004WY3D0O&location=945) ^ref-10056
+
+---
+All the known particles in the universe can be divided into two groups: particles of spin ½, which make up the matter in the universe, and particles of spin 0, 1, and 2, which, as we shall see, give rise to forces between the matter particles. — location: [949](kindle://book?action=open&asin=B004WY3D0O&location=949) ^ref-55159
+
+---
+Pauli’s exclusion principle says that two similar particles cannot exist in the same state; that is, they cannot have both the same position and the same velocity, within the limits given by the uncertainty principle. — location: [953](kindle://book?action=open&asin=B004WY3D0O&location=953) ^ref-65189
+
+---
+every particle has an antiparticle, with which it can annihilate. (In the case of the force-carrying particles, the antiparticles are the same as the particles themselves.) — location: [966](kindle://book?action=open&asin=B004WY3D0O&location=966) ^ref-35332
+
+---
+In quantum mechanics, the forces or interactions between matter particles are all supposed to be carried by particles of integer spin—0, 1, or 2. — location: [970](kindle://book?action=open&asin=B004WY3D0O&location=970) ^ref-50747
+
+---
+It is an important property of the force-carrying particles that they do not obey the exclusion principle. This means that there is no limit to the number that can be exchanged, and so they can give rise to a strong force. However, if the force-carrying particles have a high mass, it will be difficult to produce and exchange them over a large distance. So the forces that they carry will have only a short range. On the other hand, if the force-carrying particles have no mass of their own, the forces will be long range. — location: [973](kindle://book?action=open&asin=B004WY3D0O&location=973) ^ref-17019
+
+---
+waves of light or gravitational waves. They may sometimes be emitted when matter particles interact with each other by exchanging virtual force-carrying particles. (For example, the electric repulsive force between two electrons is due to the exchange of virtual photons, which can never be directly detected; but if one electron moves past another, real photons may be given off, which we detect as light waves.) — location: [980](kindle://book?action=open&asin=B004WY3D0O&location=980) ^ref-10418
+
+---
+The first category is the gravitational force. This force is universal, that is, every particle feels the force of gravity, according to its mass or energy. Gravity is the weakest of the four forces by a long way; it is so weak that we would not notice it at all were it not for two special properties that it has: it can act over large distances, and it is always attractive. This means that the very weak gravitational forces between the individual particles in two large bodies, such as the earth and the sun, can all add up to produce a significant force. The other three forces are either short range, or are sometimes attractive and sometimes repulsive, so they tend to cancel out. — location: [989](kindle://book?action=open&asin=B004WY3D0O&location=989) ^ref-21858
+
+---
+In the quantum mechanical way of looking at the gravitational field, the force between two matter particles is pictured as being carried by a particle of spin 2 called the graviton. This has no mass of its own, so the force that it carries is long range. — location: [993](kindle://book?action=open&asin=B004WY3D0O&location=993) ^ref-41240
+
+---
+The next category is the electromagnetic force, which interacts with electrically charged particles like electrons and quarks, but not with uncharged particles such as gravitons. It is much stronger than the gravitational force: the electromagnetic force between two electrons is about a million million million million million million million (1 with forty-two zeros after it) times bigger than the gravitational force. — location: [998](kindle://book?action=open&asin=B004WY3D0O&location=998) ^ref-38511
+
+---
+A large body, such as the earth or the sun, contains nearly equal numbers of positive and negative charges. Thus the attractive and repulsive forces between the individual particles nearly cancel each other out, and there is very little net electromagnetic force. — location: [1003](kindle://book?action=open&asin=B004WY3D0O&location=1003) ^ref-34406
+
+---
+on the small scales of atoms and molecules, electromagnetic forces dominate. The electromagnetic attraction between negatively charged electrons and positively charged protons in the nucleus causes the electrons to orbit the nucleus of the atom, just as gravitational attraction causes the earth to orbit the sun. — location: [1005](kindle://book?action=open&asin=B004WY3D0O&location=1005) ^ref-18374
+
+---
+The third category is called the weak nuclear force, which is responsible for radioactivity — location: [1011](kindle://book?action=open&asin=B004WY3D0O&location=1011) ^ref-1315
+
+---
+They suggested that in addition to the photon, there were three other spin-1 particles, known collectively as massive vector bosons, that carried the weak force. These were called W+ (pronounced W plus), W– (pronounced W minus), and Z° (pronounced Z naught), and each had a mass of around 100 GeV (GeV stands for gigaelectron-volt, or one thousand million electron volts). — location: [1015](kindle://book?action=open&asin=B004WY3D0O&location=1015) ^ref-13983
+
+---
+The Weinberg-Salam theory exhibits a property known as spontaneous symmetry breaking. This means that what appear to be a number of completely different particles at low energies are in fact found to be all the same type of particle, only in different states. — location: [1018](kindle://book?action=open&asin=B004WY3D0O&location=1018) ^ref-26127
+
+---
+In the Weinberg-Salam theory, at energies much greater than 100 GeV, the three new particles and the photon would all behave in a similar manner. — location: [1024](kindle://book?action=open&asin=B004WY3D0O&location=1024) ^ref-1574
+
+---
+The fourth category is the strong nuclear force, which holds the quarks together in the proton and neutron, and holds the protons and neutrons together in the nucleus of an atom. — location: [1036](kindle://book?action=open&asin=B004WY3D0O&location=1036) ^ref-19954
+
+---
+this force is carried by another spin-1 particle, called the gluon, which interacts only with itself and with the quarks. — location: [1037](kindle://book?action=open&asin=B004WY3D0O&location=1037) ^ref-38974
+
+---
+The strong nuclear force has a curious property called confinement: it always binds particles together into combinations that have no color. — location: [1038](kindle://book?action=open&asin=B004WY3D0O&location=1038) ^ref-49362
+
+---
+Another possibility is a pair consisting of a quark and an antiquark (red + antired, or green + antigreen, or blue + antiblue = white). Such combinations make up the particles known as mesons, which are unstable because the quark and antiquark can annihilate each other, producing electrons and other particles. — location: [1041](kindle://book?action=open&asin=B004WY3D0O&location=1041) ^ref-27416
+
+---
+confinement prevents one having a single gluon on its own, because gluons also have color. Instead, one has to have a collection of gluons whose colors add up to white. Such a collection forms an unstable particle called a glueball. — location: [1043](kindle://book?action=open&asin=B004WY3D0O&location=1043) ^ref-500
+
+---
+The basic idea of GUTs is as follows: as was mentioned above, the strong nuclear force gets weaker at high energies. On the other hand, the electromagnetic and weak forces, which are not asymptotically free, get stronger at high energies. At some very high energy, called the grand unification energy, these three forces would all have the same strength and so could just be different aspects of a single force. — location: [1054](kindle://book?action=open&asin=B004WY3D0O&location=1054) ^ref-42708
+
+---
+Grand unified theories do not include the force of gravity. — location: [1126](kindle://book?action=open&asin=B004WY3D0O&location=1126) ^ref-54505
+
+---
+the more fuel a star starts off with, the sooner it runs out. This is because the more massive the star is, the hotter it needs to be to balance its gravitational attraction. — location: [1163](kindle://book?action=open&asin=B004WY3D0O&location=1163) ^ref-3421
+
+---
+when the star becomes small, the matter particles get very near each other, and so according to the Pauli exclusion principle, they must have very different velocities. This makes them move away from each other and so tends to make the star expand. A star can therefore maintain itself at a constant radius by a balance between the attraction of gravity and the repulsion that arises from the exclusion principle, just as earlier in its life gravity was balanced by the heat. — location: [1171](kindle://book?action=open&asin=B004WY3D0O&location=1171) ^ref-35713
+
+---
+The theory of relativity limits the maximum difference in the velocities of the matter particles in the star to the speed of light. This means that when the star got sufficiently dense, the repulsion caused by the exclusion principle would be less than the attraction of gravity. — location: [1175](kindle://book?action=open&asin=B004WY3D0O&location=1175) ^ref-6346
+
+---
+If a star’s mass is less than the Chandrasekhar limit, it can eventually stop contracting and settle down to a possible final state as a “white dwarf” with a radius of a few thousand miles and a density of hundreds of tons per cubic inch. A white dwarf is supported by the exclusion principle repulsion between the electrons in its matter. — location: [1180](kindle://book?action=open&asin=B004WY3D0O&location=1180) ^ref-27773
+
+---
+there was another possible final state for a star, also with a limiting mass of about one or two times the mass of the sun but much smaller even than a white dwarf. These stars would be supported by the exclusion principle repulsion between neutrons and protons, rather than between electrons. They were therefore called neutron stars. — location: [1184](kindle://book?action=open&asin=B004WY3D0O&location=1184) ^ref-12903
+
+---
+The gravitational field of the star changes the paths of light rays in space-time from what they would have been had the star not been present. The light cones, which indicate the paths followed in space and time by flashes of light emitted from their tips, are bent slightly inward near the surface of the star. This can be seen in the bending of light from distant stars observed during an eclipse of the sun. As the star contracts, the gravitational field at its surface gets stronger and the light cones get bent inward more. This makes it more difficult for light from the star to escape, and the light appears dimmer and redder to an observer at a distance. Eventually, when the star has shrunk to a certain critical radius, the gravitational field at the surface becomes so strong that the light cones are bent inward so much that light can no longer escape — location: [1205](kindle://book?action=open&asin=B004WY3D0O&location=1205) ^ref-26106
+
+---
+Its boundary is called the event horizon and it coincides with the paths of light rays that just fail to escape from the black hole. — location: [1213](kindle://book?action=open&asin=B004WY3D0O&location=1213) ^ref-33098
+
+---
+the central regions of galaxies, that can also undergo gravitational collapse to produce black holes; — location: [1230](kindle://book?action=open&asin=B004WY3D0O&location=1230) ^ref-48843
+
+---
+General relativity predicts that heavy objects that are moving will cause the emission of gravitational waves, ripples in the curvature of space that travel at the speed of light. These are similar to light waves, which are ripples of the electromagnetic field, but they are much harder to detect. — location: [1260](kindle://book?action=open&asin=B004WY3D0O&location=1260) ^ref-28621
+
+---
+A neutron star has a radius of about ten miles, only a few times the critical radius at which a star becomes a black hole. — location: [1329](kindle://book?action=open&asin=B004WY3D0O&location=1329) ^ref-50851
+
+---
+The number of black holes may well be greater even than the number of visible stars, which totals about a hundred thousand million in our galaxy alone. — location: [1354](kindle://book?action=open&asin=B004WY3D0O&location=1354) ^ref-17523
+
+---
+It is thought that similar but even larger black holes, with masses of about a hundred million times the mass of the sun, occur at the centers of quasars. — location: [1362](kindle://book?action=open&asin=B004WY3D0O&location=1362) ^ref-30751
+
+---
+Matter falling into such a supermassive black hole would provide the only source of power great enough to explain the enormous amounts of energy that these objects are emitting. — location: [1365](kindle://book?action=open&asin=B004WY3D0O&location=1365) ^ref-42887
+
+---
+As the matter spirals into the black hole, it would make the black hole rotate in the same direction, causing it to develop a magnetic field rather like that of the earth. Very high-energy particles would be generated near the black hole by the in-falling matter. The magnetic field would be so strong that it could focus these particles into jets ejected outward along the axis of rotation of the black hole, that is, in the directions of its north and south poles. Such jets are indeed observed in a number of galaxies and quasars. — location: [1366](kindle://book?action=open&asin=B004WY3D0O&location=1366) ^ref-18891
+
+---
+what we think of as “empty” space cannot be completely empty because that would mean that all the fields, such as the gravitational and electromagnetic fields, would have to be exactly zero. However, the value of a field and its rate of change with time are like the position and velocity of a particle: the uncertainty principle implies that the more accurately one knows one of these quantities, the less accurately one can know the other. So in empty space the field cannot be fixed at exactly zero, because then it would have both a precise value (zero) and a precise rate of change (also zero). There must be a certain minimum amount of uncertainty, or quantum fluctuations, in the value of the field. — location: [1465](kindle://book?action=open&asin=B004WY3D0O&location=1465) ^ref-21875
+
+---
+a real particle close to a massive body has less energy than if it were far away, because it would take energy to lift it far away against the gravitational attraction of the body. — location: [1478](kindle://book?action=open&asin=B004WY3D0O&location=1478) ^ref-52617
+
+---
+What happens when the mass of the black hole eventually becomes extremely small is not quite clear, but the most reasonable guess is that it would disappear completely in a tremendous final burst of emission, equivalent to the explosion of millions of H-bombs. — location: [1491](kindle://book?action=open&asin=B004WY3D0O&location=1491) ^ref-8628
+
+---
+not provide any positive evidence for primordial black holes, but they do tell us that on average there cannot be more than 300 in every cubic light-year in the universe. This limit means that primordial black holes could make up at most one millionth of the matter in the universe. — location: [1520](kindle://book?action=open&asin=B004WY3D0O&location=1520) ^ref-22771
+
+---
+the gamma ray background tells us that there can be no more than 300 primordial black holes per cubic light-year — location: [1524](kindle://book?action=open&asin=B004WY3D0O&location=1524) ^ref-30562
+
+---
+Planck’s quantum principle tells us that each gamma ray quantum has a very high energy, because gamma rays have a very high frequency, so it would not take many quanta to radiate even ten thousand megawatts. — location: [1529](kindle://book?action=open&asin=B004WY3D0O&location=1529) ^ref-58619
+
+---
+Only if the early universe was very smooth and uniform, with a high pressure, can one explain the absence of observable numbers of primordial black holes. — location: [1549](kindle://book?action=open&asin=B004WY3D0O&location=1549) ^ref-8159
+
+---
+temperature is simply a measure of the average energy—or speed—of the particles, — location: [1593](kindle://book?action=open&asin=B004WY3D0O&location=1593) ^ref-7518
+
+---
+One second after the big bang, it would have fallen to about ten thousand million degrees. This is about a thousand times the temperature at the center of the sun, but temperatures as high as this are reached in H-bomb explosions. At this time the universe would have contained mostly photons, electrons, and neutrinos (extremely light particles that are affected only by the weak force and gravity) and their antiparticles, together with some protons and neutrons. — location: [1602](kindle://book?action=open&asin=B004WY3D0O&location=1602) ^ref-30370
+
+---
+About one hundred seconds after the big bang, the temperature would have fallen to one thousand million degrees, the temperature inside the hottest stars. At this temperature protons and neutrons would no longer have sufficient energy to escape the attraction of the strong nuclear force, and would have started to combine together to produce the nuclei of atoms of deuterium — location: [1613](kindle://book?action=open&asin=B004WY3D0O&location=1613) ^ref-20766
+
+---
+in the hot big bang model about a quarter of the protons and neutrons would have been converted into helium nuclei, along with a small amount of heavy hydrogen and other elements. The remaining neutrons would have decayed into protons, which are the nuclei of ordinary hydrogen atoms. — location: [1617](kindle://book?action=open&asin=B004WY3D0O&location=1617) ^ref-6170
+
+---
+As they were collapsing, the gravitational pull of matter outside these regions might start them rotating slightly. — location: [1634](kindle://book?action=open&asin=B004WY3D0O&location=1634) ^ref-7841
+
+---
+As the collapsing region got smaller, it would spin faster—just as skaters spinning on ice spin faster as they draw in their arms. Eventually, when the region got small enough, it would be spinning fast enough to balance the attraction of gravity, and in this way disklike rotating galaxies were born. — location: [1635](kindle://book?action=open&asin=B004WY3D0O&location=1635) ^ref-60081
+
+---
+the anthropic principle, which can be paraphrased as “We see the universe the way it is because we exist.” — location: [1709](kindle://book?action=open&asin=B004WY3D0O&location=1709) ^ref-33777
+
+---
+The weak anthropic principle states that in a universe that is large or infinite in space and/or time, the conditions necessary for the development of intelligent life will be met only in certain regions that are limited in space and time. — location: [1710](kindle://book?action=open&asin=B004WY3D0O&location=1710) ^ref-38163
+
+---
+the radius of the universe increased by a million million million million million (1 with thirty zeros after it) times in only a tiny fraction of a second. — location: [1763](kindle://book?action=open&asin=B004WY3D0O&location=1763) ^ref-60080
+
+---
+in quantum theory, particles can be created out of energy in the form of particle/antiparticle pairs. — location: [1790](kindle://book?action=open&asin=B004WY3D0O&location=1790) ^ref-25198
+
+---
+But that just raises the question of where the energy came from. The answer is that the total energy of the universe is exactly zero. The matter in the universe is made out of positive energy. However, the matter is all attracting itself by gravity. — location: [1791](kindle://book?action=open&asin=B004WY3D0O&location=1791) ^ref-39584
+
+---
+In the case of a universe that is approximately uniform in space, one can show that this negative gravitational energy exactly cancels the positive energy represented by the matter. So the total energy of the universe is zero. — location: [1794](kindle://book?action=open&asin=B004WY3D0O&location=1794) ^ref-3605
+
+---
+what the singularity theorems really indicate is that the gravitational field becomes so strong that quantum gravitational effects become important: — location: [1863](kindle://book?action=open&asin=B004WY3D0O&location=1863) ^ref-64433
+
+---
+Feynman’s proposal to formulate quantum theory in terms of a sum over histories. In this approach, a particle does not have just a single history, as it would in a classical theory. Instead, it is supposed to follow every possible path in space-time, and with each of these histories there are associated a couple of numbers, one representing the size of a wave and the other representing its position in the cycle (its phase). The probability that the particle, say, passes through some particular point is found by adding up the waves associated with every possible history that passes through that point. — location: [1868](kindle://book?action=open&asin=B004WY3D0O&location=1868) ^ref-34737
+
+---
+One can picture real and imaginary numbers in the following way: The real numbers can be represented by a line going from left to right, with zero in the middle, negative numbers like −1, −2, etc. on the left, and positive numbers, 1, 2, etc. on the right. Then imaginary numbers are represented by a line going up and down the page, with i, 2i, etc. above the middle, and −i, −2i, etc. below. — location: [1878](kindle://book?action=open&asin=B004WY3D0O&location=1878) ^ref-12146
+
+---
+A space-time in which events have imaginary values of the time coordinate is said to be Euclidean, — location: [1884](kindle://book?action=open&asin=B004WY3D0O&location=1884) ^ref-6346
+
+---
+What we now call Euclidean space-time is very similar except that it has four dimensions instead of two. — location: [1885](kindle://book?action=open&asin=B004WY3D0O&location=1885) ^ref-47736
+
+---
+as far as everyday quantum mechanics is concerned, we may regard our use of imaginary time and Euclidean space-time as merely a mathematical device (or trick) to calculate answers about real space-time. — location: [1889](kindle://book?action=open&asin=B004WY3D0O&location=1889) ^ref-15356
+
+---
+In the classical theory of gravity, which is based on real space-time, there are only two possible ways the universe can behave: either it has existed for an infinite time, or else it had a beginning at a singularity at some finite time in the past. — location: [1901](kindle://book?action=open&asin=B004WY3D0O&location=1901) ^ref-38435
+
+---
+In the quantum theory of gravity, on the other hand, a third possibility arises. Because one is using Euclidean space-times, in which the time direction is on the same footing as directions in space, it is possible for space-time to be finite in extent and yet to have no singularities that formed a boundary or edge. Space-time would be like the surface of the earth, only with two more dimensions. The surface of the earth is finite in extent but it doesn’t have a boundary or edge: if you sail off into the sunset, you don’t fall off the edge or run into a singularity. — location: [1902](kindle://book?action=open&asin=B004WY3D0O&location=1902) ^ref-31147
+
+---
+the quantum theory of gravity has opened up a new possibility, in which there would be no boundary to space-time and so there would be no need to specify the behavior at the boundary. — location: [1909](kindle://book?action=open&asin=B004WY3D0O&location=1909) ^ref-7161
+
+---
+one of the histories, we may use the anthropic principle to explain why the universe is found to be the way it is. — location: [1929](kindle://book?action=open&asin=B004WY3D0O&location=1929) ^ref-43903
+
+---
+Under the “no boundary” proposal one learns that the chance of the universe being found to be following most of the possible histories is negligible, but there is a particular family of histories that are much more probable than the others. These histories may be pictured as being like the surface of the earth, with the distance from the North Pole representing imaginary time and the size of a circle of constant distance from the North Pole representing the spatial size of the universe. The universe starts at the North Pole as a single point. As one moves south, the circles of latitude at constant distance from the North Pole get bigger, corresponding to the universe expanding with imaginary time (Fig. 8.1). The universe would reach a maximum size at the equator and would contract with increasing imaginary time to a single point at the South Pole. Even though the universe would have zero size at the North and South Poles, these points would not be singularities, any more than the North and South Poles on the earth are singular. The laws of science will hold at them, just as they do at the North and South Poles on the earth. — location: [1933](kindle://book?action=open&asin=B004WY3D0O&location=1933) ^ref-6629
+
+---
+the real importance of the singularity theorems was that they showed that the gravitational field must become so strong that quantum gravitational effects could not be ignored. — location: [1949](kindle://book?action=open&asin=B004WY3D0O&location=1949) ^ref-10373
+
+---
+a scientific theory is just a mathematical model we make to describe our observations: it exists only in our minds. So it is meaningless to ask: which is real, “real” or “imaginary” time? It is simply a matter of which is the more useful description. — location: [1958](kindle://book?action=open&asin=B004WY3D0O&location=1958) ^ref-29659
+
+---
+the proposed no boundary condition leads to the prediction that it is extremely probable that the present rate of expansion of the universe is almost the same in each direction. — location: [1964](kindle://book?action=open&asin=B004WY3D0O&location=1964) ^ref-4606
+
+---
+The uncertainty principle implies that the early universe cannot have been completely uniform because there must have been some uncertainties or fluctuations in the positions and velocities of the particles. — location: [1969](kindle://book?action=open&asin=B004WY3D0O&location=1969) ^ref-57789
+
+---
+Using the no boundary condition, we find that the universe must in fact have started off with just the minimum possible non-uniformity allowed by the uncertainty principle. The universe would have then undergone a period of rapid expansion, as in the inflationary models. During this period, the initial non-uniformities would have been amplified until they were big enough to explain the origin of the structures we observe around us. — location: [1970](kindle://book?action=open&asin=B004WY3D0O&location=1970) ^ref-29786
+
+---
+all the complicated structures that we see in the universe might be explained by the no boundary condition for the universe together with the uncertainty principle of quantum mechanics. — location: [1979](kindle://book?action=open&asin=B004WY3D0O&location=1979) ^ref-35526
+
+---
+the laws of science are unchanged under the combination of operations (or symmetries) known as C, P, and T. (C means changing particles for antiparticles. P means taking the mirror image, so left and right are interchanged. And T means reversing the direction of motion of all particles: in effect, running the motion backward.) — location: [1999](kindle://book?action=open&asin=B004WY3D0O&location=1999) ^ref-4582
+
+---
+the second law of thermodynamics. This says that in any closed system disorder, or entropy, always increases with time. — location: [2010](kindle://book?action=open&asin=B004WY3D0O&location=2010) ^ref-35659
+
+---
+There are at least three different arrows of time. First, there is the thermodynamic arrow of time, the direction of time in which disorder or entropy increases. Then, there is the psychological arrow of time. This is the direction in which we feel time passes, the direction in which we remember the past but not the future. Finally, there is the cosmological arrow of time. This is the direction of time in which the universe is expanding rather than contracting. — location: [2015](kindle://book?action=open&asin=B004WY3D0O&location=2015) ^ref-51538
+
+---
+why is the direction of time in which disorder increases the same as that in which the universe expands? — location: [2060](kindle://book?action=open&asin=B004WY3D0O&location=2060) ^ref-1117
+
+---
+the beginning of time would be a regular, smooth point of space-time and the universe would have begun its expansion in a very smooth and ordered state. It could not have been completely uniform, because that would violate the uncertainty principle of quantum theory. — location: [2072](kindle://book?action=open&asin=B004WY3D0O&location=2072) ^ref-38159
+
+---
+The universe would have started in a smooth and ordered state, and would become lumpy and disordered as time went on. This would explain the existence of the thermodynamic arrow of time. — location: [2080](kindle://book?action=open&asin=B004WY3D0O&location=2080) ^ref-59323
+
+---
+The collapse of a star to form a black hole is rather like the later stages of the collapse of the whole universe. — location: [2086](kindle://book?action=open&asin=B004WY3D0O&location=2086) ^ref-8238
+
+---
+a strong thermodynamic arrow is necessary for intelligent life to operate. In order to survive, human beings have to consume food, which is an ordered form of energy, and convert it into heat, which is a disordered form of energy. Thus intelligent life could not exist in the contracting phase of the universe. — location: [2120](kindle://book?action=open&asin=B004WY3D0O&location=2120) ^ref-12029
+
+---
+To summarize, the laws of science do not distinguish between the forward and backward directions of time. However, there are at least three arrows of time that do distinguish the past from the future. They are the thermodynamic arrow, the direction of time in which disorder increases; the psychological arrow, the direction of time in which we remember the past and not the future; and the cosmological arrow, the direction of time in which the universe expands rather than contracts. I have shown that the psychological arrow is essentially the same as the thermodynamic arrow, so that the two would always point in the same direction. The no boundary proposal for the universe predicts the existence of a well-defined thermodynamic arrow of time because the universe must start off in a smooth and ordered state. And the reason we observe this thermodynamic arrow to agree with the cosmological arrow is that intelligent beings can exist only in the expanding phase. The contracting phase will be unsuitable because it has no strong thermodynamic arrow of time. — location: [2125](kindle://book?action=open&asin=B004WY3D0O&location=2125) ^ref-62286
+
+---
+After Hubble discovered the expansion of the universe, there was no need for a cosmological constant and it is now generally believed to be zero. — location: [2159](kindle://book?action=open&asin=B004WY3D0O&location=2159) ^ref-45423
+
+---
+cosmic strings are objects that are like string in that they have length but a tiny cross section. Actually, they are more like rubber bands because they are under enormous tension, something like a million million million million tons. — location: [2162](kindle://book?action=open&asin=B004WY3D0O&location=2162) ^ref-1164
+
+---
+what one needs, in order to warp space-time in a way that will allow travel into the past, is matter with negative energy density. — location: [2218](kindle://book?action=open&asin=B004WY3D0O&location=2218) ^ref-48998
+
+---
+We thus have experimental evidence both that space-time can be warped (from the bending of light during eclipses) and that it can be curved in the way necessary to allow time travel (from the Casimir effect). — location: [2239](kindle://book?action=open&asin=B004WY3D0O&location=2239) ^ref-35950
+
+---
+if the human then goes off in a rocket ship and comes back before he or she set off, we will be able to predict what he or she will do because it will be part of recorded history. Thus, in that situation, the time traveler would have no free will. — location: [2263](kindle://book?action=open&asin=B004WY3D0O&location=2263) ^ref-8954
+
+---
+the laws of science are unchanged by combinations of the operations C, P, and T. This means that an antiparticle spinning in the anticlockwise direction and moving from A to B can also be viewed as an ordinary particle spinning clockwise and moving backward in time from B to A. — location: [2276](kindle://book?action=open&asin=B004WY3D0O&location=2276) ^ref-34345
+
+---
+one can regard the pair of particles as a single particle moving on a closed loop in space-time. When the pair is moving forward in time (from the event at which it appears to that at which it annihilates), it is called a particle. But when the particle is traveling back in time (from the event at which the pair annihilates to that at which it appears), it is said to be an antiparticle traveling forward in time. — location: [2281](kindle://book?action=open&asin=B004WY3D0O&location=2281) ^ref-15405
+
+---
+The explanation of how black holes can emit particles and radiation (given in Chapter 7) was that one member of a virtual particle/antiparticle pair (say, the antiparticle) might fall into the black hole, leaving the other member without a partner with which to annihilate. The forsaken particle might fall into the hole as well, but it might also escape from the vicinity of the black hole. If so, to an observer at a distance it would appear to be a particle emitted by the black hole. — location: [2284](kindle://book?action=open&asin=B004WY3D0O&location=2284) ^ref-65058
+
+---
+The main difficulty in finding a theory that unifies gravity with the other forces is that general relativity is a “classical” theory; that is, it does not incorporate the uncertainty principle of quantum mechanics. — location: [2328](kindle://book?action=open&asin=B004WY3D0O&location=2328) ^ref-17326
+
+---
+A necessary first step, therefore, is to combine general relativity with the uncertainty principle. As we have seen, this can produce some remarkable consequences, such as black holes not being black, and the universe not having any singularities but being completely self-contained and without a boundary. — location: [2330](kindle://book?action=open&asin=B004WY3D0O&location=2330) ^ref-59302
+
+---

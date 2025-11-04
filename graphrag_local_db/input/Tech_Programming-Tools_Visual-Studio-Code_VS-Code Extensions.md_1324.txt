@@ -1,0 +1,36 @@
+# VS-Code Extensions.md
+
+---
+aliases: []
+---
+
+2022-06-24
+# VS-Code Extensions
+
+### Backlink
+[[Visual Studio Code MOC]]
+
+### Reference
+
+### Notes
+- Recommended:
+
+1.  esbenp.prettier-vscode
+
+2.  formulahendry.auto-close-tag
+
+3.  hex-ci.stylelint-plus
+
+4.  dbaeumer.vscode-eslint
+
+5.  naumovs.color-highlight
+
+6.  DigitalBrainstem.javascript-ejs-support
+
+Optional
+
+7.  ritwickdey.LiveServer
+
+8.  erikphansen.vscode-toggle-column-selection
+
+9.  file-icons

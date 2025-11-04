@@ -1,0 +1,28 @@
+# n8n.md
+
+---
+aliases:
+tags:
+  - n8n
+  - AI
+  - mcp
+created: 2025-10-13 17:59
+ContentType:
+Backlink: "[[AI Tools MoC|AI Tools MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- [n8n-nodes-mcp](https://github.com/nerding-io/n8n-nodes-mcp)
+- [More comprehensive n8n MCP](https://github.com/czlonkowski/n8n-mcp)
+- 
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

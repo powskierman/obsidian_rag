@@ -1,0 +1,22 @@
+# Questions for pharmacist.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+  - questions
+---
+# Questions for pharmacist
+Date: 2024-12-31
+
+### Backlink
+[[Lymphoma/Lymphoma MoC]]
+
+### Reference
+-  
+### Notes
+-  What to do for Vincristine constipation
+- Who initiates the transfer to Canmore oncology
+- Do you remain the pharmacist
+- Does Dr. Slaby remain the oncologist or am I transferred to a new Dr.
+- When is day 7 Filgastrin (is chemo day, day 0 or 1)

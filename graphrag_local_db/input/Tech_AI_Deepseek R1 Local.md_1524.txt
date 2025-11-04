@@ -1,0 +1,66 @@
+# Deepseek R1 Local.md
+
+---
+aliases: 
+tags:
+  - deepseek
+---
+# Deepseek R1 Local
+Date: 2025-01-28
+
+### Backlink
+[[Deepseek MoC]]
+
+### Reference
+-  [GitHub - deepseek-aiDeepSeek-R1](https://github.com/deepseek-ai/DeepSeek-R1)
+- [Running Deepseek R1 Locally A Comprehensive Guide](https://thinhdanggroup.github.io/guide-to-run-deepseek-r1-locally/)
+- 
+### Notes
+To install and run DeepSeek R1 locally on your MacBook Pro with the M4 Max chip, follow these detailed step-by-step instructions:
+#### Prerequisites
+Apple Silicon Mac: Ensure your MacBook Pro is running on Apple Silicon (M4 Max in your case).
+macOS Version: You need macOS 11 Big Sur or later.
+Sufficient Disk Space: Choose a model version based on your available disk space:
+1.5B: ~1.1 GB
+7B: ~4.7 GB
+14B: ~9 GB (recommended for M4 Max)
+Larger models like 32B or 70B require significantly more space and resources.
+Internet Connection: Required initially to download the software and models.
+#### Step 1: Install Ollama
+Ollama is the platform that allows you to run DeepSeek R1 models locally.
+Go to the Ollama website and download the macOS installer.
+Install Ollama by following the on-screen instructions.
+Verify installation:
+Open Terminal and type `ollama list`. If no errors appear, Ollama is installed correctly124.
+#### Step 2: Download and Install DeepSeek R1
+Open Terminal on your Mac.
+Choose the model version you want to install based on your hardware capabilities:
+For example, to install the 14B model, type:
+text
+ollama run deepseek-r1:14b
+Replace 14b with 7b or 1.5b if you prefer a smaller model.
+Wait for the download and installation to complete. This process may take some time depending on your internet speed234.
+#### Step 3: Optional - Set Up a Chat Interface
+For a user-friendly interface, you can use Chatbox or Open WebUI.
+Using Chatbox:
+Download Chatbox from its official website.
+Install and open Chatbox.
+Configure it for Ollama:
+Go to Settings → Model Provider → Select Ollama.
+Enter http://127.0.0.1:11434 as the API Host.
+Select "DeepSeek R1" from the model menu348.
+Using Open WebUI (This is preferable):
+If you prefer Open WebUI:
+Install Docker if it's not already installed.
+Run the following command in Terminal to set up Open WebUI:
+text
+docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+Access Open WebUI via your browser at http://localhost:3000 and configure it for DeepSeek R16.
+#### Step 4: Run DeepSeek R1
+Open Ollama or your chosen interface (e.g., Chatbox or Open WebUI).
+Select the installed DeepSeek R1 model (e.g., "DeepSeek R1 14B").
+Enter prompts or tasks to interact with the AI.
+Tips for Optimal Performance
+Monitor system resources when running larger models like 14B or above.
+Close other resource-intensive applications during usage.
+If issues arise, restart Ollama or recheck available disk space and memory124.

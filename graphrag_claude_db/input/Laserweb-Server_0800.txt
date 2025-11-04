@@ -1,0 +1,54 @@
+---
+aliases:
+tags:
+created: 2021-12-27 17:59
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Install Node 6.x
+
+curl -sL <https://deb.nodesource.com/setup_6.x> | sudo -E bash -
+sudo apt-get install -y nodejs
+
+Confirm you have the correct NPM version (should be >=3.10.10)
+
+npm -v
+
+Confirm you have the correct NodeJS version (should be >= 6.9.4)
+
+node -v
+
+Install git
+
+sudo apt-get update
+sudo apt-get install git
+
+Download and install LaserWeb server
+
+cd /home/pi
+git clone <https://github.com/LaserWeb/lw.comm-server.git>
+cd lw.comm-server
+sudo npm install serialport --unsafe-perm --build-from-source
+sudo npm install
+
+Manually start the server
+
+cd /home/pi/lw.comm-server
+node server.js
+
+
+
+*From < <https://github.com/LaserWeb/LaserWeb4/wiki/1.4-Installation-on-RaspberryPi>>*
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

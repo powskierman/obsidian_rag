@@ -1,0 +1,16 @@
+---
+aliases: 
+tags:
+  - Halcyon
+---
+# Halcyon UI Examples
+Date: 2024-02-04
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  [Figma Smart home design concept](https://www.figma.com/proto/aHT5TkokXyCVFvUmDhgZlp/Smart-Home-UI-Kit-(Community)?type=design&node-id=355-240934&t=PMZmQw3hcqVBowqt-1&scaling=min-zoom&page-id=64%3A1107&mode=design)
+-  [Smart home app with Youtube video showing SwiftUI example](https://youtu.be/6RjFC3sLJD0?si=NcgcjxaaGmvF37_y)

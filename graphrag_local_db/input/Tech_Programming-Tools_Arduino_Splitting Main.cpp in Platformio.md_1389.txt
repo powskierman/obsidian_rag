@@ -1,0 +1,62 @@
+# Splitting Main.cpp in Platformio.md
+
+---
+aliases: []
+tags:
+  - platformio
+  - split
+---
+# Splitting Main.cpp in Platformio
+Date: 2023-09-07
+
+### Backlink
+[[PlatformIO MOC]]
+
+### Reference
+-  [Tutorial for creating multi cpp file arduino project](https://community.platformio.org/t/tutorial-for-creating-multi-cpp-file-arduino-project/5830/13)
+- 
+### Notes
+-  Here is a quick example:
+```
+main.cpp:
+
+#include <Arduino.h>
+#include "myhelperfunctions.h"
+
+void setup() {
+    Serial.begin(9600);
+    person me = {
+        .first_name = "Dummy",
+        .last_name = "Man",
+        .age = add(2018, -1800),
+    };
+    Serial.print(me.first_name + " " + me.last_name + " is ");
+    Serial.print(me.age);
+    Serial.println(" years old.");
+}
+
+void loop() {
+    ;
+}
+```
+
+ - Another .cpp-file defines the body of the function: 
+	 - myhelpferfunctions.cpp:
+```
+long add(int a, int b) {
+    return a + b;
+}
+```
+- Add a header-file (.h) with the function prototype and the struct definition. Arduino.h has to be included so you can use the variable type String. To clean up your project directory you can put the header-file in the include-folder while the source-file (.cpp) should be in the src-folder.
+	- myhelperfunctions.h:
+```
+#include <Arduino.h>
+
+typedef struct {
+    String first_name;
+    String last_name;
+    long age;
+} person;
+
+long add(int a, int b);
+```

@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2021-12-29 12:49
+ContentType: Note
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<iframe src="https://help.obsidian.md/How+to/Format+your+notes" allow="fullscreen" style="height:150%;width:120%; aspect-ratio: 4 / 3;"></iframe>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,43 @@
+# Gauchat-SwiftUI for Masterminds 3rd Edition 2022.md
+
+---
+bookId: "39104"
+title: "SwiftUI for Masterminds 3rd Edition 2022: How to take advantage of Swift and SwiftUI to create insanely great apps for iPhones, iPads, and Macs"
+author: J.D Gauchat
+asin: B0BDDPTCS4
+lastAnnotatedDate: 2023-03-01
+highlightsCount: 9
+reference: https://www.amazon.com/dp/B0BDDPTCS4
+kindle_link: kindle://book?action=open&asin=B0BDDPTCS4
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71iMYlOvyfL._SY160.jpg)
+## Highlights
+The advantage of guard over the if else statement is that the variable or constant defined in the condition outlives the statement, and therefore we can read its value outside the else block. — location: [1445](kindle://book?action=open&asin=B0BDDPTCS4&location=1445) ^ref-15452
+
+---
+Creating a function that works with values and variables that do not belong to the function itself can be dangerous; — location: [1498](kindle://book?action=open&asin=B0BDDPTCS4&location=1498) ^ref-42775
+
+---
+inout. This keyword is used to preserve a value after the function finishes processing. When a parameter is marked with inout, any changes performed on the value are stored in the original variable. — location: [1596](kindle://book?action=open&asin=B0BDDPTCS4&location=1596) ^ref-38463
+
+---
+we include an ampersand before the variable's name (&). This tells the system that the variable is going to be modified by the function. — location: [1611](kindle://book?action=open&asin=B0BDDPTCS4&location=1611) ^ref-60601
+
+---
+Every time we call this function, we must include the parameter's name (e.g., doubleValue(number: 50)). These names are called Argument Labels. — location: [1614](kindle://book?action=open&asin=B0BDDPTCS4&location=1614) ^ref-42694
+
+---
+Swift allows us to define our own argument labels in the function's definition; we just need to declare them before the name of the parameter separated by a space. — location: [1618](kindle://book?action=open&asin=B0BDDPTCS4&location=1618) ^ref-27046
+
+---
+to remove an argument label, we can define it with an underscore. — location: [1629](kindle://book?action=open&asin=B0BDDPTCS4&location=1629) ^ref-42639
+
+---
+Although creating two or more functions with the same name is not allowed, we can do it if their parameters are not the same. This is called Overloading and allows us to define multiple functions with the same name to process different types of values. — location: [1653](kindle://book?action=open&asin=B0BDDPTCS4&location=1653) ^ref-46276
+
+---
+(functions are closures with a name), — location: [1813](kindle://book?action=open&asin=B0BDDPTCS4&location=1813) ^ref-36457
+
+---

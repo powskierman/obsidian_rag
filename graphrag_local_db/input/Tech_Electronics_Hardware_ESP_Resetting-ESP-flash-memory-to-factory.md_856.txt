@@ -1,0 +1,38 @@
+# Resetting-ESP-flash-memory-to-factory.md
+
+---
+aliases:
+tags:
+created: 2021-12-30 13:48
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Created: 2019-12-22 11:19:31 -0700
+
+Modified: 2019-12-22 14:31:29 -0700
+
+---
+
+
+*From < <https://rntlab.com/question/how-perform-reset-factory-esp32/>*
+
+Install esptool via powershell:
+
+pip install esptool
+
+Then flash esp with:
+
+esptool.py --chip esp32 --port comX erase_flash
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

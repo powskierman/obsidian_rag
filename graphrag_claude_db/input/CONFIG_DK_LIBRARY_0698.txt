@@ -1,0 +1,17 @@
+---
+aliases: []
+tags: []
+---
+# CONFIG_DK_LIBRARY
+Date: 2023-07-17
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Module Kconfig: Defines CONFIG_DK_LIBRARY
+- Can be found in /opt/nordic/ncs/v2.4.0/nrf/lib/dk_buttons_and_leds
+- SoC Kconfig: Includes module Kconfig file
+- Value can be overridden in prj.conf

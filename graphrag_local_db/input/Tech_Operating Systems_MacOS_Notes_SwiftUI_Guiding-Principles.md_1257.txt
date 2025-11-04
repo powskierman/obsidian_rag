@@ -1,0 +1,31 @@
+# Guiding-Principles.md
+
+---
+aliases: []
+---
+
+2022-06-25
+# Guiding-Principles
+
+### Backlink
+[[../../../../Programming-Tools/SwiftUI/SwiftUI MoC]]
+
+### Reference
+
+### Notes
+- 1.  
+
+2.  **Data access = dependency**:
+
+    a.  Reading data in a view creates a dependency.
+
+    b.  Every view is a function of its data dependencies --- its inputs or state.
+
+```{=html}
+<!-- -->
+```
+1.  **Single source of truth**:
+
+    a.  you should always have a **single** source of truth.
+ 
+-

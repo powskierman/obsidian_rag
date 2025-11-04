@@ -1,0 +1,25 @@
+---
+aliases: 
+tags: 
+created: 2025-08-24 15:14
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- 
+```dataview
+TABLE file.name
+WHERE !file.frontmatter
+
+```
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

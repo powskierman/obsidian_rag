@@ -1,0 +1,171 @@
+---
+aliases: [Multi-hop RAG, Causal Reasoning]
+tags:
+  - AI
+  - RAG
+  - reasoning
+  - use-case
+created: 2025-10-21 15:38
+ContentType: concept
+Backlink: [[GraphRAG & LightRAG MoC]]
+---
+### Main Idea
+
+Multi-hop reasoning enables LightRAG to traverse multiple relationship steps to answer complex queries requiring causal chain discovery - a major limitation of traditional vector-based RAG.
+
+### What is Multi-Hop Reasoning?
+
+**Traditional RAG (Single-Hop):**
+```
+Query → Retrieve similar chunks → Answer
+
+Limitation: Can only find direct mentions
+```
+
+**LightRAG (Multi-Hop):**
+```
+Query → Extract entities → Traverse graph → 
+Follow relationships → Build causal chain → Answer
+
+Capability: Discovers indirect connections
+```
+
+### Examples
+
+**Example 1: Medical Causal Chain**
+
+**Query:** "What CAR-T side effects did I experience and how did they relate to my IgG levels?"
+
+**Single-Hop (Traditional RAG):**
+- Finds: Documents mentioning "CAR-T side effects"
+- Finds: Documents mentioning "IgG levels"
+- Problem: Connection between them not explicit
+
+**Multi-Hop (LightRAG):**
+```
+Yescarta (entity)
+   → hop 1 → causes → B-cell aplasia (relationship)
+   → hop 2 → results in → Low IgG (relationship)
+   → hop 3 → increases risk → Infections (relationship)
+   → hop 4 → requires → IVIG therapy (relationship)
+
+Complete chain discovered automatically!
+```
+
+**Example 2: Cross-Domain Connections**
+
+**Query:** "How can my engineering skills apply to treatment planning?"
+
+**Single-Hop:**
+- Finds: Engineering notes
+- Finds: Treatment notes
+- Problem: No explicit connection stated
+
+**Multi-Hop:**
+```
+Engineering mindset (entity)
+   → hop 1 → includes → systematic analysis (skill)
+   → hop 2 → applies to → problem solving (method)
+   → hop 3 → useful for → treatment decisions (application)
+
+Data analysis (entity)
+   → hop 1 → involves → trend tracking (technique)
+   → hop 2 → monitors → biomarkers (application)
+   → hop 3 → informs → treatment effectiveness (insight)
+
+Unexpected connections discovered!
+```
+
+**Example 3: Research Synthesis**
+
+**Query:** "How does immunotherapy work and what did I learn from my experience?"
+
+**Multi-Hop Chain:**
+```
+Immunotherapy (concept)
+   → hop 1 → includes → CAR-T therapy (type)
+   → hop 2 → example → Yescarta (specific)
+   → hop 3 → targets → CD19 (mechanism)
+   → hop 4 → eliminates → B-cells (effect)
+   → hop 5 → causes → B-cell aplasia (side effect)
+   → hop 6 → requires → IVIG support (management)
+   → hop 7 → results in → disease control (outcome)
+
+Personal experience integrated with conceptual knowledge!
+```
+
+### References
+
+- [[LightRAG Benefits]]
+- [[LightRAG Overview]]
+- [[Knowledge Graph RAG Architecture]]
+- [[Medical Timeline with GraphRAG]]
+
+### Notes
+
+**How Multi-Hop Works:**
+
+1. **Entity Extraction**: Identify key entities in query
+   - "CAR-T", "side effects", "IgG levels"
+
+2. **Graph Traversal**: Follow relationships from entities
+   - Start at "Yescarta"
+   - Follow "causes" edge
+   - Reach "B-cell aplasia"
+   - Follow "results_in" edge
+   - Reach "Low IgG"
+
+3. **Path Construction**: Build complete chain
+   - All intermediate nodes included
+   - Relationships labeled
+   - Context preserved
+
+4. **Synthesis**: LLM generates natural language explanation
+   - Uses graph structure for coherence
+   - Preserves causal logic
+   - Includes supporting details
+
+**Hop Depth Control:**
+```python
+# Configure maximum hops
+result = rag.query(
+    question,
+    mode="hybrid",
+    max_hops=5  # Limit traversal depth
+)
+```
+
+**Performance Considerations:**
+- More hops = slower queries (+1-2s per hop)
+- More hops = more comprehensive answers
+- Sweet spot: 3-5 hops for most queries
+- 7+ hops for complex research synthesis
+
+### Related Notes
+
+- [[Entity-Centric Search]]
+- [[LightRAG Query Modes]]
+- [[Medical Timeline with GraphRAG]]
+- [[LightRAG vs Traditional RAG Comparison]]
+
+### Questions / Ideas for Further Exploration
+
+- What's the optimal maximum hop depth?
+- How to avoid irrelevant branches?
+- Can we rank paths by relevance?
+- How to visualize multi-hop chains?
+- Should hop depth be query-adaptive?
+
+### To-Do
+
+- [ ] Test queries with different hop depths
+- [ ] Document common hop patterns
+- [ ] Create hop depth decision matrix
+- [ ] Build path visualization tool
+- [ ] Measure query performance vs hop count
+- [ ] Identify irrelevant path patterns
+- [ ] Optimize graph structure for common queries
+
+### Smart Connections Insights
+
+Multi-hop reasoning transforms disconnected notes into coherent narratives by automatically discovering causal chains. Essential for medical knowledge where treatment decisions depend on complex cause-effect relationships spanning multiple clinical observations.

@@ -1,0 +1,19 @@
+---
+aliases:
+  - How do I compare 2 git commits?
+tags:
+  - git
+  - compare
+  - beyond-compare
+---
+# How do I compare 2 git commits?
+Date: 2023-10-22
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Compare 2 commits using Beyond Compare
+	- `git difftool commit1 commit2`

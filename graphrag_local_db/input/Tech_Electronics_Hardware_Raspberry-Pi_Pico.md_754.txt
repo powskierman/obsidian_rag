@@ -1,0 +1,56 @@
+# Pico.md
+
+---
+aliases: []
+---
+# Pico
+Date: 2022-07-12
+
+### Tags: 
+
+### Backlink
+[[Tech/Electronics/Hardware/Raspberry-Pi/Raspberry Pi MOC]]
+
+### Reference
+- [Pico Pinout](pico-pinout.svg)
+- [Pico W Pinout](PicoW-A4-Pinout.pdf)
+- [MicroPython - Pico W](https://micropython.org/download/rp2-pico-w/)
+- [MicroPython RPi Pico W Web Server](https://www.petecodes.co.uk/creating-a-basic-raspberry-pi-pico-web-server-using-micropython/)
+- [[connecting-to-the-internet-with-pico-w.pdf]]
+- 
+ 
+### Notes
+- Raspberry Pi Pico is a microcontroller board with flexible digital interfaces. Key features include:
+	- RP2040 microcontroller chip 
+	- Dual-core Arm Cortex M0+ processor, flexible clock running up to 133 MHz
+	- 264kB of SRAM, and 2MB of on-board flash memory
+	- USB 1.1 with device and host support
+	- Low-power sleep and dormant modes
+	- Drag-and-drop programming using mass storage over USB
+	- 26 × multi-function GPIO pins
+	- 2 × SPI, 2 × I2C, 2 × UART, 3 × 12-bit ADC, 16 × controllable PWM channels
+	- Accurate clock and timer on-chip
+	- Temperature sensor
+	- Accelerated floating-point libraries on-chip
+	- 8 × Programmable I/O (PIO) state machines for custom peripheral support
+-  boards have a three pin Serial Wire Debug (SWD) header. The Pico H and W have this broken out into a small, keyed, [3-pin connector](https://datasheets.raspberrypi.com/debug/debug-connector-specification.pdf)
+- Raspberry Pi Pico W adds on-board single-band 2.4GHz wireless interface (802.11n) that has the following features:
+	- Wireless (802.11n), single-band (2.4 GHz)
+	- WPA3
+	- Soft access point supporting up to four clients
+	- Some of the wireless interface pins are shared. 
+		- The CLK is shared with VSYS monitor, so only when there isn’t an SPI transaction in progress can VSYS be read via the ADC. 
+		- The Infineon CYW43439 DIN/DOUT and IRQ all share one pin on the RP2040. Only when an SPI transaction isn’t in progress is it suitable to check for IRQs.
+- Programming:
+	- [Program your Raspberry Pi Pico with Visual Studio Code and PlatformIO](https://tutoduino.fr/en/pico-platformio/)
+	- Pico W has different firmware from Pico.  It can be found at: [MicroPython for Pico W](https://micropython.org/download/rp2-pico-w/)
+	- Blink sketch:
+		import machine
+		from machine import Pin, Timer
+
+		led = machine.Pin('LED', machine.Pin.OUT)
+		tim = Timer()
+		def tick(timer):
+				 led.toggle()
+    
+		tim.init(freq=1.5, mode=Timer.PERIODIC, callback=tick)

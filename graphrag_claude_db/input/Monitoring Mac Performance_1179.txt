@@ -1,0 +1,30 @@
+---
+
+---
+aliases: []
+tags: []
+
+created: 2025-02-16 10:30
+---
+### Main Idea
+- Determine the performance hit of GPU intensive [[MacOS]] apps
+- 
+### References
+- 
+### Notes
+- 
+- [TG Pro - Temperature Monitoring & Advanced Fan Control](https://www.tunabellysoftware.com/tgpro/#)
+	- License Key:
+```
+		4E5A7A27-1346795E-7502ABEF-8CE6C5DD-ACFF04D8
+```
+- [Asitop - Performance monitoring tool](https://github.com/tlkh/asitop)
+- In Activity monitor, go to Window and open GPU History
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

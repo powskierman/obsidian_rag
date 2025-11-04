@@ -1,0 +1,15 @@
+---
+aliases: []
+tags: []
+---
+# Home Assistant 403
+Date: 2023-03-17
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  To unblock Home Assistant, just open the file ip_bans.yaml and remove all the items there. 
+- Once ip_bans.yaml file is empty, restart HA going to Configuration > Settings. Then click to check configuration and if everything is fine click to restart.

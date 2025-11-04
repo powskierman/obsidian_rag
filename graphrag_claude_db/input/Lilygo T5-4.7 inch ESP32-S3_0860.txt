@@ -1,0 +1,14 @@
+---
+aliases: []
+tags: []
+---
+# Lilygo T5-4.7 inch ESP32-S3
+Date: 2024-03-22
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  [Lilygo T5-4.7 inch ESP32-S3 (aka plusV2.3) e-paper module · esphome](https://github.com/esphome/feature-requests/issues/1960)

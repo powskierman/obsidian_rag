@@ -1,0 +1,51 @@
+# Monitor an Arduino pin with an interrupt.md
+
+---
+aliases: []
+tags: 
+ pins
+ monitor
+---
+# Monitor an Arduino pin with an interrupt
+Date: 2023-03-29
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  To monitor the state of an Arduino pin and run a function when it changes state, you can use the attachInterrupt() function. 
+- This function allows you to attach an interrupt to a specific pin that will trigger a function whenever the pin changes state.
+
+Here is an example code that demonstrates how to use attachInterrupt() to monitor the state of a pin and run a function when it changes state:
+
+```
+const int buttonPin = 2; // the pin that the button is connected to
+volatile int buttonState = LOW; // the current state of the button
+volatile int lastButtonState = LOW; // the previous state of the button
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP); // set the button pin as input with internal pull-up resistor
+  attachInterrupt(digitalPinToInterrupt(buttonPin), buttonInterrupt, CHANGE); // attach the interrupt to the button pin
+}
+
+void loop() {
+  // do something in the loop if needed
+}
+
+void buttonInterrupt() {
+  buttonState = digitalRead(buttonPin); // read the new state of the button
+  if (buttonState != lastButtonState) { // if the state of the button has changed
+    lastButtonState = buttonState; // save the new state as the last state
+    if (buttonState == HIGH) { // if the button was pressed
+      // do something here, e.g. turn on an LED
+    } else { // if the button was released
+      // do something here, e.g. turn off an LED
+    }
+  }
+}
+
+```
+
+In this example code, the attachInterrupt() function is used to attach an interrupt to the button pin (buttonPin) that triggers the buttonInterrupt() function whenever the state of the pin changes. The buttonInterrupt() function reads the new state of the button (buttonState) and compares it to the previous state (lastButtonState). If the state of the button has changed, it saves the new state as the last state and runs the appropriate code depending on whether the button was pressed or released.

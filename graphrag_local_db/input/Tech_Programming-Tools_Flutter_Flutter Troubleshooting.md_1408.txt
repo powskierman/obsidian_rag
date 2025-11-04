@@ -1,0 +1,43 @@
+# Flutter Troubleshooting.md
+
+---
+aliases: []
+---
+# Flutter Troubleshooting
+Date: 2022-08-02
+
+### Tags: 
+
+### Backlink
+[[Flutter MoC]]
+
+### Reference
+- [mqtt_client: 9.7.2](https://pub.dev/packages/mqtt_client/example)
+- 
+### Notes
+- [Repair Flutter with flutter recreate](https://medium.com/@paulsean5/flutter-re-create-351eecf44e46)  
+- [OSX - Android sdkmanager tool not found · Issue #22279 · flutter/flutter](https://github.com/flutter/flutter/issues/22279) 
+- How to solve dart:ui error when running flutter app in VSCode
+	- Run in Debug mode by pressing F5
+	- 
+- [[Flutter MACOS Permission Error]]
+- [flutter - Changing the project name](https://stackoverflow.com/questions/46694153/changing-the-project-name)
+- [flutter - It appears that your application still contains the default signing identifier](https://stackoverflow.com/questions/56185013/it-appears-that-your-application-still-contains-the-default-signing-identifier)
+- [flutter ios - BUILD TARGET Runner OF PROJECT Runner WITH CONFIGURATION Debug === The path does not exist Command /bin/sh failed with exit code 255](https://stackoverflow.com/questions/61260883/build-target-runner-of-project-runner-with-configuration-debug-the-path-does)
+- [ios - MacOS x Flutter - "Build succeeded but the expected app not found"](https://stackoverflow.com/questions/63438860/macos-x-flutter-build-succeeded-but-the-expected-app-not-found)
+- [Error "Invalid Provisioning Profile Signature"](https://stackoverflow.com/questions/71849897/error-invalid-provisioning-profile-signature-while-trying-to-distribute-a-flut)
+- [Flutter: Could not find the built application bundle at build/ios/iphonesimulator/Runner.app](https://stackoverflow.com/questions/57980900/flutter-could-not-find-the-built-application-bundle-at-build-ios-iphonesimulato)
+- [How to Fix Flutter Warning: Your Flutter application is created using an older version](https://stackoverflow.com/questions/64425132/how-to-fix-flutter-warning-your-flutter-application-is-created-using-an-older-v)
+- [flutter - analysis_options.yaml the included file not found](https://stackoverflow.com/questions/62630553/analysis-options-yaml-the-included-file-not-found)
+- [ios - Physical device (iPad) not detected in vs code for flutter but detected and working proper for debugging in Xcode](https://stackoverflow.com/questions/58619427/physical-device-ipad-not-detected-in-vs-code-for-flutter-but-detected-and-work)
+- [(3157) Flutter Tutorial - How To Call SetState In Pop-up Alert Dialog  - YouTube](https://www.youtube.com/watch?v=THMcgdtUtFQ)
+- [Upgrade old Flutter program](https://stackoverflow.com/questions/64797607/how-do-i-upgrade-an-existing-flutter-app)
+- Solve android and Gradle issues:
+- Replace Android folder with android folder from virgin flutter app or:
+	1. Take a backup of both `build.gradle` and `settings.gradle` 
+	2. delete both of them  
+	3. run the command `gradle init`  
+	4. Restore both files
+- [How to fix argument type 'int?' can't be assigned to the parameter type 'num'](https://stackoverflow.com/questions/70144149/how-to-fix-argument-type-int-cant-be-assigned-to-the-parameter-type-num)
+- [Passing data to StatefulWidget and accessing it in it's state in Flutter](https://stackoverflow.com/questions/50287995/passing-data-to-statefulwidget-and-accessing-it-in-its-state-in-flutter)
+- [The argument type 'Color?' can't be assigned to the parameter type 'MaterialColor?](https://stackoverflow.com/questions/67930143/the-argument-type-color-cant-be-assigned-to-the-parameter-type-materialcolo)

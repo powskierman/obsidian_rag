@@ -1,0 +1,103 @@
+---
+aliases: 
+tags:
+  - swiftui
+  - watch
+  - drag
+---
+# Drag Gesture
+Date: 2024-02-10
+
+### Backlink
+[[Swift MOC]]
+
+### Reference
+-  
+### Notes
+-   Example from Halcyon 2.0 Watch in Swiftui Projects   
+```swift TI:"DragGesture" FOLD
+
+.gesture(
+      DragGesture()
+          .onChanged { value in
+              let x = min(max(value.location.x, 0), outerDialSize)
+              let y = min(max(value.location.y, 0), outerDialSize)
+              
+              let endPoint = CGPoint(x: x, y: y)
+              let centerPoint = CGPoint(x: outerDialSize / 2, y: outerDialSize / 2)
+              
+              let angle = calculateAngle(centerPoint: centerPoint, endPoint: endPoint)
+              
+              if angle < 90 || angle > 270 { return }  // Minimum and maximum angle of temperature ring
+              
+              degrees = angle - angle.remainder(dividingBy: 9)
+              // Update currentTemperature based on the new degrees
+              let newTemperature = min(max(degrees / 360 * 40, minTemperature), maxTemperature)
+              currentTemperature = newTemperature
+          }
+  )
+```
+In SwiftUI, `DragGesture` is a gesture recognizer that tracks the movement of a drag (a finger moving on the screen) across a view. It's part of SwiftUI's gesture system, which allows you to add interactive components to your UI that can respond to various touch events. Using `DragGesture`, you can detect when a user starts dragging, the movement during the drag, and when the drag ends. This makes it incredibly useful for creating custom sliders, reordering lists, drawing apps, and more.
+
+### Basic Usage
+
+To use a `DragGesture`, you attach it to a view using the `.gesture()` modifier. Here's a simple example:
+
+```swift TI:"DragGesture Example" FOLD
+import SwiftUI
+
+struct DragGestureExample: View {
+    // State to track the drag offset
+    @State private var dragOffset = CGSize.zero
+
+    var body: some View {
+        Circle()
+            .fill(Color.blue)
+            .frame(width: 100, height: 100, alignment: .center)
+            .offset(dragOffset) // Apply the drag offset to the circle
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        // Update the dragOffset when the gesture changes
+                        self.dragOffset = value.translation
+                    }
+                    .onEnded { _ in
+                        // Reset the dragOffset when the gesture ends
+                        self.dragOffset = .zero
+                    }
+            )
+    }
+}
+```
+
+### Understanding DragGesture's Value
+
+The value provided by `DragGesture` in the `onChanged` and `onEnded` closures is of type `DragGesture.Value`, which contains several useful properties:
+
+- `startLocation`: The initial location of the drag gesture in the coordinate space of the gesture's view.
+- `location`: The current location of the drag gesture.
+- `translation`: The distance the drag gesture has moved from the starting point, represented as a `CGSize`. This is often used to move a view or track the drag distance.
+- `time`: The time when the drag was detected.
+
+### Advanced Usage
+
+You can configure a `DragGesture` to require a certain minimum distance before it begins to be recognized, which can be useful to differentiate it from a tap gesture, for example:
+
+swiftCopy code
+
+`DragGesture(minimumDistance: 10, coordinateSpace: .local)`
+
+- `minimumDistance`: The minimum distance in points that the drag must move before the gesture changes from possible to began. The default value is 10.
+- `coordinateSpace`: Determines the coordinate space of the drag's location. `.local` refers to the view's coordinate space, `.global` to the screen's coordinate space, and `.named` to a custom coordinate space that you define.
+
+### Combining Gestures
+
+SwiftUI also allows you to combine gestures, enabling more complex interaction patterns. For instance, you could combine a `DragGesture` with a `LongPressGesture` to create a gesture that only activates after a long press followed by a drag:
+
+swiftCopy code
+
+`LongPressGesture(minimumDuration: 0.5)     .sequenced(before: DragGesture())     .onEnded { outcome in         // Handle the combined gesture     }`
+
+### Conclusion
+
+`DragGesture` in SwiftUI provides a powerful way to add interactive drag behaviors to your views, making it possible to create a wide range of custom UI components and interactions. By listening to the changes and end of a drag gesture, you can update your UI accordingly, creating dynamic and responsive apps.

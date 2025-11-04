@@ -1,0 +1,17 @@
+---
+bookId: "24748"
+title: "Upheaval: Turning Points for Nations in Crisis"
+author: Jared Diamond
+asin: B07H2997W4
+lastAnnotatedDate: 2020-02-06
+highlightsCount: 1
+reference: https://www.amazon.com/dp/B07H2997W4
+kindle_link: kindle://book?action=open&asin=B07H2997W4
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/91AN6qngToL._SY160.jpg)
+## Highlights
+(The reparations thereby exemplify the etymology of the Chinese word “wei-ji,” meaning “crisis,” which consists of the two characters “wei,” meaning “danger,” and “ji,” meaning “opportunity.”) — location: [1148](kindle://book?action=open&asin=B07H2997W4&location=1148) ^ref-34670
+
+---

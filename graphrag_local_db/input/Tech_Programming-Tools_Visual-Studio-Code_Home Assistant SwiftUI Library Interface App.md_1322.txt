@@ -1,0 +1,32 @@
+# Home Assistant SwiftUI Library Interface App.md
+
+---
+aliases: []
+tags: []
+---
+# Home Assistant SwiftUI Library Interface App
+Date: 2023-09-29
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  ```mermaid
+graph TD
+    A[ContentView] -->|Press 'Connect'| B(WebSocketManager connect)
+    A -->|Press 'Subscribe to Events'| C(WebSocketManager subscribeToEvents)
+    B --> D[HomeAssistantWebSocket connect]
+    C --> E[HomeAssistantWebSocket subscribeToEvents]
+    D --> F{Connected?}
+    F -->|Yes| G[HomeAssistantWebSocket onConnected]
+    F -->|No| H[HomeAssistantWebSocket onDisconnected]
+    G --> I[ContentView shows Connected state]
+    H --> J[ContentView shows Disconnected state]
+    E --> K{Subscribed?}
+    K -->|Yes| L[Receive Events]
+    K -->|No| M[Fail to Subscribe]
+    L --> N[Display events in ContentView]
+
+```

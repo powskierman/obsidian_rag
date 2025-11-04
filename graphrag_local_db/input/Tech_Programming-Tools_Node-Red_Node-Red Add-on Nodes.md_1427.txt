@@ -1,0 +1,18 @@
+# Node-Red Add-on Nodes.md
+
+---
+aliases: 
+tags:
+  - node-red
+---
+# Node-Red Add-on Nodes
+Date: 2024-09-16
+
+### Backlink
+[[Node-Red MOC]]
+
+### Reference
+-  
+### Notes
+- [Use Alexa with Node-Red for simple devices like Switches - Emulates Hue](https://flows.nodered.org/node/node-red-contrib-alexa-local)
+- [A Node-RED node to control things via Amazon Alexa - More flexible, more complex](https://github.com/hardillb/node-red-contrib-alexa-home-skill?tab=readme-ov-file)

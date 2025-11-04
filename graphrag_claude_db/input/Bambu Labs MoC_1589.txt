@@ -1,0 +1,21 @@
+---
+aliases: 
+tags:
+  - bambu
+  - P1S
+---
+# Bambu Labs MoC
+Date: 2024-10-21
+
+### Backlink
+[[3d Printing MOC]]
+
+### Reference
+-  [P1S Tech Specs](obsidian://open?vault=Michel&file=Tech%2F3D-Printing%2Fmedia%2Fbambu-lab-P1S-tech-specs.pdf)
+- [P1S Mods - video](https://youtu.be/It4dn7qPfs8?si=n5i0luunc2mP7u67)
+### Notes
+-  [[Bambu AMS LED Status]]
+- **Bambu P1S Canmore**
+	IP: 192.168.2.215
+	Serial#: 01P09A452201796
+	Access code: 19553668

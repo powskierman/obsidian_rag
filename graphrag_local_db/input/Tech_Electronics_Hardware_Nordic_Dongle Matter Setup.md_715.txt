@@ -1,0 +1,85 @@
+# Dongle Matter Setup.md
+
+---
+aliases: []
+tags: [
+ Matter
+ Dongle
+ zigbee
+]
+---
+# Dongle Matter Setup
+Date: 2023-06-04
+
+### Backlink
+[[Matter NRF light bulb example]]
+[Zigbee lightbulb dongle example](https://github.com/martelmy/NCS_examples/tree/main/zigbee/light_bulb_dongle)
+
+### Reference
+-  [Using CLI in nRF Connect examples — Matter documentation](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html)
+- [[Matter CLI examples]]
+- [nRF52840 dongle lighting-app build instructions](https://github.com/project-chip/connectedhomeip/issues/25310)
+### Notes
+- As usual for Matter only a specific build and sequence will work: 
+- I was able to successfully build and flash the lighting app on the nRF52840 dongle using the following alternative steps. However, this required me to use specific versions of the required tooling (such as west and nrf) and extra flag:
+
+1.  Download [nRF Connect for Desktop](https://www.nordicsemi.com/Products/Development-tools/nrf-connect-for-desktop/download#infotabs) and run.
+2.  Install and open Toolchain Manager application.
+3.  Install nRF Connect SDK.
+4.  Click the down arrow next to the version you installed and select Open Terminal or Open Bash.
+5.  Run:
+
+```
+python3 -m pip install -U west==0.13.1
+   
+cd ~
+git clone https://github.com/project-chip/connectedhomeip.git --depth=1
+cd connectedhomeip
+git fetch origin v1.0-branch
+git checkout a17c005209fbde737edb97b0f51ea63472c166aa
+git submodule update --init
+
+~/connectedhomeip/scripts/setup/nrfconnect/update_ncs.py --update
+source ~/connectedhomeip/scripts/activate.sh
+
+cd examples/lighting-app/nrfconnect/
+west build -b nrf52840dongle_nrf52840 -- -DCONF_FILE=./prj_no_dfu.conf
+```
+- Challenges:
+	- I encountered the dreaded openssl error:
+		- Install openssl and pkg-config:
+		- brew install openssl pkg-config
+		- Expose CHIP package to pkg-config:
+		- Use x86 terminal:
+			- cd /usr/local/lib/pkgconfig
+			- ln -s ../../Cellar/openssl@1.1/1.1.3s/lib/pkgconfig/* .
+	- I also got this error:
+	```
+		In member function 'constexpr size_t chip::Span<T>::size() const [with T = const char]', inlined from 'virtual CHIP_ERROR chip::Controller::AutoCommissioner::SetCommissioningParameters(const chip::Controller::CommissioningParameters&)' at ../../../../../../src/controller/AutoCommissioner.cpp:111:13:
+	```
+	 - As a workaround, change `auto & code` to `auto code` in the `AutoCommissioner.cpp` file
+	- it works when checkout the code at hash [a17c005](https://github.com/project-chip/connectedhomeip/commit/a17c005209fbde737edb97b0f51ea63472c166aa) but not from master.
+	- No console on dongle
+		- Use DK as segger J-link.  This provides a console to the dongle.
+- The output of `.hex` file could be found in this path: ```
+	- ~/connectedhomeip/examples/lighting-app/nrfconnect/build/zephyr/zephyr.hex`
+
+- This should work, but doesn't.  For future reference:
+	- setup a new project using the supplied example with NRF Connect in VS Code
+		- Choose nrf52840Donglenrf52840 as device
+		- choose prj_no_dfu.conf for configuration
+		- Program using nrf Connect Programmer
+			- Alternatively:
+				- Do a pristine build
+				- [[Use nrf52840 DK as J-link Programmer]]
+				- Flash with vscode 
+- Alternatively, from cli:
+	- cd matter/connectedhomeip
+	- . ./scripts/bootstrap.sh
+	- . ./scripts/activate.sh
+	- cd to project directory
+		- ex: cd examples/
+```
+west build -b nrf52840dongle_nrf52840 --build-dir build2 -- -DCONF_FILE=prj_no_dfu.conf
+```
+- [[Thread Endpoint Setup]]

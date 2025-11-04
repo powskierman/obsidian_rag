@@ -1,0 +1,60 @@
+---
+aliases: 
+tags:
+  - lymphoma
+  - diagnosis
+---
+# GCB DLBCL
+Date: 2024-12-26
+
+### Backlink
+[[Lymphoma Treatment]]
+
+	### Reference
+-  
+### Notes
+-  From FISH report: 
+	- n[166/200]
+- The molecular subtype of diffuse large B-cell lymphoma (DLBCL) described in the given query is likely GCB (germinal center B-cell-like). This conclusion is based on the following key points:
+	1.	IGH-[[BCL2]] and IGH-BCL6 Rearrangements:
+	•	The presence of IGH-[[BCL2]] translocations is strongly associated with the GCB subtype, as it is a hallmark of this group in DLBCL. Studies have shown that BCL2 rearrangements are predominantly found in GCB DLBCL cases.
+	•	Similarly, BCL6 rearrangements, while more commonly associated with GCB DLBCL, can also occur in ABC subtypes. However, ==the combination of IGH-BCL6 and IGH-[[BCL2]] rearrangements strongly favors the GCB classification.==
+	2.	[[MYC]] Rearrangements:
+	•	The query mentions ==[[MYC]] rearrangement (5’[[MYC]] sep 3’MYC). MYC translocations are not exclusive to either subtype but are frequently observed in GCB DLBCL, especially in the context of “double-hit lymphomas” (DHL) involving [[MYC]] and [[BCL2]] or BCL6.==
+	•	Concurrent [[MYC]]/[[BCL2]] or MYC/BCL6 rearrangements are typically associated with GCB DLBCL.
+	3.	IGH Translocations:
+	•	The involvement of IGH (immunoglobulin heavy chain) in translocations with [[BCL2]] and BCL6 further supports a GCB phenotype, as these genetic events are characteristic of ==germinal center-derived lymphomas.==
+	4.	Prognostic and Molecular Features:
+	•	==The molecular profile described aligns with features of GCB DLBCL, which originates from germinal center B cells== and is characterized by specific genetic alterations, including those mentioned above.
+	•	While ABC DLBCL is associated with NF-κB pathway activation and plasma cell differentiation markers like IRF4/MUM1, these features are not highlighted in the query, making ABC less likely.
+In summary, the described case exhibits genetic hallmarks most consistent with the GCB subtype of DLBCL.
+
+- What is GCB DLBCL?
+- Germinal Center B-cell-like (GCB) Diffuse Large B-cell Lymphoma (DLBCL) is one of the two main molecular subtypes of DLBCL, classified based on gene expression profiling. It is biologically distinct from the activated B-cell-like (ABC) subtype and has unique genetic, clinical, and pathological features.
+- Key Characteristics of GCB DLBCL
+	1.	Cell of Origin:
+	•	GCB DLBCL originates from B cells in the [[germinal center]] (GC) of lymphoid follicles, specifically ==from the dark zone of the GC where somatic hypermutation occurs.== This is a critical process for generating antibody diversity.
+	2.	Gene Expression Profile:
+	•	GCB DLBCL exhibits a gene expression signature that reflects its origin from germinal center B cells. This includes high expression of genes like BCL6, which is essential for maintaining the GC phenotype.
+	3.	Genetic Features:
+	•	GCB DLBCL is commonly associated with genetic abnormalities such as:
+	•	[[BCL2]] translocations, particularly t(14;18), which are hallmark features.
+	•	Mutations in EZH2, EP300, and KMT2D, which are involved in chromatin modification and epigenetic regulation.
+	•	Less frequent mutations in genes involved in immune evasion and signaling pathways, such as CD70 and STAT3.
+	•	These genetic alterations contribute to tumor survival, proliferation, and immune evasion.
+	4.	Clinical Behavior:
+	•	==GCB DLBCL generally has a better prognosis than ABC DLBCL when treated with standard therapy ([[R-CHOP]]). However, certain subgroups, such as those with “double-hit” or “double-expressor” lymphoma involving [[MYC]] and [[BCL2]] or BCL6 rearrangements, have a worse prognosis.==
+	5.	Pathogenesis:
+	•	The germinal center environment plays a crucial role in the development of GCB DLBCL. During normal GC reactions, B cells undergo somatic hypermutation and class-switch recombination to optimize antibody affinity. Dysregulation of these processes can lead to oncogenic mutations and malignant transformation.
+	6.	Subtypes within GCB DLBCL:
+	•	Recent genomic studies have identified genetic subtypes within GCB DLBCL, such as the EZB subtype (characterized by EZH2 mutations and [[BCL2]] translocations) and others with distinct molecular features and clinical outcomes.
+Clinical Implications
+Understanding the molecular characteristics of GCB DLBCL helps guide treatment strategies:
+	•	==Standard therapy for most patients is [[R-CHOP]].
+	•	High-risk subgroups (e.g., double-hit lymphomas) may require more intensive regimens or novel targeted therapies such as [[Lymphoma/autologous stem cell transplant]] or [[CAR-T Cell Therapy]].==
+	•	Ongoing research aims to refine treatment approaches based on genetic and molecular profiling.
+In summary, GCB DLBCL is a biologically distinct subtype of DLBCL derived from germinal center B cells, characterized by specific genetic alterations and generally favorable outcomes with standard therapy compared to other subtypes.
+
+Double-hit lymphomas, characterized by [[MYC]] and [[BCL2]]/BCL6 rearrangements, pose a significant challenge in treatment. While [[R-CHOP]] remains a standard, novel approaches like immunochemotherapy, targeted therapies, and stem cell transplantation are being explored.  Recent studies highlight the importance of early CNS prophylaxis and the potential of CAR T-cell therapy in improving outcomes for these patients.
+
+- [[GCB DLBCL treatment alternatives]]

@@ -13,6 +13,7 @@ import os
 # Service URLs (configurable via environment)
 EMBEDDING_SERVICE = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
 LIGHTRAG_SERVICE = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8001")
+GRAPHRAG_SERVICE = os.getenv("GRAPHRAG_SERVICE_URL", "http://localhost:8003")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
 
 st.set_page_config(
@@ -38,20 +39,73 @@ with st.sidebar:
     st.subheader("🔍 Search Mode")
     search_mode = st.radio(
         "Choose search method:",
-        ["vector", "graph-naive", "graph-local", "graph-global", "graph-hybrid"],
+        ["vector", "graph-naive", "graph-local", "graph-global", "graph-hybrid", "graphrag-local", "graphrag-global"],
         index=0,
         help="""
         - **vector**: Fast semantic search (ChromaDB)
-        - **graph-naive**: Simple graph traversal
-        - **graph-local**: Local entity exploration
-        - **graph-global**: Global knowledge synthesis
-        - **graph-hybrid**: Best of both worlds
+        - **graph-naive**: Simple graph traversal (LightRAG)
+        - **graph-local**: Local entity exploration (LightRAG)
+        - **graph-global**: Global knowledge synthesis (LightRAG)
+        - **graph-hybrid**: Best of both worlds (LightRAG)
+        - **graphrag-local**: Entity-focused search (GraphRAG-Local-Ollama)
+        - **graphrag-global**: Community-based search (GraphRAG-Local-Ollama)
         """
     )
     st.session_state.search_mode = search_mode
-    
+
     st.markdown("---")
-    
+
+    # Model Selection
+    st.subheader("🤖 Model Selection")
+
+    # Get available models from Ollama
+    @st.cache_data(ttl=60)  # Cache for 1 minute
+    def get_available_models():
+        try:
+            response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=5)
+            if response.status_code == 200:
+                models = response.json().get('models', [])
+                return [model['name'] for model in models]
+        except:
+            pass
+        return ['llama3.1:8b', 'qwen2.5-coder:14b', 'nomic-embed-text']  # fallback
+
+    available_models = get_available_models()
+
+    # Filter models (exclude embedding models for LLM selection)
+    llm_models = [m for m in available_models if 'embed' not in m.lower()]
+    embed_models = [m for m in available_models if 'embed' in m.lower()]
+
+    # LLM Model Selection
+    default_llm = 'llama3.1:8b' if 'llama3.1:8b' in llm_models else llm_models[0] if llm_models else 'llama3.1:8b'
+    selected_llm = st.selectbox(
+        "💬 Language Model:",
+        llm_models,
+        index=llm_models.index(default_llm) if default_llm in llm_models else 0,
+        help="Choose the LLM for text generation and reasoning"
+    )
+
+    # Embedding Model Selection
+    default_embed = 'nomic-embed-text:latest' if 'nomic-embed-text:latest' in embed_models else embed_models[0] if embed_models else 'nomic-embed-text'
+    selected_embed = st.selectbox(
+        "🔤 Embedding Model:",
+        embed_models + ['nomic-embed-text'],  # Add fallback
+        index=embed_models.index(default_embed) if default_embed in embed_models else 0,
+        help="Choose the embedding model for vector search"
+    )
+
+    # Store in session state
+    st.session_state.selected_llm = selected_llm
+    st.session_state.selected_embed = selected_embed
+
+    # Model info
+    with st.expander("ℹ️ Model Info"):
+        st.text(f"LLM: {selected_llm}")
+        st.text(f"Embeddings: {selected_embed}")
+        st.text(f"Available: {len(available_models)} models")
+
+    st.markdown("---")
+
     # Service Status
     st.subheader("📊 Services")
     
@@ -69,7 +123,7 @@ with st.sidebar:
             st.success("✅ Knowledge Graph: Active")
         else:
             st.warning("⚠️ Graph not indexed")
-            if st.button("🔄 Index Vault for Graph"):
+            if st.button("🔄 Index Vault for Graph", key="lightrag_index"):
                 with st.spinner("Building knowledge graph..."):
                     response = requests.post(f'{LIGHTRAG_SERVICE}/index-vault', json={})
                     if response.status_code == 200:
@@ -77,6 +131,23 @@ with st.sidebar:
                         st.rerun()
     except:
         st.error("⚠️ Graph service offline")
+
+    # Check GraphRAG service
+    try:
+        graphrag_stats = requests.get(f'{GRAPHRAG_SERVICE}/stats', timeout=2).json()
+        artifacts = graphrag_stats.get('indexed_artifacts', 0)
+        if artifacts > 0:
+            st.success(f"✅ GraphRAG-Local: {artifacts} artifacts")
+        else:
+            st.warning("⚠️ GraphRAG not indexed")
+            if st.button("🔄 Index Vault for GraphRAG", key="graphrag_index"):
+                with st.spinner("Building GraphRAG knowledge graph..."):
+                    response = requests.post(f'{GRAPHRAG_SERVICE}/build-index', json={})
+                    if response.status_code == 200:
+                        st.success("✅ GraphRAG indexed!")
+                        st.rerun()
+    except:
+        st.error("⚠️ GraphRAG service offline")
     
     # Check Ollama
     try:
@@ -91,14 +162,8 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Model selection
+    # Settings
     st.subheader("⚙️ Settings")
-    
-    model_option = st.selectbox(
-        "Model",
-        ["qwen2.5-coder:14b", "deepseek-r1:14b", "llama3.2:3b"],
-        help="LLM for generating responses"
-    )
     
     num_sources = st.slider("Sources", 1, 20, 5)
     temperature = st.slider("Temperature", 0.0, 1.0, 0.3, 0.1)
@@ -113,7 +178,7 @@ with st.sidebar:
             if st.session_state.messages:
                 export_data = {
                     "timestamp": datetime.now().isoformat(),
-                    "model": model_option,
+                    "model": st.session_state.get('selected_llm', 'llama3.1:8b'),
                     "search_mode": search_mode,
                     "messages": st.session_state.messages
                 }
@@ -138,7 +203,9 @@ mode_emoji = {
     'graph-naive': '🌐',
     'graph-local': '📍',
     'graph-global': '🌍',
-    'graph-hybrid': '⚡'
+    'graph-hybrid': '⚡',
+    'graphrag-local': '🧠',
+    'graphrag-global': '🌌'
 }
 st.caption(f"{mode_emoji.get(search_mode, '🔍')} Using: **{search_mode}** search")
 
@@ -216,6 +283,39 @@ if prompt := st.chat_input("Ask about your notes..."):
                     
                     context_text = "\n\n---\n\n".join(context_parts)
             
+            elif search_mode.startswith('graphrag-'):
+                # Use GraphRAG-Local-Ollama search
+                graphrag_mode = 'local' if search_mode == 'graphrag-local' else 'global'
+                progress_text = f"🧠 Querying GraphRAG ({graphrag_mode} mode)..."
+                if graphrag_mode == 'global':
+                    progress_text += " This may take several minutes for community-based analysis."
+
+                with st.spinner(progress_text):
+                    try:
+                        graphrag_response = requests.post(
+                            f'{GRAPHRAG_SERVICE}/query',
+                            json={
+                                "query": prompt,
+                                "mode": graphrag_mode
+                            },
+                            timeout=300  # Increased timeout for GraphRAG processing
+                        )
+
+                        if graphrag_response.status_code != 200:
+                            st.error("GraphRAG query failed")
+                            st.stop()
+
+                        graphrag_result = graphrag_response.json()
+                        context_text = graphrag_result.get('result', '')
+                        sources_list = [{"filename": "GraphRAG Knowledge Graph", "filepath": "GraphRAG-Local-Ollama", "relevance": 100}]
+
+                    except requests.exceptions.Timeout:
+                        st.error("⏱️ GraphRAG query timed out. Try using 'graphrag-local' mode for faster results, or simplify your query.")
+                        st.stop()
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"GraphRAG query failed: {str(e)}")
+                        st.stop()
+
             else:
                 # Use LightRAG graph search
                 graph_mode = search_mode.replace('graph-', '')
@@ -254,7 +354,8 @@ if prompt := st.chat_input("Ask about your notes..."):
                 st.stop()
             
             # Step 2: Generate response with LLM
-            with st.spinner(f"💭 Thinking with {model_option}..."):
+            selected_model = st.session_state.get('selected_llm', 'llama3.1:8b')
+            with st.spinner(f"💭 Thinking with {selected_model}..."):
                 system_prompt = f"""You are an AI assistant helping Michel understand his Obsidian knowledge base.
 
 Context from notes:
@@ -274,7 +375,7 @@ Answer:"""
                 ollama_response = requests.post(
                     f'{OLLAMA_HOST}/api/generate',
                     json={
-                        'model': model_option,
+                        'model': selected_model,
                         'prompt': system_prompt,
                         'stream': False,
                         'options': {

@@ -1,0 +1,17 @@
+# nrfutil MoC.md
+
+---
+aliases: []
+tags: []
+---
+# nrfutil MoC
+Date: 2023-06-07
+
+### Backlink
+[[]]
+
+### Reference
+-  [nRF Util becomes a unified command line utility](https://devzone.nordicsemi.com/nordic/nordic-blog/b/blog/posts/nrf-util-unified-command-line-utility)
+- 
+### Notes
+-

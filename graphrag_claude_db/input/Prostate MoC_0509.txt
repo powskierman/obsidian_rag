@@ -1,0 +1,34 @@
+---
+aliases: 
+tags:
+  - prostate
+  - medical
+  - MoC
+created: 2025-03-03 16:40
+---
+### Main Idea
+- 
+### References
+- [Dr. Carlson Urologist](http://drcarlson.com)
+- 
+### Notes
+-Turp 
+-[[urolift]] 
+-[[rezum]]
+-[[Prostatic Artery Embolisation]]
+-[[acoustic wave therapy]] 
+[[Thermaspec tumt]]
+Based on the evidence:
+	1.	Rezum has the best overall track record for a balance of effectiveness, durability, low retreatment rates, and minimal side effects.
+	2.	PAE is also highly effective but has higher retreatment rates compared to Rezum.
+	3.	UroLift is ideal for preserving sexual function but may not provide as robust symptom relief for larger prostates.
+	4.	TUMT, while minimally invasive, has the least favorable long-term outcomes due to high retreatment rates.
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,23 @@
+# Chain of Draft.md
+
+---
+aliases: 
+tags:
+created: 2025-03-07 12:03
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Prompt example:
+	- `Think step by step, but only keep a minimum draft for each thinking step, with 5 words at most.  Return the answer at the end after a separator ####.`
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

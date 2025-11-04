@@ -1,0 +1,25 @@
+---
+aliases:
+tags:
+  - health
+  - vaccine
+created: 2022-01-03 19:42
+ContentType: Note
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+# Vaccines
+![[MichelLapointe20220103.pdf]]
+![[LorraineLapointe20220103.pdf]]
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

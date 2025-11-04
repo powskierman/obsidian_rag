@@ -1,0 +1,35 @@
+---
+aliases: 
+tags:
+  - xcode
+  - MoC
+---
+
+### Backlink
+[[MacOS MOC]]
+
+### Reference
+- [[iOS Apps for Masterminds 4th Edition]]
+- [[SwiftPlantUML]]
+- [[Xcode - Segregating Passwords and Access Keys from Code]]
+- [[Xcode - Testing a Framework]]
+- [[Xcode - Internal Distribution]]
+- 
+### Notes
+- [[Xcode-Keyboard-Shortcuts]] 
+- [[Xcode Keyboard-Shortcuts-Cont'd]]
+- [[Xcode code snippets]]
+-  [Code sense](https://github.com/ccmoret/XcodeCS)  
+- [[Add-Dependency]]
+- [[27-IOS-open-source-libraries]]
+- [[../Swift/How to Solve the Error Maximum number of apps for free development reached]]
+- [[Xcode Rename-Project]]
+-  [Installing CocoaPods](https://srz.io/posts/2022/01/installing-cocoapods/)
+- [asdf-vm/asdf-ruby: Ruby plugin for asdf version manager](https://github.com/asdf-vm/asdf-ruby)
+- Invalid code signature problem
+	- Go to your Iphone Settings -> General -> Device Management and "trust" yourself as developer.
+- [Xcode couldn't find a provisioning profile](https://developer.apple.com/forums/thread/69950)
+- [[Info.plist Is Missing in Xcode]]
+- [[Dependencies Troubleshooting]]
+- [[Xcode -Change build configuration]]
+- [[HassFramework]]

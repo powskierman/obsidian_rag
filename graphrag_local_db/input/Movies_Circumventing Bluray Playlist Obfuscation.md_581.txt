@@ -1,0 +1,33 @@
+# Circumventing Bluray Playlist Obfuscation.md
+
+---
+
+---
+aliases: []
+tags: []
+
+created: 2025-02-14 15:46
+---
+### Main Idea
+- Defeat bluray copy protection
+### References
+- [Playlist Obfuscation - What a pain. Any tips  rPleX](https://www.reddit.com/r/PleX/comments/gw43gv/playlist_obfuscation_what_a_pain_any_tips/)
+- 
+### Notes
+- **Circumventing Bluray Playlist Obfuscation**
+	1. ﻿﻿﻿Download Process Monitor from Microsoft
+	2. ﻿﻿﻿Create a filter that contains "Path contains mpls"
+	3. ﻿﻿﻿File Capture Events
+	4. ﻿﻿﻿Play movie in commercial Bluray Player like Cyberlink PowerDVD
+	5. ﻿﻿﻿Once main movie is playing, note mpls file in path
+	6. ﻿﻿﻿Rip this file in MakeMKV
+### Related Notes
+- [[Ripping DVDs and Bluray]]
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### How to Use This Note
+- 
+### Smart Connections Insights
+-

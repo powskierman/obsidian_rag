@@ -1,0 +1,220 @@
+# Gould-Wonderful Life.md
+
+---
+bookId: "57113"
+title: "Wonderful Life: The Burgess Shale and the Nature of History"
+author: Stephen Jay Gould
+asin: B00H987FS6
+lastAnnotatedDate: 2021-06-26
+highlightsCount: 68
+reference: https://www.amazon.com/dp/B00H987FS6
+kindle_link: kindle://book?action=open&asin=B00H987FS6
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/912aWPu5+fL._SY160.jpg)
+## Highlights
+the Burgess Shale, found high in the Canadian Rockies in Yoho National Park, on the eastern border of British Columbia, are the world’s most important animal fossils. — location: [247](kindle://book?action=open&asin=B00H987FS6&location=247) ^ref-55759
+
+---
+The history of life is a story of massive removal followed by differentiation within a few surviving stocks, not the conventional tale of steadily increasing excellence, complexity, and diversity. — location: [278](kindle://book?action=open&asin=B00H987FS6&location=278) ^ref-11467
+
+---
+We may, as this book advocates, accept the implications and learn to seek the meaning of human life, including the source of morality, in other, more appropriate, domains—either stoically with a sense of loss, or with joy in the challenge if our temperament be optimistic. — location: [482](kindle://book?action=open&asin=B00H987FS6&location=482) ^ref-27714
+
+---
+The sweep of anatomical variety reached a maximum right after the initial diversification of multicellular animals. — location: [513](kindle://book?action=open&asin=B00H987FS6&location=513) ^ref-15762
+
+---
+The current earth may hold more species than ever before, but most are iterations upon a few basic anatomical designs. — location: [514](kindle://book?action=open&asin=B00H987FS6&location=514) ^ref-65423
+
+---
+Compared with the Burgess seas, today’s oceans contain many more species based upon many fewer anatomical plans. — location: [516](kindle://book?action=open&asin=B00H987FS6&location=516) ^ref-2434
+
+---
+Perhaps the grim reaper works during brief episodes of mass extinction, provoked by unpredictable environmental catastrophes (often triggered by impacts of extraterrestrial bodies). — location: [527](kindle://book?action=open&asin=B00H987FS6&location=527) ^ref-46594
+
+---
+20 percent of major groups are known exclusively by their presence in the three greatest Paleozoic Lagerstätten—the Burgess Shale, the Devonian Hunsrückschiefer of Germany, and the Carboniferous Mazon Creek near Chicago. — location: [774](kindle://book?action=open&asin=B00H987FS6&location=774) ^ref-8767
+
+---
+Burgess Shale ranks among the most invisible of transformations for two basic reasons, but its power to alter our view of life cannot be matched by any other paleontological discovery. — location: [1076](kindle://book?action=open&asin=B00H987FS6&location=1076) ^ref-15072
+
+---
+The basic principle of arthropod design is metamerism, the construction of the body from an extended series of repeated segments. — location: [1460](kindle://book?action=open&asin=B00H987FS6&location=1460) ^ref-18745
+
+---
+we can grasp the complexities of this central theme in arthropod evolution by considering just two matters: the fusion and differentiation of segments themselves, and the specialization of appendages. The numerous separate and similar segments of ancestral arthropods (figure 2) tended to coalesce into fewer specialized groups. The most common arrangement is a three-part division, into head, middle, and rear (called by various names, such as cephalon, thorax, and pygidium in trilobites, or head, thorax, and abdomen in insects and crustaceans). Most chelicerates have a two-part division, with a prosoma followed by an opisthosoma — location: [1463](kindle://book?action=open&asin=B00H987FS6&location=1463) ^ref-42860
+
+---
+The walking legs of most marine arthropods perform an additional function that seems odd from our vertebrate-centered perspective. Some marine arthropods feed as we do by seizing food items in front of their head and passing them directly to the mouth. But most use their walking legs to grasp food particles and pass them forward to the mouth along a food groove situated in the ventral (bottom) mid-line, between the legs. — location: [1491](kindle://book?action=open&asin=B00H987FS6&location=1491) ^ref-1393
+
+---
+We form the higher-level taxonomy of arthropods by joining the two principles discussed above: patterns of tagmosis, or fusion of segments, and specialization of appendages by loss of one ramus and differentiation of the other. — location: [1499](kindle://book?action=open&asin=B00H987FS6&location=1499) ^ref-43465
+
+---
+the four major kinds of arthropods: 1. Uniramia. As the name implies, insects and their kin have invariably lost the gill branch of the original biramous limb; they build their appendages (antennae, legs, mouth parts) exclusively from leg branches. (Insects breathe through invaginations of the external body surface, called tracheae.) 2. Chelicerata. Most modern chelicerates have six uniramous appendages on the prosoma. The first pair—chelicerae—are jawlike at the distal end and are used for grasping. (Antennae are absent in this group.) The second pair—pedipalps—are usually sensory in function. The last four pairs are usually leglike (giving spiders their eight legs). All these anterior appendages have evolved from leg branches. The situation is reversed on the posterior section. The opisthosomal appendages are also uniramous, but have been built from gill branches only. (The “lung-books,” or breathing organs, of spiders are on the abdomen.) 3. Crustacea. Despite an enormous diversity of form, from barnacles to lobsters, all crustaceans are distinguished by their stereotypical pattern of five pairs of appendages on the head (indicating that the head was formed by a tagmosis of at least five segments). The first two pairs, usually called antennae and antennules, are uniramous; they lie in a pre-oral position, in front of the mouth, and have sensory functions. The last three lie in a post-oral position, behind the mouth, and are usually used in feeding, as mouth parts. Appendages on the trunk often retain the original biramous form. 4. Trilobita. The trilobite head bears one pre-oral pair of appendages (antennae) and three post-oral pairs. Each body segment usually bears a pair of biramous limbs very little modified from the presumed ancestral form. The stereotypy of these patterns is, perhaps, the most striking phenomenon in modern arthropods. Of nearly a million described species of insects, none has a biramous appendage, and nearly all have exactly three pairs of limbs on the thorax. Marine crustacea display incredible diversity of form, but all have the same pattern of tagmosis in the head—two pre-oral and three post-oral pairs of appendages. Apparently, evolution settled upon just a few themes or ground plans for arthropods and then stuck with them through the greatest story of diversification in the entire animal kingdom. — location: [1501](kindle://book?action=open&asin=B00H987FS6&location=1501) ^ref-8537
+
+---
+Marrella splendens overwhelms anything else in the Burgess by sheer abundance. Walcott collected more than 12,000 specimens. — location: [1545](kindle://book?action=open&asin=B00H987FS6&location=1545) ^ref-32915
+
+---
+The fate of Walcott’s 1912 chart is a striking epitome of the entire Burgess story. Of his twenty-two genera, only two are legitimate members of their groups. — location: [1576](kindle://book?action=open&asin=B00H987FS6&location=1576) ^ref-29482
+
+---
+the walking legs of spiders are all on the prosoma, or head portion), — location: [2795](kindle://book?action=open&asin=B00H987FS6&location=2795) ^ref-36047
+
+---
+With the discovery of Sanctacaris, we now have, in the Burgess, members of all four great arthropod groups—trilobites in fair abundance, crustaceans represented by Canadaspis, uniramians by Aysheaia* (accepting Robison’s interpretation, as I do), and chelicerates by Sanctacaris — location: [2799](kindle://book?action=open&asin=B00H987FS6&location=2799) ^ref-44174
+
+---
+The fauna contains 119 genera in 140 species; 37 percent of these genera are arthropods. — location: [3284](kindle://book?action=open&asin=B00H987FS6&location=3284) ^ref-23440
+
+---
+the most common substrate walker (the arthropod Marrella) and the most common burrower (the priapulid worm Ottoia — location: [3287](kindle://book?action=open&asin=B00H987FS6&location=3287) ^ref-44943
+
+---
+He found that the Burgess genera, despite their odd and disparate anatomies, fall into conventional categories when classified by feeding style and habitat. He recognized four major groups: (1) Deposit-feeding collectors (mostly arthropods)—60 percent of the total number of individuals; 25–30 percent of the genera. (This category includes Marrella and Canadaspis, the two most common Burgess animals, hence the high representation for individuals). (2) Deposit-feeding swallowers (mostly ordinary mollusks with hard parts)—1 percent of individuals; 5 percent of genera. (3) Suspension feeders (mostly sponges, taking food directly from the water column)—30 percent of individuals; 45 percent of genera. (4) Carnivores and scavengers (mostly arthropods)—10 percent of individuals; 20 percent of genera. — location: [3290](kindle://book?action=open&asin=B00H987FS6&location=3290) ^ref-2693
+
+---
+Detritus and suspension feeders did dominate, but their niches did not overlap broadly, with all species simply sopping up everything edible in sight. Rather, most organisms were specialized for feeding on particular types and sizes of food in a definitely limited environment. — location: [3306](kindle://book?action=open&asin=B00H987FS6&location=3306) ^ref-32944
+
+---
+The Burgess Shale is Middle Cambrian; the famous explosion that originated modern life occurred just before, during the Lower Cambrian. — location: [3348](kindle://book?action=open&asin=B00H987FS6&location=3348) ^ref-51809
+
+---
+In conventional Darwinian theory, the organism proposes and the environment disposes. Organisms provide raw material in the form of genetic variation expressed in morphological differences. Within a population at any one time, these differences are small and—more important for the basic theory—undirected.* Evolutionary change (as opposed to mere variation) is produced by forces of natural selection arising from the external environment — location: [3399](kindle://book?action=open&asin=B00H987FS6&location=3399) ^ref-12487
+
+---
+The Cambrian explosion was the first filling of the ecological barrel for multicellular life. This was a time of unparalleled opportunity. Nearly anything could find a place. Life was radiating into empty space and could proliferate at logarithmic rates, like a bacterial cell alone on an agar plate. In the bustle and ferment of this unique period, experimentation reigned in a world virtually free of competition for the one and only time. — location: [3407](kindle://book?action=open&asin=B00H987FS6&location=3407) ^ref-17865
+
+---
+In Darwinian theory, competition is the great regulator. Darwin conceived the world in metaphor as a log with ten thousand wedges, representing species, tightly hammered in along its length. A new species can enter this crowded world only by insinuating itself into a crack and popping another wedge out. Thus, diversity is self-regulating. As the Cambrian explosion proceeded, it drove itself to completion by filling the log with wedges. All later change would occur by a slower process of competition and displacement. — location: [3410](kindle://book?action=open&asin=B00H987FS6&location=3410) ^ref-5650
+
+---
+Life has suffered some astounding mass extinctions since the Cambrian—the Permian debacle may have wiped out 95 percent or more of all marine species—yet the Burgess phenomenon of explosive disparity never occurred again. — location: [3415](kindle://book?action=open&asin=B00H987FS6&location=3415) ^ref-50439
+
+---
+no mode of life, no basic ecology, was entirely wiped out by the Permian debacle. — location: [3419](kindle://book?action=open&asin=B00H987FS6&location=3419) ^ref-2587
+
+---
+never, not even once, has a new phylum arisen since Burgess times. — location: [3438](kindle://book?action=open&asin=B00H987FS6&location=3438) ^ref-50168
+
+---
+copies for many genes, copies that then diverge into a range of related functions, tied up genomes into webs of interaction not easily broken? Did early genes have fewer interactions with others? Did ancient organisms develop with more direct translation of gene to product, permitting such creatures to interchange and alter their parts separately? Most important, do increased complexity and stereotypy of development from egg to adult put a brake upon potential changes of great magnitude? — location: [3455](kindle://book?action=open&asin=B00H987FS6&location=3455) ^ref-5118
+
+---
+all Cambrian animals, despite their disparity of form, may have diverged not long before from a late Precambrian common ancestor. — location: [3468](kindle://book?action=open&asin=B00H987FS6&location=3468) ^ref-40876
+
+---
+In other words, the similar response of Cambrian organisms may reflect the homology of a genetic system still largely held in common, and still highly flexible, not only the analogy of response to a common external push. — location: [3471](kindle://book?action=open&asin=B00H987FS6&location=3471) ^ref-52345
+
+---
+the Burgess pattern of rapid, maximal disparity followed by later decimation is a general property of systems, — location: [3475](kindle://book?action=open&asin=B00H987FS6&location=3475) ^ref-29787
+
+---
+Instead of a narrow beginning and a constantly expanding upward range, multicellular life reaches its maximal scope at the start, while later decimation leaves only a few surviving designs. — location: [3500](kindle://book?action=open&asin=B00H987FS6&location=3500) ^ref-48531
+
+---
+the human mind arose so late, and therefore threatens to demand interpretation as an accidental afterthought — location: [3504](kindle://book?action=open&asin=B00H987FS6&location=3504) ^ref-23969
+
+---
+our origin is the product of massive historical contingency, and we would probably never arise again even if life’s tape could be replayed a thousand times. — location: [3513](kindle://book?action=open&asin=B00H987FS6&location=3513) ^ref-6508
+
+---
+Critics claim that our motto “survival of the fittest” is a meaningless tautology because fitness is defined by survival, — location: [3560](kindle://book?action=open&asin=B00H987FS6&location=3560) ^ref-8688
+
+---
+The greatest impediment to scientific innovation is usually a conceptual lock, not a factual lack. — location: [4261](kindle://book?action=open&asin=B00H987FS6&location=4261) ^ref-24483
+
+---
+The resolution of history must be rooted in the reconstruction of past events themselves—in their own terms—based on narrative evidence of their own unique phenomena. — location: [4289](kindle://book?action=open&asin=B00H987FS6&location=4289) ^ref-21093
+
+---
+the central principle of all history—contingency. A historical explanation does not rest on direct deductions from laws of nature, but on an unpredictable sequence of antecedent states, where any major change in any step of the sequence would have altered the final result. This final result is therefore dependent, or contingent, upon everything that came before—the unerasable and determining signature of history. — location: [4399](kindle://book?action=open&asin=B00H987FS6&location=4399) ^ref-20178
+
+---
+Replay the tape a million times from a Burgess beginning, and I doubt that anything like Homo sapiens would ever evolve again. It is, indeed, a wonderful life. — location: [4522](kindle://book?action=open&asin=B00H987FS6&location=4522) ^ref-57000
+
+---
+Charles Darwin recognized this central distinction between laws in the background and contingency in the details — location: [4538](kindle://book?action=open&asin=B00H987FS6&location=4538) ^ref-31887
+
+---
+And so, ultimately, the question of questions boils down to the placement of the boundary between predictability under invariant law and the multifarious possibilities of historical contingency. Traditionalists like Walcott would place the boundary so low that all major patterns of life’s history fall above the line into the realm of predictability (and, for him, direct manifestation of divine intentions). But I envision a boundary sitting so high that almost every interesting event of life’s history falls into the realm of contingency. — location: [4550](kindle://book?action=open&asin=B00H987FS6&location=4550) ^ref-32094
+
+---
+Homo sapiens, I fear, is a “thing so small” in a vast universe, a wildly improbable evolutionary event well within the realm of contingency. Make of such a conclusion what you will. Some find the prospect depressing; I have always regarded it as exhilarating, and a source of both freedom and consequent moral responsibility. — location: [4575](kindle://book?action=open&asin=B00H987FS6&location=4575) ^ref-42455
+
+---
+The major argument of this book holds that contingency is immeasurably enhanced by the primary insight won from the Burgess Shale—that current patterns were not slowly evolved by continuous proliferation and advance, but set by a pronounced decimation (after a rapid initial diversification of anatomical designs), probably accomplished with a strong, perhaps controlling, component of lottery. — location: [4743](kindle://book?action=open&asin=B00H987FS6&location=4743) ^ref-6415
+
+---
+Lineages that arose early in the history of multicellular life, defined as during the Cambrian or Ordovician periods, have average centers of gravity less than 0.5. Lineages that arose later cannot be distinguished from 0.5 in their mean values. — location: [4779](kindle://book?action=open&asin=B00H987FS6&location=4779) ^ref-10849
+
+---
+mammalian lineages that arose during the Paleocene epoch, the initial period of explosive diversification following the demise of dinosaurs, tend to be bottom-heavy, while lineages arising later are symmetrical. — location: [4785](kindle://book?action=open&asin=B00H987FS6&location=4785) ^ref-26397
+
+---
+We may interpret this bottom-heavy pattern in several ways. I like to think of it as “early experimentation and later standardization.” — location: [4786](kindle://book?action=open&asin=B00H987FS6&location=4786) ^ref-19416
+
+---
+nearly a million described species of modern insects, but only three basic arthropod designs today, compared with more than twenty in the Burgess. — location: [4791](kindle://book?action=open&asin=B00H987FS6&location=4791) ^ref-49259
+
+---
+Mass extinctions have been recorded since the dawn of paleontology. These episodes mark the major boundaries of the geological time scale. — location: [4804](kindle://book?action=open&asin=B00H987FS6&location=4804) ^ref-7033
+
+---
+mass extinctions are more frequent, rapid, devastating in magnitude, and distinctively different in effect than we formerly imagined. — location: [4816](kindle://book?action=open&asin=B00H987FS6&location=4816) ^ref-8945
+
+---
+For growth and reproduction, diatoms rely upon the seasonal availability of nutrients rising to the surface from deeper waters in zones of upwelling. (These episodes of upwelling unleash so-called diatom “blooms.”) When these nutrients are depleted, diatoms can change their form to a “resting spore,” essentially shut down their metabolism and sink to deeper waters. A return of nutrients will terminate this period of dormancy. — location: [4857](kindle://book?action=open&asin=B00H987FS6&location=4857) ^ref-63915
+
+---
+The different-rules model therefore fractures the causal continuity that Darwin envisaged between reasons for success within local populations and the causes of survival and proliferation through long stretches of geological time. Hence, this model strongly promotes the role of contingency, viewed primarily as unpredictability, in evolution. — location: [4865](kindle://book?action=open&asin=B00H987FS6&location=4865) ^ref-4198
+
+---
+do not, by the way, view the origin of life itself as a chancy or unpredictable event. I suspect that given the composition of early atmospheres and oceans, life’s origin was a chemical necessity. Contingency arises later, when historical complexity enters the picture of evolution.) — location: [4890](kindle://book?action=open&asin=B00H987FS6&location=4890) ^ref-12591
+
+---
+Stromatolites and their prokaryotic builders dominated the fossil record throughout the world for more than 2 billion years. — location: [4897](kindle://book?action=open&asin=B00H987FS6&location=4897) ^ref-26146
+
+---
+The first eukaryotic cells (the complex textbook variety, complete with nucleus and numerous structures of the cytoplasm) appeared some 1.4 billion years ago. — location: [4898](kindle://book?action=open&asin=B00H987FS6&location=4898) ^ref-55030
+
+---
+multicellular animals did not arise soon after the origin of eukaryotic cells; they first appeared just before the Cambrian explosion some 570 million years ago. — location: [4901](kindle://book?action=open&asin=B00H987FS6&location=4901) ^ref-26811
+
+---
+Ediacara fauna has special importance as the only evidence for multicellular life before the great divide separating the Precambrian and Cambrian, — location: [4935](kindle://book?action=open&asin=B00H987FS6&location=4935) ^ref-56197
+
+---
+the Ediacara creatures represent an entirely separate experiment in multicellular life—one that ultimately failed in a previously unrecognized latest Precambrian extinction, for no Ediacara elements survived into the Cambrian. — location: [4951](kindle://book?action=open&asin=B00H987FS6&location=4951) ^ref-32249
+
+---
+By studying the varied and abundant trace fossils (tracks, trails, and burrows) of the same strata, he is convinced that metazoan animals of modern design—probably genuine worms in one form or another—shared the earth with the Ediacara fauna. Thus, as with the Burgess, several different anatomical possibilities were present right at the beginning. — location: [4961](kindle://book?action=open&asin=B00H987FS6&location=4961) ^ref-57206
+
+---
+Ediacara design looks like an alternative solution to the problem of gaining enough surface area as size increases. — location: [4970](kindle://book?action=open&asin=B00H987FS6&location=4970) ^ref-63215
+
+---
+Mammals evolved at the end of the Triassic, at the same time as dinosaurs, or just a tad later. Mammals spent their first hundred million year—two-thirds of their total history—as small creatures living in the nooks and crannies of a dinosaur’s world. Their sixty million years of success following the demise of dinosaurs has been something of an afterthought. — location: [5047](kindle://book?action=open&asin=B00H987FS6&location=5047) ^ref-39646
+
+---
+we are an improbable and fragile entity, fortunately successful after precarious beginnings as a small population — location: [5076](kindle://book?action=open&asin=B00H987FS6&location=5076) ^ref-27113
+
+---
+the embodiment of contingency: Homo sapiens is an entity, not a tendency. — location: [5093](kindle://book?action=open&asin=B00H987FS6&location=5093) ^ref-53475
+
+---
+Little quirks at the outset, occurring for no particular reason, unleash cascades of consequences that make a particular future seem inevitable in retrospect. But the slightest early nudge contacts a different groove, and history veers into another plausible channel, diverging continually from its original pathway. — location: [5102](kindle://book?action=open&asin=B00H987FS6&location=5102) ^ref-23845
+
+---
+The conclusion that it [Pikaia] is not a worm but a chordate appears inescapable. The superb preservation of this Middle Cambrian organism makes it a landmark in the history of the phylum to which all the vertebrates, including man, belong — location: [5128](kindle://book?action=open&asin=B00H987FS6&location=5128) ^ref-4905
+
+---
+why do humans exist?—a major part of the answer, touching those aspects of the issue that science can treat at all, must be: because Pikaia survived the Burgess decimation. — location: [5143](kindle://book?action=open&asin=B00H987FS6&location=5143) ^ref-21945
+
+---
+We are the offspring of history, and must establish our own paths in this most diverse and interesting of conceivable universe—one indifferent to our suffering, and therefore offering us maximal freedom to thrive, or to fail, in our own chosen way. — location: [5147](kindle://book?action=open&asin=B00H987FS6&location=5147) ^ref-64407
+
+---

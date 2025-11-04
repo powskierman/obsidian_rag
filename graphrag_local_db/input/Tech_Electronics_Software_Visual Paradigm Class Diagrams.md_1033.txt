@@ -1,0 +1,36 @@
+# Visual Paradigm Class Diagrams.md
+
+---
+aliases: []
+tags: []
+---
+# Visual Paradigm Class Diagrams
+Date: 2023-01-08
+
+### Backlink
+[[]]
+
+### Reference
+-  [How to Draw Class Diagram](https://www.visual-paradigm.com/support/documents/vpuserguide/94/2576/7190_drawingclass.html)
+-  [[How to add enum to class diagram]]
+- [[Visual Paradigm - Add array as parameter]]
+### Notes
+- Introduction to Class Diagrams
+- Creating a Class Diagram
+	- Select **Diagram > New** from the application toolbar.  
+	- In the **New Diagram** window, select **Class Diagram**.
+	- Click **Next**.
+	- Enter the diagram name and description. The **Location** field enables you to select a model to store the diagram.
+	- Click **OK**.
+- Adding Classes
+	- Adding Attributes
+	- Adding Operations
+	- Adding Relationships
+- Customizing Class Diagrams
+	- Customizing the Appearance of Classes and Their Members
+	- Customizing the Appearance of Relationships
+- Advanced Features
+	- Creating and Using Templates
+	- Creating Dynamic Diagrams
+	- Exporting Diagrams
+- Frequently Asked Questions (FAQ)

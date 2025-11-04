@@ -1,0 +1,186 @@
+---
+aliases:
+tags:
+  - sns
+  - tables
+  - service
+created: 2021-12-29 16:54
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  [AWS Login](https://www.amazon.com/ap/signin?openid.assoc_handle=aws&openid.return_to=https%3A%2F%2Fsignin.aws.amazon.com%2Foauth%3Fcoupled_root%3Dtrue%26response_type%3Dcode%26redirect_uri%3Dhttps%253A%252F%252Fconsole.aws.amazon.com%252Fiot%252Fhome%253Fregion%253Dus-east-1%2526state%253DhashArgs%252523%25252Ftest%2526isauthcode%253Dtrue%26client_id%3Darn%253Aaws%253Aiam%253A%253A015428540659%253Auser%252Ficebreaker%26code_challenge%3D_si9OVxNXX6VawKK4j82m-V8UM5PbNLMH3KwLr2xobs%26code_challenge_method%3DSHA-256&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&action=&disableCorpSignUp=&clientContext=&marketPlaceId=&poolName=&authCookies=&pageId=aws.login&siteState=pre-register%2CEN_US&accountStatusPolicy=P1&sso=&openid.pape.preferred_auth_policies=MultifactorPhysical&openid.pape.max_auth_age=120&openid.ns.pape=http%3A%2F%2Fspecs.openid.net%2Fextensions%2Fpape%2F1.0&server=%2Fap%2Fsignin%3Fie%3DUTF8&accountPoolAlias=&forceMobileApp=0&language=EN_US&forceMobileLayout=0&awsEmail=mlapoint99%40hotmail.com)
+
+2.  [AWS-IoT](https://console.aws.amazon.com/iot/home?region=us-east-1#/home)
+
+    a.  managed cloud platform that lets connected devices easily and securely interact with cloud applications and other devices.
+
+    b.  Thing->Rule->Action->User->Role->Policy->Topic->Subscription->Endpoint
+
+    c.  Monitor: Dashboard
+
+    d.  Manage/Things
+
+        i.  Create and edit IoT devices
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Secure
+
+        i.  Where certificates and policies are created and managed
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Act
+
+        i.  Rules
+
+            1.  Rules give your devices the ability to interact with AWS services.
+
+            2.  Rules are analyzed and actions are performed based on the MQTT topic stream.
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Test
+
+        i.  View MQTT messages with the AWS IoT MQTT client
+
+```{=html}
+<!-- -->
+```
+1.  [AWS IAM](https://console.aws.amazon.com/iam/home?region=us-east-1#/home)
+
+    a.  Identity and Access Management
+
+    b.  create and manage AWS users and groups
+
+    c.  use permissions to allow and deny their access to AWS resources.
+
+    d.  Manage groups, users, roles and policies
+
+```{=html}
+<!-- -->
+```
+1.  [AWS SNS](https://console.aws.amazon.com/sns/v3/home?region=us-east-1#/dashboard)
+
+    a.  a managed messaging service that lets you decouple publishers from subscribers.
+
+    b.  Topics
+
+        i.  a logical access point that acts as a*communication channel*.
+
+        ii. lets you group multiple*endpoints*(such as AWS Lambda, Amazon SQS, HTTP/S, or an email address).
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Subscriptions
+
+        i.  To receive messages published to[a topic](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html), you must*subscribe*an[endpoint](https://docs.aws.amazon.com/sns/latest/dg/sns-create-subscribe-endpoint-to-topic.html#sns-endpoints)to the topic.
+
+        ii. When you subscribe an endpoint to a topic, the endpoint begins to receive messages published to the associated topic.
+
+```{=html}
+<!-- -->
+```
+1.  [AWS SES](https://console.aws.amazon.com/ses/home?region=us-east-1)
+
+    a.  Amazon Simple Email Service
+
+    b.  send and receive email using a reliable and scalable email platform
+
+    c.  send mail from within any application.
+
+    d.  Setup email addresses
+
+```{=html}
+<!-- -->
+```
+1.  [AWS S3](https://s3.console.aws.amazon.com/s3/home?region=us-east-1)
+
+    a.  SimpleStorageService
+
+    b.  Buckets
+
+        i.  a public cloud storage resource
+
+        ii. A cloud folder
+
+```{=html}
+<!-- -->
+```
+1.  Kinesis Firehose
+
+    a.  Is an Action within a IoT rule
+
+    b.  loads streaming data into data lakes, data stores, and analytics services.
+
+    c.  capture, transform, and deliver streaming data to S3, Redshift, Elasticsearch, HTTP endpoints, and other service providers
+
+```{=html}
+<!-- -->
+```
+1.  [Dynamo DB](https://console.aws.amazon.com/dynamodbv2/home?region=us-east-1#service)
+
+    a.  fast and flexible NoSQL database service for any scale application
+
+    b.  [Table](https://console.aws.amazon.com/dynamodbv2/home?region=us-east-1#tables)
+
+        i.  Partition key
+
+            1.  1st part of the table's primary key.
+
+            2.  hash value that is used to retrieve items from your table
+
+        ```{=html}
+        <!-- -->
+        ```
+        i.  Sort key
+
+            1.  the second part of the table's primary key.
+
+            2.  allows for searching within an item collection.
+
+```{=html}
+<!-- -->
+```
+1.  [Data Pipeline](https://console.aws.amazon.com/datapipeline/home?region=us-east-1)
+
+    a.  cloud-based data workflow service
+
+    b.  processes and moves data between different AWS services and on-premise data sources.
+
+```{=html}
+<!-- -->
+```
+1.  AWS Glue
+
+    a.  a serverless data integration service
+
+    b.  discover, prepare, and combine data for analytics, machine learning, and application development
+
+    c.  Data crawler
+
+    d.  transformer
+
+```{=html}
+<!-- -->
+```
+1.  [Cloudwatch](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1)
+
+    a.  monitoring and observability service
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

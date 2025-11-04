@@ -1,0 +1,23 @@
+# Wifi-Manager.md
+
+---
+aliases:
+tags:
+created: 2021-12-30 13:50
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  [Wifi Manager](https://diyprojects.io/esp32-test-wifimanager-library-manage-wifi-connections/#.YZhWxy8r1MR)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,43 @@
+---
+aliases: []
+tags: [
+ thread
+ commissioning
+ edge
+ troubleshooting
+ border-router
+]
+---
+# Commissioning Thread Edge Device
+Date: 2023-05-25
+
+### Backlink
+[[Tech/Electronics/Hardware/Nordic/Thread MoC]]
+
+### Reference
+-  [Thread Commissioning Guide](https://bbdmj.github.io/cascoda-sdk/docs/guides/thread-commissioning.html)
+- [Thread border router required with Matter - Configuration - Home Assistant](https://community.home-assistant.io/t/thread-border-router-required-with-eve-and-matter/562937/12)
+- 
+### Notes
+- start with:  [[Thread Endpoint Setup]]
+- Go to:  Home Assistant****/Settings/Integrations/Thread/Gear/Configure/Information and copy:
+	- _operational_dataset:_  Dataset active -x:
+```
+0e080000000000010000041056793e65085ede973a3ad5ad4b4859cc0c0402a0f7f8000300000b35060004001fffe00102fb000208fb02fb02fb020000051000112233445566778899aabbccddeeff0708fd000000fb01000103024e48
+```
+
+- At boot, an NRF device with the Matter lightbulb example, will provide the following information: 
+- vendorID=65521 productID=32773 discriminator=3840/15
+- Device Configuration:
+	- Serial Number: 11223344556677889900
+	- Vendor Id: 65521 (0xFFF1)
+	- Product Id: 32773 (0x8005)
+	- Product Name: not-specified
+	- Hardware Version: 0
+	- Setup Pin Code (0 for UNKNOWN/ERROR): 20202021
+	- Setup Discriminator (0xFFFF for UNKNOWN/ERROR): 3840 (0xF00)
+	- Manufacturing Date: (not set)
+	- Device Type: 65535 (0xFFFF)
+	- SetupQRCode: MT:6FCJ142C00KA0648G00
+- [[Openthread ot commands]]
+- [[chip-tool pairing ble-thread]]

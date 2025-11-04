@@ -1,0 +1,83 @@
+# Diagnosis and Options.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+Backlink: "[[Lymphoma MoC]]"
+---
+### Reference
+-  [[Lymphoma Prognosis]]
+- [Zuma-12 Study](../Media/zuma-12.pdf)
+### Notes
+-  <mark style="background: #ABF7F7A6;">My diagnosis, based on the FISH results, indicates high-grade B-cell lymphoma (HGBL) with double-hit:</mark>
+	1.	[[MYC]] rearrangement (present in ≥51% of cells),
+		- <mark style="background: #ABF7F7A6;">Uncontrolled cell division and tumor growth</mark>	
+	2.	[[BCL2]]/IGH rearrangement (common in “double-hit” lymphomas)
+		- <mark style="background: #ABF7F7A6;">Inhibits apoptosis</mark>
+		This profile places my lymphoma in the double-hit category, associated with <mark style="background: #ABF7F7A6;">aggressive behavior and a high risk of relapse with standard therapies.</mark>
+
+Double-hit lymphomas, characterized by [[MYC]] and [[BCL2]]/BCL6 rearrangements, pose a significant challenge in treatment. While [[R-CHOP]] remains a standard, novel approaches like immunochemotherapy, targeted therapies, and stem cell transplantation are being explored.  Recent studies highlight the importance of early CNS prophylaxis and the potential of CAR T-cell therapy in improving outcomes for these patients.
+
+#### Emerging Therapies for HGBL with [[MYC]]/[[BCL2]]/BCL6 Rearrangements
+
+Several promising therapies and clinical trial approaches could be applicable to my case:
+
+1. **CAR-T Cell Therapy**
+
+- <mark style="background: #ABF7F7A6;">CAR-T therapy targeting CD19 has demonstrated efficacy in aggressive B-cell lymphomas</mark>, including double- and triple-hit lymphomas. Options include:
+
+- <mark style="background: #ABF7F7A6;">Axicabtagene ciloleucel </mark>([[Yescarta]]) [Yescarta study](https://www.targetedonc.com/view/axi-cel-delivers-long-lasting-responses-in-high-risk-large-b-cell-lymphoma?t)
+  •	<mark style="background: #ABF7F7A6;">Lisocabtagene maraleucel</mark> ([[Breyanzi]])
+  •	<mark style="background: #ABF7F7A6;">Tisagenlecleucel</mark> ([[Kymriah]])</mark>
+  Among the three therapies,<mark style="background: #ABF7F7A6;"> Yescarta has the most robust data specifically for high-grade and double-/triple-hit lymphomas</mark>, showing excellent response rates and durability.
+  •	Breyanzi provides comparable efficacy but may have a slightly better safety profile due to lower rates of cytokine release syndrome (CRS) and neurotoxicity.
+
+  - Key advantages:
+    - <mark style="background: #ABF7F7A6;">Potential to induce durable remissions in patients with refractory or relapsed HGBL.</mark>
+    - <mark style="background: #ABF7F7A6;">Especially effective in patients who do not respond to or relapse after chemotherapy or autologous stem cell transplant</mark>.
+
+  - Emerging improvements:
+    - <mark style="background: #ABF7F7A6;">Dual-target CAR-T cells (e.g., targeting CD19 + CD22 or CD20) may enhance efficacy in resistant cases</mark>.	
+
+2. **Bispecific Antibodies**
+
+- Bispecific T-cell engagers (BiTEs) redirect T-cells to target lymphoma cells. These drugs are effective even in heavily pretreated patients.
+	- Key agents:
+		•	Epcoritamab: A bispecific antibody targeting CD3 (on T cells) and CD20 (on B cells).
+		•	Glofitamab: Another CD20/CD3 bispecific antibody with promising activity in aggressive lymphomas.
+		•	Mosunetuzumab: Also targets CD20/CD3, effective in relapsed or refractory B-cell lymphomas.
+	- Advantages:
+	  - Outpatient treatment possible.
+	  - Effective in patients with high tumor burden.
+
+3. **[[BCL2]] Inhibitors**
+- My lymphoma’s [[BCL2]] rearrangement makes it potentially sensitive to venetoclax, a selective BCL2 inhibitor.
+	- [[Venetoclax]]:
+		•	Often used in combination with chemotherapy or targeted therapies.
+		•	Has shown activity in double-hit lymphomas, particularly those with [[BCL2]] overexpression.
+	- Combination strategies:
+	  - Venetoclax + DA-EPOCH-R (or other chemo-immunotherapy regimens).
+	  - Venetoclax + rituximab or obinutuzumab (anti-CD20 antibodies).
+	
+
+3. **Novel Targeted Therapies**
+	- Several emerging agents are being evaluated for double-/triple-hit lymphomas:
+	- 	•	Selinexor: A selective inhibitor of nuclear export, effective in relapsed/refractory aggressive lymphomas.
+			•	Pirtobrutinib (LOXO-305): A next-generation BTK inhibitor showing promise in heavily pretreated patients.
+	
+4. **Epigenetic and [[MYC]]-Targeting Therapies**
+		•	BET inhibitors: Target bromodomain and extraterminal proteins (e.g., BRD4) involved in [[MYC]] transcription. These are under investigation in [[MYC]]-rearranged lymphomas.
+		•	CDK9 inhibitors: Suppress [[MYC]] and [[BCL2]] expression by targeting transcriptional regulators.
+
+5. **Antibody-Drug Conjugates (ADCs)**
+		•	Polatuzumab vedotin: Targets CD79b, a protein on B-cell lymphomas, delivering a cytotoxic agent directly to tumor cells. It’s FDA-approved in combination with bendamustine + rituximab for relapsed/refractory large B-cell lymphoma.
+
+6. **Checkpoint Inhibitors**
+	- Checkpoint inhibitors like pembrolizumab (anti-PD-1) may be effective when combined with other therapies, especially in cases with high tumor mutational burden (TMB) or PD-L1 expression.
+
+7. **Clinical Trials**
+	My diagnosis makes me a candidate for clinical trials investigating:
+	•	Dual-target CAR-T cells.
+	•	CAR-NK cells (natural killer cell-based therapies).
+	•	Combination therapies involving venetoclax, bispecific antibodies, or checkpoint inhibitors.

@@ -1,0 +1,22 @@
+# Sourcegraph MoC.md
+
+---
+aliases: 
+tags:
+  - sourcegraph
+  - MoC
+---
+# Sourcegraph MoC
+Date: 2024-03-28
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- [Sourcegraph - Tutorial](https://www.seporaitis.net/posts/2023/06/13/sourcegraph/) 
+- [seporaitissourcegraph-local A repository explaining how to run Sourcegraph single container, with many other features.](https://github.com/seporaitis/sourcegraph-local)
+- -  Github Access token:
+
+- `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`

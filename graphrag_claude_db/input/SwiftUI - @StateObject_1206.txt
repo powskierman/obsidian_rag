@@ -1,0 +1,14 @@
+---
+aliases: []
+tags: []
+---
+# SwiftUI - @StateObject
+Date: 2023-03-04
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  @State object is used to create object owned by a view

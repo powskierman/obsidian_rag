@@ -1,0 +1,899 @@
+# Advanced Techniques.md
+
+---
+aliases: 
+tags:
+  - AI
+  - sequential-thinking
+  - advanced
+created: 2025-10-17 11:10
+ContentType: Advanced Guide
+Backlink: "[[Sequential Thinking Tool|Sequential Thinking Tool]]"
+---
+### Main Idea
+Advanced techniques and power user patterns for Sequential Thinking.
+
+### References
+- [[Sequential Thinking Tool]]
+- [[Core Concepts]]
+- [[Usage Patterns]]
+
+### Notes
+
+## Power User Techniques
+
+### 1. Complex Multi-Factor Decisions
+
+Use branching to explore scenarios:
+
+**Pattern**:
+```
+Branch optimistic: Best case assumptions
+Branch pessimistic: Worst case assumptions  
+Branch realistic: Most likely scenario
+Compare all three → Make decision
+```
+
+**Example**:
+```
+Thought 1: "Investment decision with uncertainty"
+Thought 2: "Three scenarios to explore"
+Thought 3: [Optimistic] "10% annual growth, stable market"
+Thought 4: [Optimistic] "ROI: 150% over 5 years"
+Thought 5: [Pessimistic] "3% growth, market volatility"
+Thought 6: [Pessimistic] "ROI: 50% over 5 years"
+Thought 7: [Realistic] "6% growth, moderate volatility"
+Thought 8: [Realistic] "ROI: 85% over 5 years"
+Thought 9: "Comparing scenarios: Even in pessimistic case, positive ROI"
+Thought 10: "Decision: Proceed with realistic expectations"
+```
+
+---
+
+### 2. Debugging Production Issues
+
+Use systematic hypothesis testing:
+
+**Pattern**:
+```
+Generate 3-4 hypotheses upfront
+Test each systematically
+Revise based on evidence
+Converge on root cause
+```
+
+**Example**:
+```
+Thought 1: "Production outage - 503 errors"
+Thought 2: "Four hypotheses: DB, cache, network, code bug"
+Thought 3: [Test 1] "DB metrics: normal. Hypothesis 1 rejected"
+Thought 4: [Test 2] "Cache hit rate: 95%. Hypothesis 2 rejected"
+Thought 5: [Test 3] "Network latency: p99 at 5s. Hypothesis 3 confirmed!"
+Thought 6: "Root cause: Network timeout between services"
+Thought 7: "Solution: Increase timeout + add retry logic"
+```
+
+---
+
+### 3. System Design
+
+Use iterative refinement with constraints:
+
+**Pattern**:
+```
+Start with simple design
+Add constraints incrementally
+Revise design as needed
+Validate against all requirements
+```
+
+**Example**:
+```
+Thought 1: "Design URL shortener"
+Thought 2: "V1: Simple hash of URL"
+Thought 3: "Adding scale constraint: 100M URLs"
+Thought 4: "V2: Base62 encoding of counter"
+Thought 5: "Adding reliability: Need distributed counter"
+Thought 6: "V3: Use Redis for distributed counter with replication"
+Thought 7: "Adding performance: Read-heavy workload"
+Thought 8: "V4: Add CDN caching layer"
+Thought 9: "Validating: Handles scale ✓, reliable ✓, fast ✓"
+Thought 10: "Final: Distributed counter + Redis + CDN"
+```
+
+---
+
+### 4. Research and Analysis
+
+Use divide and conquer:
+
+**Pattern**:
+```
+Break into research questions
+Explore each thoroughly (may branch)
+Synthesize findings
+Draw conclusions
+```
+
+**Example**:
+```
+Thought 1: "Research: Is GraphQL better than REST for our use case?"
+Thought 2: "Three research questions: Performance, DX, ecosystem"
+Thought 3: [Performance] "GraphQL: Single endpoint, flexible queries"
+Thought 4: [Performance] "REST: Multiple endpoints, optimized per resource"
+Thought 5: [Performance] "Winner: Depends on access patterns"
+Thought 6: [DX] "GraphQL: Strong typing, introspection, tooling"
+Thought 7: [DX] "REST: Simple, widely understood, mature tooling"
+Thought 8: [Ecosystem] "Both have strong ecosystems in 2025"
+Thought 9: "Synthesis: GraphQL wins on DX, REST on simplicity"
+Thought 10: "Conclusion: GraphQL for new API with complex queries"
+```
+
+---
+
+## Advanced Branching Strategies
+
+### Multi-Level Branching
+
+```
+Thought 1: Problem
+    ↓
+Thought 2: Approach A vs B
+    ↓
+    ├─ Branch A
+    │   ↓
+    │   Thought 3: Sub-option A1 vs A2
+    │       ↓
+    │       ├─ Branch A1
+    │       └─ Branch A2
+    │
+    └─ Branch B
+        ↓
+        Thought 4: Sub-option B1 vs B2
+            ↓
+            ├─ Branch B1
+            └─ Branch B2
+```
+
+**When to Use**: Complex decisions with nested options
+
+**Example**: Database choice → SQL vs NoSQL → PostgreSQL vs MySQL vs MongoDB vs Cassandra
+
+---
+
+### Parallel Exploration with Synthesis
+
+```
+        Thought 1-2: Setup
+              ↓
+    ┌─────────┼─────────┐
+    ↓         ↓         ↓
+Branch A  Branch B  Branch C
+    ↓         ↓         ↓
+Explore   Explore   Explore
+    ↓         ↓         ↓
+    └─────────┼─────────┘
+              ↓
+        Synthesis
+```
+
+**When to Use**: Multiple independent factors need evaluation
+
+**Example**: Evaluating candidates across different criteria (technical skills, culture fit, salary expectations)
+
+---
+
+## Meta-Cognitive Techniques
+
+### 1. Recognizing When Stuck
+
+**Pattern**: Explicitly acknowledge and pivot
+
+```
+Thought 7: "I've been circling around this for 3 thoughts without progress.
+            Let me step back and reconsider the fundamental approach."
+            
+Thought 8: [Meta] "The issue is I'm optimizing the wrong thing.
+            The real problem is X, not Y."
+```
+
+---
+
+### 2. Balancing Breadth vs Depth
+
+**Pattern**: Consciously decide exploration strategy
+
+```
+Thought 3: "I could explore this path deeply, but I should first
+            survey all options at high level."
+            
+Thoughts 4-6: [Breadth] Quick evaluation of 3 approaches
+
+Thought 7: "Now diving deep into the most promising option..."
+
+Thoughts 8-10: [Depth] Detailed analysis of selected approach
+```
+
+---
+
+### 3. Managing Cognitive Load
+
+**Pattern**: Break complex reasoning into manageable chunks
+
+```
+Thought 5: "This problem has 5 independent dimensions.
+            I'll tackle them sequentially rather than simultaneously."
+            
+Thoughts 6-7: Dimension 1 (memory)
+Thoughts 8-9: Dimension 2 (performance)  
+Thought 10: Dimension 3 (cost)
+...
+```
+
+---
+
+## Optimization Techniques
+
+### Thought Efficiency
+
+**Inefficient**:
+```
+Thought 5: "Maybe we should check the database"
+Thought 6: "Let me look at the metrics"
+Thought 7: "The metrics show..."
+```
+
+**Efficient**:
+```
+Thought 5: "Checking database metrics: CPU at 80%, queries taking 2s average.
+            This confirms DB is bottleneck."
+```
+
+---
+
+### Strategic Revision
+
+**Pattern**: Revise early to avoid cascading errors
+
+```
+Thought 3: "Approach A looks good"
+Thought 4: "Starting to implement details of A..."
+Thought 5: [EARLY REVISION] "Wait - Approach A violates constraint X.
+            Better to catch this now than after 5 more thoughts."
+```
+
+Vs. late revision:
+```
+Thoughts 3-8: Build on approach A
+Thought 9: "Oh no, A violates constraint X"
+// Wasted 6 thoughts!
+```
+
+---
+
+### Incremental Verification
+
+**Pattern**: Verify continuously, not just at end
+
+```
+Thought 3: "Hypothesis: Use Redis for caching"
+Thought 4: [Verify 1] "Checking memory requirements: 4GB needed, available ✓"
+Thought 5: "Adding persistence layer"
+Thought 6: [Verify 2] "Checking persistence performance: 10ms writes ✓"
+Thought 7: "Adding replication"
+Thought 8: [Verify 3] "Checking replication lag: <100ms ✓"
+Thought 9: "All verifications passed - final solution complete"
+```
+
+---
+
+## Advanced Use Cases
+
+### 1. Algorithmic Trading Strategy
+
+```
+Thought 1: "Design momentum trading strategy"
+Thought 2: "Constraints: Max 2% drawdown, 20% annual target"
+Thought 3: [Signal] "Use 20/50 day MA crossover"
+Thought 4: [Risk] "Position sizing: 2% account risk per trade"
+Thought 5: [Testing] "Backtesting on 10 years data..."
+Thought 6: [Results] "Sharpe ratio 1.5, max drawdown 3%"
+Thought 7: [REVISION] "Max drawdown exceeds constraint"
+Thought 8: [Adjustment] "Reduce position size to 1.5%"
+Thought 9: [Retest] "Max drawdown now 1.8% ✓, returns 18%"
+Thought 10: "Final strategy validated"
+```
+
+---
+
+### 2. Legal Contract Analysis
+
+```
+Thought 1: "Analyze merger agreement for risks"
+Thought 2: "Five key areas: liability, IP, termination, indemnity, arbitration"
+Thought 3: [Liability] "Section 8: Limited to $5M - favorable"
+Thought 4: [IP] "Section 12: All IP transfers - verify completeness"
+Thought 5: [IP Investigation] "Patent #123 missing from schedule"
+Thought 6: [RED FLAG] "Missing patent is core technology"
+Thought 7: [Termination] "90-day notice required - standard"
+Thought 8: [Indemnity] "Uncapped IP indemnity - ISSUE"
+Thought 9: "Two major issues found: Missing patent + uncapped indemnity"
+Thought 10: "Recommendation: Renegotiate before signing"
+```
+
+---
+
+### 3. Medical Diagnosis (Conceptual)
+
+```
+Thought 1: "Patient symptoms: fever, rash, joint pain"
+Thought 2: "Differential diagnosis: viral, bacterial, autoimmune"
+Thought 3: [Viral] "Could be dengue, chikungunya, or Zika"
+Thought 4: [Test results] "WBC normal rules out severe bacterial"
+Thought 5: [Travel history] "Recent travel to endemic area"
+Thought 6: [Narrowing] "Most likely: dengue or chikungunya"
+Thought 7: [Timing] "Rash appeared day 3 - classic for dengue"
+Thought 8: [Confirmation] "Request dengue IgM/IgG test"
+Thought 9: "Working diagnosis: Dengue fever"
+Thought 10: "Management plan: Supportive care, monitor platelets"
+```
+
+---
+
+## Combining with Other Tools
+
+### Sequential Thinking + REPL
+
+```
+1. Sequential Thinking: Design algorithm
+2. REPL: Implement and test
+3. Sequential Thinking: Analyze results and optimize
+4. REPL: Test optimizations
+5. Repeat until satisfied
+```
+
+---
+
+### Sequential Thinking + Web Search
+
+```
+1. Web Search: Gather data on topic
+2. Sequential Thinking: Reason about findings
+3. Web Search: Fill knowledge gaps identified
+4. Sequential Thinking: Synthesize complete answer
+```
+
+---
+
+### Sequential Thinking + Extended Thinking
+
+```
+1. Extended Thinking: Long-form exploration (10+ min)
+2. Sequential Thinking: Explicit structured reasoning
+3. Regular conversation: Communicate results
+```
+
+---
+
+## When to Go Deep vs. Broad
+
+### Go Deep (10-20+ thoughts)
+- Critical decisions with high stakes
+- Complex system design
+- Root cause analysis of severe issues
+- Strategic planning
+- Research synthesis
+
+### Stay Broad (5-8 thoughts)
+- Initial exploration
+- Comparing well-understood options
+- Straightforward optimization
+- Validation of existing solution
+
+---
+
+### Related Notes
+- [[Sequential Thinking Tool]]
+- [[Examples]]
+- [[Usage Patterns]]
+
+### Questions / Ideas for Further Exploration
+- What's the optimal depth for different problem complexities?
+- How to balance exploration vs exploitation in branching?
+- Can meta-cognitive patterns be formalized?
+
+### To-Do
+- [ ] Add case studies for each advanced technique
+- [ ] Create decision tree for technique selection
+- [ ] Document anti-patterns for advanced usage
+
+### Smart Connections Insights
+- 
+---
+aliases:
+  - Sequential Thinking Advanced
+  - ST Power User Guide
+tags:
+  - AI
+  - sequential-thinking
+  - advanced
+created: 2025-10-17
+ContentType: Advanced Guide
+Backlink: "[[Sequential Thinking MoC]]"
+---
+
+### Main Idea
+
+Advanced techniques and strategies for power users of the Sequential Thinking tool.
+
+### References
+
+- [[Sequential Thinking MoC]]
+- [[Core Concepts]]
+- [[Usage Patterns]]
+- [[Examples]]
+
+### Notes
+
+## Advanced Techniques
+
+### 1. Multi-Scenario Analysis
+
+Use branching to explore different scenarios simultaneously:
+
+```
+Branch optimistic: Best case assumptions
+Branch pessimistic: Worst case assumptions
+Branch realistic: Most likely scenario
+Compare all three → Make decision
+```
+
+**Example Application:**
+- Business strategy planning
+- Risk assessment
+- Investment decisions
+- Technology selection
+
+**Implementation:**
+```
+Thought 1: Define decision criteria
+Thought 2: Identify key uncertainties
+Thought 3 [Branch optimistic]: Assume best case...
+Thought 4 [Branch pessimistic]: Assume worst case...
+Thought 5 [Branch realistic]: Assume likely case...
+Thought 6: Compare scenarios
+Thought 7: Decision with confidence intervals
+```
+
+---
+
+### 2. Hypothesis Testing Framework
+
+Systematic hypothesis generation and testing:
+
+```
+1. Generate 3-4 competing hypotheses
+2. Define testable predictions for each
+3. Test each systematically
+4. Revise based on evidence
+5. Converge on most likely explanation
+```
+
+**Best for:**
+- Debugging complex systems
+- Root cause analysis
+- Scientific reasoning
+- Medical diagnosis (conceptual)
+
+**Key Principle:** Generate multiple hypotheses before testing any.
+
+---
+
+### 3. Iterative Refinement Pattern
+
+Start rough, refine progressively:
+
+```
+Iteration 1: Rough solution (satisfices)
+Iteration 2: Add detail (handles edge cases)
+Iteration 3: Optimize (efficiency)
+Iteration 4: Polish (production ready)
+```
+
+**When to use:**
+- System design
+- Architecture decisions
+- Process improvement
+- Creative solutions
+
+**Tip:** Make each iteration a distinct thought with explicit improvements.
+
+---
+
+### 4. Constraint-Driven Design
+
+Use constraints to guide exploration:
+
+```
+Thought 1: List all constraints
+Thought 2: Rank constraints by priority
+Thought 3: Design satisfying hard constraints
+Thought 4: Optimize for soft constraints
+Thought 5: Verify against all constraints
+```
+
+**Applications:**
+- Performance optimization
+- Architecture under limitations
+- Resource-constrained solutions
+
+---
+
+### 5. Divide and Conquer at Scale
+
+For very complex problems:
+
+```
+1. Break into 3-5 major subproblems
+2. For each subproblem:
+   a. Branch to explore it
+   b. May sub-branch if needed
+   c. Reach local conclusion
+3. Synthesize all subproblem solutions
+4. Verify complete solution
+```
+
+**Tip:** Don't go more than 2 levels deep in branching.
+
+---
+
+## Power User Strategies
+
+### Strategy 1: Pre-Analysis Planning
+
+Before starting Sequential Thinking, spend one thought on meta-planning:
+
+```
+Thought 1: Meta-analysis
+- Problem type: Debugging / Design / Analysis / Decision
+- Expected complexity: Simple / Medium / Complex
+- Planned approach: Linear / Branching / Iterative
+- Initial estimate: 5-7 thoughts
+```
+
+**Benefit:** Better initial `total_thoughts` estimate.
+
+---
+
+### Strategy 2: Checkpoint Thoughts
+
+Every 3-4 thoughts, add a checkpoint:
+
+```
+Thought 4: Checkpoint
+- Progress so far: Identified root cause
+- Remaining work: Design solution, verify
+- Still on track: Yes / Need to adjust
+- Estimated remaining: 3 thoughts
+```
+
+**Benefit:** Maintains orientation in long sequences.
+
+---
+
+### Strategy 3: Explicit Assumption Tracking
+
+Document assumptions early:
+
+```
+Thought 2: Assumptions
+1. Database is the bottleneck (to verify)
+2. Traffic is uniformly distributed (uncertain)
+3. Budget allows hardware upgrade (need to confirm)
+```
+
+**Benefit:** Makes it easier to revise when assumptions prove wrong.
+
+---
+
+### Strategy 4: Graduated Confidence
+
+Express confidence levels:
+
+```
+Thought 5: Hypothesis
+The issue is in the cache layer (Confidence: 70%)
+
+Thought 6: Verification
+Checked cache metrics - hypothesis confirmed (Confidence: 95%)
+```
+
+**Benefit:** Shows evolving certainty naturally.
+
+---
+
+### Strategy 5: Explicit Trade-off Analysis
+
+When choosing between options:
+
+```
+Thought 7: Trade-off Analysis
+Option A: Fast (1 week) but technical debt (+)
+Option B: Slow (3 weeks) but clean architecture (+)
+Decision criteria: Time to market is critical
+Choice: Option A with plan to refactor
+```
+
+**Benefit:** Transparent decision rationale.
+
+---
+
+## Advanced Branching Techniques
+
+### Parallel Exploration
+
+Explore multiple paths simultaneously then merge:
+
+```
+T1: Problem statement
+T2: Three approaches identified
+T3 [Branch A]: Approach A details...
+T4 [Branch B from T2]: Approach B details...
+T5 [Branch C from T2]: Approach C details...
+T6 [Merge]: Compare A, B, C
+T7: Selected best approach
+```
+
+---
+
+### Sequential Branching
+
+Branch, evaluate, then branch again:
+
+```
+T1: Problem
+T2: Try approach A
+T3 [Branch A]: Explore A
+T4 [Branch A]: A has issues
+T5 [Branch B from T2]: Try approach B instead
+T6 [Branch B]: B works better
+T7: Choose B
+```
+
+---
+
+### Nested Branching (Use Sparingly)
+
+Branch within a branch for deep exploration:
+
+```
+T1: Main problem
+T2: Explore solution domain A
+T3 [Branch A]: Solution A1 details
+T4 [Branch A.1 from T3]: Sub-variant A1a
+T5 [Branch A.2 from T3]: Sub-variant A1b
+T6 [Branch A]: Synthesize A1a and A1b
+T7: Main conclusion
+```
+
+**Warning:** Don't exceed 2 levels of nesting - becomes confusing.
+
+---
+
+## Revision Strategies
+
+### Early Revision
+
+Catch errors early:
+
+```
+T1: Initial understanding
+T2: First approach
+T3: Actually, T1 was wrong (REVISE)
+T4: Corrected approach
+```
+
+**Benefit:** Prevents building on false premises.
+
+---
+
+### Late Revision
+
+Discover issues near completion:
+
+```
+T1-T5: Build solution
+T6: Verify... wait, doesn't handle edge case X
+T7 [REVISE T5]: Adjusted solution for edge case
+T8: Re-verify - now complete
+```
+
+**Benefit:** Ensures thorough validation.
+
+---
+
+### Multiple Revisions
+
+Don't hesitate to revise repeatedly:
+
+```
+T1: Understanding
+T2: Approach A
+T3 [REVISE T2]: Actually, approach B
+T4: Details of B
+T5 [REVISE T3]: Wait, hybrid A+B is better
+T6: Final hybrid approach
+```
+
+**Benefit:** Shows genuine problem-solving process.
+
+---
+
+## Efficiency Techniques
+
+### 1. Batch Related Thoughts
+
+Combine closely related analyses:
+
+```
+Good: T3: "Analyzing database performance: Indexes are missing on foreign keys, query plan shows sequential scans, connection pool is properly sized."
+
+Avoid: T3: "Analyzing database..."
+        T4: "Indexes are missing..."
+        T5: "Query plan shows..."
+```
+
+---
+
+### 2. Progressive Detail
+
+Start high-level, add detail progressively:
+
+```
+T1: High-level problem (30,000 ft view)
+T2: Key components (10,000 ft)
+T3: Specific subsystem (1,000 ft)
+T4: Implementation details (ground level)
+```
+
+---
+
+### 3. Skip Obvious Intermediate Steps
+
+For clear progressions, you can skip steps:
+
+```
+Okay: T1: Problem → T2: Solution → T3: Verify
+
+Unnecessary: T1: Problem → T2: Restate problem → T3: Think about problem → T4: Solution
+```
+
+---
+
+## When Sequential Thinking Excels
+
+### Complex Multi-Factor Decisions
+
+- Business strategy with many stakeholders
+- Architecture with competing concerns
+- Optimization with multiple objectives
+
+**Why it excels:** Can branch to explore each factor independently.
+
+---
+
+### Debugging Production Issues
+
+- Intermittent errors
+- Multi-service systems
+- Performance degradation
+
+**Why it excels:** Hypothesis testing with revision as facts emerge.
+
+---
+
+### System Design
+
+- Greenfield architecture
+- Migration planning
+- Technology selection
+
+**Why it excels:** Can iterate designs and compare alternatives.
+
+---
+
+### Research and Analysis
+
+- Literature review
+- Competitive analysis
+- Market research
+
+**Why it excels:** Divide and conquer with synthesis.
+
+---
+
+## Pro Tips
+
+### Tip 1: Name Your Branches Clearly
+
+```
+Good: branch_id = "async_with_queue"
+Bad: branch_id = "option2"
+```
+
+---
+
+### Tip 2: Use Checkpoints in Long Sequences
+
+Every 5 thoughts in sequences > 10 thoughts total.
+
+---
+
+### Tip 3: Explicitly State What You're Skipping
+
+```
+"Skipping analysis of edge case X as it only affects 0.1% of users..."
+```
+
+---
+
+### Tip 4: Front-Load Verification Criteria
+
+```
+T1: "Solution must satisfy: < 100ms latency, < $500/month cost, handles 10K req/s"
+```
+
+---
+
+### Tip 5: Use Revision Purposefully
+
+Not every wrong turn needs explicit revision - only significant redirections.
+
+---
+
+## Advanced Patterns Library
+
+### Pattern: Red Team Analysis
+
+```
+T1: Propose solution
+T2-T3: [Branch Defense]: Defend solution
+T4-T5: [Branch Attack]: Find weaknesses
+T6: Synthesis - improved solution
+```
+
+---
+
+### Pattern: Time-Boxed Exploration
+
+```
+T1: Problem definition
+T2: "Will explore for 5 thoughts, then decide"
+T3-T7: Exploration
+T8: Decision based on findings
+```
+
+---
+
+### Pattern: Confidence Convergence
+
+```
+T1: Multiple hypotheses (20% confidence each)
+T2: Test most likely (40% confidence)
+T3: Test second (60% confidence)
+T4: Confirm (95% confidence)
+```
+
+---
+
+### Related Notes
+
+- [[Examples]] - See advanced techniques in action
+- [[Usage Patterns]] - Foundation patterns
+- [[Core Concepts]] - Theory behind techniques
+
+### Questions / Ideas for Further Exploration
+
+- What other advanced patterns are useful?
+- How can we teach these techniques effectively?
+- What's the optimal branching depth for different problems?

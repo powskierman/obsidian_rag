@@ -1,0 +1,25 @@
+# conjugate.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-02-11 13:49
+ContentType: Reference
+Backlink: "[[Trigonometry MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+-  A conjugate is a similar surd but with a different sign. The conjugate of (7 + √5) is (7 - √5). 
+-  
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

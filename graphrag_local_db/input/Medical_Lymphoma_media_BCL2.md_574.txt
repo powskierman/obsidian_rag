@@ -1,0 +1,26 @@
+# BCL2.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+created: 2025-03-10 15:39
+Backlink:
+---
+### Main Idea
+- What is the [BCL2](https://[[BCL2]]) mutation
+### References
+- 
+### Notes
+- **BCL2 Rearrangement**
+	•	The BCL2 gene, located on ==chromosome 18 (18q21), encodes a protein that inhibits apoptosis (programmed cell death), promoting cell survival.==
+	•	==In DHL, BCL2 is typically translocated to the immunoglobulin heavy chain locus (IGH), resulting in its overexpression. This protects tumor cells from apoptosis even under stress conditions like chemotherapy.==
+	•	<mark style="background: #FFB8EBA6;">The anti-apoptotic effect of BCL2 complements the proliferative drive of MYC, creating a highly aggressive tumor phenotype.</mark>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

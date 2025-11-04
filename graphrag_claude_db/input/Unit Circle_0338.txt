@@ -1,0 +1,82 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-15 11:23
+ContentType: Reference
+Backlink: "[[Trigonometry MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- [Interactive Unit Circle](https://www.mathsisfun.com/algebra/trig-interactive-unit-circle.html)
+- [[Notes-Unit-circle-and-trig.pdf]]
+- [Khan, Unit Circle](https://www.khanacademy.org/math/algebra2/x2ec2f6f830c9fb89:trig/x2ec2f6f830c9fb89:unit-circle/a/trig-unit-circle-review)
+- [Wikipedia, Unit Circle](https://en.wikipedia.org/wiki/Unit_circle#/media/File:Circle-trig6.svg)
+- 
+- The unit circle definition allows us to extend the domain of sine and cosine to $\mathbb R$.
+- [[Angle]]s in the plane are positive when measured anticlockwise, and negative when measured clockwise. 
+- To simplify computations, we fit an [[angle]]'s [[triangle]] into a circle with radius _r_ = 1. 
+	- A circle with a radius of 1 is called "the unit circle". 
+	- Once the hypotenuse has a fixed length of _r_ = 1, then the values of the trig ratios will depend only on _x_ and _y_, since multiplying or dividing by _r_ = 1 won't change anything. 
+- #### Unit Circle
+-  ![[Unit Circle Relationships.png|500]]
+	- [More elaborate diagram of unit circle](Circle-trig6.svg)
+	-  $x^2+y^2=1$
+	- in the unit circle, for any angle θ: 
+		- $\cos(\theta)=x$
+		- $\sin(θ) = y$
+		- $\tan(θ) = {y \over x}= {\sin(\theta)\over \cos(\theta)}$
+	- When the angle is 0
+		-  $\sin(0) = 0$
+		- $\cos(0)=1$
+		- $\tan(0) = 0$ 
+
+-  $\sin(\theta)$ is the real number obtained by moving directly across to the vertical $y$ axis
+- $cos(\theta)$ is the $\mathbb R$ obtained by moving down to the $x$ axis
+- Points on the unit circle with angles θ equivalent to 0, $\pi \over 2$, $\pi$, $3\pi \over 2$ fall on the axes at the points (1, 0), (0, 1), (−1, 0), (0, −1) respectively.
+- Memorize the unit circle using the **[[ASAP]]** mnemonic:
+	- **All** - You need to memorize all of the first quadrant [[radians]].
+	- **Subtract** - To get the numerator of each radian in the second quadrant, you subtract 1 from the denominator for the corresponding first quadrant angle.
+	- **Add** - To get the numerator of each radian in the third quadrant, you add 1 to the denominator for the corresponding first quadrant angle.
+	- **Prime numbers** - Each radian in the fourth quadrant starts with a prime number.
+	- ![[Memorize Unit Circle.png|500]]
+- [[Sine Curve]]
+- ### Process for determining the sine/cosine of $\LARGE \theta$ :
+ - Starting from (1,0), move along the unit circle in the counterclockwise direction until the angle that is formed between your position, the origin, and the positive x-axis is equal to $\large \theta$.
+ - sin⁡(θ) is equal to the y-coordinate of your point, and cos⁡(θ) is equal to the x-coordinate.
+ - If [[radians]] is 4, angle is multiple of $45^\circ$ ex: ${3 \pi}\over 4$
+ - 
+ - ### Solve trig angles of special values
+  - ### Strategy
+   - Draw the desired angle on the unit circle and find a corresponding right [[triangle]].
+   - Solve the right [[triangle]] using the known trigonometric values of the [[Special Triangles]], or their complementary angles.
+   - A complimentary angle is $90^\circ-\theta$
+	- #### Special trig values
+		- Trigonometric values for 0:
+			- $\sin⁡(0)=0$
+			- $\cos⁡(0)=1$
+		- Trigonometric values for $\pi \over 6$:
+			- $\sin⁡({\pi \over 6})={1 \over 2}$
+			- $\cos⁡({\pi \over 6})={\sqrt 3 \over 2}$
+		- Trigonometric values for $\pi \over 4$:
+			- $\sin⁡({\pi \over 4})={\sqrt 2 \over 2}$
+			- $\cos⁡({\pi \over 4})={\sqrt 2 \over 2}$
+		- Trigonometric values for $\pi \over 3$:
+			- $\sin⁡({\pi \over 3})={\sqrt 3 \over 2}$
+			- $\cos⁡({\pi \over 3})={1 \over 2}$
+		- 
+- ### How to Calculate the Sine of Special Angles in Degrees
+	- $\sin(a + b) = (\sin a \times\cos b)+\cos(a) \times \sin(b)$
+	- $\sin(a - b) = (\sin a \times\cos b)-\cos(a) \times \sin(b)$
+	-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

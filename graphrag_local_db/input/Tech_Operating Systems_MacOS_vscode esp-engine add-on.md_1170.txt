@@ -1,0 +1,23 @@
+# vscode esp-engine add-on.md
+
+---
+aliases: []
+---
+# vscode esp-engine add-on
+Date: 2022-11-15
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+-  - The ESP-Engine contains following Commands (Use CTRL+Shift+P to check key Bindings for your system) :
+	- ESP-Engine.Initiate: Convert current working directory to template IDF project.
+	- ESP-Engine.Build: Compile the whole project and generate Bin files for flashing.
+	- ESP-Engine.Clean: Clean built files.
+	- ESP-Engine.Flash: FLashes the built binaries to specified target device.
+	- ESP-Engine.Monitor: Serial Monitor for Debugging.
+	- ESP-Engine.Menuconfig: Project Configuration window.

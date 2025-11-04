@@ -1,0 +1,89 @@
+---
+bookId: "47753"
+title: "Docker Quick Start Guide: Learn Docker like a boss, and finally own your applications"
+author: Earl Waud
+asin: B07L1LWQ9V
+lastAnnotatedDate: 2022-06-19
+highlightsCount: 25
+reference: https://www.amazon.com/dp/B07L1LWQ9V
+kindle_link: kindle://book?action=open&asin=B07L1LWQ9V
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81N9cRKn+pL._SY160.jpg)
+## Highlights
+A Docker registry is just a centralized location to store and retrieve Docker images. — location: [928](kindle://book?action=open&asin=B07L1LWQ9V&location=928) ^ref-35783
+
+---
+the difference between a running container and a stopped one is that the process is either running or it has exited, leaving behind its own read/write layer. — location: [998](kindle://book?action=open&asin=B07L1LWQ9V&location=998) ^ref-6322
+
+---
+--rm parameter: # there is no short form of the --rm parameter docker container run --rm hello-world This parameter instructs Docker to remove the container's read/write layer automatically when the container exits. When you run a docker container without the --rm parameter, the container data is left behind when the container exits so that the container can be restarted again later. — location: [1004](kindle://book?action=open&asin=B07L1LWQ9V&location=1004) ^ref-2168
+
+---
+Like the container IDs, the container names must be unique on a host. You cannot have two containers (even if one has exited) that have the same name. If you will have more than one container running the same image, such as web server image, name them uniquely, for example, web01 and web02. — location: [1039](kindle://book?action=open&asin=B07L1LWQ9V&location=1039) ^ref-26070
+
+---
+sometimes you will want to remove a container even if it is currently running. You can use the --force parameter to handle that situation. — location: [1044](kindle://book?action=open&asin=B07L1LWQ9V&location=1044) ^ref-53486
+
+---
+If you have set up Docker command completion, you can type in the command up to where you need to enter the unique identifier for the container(s) and then use the Tab key to get a list of containers, tabbing to the one you want to delete. Once you've highlighted the container to delete, use the space or Enter key to select it. You can hit Tab again to select another container to delete more than one at a time. — location: [1054](kindle://book?action=open&asin=B07L1LWQ9V&location=1054) ^ref-16679
+
+---
+docker container rm --force $(docker container ls --all --quiet) # using short parameter names docker container rm -f $(docker container ls -aq) # using the old syntax docker rm -f $(docker ps -aq) This will remove all of the containers both running and exited from your system, so be careful! You will probably use this shortcut often, so creating a system alias for it is pretty handy. You can add something like the following to your ~/.bash_profile or ~/zshrc file: alias RMAC='docker container rm --force $(docker container ls --all --quiet)'. — location: [1067](kindle://book?action=open&asin=B07L1LWQ9V&location=1067) ^ref-28379
+
+---
+have the container run as a background process, giving you back control of your terminal session once it launches. Of course, there is a parameter for that. It is the --detach parameter. Here is what using that parameter looks like: # using the full form of the parameter docker container run --detach --name web-server --rm nginx # using the short form of the parameter docker container run -d --name web-server --rm nginx — location: [1078](kindle://book?action=open&asin=B07L1LWQ9V&location=1078) ^ref-10224
+
+---
+how do I stop a detached container? Well, I am glad you asked. You use the container stop command. — location: [1085](kindle://book?action=open&asin=B07L1LWQ9V&location=1085) ^ref-58123
+
+---
+when you use the --detach parameter, control of the session is returned as soon as the container starts so you don't see the data sent to stdout and stderr. If you want to see that data, you use the container logs command. That command looks like this: # the long form of the command # Usage: docker container logs [OPTIONS] CONTAINER docker container logs --follow --timestamps web-server # the short form of the command docker container logs -f -t web-server — location: [1097](kindle://book?action=open&asin=B07L1LWQ9V&location=1097) ^ref-620
+
+---
+the --tail parameter with a number to dump just the last number of lines. — location: [1107](kindle://book?action=open&asin=B07L1LWQ9V&location=1107) ^ref-57953
+
+---
+you want to know what processes are running inside a container. That's where the container top command comes in. — location: [1113](kindle://book?action=open&asin=B07L1LWQ9V&location=1113) ^ref-51564
+
+---
+docker container top web-server # using the old syntax docker top web-server — location: [1117](kindle://book?action=open&asin=B07L1LWQ9V&location=1117) ^ref-12105
+
+---
+if you want to have the changes you make inside a running container persist and be available when you run new containers, you can use the container commit command. The container commit command allows you to save the current read/write layer of a container along with the layers of the original image, creating a brand new image. — location: [1232](kindle://book?action=open&asin=B07L1LWQ9V&location=1232) ^ref-27499
+
+---
+A Dockerfile (yes, the correct spelling is all one word, with a capital D) is a text file that contains instructions used by the Docker daemon to create a Docker image. — location: [1313](kindle://book?action=open&asin=B07L1LWQ9V&location=1313) ^ref-2419
+
+---
+The order of the instructions in the Dockerfile is significant. — location: [1317](kindle://book?action=open&asin=B07L1LWQ9V&location=1317) ^ref-63656
+
+---
+All of the instructions found in the Dockerfile will result in a new layer being generated as the Docker image is built, — location: [1320](kindle://book?action=open&asin=B07L1LWQ9V&location=1320) ^ref-18429
+
+---
+The best practice is to use instructions that change least early in the Dockerfile, and instructions that change more frequently in the later part of the Dockerfile. — location: [1325](kindle://book?action=open&asin=B07L1LWQ9V&location=1325) ^ref-24933
+
+---
+Every Dockerfile must have a FROM instruction, and it must be the first instruction in the file. — location: [1331](kindle://book?action=open&asin=B07L1LWQ9V&location=1331) ^ref-43655
+
+---
+The FROM instruction will create the first layer in our new image. That layer will be the size of the image specified in the instruction's parameter so it is best to specify the smallest image that meets the criteria needed for your new image. — location: [1342](kindle://book?action=open&asin=B07L1LWQ9V&location=1342) ^ref-5422
+
+---
+the OS image for alpine will be much smaller than images of other OSes, — location: [1345](kindle://book?action=open&asin=B07L1LWQ9V&location=1345) ^ref-30137
+
+---
+The LABEL instruction adds a zero-byte-sized layer to the image when it is created. An image can have more than one LABEL, and each LABEL instruction can provide one or more LABELs. The most common use for the LABEL instruction is to provide information about the image maintainer. — location: [1356](kindle://book?action=open&asin=B07L1LWQ9V&location=1356) ^ref-39611
+
+---
+You can view all of the labels for an image by using the inspect command: — location: [1377](kindle://book?action=open&asin=B07L1LWQ9V&location=1377) ^ref-63312
+
+---
+Docker image is made up of a series of read-only layers built upon one another, and that when you run a container from a Docker image, it creates a new read-write layer that you can think of as being on top of the read-only layers. All the changes to the container are applied to the read-write layer. — location: [1576](kindle://book?action=open&asin=B07L1LWQ9V&location=1576) ^ref-15400
+
+---
+The VOLUME instruction will create a storage location that is outside of the United File System, and by so doing, allow storage to persist beyond the life of your container. Here is the syntax of the VOLUME instruction: # VOLUME instruction syntax VOLUME ["/data"] # or for creating multiple volumes with a single instruction VOLUME /var/log /var/db /moreData — location: [1585](kindle://book?action=open&asin=B07L1LWQ9V&location=1585) ^ref-18502
+
+---

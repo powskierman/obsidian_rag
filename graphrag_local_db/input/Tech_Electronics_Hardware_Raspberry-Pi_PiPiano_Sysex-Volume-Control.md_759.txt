@@ -1,0 +1,37 @@
+# Sysex-Volume-Control.md
+
+---
+aliases:
+tags:
+created: 2022-06-26 15:00
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+This Universal SysEx message adjusts a device's master volume. Remember that in a multitimbral device, the [Volume controller](http://www.borg.com/~jglatt/tech/midispec/volctl.htm) messages are used to control the volumes of the individual Parts. So, we need some message to control Master Volume. Here it is.
+
+**0xF0 SysEx
+0x7F Realtime
+0x7F The SysEx channel. Could be from 0x00 to 0x7F.
+Here we set it to "disregard channel".
+0x04 Sub-ID -- Device Control
+0x01 Sub-ID2 -- Master Volume
+0xLL Bits 0 to 6 of a 14-bit volume
+0xMM Bits 7 to 13 of a 14-bit volume
+0xF7 End of SysEx**
+
+
+
+*From < <http://midi.teragonaudio.com/tech/midispec/mastrvol.htm>>*
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

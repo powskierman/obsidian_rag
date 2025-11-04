@@ -1,0 +1,23 @@
+---
+aliases: [brew]
+---
+# Homebrew
+Date: 2022-10-12
+
+### Tags: 
+
+### Backlink
+[[MacOS MOC]]
+
+### Reference
+- /opt/homebrew/bin/brew install  
+### Notes
+-  For the ARM architecture, you don't need to use `arch` but you do need to use the full path of the homebrew command.
+
+```
+/opt/homebrew/bin/brew install sometool
+```
+- To uninstall homebrew:
+	- ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+```
+- 

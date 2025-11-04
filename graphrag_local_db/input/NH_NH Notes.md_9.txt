@@ -1,0 +1,41 @@
+# NH Notes.md
+
+---
+aliases:
+tags:
+  - NH
+  - Base
+created: 2025-08-24 11:30
+Backlink:
+---
+### Main Idea
+- A base that lists all notes with tag: NH
+### References
+- 
+### Notes
+```base
+views:
+  - type: table
+    name: Table
+    filters:
+      and:
+        - file.hasTag("NH")
+    order:
+      - file.name
+      - tags
+      - created
+
+```
+
+
+![[NH Notes Base.base]]
+
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

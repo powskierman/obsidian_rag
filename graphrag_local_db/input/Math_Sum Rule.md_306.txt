@@ -1,0 +1,26 @@
+# Sum Rule.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-02-22 15:37
+ContentType: Reference
+Backlink: "[[derivative MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- The sum of the derivatives = the [[derivative MOC|derivative]] of the sums
+	- $d \over dt$`[`$w1(t)$ +$w2(t)$]  =  $w1'(t)$ + $w'2(t)$
+	
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,16 @@
+# Namespaces.md
+
+---
+aliases: []
+tags: []
+---
+# Namespaces
+Date: 2023-04-03
+
+### Backlink
+[[Tech/Programming-Tools/C++/C++ MOC]]
+
+### Reference
+-  
+### Notes
+-  namespace declarations in C++ bring the names of the specified namespaces into the current scope, allowing the programmer to use the functions, classes, and variables defined in those namespaces without needing to specify the namespace each time they are used.

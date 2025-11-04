@@ -1,0 +1,17 @@
+# MoC Template.md
+
+---
+aliases: 
+tags:
+  - MoC
+created: <% tp.date.now("YYYY-MM-DD HH:mm") %>
+Backlink:
+---
+## Links
+- 
+## Related MoCs
+- [[]]
+- ## External Resources
+- 
+## Notes
+<% tp.system.clipboard() %>

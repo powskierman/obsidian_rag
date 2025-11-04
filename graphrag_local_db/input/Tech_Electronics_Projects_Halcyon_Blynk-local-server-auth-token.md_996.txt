@@ -1,0 +1,41 @@
+# Blynk-local-server-auth-token.md
+
+---
+aliases:
+tags:
+created: 2022-07-01 08:23
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Auth tokens for User <mlapoint99@hotmail.com> on local Blynk server
+
+Password: xlap8911
+
+'Cuisine' : e0a77038e627442bbd543143c2c7b3b1
+
+'TV Room' : 430bcde7ae4d4d28927aaf1ceaf41c8a
+
+'Salon' : a44b1cefe71a4b54afe705080c85a67f
+
+'Amis' : 7aece74ec3dd426a81107047dabda3d6
+
+'Chambre' : huNodqzX7bojGQ6Po6vaBvYNLPM-lKFN
+
+'Meteo' : 431aa90ce268487aad45c331d98a21cf
+
+'Thermostat' : 0abf7b0507d8490cb109681d3f47e4cd
+
+'Test' : a69a3f4c89e84300b9f8e42365ef6ac1
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

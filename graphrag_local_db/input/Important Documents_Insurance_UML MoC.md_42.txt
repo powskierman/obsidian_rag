@@ -1,0 +1,24 @@
+# UML MoC.md
+
+---
+aliases: []
+---
+# UML MoC
+Date: 2022-08-22
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [[UML Class Diagram Tutorial]]
+- [Classes and Relationships](http://www.cs.utsa.edu/~cs3443/uml/uml.html)
+- [Protocols and Extensions in UML](https://stackoverflow.com/questions/37509964/how-to-visualize-protocols-and-extensions-in-uml)
+- 
+### Notes
+-  Relationships
+	- Extension or Generalization: A class extends another class. For example, the Book class might extend the Document class.
+- Relations between classes are defined using the following symbols :
+
+<table border="1" cellspacing="0" cellpadding="5"><tbody><tr><td><b>Type</b></td><td><b>Symbol</b></td><td><b>Drawing</b></td></tr><tr><td>Extension</td><td><code class="cod">&lt;|--</code></td><td><img loading="lazy" src="https://plantuml.com/img/extends01.png"></td></tr><tr><td>Composition</td><td><code class="cod">*--</code></td><td><img loading="lazy" src="https://plantuml.com/img/sym03.png"></td></tr><tr><td>Aggregation</td><td><code class="cod">o--</code></td><td><img loading="lazy" src="https://plantuml.com/img/sym01.png"></td></tr></tbody></table>

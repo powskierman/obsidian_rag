@@ -1,0 +1,85 @@
+# NH Thread Network Nodes.md
+
+---
+aliases: 
+tags:
+  - thread
+  - NH
+---
+# NH Thread Network Nodes
+Date: 2024-08-20
+
+### Backlink
+[[Tech/Networking/Thread MoC|Thread MoC]]
+
+### Reference
+- [[Thread Network Keys]]
+- [[ESP Thread Border Router REST commands]]
+- [[ESP Border Router Dev Kit]]
+-  
+### Notes
+- To identify a specific node, use the [[Mesh-Local address]], which is typically stable in Thread networks.
+	- 
+- Nodes:
+		- Rpi #OTBR 
+			- 192.168.0.11:8081
+			- Rloc16: 0x3800
+			- Leader
+			- IPs
+			- 1. Node 3 (ExtAddress: eac7ebc8aaaeda94)    
+		    - fdf8:8acf:56e4:1:5162:f5ae:f856:dcd3
+		    - fdfe:fb46:ee79:4084:0:ff:fe00:fc11
+		    - fdfe:fb46:ee79:4084:0:ff:fe00:fc10
+		    - fdfe:fb46:ee79:4084:0:ff:fe00:fc00
+		    - fdfe:fb46:ee79:4084:0:ff:fe00:fc38
+		    - fdfe:fb46:ee79:4084:0:ff:fe00:3800
+		    - fdfe:fb46:ee79:4084:ebef:f3aa:3127:cede
+		    - fe80:0:0:0:e8c7:ebc8:aaae:da94 (Link-local)
+
+		- Office #border-router
+			- 192.168.0.220
+			- Rloc16: 0x1800
+			- Node 1 (ExtAddress: 5ea8a265e940bac3)
+			    - fdfe:fb46:ee79:4084:0:ff:fe00:fc10
+			    - fdfe:fb46:ee79:4084:0:ff:fe00:1800
+			    - fdf8:8acf:56e4:1:e985:5cc1:a8b7:e872
+			    - fdfe:fb46:ee79:4084:8361:c238:1d39:6790
+			    - fe80:0:0:0:5ca8:a265:e940:bac3 (Link-local)
+		- Test #border-router
+			- 192.168.0.217
+			- Rloc16: 0xd400			
+			1. Node 5 (ExtAddress: ca17ca6327587269)    
+			- fdf8:8acf:56e4:1:9427:e6bb:c6c4:b205
+			- fdfe:fb46:ee79:4084:0:ff:fe00:d400
+			- fdfe:fb46:ee79:4084:a6bf:3d37:384a:c814
+			- fe80:0:0:0:c817:ca63:2758:7269 (Link-local)
+		- ESP32H2 dev board
+			- Rloc16: 0x9c00
+			- 1. Node 6 (ExtAddress: ce7df3cbb146209a) 
+		    - fdfe:fb46:ee79:4084:0:ff:fe00:9c00
+		    - fdf8:8acf:56e4:1:8960:1d0d:e186:7715
+		    - fdfe:fb46:ee79:4084:930c:898b:28b5:1143
+		    - fe80:0:0:0:cc7d:f3cb:b146:209a (Link-local)
+			- - [[IP Address of ESP32-H2 on Thread]]
+		- Eve Smart Plug
+			- Rloc16: 0xc800
+			- ipaddr:
+				1. Node 2 (ExtAddress: 96419867a9920633)    
+			    - fdfe:fb46:ee79:4084:0:ff:fe00:c800
+			    - fdf8:8acf:56e4:1:b374:3948:4638:e7b6
+			    - fdfe:fb46:ee79:4084:7da:5574:ee1c:9f03
+			    - fe80:0:0:0:9441:9867:a992:633 (Link-local)
+
+		- Inovelli Smart Switch
+			- Rloc16: ox5000
+			- 1. Node 4 (ExtAddress: 5e3b5babb6b0a1a3)    
+		    - fdfe:fb46:ee79:4084:0:ff:fe00:5000
+		    - fdf8:8acf:56e4:1:f3c6:34e7:962a:1009
+		    - fdfe:fb46:ee79:4084:b1c1:3cc0:4612:2995
+		    - fe80:0:0:0:5c3b:5bab:b6b0:a1a3 (Link-local)
+
+	- Each node has:
+		- A mesh-local address (starting with fdfe:fb46:ee79:4084)
+		- A global address (starting with fdf8:8acf:56e4:1)
+		- A link-local address (starting with fe80)
+		- Some nodes have additional addresses for routing and other purposes

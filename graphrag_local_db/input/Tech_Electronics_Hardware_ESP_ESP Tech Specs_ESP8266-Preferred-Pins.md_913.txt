@@ -1,0 +1,23 @@
+# ESP8266-Preferred-Pins.md
+
+---
+aliases:
+tags:
+created: 2021-12-31 10:05
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+![GMO function notes I restrictions for normal be HIGH during boot / reset (has buiR in min-up) reserved for frimmre upload and sedal monitor. not reccomended as GPIO pin (aaive Lom be HIGH bo«i / reset I wakeup (has in Bin-up) reserved for firmwa1E upload and serial monitor. not reccomended as GPIO pin these pins are reserved for mcu - flash communication, do not use! quite safe pin quite safe pm qui& safe pin be LOW durirv boot / reset wakeup (has built in pull-dwl) for sleep rnode, conned to EXT_RSTB, on will output LOW for reset default behaviour on boot osdMes, than üNues HIGH aner LOW for -50rns, then HIGH than HIGH after LOW for -soms, then HIGH HIGH for -looms, then LOW HIGH for -looms, LOW HIGH then LOW LOW HIGH then fans to ---IW 24 GP105 recc. for sensors for run snfthxx 1 2 3 6-11 12 13 14 15 10 nfo: TXD vo RXD VO. MISO (SDO) 1/0. MOSI (SDI) VO, SCK vo LO (no *OGH HIGH HIGH YES tip 4ch btnZ3 4 max source current I pin: max drain current / pin: 12mA GPIO pins total current: 16 x 12mA ESP8266 PINOUT VOL)A i LUA 'v't;tYiPS •v'DD3P.3 'POUT ADC 6 CE_PD CP-'016 8 03-31-2016 22 C,P107 21 GP106 c;P101 20 17 spr_9 SPX*' SPIWP Bspxw* NOTES: A Tun nin m.rr•nt Rmå GPIO Inst Name 1 UORXD U 4 D ATAI 10 SD DATA3 U ' 15 MTDO U 16 XPD_DCDC Function O MT K D DCDC Function 1 SPICSI p p! vvp RTC GPIOO Function 2 Function 3 Function 4 AtReset After Reset Sleep CLK RT oe=O p 01 HSPICS GPI GPIOIO GP1015 htsplb..vp UORTS oe=O u oe=0 oe=l,wpd u EXT WAKEUP DEEPSLEEP BT_ AL EN oe=O oe=l ](ESP8266-Preferred-Pins-image1.jpeg){width="4.364583333333333in" height="6.5in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

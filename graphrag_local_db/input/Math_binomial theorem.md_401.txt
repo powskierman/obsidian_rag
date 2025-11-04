@@ -1,0 +1,66 @@
+# binomial theorem.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-01-22 13:13
+ContentType: Reference
+Backlink: "[[Algebra MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+https://brilliant.org/wiki/binomial-theorem-n-choose-k/
+
+- The binomial theorem (or binomial expansion) is a result of expanding the powers of binomials or sums of two terms. The coefficients of the terms in the expansion are the *binomial coefficients*.
+	- $(x+y)^1$ = $x+y$
+	- $(x+y)^2$ = $x^2+2xy+y^2$
+	- $(x+y)^3$ = $x^3+3xy^2+3x^2y+y^3$
+	- $(x+y)^4$ =	$x^4+4xy^3+6x^2y^2+4x^3y+y^4$
+## Theorem
+Let n be a positive integer, and x and y real  (or complex , or polynomials). The coefficient of $x^k y^{n−k}$, in the k$\text{th}$ term in the expansion of $(x+y)^n$, is equal to $(n^k)(k^n)$, where:
+$${\left(\begin{array}{l}n \\ k\end{array}\right)=\frac{n !}{(n-k) ! k !}}$$
+so:
+$$
+(x+y)^{n}=\sum_{r=0}^{n}\left(\begin{array}{l}
+n \\
+r
+\end{array}\right) x^{n-r} y^{r}=\sum_{r=0}^{n}\left(\begin{array}{l}
+n \\
+r
+\end{array}\right) x^{r} y^{n-r} .
+$$
+or:
+The **binomial theorem** states that for any positive integer nn, we have:
+$$
+\begin{aligned}
+(x+y)^{n} &=\left(\begin{array}{l}
+n \\
+0
+\end{array}\right) x^{n}+\left(\begin{array}{l}
+n \\
+1
+\end{array}\right) x^{n-1} y+\cdots+\left(\begin{array}{c}
+n \\
+n-1
+\end{array}\right) x y^{n-1}+\left(\begin{array}{l}
+n \\
+n
+\end{array}\right) y^{n} \\
+&=\sum_{k=0}^{n}\left(\begin{array}{l}
+n \\
+k
+\end{array}\right) x^{n-k} y^{k}
+\end{aligned}
+$$
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

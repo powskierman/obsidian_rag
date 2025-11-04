@@ -1,0 +1,17 @@
+# Books MoC.md
+
+---
+aliases: 
+tags:
+  - MoC
+created: 2025-08-26 18:49
+Backlink:
+---
+## Links
+- 
+## Related MoCs
+- [[]]
+## External Resources
+- 
+## Notes
+![[Books/Books/Untitled.base]]

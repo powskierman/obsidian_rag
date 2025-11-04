@@ -1,0 +1,20 @@
+# ninja ROM report.md
+
+---
+aliases: []
+tags: [
+ ninja
+ report
+]
+---
+# ninja ROM report
+Date: 2023-06-16
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- ninja rom report:  
+	- Provides an in-depth build report when using ninja

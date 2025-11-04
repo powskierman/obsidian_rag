@@ -1,0 +1,17 @@
+---
+aliases: 
+tags:
+  - epson
+  - printer
+---
+# Epson ET-3750
+Date: 2023-12-29
+
+### Backlink
+[[]]
+
+### Reference
+-  [[Printer test page.jpg]]
+- [Cleaning print heads video](https://youtu.be/4CEWsFwfJXg?si=lZOLKumdeLgJONSS)
+### Notes
+-  

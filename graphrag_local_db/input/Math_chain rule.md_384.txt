@@ -1,0 +1,27 @@
+# chain rule.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-02-21 12:50
+ContentType: Reference
+Backlink: "[[derivative MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Lets us find derivatives of s
+	- The circle means 
+- $d \over dx$`[`$(f \circ g)(x)$`]` = $f'(g(x))g'(x)$
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

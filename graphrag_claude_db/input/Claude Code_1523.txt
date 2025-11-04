@@ -1,0 +1,33 @@
+---
+aliases:
+tags:
+  - AI
+  - claude
+created: 2025-09-16 10:02
+ContentType:
+Backlink: "[[AI Tools MoC|AI Tools MoC]]"
+---
+### Main Idea
+- 
+### References
+- [[How I use Claude Code (+ my best tips)]]
+- [[Claude Code Information Files]]
+### Notes
+- - **Shift+Enter** doesn't work by default for new lines.  Tell Claude to set up your terminal with `/terminal-setup`.
+- **Dragging files in** opens them in a new tab. Hold Shift while dragging to reference them properly in Claude.
+- **Pasting images** from clipboard doesn't work with Command+V. Use Control+V instead.
+- **Stopping Claude** isn't Control+C (that just exits entirely). Use Escape to stop Claude.
+- **Jumping to previous messages**: Escape twice shows a list of all previous messages you can jump back to.
+- The **`CLAUDE.md`** file provides a project overview and some key commands.
+- **Message queuing**: You can type multiple prompts and Claude will work through them intelligently.
+- [[Claude Code Hooks]]
+- **Custom slash commands**: 
+	- To add commands, just create a `.claude/commands` folder, add the command name as a file with a `.md` extension.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

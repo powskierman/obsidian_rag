@@ -1,0 +1,22 @@
+# File Sharing.md
+
+---
+aliases: 
+tags:
+  - scp
+  - linux
+  - file-sharing
+---
+# File Sharing
+Date: 2024-02-01
+
+### Backlink
+[[Linux MOC]]
+
+### Reference
+-  
+### Notes
+- Use SCP at the CLI:
+	- `scp /path/to/local/file pi@raspberrypi.local:/path/to/destination
+`
+- [[Open-Server-Share]]

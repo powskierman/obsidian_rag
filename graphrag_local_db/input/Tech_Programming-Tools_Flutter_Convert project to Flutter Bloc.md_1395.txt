@@ -1,0 +1,65 @@
+# Convert project to Flutter Bloc.md
+
+---
+aliases: []
+---
+# Convert project to Flutter Bloc
+Date: 2022-09-07
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+-       emit(GarageState(garage: doorColor));
+      print('[13] doorColor is: $doorColor'); 
+### Notes
+- Delete stateful class 
+- <cmd><shift> p
+	- pubspec assist, add update dependencies
+	- flutter_bloc, equatable
+- flutter pub get
+- right-click lib and create bloc
+	- Bloc -new bloc - name
+	- Create new directory name in bloc
+	- move all bloc files to new directory
+	- create file bloc_imports.dart in  bloc
+- In bloc_imports.dart,
+	- export 'package:flutter_bloc/flutter_bloc.dart';
+	- export './garage_bloc/garage_bloc.dart';
+- In name_state.dart,
+	- create final variable with proper type
+		- final Color colorValue;
+	- Add required this to constructor
+		- const GarageState({required this.colorValue});
+	- Click lightbulb next to nameInitial and create constructor
+	- Correct nameInitial constructor like so:
+		- const GarageInitial() : super(colorValue: Colors.black);
+- In name_event.dart,
+	- delete nameEvent constructor
+	- create appropriate class events ie.
+		- class DoorSelectEvent extends GarageEvent {}
+	- remove extends equitable
+		- abstract class GarageEvent {}
+	- Save file
+- in name_state.dart,
+	- Modify constructor for required inputs
+		- const GarageState({required this.doorValue, required this.colorValue});
+	- Modify state constructor with default values
+		- const GarageInitial() : super(doorValue: 'no', colorValue: Colors.black);
+	- To correct error remove abstract from name_bloc.dart
+- in name_bloc.dart,
+	- Create emit statement
+		- on<DoorSelectEvent>((event, emit) {
+				emit(GarageState(
+				doorValue: state.doorValue, colorValue: state.colorValue));
+- Implement bloc provider in main build widget
+	- Highlight MaterialApp
+	- cmd-. Select wrap with bloc provider
+		- rename to NameBloc
+		- to eliminate error, press lightbulb 
+			- select import bloc/bloc_imports.dart
+	- Select object to be displayed and wrap with blocProvider
+	child: BlocProvider(create: (context) => GarageBloc(),
+		child: Icon(Icons.garage_outlined, size: 190, color: doorColor),

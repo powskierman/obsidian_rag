@@ -1,0 +1,4 @@
+# Simplified GraphRAG requirements for CLI usage
+graphrag
+flask
+pyyaml

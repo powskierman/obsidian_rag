@@ -1,0 +1,28 @@
+# IR-Hardware-Resources.md
+
+---
+aliases:
+tags:
+  - tech
+created: 2022-05-28 08:42
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  [Constant Current LED Circuit](https://www.analysir.com/blog/2013/11/22/constant-current-infrared-led-circuit/)
+
+
+
+![](IR-Hardware-Resources-image1.jpeg){width="4.0in" height="5.166666666666667in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

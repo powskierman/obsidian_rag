@@ -1,0 +1,70 @@
+---
+aliases: [espressif matter]
+---
+# esp-idf Matter Install
+Date: 2022-11-15
+
+### Tags: 
+
+### Backlink
+[[Matter MoC]]
+
+### Reference
+- [connectedhomeip build app and commission](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/esp32/build_app_and_commission.md)
+- [connectedhomeipBUILDING.md at master · project-chipconnectedhomeip](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md)
+-  [Espressif    Matter    Google - Better documentation than original](https://developers.home.google.com/matter/vendors/espressif)
+- [Espressif's SDK for Matter main documentation](https://docs.espressif.com/projects/esp-matter/en/main/esp32/developing.html)
+- [Espressif Matter API Reference](https://docs.espressif.com/projects/esp-matter/en/main/esp32/api-reference/index.html)
+- [Hands-on Matter - The Matter Light Bulb (Part 2)](https://grandcentrix.net/en/blog/matter_02/)
+### Notes
+- If using connectedhomeIP build, go to: [[ConnectedHomeIP]]
+- If the bootstrapping fails, delete the folder **.environment/** and start again.
+- If ERROR: This script was called from a virtual environment, can not create a virtual environment again:
+	- deactivate
+- Reset path:
+	- -> ls -als
+- get esp-idf repository:
+	- git clone --recursive https://github.com/espressif/esp-idf.git
+	- cd ~/esp/esp-idf
+	- git checkout v4.4.3
+	- git submodule update --init --recursive
+	- ./install.sh
+	- source export.sh
+	-  cd ..
+- Get esp-matter repository
+	- Use X86 shell
+	- git clone --recursive https://github.com/espressif/esp-matter.git
+	- cd  ~/esp/esp-matter
+	- ./install.sh
+	-  source export.sh
+	- export IDF_CCACHE_ENABLE=1
+	- cd ..
+- Install openssl:
+	- brew install openssl pkg-config
+- Adjust path for openssl:
+	- -> export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:"/opt/homebrew/opt/openssl@3/lib/pkgconfig" 
+	- 
+- Build:
+	- If zap error:
+		- Zap is very painful to use, use the non-zap, esp-matter version of the lighting app.
+	- Clean environment
+		- cd esp-matter/connectedhomeip/connectedhomeip
+		- yes | rm -r .environment
+	- cd examples/lighting-app/esp32
+	- Adjust environment 
+		- idf.py menuconfig
+			- Choose flash size
+	- Important!: idf.py -p /dev/cu.usbmodem3101 erase-flash
+	- idf.py --preview set-target esp32s3
+		- This should do a idf.py build
+		- If mdns error:
+			- idf.py add-dependency mdns
+		- if compile error delete build directory
+	- idf.py flash monitor
+- Provisioning
+	- Connect to wifi
+		- In the matter monitor: 
+			- matter wifi connect ssid password
+		- Use ios Home app to connect
+			- Scan code from https://docs.espressif.com/projects/esp-matter/en/main/esp32/developing.html
+		- ![](https://docs.espressif.com/projects/esp-matter/en/main/esp32/_images/matter_qrcode_20202021_3840.png)

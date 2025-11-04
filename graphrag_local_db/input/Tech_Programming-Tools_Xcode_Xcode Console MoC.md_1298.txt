@@ -1,0 +1,19 @@
+# Xcode Console MoC.md
+
+---
+aliases: 
+tags:
+  - xcode
+  - MoC
+  - console
+---
+# Xcode Console MoC
+Date: 2024-02-17
+
+### Backlink
+[[Xcode MOC]]
+
+### Reference
+-  
+### Notes
+- [[Xcode Console Troubleshooting ]]

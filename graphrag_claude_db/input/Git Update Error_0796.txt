@@ -1,0 +1,18 @@
+---
+aliases: []
+tags: [
+ git
+]
+---
+# Git Update Error
+Date: 2023-06-06
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  If an error occurs when doing: git submodule update --init
+	- Do this instead: 
+		- git fetch --recurse-submodules

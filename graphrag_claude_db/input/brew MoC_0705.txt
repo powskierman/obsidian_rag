@@ -1,0 +1,20 @@
+---
+aliases: []
+tags: [
+ brew
+]
+---
+# brew MoC
+Date: 2023-07-29
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- To install: 
+	- brew install package
+- To uninstall:
+	- brew uninstall package
+	- brew autoremove

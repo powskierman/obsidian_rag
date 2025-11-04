@@ -1,0 +1,24 @@
+# Rigol-MSO-5000-Invoice.md
+
+---
+aliases:
+tags:
+  - purchase
+created: 2022-01-01 13:42
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+![RIGOL THANK YOU YOUR ORDER WAS PROCESSED SUCCESSFULLY YOUR ORDER NUMBER IS: A41BYPE3 ORDER DETAILS Order NO: Transaction amount Name: E-mail: PayPal: ELECTRO-METERS a41bype3 $1324.51 Michel Lapointe mlapoint99@hotmail.com mlapoint99@hotmail.com 900 McKay Rd. I Pickering, Ontario LIW 3X8 Canada Email: onlinesales@electro-meters.com (mailto:onlinesales@electro-meters.com) Phone: 905.428.3413 (tel:905.428.3413) Toll-Free: 800.617.3413 (tel:800.617.3413) Fax: 905.428.6086 (tel:905.428.6086) ](Rigol-MSO-5000-Invoice-image1.jpg){width="8.5in" height="11.0in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

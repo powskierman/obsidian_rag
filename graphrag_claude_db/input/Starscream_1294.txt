@@ -1,0 +1,52 @@
+---
+aliases: 
+tags:
+  - starscream
+---
+# Starscream
+Date: 2023-10-29
+
+### Backlink
+[[Swift MOC]]
+
+### Reference
+-  
+### Notes
+-  Install using Swift Package Manager (SPM):
+	- Open your Xcode project.
+	- Go to File > Swift Packages > Add Package Dependency.
+	- Enter the Starscream repository URL: https://github.com/daltoniam/Starscream.git
+	- Follow the prompts to add Starscream.
+- Troubleshooting:
+	- The message "Missing package product 'Starscream'" suggests that while Starscream has been added to your project, Xcode might be having trouble correctly linking or recognizing it.
+	- Here's a series of steps you can follow to troubleshoot and hopefully resolve this issue:
+	- **Clean and Rebuild**:
+		    - Go to `Product` > `Clean Build Folder` or simply press `Shift + Command + K`.
+		    - Then try building your project again.
+	- **Check Target Linking**:
+		- Click on your project in the Project Navigator.
+		- Under 'TARGETS', select your main app target.
+		- Go to the 'General' tab.
+		- In the 'Frameworks, Libraries, and Embedded Content' section, ensure that Starscream is listed and its status is set to `Embed & Sign`.
+	- **Reset Package Caches**:
+		- Go to `File` > `Swift Packages` > `Reset Package Caches`.
+	- **Update Package**:
+		- Go to `File` > `Swift Packages` > `Update to Latest Package Versions`.
+	- **Remove and Re-add the Package**:
+		- Sometimes removing the package and re-adding it can solve the problem:
+	        - Go to `File` > `Swift Packages` > `Remove Package Dependency`.
+	        - After removing it, add it again using `File` > `Swift Packages` > `Add Package Dependency`.
+	- **Check Your Project's Build Settings**:
+		- Click on your project in the Project Navigator.
+		- Under 'TARGETS', select your main app target.
+		- Go to the 'Build Settings' tab.
+		- Make sure that `Always Embed Swift Standard Libraries` is set to `Yes`.
+	- **Check Package Resolution**:
+    
+    - In the Project Navigator, open the `Package.resolved` file located in the `Workspace` folder.
+    - Confirm that Starscream is listed there with the correct version.
+	- **Restart Xcode**:
+	- **Manual Package Resolution**:
+		- Delete the `.build` folder and the `Package.resolved` file from your workspace or project folder (make sure to backup or commit any changes before doing this).
+		- Then, try re-adding the Starscream package.
+	- **Check for Xcode Updates**

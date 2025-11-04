@@ -1,0 +1,34 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-07-05 12:08
+ContentType: Reference
+Backlink: "[[Unit Circle]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+date(2022-02-08)
+
+
+
+- [Wikihow, memorize unit circle](https://www.wikihow.com/Memorize-the-Unit-Circle)
+
+- Memorize the  using the **** mnemonic:
+	- **All** - You need to memorize all the first quadrant .
+	- **Subtract** - To get the numerator of each radian in the second quadrant, you subtract 1 from the denominator for the corresponding first quadrant angle.
+	- **Add** - To get the numerator of each radian in the third quadrant, you add 1 to the denominator for the corresponding first quadrant angle.
+	- **Prime numbers** - Each radian in the fourth quadrant starts with a prime number.
+ 
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

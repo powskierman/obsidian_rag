@@ -1,0 +1,23 @@
+---
+aliases: 
+tags:
+  - ebooks
+  - drm
+created: 2025-02-25 15:37
+---
+### Main Idea
+- This software removes DRM easily from ebooks, except for Apple Books
+### References
+- [Best eBook Converter, Convert + Backup eBooks for reading anywhere.](https://epubor.com/ultimate.html)
+### Notes
+- Epubor Ultimate makes it simple to convert a bunch of books to EPUB, PDF or Mobi, and the converted books are displayed exactly the way they are.
+- **Epubor Ultimate for Mac** (1 Year License)|
+	`K53KF44V-80SDGQC6-MHG99AKH-HPTAPW23`
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

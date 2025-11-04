@@ -1,0 +1,20 @@
+# Neumorphism.md
+
+---
+aliases: []
+---
+# Neumorphism
+Date: 2022-09-05
+
+### Tags: 
+
+### Backlink
+[[Flutter MoC]]
+
+### Reference
+- [Neumorphism design theory video](https://khurramali63.medium.com/generate-class-diagram-from-flutter-dart-code-9b8c2b49c026) 
+- [flutter_neumorphic 3.2.0](https://pub.dev/packages/flutter_neumorphic/example)
+- [github - flutter-neumorphic](https://github.com/Idean/Flutter-Neumorphic/blob/master/lib/src/widget/switch.dart)
+- 
+### Notes
+-

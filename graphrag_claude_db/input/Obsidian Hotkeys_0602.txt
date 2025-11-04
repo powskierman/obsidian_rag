@@ -1,0 +1,40 @@
+---
+aliases: []
+---
+
+2022-06-22
+# Obsidian Hotkeys
+
+^707d4b
+
+### Backlink
+[[Obsidian MOC]]
+
+### Reference
+- [Keycombiner Obsidian keyboard shortcuts](https://keycombiner.com/collections/obsidian/)
+- [Defkey Obsidian keyboard shortcuts](https://defkey.com/obsidian-shortcuts)
+- [Mac Keyboard shortcuts](https://support.apple.com/en-us/HT201236) 
+- [Obsidian cheat sheet](https://github.com/ieshreya/Obsidian-Cheat-Sheet)
+- [Latex cheat sheet](latexcheatsheet.pdf)
+- 
+
+### Notes
+| Hotkey | Action                          |
+| ------ | ------------------------------- | 
+| ⌘N     | New note                        | 
+| ⌘⇧N    | New note in new pane            |
+| ⌘⌥A    | Insert new note template        |
+| ⌘⇧M    | Toggle bullet or numbered list  |
+| ⌘W     | Close active pane               | 
+| ⌘⇧T    | Undo close pane                 |
+| ⌘E     | Toggle reading view             |
+| ⌘I     | Toggle italics                  |
+| ⌘B     | Toggle bold                     |
+| ⌘P     | Command palette                 |
+| ⌘⇧D    | Open tables control bar         |
+| ⌥0     | Convert URL to preview (iframe) |
+| ⌘⇧X    | Maximize active pane            | 
+| ⌃[tab]  | Cycle through open panes 
+
+^f70033
+

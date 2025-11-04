@@ -1,0 +1,32 @@
+---
+aliases:
+tags:
+  - tech
+created: 2021-12-29 16:48
+ContentType: Reference
+Backlink: "[[Arduino IDE]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  [ESP32 / Big Sur Mac OS Arduino IDE compilation fail](https://forum.arduino.cc/index.php?topic=699989.0)
+
+2.  [Remove a library](https://stackoverflow.com/questions/16752806/how-do-i-remove-a-library-from-the-arduino-environment)
+---
+tags:
+  - arduino
+  - problem-solving
+  - troubleshooting
+created: 2025-01-16
+ContentType: Troubleshooting
+---
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

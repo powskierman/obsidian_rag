@@ -1,0 +1,31 @@
+---
+aliases: 
+tags:
+  - obsidian
+  - MoC
+---
+
+2022-06-23
+# Obsidian MOC
+
+### Backlink
+[[Tech MOC]]
+
+### Reference
+1. [[Markdown MOC]]
+3. [[Obsidian Hotkeys]]
+4. [[Obsidian User Guide]]
+5. [[Obsidian/Tutorials]]
+6. [[Metadata]]
+7. [[Excalidraw MOC]]
+8. [[2020 Comprehensive Obsidian Workflow For Zettelkasten and Evergreen Notes]]
+9. [[LYT Lessons]]
+10. [[Slideshow]]
+11. [[Obsidian Codeblocks]]
+12. [Obsidian Style Guide ](https://obsidian-rs.github.io/docs/doc1/)
+13. [[Obsidian Tags]]
+14. [[Smart Connections MoC]]
+15. [Run DeepSeek Locally in Obsidian](https://dev.to/proflead/run-deepseek-locally-in-obsidian-complete-beginners-guide-g38?t)
+
+### Notes
+- 

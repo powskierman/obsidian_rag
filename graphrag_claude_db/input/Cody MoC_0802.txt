@@ -1,0 +1,18 @@
+---
+aliases: 
+tags:
+  - cody
+  - MoC
+---
+# Cody MoC
+Date: 2024-03-28
+
+### Backlink
+[[]]
+
+### Reference
+-  [The power user's guide to Cody AI for Visual Studio Code](https://sourcegraph.com/blog/power-users-guide-to-cody-ai-for-visual-studio-code)
+- 
+### Notes
+-  vscode access token
+	- `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`

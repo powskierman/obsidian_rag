@@ -1,0 +1,32 @@
+# SwiftUI - Binding state to user interface controls.md
+
+---
+aliases: []
+tags: [@Binding, @State]
+---
+# SwiftUI - Binding state to user interface controls
+Date: 2023-02-28
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  To transfer properties between views, we need @State and @Binding
+	- Declare and initialize the variable in the top view:
+```
+struct TabViewTabItems: View{
+
+    @State var selectedHomeIndex = 0
+
+    @State var selectedRoomIndex = 0
+```
+- In the body, where the receiving View is called, enter the variables as parameters with a 2 way Binding ($)
+```
+    var body: some View {
+
+        TabView {
+
+            GarageView(selectedHomeIndex: $selectedHomeIndex, selectedRoomIndex: $selectedRoomIndex)
+```

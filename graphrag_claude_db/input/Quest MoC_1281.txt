@@ -1,0 +1,15 @@
+---
+aliases: 
+tags:
+  - quest
+---
+# Quest MoC
+Date: 2025-01-05
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  [[Travel Apps]]

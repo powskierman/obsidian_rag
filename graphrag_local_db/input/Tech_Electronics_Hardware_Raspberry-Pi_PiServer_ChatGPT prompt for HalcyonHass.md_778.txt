@@ -1,0 +1,18 @@
+# ChatGPT prompt for HalcyonHass.md
+
+---
+aliases: []
+tags: []
+---
+# ChatGPT prompt for HalcyonHass
+Date: 2024-03-21
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  This is my thermostat app.  In ContentView, we display a thermostat dial and the outside temperature.  We are using a tab view that allows us to select which room the settings apply to.
+- This is OtherView.  When the gear icon button in ContentView is pushed, OtherView is displayed with a sheet:  
+- In ContentView, the settings for each room are saved when we change tabs.  I need the same thing for the slider minValue and maxValue.  This is HeatPumpRangeSlider:

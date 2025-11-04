@@ -1,0 +1,59 @@
+---
+bookId: "55179"
+title: "The Elements of Pizza: Unlocking the Secrets to World-Class Pies at Home [A Cookbook]"
+author: Ken Forkish
+asin: B012KJYR3O
+lastAnnotatedDate: 2022-06-29
+highlightsCount: 15
+reference: https://www.amazon.com/dp/B012KJYR3O
+kindle_link: kindle://book?action=open&asin=B012KJYR3O
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/91q0Q2+SbRL._SY160.jpg)
+## Highlights
+there is an inverse relationship between ideal dough hydration (lower) and your oven temperature (higher). — location: [1013](kindle://book?action=open&asin=B012KJYR3O&location=1013) ^ref-35938
+
+---
+Keep in mind that yeast dies at around 114°F (46°C), — location: [1033](kindle://book?action=open&asin=B012KJYR3O&location=1033) ^ref-23899
+
+---
+most of the direct pizza doughs in this book use very tiny amounts of yeast, and I have gotten the best results mixing dough that ends up between 80° and 82°F (27° and 28°C), — location: [1037](kindle://book?action=open&asin=B012KJYR3O&location=1037) ^ref-57188
+
+---
+Salt tempers the fermentation and allows the dough balls to hold longer without overfermenting. — location: [1179](kindle://book?action=open&asin=B012KJYR3O&location=1179) ^ref-5422
+
+---
+Cooking the sauce to thicken it before making pizza removes the freshness of flavor and is rarely done in Italy, — location: [1287](kindle://book?action=open&asin=B012KJYR3O&location=1287) ^ref-8031
+
+---
+The typical sauce at a Neapolitan pizzeria is simply pureed canned whole tomatoes and salt. — location: [1341](kindle://book?action=open&asin=B012KJYR3O&location=1341) ^ref-11265
+
+---
+if you overpuree the canned tomatoes with an immersion or kitchen blender, you release more liquid from the tomatoes themselves, and that’s when the sauce becomes too watery. For this reason, some people will say the best way to make pizza sauce is to use a food mill. — location: [1351](kindle://book?action=open&asin=B012KJYR3O&location=1351) ^ref-7176
+
+---
+be mindful of how much you pulse your canned tomatoes, especially if you’re using a blender. Going from perfectly thick to overly watery can happen very quickly. — location: [1358](kindle://book?action=open&asin=B012KJYR3O&location=1358) ^ref-45440
+
+---
+Neapolitan-style pizza? Use brine-packed fior di latte or mozzarella di bufala. — location: [1379](kindle://book?action=open&asin=B012KJYR3O&location=1379) ^ref-44644
+
+---
+Two main types of mozzarella are used in Italy: fresh cheese made from cow’s milk, called fior di latte, and fresh cheese made from water buffalo milk, called mozzarella di bufala. Bufala is both richer in fat and more acidic (a perfect complement!) than fior di latte; — location: [1380](kindle://book?action=open&asin=B012KJYR3O&location=1380) ^ref-20270
+
+---
+To prevent over-liquefaction in the home oven when using brine-packed fior di latte, add the cheese about 4 minutes into the baking cycle. — location: [1402](kindle://book?action=open&asin=B012KJYR3O&location=1402) ^ref-65103
+
+---
+For delicately flavored fresh cheeses like burrata, the magic mozzarella that’s filled with whole cream, put it on top of the pizza right after it comes out of the oven. — location: [1403](kindle://book?action=open&asin=B012KJYR3O&location=1403) ^ref-32406
+
+---
+The yellower the mozzarella, the more age and saltiness it is likely to have. Try different kinds of low-moisture mozzarella to find the one you like best. As a rule, I prefer whiter, fresh brands like Calabro and Losurdo for American pizzas. If you’re using low-moisture mozzarella, shred your own cheese. It takes just a minute with a decent box grater. Grate over the large holes. — location: [1443](kindle://book?action=open&asin=B012KJYR3O&location=1443) ^ref-52141
+
+---
+Parmigiano-Reggiano cheese, feel free to substitute Grana Padano. These two cheeses are made in the same places using the same techniques and have a very similar character, but Parmigiano-Reggiano is finer—made from a higher quality milk—and is aged longer. — location: [1451](kindle://book?action=open&asin=B012KJYR3O&location=1451) ^ref-12764
+
+---
+Low-moisture mozzarella will have more salt than fresh fior di latte mozzarella. — location: [1461](kindle://book?action=open&asin=B012KJYR3O&location=1461) ^ref-6466
+
+---

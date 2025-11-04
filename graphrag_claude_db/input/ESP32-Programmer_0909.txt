@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2021-12-30 13:33
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+![](ESP32-Programmer-image1.jpeg){width="5.0in" height="6.427083333333333in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,78 @@
+# ContentView.md
+
+---
+aliases: []
+---
+
+2022-06-25
+# ContentView
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+- struct ContentView: View {
+
+@State private var name = ""
+
+
+
+var body: some View {
+
+Form {
+
+TextField("Enter your name", text: $name)
+
+Text("Hello World")
+
+}
+
+}
+
+}
+
+1.  ContentView is a struct, which might be created as a constant. that means it's immutable. You need @State to allow changes
+
+2.  @State property wrapper automatically watches for changes, and when something happens it will automatically re-invoke the body property. it will reload your UI to reflect the changed state.
+
+3.  private explicitly shows that the variable belongs to this struct
+
+4.  $variable
+
+    a.  2 way bindings are required to modify text field and maintain state
+
+    b.  dollar sign before a property name, creates a two-way binding: the value of the property is read, but also written.
+
+```{=html}
+<!-- -->
+```
+1.  @Binding: The view depends on a @State variable from another View.
+
+2.  some keyword returns an opaque type, all possible return types must all be of the same type.
+
+    a.  You can return anything in that body property as long as it conforms to the View protocol.
+
+```{=html}
+<!-- -->
+```
+1.  Form{}
+
+    a.  Creates form structure similar to Settings app
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Group{}
+
+        a.  groups Text items if more than 10 items
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Section{}
+
+        a.  creates space between sections
+ 
+-

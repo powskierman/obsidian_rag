@@ -1,0 +1,134 @@
+# Install-Procedure.md
+
+---
+aliases:
+tags:
+  - pubsubtest
+created: 2022-07-01 14:19
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Install Procedure
+
+    a.  <https://www.instructables.com/Secure-IOT-With-AWS-and-Hornbill-ESP32-Using-Ardui/>
+
+    b.  <https://aws.amazon.com/blogs/compute/building-an-aws-iot-core-device-using-aws-serverless-and-an-esp32/>
+
+        i.  For eof ssl certificate method
+
+```{=html}
+<!-- -->
+```
+1.  User ID
+
+    a.  There are two different types of users in AWS.
+
+        i.  account owner (root user)
+
+        ii. AWS Identity and Access Management (IAM) user.
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Root user ID
+
+"UserId": "128854164886",
+
+Password: 2260xlap
+
+"Account": "128854164886",
+
+"Arn": "arn:aws:iam::128854164886:root"
+
+3.  IAM user ID
+
+    a.  IAM users are created by the root user
+
+    b.  Userid: powskierman
+
+    c.  Password: 40H1ghl@nd
+
+    d.  Access key ID: AKIAR4ACOQWLEP2M6JPG
+
+    e.  Secret key: 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
+
+    f.  Login: <https://128854164886.signin.aws.amazon.com/console>
+
+```{=html}
+<!-- -->
+```
+3.  AWS CLI access keys
+
+    a.  AWSAccessKeyId= AKIAI64G4YCQXO7XHB4A
+
+    b.  AWSSecretKey= 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
+
+    c.  Default Region= us-east-1
+
+    d.  Default output format= JSON
+
+```{=html}
+<!-- -->
+```
+1.  [Managing devices](https://docs.aws.amazon.com/iot/latest/developerguide/iot-thing-management.html)
+
+2.  Direct connection to AWS-IoT with ESP32
+
+    a.  [Project Location](http://Users/michel/Documents/PlatformIO/Projects/ESP32AwsArduinoJson)
+
+        i.  Press boot button for 1 second to send message to AWS IoT
+
+        ii. [esp32-aws-iot](https://github.com/jandelgado/esp32-aws-iot#pubsubtest-examplequickstart)
+
+            1.  [Install bot3](https://github.com/boto/boto3)
+
+                a.  [virtualenv prerequisite](https://pypi.org/project/virtualenv/)
+
+```{=html}
+<!-- -->
+```
+1.  [AWS IoT Mongoose](https://aws.amazon.com/blogs/apn/aws-iot-on-mongoose-os-part-1/)
+
+2.  AWS IoT Raspberry Pi
+
+    a.  sudo apt-get install git
+
+    b.  git clone <https://github.com/aws/aws-iot-device-sdk-python.git>
+
+    c.  cd aws-iot-device-sdk-python/
+
+    d.  sudo python setup.py install
+
+```{=html}
+<!-- -->
+```
+1.  [AWS Raspberry Pi](https://github.com/aws)
+
+    a.  [AWS IoT RPi](https://github.com/aws/aws-iot-device-sdk-python)
+
+        i.  python MybasicPubSub.py -e a1oy8y5mouk0sf-ats.iot.us-east-1.amazonaws.com -r Pi_X509_CaCert.pem -c 4de45298aa-certificate.pem.crt -k 4de45298aa-private.pem.key
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  [AWS-cli](https://github.com/aws/aws-cli)
+
+        i.  [AWS-CLI User Guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
+
+```{=html}
+<!-- -->
+```
+1.  [Amazon Simple Notification Service (SNS) | Messaging Service | AWS](https://aws.amazon.com/sns/?whats-new-cards.sort-by=item.additionalFields.postDateTime&whats-new-cards.sort-order=desc)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

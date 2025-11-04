@@ -1,0 +1,35 @@
+# Smolagents.md
+
+---
+aliases: 
+tags:
+  - smolagents
+  - AI
+---
+# Smolagents
+Date: 2025-02-10
+
+### Backlink
+[[AI Tools MoC]]
+
+### Reference
+-  https://github.com/huggingface/smolagents
+- 
+### Notes
+-  Smolagents, is a minimalist Python framework designed to create AI agents efficiently. It focuses on code agents, where agents write and execute Python code snippets to perform tasks, rather than producing JSON or text-based outputs. 
+Key Features:
+	•	Simplicity: Minimal abstractions with a compact codebase (~1,000 lines).
+	•	Secure Execution: Supports sandboxed environments like E2B for safe code execution.
+	•	LLM-Agnostic: Compatible with models from Hugging Face Hub, OpenAI, Anthropic, and others via LiteLLM.
+	•	Tool Integration: Deep integration with Hugging Face Hub for sharing and loading tools.
+	•	Performance: Matches proprietary models’ performance using open-source LLMs.
+Smolagents also supports traditional tool-calling agents for scenarios where direct code execution isn’t ideal. It simplifies AI workflows, making it accessible for developers to deploy robust agents quickly.
+- **Applications**
+Smolagents has diverse real-world applications across industries due to its ability to create efficient, task-specific AI agents. Here are some examples:
+	•	Research and Summarization: Automates tasks like gathering, organizing, and summarizing information for academic or professional purposes.
+	•	Content Creation: Assists in writing, editing, and organizing content such as blog posts or research papers.
+	•	Data Analysis: Performs computations, data processing, and visualization for business or scientific needs.
+	•	Web Automation: Automates web browsing tasks for real-time data retrieval, useful in building Retrieval-Augmented Generation (RAG) systems.
+	•	Custom Tools: Enables development of tools like travel planners or shopping assistants that integrate APIs for personalized user experiences.
+	•	Multi-Agent Systems: Coordinates specialized agents to handle complex workflows, improving efficiency in collaborative tasks.
+These applications highlight Smolagents’ flexibility and power in simplifying AI-driven automation.

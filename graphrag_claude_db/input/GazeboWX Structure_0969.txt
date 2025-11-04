@@ -1,0 +1,124 @@
+---
+aliases:
+tags:
+  - gazebo
+  - esphome
+  - nextion
+created: 2025-10-05 17:44
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- [[media/START_HERE]]
+- [[media/README]]
+- [[media/README_MODULAR]]
+- [[media/README_THERMOSTAT]]
+- [[media/IMPLEMENTATION_SUMMARY]]
+- [[media/IMPLEMENTATION_REPORT]]
+- [[media/Nextion Display - Page 3 Configuration Guide]]
+- 
+### Notes
+#### Module Structure:
+- Main Module (gazebo-thermostat.yaml):
+  - Page 0: Weather overview display
+  - Core system: WiFi, logging, API, OTA,
+  time sync
+  - Display coordination: Manages all pages
+  from imported modules
+  - Module imports: Includes weather and
+  thermostat modules
+
+- Weather Module (weather.yaml):
+  - Pages 1 & 2: Weather forecast displays
+  - Home Assistant integration: Weather
+  sensor data
+  - Openmeteo data: 7-period hourly
+  forecasts
+  - Monitoring: HA sensor connection status
+
+- Thermostat Module (thermostat.yaml):
+  - Page 3: Thermostat control interface
+  - Temperature sensing: Advanced validation
+   & error handling
+  - Heating control: Relay management with
+  safety features
+  - User interface: Robust slider input with
+   validation
+  - Safety systems: Malfunction detection,
+  runaway protection
+
+- Key Features:
+  - Modular imports: packages: system for
+  clean separation
+  - Shared components: All modules can
+  reference each other's sensors/controls
+  - Robust error handling: UTF-8 safe, no
+  special characters
+  - Cross-module coordination: Display
+  updates all pages using data from all
+  modules
+
+  - The modular system maintains all the
+  robust error handling while providing
+  better organization and maintainability.
+  Each page is now logically separated while
+   still working together as a unified
+  system.
+
+
+  Summary
+
+  ✅ Created thermostat.yaml: Added the missing modular thermostat component file with:
+  - Temperature sensors 
+  - GPIO relay control (pin 12)
+  - Number inputs for temperature settings and hysteresis
+  - Select component for operating modes
+  - Binary sensors for touch interface and status
+  - Global variables for safety timers and error tracking
+  - Advanced sensor validation with bad read counting and malfunction detection
+  - Hysteresis control logic with safety features
+  - Complete Home Assistant integration
+  
+  2. Added Timer Scheduling
+  - Timer Start Hour / Timer End Hour number controls (default 6:00-22:00)
+  - Timer Enable switch to enable/disable scheduling
+  - Supports overnight schedules (e.g., 22:00-06:00)
+  - Thermostat only runs during scheduled hours when timer is enabled
+
+  3. Added Manual Override Controls
+  - Manual Run switch - forces heating ON, overriding all other logic
+  - Manual Stop switch - forces heating OFF, highest priority safety override
+  - Home Status switch - thermostat only runs when "Home" (legacy C++ behavior)
+
+  4. Enhanced Safety & Logging
+  - Clear emoji-based logging: 🔥 HEATING ON/OFF, 🛑 Manual Stop, 🔴 Manual Run
+  - All legacy C++ priority logic implemented:
+    a. Sensor malfunction (highest priority - safety shutdown)
+    b. Manual Stop (forces OFF)
+    c. Manual Run (forces ON)
+    d. Mode check (must be "Heat")
+    e. Home status (must be "Home")
+    f. Timer schedule (if enabled)
+    g. Temperature logic
+
+- Available Controls in Home Assistant:
+  - Thermostat Mode: Off/Heat/Manual
+  - Desired Temperature: 10-35°C (0.5°C steps)
+  - Temperature Correction: -10 to +10°C sensor calibration
+  - Hysteresis: 1-5°C (controls when heating turns off)
+  - Timer Start/End Hour: 0-23 (scheduling)
+  - Manual Run/Stop: Override switches
+  - Home Status: Home/Away control
+  - Timer Enable: Enable/disable scheduling
+  
+  
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,142 @@
+---
+id: 16112648
+updated: 2022-06-18
+title: Getting Started With the Photon
+author: Simon Monk
+highlights: 28
+last_highlight: 2016-05-08
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112648
+Updated: 2022-06-18
+%%
+
+![]( https://m.media-amazon.com/images/I/81Os+c4zCBL._SY500.jpg)
+
+# About
+Title: [[Getting Started With the Photon]]
+Authors: [[Simon Monk]]
+Category: #books
+Number of Highlights: ==28==
+Readwise URL: https://readwise.io/bookreview/16112648
+Date: [[2022-06-18]]
+Last Highlighted: *2016-05-08*
+
+---
+
+# Highlights
+
+Each time around the loop, the Photon/Core will also do a quick check to see if the cloud service is trying to push it a new app. ([420](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=420)) %% Color: yellow %% ^334463566
+
+---
+
+Programmers have an acronym that they use — DRY, for Don’t Repeat Yourself ([606](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=606)) %% Color: yellow %% ^334463567
+
+---
+
+it does not matter where in the program you write the code for a function. However, the convention is to have the setup and loop functions at the top of the file, as these are the root of any later calls to other functions. ([631](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=631)) %% Color: yellow %% ^334463568
+
+---
+
+int is used for whole numbers. These numbers can be positive or negative or 0 but must be in the range –2,147,483,648 to 2,147,483,647. ([667](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=667)) %% Color: yellow %% ^334463569
+
+---
+
+Floats have a vast range, from –3.4028235E+38 to 3.4028235E+38. ([678](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=678)) %% Color: yellow %% ^334463570
+
+---
+
+This is how you define an array of ints: int durations[] = {200, 200, 200, 600, 600, 600, 200, 200, 200}; Notice that the variable name now has [] after it to indicate that it is an array rather than a single value. ([708](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=708)) %% Color: yellow %% ^334463571
+
+---
+
+In C, the first element of an array is the zeroth element rather than the first element. ([759](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=759)) %% Color: yellow %% ^334463572
+
+---
+
+The value given to the string is enclosed in double quotes. ([764](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=764)) %% Color: yellow %% ^334463573
+
+---
+
+only double quotes will do for C. ([765](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=765)) %% Color: yellow %% ^334463574
+
+---
+
+The function length is a special kind of function called a method. The difference between a method and a function is that a method is owned by a type, so here strings have a method called length that you can call using the dot notation after the string variable name. ([770](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=770)) %% Color: yellow %% ^334463575
+
+---
+
+You can use == to test if two things are equal, or != to test that they are not equal. ([788](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=788)) %% Color: yellow %% ^334463576
+
+---
+
+It is also possible to combine more than one condition by using && (and) and || (or). ([790](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=790)) %% Color: yellow %% ^334463577
+
+---
+
+a pull-up resistor connected between the digital input and 3.3V. The point of this resistor is to pull the input up to 3.3V (HIGH) until the switch is pressed, and then the switch will override the pulling effect of the resistor and make the input LOW. ([970](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=970)) %% Color: yellow %% ^334463578
+
+---
+
+when using a Photon with digital inputs, it is a good idea to load the app first, before you start wiring up the hardware, so that there is no danger of a digital output being short-circuited to GND. ([976](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=976)) %% Color: yellow %% ^334463579
+
+---
+
+A pulse-width modulation (PWM) output of a Photon or Core will produce 500 pulses every second. ([1031](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1031)) %% Color: yellow %% ^334463580
+
+---
+
+The value of the duty cycle is a number between 0, which means permanently off, and 255, which means permanently on. So a value of 127 will put the output at pretty much half power. ([1043](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1043)) %% Color: yellow %% ^334463581
+
+---
+
+A Function associates a command that you can send to the Photon/Core with a C function on that device’s app. Whenever the device receives that command, it runs the associated C function. ([1089](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1089)) %% Color: yellow %% ^334463582
+
+---
+
+When the ledSwitcher function is called as a result of a message arriving, it receives a String as its parameter. ([1137](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1137)) %% Color: yellow %% ^334463583
+
+---
+
+there are two long tokens that help secure your Photon. The first token is a device ID for the Photon or Core. Each of your devices will have a different device ID. ([1145](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1145)) %% Color: yellow %% ^334463584
+
+---
+
+The second token is not specific to a Photon/Core, but rather to your whole Particle account. You will find this if you click the Settings button on the Web IDE, ([1152](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1152)) %% Color: yellow %% ^334463585
+
+---
+
+the JavaScript is going to send the web requests to the Particle web service and hence to your Photon/Core. ([1243](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1243)) %% Color: yellow %% ^334463586
+
+---
+
+The $ symbol is how you access the jQuery library functions, one of which is called post. ([1253](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1253)) %% Color: yellow %% ^334463587
+
+---
+
+The body section of the HTML file is responsible for displaying the heading and buttons on the web page. ([1258](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1258)) %% Color: yellow %% ^334463588
+
+---
+
+Security Now that you can create a web page on your local hard drive to control your device, the temptation is to place the HTML file onto a web server, so that it can be accessed from anywhere. You can do this, but not without compromising your security. Anyone doing View Source would immediately get access to your device ID and access token. They’re there in the web page for all to see. If this matters to you, you should host the page behind a login screen, or on a web server that runs within your network. ([1260](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1260)) %% Color: yellow %% ^334463589
+
+---
+
+Just make sure that if the thing you are connecting has a positive and negative connection, the positive connection goes to the power supply and the negative connection to the relay. ([1310](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1310)) %% Color: yellow %% ^334463590
+
+---
+
+Buzzing is accomplished using the tone and noTone commands. These commands can be used only on the pins D0, D1, A0, A1, A4, A5, A6, A7, RX, and TX. ([1524](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1524)) %% Color: yellow %% ^334463591
+
+---
+
+Using & allows the Photon/Core’s firmware to defer fetching the value of the variable until it needs the value of the Variable. ([1601](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=1601)) %% Color: yellow %% ^334463592
+
+---
+
+to the ([2317](https://readwise.io/to_kindle?action=open&asin=B00XQCZTFA&location=2317)) %% Color: pink %% ^334463593
+
+---

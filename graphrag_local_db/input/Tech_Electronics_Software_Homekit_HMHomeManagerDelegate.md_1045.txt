@@ -1,0 +1,19 @@
+# HMHomeManagerDelegate.md
+
+---
+aliases: []
+tags: []
+---
+# HMHomeManagerDelegate
+Date: 2023-03-09
+
+### Backlink
+[[Homekit MoC]]
+
+### Reference
+-  
+### Notes
+-  HMHomeManagerDelegate is a protocol in the HomeKit framework. It defines methods that allow you to receive updates about changes to the user's home configuration and the availability of homes.
+- When you use the HomeKit framework to integrate smart home functionality into your app, you typically start by creating a HMHomeManager object. This object is responsible for managing the user's home configuration and providing access to the homes and accessories that are available.
+
+By adopting the HMHomeManagerDelegate protocol, you can receive notifications when the user's home configuration changes, such as when a new home is added or removed, or when the user changes the name of a home. You can also receive notifications when the home manager's connection state changes, such as when the user's iOS device goes in and out of range of a HomeKit-enabled accessory.

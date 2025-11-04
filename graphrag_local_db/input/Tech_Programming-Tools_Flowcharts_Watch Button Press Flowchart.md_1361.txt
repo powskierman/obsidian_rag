@@ -1,0 +1,90 @@
+# Watch Button Press Flowchart.md
+
+---
+aliases: 
+tags:
+  - garage
+  - flowchart
+---
+# Watch Button Press Flowchart
+Date: 2023-11-26
+
+### Backlink
+[[Garage Flowcharts]]
+
+### Reference
+-  
+### Notes
+
+#### Button Actuation Flow (Including Watch)
+
+1. **Press Button on Watch**:
+    
+    - User presses a button on the watch interface.
+2. **WatchViewModel.sendCommandToPhone**:
+    
+    - Executes the `sendCommandToPhone(entityId, newState)` function in `WatchViewModel`.
+3. **WCSession Reachability Check**:
+    
+    - Checks if the WCSession is reachable.
+4. **WCSession.default.sendMessage()**:
+    
+    - If reachable, sends a message to the phone using `WCSession.default.sendMessage()`.
+5. **Phone Receives Command**:
+    
+    - Phone receives the command and handles it.
+6. **WebSocketManager.handleEntityAction**:
+    
+    - The command is processed by `WebSocketManager` on the phone, triggering actions on Home Assistant.
+7. **WebSocket Connection Check**:
+    
+    - The connection to the WebSocket is checked before sending the command.
+8. **Send Toggle Command or Attempt Reconnect**:
+    
+    - If connected, sends the toggle command.
+    - If not connected, attempts to reconnect.
+
+#### Door State Update Flow (Including Watch)
+
+1. **Receive Door State via WebSocket**:
+    
+    - The phone receives the door state through a WebSocket message.
+2. **Update UI for Closed/Open State**:
+    
+    - The phone UI is updated based on the door state.
+3. **Send State Update to Watch**:
+    
+    - The updated state is sent to the watch.
+4. **WatchViewModel.didReceiveMessage()**:
+    
+    - The watch's `WatchViewModel` receives the message.
+5. **WatchViewModel.updateStateBasedOnMessage()**:
+    
+    - Updates the watch state based on the received message.
+6. **Update Watch UI**:
+    
+    - The watch UI is updated to reflect the new state.
+    - 
+```mermaid
+graph TD
+    A[Press Button on Watch] --> B["WatchViewModel.sendCommandToPhone(entityId, newState)"]
+    B --> C{WCSession Reachability Check}
+    C -->|Reachable| D["WCSession.default.sendMessage()"]
+    C -->|Not Reachable| E[End Process]
+    D --> F[Phone Receives Command]
+    F --> G["WebSocketManager.handleEntityAction('entityId')"]
+    G --> H{WebSocket Connection Check}
+    H -->|Connected| I[Send Toggle Command]
+    H -->|Not Connected| J[Attempt Reconnect]
+    J -->|Success| I
+    J -->|Failure| K[End Process]
+    
+    L[Receive Door State via WebSocket] --> M{Door State Check}
+    M -->|Closed| N["Update UI for Closed State"]
+    M -->|Open| O["Update UI for Open State"] 
+    N --> P[Send State Update to Watch]
+    O --> P 
+    P --> Q["WatchViewModel.didReceiveMessage()"] 
+    Q --> R["WatchViewModel.updateStateBasedOnMessage()"] 
+    R --> S{Update Watch UI}
+    ```

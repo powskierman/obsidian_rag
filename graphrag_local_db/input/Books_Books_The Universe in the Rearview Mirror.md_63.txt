@@ -1,0 +1,784 @@
+# The Universe in the Rearview Mirror.md
+
+---
+id: 16112700
+updated: 2022-06-18
+title: The Universe in the Rearview Mirror
+author: Dave Goldberg
+highlights: 188
+last_highlight: 2015-05-18
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112700
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51IiPC2CjWL._SL500_.jpg)
+
+# About
+Title: [[The Universe in the Rearview Mirror]]
+Authors: [[Dave Goldberg]]
+Category: #books
+Number of Highlights: ==188==
+Readwise URL: https://readwise.io/bookreview/16112700
+Date: [[2022-06-18]]
+Last Highlighted: *2015-05-18*
+
+---
+
+# Highlights
+
+breakthroughs almost always come in realizing that things that appear different are, in fact, the same. To understand how things work, we need to understand symmetry. ([126](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=126)) %% Color: yellow %% ^334465014
+
+---
+
+A thing is symmetrical if there is something you can do to it so that after you have finished doing it, it looks the same as before. ([158](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=158)) %% Color: yellow %% ^334465015
+
+---
+
+Aristotle assumed that orbits must be circular because of the “perfection” of the circle as a symmetric form. ([164](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=164)) %% Color: yellow %% ^334465016
+
+---
+
+the elliptical orbits of the planets—is a consequence of a much deeper symmetry. ([169](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=169)) %% Color: yellow %% ^334465017
+
+---
+
+the act of scaling is not a symmetry of nature. ([217](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=217)) %% Color: yellow %% ^334465018
+
+---
+
+The nucleus makes up about 99.95 percent of the mass of an atom, but takes up only about 1 quadrillionth of the total volume. ([311](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=311)) %% Color: yellow %% ^334465019
+
+---
+
+All of these, photons, gluons, and gravitons (if they exist), are massless, and therefore travel at the speed of light. ([340](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=340)) %% Color: yellow %% ^334465020
+
+---
+
+A lump of radium will quickly start decaying into things like radon and helium, which, combined, are quite a bit lighter than the original radium atoms. That extra gets converted into high-energy x-rays. ([353](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=353)) %% Color: yellow %% ^334465021
+
+---
+
+if you were to add up the masses of the quarks, you’d find that they make up only about 2 percent or so of the mass of a proton. The other 98 percent comes from the insane energies involved as the quarks fly around and interact inside the protons. ([365](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=365)) %% Color: yellow %% ^334465022
+
+---
+
+Antimatter is made all the time in the sun, which produces positrons as a side effect of fusing hydrogen into helium. ([395](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=395)) %% Color: yellow %% ^334465023
+
+---
+
+C Symmetry: The physical laws for antiparticles behave exactly the same as for their respective particles. ([403](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=403)) %% Color: yellow %% ^334465024
+
+---
+
+In 2001, NASA launched the Wilkinson Microwave Anisotropy Probe (WMAP). As the acronym implies, WMAP was sent up to make a detailed map of the Cosmic Microwave Radiation, ([414](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=414)) %% Color: yellow %% ^334465025
+
+---
+
+14 million years after the beginning, the universe was a balmy 310K (room temperature) and the universe glowed in the infrared. ([426](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=426)) %% Color: yellow %% ^334465026
+
+---
+
+1 second after the Big Bang, the universe was about 10 billion degrees; ([427](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=427)) %% Color: yellow %% ^334465027
+
+---
+
+a microsecond after the Big Bang, temperatures were more than 10 trillion degrees. ([427](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=427)) %% Color: yellow %% ^334465028
+
+---
+
+Free neutrons, for example, decay into their (slightly lighter) proton counterparts after about 10 minutes or so. But protons don’t have anything to decay into. ([451](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=451)) %% Color: yellow %% ^334465029
+
+---
+
+Whenever weak interactions occur, there’s almost always a neutrino involved in some way. ([489](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=489)) %% Color: yellow %% ^334465030
+
+---
+
+the weak force is what allows the sun to turn hydrogen into helium and, as a by-product, the heat and light that make life possible on earth. ([490](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=490)) %% Color: yellow %% ^334465031
+
+---
+
+Every particle that we’ve yet discovered has an intrinsic, immutable spin, ([497](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=497)) %% Color: yellow %% ^334465032
+
+---
+
+Antimatter is exactly the opposite. Antineutrinos coming out of a nuclear decay will spin counterclockwise. Matter and antimatter seem to know the difference between left and right, which is, quite literally, the only major difference between the two. ([515](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=515)) %% Color: yellow %% ^334465033
+
+---
+
+Matter and antimatter are almost identical to one another, except for the tiniest of differences: Neutrinos spin one way and antineutrinos spin the other. ([523](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=523)) %% Color: yellow %% ^334465034
+
+---
+
+Our DNA spirals a very specific way. If you point a strand toward you, it will always twist counterclockwise. ([542](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=542)) %% Color: yellow %% ^334465035
+
+---
+
+P Symmetry: All of the laws of physics look just as valid if you view everything through a mirror. ([583](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=583)) %% Color: yellow %% ^334465036
+
+---
+
+The combination of charge and parity symmetry simply does not hold in our universe. ([636](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=636)) %% Color: yellow %% ^334465037
+
+---
+
+There is something asymmetric between matter and antimatter that seems to show up when the weak force is involved. ([638](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=638)) %% Color: yellow %% ^334465038
+
+---
+
+The current thinking is that the small matter–antimatter accounting error occurred very, very early on, around 10-35 second after the Big Bang during which the temperatures were more than a quintillion times those at the center of the sun. ([648](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=648)) %% Color: yellow %% ^334465039
+
+---
+
+Even at those astounding energies, the asymmetry between matter and antimatter is extremely small. For every billion antiparticles that were created, there were a billion and one particles. One. Just one. We know that because there are currently about a billion times as many photons in the universe as there are protons. When the billion antiprotons annihilated with the billion protons, they left behind the billions of photons that we observe today, though greatly weakened by the expansion of the universe. ([650](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=650)) %% Color: yellow %% ^334465040
+
+---
+
+Because of relative tilts of earth’s and Venus’s orbits, you get one shot to observe a transit of Venus, and then must wait 8 years for another. After that, you’re out of luck for about 120 years. ([717](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=717)) %% Color: yellow %% ^334465041
+
+---
+
+the Anthropic Principle claim is that people are likely to find themselves in those regions of space and time most suited to their evolution and existence. ([756](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=756)) %% Color: yellow %% ^334465042
+
+---
+
+We tend to call it Dark Energy today, but the idea is much the same: There is some unchanging fluid throughout the universe that seems to work as a sort of antigravity. ([789](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=789)) %% Color: yellow %% ^334465043
+
+---
+
+U-235 decays six times faster than U-238. ([818](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=818)) %% Color: yellow %% ^334465044
+
+---
+
+Time Translation Symmetry: All of the laws of physics behave the same at different times. ([825](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=825)) %% Color: yellow %% ^334465045
+
+---
+
+T Symmetry: The laws of physics look the same upon a reversal of the flow of time. ([842](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=842)) %% Color: yellow %% ^334465046
+
+---
+
+We can even imagine creating a parallel universe using the following steps: 1. Turn all particles to antiparticles and vice versa. 2. Flip everything in a mirror. 3. Reverse the flow of time. This is known as a CPT transformation, and there’s almost nothing we can say about it except that literally every experiment that has ever been done has suggested that the universe is CPT symmetric. ([861](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=861)) %% Color: yellow %% ^334465047
+
+---
+
+Uniformity is about as unstructured as you can get. ([878](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=878)) %% Color: yellow %% ^334465048
+
+---
+
+Entropy is basically the number of microstates* in which the particles or coin toss results can be arranged to give you the same macrostate configuration. ([905](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=905)) %% Color: yellow %% ^334465049
+
+---
+
+As the molecules fall into the clumps, the energy gets turned into heat, and the heat is essentially entropy. ([1020](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1020)) %% Color: yellow %% ^334465050
+
+---
+
+To a universe dominated by gravity (like the beginning of time), a perfectly smooth distribution is the lowest entropy configuration. In the future, when gravity becomes less important, a perfectly smooth distribution is the highest entropy configuration. ([1023](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1023)) %% Color: yellow %% ^334465051
+
+---
+
+Distances were measured for over a million galaxies, and images were taken of over a hundred million more. ([1026](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1026)) %% Color: yellow %% ^334465052
+
+---
+
+Aristotle was intuitively right about one thing: The universe really is governed by underlying symmetries. From his Physics: In circular motion there are no such definite points: for why should any one point on the line be a limit rather than any other? Any one point as much as any other is alike starting-point, middle-point, and finishing-point, so that we can say of certain things both that they are always and that they never are at a starting-point and at a finishing-point. There’s something special about a circle and, by extension, a sphere. No matter how you turn it, it looks the same. And everything was spherical with this guy. The stationary earth was a perfect sphere. It sat in the middle of a series of about fifty or so perfectly concentric spherical shells containing the moon, the planets, the sun, the distant stars, and ultimately, the unmoved mover himself. ([1083](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1083)) %% Color: yellow %% ^334465053
+
+---
+
+There never was a period of “flat earth darkness” among scholars (regardless of how the public at large may have conceptualized our planet both then and now). Greek knowledge of sphericity never faded, and all major medieval scholars accepted the earth’s roundness as an established fact of cosmology. ([1094](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1094)) %% Color: yellow %% ^334465054
+
+---
+
+In the late seventeenth century, Isaac Newton showed that the earth is an oblate spheroid, slightly larger around the equator than through the poles. ([1096](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1096)) %% Color: yellow %% ^334465055
+
+---
+
+In the second century, Claudius Ptolemy perfected the Aristotelian geocentric model in his Almagest ([1102](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1102)) %% Color: yellow %% ^334465056
+
+---
+
+more than 400 years before Ptolemy, the Greek astronomer Aristarchus of Samos* described a heliocentric universe. Very little of Aristarchus’s work has reached us directly, but it’s been described by others, including the mathematician Archimedes: Aristarchus has brought out a book consisting of certain hypotheses . . . that the fixed stars and the Sun remain unmoved, that the Earth revolves about the Sun on the circumference of a circle, the Sun lying in the middle of the Floor, and that the sphere of the fixed stars, situated about the same center as the Sun, is so great that the circle in which he supposes the Earth to revolve bears such a proportion to the distance of the fixed stars as the center of the sphere bears to its surface. ([1107](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1107)) %% Color: yellow %% ^334465057
+
+---
+
+It wasn’t until 1543, when the Polish astronomer Nicolaus Copernicus published his De revolutionibus orbium coelestium, that Aristarchus’s model was rediscovered. ([1117](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1117)) %% Color: yellow %% ^334465058
+
+---
+
+Giordano Bruno, who was first and foremost a Dominican friar, went much further than Copernicus. Not only did Bruno argue that the sun was the center of our universe, but he also thought (correctly, as it turns out) that all of the stars are simply suns like our own. He wasn’t framing things in hypotheticals. Instead, he argued: In space there are countless constellations, suns and planets; we see only the suns because they give light; the planets remain invisible, for they are small and dark. There are also numberless earths circling around their suns, no worse and no less than this globe of ours. For no reasonable mind can assume that heavenly bodies that may be far more magnificent than ours would not bear upon them creatures similar or even superior to those upon our human earth. ([1126](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1126)) %% Color: yellow %% ^334465059
+
+---
+
+In 1609, Johannes Kepler published his Astronomia nova, which, among much else, laid down the laws of planetary motion. ([1135](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1135)) %% Color: yellow %% ^334465060
+
+---
+
+Galileo saw that Mercury and Venus, now known as the innermost planets, have phases, just like the moon, consistent with their motion around the sun. He saw that the Milky Way was nothing else but a mass of innumerable stars planted together in clusters. ([1156](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1156)) %% Color: yellow %% ^334465061
+
+---
+
+In 1698, the Dutch physicist Christiaan Huygens who, among much else, was one of the first to describe light as a wave, put it: Why [should] not every one of these stars and suns have as great a retinue as our sun, of planets with their moons to wait upon them? ([1163](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1163)) %% Color: yellow %% ^334465062
+
+---
+
+the SDSS has mapped over a hundred million galaxies, but a conservative estimate would put the total number in the observable universe in the low trillions. ([1178](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1178)) %% Color: yellow %% ^334465063
+
+---
+
+Cosmological Principle, which says, in essence, that the universe is more or less the same in all directions and in all places. ([1182](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1182)) %% Color: yellow %% ^334465064
+
+---
+
+gravity can curve either space, time, or both. ([1189](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1189)) %% Color: yellow %% ^334465065
+
+---
+
+is known as the fine structure constant (or FSC, for short) ([1306](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1306)) %% Color: yellow %% ^334465066
+
+---
+
+In the equation, e stands for the charge of an electron; c is, of course, the speed of light; is known as the reduced Planck constant. ([1307](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1307)) %% Color: yellow %% ^334465067
+
+---
+
+The fine structure constant has a value of about 1/137.03599908 ([1309](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1309)) %% Color: yellow %% ^334465068
+
+---
+
+The FSC is a measure of the strength of the electromagnetic force, ([1314](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1314)) %% Color: yellow %% ^334465069
+
+---
+
+Quasars are essentially giant black holes that absorb huge amounts of material. As the material falls in at speeds approaching the speed of light, it heats up and produces ([1334](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1334)) %% Color: yellow %% ^334465070
+
+---
+
+Translational Symmetry: The laws of physics are exactly the same at all places in the universe. ([1350](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1350)) %% Color: yellow %% ^334465071
+
+---
+
+The second part of the Cosmological Principle sounds very similar, but there’s a twist. Not only is the universe (roughly) the same in all places, but it looks more or less the same in all directions. ([1354](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1354)) %% Color: yellow %% ^334465072
+
+---
+
+Rotational Symmetry: The laws of physics don’t change if you rotate a system in its entirety. ([1372](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1372)) %% Color: yellow %% ^334465073
+
+---
+
+Invariant: A number that is unchanged by a transformation. ([1538](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1538)) %% Color: yellow %% ^334465074
+
+---
+
+While a symmetry describes the sort of transformations that you can apply to a system without changing it, an invariant is the thing itself that is unaltered. ([1540](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1540)) %% Color: yellow %% ^334465075
+
+---
+
+Noether’s (first) Theorem: Every symmetry corresponds to a conserved quantity. ([1579](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1579)) %% Color: yellow %% ^334465076
+
+---
+
+Noether’s Theorem predicts: Time Invariance Conservation of Energy Spatial Invariance Conservation of Momentum Rotational Invariance Conservation of Angular Momentum ([1594](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1594)) %% Color: yellow %% ^334465077
+
+---
+
+Noether’s great contribution to physics is the mathematical proof that so long as the laws of physics don’t change with time, then energy can’t be created or destroyed. ([1601](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1601)) %% Color: yellow %% ^334465078
+
+---
+
+Newton’s First Law: Every body persists in its state of being at rest or of moving uniformly straight forward, except insofar as it is compelled to change its state by force impressed. ([1621](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1621)) %% Color: yellow %% ^334465079
+
+---
+
+Take the energies of motion and subtract the energies of interaction and there it is: Lagrangian = Kinetic energy - Potential energy ([1745](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1745)) %% Color: yellow %% ^334465080
+
+---
+
+on average the Lagrangian—the action—is zero. ([1748](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1748)) %% Color: yellow %% ^334465081
+
+---
+
+If there’s a symmetry, it’s the Lagrangian—essentially all of the energies involved—that remains invariant. ([1761](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1761)) %% Color: yellow %% ^334465082
+
+---
+
+Emmy Noether found the deeper truth. She realized that the Lagrangian is the thing that is symmetric. ([1765](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1765)) %% Color: yellow %% ^334465083
+
+---
+
+Theory of Special Relativity. He made two simple assumptions: 1. The same laws of electrodynamics and optics will be valid for all frames of reference for which the equations of mechanics hold good. 2. Light is always propagated in empty space with a definite velocity c which is independent of the state of motion of the emitting body. ([1882](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1882)) %% Color: yellow %% ^334465084
+
+---
+
+the speed of light and the laws of physics—remains invariant for observers moving at different velocities. ([1886](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1886)) %% Color: yellow %% ^334465085
+
+---
+
+Lorentz Invariance: A law of physics will be written in such a way that the results are independent of the orientation or velocity of the system. ([1888](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1888)) %% Color: yellow %% ^334465086
+
+---
+
+Light signals will always have this one-to-one separation of space and time. ([1942](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=1942)) %% Color: yellow %% ^334465087
+
+---
+
+A muon is almost identical to an electron—but 200 times heavier. ([2009](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2009)) %% Color: yellow %% ^334465088
+
+---
+
+After about 2 millionths of a second on average, a muon will decay into an electron and a neutrino-antineutrino pair. ([2010](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2010)) %% Color: yellow %% ^334465089
+
+---
+
+Emmy Noether taught us some very important lessons about the nature of symmetry and conservation laws. She showed us, for instance, that time is intimately related to energy and that space is intimately related to momentum. ([2056](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2056)) %% Color: yellow %% ^334465090
+
+---
+
+Energy is like time, not space. No matter your perspective, you can’t make the flow of my clock stop entirely, and likewise, no matter how you look at a particle, you can’t make the energy disappear entirely. ([2064](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2064)) %% Color: yellow %% ^334465091
+
+---
+
+Light is, essentially, pure energy and momentum, and the two are related in a very simple way, by c. ([2073](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2073)) %% Color: yellow %% ^334465092
+
+---
+
+The natural state of motion for a particle is to move in a straight line and at a constant speed. By spinning the ship, supposing the radius of the ship is sufficiently large, you’ll feel a comfortable artificial gravity because the floor under your feet is constantly changing direction as you turn. ([2179](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2179)) %% Color: yellow %% ^334465093
+
+---
+
+We think of the ISS as being in space, but in a sense it’s very much in earth’s grasp. Gravity 400 kilometers above the surface of the earth is only about 11 percent weaker than on the ground. ([2195](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2195)) %% Color: yellow %% ^334465094
+
+---
+
+gravity doesn’t arise solely from mass. There’s an equivalence between mass and energy, remember, so any form of energy will ultimately give rise to gravity. ([2357](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2357)) %% Color: yellow %% ^334465095
+
+---
+
+Quasars are enormously luminous objects at the centers of galaxies where hot, glowing clouds of gas get swallowed up by supermassive black. ([2384](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2384)) %% Color: yellow %% ^334465096
+
+---
+
+There’s no real difference between accelerating and being in a real gravitational field. ([2436](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2436)) %% Color: yellow %% ^334465097
+
+---
+
+A solar mass black hole would radiate at a temperature of about 60 billionths of a degree Kelvin. ([2474](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2474)) %% Color: yellow %% ^334465098
+
+---
+
+Solar mass black holes won’t actually start evaporating until the universe gets 50 million times cooler (and thus 50 million times bigger) than it is now. That won’t be for a few hundred billion years or so. ([2477](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2477)) %% Color: yellow %% ^334465099
+
+---
+
+Black holes are essentially entropy-producing machines. ([2487](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2487)) %% Color: yellow %% ^334465100
+
+---
+
+Particle Replacement Symmetry: All of the measurable quantities in a system will remain unchanged if you swap two particles of identical type and state. ([2517](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2517)) %% Color: yellow %% ^334465101
+
+---
+
+The simplest particles (at least spinwise) have a spin of 1. For spin, everything is expressed as a multiple of the reduced Planck’s constant, written, as we’ve seen, as a weird little symbol, . This is an incredibly tiny number. To give you an idea, the second hand on a grandfather clock has an angular momentum about 1029 times larger. ([2744](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2744)) %% Color: yellow %% ^334465102
+
+---
+
+There are a bunch of different spin-1 particles, and they all have something in common. The photon is the mediator for electromagnetism; the gluon is the mediator for the strong force; and the rather unimaginatively named W and Z particles are the mediators for the weak force. Get the pattern? ([2750](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2750)) %% Color: yellow %% ^334465103
+
+---
+
+Collectively, all of the particles that are spin-1 (or any integer) are known as bosons, ([2752](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2752)) %% Color: yellow %% ^334465104
+
+---
+
+Just as a spin-1 object looks the same after one full rotation, a spin-2 object looks the same after one-half of a turn. This is essentially the same symmetry as grand design spiral galaxies. ([2758](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2758)) %% Color: yellow %% ^334465105
+
+---
+
+Integer spins not only tell us that particles act as mediators, they also tell us how they act as mediators. Particles with odd spin (photons and gluons and so forth) always produce repulsive forces between particles with like charge. ([2761](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2761)) %% Color: yellow %% ^334465106
+
+---
+
+Mediators with an even spin, if they actually exist, behave in the opposite way, in that particles with the same charge will attract one another. Because mass is the equivalent of charge in gravity (a spin-2 mediator) and the masses of all particles are positive or zero, this is just a cool way of showing that gravity is attractive. ([2763](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2763)) %% Color: yellow %% ^334465107
+
+---
+
+Electrons are spin-½, but they aren’t the only ones. Dirac’s equation describes a whole class of particles known as fermions. This includes quarks, positrons, and neutrinos—essentially all of the building blocks of matter and antimatter. ([2779](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2779)) %% Color: yellow %% ^334465108
+
+---
+
+We have to remember that what we observe is not nature herself, but nature exposed to our method of questioning. ([2790](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2790)) %% Color: yellow %% ^334465109
+
+---
+
+Electrons are microscopic gyroscopes that somehow, through the power of mathemagic, look the same only if you turn them around twice. ([2802](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2802)) %% Color: yellow %% ^334465110
+
+---
+
+Pauli’s theorem essentially says that whether a particle is a boson or a fermion entirely determines what happens when you swap identical particles in a system. ([2816](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2816)) %% Color: yellow %% ^334465111
+
+---
+
+If you rotate a fermion just once, its wave function will be 180 degrees out of phase from where it started. This is exactly equivalent to multiplying by a minus one. Rotate it a second time, and there’s a 360-degree change in phase, which amounts to no change at all. This is exactly the rule for a spin-½ particle. ([2829](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2829)) %% Color: yellow %% ^334465112
+
+---
+
+the minus one that shows up when you rotate a fermion (and correspondingly, the plus one that shows up when you rotate a boson) is exactly the same as the minus one that shows up if you swap two fermions of the same type. ([2832](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2832)) %% Color: yellow %% ^334465113
+
+---
+
+A negative times a negative is a positive, which means that the product of two electrons and two protons are the same: +1. That plus sign means that like charges repel one another. ([2846](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2846)) %% Color: yellow %% ^334465114
+
+---
+
+There are three quarks (fermions) in a proton, and if you multiply -1 by itself 3 times, you end up with -1 again, and that is why protons and neutrons are fermions. ([2850](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2850)) %% Color: yellow %% ^334465115
+
+---
+
+A quark, for instance, has a parity of +1, which means that the version in the mirror is the same as the original. Just like with charge, the antiparticle will have the opposite sign; the antiquark gets a parity of -1. ([2853](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2853)) %% Color: yellow %% ^334465116
+
+---
+
+You can’t get two electrons in exactly the same place at exactly the same time with the same spin. ([2882](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2882)) %% Color: yellow %% ^334465117
+
+---
+
+This is known, quite rightly, as the Pauli Exclusion Principle. ([2884](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2884)) %% Color: yellow %% ^334465118
+
+---
+
+We’ve spent a lot of time talking about spin of an electron, but throughout it all, I’ve stressed that there are only two possibilities: up and down. Because of the Exclusion Principle, an atom can get only two electrons in the lowest energy state, one for spin-up and one for spin-down. ([2890](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2890)) %% Color: yellow %% ^334465119
+
+---
+
+elements with lots of extra electrons outside those shells—things like copper and gold and so on—are excellent electrical conductors; ([2902](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2902)) %% Color: yellow %% ^334465120
+
+---
+
+All of the particles in your everyday life—neutrons, protons, and electrons—obey the Pauli Exclusion Principle because they are fermions, and that exclusion makes all of the good things in the universe possible. ([2904](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2904)) %% Color: yellow %% ^334465121
+
+---
+
+Because of their plus sign, bosons couldn’t care less about the Pauli Exclusion Principle. ([2906](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2906)) %% Color: yellow %% ^334465122
+
+---
+
+Without fermions, we don’t get any of the chemistry or structure that we see in our everyday world. In other words, but for the existence of a minus one, you wouldn’t be here; ([2911](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2911)) %% Color: yellow %% ^334465123
+
+---
+
+Heavier particles can be squeezed tighter than can lighter ones before the Pauli Exclusion Principle kicks in. Neutrons are about 2,000 times the mass of electrons, so the newly formed neutron star can collapse about 2,000 times smaller than a white dwarf of the same mass. ([2941](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2941)) %% Color: yellow %% ^334465124
+
+---
+
+Nickel, copper, gold, and (Superman’s own) krypton are some of the many elements that would be energetically impossible without supernova explosions. ([2954](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2954)) %% Color: yellow %% ^334465125
+
+---
+
+it was Particle Replacement Symmetry and the Rotational Symmetry of fermions that gave rise to the Pauli Exclusion Principle, which in turn gave rise to degeneracy pressure. ([2958](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2958)) %% Color: yellow %% ^334465126
+
+---
+
+Neutron stars can spin at thousands of times per second and many of them have magnetic fields over 10 million times stronger than the earth’s. ([2968](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2968)) %% Color: yellow %% ^334465127
+
+---
+
+the total mass in a teaspoon is somewhere on the order of 10 billion tons. That’s about the mass of a reasonable-size mountain. ([2982](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2982)) %% Color: yellow %% ^334465128
+
+---
+
+10-minute lifetime of a neutron is incredibly long. After that 10 minutes (on average) a neutron decays into a proton, an electron, and normally undetectable antineutrino. ([2993](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2993)) %% Color: yellow %% ^334465129
+
+---
+
+the case of neutron decay, about 0.08 percent of the mass gets converted to energy in the process, which doesn’t sound like too much, but multiply it over your teaspoon of neutron star, and it ends up producing an equivalent energy of roughly that put out by the sun every 2 or 3 seconds. ([2995](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2995)) %% Color: yellow %% ^334465130
+
+---
+
+The neutron decays release the equivalent energy of a trillion megaton nuclear device. ([2997](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=2997)) %% Color: yellow %% ^334465131
+
+---
+
+Particles, even elementary particles, aren’t fixed and constant things. We’ve seen that in the vacuum of space, particles and antiparticles are created from nothing and return almost as quickly. ([3020](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3020)) %% Color: yellow %% ^334465132
+
+---
+
+The universe, even when it’s apparently empty, is filled with fields. ([3025](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3025)) %% Color: yellow %% ^334465133
+
+---
+
+Just as water molecules and water waves are two sides of the same coin, photons and electromagnetic fields are just two different ways of thinking about the same thing. ([3033](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3033)) %% Color: yellow %% ^334465134
+
+---
+
+Every particle has a corresponding field. ([3038](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3038)) %% Color: yellow %% ^334465135
+
+---
+
+Without photons, charged particles have no way of interacting. ([3062](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3062)) %% Color: yellow %% ^334465136
+
+---
+
+Global Phase Symmetry: The phase of a field can change everywhere in space and time by a fixed amount and there will be no measurable effect. ([3083](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3083)) %% Color: yellow %% ^334465137
+
+---
+
+if you have a symmetry, you get a conserved quantity. ([3130](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3130)) %% Color: yellow %% ^334465138
+
+---
+
+The weak force is absolutely vital to our existence. It’s the engine that churns hydrogen into helium and, in the process, turns protons into neutrons. ([3135](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3135)) %% Color: yellow %% ^334465139
+
+---
+
+neutrinos or antineutrinos always seem to be involved whenever there’s a weak interaction. ([3137](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3137)) %% Color: yellow %% ^334465140
+
+---
+
+Neutrinos are very closely associated with electrons. ([3139](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3139)) %% Color: yellow %% ^334465141
+
+---
+
+Electron–Neutrino Symmetry Conservation of weak isospin ([3151](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3151)) %% Color: yellow %% ^334465142
+
+---
+
+We also get mediating particles. In the weak force, they’re known as the W+, W-, and Z0 bosons, ([3155](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3155)) %% Color: yellow %% ^334465143
+
+---
+
+There’s an extraordinary thing about the neutron, which Heisenberg observed shortly after its discovery in 1932: apart from the obvious fact that it carries no charge, it is almost identical to the proton. . . . Heisenberg proposed that we regard them as two “states” of a single particle, the nucleon. ([3161](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3161)) %% Color: yellow %% ^334465144
+
+---
+
+Neutrons and protons differ in mass by only about 0.1 percent. They also, as we’ve seen, have a very intimate relationship in that the former can decay into the latter. ([3163](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3163)) %% Color: yellow %% ^334465145
+
+---
+
+turning a proton into a neutron is really the same thing as turning an up into a down. ([3168](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3168)) %% Color: yellow %% ^334465146
+
+---
+
+The relationship between the up and the down quark seems very much the same as the relationship between the electron and the neutrino. ([3168](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3168)) %% Color: yellow %% ^334465147
+
+---
+
+Just as we split up our Standard Model into fermions and bosons, we’re going to split up our fermions into two piles as well. ([3171](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3171)) %% Color: yellow %% ^334465148
+
+---
+
+In one pile we have the electrons, muons, tau particles, and neutrinos—collectively known as leptons—and in the other we have quarks. The big difference between the two is quarks are subject to the strong force while the leptons are not. ([3172](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3172)) %% Color: yellow %% ^334465149
+
+---
+
+As with the weak force, the symmetry of the strong force has a special name: SU(3). And as with the weak force, the symmetry predicts a conserved quantity: color. This is basically the equivalent of charge, but for quarks. ([3179](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3179)) %% Color: yellow %% ^334465150
+
+---
+
+It’s no coincidence that there are three colors; it’s just a consequence of the 3 in SU(3). Leptons have no color, so in the same way that electrically neutral particles are ignored by electromagnetism, leptons sit out the strong force. ([3185](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3185)) %% Color: yellow %% ^334465151
+
+---
+
+This symmetry says that if you changed red particles to green and green to red (or any other switch), then the interactions would be the same as before you started. Or to put it another way: Color Symmetry Conservation of color ([3187](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3187)) %% Color: yellow %% ^334465152
+
+---
+
+Just as with all of our other Gauge Symmetries, color leads inexorably to mediator particles known as gluons. ([3193](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3193)) %% Color: yellow %% ^334465153
+
+---
+
+Gluons directly interact with one another, and consequently tend to get in each other’s way. This, incidentally, is why the strong force is confined to the nucleus of atoms. ([3198](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3198)) %% Color: yellow %% ^334465154
+
+---
+
+Neutrinos are always left-handed. Left-handedness is intimately related to the weak force. Right-handed particles are totally immune to the weak force (just as colorless particles are immune to the strong force, and neutral particles are immune to electromagnetism), ([3213](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3213)) %% Color: yellow %% ^334465155
+
+---
+
+Take a look at the relation between the weak isospin, the weak hypercharge, and ordinary electric charge, and you’ll note that they are very closely related. This is a pretty good clue that the underlying forces are probably unified too. ([3229](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3229)) %% Color: yellow %% ^334465156
+
+---
+
+at early times, there was a single force described by a single equation, but with four mediator particles. It was only the cooling of the universe and the rather mysterious Higgs mechanism that makes the two forces appear separate. ([3237](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3237)) %% Color: yellow %% ^334465157
+
+---
+
+In the unified Electroweak Model, the photon and Z0 aren’t really two different particles but are two different states of the same particle. Why shouldn’t they be? Both are electrically neutral. Both are spin-1. And while the Z0 has considerable mass today, in early times, both were massless. ([3238](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3238)) %% Color: yellow %% ^334465158
+
+---
+
+Because the energies involved with photons and Z0s are so different from one another, today they are grouped as two distinct particles. ([3249](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3249)) %% Color: yellow %% ^334465159
+
+---
+
+W bosons are roughly 85 times the mass of a proton, and the Z0 is even more massive than that. The weak mediators are supposed to be completely massless, and instead they are huge. This hugeness plays a big role in the physics of the weak force. It is, in fact, what makes the weak force so weak. ([3253](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3253)) %% Color: yellow %% ^334465160
+
+---
+
+At very high energies, the kind that filled the universe in the first 10-12 second after the Big Bang, electromagnetism and the weak force were unified, as we’ve seen. The Ws, Z0, and photons were all mediators of the electroweak force. ([3300](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3300)) %% Color: yellow %% ^334465161
+
+---
+
+A molecule of water (two hydrogens and an oxygen), for instance, would have to be squeezed by roughly a factor of a million before the weak force kicks in. ([3307](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3307)) %% Color: yellow %% ^334465162
+
+---
+
+the Electron–Neutrino Symmetry is directly related to the weak force. ([3315](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3315)) %% Color: yellow %% ^334465163
+
+---
+
+the Higgs isn’t famous because it has mass; it’s famous because it gives mass to other particles. ([3325](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3325)) %% Color: yellow %% ^334465164
+
+---
+
+the Higgs field interacts with other fields. Interactions, in the realm of physics, mean energy, and energy means mass. ([3326](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3326)) %% Color: yellow %% ^334465165
+
+---
+
+The electron field interacts with the photon field. This is, of course, the electromagnetic force. ([3330](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3330)) %% Color: yellow %% ^334465166
+
+---
+
+the Higgs field, in particular, responds to the weak force. ([3334](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3334)) %% Color: yellow %% ^334465167
+
+---
+
+The Higgs is a boson, which means that it gets grouped with the photon, the gluons, and the other mediators—the ([3341](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3341)) %% Color: yellow %% ^334465168
+
+---
+
+W+ particle continuously sends and receives Higgses, except that instead of sending the Higgs particles somewhere else, it reaps what it sows, in the process working up a sweat of interaction energy. Since energy is mass, the W+ gains weight, seemingly from nowhere. ([3343](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3343)) %% Color: yellow %% ^334465169
+
+---
+
+They found that the Higgs was about 133 times the mass of the proton. ([3386](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3386)) %% Color: yellow %% ^334465170
+
+---
+
+while discovering the Higgs is a very big deal, it turns out to describe surprisingly little of the mass in our everyday life. ([3396](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3396)) %% Color: yellow %% ^334465171
+
+---
+
+But if the weak force really obeys the left-handed symmetries that we’ve seen—a symmetry, I remind you, that is ultimately responsible for the dominance of matter over antimatter—then ([3412](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3412)) %% Color: yellow %% ^334465172
+
+---
+
+The total mass of quarks in a proton is only about 2 percent the mass of the proton itself. The rest, virtually all of your mass, is made up of the interaction energies between the quarks. ([3419](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3419)) %% Color: yellow %% ^334465173
+
+---
+
+The Higgs also doesn’t tell us where Dark Matter comes from, that makes up 85 percent the mass of the universe. ([3421](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3421)) %% Color: yellow %% ^334465174
+
+---
+
+Our entire model of the universe is built on symmetries. Some, like isotropy (the laws are the same in all directions), homogeneity (same in all places), and time invariance (same at all times) seem natural enough. Even relativity, the Lorentz Invariance that allows everyone to observe a constant speed of light, has an elegance to it that makes it seem natural. ([3455](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3455)) %% Color: yellow %% ^334465175
+
+---
+
+Dark Matter, you’ll recall, holds together clusters and galaxies, and seems to be five or six times as abundant as ordinary matter made of protons and neutrons. ([3535](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3535)) %% Color: yellow %% ^334465176
+
+---
+
+The simplest explanation for Dark Energy is that it is the net effect of particles popping into and out of the vacuum. ([3543](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3543)) %% Color: yellow %% ^334465177
+
+---
+
+Could it be that there was a time in the history of the universe when these symmetries were perfect and then something, the random chance of quantum mechanics, perhaps, simply tipped the balance?* Symmetry, in other words, broke. ([3556](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3556)) %% Color: yellow %% ^334465178
+
+---
+
+it is almost always the case that cooling a system will cause a symmetry breaking. ([3570](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3570)) %% Color: yellow %% ^334465179
+
+---
+
+Starting with something that’s decidedly asymmetric, a magnet has a north and south pole, symmetry can be restored by simply heating it up. ([3575](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3575)) %% Color: yellow %% ^334465180
+
+---
+
+Electroweak Model describes the combination of electromagnetism and the weak force, ([3595](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3595)) %% Color: yellow %% ^334465181
+
+---
+
+Grand Unified Theories describe the merger of weak, strong, and electromagnetism. ([3597](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3597)) %% Color: yellow %% ^334465182
+
+---
+
+Theories of Everything* add gravity to the mix as well. ([3597](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3597)) %% Color: yellow %% ^334465183
+
+---
+
+Unlike most forces that get weaker and weaker as you get farther away, the strong force gets stronger and stronger. If I try to pull a proton apart and take a look at the constituent quarks, all of the energy that I put in will just go into making new particles. ([3616](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3616)) %% Color: yellow %% ^334465184
+
+---
+
+There is an energy scale, around 1015 gigaelectron volts, where the strengths of all forces intersect. ([3619](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3619)) %% Color: yellow %% ^334465185
+
+---
+
+Each of the fundamental forces responds to a different kind of charge. There is electrical charge, color (for the strong force), weak isospin and hypercharge (for the weak force), and mass (for gravity). But not every particle has every kind of charge. ([3656](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3656)) %% Color: yellow %% ^334465186
+
+---
+
+there really are 16 different particles in the Standard Model. The up and down quarks each have three possible colors, giving a total of six different quarks in each generation. There is also an electron and a neutrino. Because there’s only one color (beige, I guess), we get to add only two to our total, bringing us up to eight particles. Then we simply add the detail that the particles can be either left-handed or right-handed (two possibilities), and we get a total of sixteen different states. ([3664](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3664)) %% Color: yellow %% ^334465187
+
+---
+
+without a way to turn quarks into leptons and vice versa, protons are quite literally immortal. ([3678](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3678)) %% Color: yellow %% ^334465188
+
+---
+
+Protons have the distinction of being the lightest baryon, the catchall term for things made of quarks. ([3679](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3679)) %% Color: yellow %% ^334465189
+
+---
+
+Noether’s First Theorem: Every continuous symmetry corresponds to a conserved quantity. ([3846](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3846)) %% Color: yellow %% ^334465190
+
+---
+
+C Symmetry (for charge conjugation): The physical laws for antiparticles behave exactly the same as for their respective particles. It’s a symmetry for all of the forces but the weak force. ([3848](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3848)) %% Color: yellow %% ^334465191
+
+---
+
+P Symmetry (for parity): All of the laws of physics look just as valid if you view everything through a mirror. Also broken for the weak force. ([3849](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3849)) %% Color: yellow %% ^334465192
+
+---
+
+T Symmetry (for time reversal): The laws of physics look the same upon a reversal of the flow of time. By itself, this one is also broken for the weak force. ([3850](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3850)) %% Color: yellow %% ^334465193
+
+---
+
+CP Symmetry: Combination of C and P. This is also violated in the weak force, and a good thing too, because without a CP violation, there’d be no excess matter in the universe. ([3852](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3852)) %% Color: yellow %% ^334465194
+
+---
+
+CPT Symmetry: Combination of C, P, and T, applied in any order. A perfect symmetry of our universe, so far as we can tell. ([3853](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3853)) %% Color: yellow %% ^334465195
+
+---
+
+Particle Replacement Symmetry: All of the measurable quantities in a system will remain unchanged if you swap two particles of identical type and state. The complication is that if you exchange two fermions, the wave function is multiplied by a -1, but this isn’t anything you can detect directly. ([3854](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3854)) %% Color: yellow %% ^334465196
+
+---
+
+Time Translation Symmetry: All of the laws of physics behave the same at different times. From Noether’s Theorem, this leads to conservation of energy. ([3857](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3857)) %% Color: yellow %% ^334465197
+
+---
+
+Translational Symmetry: The laws of physics are exactly the same at all places in the universe. On large scales, this is reflected in the homogeneity of the universe and the Cosmological Principle. From Noether’s Theorem, this leads to conservation of momentum. ([3859](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3859)) %% Color: yellow %% ^334465198
+
+---
+
+Rotational Symmetry: The laws of physics don’t change if you rotate a system in its entirety. On large scales, this is reflected in the isotropy of the universe and is also part of the assumptions underlying the Cosmological Principle. This leads to conservation of angular momentum. ([3861](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3861)) %% Color: yellow %% ^334465199
+
+---
+
+Lorentz Invariance: The laws of physics look equally valid for any observer moving at constant speed and direction. It’s also the basis for Special Relativity. ([3863](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3863)) %% Color: yellow %% ^334465200
+
+---
+
+Weak Equivalence Principle: Particles moving in free fall are locally indistinguishable from inertial systems. This serves as the basis for General Relativity. ([3864](https://readwise.io/to_kindle?action=open&asin=B009VMBWAU&location=3864)) %% Color: yellow %% ^334465201
+
+---

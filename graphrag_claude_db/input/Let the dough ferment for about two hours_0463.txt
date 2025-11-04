@@ -1,0 +1,18 @@
+---
+aliases:
+tags:
+  - Baguette
+  - recipe
+---
+# Let the dough ferment for about two hours
+Date: 2024-10-09
+
+### Backlink
+[[Baguettes Recipe]]
+
+### Reference
+-  
+### Notes
+-  When using a Miele combo steam oven for proofing your baguette dough, you can optimize the environment for fermentation by following these settings:
+	1.	Temperature: Set your steam oven to 82°F (28°C) if possible, as this is an ideal temperature for dough proofing. If your oven does not allow for such a low setting, 95°F (35°C) is also suitable.
+	2.	Time: Allow the dough to ferment until it has doubled in size. This typically takes about 30 minutes in a steam oven due to the controlled temperature and humidity. However, since you mentioned a two-hour fermentation period, you may need to adjust based on how quickly the dough rises in your specific environment.

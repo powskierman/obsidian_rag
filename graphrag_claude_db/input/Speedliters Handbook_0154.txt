@@ -1,0 +1,114 @@
+---
+id: 16112703
+updated: 2022-06-18
+title: Speedliters Handbook
+author: Syl Arena
+highlights: 21
+last_highlight: 2015-03-28
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112703
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51EMnk8eLCL._SL500_.jpg)
+
+# About
+Title: [[Speedliters Handbook]]
+Authors: [[Syl Arena]]
+Category: #books
+Number of Highlights: ==21==
+Readwise URL: https://readwise.io/bookreview/16112703
+Date: [[2022-06-18]]
+Last Highlighted: *2015-03-28*
+
+---
+
+# Highlights
+
+this—light enables you to see the object, shadows enable you to see its depth. ([336](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=336)) %% Color: yellow %% ^334465382
+
+---
+
+To create interesting light, you also need to create interesting shadows. ([338](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=338)) %% Color: yellow %% ^334465383
+
+---
+
+If everything in your photo is lit evenly, then nothing will stand out. ([343](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=343)) %% Color: yellow %% ^334465384
+
+---
+
+the scene is brightly lit, often I will underexpose the ambient—making the portion of the picture not lit by the Speedlite a bit dark—because I want to direct the viewer’s eye to the subject. Now, if the scene is dimly lit, a camera operating in Av will typically overexpose the background. Remember, the camera has no idea what it’s seeing. So, it will use a long exposure to gather what it thinks is enough ambient light. In this situation, I will also dial the exposure down to reduce the amount of the ambient. ([389](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=389)) %% Color: yellow %% ^334465385
+
+---
+
+E-TTL is Canon’s proprietary system where the camera and flash work together automatically to set the power level on the flash. ([426](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=426)) %% Color: yellow %% ^334465386
+
+---
+
+Just as you can use Exposure Compensation to increase or decrease the amount of ambient light in your shot, you can use Flash Exposure Compensation (FEC) to increase or decrease the amount of flash in your shot. ([447](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=447)) %% Color: yellow %% ^334465387
+
+---
+
+The fastest place to set FEC is on the Speedlite. ([452](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=452)) %% Color: yellow %% ^334465388
+
+---
+
+Aperture Controls Flash Exposure. Shutter Speed Controls Ambient Exposure. ([492](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=492)) %% Color: yellow %% ^334465389
+
+---
+
+At , a 580EX fires for about . At that drops to about ([496](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=496)) %% Color: yellow %% ^334465390
+
+---
+
+As long as the sync speed for your camera is not exceeded, then shutter speed has no effect on flash exposure. ([499](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=499)) %% Color: yellow %% ^334465391
+
+---
+
+if you want more ambient light in your exposure, then you have to use a longer (slower) shutter speed. If you want to dim the ambient more, then you have to use a shorter (faster) shutter speed. In either instance, your flash exposure would not change significantly. ([506](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=506)) %% Color: yellow %% ^334465392
+
+---
+
+Build your shots in steps. Find the exposure for the ambient light. Set your Speedlite. Worry about its position and modification first. Get it to go where you want and give it the shadow quality that you want. Then play with the power level. If you are using multiple Speedlites, go for your ambient exposure. Set and tune your key light. Work on the fill light next, and then work on the rim/separation light. ([512](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=512)) %% Color: yellow %% ^334465393
+
+---
+
+In a scene with a high degree of chiaroscuro, the light transitions from bright to dark quickly. ([622](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=622)) %% Color: yellow %% ^334465394
+
+---
+
+Geometry (the patterns in a frame) and lighting (the shadows in the frame) are the two ways that a photographer can add depth back into a scene. ([631](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=631)) %% Color: yellow %% ^334465395
+
+---
+
+Here are two things to remember when using the histogram as a flash meter: • The right endpoint tells you about your exposure. • The left endpoint tells you about your contrast. ([1122](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=1122)) %% Color: yellow %% ^334465396
+
+---
+
+As the apparent size of a light source gets smaller, the directionality of its light increases. ([1341](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=1341)) %% Color: yellow %% ^334465397
+
+---
+
+Move a large source far enough away and it will eventually become a small light source. ([1341](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=1341)) %% Color: yellow %% ^334465398
+
+---
+
+there’s no need to change the exposure if the distance between the subject and lights does not change. ([1406](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=1406)) %% Color: yellow %% ^334465399
+
+---
+
+The closer your light source is to your subject, the more dramatic the falloff will be. Likewise, the farther you place your light from the subject the more even the light will be. ([1438](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=1438)) %% Color: yellow %% ^334465400
+
+---
+
+Use the shutter to control the ambient exposure. Use the aperture to control the flash exposure. ([1531](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=1531)) %% Color: yellow %% ^334465401
+
+---
+
+The power setting on a Speedlite controls how long the flashtube fires, not how bright it burns. ([1889](https://readwise.io/to_kindle?action=open&asin=B004JXXKYW&location=1889)) %% Color: yellow %% ^334465402
+
+---

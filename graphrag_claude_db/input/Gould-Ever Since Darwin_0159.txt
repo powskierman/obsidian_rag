@@ -1,0 +1,80 @@
+---
+bookId: "8147"
+title: "Ever Since Darwin: Reflections in Natural History"
+author: Stephen Jay Gould
+asin: B00I036L8E
+lastAnnotatedDate: 2019-01-18
+highlightsCount: 22
+reference: https://www.amazon.com/dp/B00I036L8E
+kindle_link: kindle://book?action=open&asin=B00I036L8E
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81k78HtLNkL._SY160.jpg)
+## Highlights
+First, Darwin argues that evolution has no purpose. Individuals struggle to increase the representation of their genes in future generations, and that is all. If the world displays any harmony and order, it arises only as an incidental result of individuals seeking their own advantage—the economy of Adam Smith transferred to nature. — location: [89](kindle://book?action=open&asin=B00I036L8E&location=89) ^ref-14415
+
+---
+Darwin applied a consistent philosophy of materialism to his interpretation of nature. Matter is the ground of all existence; mind, spirit, and God as well, are just words that express the wondrous results of neuronal complexity. — location: [93](kindle://book?action=open&asin=B00I036L8E&location=93) ^ref-15016
+
+---
+most laymen still equate evolution with progress and define human evolution not simply as change, but as increasing intelligence, increasing height, or some other measure of assumed improvement. — location: [409](kindle://book?action=open&asin=B00I036L8E&location=409) ^ref-29731
+
+---
+To Darwin, improved meant only “better designed for an immediate, local environment.” Local environments change constantly: they get colder or hotter, wetter or drier, more grassy or more forested. Evolution by natural selection is no more than a tracking of these changing environments by differential preservation of organisms better designed to live in them: — location: [522](kindle://book?action=open&asin=B00I036L8E&location=522) ^ref-23882
+
+---
+We refer to genes that control the timing of developmental events as the regulatory system. — location: [615](kindle://book?action=open&asin=B00I036L8E&location=615) ^ref-11858
+
+---
+Evolution usually proceeds by “speciation”—the splitting of one lineage from a parental stock—not by the slow and steady transformation of these large parental stocks. — location: [718](kindle://book?action=open&asin=B00I036L8E&location=718) ^ref-55287
+
+---
+In the allopatric theory, popularized by Ernst Mayr, new species arise in very small populations that become isolated from their parental group at the periphery of the ancestral range. Speciation in these small isolates is very rapid by evolutionary standards—hundreds or thousands of years — location: [723](kindle://book?action=open&asin=B00I036L8E&location=723) ^ref-55063
+
+---
+natural selection tends to be intense in geographically marginal areas where the species barely maintains a foothold. — location: [727](kindle://book?action=open&asin=B00I036L8E&location=727) ^ref-27929
+
+---
+Only in humans are the ends of long bones and digits still entirely cartilaginous at birth. — location: [775](kindle://book?action=open&asin=B00I036L8E&location=775) ^ref-1473
+
+---
+growth—ontogeny recapitulates phylogeny, — location: [808](kindle://book?action=open&asin=B00I036L8E&location=808) ^ref-62678
+
+---
+If women gave birth when they “should”—after a gestation of about a year and a half—our babies would share the standard precocial features of other primates. — location: [867](kindle://book?action=open&asin=B00I036L8E&location=867) ^ref-41102
+
+---
+If length of gestation had slowed down as much as the rest of our growth and development, human babies would be born anywhere from seven to eight months (Passingham’s estimate) to a year (Portmann and Ashley Montagu’s estimate) after the nine months actually spent in utero. — location: [887](kindle://book?action=open&asin=B00I036L8E&location=887) ^ref-44094
+
+---
+our brains continue to grow at rapid, fetal rates after birth. The brains of many mammals are essentially fully formed at birth. — location: [897](kindle://book?action=open&asin=B00I036L8E&location=897) ^ref-10268
+
+---
+The brain of a human baby is only one-fourth its final size at birth. — location: [899](kindle://book?action=open&asin=B00I036L8E&location=899) ^ref-58056
+
+---
+“Man’s brain does not reach the proportion found for the chimpanzee at birth until around six months after birth. — location: [899](kindle://book?action=open&asin=B00I036L8E&location=899) ^ref-41582
+
+---
+The recent evolution of consciousness must be viewed as the most cataclysmic happening since the Cambrian if only for its geologic and ecological effects. — location: [1460](kindle://book?action=open&asin=B00I036L8E&location=1460) ^ref-56491
+
+---
+Theoretical ecology, which works in the smallest dimension of “ecological” time (organic interactions over seasons or, at most, years), has begun to influence paleontology, the custodian of the longest dimension of all—three billion years of the history of life. — location: [1477](kindle://book?action=open&asin=B00I036L8E&location=1477) ^ref-38176
+
+---
+the introduction of a new level in the ecological pyramid tends to broaden the level below it. — location: [1546](kindle://book?action=open&asin=B00I036L8E&location=1546) ^ref-55958
+
+---
+The key to the Cambrian explosion, Stanley argues, is the evolution of cropping herbivores—single-celled protists that ate other cells. Croppers made space for a greater diversity of producers, and this increased diversity permitted the evolution of more specialized croppers. The ecological pyramid burst out in both directions, adding many species at lower levels of production and adding new levels of carnivory at the top. — location: [1551](kindle://book?action=open&asin=B00I036L8E&location=1551) ^ref-15131
+
+---
+It is a long step from bacteria to the evolution of life, but sigmoidal growth is a general property of certain systems, and the analogy seems to hold in this case. — location: [1617](kindle://book?action=open&asin=B00I036L8E&location=1617) ^ref-31927
+
+---
+Sigmoidal patterns occur only in open, unconstrained systems, where food and space are so abundant that organisms grow until their own numbers limit further increase. — location: [1640](kindle://book?action=open&asin=B00I036L8E&location=1640) ^ref-17559
+
+---
+The ocean floor does not plunge uniformly from shoreline to ocean deep. Today’s continents are generally bordered by a very wide continental shelf of persistently shallow water. Seaward of the shelf lies the continental slope of much greater steepness. If sea level fell far enough to expose the entire continental shelf, then most of the world’s shallow seas would disappear. This may well have happened during the late Permian. — location: [1731](kindle://book?action=open&asin=B00I036L8E&location=1731) ^ref-3262
+
+---

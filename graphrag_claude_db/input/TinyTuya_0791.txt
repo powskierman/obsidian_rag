@@ -1,0 +1,54 @@
+---
+aliases: 
+tags:
+  - tuya
+  - tinytuya
+  - localtuya
+  - Home-Assistant
+---
+# TinyTuya
+Date: 2023-10-28
+
+### Backlink
+[[../../../Software/Home-Assistant/media/Home-Assistant MoC]]
+
+### Reference
+-  
+### Notes
+-  Sign up for the developer account at iot.tuya.com and have registered your Tuya device(s) with that account you will have an “API key” and “API secret” from tuya.com. Also check on one of the ‘virtual ID’ of a device currently registered in the app.
+- For more detailed information take a look at [codetheweb / tuyapi 114](https://github.com/codetheweb/tuyapi/blob/189b4f2818d52cd609d6feb750f939a603920909/docs/SETUP.md).
+- Open a CLI.
+- Check whether npm (Node Package Manager) is installed:
+`sudo npm --version`
+	- If npm is not installed run for Debian and derivatives:
+		`sudo apt install npm`
+- Now install/update tuya-cli:
+	`sudo npm i -g @tuyapi/cli`
+- Now have your Tuya “API key”, the “API secret” and the “virtual ID” of one of your devices registered in the app ready and run “tuya-cli wizard”:
+	`sudo tuya-cli wizard`
+- On the CLI you will see something similar to the following:
+	- The API key from tuya.com: <type-in-your-api-key>
+		- The API secret from tuya.com: <type-in-your-api-secret>
+		- Provide a "virtual ID" of a device currently registered in the app: <type-in-the-virtual-id>
+- You’ll see an output similar to the following:
+
+```json 'FOLD'
+[
+  {
+    name: '<device-name> ',
+    id: '<some-string>',
+    key: '<another-string>'
+  }
+]
+```
+- The above command will list all registered devices, their names, id’s and keys. It’s wise to copy the whole output into a text file to have it ready at hand, especially if you have many devices.
+- After you have installed the LocalTuya integration with HA go to the Integrations page, look for “localtuya” and click on “Configure”.
+- Now check “Add a new device” and pick or add a device to configure:
+	- Name = the device-name
+	- Host = the IP address of the particular device.
+	- Device ID = <see above tuya-cli wizard output for id:>
+	- Local key = <see above tuya-cli wizard output for key:>
+	>Note: Whenever you have to reset one (or more) of your Tuya devices using the Smart Life app the Local key(s) will change. Thus you will need to run sudo tuya-cli wizard again from the CLI to obtain the new Local key(s). Within the LocalTuya integration at HA you don’t want to check on “Add a new device” but use “Edit a device” instead to change the Local key accordingly.
+
+
+

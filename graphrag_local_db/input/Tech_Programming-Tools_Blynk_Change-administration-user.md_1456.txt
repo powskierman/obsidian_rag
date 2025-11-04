@@ -1,0 +1,42 @@
+# Change-administration-user.md
+
+---
+aliases:
+tags:
+created: 2021-12-29 14:40
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Stop server;
+
+    a.  ps -aux | grep java
+
+*From <<https://github.com/blynkkk/blynk-server>>*
+
+2.  Sudo kill <process>
+
+```{=html}
+<!-- -->
+```
+2.  Findadmin@...userfile and remove it;
+
+3.  Manually open json with user you want to make admin and set "isSuperAdmin" totrue.
+
+4.  Start server;
+
+
+
+*From <<https://community.blynk.cc/t/how-to-change-password-of-admin-user/19243/3>>*
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

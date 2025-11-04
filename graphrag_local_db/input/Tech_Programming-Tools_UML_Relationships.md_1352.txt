@@ -1,0 +1,22 @@
+# Relationships.md
+
+---
+aliases: []
+---
+
+2022-06-24
+# Relationships
+
+### Backlink
+[[C++ Terminology]]
+
+### Reference
+
+### Notes
+
+1. ![](http://2.bp.blogspot.com/-EjTahSiP7is/UKj8B-wIQeI/AAAAAAAAACE/seDeXyS8pKU/s1600/relationships.jpg)
+2. [[**Association**]] tells us that Class A has an attribute of Class B.
+
+2.  [[**Aggregation**]] represents the same relation, but it also makes it explicit that the Class B attribute*won't die together*with the Class A object.
+
+3.  **[[Composition]]** is a stronger form of association, that shows that the Class B object*gets destroyed along with*the Class A object

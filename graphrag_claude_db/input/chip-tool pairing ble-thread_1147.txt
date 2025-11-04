@@ -1,0 +1,22 @@
+---
+aliases: []
+tags: [
+ ble
+ thread
+ matter
+ pairing
+ ]
+---
+# chip-tool pairing ble-thread
+Date: 2023-05-25
+
+### Backlink
+[[Commissioning Thread Edge Device]]
+
+### Reference
+-  
+### Notes
+-  
+```
+chip-tool pairing ble-thread 20202021 3840 <ThreadNetworkDataset>
+```

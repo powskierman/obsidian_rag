@@ -1,0 +1,61 @@
+# Closure.md
+
+---
+aliases: 
+tags:
+  - swift
+  - closure
+---
+# Closure
+Date: 2023-12-18
+
+### Backlink
+[[Swift MOC]]
+
+### Reference
+-  
+### Notes
+-  In Swift, a closure is a self-contained block of functionality that can be passed around and used in your code. Closures are similar to functions in that they can take parameters, return values, and be assigned to variables, but they also have some unique capabilities.
+
+Here's a detailed explanation:
+
+Block of Code: A closure is essentially a block of code that can be executed at a later time. It's similar to a function, but it does not require a name or a function definition, which makes it handy for creating quick snippets of code that can be passed as arguments or used as callback handlers.
+Capture Values: One of the key features of closures is their ability to capture and store references to any constants and variables from the context in which they were defined. This is known as "closing over" those constants and variables. It means that a closure can access and modify these values even after the original context where the values were defined has gone out of scope.
+Syntax: The basic syntax of a closure in Swift is as follows:
+swift
+```swift
+{ (parameters) -> return type in
+    // Code
+}
+```
+
+For example, a simple closure that takes two Int parameters and returns an Int could look like this:
+```swift
+Copy code
+{ (a: Int, b: Int) -> Int in
+    return a + b
+}
+```
+Simplifying Syntax: Swift provides various ways to simplify the syntax of a closure. If the context is clear, Swift can infer the types of the closure’s parameters and the type of the value it returns. Swift also allows shorthand argument names to inline closures, which can be used to refer to the values of the closure’s arguments.
+
+```swift
+Copy code
+// Full syntax
+let sum: (Int, Int) -> Int = { (a: Int, b: Int) -> Int in
+    return a + b
+}
+
+// Simplified syntax
+let simplifiedSum: (Int, Int) -> Int = { a, b in a + b }
+```
+Using Closures: Closures are often used for callbacks and completion handlers in asynchronous operations, sort and filter operations in collections, and in other places where a snippet of code needs to be executed at a later point.
+Escaping and Non-Escaping Closures: By default, closures are non-escaping, meaning they cannot outlive the function they are passed to. However, if you need a closure to be stored and executed after the function returns, it must be marked as @escaping.
+Trailing Closures: If a closure is the last parameter of a function, it can be written as a trailing closure outside of the parentheses. This makes the syntax cleaner, especially for long closures.
+
+```swift
+Copy code
+someFunctionThatTakesAClosure() {
+    // Closure's body goes here
+}
+```
+Closures are a fundamental part of Swift, providing a powerful and flexible way to write code that can be passed around and executed later, making them particularly useful for handling asynchronous operations, callbacks, and more.

@@ -1,0 +1,16 @@
+---
+aliases: []
+tags: []
+---
+# MVVM
+Date: 2024-03-24
+
+### Backlink
+[[Swift MOC]]
+
+### Reference
+-  
+### Notes
+- SwiftUI views react to changes in observable objects automatically. By using `@Published` properties in the ViewModel, you enable SwiftUI to efficiently update the UI in response to changes, ensuring that your UI is always in sync with your model.  
+- The ViewModel's role is to manage the state and logic for views, making the data handling and business logic testable independently of the UI.
+	- By keeping this state in the ViewModel, you centralize state management, simplifying state updates and access. This centralization ensures that any view that needs to reflect or modify a state can do so through a single source of truth, improving consistency and minimizing bugs.

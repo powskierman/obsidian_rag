@@ -1,0 +1,45 @@
+# Apple Containers.md
+
+---
+aliases: 
+tags:
+  - container
+created: 2025-07-09 12:29
+Backlink:
+---
+### Main Idea
+- 
+### References
+- [Getting Started](https://github.com/apple/container/blob/main/docs/tutorial.md)
+- [Github Page](https://github.com/apple/container/tree/main)
+- [Apple Containerization Framework - Medium](https://medium.com/cloudnativepub/apples-new-containerization-framework-d0f808a77693)
+- [Container Tutorial](https://github.com/apple/container/blob/main/docs/tutorial.md)
+
+### Notes
+[[Getting Started with Apple Containerization]]
+## Common Commands
+
+| Action                | Command Example                                             |
+| --------------------- | ----------------------------------------------------------- |
+| Start system service  | `container system start`                                    |
+| Pull image            | `container image pull alpine:latest`                        |
+| Run container (shell) | `container run -t -i alpine:latest sh`                      |
+| Run container (bg)    | `container run --name my-web-server --detach --rm web-test` |
+| List containers       | `container ls`                                              |
+| Exec command          | `container exec my-web-server ls /`                         |
+| Stop container        | `container stop my-web-server`                              |
+| Stop system service   | `container system stop`                                     |
+
+Apple’s Containerization CLI offers a familiar, Docker-like experience, but with native macOS integration and stronger security isolation. For advanced features and troubleshooting, refer to the official documentation and GitHub repository.
+
+
+
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

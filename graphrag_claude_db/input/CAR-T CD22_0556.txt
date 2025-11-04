@@ -1,0 +1,27 @@
+---
+aliases:
+tags:
+  - lymphoma
+  - treatment
+  - CAR-T
+created: 2025-10-29 11:10
+ContentType:
+Backlink: "[[Lymphoma Treatment]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- <mark style="background: #FFF3A3A6;">CD22 CAR-T cell therapy is now available in Alberta</mark>, specifically through a phase I clinical trial called <mark style="background: #FFF3A3A6;">CLIC-2201</mark> for patients with relapsed or refractory B-cell leukemias or lymphomas. This Canadian-developed therapy is part of a national initiative, with clinical sites including Calgary and Edmonton, allowing pediatric and adult patients to participate locally. The trial represents one of the first opportunities for Albertans to access CD22-targeted CAR-T therapy, offering hope to individuals who have not responded to previous CD19-targeted CAR-T treatments or standard therapies. Interested patients should consult with their oncologist or contact the Alberta cancer centres for eligibility and referral details, as participation in this trial is subject to specific inclusion criteria and space availability at local cancer centres like those in Calgary and Edmonton.
+- This national initiative involves collaboration with experts from BC Cancer, The Ottawa Hospital, and is supported by Canadian research groups and Health Canada. The University of Calgary’s Charbonneau Cancer Institute details Dr. Kevin Hay’s work in bringing this innovative treatment option to Alberta, with funding and regulatory oversight offered by BioCanRx and national cancer networks. Clinical trial recruitment for CLIC-2201 began in 2025, and information about ongoing recruitment is available through Alberta Health Services and the Alberta Cancer Clinical Trials Registry.
+- Access to CAR-T cell therapy, including CD22 targeting products, remains limited to major provincial cancer centres. For Albertans, the therapy is administered at designated centres in Calgary and Edmonton. This access is restricted to patients who meet strict clinical trial criteria and is not yet standard of care outside the clinical trial setting in Alberta.
+- If you are an Alberta resident seeking this therapy, discuss eligibility and next steps with your oncology care team, who can provide the most up-to-date referral pathways and help determine if you qualify for current or future arms of the CD22 CAR-T trial.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

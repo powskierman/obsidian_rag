@@ -1,0 +1,17 @@
+# coefficient.md
+
+---
+aliases: []
+---
+
+2022-03-29
+# coefficient
+
+### Backlink
+[[Algebra MOC]]
+
+### Reference
+
+### Notes
+- A coefficient is a number used to multiply a variable. Example: 6z 
+-

@@ -1,0 +1,20 @@
+# esp-prog to ESP32.md
+
+---
+aliases: 
+tags:
+  - esp32
+  - Debugging
+  - esp-prog
+---
+# esp-prog to ESP32
+Date: 2023-09-19
+
+### Backlink
+[[Debugging MoC]]
+
+### Reference
+-  [esp-prog to ESP32](https://www.visualmicro.com/pics/Debug-Help-ESP32-PROG-JTAG-Connections.png)
+- 
+### Notes
+-  ![[18ABDB17-3725-48D9-BAE5-A060F2A4332B.png]]

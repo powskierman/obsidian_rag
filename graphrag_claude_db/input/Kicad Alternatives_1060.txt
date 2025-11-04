@@ -1,0 +1,14 @@
+---
+aliases: []
+---
+
+2022-03-12
+# Kicad Alternatives
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+- [EsyEDA](https://easyeda.com)

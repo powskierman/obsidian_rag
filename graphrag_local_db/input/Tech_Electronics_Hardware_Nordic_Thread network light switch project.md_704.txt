@@ -1,0 +1,17 @@
+# Thread network light switch project.md
+
+---
+aliases: []
+tags: []
+---
+# Thread network light switch project
+Date: 2024-05-01
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- [Form thread network tutorial ](https://openthread.io/codelabs/esp-openthread-hardware#1)
+-

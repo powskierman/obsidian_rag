@@ -1,0 +1,101 @@
+# Autorouting.md
+
+---
+aliases:
+tags:
+created: 2021-12-31 10:06
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Mac Installation:
+
+    a.  Download [Freeroute.jar](https://github.com/freerouting/freerouting/files/1282814/freeroute.jar.zip).
+
+
+
+2.  Windows Installation:
+
+    a.  To get started download and install NetBeans [from the official web site](https://web.archive.org/web/20190901122444/https:/netbeans.org/).
+
+[2. Install git, if you haven't done it so already. Here's how.](https://web.archive.org/web/20190901122444/https:/help.github.com/articles/set-up-git/)
+
+
+
+3. Open a terminal and navigate into a folder you're going to clone [this repo](https://web.archive.org/web/20190901122444/https:/github.com/nikropht/FreeRouting) to. Issue the following command:
+
+git clone <https://github.com/nikropht/FreeRouting.git>
+
+
+
+4. Follow the steps 2 to 5 described on this site at the bottom: [https://github.com/nikropht/FreeRouting.git](https://web.archive.org/web/20190901122444/https:/github.com/nikropht/FreeRouting.git)
+
+
+
+5. Obtain the missing jh.jar file. I used one from git from this project. This one works:
+
+<https://github.com/kellertuer/Gravel/blob/master/javahelp/jh2.0/javahelp/lib/jh.jar>
+
+
+
+If you can't be bothered you can clone the whole project to get that single file by saying:
+
+git clone <https://github.com/kellertuer/Gravel.git>
+
+to your computer.
+
+
+
+6. Then follow steps 6 to 10 from here [https://github.com/nikropht/FreeRouting.git](https://web.archive.org/web/20190901122444/https:/github.com/nikropht/FreeRouting.git)
+
+
+
+7. Click the little play button for run in NetBeans, and Freerouting will fire up.
+
+
+
+8. Load and arrange your design in Pcbnew and click Tools > FreeRoute
+
+
+
+9. Choose export data to .dsn
+
+
+
+10. Then launch Freerouting from within NetBeans and load the file you saved using the open your own design facility. It should look similar to this:
+
+11. Configure your desired settings and hit Autoroute.
+
+
+
+1.  In PCBNew, /File;Export; export data to .dsn
+
+2.  Run FreeRouting.jar from Onedrive/Kicad/Freeroute/
+
+3.  Open .dns file created in PCBNew
+
+4.  Press Autorouter button
+
+5.  Once routing is finished, Click File > Export Specctra session file.
+
+6.  Go back to Pcbnew and click Back import the Specctra Session file. And click yes to rebuild the connectivity data.
+
+![Picture](Autorouting-image1.png){width="4.875in" height="3.0416666666666665in"}
+
+
+
+
+
+![Picture](Autorouting-image2.png){width="4.875in" height="2.3229166666666665in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,44 @@
+---
+bookId: "37661"
+title: Photoshop for Lightroom Users (Voices That Matter)
+author: Scott Kelby
+asin: B00HDFOUU6
+lastAnnotatedDate: 2015-06-22
+highlightsCount: 10
+reference: https://www.amazon.com/dp/B00HDFOUU6
+kindle_link: kindle://book?action=open&asin=B00HDFOUU6
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/91g7tcpwXeL._SY160.jpg)
+## Highlights
+To toggle through any nested tools, just add the Shift key. For example, each time you press Shift-I, it brings the next nested tool to the front as the active tool. — location: [253](kindle://book?action=open&asin=B00HDFOUU6&location=253) ^ref-61380
+
+---
+you’re painting with a brush, the Foreground color swatch will show you the color you’ll be painting with (in our example on the left, our current Foreground color is black). The Background color swatch shows the color the Eraser tool uses (here, it’s white). To change colors, click once on a swatch to bring up Photoshop’s Color Picker. — location: [262](kindle://book?action=open&asin=B00HDFOUU6&location=262) ^ref-35620
+
+---
+If you want to fit your image as large as it can fully be viewed within Photoshop, just double-click directly on the Hand tool in the Toolbox, as shown here (its icon is a hand). To jump right to a 100% (1:1) view, just double-click on the Zoom tool (its icon is a magnifying glass). — location: [276](kindle://book?action=open&asin=B00HDFOUU6&location=276) ^ref-46082
+
+---
+To hide all the panels from view (including the Toolbox on the left and Options Bar at the top), press the Tab key and you’ll get the view you see here—just your image, with no panels or Toolbox. If you only want the panels hidden, and to keep the Toolbox and Options Bar still visible, then press Shift-Tab instead. — location: [288](kindle://book?action=open&asin=B00HDFOUU6&location=288) ^ref-14766
+
+---
+If you want to make a square selection (rather than a rectangle), just press-and-hold the Shift key, then click-and-drag out your selection and it will be perfectly square — location: [324](kindle://book?action=open&asin=B00HDFOUU6&location=324) ^ref-24631
+
+---
+When the object you want to remove is large, that’s when we reach for the Patch tool. — location: [387](kindle://book?action=open&asin=B00HDFOUU6&location=387) ^ref-38489
+
+---
+It’s also kind of like Lightroom’s Spot Removal tool, if it was combined with Photoshop’s Lasso tool. — location: [388](kindle://book?action=open&asin=B00HDFOUU6&location=388) ^ref-37505
+
+---
+If the object you want to remove is near an edge in the image, chances are the Patch tool will leave a large smear when it patches the area. If that happens, press Command-Z (PC: Ctrl-Z) to Undo, then go up to the Options Bar and, from the Patch pop-up menu, choose Content-Aware, and try again. That will usually do the trick. — location: [399](kindle://book?action=open&asin=B00HDFOUU6&location=399) ^ref-23025
+
+---
+I change mine to go over to Photoshop as a PSD (Photoshop’s native file format) rather than a TIFF, simply because its file size is often much smaller but without any loss of quality. — location: [596](kindle://book?action=open&asin=B00HDFOUU6&location=596) ^ref-27256
+
+---
+Edit Original. I only choose this one in one very specific scenario: when I’ve taken an image over to Photoshop, then saved the file with all its layers still intact and let it go back to Lightroom. — location: [652](kindle://book?action=open&asin=B00HDFOUU6&location=652) ^ref-60053
+
+---

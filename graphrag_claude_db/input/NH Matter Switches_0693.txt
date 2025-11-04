@@ -1,0 +1,27 @@
+---
+aliases: []
+tags: []
+---
+# NH Matter Switches
+Date: 2024-06-17
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- Procedure:
+	- Install the switch
+	- Get the pairing code from the front of the switch, underneath the front plate
+	- Use the Alexa app
+		- Go to Devices tab, press "+", top right
+		- Add device
+		- Go to bottom of list.  Choose other
+		- Tap Matter logo, choose yes
+- 3 spotlights
+	- Spot
+	- 2214-511-0984
+- Main lights
+	- Main
+	- 2459-264-1827

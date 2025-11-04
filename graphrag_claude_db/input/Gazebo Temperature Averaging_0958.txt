@@ -1,0 +1,99 @@
+---
+aliases:
+tags:
+  - gazebo
+  - esphome
+created: 2025-09-20 14:33
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+#### Complete Temperature Averaging Implementation:
+
+  1. **Global Variables for Averaging** (lines 381-388):
+	  - temp_averaged: Raw averaged value (Arduino TempAvg
+	  equivalent)
+	  - temp_actual: Rate-limited display value (Arduino
+	  TempAct equivalent)
+	  - sensor_last_valid: Previous reading for averaging
+	  (Arduino LastRead equivalent)
+
+  2. **Arduino Averaging Algorithm** (lines 111-139):
+	  - Formula: TempAvg = (ReadF + LastRead + (2 * 
+	  TempCorrection))/2
+	  - Rate Limiting: Temperature changes limited to 1°C per
+	  reading
+	  - Dual Values: Maintains both averaged and display
+	  temperatures
+	  - Debug Logging: Shows raw, averaged, and actual values
+
+  3. **Perceived Temperature Feature** (lines 114-118, 
+  232-237, 315-326):
+	  - Humidity Control: Manual humidity input for perceived
+	  temp calculation
+	  - Toggle Switch: Enable/disable perceived temperature
+	  mode
+	  - Formula: TempAvg += (Humidity - 40) / 10 when enabled
+	  - Conditions: Only active when temp > 20°C and humidity
+  > 	40%
+
+  4. **Comprehensive Monitoring** (lines 186-203):
+	  - Temperature Averaged: Shows the calculated averaged
+	  value
+	  - Temperature Raw Reading: Shows the last raw sensor
+	  reading
+	  - Humidity: Manual input for perceived temperature
+	  calculations
+	  - Real-time Updates: All sensors update every 5 seconds
+
+  5. **Enhanced Display Integration** (lines 611-615):
+	  - Raw Temperature: Shows unprocessed sensor reading
+	  - Averaged Temperature: Shows calculated average
+	  - Perceived Mode: Shows "PERCEIVED" or "ACTUAL" mode
+	  - Humidity Value: Displays current humidity setting
+
+  6. **Status Integration** (lines 392-401):
+	  - Mode Indication: Status shows "(Perceived temp)" or
+	  "(Actual temp)"
+	  - Error Handling: Maintains error reporting with mode
+	  information
+
+  🧮 **Averaging Process:**
+  1. Raw Reading: Get sensor value (20.0°C + correction)
+  2. Averaging: (Current + Previous + 2×Correction) ÷ 2
+  3. Perceived Temp: Add humidity offset if enabled
+  4. Rate Limiting: Limit changes to 1°C per reading
+  5. Storage: Save for next averaging cycle
+
+  📊 **Example Operation:**
+  - Raw Reading: 20.5°C
+  - Previous Reading: 20.0°C
+  - Temperature Correction: +0.5°C
+  - Average: (20.5 + 20.0 + 2×0.5) ÷ 2 = 21.0°C
+  - Perceived (50% humidity): 21.0 + (50-40)÷10 = 22.0°C
+  - Display: Rate-limited to 1°C change from previous
+
+  🎛️ **Controls Available**:
+	  - Use Perceived Temperature: Toggle switch in Home
+	  Assistant
+	  - Humidity: Manual slider (0-100%) for perceived temp
+	  calculations
+	  - Temperature Correction: Calibration offset (±10°C)
+
+  📱 **Home Assistant Integration**:
+	  - All averaging values visible as separate sensors
+	  - Toggle perceived temperature mode via switch
+	  - Monitor averaging process in real-time
+	  - Compatible with existing thermostat logic
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

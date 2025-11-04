@@ -1,0 +1,18 @@
+---
+aliases: []
+---
+
+2022-06-26
+# Raspberry Pi Security Camera
+
+### Backlink
+[[Raspberry Pi Projects MOC]]
+
+### Reference
+- [[Raspberry-Pi-Camera-Module-Documentation]]
+- [[raspicam-commands]]
+- 
+### Notes
+-  [[Building-a-Motion-Activated-Security-Camera-with-the-Raspberry-Pi-Zero]]
+- [[Raspberry Pi Security Camera]]
+- 

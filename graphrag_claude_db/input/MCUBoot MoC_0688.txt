@@ -1,0 +1,21 @@
+---
+aliases: []
+tags: [
+ mcuboot
+]
+---
+# MCUBoot MoC
+Date: 2023-07-18
+
+### Backlink
+[[]]
+
+### Reference
+-  [Device Firmware Update (DFU) with MCUBoot bootloader](https://devzone.nordicsemi.com/guides/nrf-connect-sdk-guides/b/software/posts/device-firmware-update-dfu-with-mcuboot-bootloader)
+- [How to build mcuboot ](https://hackmd.io/@0xff07/zephyr-rtos/https%3A%2F%2Fhackmd.io%2F%400xff07%2FHyv32nnlj)
+- [MCUboot Walkthrough and Porting Guide](https://interrupt.memfault.com/blog/mcuboot-overview)
+- 
+### Notes
+-  [[No such file or directory include pm_config.h]]
+- [[Build mcuboot app]]
+- - `slots` - Every image can be saved in a “primary” slot or “secondary” slot. The “primary” slot is where the binary executes from. The “secondary” slot is where an image is staged prior to being installed.

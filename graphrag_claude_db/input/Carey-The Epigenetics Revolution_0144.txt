@@ -1,0 +1,450 @@
+---
+bookId: "59826"
+title: "The Epigenetics Revolution: How Modern Biology Is Rewriting Our Understanding of Genetics, Disease, and Inheritance"
+author: Nessa Carey
+asin: B0074MTTEK
+lastAnnotatedDate: 2015-12-05
+highlightsCount: 145
+reference: https://www.amazon.com/dp/B0074MTTEK
+kindle_link: kindle://book?action=open&asin=B0074MTTEK
+tags:
+  - book-notes
+  - biology
+---
+![](https://m.media-amazon.com/images/I/61Hl9SR3pJL._SY160.jpg)
+## Highlights
+The epigenetic system controls how the genes in DNA are used, in some cases for hundreds of cell division cycles, and the effects are inherited from when cells divide. — location: [331](kindle://book?action=open&asin=B0074MTTEK&location=331) ^ref-60191
+
+---
+In the rich parts of our planet the diseases that kill most of us are chronic. They take a long time to develop and often they take a long time to kill us when they do. — location: [410](kindle://book?action=open&asin=B0074MTTEK&location=410) ^ref-33841
+
+---
+therapeutic cloning; creating cells identical to a specific individual in order to treat a disease. — location: [423](kindle://book?action=open&asin=B0074MTTEK&location=423) ^ref-10954
+
+---
+Under laboratory conditions, the cells of the ICM can be grown in culture as pluripotent embryonic stem (ES) cells. — location: [456](kindle://book?action=open&asin=B0074MTTEK&location=456) ^ref-57686
+
+---
+Just a small change in culture conditions, for example, and a culture dish full of one-time ES cells can differentiate into cardiomyocytes — location: [462](kindle://book?action=open&asin=B0074MTTEK&location=462) ^ref-11295
+
+---
+Fibroblasts are the main cells in connective tissue and are found in all sorts of organs including skin. — location: [504](kindle://book?action=open&asin=B0074MTTEK&location=504) ^ref-31365
+
+---
+Yamanaka called the cells that he created ‘induced pluripotent stem cells’ and the acronym – iPS cells — location: [532](kindle://book?action=open&asin=B0074MTTEK&location=532) ^ref-58016
+
+---
+It’s incredible to think that mammalian cells carry about 20,000 genes, and yet it only takes four to turn a fully differentiated cell into something that is pluripotent. — location: [534](kindle://book?action=open&asin=B0074MTTEK&location=534) ^ref-49565
+
+---
+It’s been calculated that we could take just 40 donors of specific blood types, and create a bank of iPS cells from those people that would supply all our needs — location: [648](kindle://book?action=open&asin=B0074MTTEK&location=648) ^ref-30401
+
+---
+Each cell contains six billion base-pairs of DNA (half originally came from your father and half from your mother). This sequence of six billion base-pairs is what we call the genome. So every single cell division in the human body was the result of copying 6,000,000,000 bases of DNA. — location: [752](kindle://book?action=open&asin=B0074MTTEK&location=752) ^ref-12541
+
+---
+The ‘bricks’ in proteins are quite small molecules called amino acids, and there are twenty standard amino acids — location: [766](kindle://book?action=open&asin=B0074MTTEK&location=766) ^ref-35021
+
+---
+the cell machinery ‘reads’ DNA in blocks of three base-pairs at a time. Each block of three is known as a codon — location: [770](kindle://book?action=open&asin=B0074MTTEK&location=770) ^ref-53176
+
+---
+From just four bases it’s possible to create sixty-four different codons, more than enough for the twenty amino acids. — location: [771](kindle://book?action=open&asin=B0074MTTEK&location=771) ^ref-32932
+
+---
+When a particular DNA stretch is ‘read’ so that a protein can be produced using that bit of script, a huge complex of proteins unzips the right piece of DNA and makes mRNA copies. The complex uses the base-pairing principle to make perfect mRNA copies. The mRNA molecules are then used as temporary templates at specialised structures in the cell that produce protein. These read the three letter codon code and stitch together the right amino acids to form the longer protein chains. — location: [778](kindle://book?action=open&asin=B0074MTTEK&location=778) ^ref-52309
+
+---
+all proteins are encoded by genes, even if not all genes encode proteins. There are about 20,000 to 24,000 protein-encoding genes in our DNA, — location: [804](kindle://book?action=open&asin=B0074MTTEK&location=804) ^ref-17066
+
+---
+Each cell in our body contains 6,000,000,000 base-pairs. About 120,000,000 of these code for proteins. — location: [841](kindle://book?action=open&asin=B0074MTTEK&location=841) ^ref-14178
+
+---
+So although we think of proteins as being the most important things our cells produce, about 98 per cent of our genome doesn’t code for protein. — location: [843](kindle://book?action=open&asin=B0074MTTEK&location=843) ^ref-62818
+
+---
+The first epigenetic modification to be identified was DNA methylation. — location: [881](kindle://book?action=open&asin=B0074MTTEK&location=881) ^ref-61135
+
+---
+The average molecular weight of a base-pair is around 600 Da (the Da stands for Daltons, the unit that is used for molecular weight). A methyl group only weighs 15 Da. — location: [884](kindle://book?action=open&asin=B0074MTTEK&location=884) ^ref-7387
+
+---
+C – cytosine. It’s the only one of the four DNA bases that gets methylated, to form 5-methylcytosine. — location: [888](kindle://book?action=open&asin=B0074MTTEK&location=888) ^ref-18631
+
+---
+This methylation reaction is carried out in our cells, and those of most other organisms, by one of three enzymes called DNMT1, DNMT3A or DNMT3B. DNMT stands for DNA methyltransferase. The DNMTs are examples of epigenetic ‘writers’ – enzymes that create the epigenetic code. — location: [890](kindle://book?action=open&asin=B0074MTTEK&location=890) ^ref-25743
+
+---
+Most of the time these enzymes will only add a methyl group to a C that is followed by a G. C followed by G is known as CpG. — location: [892](kindle://book?action=open&asin=B0074MTTEK&location=892) ^ref-24770
+
+---
+methylation of DNA has profound effects on how genes are expressed, and ultimately on cellular, tissue and whole-body functions. — location: [899](kindle://book?action=open&asin=B0074MTTEK&location=899) ^ref-54221
+
+---
+high levels of DNA methylation were associated with genes that were switched off. — location: [903](kindle://book?action=open&asin=B0074MTTEK&location=903) ^ref-57672
+
+---
+Under most circumstances, methylation of the CpG island at the start of a gene turns that gene off. — location: [923](kindle://book?action=open&asin=B0074MTTEK&location=923) ^ref-18764
+
+---
+Once MeCP2 binds to 5-methylcytosine in a gene promoter it seems to do a number of things. It attracts other proteins that also help to switch the gene off4. It may also stop the DNA transcription machinery from binding to the gene promoter, and this prevents mRNA messenger molecule from being produced5. Where genes and their promoters are very heavily methylated, binding of MeCP2 seems to be part of a process where that region of a chromosome gets shut down almost permanently. The DNA becomes incredibly tightly coiled up and the gene transcription machinery can’t get access to the base-pairs to make mRNA copies. — location: [930](kindle://book?action=open&asin=B0074MTTEK&location=930) ^ref-21398
+
+---
+the majority of cases of Rett syndrome are caused by mutations in MeCP2, the gene which encodes the reader of methylated DNA. — location: [968](kindle://book?action=open&asin=B0074MTTEK&location=968) ^ref-54939
+
+---
+DNA is intimately associated with proteins, and in particular with proteins called histones. At the moment most attention in epigenetics and gene regulation is focused on four particular histone proteins called H2A, H2B, H3 and H4. — location: [1020](kindle://book?action=open&asin=B0074MTTEK&location=1020) ^ref-59377
+
+---
+Two copies of each of these four histone proteins come together to form a tight structure called the histone octamer (so called because it’s formed of eight individual histones). — location: [1023](kindle://book?action=open&asin=B0074MTTEK&location=1023) ^ref-55962
+
+---
+DNA coils tightly around this protein stack like a long liquorice whip around marshmallows, to form a structure called the nucleosome. One hundred and forty seven base-pairs of DNA coil around each nucleosome. — location: [1025](kindle://book?action=open&asin=B0074MTTEK&location=1025) ^ref-33732
+
+---
+There is so much more to histones than just acting as a molecular reel for wrapping DNA around. — location: [1041](kindle://book?action=open&asin=B0074MTTEK&location=1041) ^ref-55017
+
+---
+histone proteins were chemically modified in cells, and that this modification increased expression of genes near a specific modified nucleosome — location: [1048](kindle://book?action=open&asin=B0074MTTEK&location=1048) ^ref-47720
+
+---
+Like DNA methylation, lysine acetylation is an epigenetic mechanism for altering gene expression which doesn’t change the underlying gene sequence. — location: [1053](kindle://book?action=open&asin=B0074MTTEK&location=1053) ^ref-4654
+
+---
+So back in 1996 there was a nice simple story. DNA methylation turned genes off and histone acetylation turned genes on. — location: [1057](kindle://book?action=open&asin=B0074MTTEK&location=1057) ^ref-30819
+
+---
+more than 50 different epigenetic modifications to histone proteins have been identified — location: [1060](kindle://book?action=open&asin=B0074MTTEK&location=1060) ^ref-19493
+
+---
+the single-celled zygote divides, and very quickly daughter cells start to take on discrete functions. The first noticeable event is that the cells of the early embryo split into the inner cell mass (ICM) and the trophoectoderm. — location: [1080](kindle://book?action=open&asin=B0074MTTEK&location=1080) ^ref-46887
+
+---
+Both Oct4 and the epigenetic enzyme with which it works are essential for development of the early embryo. If either is absent, the zygote can’t even develop as far as creating an ICM. — location: [1102](kindle://book?action=open&asin=B0074MTTEK&location=1102) ^ref-60329
+
+---
+In addition to these histone writers and erasers there are over 100 proteins that act as ‘readers’ of this histone code by binding to epigenetic marks. These readers attract other proteins and build up complexes that switch on or turn off gene expression. — location: [1123](kindle://book?action=open&asin=B0074MTTEK&location=1123) ^ref-10081
+
+---
+Histone modifications are different to DNA methylation in a very important way. DNA methylation is a very stable epigenetic change. Once a DNA region has become methylated it will tend to stay methylated under most conditions. — location: [1126](kindle://book?action=open&asin=B0074MTTEK&location=1126) ^ref-43816
+
+---
+These changes in the histone code are one of the key ways in which nurture (the environment) interacts with nature (our genes) to create the complexity of every higher organism on earth. — location: [1135](kindle://book?action=open&asin=B0074MTTEK&location=1135) ^ref-339
+
+---
+why is it quite rare for both MZ twins in a pair to develop type 1 diabetes? — location: [1204](kindle://book?action=open&asin=B0074MTTEK&location=1204) ^ref-52023
+
+---
+The majority of non-infectious diseases that afflict most people take a long time to develop, and then remain as a problem for many years if there is no cure available. — location: [1217](kindle://book?action=open&asin=B0074MTTEK&location=1217) ^ref-50523
+
+---
+When they looked at pairs of MZ twins who were much older, such as in their fifties, there was a lot of variation within the pair for the amount of DNA methylation or histone acetylation. This seemed to be particularly true of twins that had lived apart for a long time. — location: [1233](kindle://book?action=open&asin=B0074MTTEK&location=1233) ^ref-21400
+
+---
+identical twins begin to diverge epigenetically during development in the uterus. — location: [1250](kindle://book?action=open&asin=B0074MTTEK&location=1250) ^ref-8439
+
+---
+even genetically identical individuals are epigenetically distinct by the time of birth, and these epigenetic differences become more pronounced with age and exposure to different environments. — location: [1251](kindle://book?action=open&asin=B0074MTTEK&location=1251) ^ref-50952
+
+---
+The mouse and human lineages separated a mere 75 million or so years ago4. 99 per cent of the genes found in mice can also be detected in humans, although they aren’t generally absolutely identical between the two species. — location: [1273](kindle://book?action=open&asin=B0074MTTEK&location=1273) ^ref-9413
+
+---
+This piece of DNA is called a retrotransposon, and it’s one of those DNA sequences that doesn’t code for a protein. Instead, it codes for an abnormal piece of RNA. — location: [1313](kindle://book?action=open&asin=B0074MTTEK&location=1313) ^ref-258
+
+---
+Genetically identical mice don’t all have the same body weight. — location: [1337](kindle://book?action=open&asin=B0074MTTEK&location=1337) ^ref-10220
+
+---
+if a mother is malnourished during pregnancy, her child may be at increased risk of ill-health, not just during the immediate post-birth infancy, but for decades. — location: [1386](kindle://book?action=open&asin=B0074MTTEK&location=1386) ^ref-60456
+
+---
+this is at least in part due to molecular epigenetic effects, which result in impaired developmental programming and life-long defects in gene expression and cellular function. — location: [1387](kindle://book?action=open&asin=B0074MTTEK&location=1387) ^ref-63445
+
+---
+Random fluctuations in epigenetic modifications during early development lead to nonidentical patterns of gene expression. These become epigenetically set and exaggerated over the years, until eventually the genetically identical twins become phenotypically different, — location: [1423](kindle://book?action=open&asin=B0074MTTEK&location=1423) ^ref-4494
+
+---
+the children whose mothers had been malnourished during the very early stages of pregnancy, when developmental programming is at its peak, who went on to be at higher risk of adult obesity. Their cells had become epigenetically programmed to make the most of limited food supply. — location: [1435](kindle://book?action=open&asin=B0074MTTEK&location=1435) ^ref-62295
+
+---
+The chromosomes in the pronuclei of sperm and eggs carry large numbers of epigenetic modifications. This is part of what keeps these gametes behaving as gametes, and not turning into other cell types. — location: [1823](kindle://book?action=open&asin=B0074MTTEK&location=1823) ^ref-17960
+
+---
+Almost immediately after the sperm has penetrated the egg, something very dramatic happens to it. Pretty much all the methylation on the male pronucleus DNA (i.e. from the sperm) gets stripped off, incredibly quickly. The same thing happens to the DNA on the female pronucleus, albeit a lot more slowly. — location: [1829](kindle://book?action=open&asin=B0074MTTEK&location=1829) ^ref-60688
+
+---
+Here’s the sequence of epigenetic events in very early development:   1.  The male and female pronuclei (from the sperm and the egg respectively) are carrying epigenetic modifications; 2.  The epigenetic modifications get taken off (in the immediate post-fertilisation zygote); 3.  New epigenetic modifications get put on (as the cells begin to specialise). — location: [1839](kindle://book?action=open&asin=B0074MTTEK&location=1839) ^ref-30157
+
+---
+The defects that are seen in these cloned animals are another demonstration that if early epigenetic modifications go wrong, they may stay wrong for life. — location: [1862](kindle://book?action=open&asin=B0074MTTEK&location=1862) ^ref-27196
+
+---
+the methylation in the offspring is dependent on the sex of the parent who passed the inserted DNA onto them. It’s not dependent on what the methylation was like in the parent. — location: [1884](kindle://book?action=open&asin=B0074MTTEK&location=1884) ^ref-24423
+
+---
+although the vast majority of the mammalian genome does get reset when the egg and the sperm fuse, a small percentage of it is immune from this reprogramming. — location: [1908](kindle://book?action=open&asin=B0074MTTEK&location=1908) ^ref-25365
+
+---
+Only 2 per cent of our genome codes for proteins. A massive 42 per cent is composed of retrotransposons. These are very odd sequences of DNA, which probably originated from viruses in our evolutionary past. — location: [1910](kindle://book?action=open&asin=B0074MTTEK&location=1910) ^ref-13527
+
+---
+something in the male chromosomes pushes the developmental programme in favour of the placenta, whereas a maternally-derived genome has less of a drive towards the placenta, and more towards the embryo itself. — location: [1992](kindle://book?action=open&asin=B0074MTTEK&location=1992) ^ref-26854
+
+---
+Imprinting evolved about 150 million years ago7, and it really only occurs to a great extent in placental mammals. — location: [2041](kindle://book?action=open&asin=B0074MTTEK&location=2041) ^ref-51324
+
+---
+deletion was inherited. It’s summarised in Figure 8.2. When the abnormal chromosome was inherited from the father, the child had PWS. When the same chromosome abnormality was inherited from the mother, the child had AS12. This is a clear case of epigenetic inheritance of a disorder. Children with PWS and AS had exactly the same problem genetically – they were missing a specific region of chromosome 15. — location: [2066](kindle://book?action=open&asin=B0074MTTEK&location=2066) ^ref-16917
+
+---
+imprinting refers to a situation where there is expression of only one member of a pair of genes, and the expression may be either maternal or paternal. — location: [2112](kindle://book?action=open&asin=B0074MTTEK&location=2112) ^ref-59158
+
+---
+The number of imprinted genes is quite low, rather less than 1 per cent of all protein-coding genes. Even this small percentage won’t be imprinted in all tissues. — location: [2146](kindle://book?action=open&asin=B0074MTTEK&location=2146) ^ref-62678
+
+---
+Just as the IAP retrotransposons stay methylated during zygotic reprogramming, mechanisms have evolved to protect imprinted regions from this broad-brush removal of methylation. — location: [2153](kindle://book?action=open&asin=B0074MTTEK&location=2153) ^ref-52493
+
+---
+If we follow the path from the sperm that fertilised the egg to a new sperm being formed in male offspring, the sequence goes like this:   1.  The sperm that enters the egg has epigenetic modifications on it; 2.  The epigenetic modifications get taken off, except at the imprinted regions (in the immediate post-fertilisation zygote); 3.  Epigenetic modifications get put on (as the cells of the ICM begin to specialise); 4.  The epigenetic modifications get taken off, including at the imprinted regions (as the primordial germ cells break away from the somatic differentiation pathway); 5.  Epigenetic modifications get put on (as the sperm develops). — location: [2190](kindle://book?action=open&asin=B0074MTTEK&location=2190) ^ref-54863
+
+---
+Epigenetics explains why cloned animals have health issues, but also explains why their offspring don’t. In fact, the offspring are essentially indistinguishable from animals produced naturally. — location: [2268](kindle://book?action=open&asin=B0074MTTEK&location=2268) ^ref-45333
+
+---
+Humans have 23 pairs of chromosomes in their cells, and inherited one of each pair from each parent. Twenty-two of these pairs (imaginatively named chromosomes 1 to 22) are called autosomes — location: [2293](kindle://book?action=open&asin=B0074MTTEK&location=2293) ^ref-17498
+
+---
+There are 22 obvious pairs – the autosomes – but there are two chromosomes left over that don’t look like each other at all. One is very large, one exceptionally small. These are called the sex chromosomes. The large one is called X, and the small one is called Y. The notation to describe the normal chromosome constitution of human males is 46, XY. Females are described as 46, XX because they don’t have a Y chromosome, and instead have two X chromosomes. — location: [2306](kindle://book?action=open&asin=B0074MTTEK&location=2306) ^ref-65085
+
+---
+The Y chromosome carries very few active genes. There are only between 40 and 50 protein-coding genes on the Y chromosome, of which about half are completely male-specific. — location: [2310](kindle://book?action=open&asin=B0074MTTEK&location=2310) ^ref-48704
+
+---
+The XY system of sex determination doesn’t exist in other animal classes so X chromosome dosage compensation is limited to placental mammals. — location: [2335](kindle://book?action=open&asin=B0074MTTEK&location=2335) ^ref-11485
+
+---
+Individual cells from a normal female do indeed only express genes from one X chromosome copy – the other copy is, effectively, shut down; 2.  X inactivation occurs early in development, at the stage when the pluripotent cells of the embryonic inner cell mass are beginning to differentiate into different lineages (near the top of Waddington’s epigenetic landscape); 3.  On average, in 50 per cent of cells in a female the maternally derived X chromosome is shut down. In the other 50 per cent of cells it’s the chromosome inherited from Dad which gets inactivated; 4.  Once a cell has switched off one of a pair of X chromosomes, that particular copy of the X stays switched off in all the daughter cells for the rest of that woman’s life, even if she lives to over 100 years of age.   The X chromosome isn’t inactivated by mutation; it keeps its DNA sequence entirely intact. X inactivation is the epigenetic phenomenon par excellence. — location: [2345](kindle://book?action=open&asin=B0074MTTEK&location=2345) ^ref-45607
+
+---
+There are, after all, only 50–100 imprinted genes in the mammalian genome. — location: [2369](kindle://book?action=open&asin=B0074MTTEK&location=2369) ^ref-8807
+
+---
+X inactivation operates on a much greater scale. It’s a mechanism for switching off over 1,000 genes, en masse and permanently. — location: [2370](kindle://book?action=open&asin=B0074MTTEK&location=2370) ^ref-59700
+
+---
+Males only have one X chromosome in their cells, so they don’t carry out X inactivation. But females randomly inactivate an X chromosome in all their cells. Consequently, at a very fundamental level, all cells in a female body can be split into two camps depending on which X chromosome they inactivated. — location: [2389](kindle://book?action=open&asin=B0074MTTEK&location=2389) ^ref-10847
+
+---
+When Xist binds over the X chromosome that produced it, it induces a kind of creeping epigenetic paralysis. It covers more and more genes, switching them off. — location: [2470](kindle://book?action=open&asin=B0074MTTEK&location=2470) ^ref-14598
+
+---
+the two copies of the X find each other and make physical contact. This physical contact is only over a really small fraction of the whole chromosome, but it’s essential for triggering inactivation17. If it doesn’t happen, then the X chromosome assumes it is all alone in the cell, Xist never gets switched on, and there is no X inactivation. — location: [2504](kindle://book?action=open&asin=B0074MTTEK&location=2504) ^ref-50951
+
+---
+muscle has a very unusual structure. It is called a syncytial tissue, which means that lots of individual cells fuse and operate almost like one giant cell, but with lots of discrete nuclei. — location: [2594](kindle://book?action=open&asin=B0074MTTEK&location=2594) ^ref-8443
+
+---
+There are regions on both the X and the Y called pseudoautosomal regions. — location: [2640](kindle://book?action=open&asin=B0074MTTEK&location=2640) ^ref-14081
+
+---
+When an X chromosome inactivates, these pseudoautosomal regions are spared. — location: [2642](kindle://book?action=open&asin=B0074MTTEK&location=2642) ^ref-54418
+
+---
+the phenotypic differences between worms and humans aren’t caused by Homo sapiens having more, different or ‘better’ genes. — location: [2729](kindle://book?action=open&asin=B0074MTTEK&location=2729) ^ref-65263
+
+---
+Over 98 per cent of the human genome doesn’t code for protein. All but 2 per cent of our genome is ‘junk’. — location: [2749](kindle://book?action=open&asin=B0074MTTEK&location=2749) ^ref-59183
+
+---
+miRNAs are about 21 nucleotides (bases) in length (sometimes slightly smaller or longer) and most of them seem to act as post-transcriptional regulators of gene expression. They don’t stop production of an mRNA, instead they regulate how that mRNA behaves. — location: [2874](kindle://book?action=open&asin=B0074MTTEK&location=2874) ^ref-56331
+
+---
+Although miRNAs are usually 21 bases in length, they don’t have to match the mRNA over the entire 21 nucleotides. The key region is positions 2 to 8 on the miRNA. — location: [2886](kindle://book?action=open&asin=B0074MTTEK&location=2886) ^ref-54337
+
+---
+If, however, the match is perfect, the binding of miRNA to mRNA triggers destruction of the mRNA, by enzymes that attach to the miRNA — location: [2889](kindle://book?action=open&asin=B0074MTTEK&location=2889) ^ref-18017
+
+---
+a single miRNA can regulate more than one mRNA molecule. — location: [2892](kindle://book?action=open&asin=B0074MTTEK&location=2892) ^ref-65163
+
+---
+Because miRNAs in particular can regulate lots of other genes, the effects of disrupting miRNA copy numbers may be very extensive. — location: [2900](kindle://book?action=open&asin=B0074MTTEK&location=2900) ^ref-38540
+
+---
+The fact that 98 per cent of the human genome does not code for protein suggests that there has been a huge evolutionary investment in the development of complicated ncRNA-mediated regulatory processes. — location: [2901](kindle://book?action=open&asin=B0074MTTEK&location=2901) ^ref-37414
+
+---
+human and chimp proteins are incredibly similar. About a third of all proteins are exactly the same between us and our knuckle-dragging cousins, and the rest differ only by one or two amino acids. Another thing we have in common is that over 98 per cent of our genomes don’t code for protein. This suggests that both species use ncRNAs to create complex regulatory networks which govern gene and protein expression. — location: [2909](kindle://book?action=open&asin=B0074MTTEK&location=2909) ^ref-8331
+
+---
+We humans, more than any other species, edit our ncRNA molecules to a remarkable degree. — location: [2918](kindle://book?action=open&asin=B0074MTTEK&location=2918) ^ref-50719
+
+---
+We also edit particularly extensively in the brain. This makes editing of ncRNA an attractive candidate process to explain why we are mentally so much more sophisticated than our primate relatives, even though we share so much of our DNA template in common. — location: [2919](kindle://book?action=open&asin=B0074MTTEK&location=2919) ^ref-43137
+
+---
+Most proteins are as good as they’re going to get. So how has evolution solved the problem of creating ever more complex and sophisticated organisms? Basically, by altering the regulation of proteins, rather than altering the proteins themselves. — location: [2932](kindle://book?action=open&asin=B0074MTTEK&location=2932) ^ref-61601
+
+---
+miRNAs play major roles in control of pluripotency and control of cellular differentiation. — location: [2936](kindle://book?action=open&asin=B0074MTTEK&location=2936) ^ref-56001
+
+---
+miR-NAs also improve reprogramming of somatic cells into iPS cells27 — location: [2947](kindle://book?action=open&asin=B0074MTTEK&location=2947) ^ref-30837
+
+---
+ncRNAs have recently been implicated in Lamarckian transmission of inherited characteristics. In one example, fertilised mouse eggs were injected with a miRNA which targeted a key gene involved in growth of heart tissue. The mice which developed from these eggs had enlarged hearts (cardiac hypertrophy) suggesting that the early injection of the miRNA disturbed the normal developmental processes. Remarkably, the offspring of these mice also had a high frequency of cardiac hypertrophy. — location: [2973](kindle://book?action=open&asin=B0074MTTEK&location=2973) ^ref-28143
+
+---
+ncRNAs are predominantly regulatory molecules, acting in networks that are rich in compensatory mechanisms, — location: [2982](kindle://book?action=open&asin=B0074MTTEK&location=2982) ^ref-52726
+
+---
+There is now a strong body of evidence that ncRNAs play a role in cancer. — location: [3022](kindle://book?action=open&asin=B0074MTTEK&location=3022) ^ref-24150
+
+---
+Cancer is a multi-step disease and a lot of things need to go wrong in an individual cell before it becomes cancerous. — location: [3026](kindle://book?action=open&asin=B0074MTTEK&location=3026) ^ref-54714
+
+---
+When a cell divides, it separates the two strands of the DNA double helix and copies each one. But the enzymes that copy the DNA can’t themselves copy DNA methylation. As a consequence each new double helix had one methylated strand and one unmethylated one. The DNA methyltransferase called DNMT1 can recognise DNA which has only got DNA methylation on one strand and can replace it on the other strand. This restores the original DNA methylation pattern. — location: [3156](kindle://book?action=open&asin=B0074MTTEK&location=3156) ^ref-59692
+
+---
+SAHA prevents HDAC enzymes from removing acetyl groups from histone proteins, and as a result, the histones carry lots of acetyl groups. — location: [3204](kindle://book?action=open&asin=B0074MTTEK&location=3204) ^ref-41461
+
+---
+DNA methylation is a repressive modification. DNMT activity increases DNA methylation and therefore represses gene expression. — location: [3214](kindle://book?action=open&asin=B0074MTTEK&location=3214) ^ref-30792
+
+---
+If the histones upstream of a gene are heavily acetylated, the gene is likely to be highly expressed. If the histones are lacking acetylation, the gene is likely to be switched off. — location: [3217](kindle://book?action=open&asin=B0074MTTEK&location=3217) ^ref-53723
+
+---
+But cancer isn’t just a result of too much cell proliferation. If cells divide too quickly but are otherwise normal, they form structures called benign tumours. — location: [3232](kindle://book?action=open&asin=B0074MTTEK&location=3232) ^ref-32359
+
+---
+In full-blown cancer the cells don’t just divide too often, they are also abnormal and can start to invade other tissues. — location: [3235](kindle://book?action=open&asin=B0074MTTEK&location=3235) ^ref-59142
+
+---
+As a cell becomes increasingly cancerous, both copies of key tumour suppressor genes usually get switched off (inactivated). In many cases this may be because the gene has mutated in the cancer cells. — location: [3249](kindle://book?action=open&asin=B0074MTTEK&location=3249) ^ref-26723
+
+---
+If the DNA at the promoter becomes excessively methylated or the histones are covered in repressive modifications, the tumour suppressor will be switched off. The gene has been inactivated without changing the underlying blueprint. — location: [3258](kindle://book?action=open&asin=B0074MTTEK&location=3258) ^ref-64030
+
+---
+DNMT3A and DNMT3B can carry out the process known as de novo DNA methylation. That is, they can methylate virgin DNA, and create completely new regions of highly repressed chromatin. — location: [3392](kindle://book?action=open&asin=B0074MTTEK&location=3392) ^ref-18890
+
+---
+Both EZH2 and LSD1 are up-regulated in certain cancer types, and their expression correlates with the aggressiveness of the cancer and with poor patient survival30,31. Basically, the more active these enzymes, the worse the prognosis for the patient. — location: [3403](kindle://book?action=open&asin=B0074MTTEK&location=3403) ^ref-4278
+
+---
+There are a set of genes that seem to be rather prone to getting themselves switched off epigenetically. — location: [3434](kindle://book?action=open&asin=B0074MTTEK&location=3434) ^ref-29569
+
+---
+Evolution has favoured cellular mechanisms that promote effective early growth and development, including the production of multiple different tissue types. Many of these tissue types contain reservoirs of stem cells which are specific to that tissue. Our bodies need these for tissue growth as we mature, and for tissue regeneration following injury. The fates and identities of these tissue-specific stem cells are controlled by the precise patterns of epigenetic modifications. By using epigenetic modifications to control gene expression, the cells keep some flexibility. — location: [3440](kindle://book?action=open&asin=B0074MTTEK&location=3440) ^ref-6354
+
+---
+Regulatory systems that allow cells to be flexible are inevitably also systems that allow cells to go wrong. — location: [3448](kindle://book?action=open&asin=B0074MTTEK&location=3448) ^ref-26803
+
+---
+The stressed-out mice, those that had suffered separation from their mothers in early life, had decreased DNA methylation of the arginine vasopressin gene. This resulted in increased production of arginine vasopressin, which stimulated the stress response7. — location: [3649](kindle://book?action=open&asin=B0074MTTEK&location=3649) ^ref-7028
+
+---
+MeCP2 is the protein we met in Chapter 4, which binds to methylated DNA and helps repress gene expression. It’s also the gene which is mutated in Rett syndrome, the devastating neurological disorder. Adrian Bird has shown that the MeCP2 protein is incredibly highly expressed in neurons — location: [3661](kindle://book?action=open&asin=B0074MTTEK&location=3661) ^ref-25106
+
+---
+Normally, MeCP2 protein binds to the methylated DNA at the arginine vasopressin gene. But in the stressed baby mice, the signalling cascade mentioned in the previous paragraph adds a small chemical group called a phosphate to the MeCP2 protein and because of this MeCP2 falls off the arginine vasopressin gene. — location: [3664](kindle://book?action=open&asin=B0074MTTEK&location=3664) ^ref-32726
+
+---
+the early life events trigger epigenetic changes which get effectively ‘stuck’. Because of this, the animal continues to be highly stressed, with abnormal hormone production, long after the initial stress has vanished. — location: [3673](kindle://book?action=open&asin=B0074MTTEK&location=3673) ^ref-43403
+
+---
+some of the changes seen in the rodent models of early stress may be relevant in humans. — location: [3677](kindle://book?action=open&asin=B0074MTTEK&location=3677) ^ref-17964
+
+---
+Serotonin is released in the brain in response to pleasurable stimuli; it’s the feel-good molecule — location: [3694](kindle://book?action=open&asin=B0074MTTEK&location=3694) ^ref-18779
+
+---
+The levels of serotonin are low in the brains of people suffering from depression. SSRI drugs raise the levels of serotonin in the brain. — location: [3695](kindle://book?action=open&asin=B0074MTTEK&location=3695) ^ref-44228
+
+---
+the nucleus accumbens. This region plays a role in various emotionally important brain functions. These include aggression, fear, pleasure and reward. — location: [3718](kindle://book?action=open&asin=B0074MTTEK&location=3718) ^ref-18489
+
+---
+The cortex is like a hard drive on a computer with gigabytes of storage. The hippocampus is more like the RAM (random access memory) chip, where data are temporarily processed before being deleted, or transferred to the hard drive for permanent storage. — location: [3860](kindle://book?action=open&asin=B0074MTTEK&location=3860) ^ref-4563
+
+---
+one thing we know for sure is that memory involves long-term changes in gene expression, and in the way neurons make connections with one another. And that again leads to the hypothesis that epigenetic mechanisms may play a role. — location: [3868](kindle://book?action=open&asin=B0074MTTEK&location=3868) ^ref-10918
+
+---
+One useful definition of ageing is ‘the progressive functional decline of tissue function that eventually results in mortality’ — location: [3969](kindle://book?action=open&asin=B0074MTTEK&location=3969) ^ref-20485
+
+---
+The epigenome may eventually turn out to be far more prone to changes with age than the genome, because the epigenome is more naturally variable than the genome anyway. — location: [3989](kindle://book?action=open&asin=B0074MTTEK&location=3989) ^ref-19212
+
+---
+low levels of DNA methylation are associated with instability of the genome. — location: [4043](kindle://book?action=open&asin=B0074MTTEK&location=4043) ^ref-23694
+
+---
+Ninety-five per cent of people who have a form of cancer called chronic myeloid leukaemia have the Philadelphia chromosome in their cancer cells. — location: [4052](kindle://book?action=open&asin=B0074MTTEK&location=4052) ^ref-51848
+
+---
+Telomeres play a critical role in control of ageing. The more a cell divides, the smaller its telomeres become. Essentially, as we age, the telomeres get shorter. — location: [4062](kindle://book?action=open&asin=B0074MTTEK&location=4062) ^ref-41215
+
+---
+The DNA of vertebrate telomeres consists of hundreds of repeats of the sequence TTAGGG. — location: [4068](kindle://book?action=open&asin=B0074MTTEK&location=4068) ^ref-64921
+
+---
+there are no CpG motifs at the telomeres, so there can’t be any DNA methylation. — location: [4069](kindle://book?action=open&asin=B0074MTTEK&location=4069) ^ref-17570
+
+---
+it’s likely to be very difficult to create drugs that increase longevity without increasing the risk of cancer as well. — location: [4087](kindle://book?action=open&asin=B0074MTTEK&location=4087) ^ref-55821
+
+---
+Yeast never methylate their DNA, so all epigenetic effects must be caused by histone modifications. — location: [4123](kindle://book?action=open&asin=B0074MTTEK&location=4123) ^ref-1787
+
+---
+skeletal muscle contains specialised stem cells called satellite cells. These can only divide a certain number of times. Once they are exhausted, you can’t create new muscle fibres. — location: [4128](kindle://book?action=open&asin=B0074MTTEK&location=4128) ^ref-659
+
+---
+Because the queen who founded the colony mated several times, not all the bees in the colony will be genetically identical to each other, because some of them will have different fathers. — location: [4279](kindle://book?action=open&asin=B0074MTTEK&location=4279) ^ref-30848
+
+---
+For honeybees the DNA script is constant but the outcome is variable. The outcome is controlled by an early event (feeding pattern) which sets a phenotype that is maintained throughout the rest of life. — location: [4293](kindle://book?action=open&asin=B0074MTTEK&location=4293) ^ref-47780
+
+---
+The critical roll of the dice for honeybees happens after the third day of life, as a fairly immobile grub or larva. Until day three, all honeybee larvae are given the same food. This is a substance called royal jelly, which is produced by a specialised group of workers. These young workers are known as nurse bees and they secrete royal jelly from glands in their heads. — location: [4296](kindle://book?action=open&asin=B0074MTTEK&location=4296) ^ref-33858
+
+---
+The honeybee genome was also shown to contain a lot of CpG motifs. — location: [4318](kindle://book?action=open&asin=B0074MTTEK&location=4318) ^ref-10778
+
+---
+When the scientists decreased the expression of Dnmt3 in the honeybee larvae, the results were the same as if they had fed them royal jelly. — location: [4335](kindle://book?action=open&asin=B0074MTTEK&location=4335) ^ref-60466
+
+---
+the brains of queens and worker bees have a different DNA methylation pattern. — location: [4340](kindle://book?action=open&asin=B0074MTTEK&location=4340) ^ref-38391
+
+---
+that one of the major compounds found in royal jelly inhibits a key class of epigenetic enzymes — location: [4363](kindle://book?action=open&asin=B0074MTTEK&location=4363) ^ref-7278
+
+---
+mammals and honeybees both use DNA methylation in the brain during memory processing. — location: [4383](kindle://book?action=open&asin=B0074MTTEK&location=4383) ^ref-62473
+
+---
+active pluripotent stem cells are a completely normal part of a plant. In plants these pluripotent stem cells are found at the tips of stems and the tips of roots. — location: [4449](kindle://book?action=open&asin=B0074MTTEK&location=4449) ^ref-46129
+
+---
+Flowering plants share a characteristic epigenetic phenomenon with mammals, and with no other members of the animal kingdom. Flowering plants are the only organisms we know of besides placental mammals in which genes are imprinted. Imprinting is the process we examined in Chapter 8, where the expression pattern of a gene is dependent on whether it was inherited from the mother or father. — location: [4546](kindle://book?action=open&asin=B0074MTTEK&location=4546) ^ref-18059
+
+---
+A phenomenon is likely to be influenced by epigenetic alterations in DNA and its accompanying proteins if one or both of the following conditions are met:   1.  Two things are genetically identical, but phenotypically variable; 2.  An organism continues to be influenced by an event long after this initiating event has occurred. — location: [4602](kindle://book?action=open&asin=B0074MTTEK&location=4602) ^ref-17069
+
+---
+phenotype. In lots of reptile species, including crocodiles and alligators, the two sexes are genetically identical. — location: [4624](kindle://book?action=open&asin=B0074MTTEK&location=4624) ^ref-16748
+
+---
+We are in the grip of a global obesity epidemic. Even if our societies manage to get control of this (and very few western cultures show many signs of doing so) we may already have generated a less than optimal epigenetic legacy for our children and grandchildren. — location: [4680](kindle://book?action=open&asin=B0074MTTEK&location=4680) ^ref-14963
+
+---
+Increasing the supply of folic acid in the very early stages of pregnancy has been a public health triumph, as it has led to a major drop in the incidence of spina bifida in newborns — location: [4684](kindle://book?action=open&asin=B0074MTTEK&location=4684) ^ref-23303
+
+---

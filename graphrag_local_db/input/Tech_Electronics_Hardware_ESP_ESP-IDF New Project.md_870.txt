@@ -1,0 +1,39 @@
+# ESP-IDF New Project.md
+
+---
+aliases: []
+---
+# ESP-IDF New Project
+Date: 2022-11-16
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [IDF Frontend - idf.py](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-py.html)
+- [ESP32 GPIO with ESP-IDF with LED Blinking example](https://esp32tutorials.com/esp32-gpio-esp-idf-led-blinking-example/)
+- 
+### Notes
+- In VSCode:
+	- <Kbd>CMD-SHFT-P<Kbd> (Palette)
+	- esp-idf new project
+- In esp-idf:
+	- ./install.sh
+	- source export.sh
+	-  cd ..
+- 
+- Build:
+	- cd to project directory
+	- set the correct chip target: 
+		- idf.py --preview set-target esp32c3
+	- Create project
+		- idf.py create-project -p . projectName
+	- Adjust environment.  The simplest way to use the partition table is to open the project configuration menu (`idf.py menuconfig`) and choose one of the simple predefined partition tables under [CONFIG_PARTITION_TABLE_TYPE](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig.html#config-partition-table-type):
+		- idf.py menuconfig
+			- Choose flash size
+	- idf.py build
+	- idf.py flash
+	- if required:
+		- idf.py monitor

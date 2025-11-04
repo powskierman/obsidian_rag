@@ -1,0 +1,29 @@
+---
+aliases: 
+tags:
+  - garage
+  - flowchart
+---
+# PhoneExtension Flowchart
+Date: 2023-11-26
+
+### Backlink
+[[Garage Flowcharts]]
+
+### Reference
+-  
+### Notes
+```mermaid
+flowchart TD
+    A[Start: setEntityState] -->|Check connection| B{Connection State}
+    B -- Connected --> C[Increment messageId]
+    B -- Not Connected --> D[Attempt Reconnect]
+    D --> E{Reconnection Success?}
+    E -- Yes --> F[Re-attempt setEntityState]
+    E -- No --> G[End: Reconnect Failed]
+    C --> H[Log Action]
+    H --> I[Determine Domain and Service]
+    I --> J[Send Command]
+    J --> K[End: Command Sent]
+    F --> C
+    ```

@@ -1,0 +1,20 @@
+---
+aliases: []
+---
+# CocoaMQTT Runtime Crash
+Date: 2022-10-28
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+-
+### Notes
+-  Replace KCFStreamNetworkServiceTypeBackground with PKPushTypeVoIP in ~/Pods/Pods/CocoaAsyncSocket/GCDAsyncSocket.m
+	 ``` #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+	r1 = CFReadStreamSetProperty(readStream, kCFStreamNetworkServiceType, PKPushTypeVoIP);
+	r2 = CFWriteStreamSetProperty(writeStream, kCFStreamNetworkServiceType, PKPushTypeVoIP);
+#pragma clang diagnostic pop 
+```

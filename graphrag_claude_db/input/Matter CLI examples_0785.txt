@@ -1,0 +1,285 @@
+---
+aliases: []
+tags: [
+ Matter
+ CLI
+ nrf_Connect
+]
+---
+# Matter CLI examples
+Date: 2023-06-11
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+## Using Matter-specific commands[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#using-matter-specific-commands "Permalink to this heading")
+
+
+The nRF Connect examples let you use several Matter-specific CLI commands.
+
+These commands are not available by default and to enable using them, set the `CONFIG_CHIP_LIB_SHELL=y` Kconfig option in the `prj.conf` file of the given example.
+
+Every invoked command must be preceded by the `matter` prefix.
+
+See the following subsections for the description of each Matter-specific command.
+
+### `device` command group[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#device-command-group "Permalink to this heading")
+
+Handles a group of commands that are used to manage the device. You must use this command together with one of the additional subcommands listed below.
+
+#### `factoryreset` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#factoryreset-subcommand "Permalink to this heading")
+
+Performs device factory reset that is hardware reset preceded by erasing of the whole Matter settings stored in a non-volatile memory.
+
+```
+uart:~$ matter device factoryreset
+Performing factory reset ...
+
+```
+
+### `onboardingcodes` command group[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#onboardingcodes-command-group "Permalink to this heading")
+
+Handles a group of commands that are used to view information about device onboarding codes. The `onboardingcodes` command takes one required parameter for the rendezvous type, then an optional parameter for printing a specific type of onboarding code.
+
+The full format of the command is as follows:
+
+```
+onboardingcodes none|softap|ble|onnetwork [qrcode|qrcodeurl|manualpairingcode]
+
+```
+
+#### `none` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#none-subcommand "Permalink to this heading")
+
+Prints all onboarding codes. For example:
+
+```
+uart:~$ matter onboardingcodes none
+QRCode:             MT:W0GU2OTB00KA0648G00
+QRCodeUrl:          https://project-chip.github.io/connectedhomeip/qrcode.html?data=MT%3AW0GU2OTB00KA0648G00
+ManualPairingCode:  34970112332
+
+```
+
+#### `none qrcode` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#none-qrcode-subcommand "Permalink to this heading")
+
+Prints the device [onboarding QR code payload](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/nrfconnect_android_commissioning.md#preparing-accessory-device). Takes no arguments.
+
+```
+uart:~$ matter onboardingcodes none qrcode
+MT:W0GU2OTB00KA0648G00
+
+```
+
+#### `none qrcodeurl` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#none-qrcodeurl-subcommand "Permalink to this heading")
+
+Prints the URL to view the [device onboarding QR code](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/nrfconnect_android_commissioning.md#preparing-accessory-device) in a web browser. Takes no arguments.
+
+```
+uart:~$ matter onboardingcodes none qrcodeurl
+https://project-chip.github.io/connectedhomeip/qrcode.html?data=MT%3AW0GU2OTB00KA0648G00
+
+```
+
+#### `none manualpairingcode` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#none-manualpairingcode-subcommand "Permalink to this heading")
+
+Prints the pairing code for the manual onboarding of a device. Takes no arguments.
+
+```
+uart:~$ matter onboardingcodes none manualpairingcode
+34970112332
+
+```
+
+### `config` command group[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#config-command-group "Permalink to this heading")
+
+Handles a group of commands that are used to view device configuration information. You can use this command without any subcommand to print all available configuration data or to add a specific subcommand.
+
+```
+uart:~$ matter config
+VendorId:        65521 (0xFFF1)
+ProductId:       32768 (0x8000)
+HardwareVersion: 1 (0x1)
+FabricId:
+PinCode:         020202021
+Discriminator:   f00
+DeviceId:
+
+```
+
+The `config` command can also take the subcommands listed below.
+
+#### `pincode` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#pincode-subcommand "Permalink to this heading")
+
+Prints the PIN code for device setup. Takes no arguments.
+
+```
+uart:~$ matter config pincode
+020202021
+
+```
+
+#### `discriminator` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#discriminator-subcommand "Permalink to this heading")
+
+Prints the device setup discriminator. Takes no arguments.
+
+```
+uart:~$ matter config discriminator
+f00
+
+```
+
+#### `vendorid` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#vendorid-subcommand "Permalink to this heading")
+
+Prints the vendor ID of the device. Takes no arguments.
+
+```
+uart:~$ matter config vendorid
+65521 (0xFFFF1)
+
+```
+
+#### `productid` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#productid-subcommand "Permalink to this heading")
+
+Prints the product ID of the device. Takes no arguments.
+
+```
+uart:~$ matter config productid
+32768 (0x8000)
+
+```
+
+#### `hardwarever` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#hardwarever-subcommand "Permalink to this heading")
+
+Prints the hardware version of the device. Takes no arguments.
+
+```
+uart:~$ matter config hardwarever
+1 (0x1)
+
+```
+
+#### `deviceid` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#deviceid-subcommand "Permalink to this heading")
+
+Prints the device identifier. Takes no arguments.
+
+#### `fabricid` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#fabricid-subcommand "Permalink to this heading")
+
+Prints the fabric identifier. Takes no arguments.
+
+### `ble` command group[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#ble-command-group "Permalink to this heading")
+
+Handles a group of commands that are used to control the device Bluetooth LE transport state. You must use this command together with one of the additional subcommands listed below.
+
+#### `help` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#help-subcommand "Permalink to this heading")
+
+Prints help information about the `ble` command group.
+
+```
+uart:~$ matter ble help
+  help            Usage: ble <subcommand>
+  adv             Enable or disable advertisement. Usage: ble adv <start|stop|state>
+
+```
+
+#### `adv start` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#adv-start-subcommand "Permalink to this heading")
+
+Enables Bluetooth LE advertising.
+
+```
+uart:~$ matter ble adv start
+Starting BLE advertising
+
+```
+
+#### `adv stop` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#adv-stop-subcommand "Permalink to this heading")
+
+Disables Bluetooth LE advertising.
+
+```
+uart:~$ matter ble adv stop
+Stopping BLE advertising
+
+```
+
+#### `adv status` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#adv-status-subcommand "Permalink to this heading")
+
+Prints the information about the current Bluetooth LE advertising status.
+
+```
+uart:~$ matter ble adv state
+BLE advertising is disabled
+
+```
+
+### `nfc` command group[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#nfc-command-group "Permalink to this heading")
+
+Handles a group of commands that are used to control the device NFC tag emulation state. You must use this command together with one of the additional subcommands listed below.
+
+#### `start` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#start-subcommand "Permalink to this heading")
+
+Starts the NFC tag emulation.
+
+```
+uart:~$ matter nfc start
+NFC tag emulation started
+
+```
+
+#### `stop` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#stop-subcommand "Permalink to this heading")
+
+Stops the NFC tag emulation.
+
+```
+uart:~$ matter nfc stop
+NFC tag emulation stopped
+
+```
+
+#### `state` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#state-subcommand "Permalink to this heading")
+
+Prints the information about the NFC tag emulation status.
+
+```
+uart:~$ matter nfc state
+NFC tag emulation is disabled
+
+```
+
+### `dns` command group[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#dns-command-group "Permalink to this heading")
+
+Handles a group of commands that are used to trigger performing DNS queries. You must use this command together with one of the additional subcommands listed below.
+
+#### `browse` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#browse-subcommand "Permalink to this heading")
+
+Browses for DNS services of `_matterc_udp` type and prints the received response. Takes no argument.
+
+```
+uart:~$ matter dns browse
+Browsing ...
+DNS browse succeeded:
+   Hostname: 0E824F0CA6DE309C
+   Vendor ID: 9050
+   Product ID: 20043
+   Long discriminator: 3840
+   Device type: 0
+   Device name:
+   Commissioning mode: 0
+   IP addresses:
+      fd08:b65e:db8e:f9c7:2cc2:2043:1366:3b31
+
+```
+
+#### `resolve` subcommand[](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/matter/nrfconnect_examples_cli.html#resolve-subcommand "Permalink to this heading")
+
+Resolves the specified Matter node service given by the _fabric-id_ and _node-id_.
+
+```
+uart:~$ matter dns resolve fabric-id node-id
+Resolving ...
+DNS resolve for 000000014A77CBB3-0000000000BC5C01 succeeded:
+   IP address: fd08:b65e:db8e:f9c7:8052:1a8e:4dd4:e1f3
+   Port: 5540
+```

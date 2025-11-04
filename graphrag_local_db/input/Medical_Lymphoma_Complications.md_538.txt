@@ -1,0 +1,126 @@
+# Complications.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+  - complications
+---
+# Complications
+Date: 2025-01-30
+
+### Backlink
+[[Lymphoma MoC]]
+
+### Reference
+-  
+### Notes
+My case involves a germinal center B-cell-like (GCB) double-hit lymphoma with complex genetic abnormalities. The ISCN nomenclature  indicates:
+```
+ISCN nomenclature nuc ish(BCL6x2)[200],([[MYC]]x≥2)(5'[[MYC]] sep 3'MYC)x≥1[102/200],(IGH,[[BCL2]])x≥3(IGH con BCL6x≥2)[166/200
+```
+[[MYC]] rearrangement (split signals in 102/200 cells)
+IGH-[[BCL2]] translocation (detected in 166/200 cells) alongside potential BCL6 involvement
+<mark style="background: #ABF7F7A6;">No evidence of BCL6 rearrangement (two intact copies)</mark>
+### Key Implications of LDH Fluctuations
+#### Diagnostic Significance
+<mark style="background: #ABF7F7A6;">Initial LDH elevation (310 U/L)</mark> aligns with typical presentation patterns in double-hit lymphomas, where 60-80% of patients show elevated LDH at diagnosis.
+- Reference Range (Units):120-250 (U/L)
+- 1st treatment: 175
+- 2nd treatment: 219
+- 3rd treatment: 231
+LDH > upper limit of normal (ULN) correlates with:
+2.1x higher risk of CNS relapse
+40% reduction in 2-year survival rates compared to normal LDH
+#### Treatment Response Patterns
+Post-cycle 1 reduction (160 U/L) suggests initial chemosensitivity
+Post-cycle 2 rebound (220 U/L) raises concerns about:
+Early treatment resistance (observed in 30-40% of R-CHOP-treated DHL patients)
+Potential clonal evolution or emergence of resistant subpopulations
+LDH Pattern	Clinical Correlation
+310 → 160	Favorable initial response
+160 → 220	Possible residual disease/progression
+### Prognostic Considerations
+#### Molecular Risk Profile:
+[[MYC]]-IGH partner (worse prognosis than non-IG partners)813
+Concurrent [[BCL2]] rearrangement (median OS 12-18 months with R-CHOP vs 24+ months with DA-EPOCH-R)520
+Treatment Implications:
+Current NCCN guidelines recommend DA-EPOCH-R rather than R-CHOP for DHL820
+57% 3-year PFS with DA-EPOCH-R vs 32% with R-CHOP in [[MYC]]/[[BCL2]] DHL
+#### Recommended Actions
+Immediate PET-CT to assess metabolic response
+CNS evaluation (MRI brain + LP with flow cytometry) given:
+18-22% CNS relapse risk in DHL with fluctuating LDH
+Treatment escalation consideration to DA-EPOCH-R or clinical trial regimens
+Serial LDH monitoring (every cycle) - persistent elevation >ULN predicts 83% risk of progression within 6 months
+This biochemical pattern warrants urgent reassessment of therapeutic strategy given the aggressive biology of [[MYC]]/[[BCL2]] double-hit lymphomas. Close coordination with a lymphoma specialist is strongly advised.
+
+## **treatment approach**
+The treatment approach for my double-hit lymphoma (DHL) at age 74 requires balancing efficacy and tolerability. While R-CHOP is often chosen for elderly patients due to its manageable toxicity profile, my rising LDH and high-risk molecular features ([[MYC]]/[[BCL2]] rearrangements) warrant consideration of alternative strategies. Below is a structured analysis of options based on current evidence and Alberta-specific guidelines:
+
+#### **Why R-CHOP May Be Preferred Over DA-EPOCH at 74**
+
+- **Tolerability**: DA-EPOCH-R is more intensive, with higher rates of hematologic toxicity (grade ≥3 neutropenia in 59% vs. 40% with R-CHOP) [7](https://pmc.ncbi.nlm.nih.gov/articles/PMC7940714/)[11](https://pmc.ncbi.nlm.nih.gov/articles/PMC10646795/).
+- **Age Limitations**: Retrospective data show DA-EPOCH-R is typically reserved for patients <70–75 years due to toxicity risks [1](https://ashpublications.org/ashclinicalnews/news/3405/How-I-Treat-in-Brief-Double-Hit-Lymphoma)[15](https://www.lymphoma.ca/wp-content/uploads/2021/09/LymphomaCanada_Guideline_Frontline_DLBCL_VF_Digital.pdf).
+- **Limited Survival Benefit**: In elderly DHL, DA-EPOCH-R shows only a 10–15% improvement in 2-year PFS over R-CHOP [14](https://www.sciencedirect.com/science/article/abs/pii/S2152265017319468)[16](https://ascopubs.org/doi/10.1200/JCO.2018.36.15_suppl.e19530).
+
+#### **Additional Treatments to Consider**
+
+##### **1. Polatuzumab Vedotin-Based Regimens**
+
+- **R-Pola-CHP**: Combines polatuzumab (anti-CD79b ADC) with R-CHP, showing 76% 2-year PFS in DLBCL, including high-risk subtypes [3](https://pmc.ncbi.nlm.nih.gov/articles/PMC10351275/)[11](https://pmc.ncbi.nlm.nih.gov/articles/PMC10646795/).
+- **Pola-BR**: For relapsed/refractory cases, with 40% CR rates in elderly patients [3](https://pmc.ncbi.nlm.nih.gov/articles/PMC10351275/).
+
+#### **2. CAR T-Cell Therapy**
+
+- **ZUMA-7 Trial**: Axi-cel (CD19 CAR-T) improved 2-year OS to 43% vs. 24% with salvage chemo in refractory DHL [4](https://consultqd.clevelandclinic.org/car-t-cell-therapy-effective-in-refractory-double-hit-triple-hit-lymphoma).
+- **Eligibility**: Alberta’s Cross Cancer Institute offers CAR-T for patients ≤75 with ECOG ≤1 [4](https://consultqd.clevelandclinic.org/car-t-cell-therapy-effective-in-refractory-double-hit-triple-hit-lymphoma)[11](https://pmc.ncbi.nlm.nih.gov/articles/PMC10646795/).
+
+#### **3. Tafasitamab + Lenalidomide**
+
+- **L-MIND Trial**: 57% ORR in elderly DLBCL, including [[MYC]]-altered cases [3](https://pmc.ncbi.nlm.nih.gov/articles/PMC10351275/).
+- **Advantage**: Oral lenalidomide avoids chemotherapy toxicity.
+
+#### **4. CNS Prophylaxis**
+
+- **High-Dose Methotrexate (HD-MTX)**: Recommended for DHL with LDH >ULN (3–4 cycles at 3 g/m²) [8](https://www.lymphoma.ca/wp-content/uploads/2021/09/LymphomaCanada_Guideline_Frontline_DLBCL_VF_Digital.pdf)[15](https://www.lymphoma.ca/wp-content/uploads/2021/09/LymphomaCanada_Guideline_Frontline_DLBCL_VF_Digital.pdf).
+- **Intrathecal Chemo**: Consider if PET shows extranodal sites or neurologic symptoms [18](https://ashpublications.org/blood/article/130/5/590/36799/How-I-treat-double-hit-lymphoma).
+
+## **Alberta-Specific Recommendations**
+
+| Strategy                 | Criteria                 | Access in Alberta                                                                                                                               |
+| ------------------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-CHOP + HD-MTX          | High CNS risk (LDH >ULN) | Arthur Child Cancer Centre [15](https://www.lymphoma.ca/wp-content/uploads/2021/09/LymphomaCanada_Guideline_Frontline_DLBCL_VF_Digital.pdf)     |
+| Polatuzumab combinations | Relapsed/refractory DHL  | Clinical trials (NCT03274492)                                                                                                                   |
+| CAR-T (axi-cel)          | ≤75 years, ECOG ≤1       | Arthur Child Cancer Centre [4](https://consultqd.clevelandclinic.org/car-t-cell-therapy-effective-in-refractory-double-hit-triple-hit-lymphoma) |
+
+#### **Supportive Care Adjustments**
+
+1. **Dynamic Dosing**:
+    
+    - Reduce doxorubicin to 40 mg/m² if LVEF <50% [7](https://pmc.ncbi.nlm.nih.gov/articles/PMC7940714/)[11](https://pmc.ncbi.nlm.nih.gov/articles/PMC10646795/).
+    - Use G-CSF prophylaxis to maintain dose intensity [9](https://ashpublications.org/blood/article/116/24/5103/28024/How-I-treat-elderly-patients-with-diffuse-large-B)[15](https://www.lymphoma.ca/wp-content/uploads/2021/09/LymphomaCanada_Guideline_Frontline_DLBCL_VF_Digital.pdf).
+    
+2. **Geriatric Assessment**:
+    
+    - Gait speed <0.8 m/s or grip strength <20 kg → consider R-miniCHOP (50% dose reduction) [11](https://pmc.ncbi.nlm.nih.gov/articles/PMC10646795/)[19](https://aol.amegroups.org/article/view/8608/html).
+    
+
+#### **Key Monitoring Parameters**
+
+- **LDH/Albumin Ratio**: >4.5 predicts progression (83% risk within 6 months) [Previous Answer].
+- **Monocyte Trends**: AMC >630/mm³ → 2.1x higher progression risk [Previous Answer].
+
+#### **When to Escalate Therapy**
+
+- <mark style="background: #ABF7F7A6;">**PET-CT After Cycle 2**: Deauville 4–5 → switch to DA-EPOCH-R or enroll in NCT04464291 (CD19/CD20 bispecific antibodies).</mark>
+- **CNS Relapse**: MRI brain + LP with flow cytometry; consider intrathecal rituximab [18](https://ashpublications.org/blood/article/130/5/590/36799/How-I-treat-double-hit-lymphoma).
+
+#### **Conclusion**
+
+Your hematologist should consider:
+
+1. **Adding polatuzumab** to R-CHOP for enhanced efficacy.
+2. <mark style="background: #ABF7F7A6;">**CAR-T referral** if refractory to 2 cycles.</mark>
+3. **HD-MTX prophylaxis** given LDH fluctuations.
+4. **Clinical trials** for novel agents (e.g., glofitamab, epcoritamab) available at Alberta centers [23](https://www.mylymphomateam.com/resources/understanding-double-hit-lymphoma).

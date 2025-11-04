@@ -1,0 +1,24 @@
+---
+aliases:
+tags:
+created: 2021-12-30 14:02
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+a.  
+## GUIslice for Arduino
+
+[GUISlice](https://www.impulseadventure.com/elec/arduino-touch-gui.html) is a free C library that provides interactive GUI elements for Arduino with TFT displays. A touchscreen GUI for Arduino can be created in a few lines of code.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

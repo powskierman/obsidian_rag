@@ -1,0 +1,33 @@
+# PEMDAS.md
+
+---
+aliases:
+tags:
+  - algebra
+  - math
+created: 2022-02-01 15:07
+Backlink:
+---
+### Main Idea
+- Order of mathematical operations
+### References
+- 
+### Notes
+- 2022-02-01
+# PEMDAS
+[[Algebra MOC]]
+
+### Reference
+[Purple Math, Order of Operations](https://www.purplemath.com/modules/orderops.ht)m - 
+
+### Notes
+- "Parentheses, Exponents, Multiplication and Division, and Addition and Subtraction"
+-  
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

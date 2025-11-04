@@ -1,0 +1,690 @@
+---
+id: 16112747
+updated: 2022-06-18
+title: How to Use Readwise
+author: Readwise Team
+highlights: 62
+last_highlight: 
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112747
+Updated: 2022-06-18
+%%
+
+![]( https://readwise-assets.s3.amazonaws.com/static/images/rw-tips-cover.afa432726981.png)
+
+# About
+Title: [[How to Use Readwise]]
+Authors: [[Readwise Team]]
+Category: #books
+Number of Highlights: ==62==
+Readwise URL: https://readwise.io/bookreview/16112747
+Date: [[2022-06-18]]
+Last Highlighted: **
+
+---
+
+# Highlights
+
+Getting to Know Readwise ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) ^334466630
+
+Note: .h1
+
+---
+
+Introduction to How to Use Readwise ([1](https://readwise.io/to_kindle?action=open&asin=null&location=1)) ^334466631
+
+Note: .h2
+
+---
+
+What is this book How to Use Readwise? It's our version of a user manual explaining how to get the most benefit out of Readwise. These highlights will be resurfaced automatically like those from any other book. Because this book is within Readwise, that means you can perform all the standard actions: you can make this book appear more or less often or not at all; you can favorite (to see the highlight more often) and discard (to no longer see the highlight); and so on. We sincerely hope these tips help you get more out of Readwise! If not, you can disable this book from resurfacing at any time. ([2](https://readwise.io/to_kindle?action=open&asin=null&location=2)) ^334466632
+
+---
+
+Remember More the Daily Review ([3](https://readwise.io/to_kindle?action=open&asin=null&location=3)) ^334466633
+
+Note: .h2
+
+---
+
+Readwise makes it fun and easy to revisit the best parts of what you've read. It does this two ways. The first is the daily email, which is intended for casual consumption—perhaps while drinking your morning coffee or riding the train into work. The second is the web app, which enables you to do things like add notes and tags to your highlights. To review your highlights in the web app, click the Readwise logo at the top of any Readwise email or click Daily Readwise from the [Readwise Dashboard](https://readwise.io/dashboard) at any time. ([4](https://readwise.io/to_kindle?action=open&asin=null&location=4)) ^334466634
+
+---
+
+How to Use the Readwise Dashboard ([5](https://readwise.io/to_kindle?action=open&asin=null&location=5)) ^334466635
+
+Note: .h2
+
+---
+
+The [Readwise Dashboard](https://readwise.io/dashboard) is the command center of your Readwise experience. From here, you can access your Daily Review, add more highlight sources (such as Kindle, iBooks, Instapaper, Pocket, and dozens more), view highlights by book or article, customize your Preferences, Search, and more. ([6](https://readwise.io/to_kindle?action=open&asin=null&location=6)) ^334466636
+
+---
+
+How to View the Highlights of a Book ([7](https://readwise.io/to_kindle?action=open&asin=null&location=7)) ^334466637
+
+Note: .h2
+
+---
+
+You can view all your highlights for any given book by selecting [Books](https://readwise.io/library) from the Readwise Dashboard. From the Books view, you can see statistics for each book such as how many highlights you've taken and the date of your last highlight, and you can perform actions such as increasing or decreasing the frequency of seeing a particular book in your Daily Review. You can do the same for highlights from any other type of content (including articles, tweets, and podcasts). ([8](https://readwise.io/to_kindle?action=open&asin=null&location=8)) ^334466638
+
+---
+
+How to Review a Specific Book ([9](https://readwise.io/to_kindle?action=open&asin=null&location=9)) ^334466639
+
+Note: .h2
+
+---
+
+The cornerstone of Readwise is the Daily Review, but many users also like to review only their highlights from a single book or article from start to finish. Reviewing your highlights shortly after finishing a book is one of the best ways to solidify all your takeaways from that book. If you have too many highlights to "process" in one sitting, Readwise remembers where you left off so you can pick up the process in a future session. To review your highlights from a specific book or article in chronological order, navigate to it from the [Books](https://readwise.io/library) section of the Readwise Dashboard. ([10](https://readwise.io/to_kindle?action=open&asin=null&location=10)) ^334466640
+
+---
+
+How to View and Review Specific Articles ([11](https://readwise.io/to_kindle?action=open&asin=null&location=11)) ^334466641
+
+Note: .h2
+
+---
+
+In addition to books, you can also review highlights from articles that you’ve read and highlighted in reading apps such as Instapaper, Pocket, Medium, and dozens of others. We’ve even begun building our own [Readwise reading app](https://readwise.io/read). Just like viewing Books, you access your Articles by clicking the [Articles](https://readwise.io/articles) link on the Readwise Dashboard. ([12](https://readwise.io/to_kindle?action=open&asin=null&location=12)) ^334466642
+
+---
+
+How to Manage Your Readwise Account ([13](https://readwise.io/to_kindle?action=open&asin=null&location=13)) ^334466643
+
+Note: .h2
+
+---
+
+The [Account Settings](https://readwise.io/preferences/account) menu is where you can modify your subscription, update your billing info, export all your data, and delete your account. You can reach your account settings via the Readwise Dashboard. Note: If you delete your account, all your data will be permanently wiped from our servers and cannot be recovered.
+
+![](https://s3.amazonaws.com/readwiseio/2022/03/account-settings-button-annotated-1.png) ([14](https://readwise.io/to_kindle?action=open&asin=null&location=14)) ^334466644
+
+---
+
+How to Use Readwise on Your Phone ([15](https://readwise.io/to_kindle?action=open&asin=null&location=15)) ^334466645
+
+Note: .h2
+
+---
+
+Readwise offers a native mobile app for both iOS and Android. The mobile app does everything the web app can do and more. Among other things, the mobile app enables you to "highlight" physical books using your phone's camera (OCR). On iOS, you can also install a widget that rotates different highlights on your home screen throughout the day. You can find links to each platform here: [Readwise Mobile Apps](https://readwise.io/homescreen). ([16](https://readwise.io/to_kindle?action=open&asin=null&location=16)) ^334466646
+
+---
+
+How to Invite Friends to Readwise ([17](https://readwise.io/to_kindle?action=open&asin=null&location=17)) ^334466647
+
+Note: .h2
+
+---
+
+Readwise has gotten to where it is today because of users like you generously spreading the word! If you want to share Readwise with friends or family, be sure to give them using your custom-generated [invite link](https://readwise.io/invite). This link gives both you and your friend an extra free month of Readwise! You can find the status of any referrals on the same page. ([18](https://readwise.io/to_kindle?action=open&asin=null&location=18)) ^334466648
+
+---
+
+How Readwise Began ([19](https://readwise.io/to_kindle?action=open&asin=null&location=19)) ^334466649
+
+Note: .h2
+
+---
+
+Many users ask us about how Readwise got started. It began in 2016 when [Tristan Homsi](https://twitter.com/homsiT) and [Daniel Doyon](https://twitter.com/deadly_onion) connected through an obscure comment about reading lists on Hacker News and subsequently bonded over a mutual interest in so-called "reading tech". One thing led to another and they decided to collaborate on an MVP, which launched in May 2017. Readwise has organically evolved ever since. You can learn more about our newest ambition on the Readwise blog: [The Next Chapter of Readwise: Our Own Reading App](https://blog.readwise.io/readwise-reading-app/). ([20](https://readwise.io/to_kindle?action=open&asin=null&location=20)) ^334466650
+
+---
+
+How Readwise is Funded ([21](https://readwise.io/to_kindle?action=open&asin=null&location=21)) ^334466651
+
+Note: .h2
+
+---
+
+Some users ask us why we've decided to bootstrap Readwise through revenues rather than raise venture capital. It's a complicated answer to a complicated question, but long story short, we concluded that bootstrapping would better enable us to focus on our small niche market of "nonfiction power readers" rather than having to pursue the larger but more casual venture scale market. You can read more about this decision here: [Why We're Bootstrapping Readwise](https://blog.readwise.io/why-were-bootstrapping-readwise/). ([22](https://readwise.io/to_kindle?action=open&asin=null&location=22)) ^334466652
+
+---
+
+Synchronizing Your Data ([23](https://readwise.io/to_kindle?action=open&asin=null&location=23)) ^334466653
+
+Note: .h1
+
+---
+
+How to Automatically Sync Your Kindle Highlights ([24](https://readwise.io/to_kindle?action=open&asin=null&location=24)) ^334466654
+
+Note: .h2
+
+---
+
+Any highlights you take in a Kindle ebook are automatically synchronized to the Amazon cloud — if (and only if) you purchased the ebook directly from Amazon. Readwise uses a browser extension to automatically save these Kindle highlights to your Readwise account. Please note that you have to use Chrome or Firefox with the Readwise extension installed for Kindle highlights to sync automatically. If you don’t use the Chrome or Firefox extensions, you'll need to manually sync your Kindle highlights from time to time. ([25](https://readwise.io/to_kindle?action=open&asin=null&location=25)) ^334466655
+
+---
+
+How to Manually Sync Your Kindle Highlights Using My Clippings.txt ([26](https://readwise.io/to_kindle?action=open&asin=null&location=26)) ^334466656
+
+Note: .h2
+
+---
+
+X If you don't use Chrome or Firefox with the Readwise extension installed, you'll need to manually "resync" your Kindle highlights from time to time. You can manually resync by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and clicking on the Amazon Kindle icon from a desktop computer. Readwise will also send you a reminder email every time you’ve gone 45 days without a new highlight. ([27](https://readwise.io/to_kindle?action=open&asin=null&location=27)) ^334466657
+
+---
+
+How to Sync Your Apple Books Highlights ([28](https://readwise.io/to_kindle?action=open&asin=null&location=28)) ^334466658
+
+Note: .h2
+
+---
+
+In addition to Amazon Kindle, Readwise supports a variety of other reading platforms including Apple Books. You can import your Apple Books highlights into Readwise by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and then clicking the Apple Books option. ([29](https://readwise.io/to_kindle?action=open&asin=null&location=29)) ^334466659
+
+---
+
+How to Supplement Your Account with Popular Highlights ([30](https://readwise.io/to_kindle?action=open&asin=null&location=30)) ^334466660
+
+Note: .h2
+
+---
+
+If you want to use Readwise but don’t have enough highlights of your own, or if you’ve read a paper book or listened to an audiobook where you couldn’t take highlights, you can _supplement_ your account with popular highlights from those books. Even though this isn’t the same as revisiting your own highlights, it's surprisingly effective! You can add popular highlights by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and then clicking the [Supplemental Highlights](https://readwise.io/quick) option. ([31](https://readwise.io/to_kindle?action=open&asin=null&location=31)) ^334466661
+
+---
+
+How to Manually Sync Your Kindle Highlights Using My Clippings.txt ([32](https://readwise.io/to_kindle?action=open&asin=null&location=32)) ^334466662
+
+Note: .h2
+
+---
+
+Every highlight you make on your Kindle device is saved to a local text file called My Clippings.txt. You can import the highlights from this file into Readwise by clicking the [Import](https://readwise.io/welcome/sync) option from the Readwise Dashboard and then clicking the [My Clippings.txt](https://readwise.io/import_clippings) option. This technique is useful if you don’t wish to use the Readwise browser extension or if you’re dealing with highlights from documents you did _not_ purchase from Amazon. ([33](https://readwise.io/to_kindle?action=open&asin=null&location=33)) ^334466663
+
+---
+
+How to Sync Your Instapaper Highlights ([34](https://readwise.io/to_kindle?action=open&asin=null&location=34)) ^334466664
+
+Note: .h2
+
+---
+
+Readwise isn't limited to just books: you can also import highlights from articles. There are numerous reading apps out there (including soon [our own reading app](https://readwise.io/read)), but one of the most popular is Instapaper. You can connect your Instapaper account to Readwise by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and clicking the Instapaper link. ([35](https://readwise.io/to_kindle?action=open&asin=null&location=35)) ^334466665
+
+---
+
+How to Sync Your Pocket Highlights ([36](https://readwise.io/to_kindle?action=open&asin=null&location=36)) ^334466666
+
+Note: .h2
+
+---
+
+Readwise isn't limited to just books: you can also import highlights from articles. There are numerous reading apps out there (including soon [our own reading app](https://readwise.io/read)), but one of the most popular is Pocket. You can connect your Instapaper account to Readwise by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and clicking the Pocket link. ([37](https://readwise.io/to_kindle?action=open&asin=null&location=37)) ^334466667
+
+---
+
+How to Manually Add Highlights ([38](https://readwise.io/to_kindle?action=open&asin=null&location=38)) ^334466668
+
+Note: .h2
+
+---
+
+In addition to syncing highlights from a variety of digital reading platforms, you can also manually type or paste in highlights to Readwise. You can manually create a book in Readwise and begin adding highlights by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and clicking the [Freeform Input](https://readwise.io/import_freeform) link. ([39](https://readwise.io/to_kindle?action=open&asin=null&location=39)) ^334466669
+
+---
+
+How to Save Tweets and Twitter Threads ([40](https://readwise.io/to_kindle?action=open&asin=null&location=40)) ^334466670
+
+Note: .h2
+
+---
+
+Twitter can be a profound source of wisdom – just like books and articles – filled with insights worth revisiting. For this reason, you can save both individual tweets and whole Twitter threads to Readwise. To begin saving from Twitter, first connect your Twitter account to Readwise by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and clicking the [Twitter](https://readwise.io/twitter_start) link. Once connected, you can publicly save individual tweets by replying on Twitter with “@readwiseio save”. You can privately save tweets by DMing the tweet to the @readwiseio account. To save whole threads, you can reply with “@readwiseio save thread”. ([41](https://readwise.io/to_kindle?action=open&asin=null&location=41)) ^334466671
+
+---
+
+How to Manually Import Highlights in Bulk Using CSV ([42](https://readwise.io/to_kindle?action=open&asin=null&location=42)) ^334466672
+
+Note: .h2
+
+---
+
+If you have highlights from an obscure source, such as a niche reading or note-taking app, you can often import those into Readwise using a CSV file (comma separated values). You can upload a CSV file by selecting [Import](https://readwise.io/welcome/sync) from the Readwise Dashboard and clicking the [CSV Import](https://readwise.io/import_bulk) link. From there, you will need to follow the instructions and examples on how to properly structure your data. ([43](https://readwise.io/to_kindle?action=open&asin=null&location=43)) ^334466673
+
+---
+
+Customizing the Daily Review ([44](https://readwise.io/to_kindle?action=open&asin=null&location=44)) ^334466674
+
+Note: .h1
+
+---
+
+How to Change the Readwise Email Frequency ([45](https://readwise.io/to_kindle?action=open&asin=null&location=45)) ^334466675
+
+Note: .h2
+
+---
+
+By default, you'll receive a Daily Review email once per day. You can change this preference to be every other day, weekly, or never by selecting [Email Preferences](https://readwise.io/preferences) from the Readwise Dashboard. From there, you can also change the email address and the time the email is sent. ([46](https://readwise.io/to_kindle?action=open&asin=null&location=46)) ^334466676
+
+---
+
+How Email Frequency Adjusts Automatically ([47](https://readwise.io/to_kindle?action=open&asin=null&location=47)) ^334466677
+
+Note: .h2
+
+---
+
+During busy times, it can be a little overwhelming to watch emails pile up in your inbox. If you’re unable to read the Daily Review email for several days in a row, Readwise will automatically decrease the frequency at which emails are sent. First from everyday to every other day, then from every other day to every week. It works the same in reverse. Once you start reading your emails again, your frequency will be automatically increased. ([48](https://readwise.io/to_kindle?action=open&asin=null&location=48)) ^334466678
+
+---
+
+How to Customize Email Send Time ([49](https://readwise.io/to_kindle?action=open&asin=null&location=49)) ^334466679
+
+Note: .h2
+
+---
+
+By default, you're set to receive your Daily Review email at 8:00 AM Eastern Standard Time. For many users, this morning routine is perfect. If you're in a different time zone, or if Readwise fits better into a different part of your routine, you can change this send time by selecting the [Email Preferences](https://readwise.io/preferences) menu from the Readwise Dashboard and toggling the Send Time option. ([50](https://readwise.io/to_kindle?action=open&asin=null&location=50)) ^334466680
+
+---
+
+How to Change the Daily Review Length ([51](https://readwise.io/to_kindle?action=open&asin=null&location=51)) ^334466681
+
+Note: .h2
+
+---
+
+By default, you're set to receive 5 highlights per Daily Review. You can increase or decrease this number by selecting [Review Settings](https://readwise.io/configure/review) from the Readwise Dashboard. From there, you can change how many highlights you want to receive each review as well as other options such as whether you want your Daily Reviews to favor older or newer highlights. ([52](https://readwise.io/to_kindle?action=open&asin=null&location=52)) ^334466682
+
+---
+
+How to Disable the Quality Filter ([53](https://readwise.io/to_kindle?action=open&asin=null&location=53)) ^334466683
+
+Note: .h2
+
+---
+
+By default, your Daily Review will exclude highlights that appear to be short sentence fragments. Readwise does this because many users accidentally take incomplete highlights when just starting with a reading platform such as Kindle, and these fragments are unpleasant to revisit. If you want to see all your highlights included in Daily Reviews, you can disable this setting by selecting [Review Settings](https://readwise.io/configure/review) from the Readwise Dashboard and toggling the Highlight Quality Filter option. ([54](https://readwise.io/to_kindle?action=open&asin=null&location=54)) ^334466684
+
+---
+
+How to See Newer or Older Highlights ([55](https://readwise.io/to_kindle?action=open&asin=null&location=55)) ^334466685
+
+Note: .h2
+
+---
+
+If you’ve been reading and highlighting ebooks for several years, you may have tens of thousands of highlights reflecting your changing interests over time. By default, your Daily Review will randomly select from the highlights with no adjustment for how new or old a highlight is, but you can tweak the resurfacing algorithm to favor newer or older highlights by selecting [Review Settings](https://readwise.io/configure/review) from the Readwise Dashboard and moving the Highlight Recency slider. ([56](https://readwise.io/to_kindle?action=open&asin=null&location=56)) ^334466686
+
+---
+
+How to Exclude Specific Books ([57](https://readwise.io/to_kindle?action=open&asin=null&location=57)) ^334466687
+
+Note: .h2
+
+---
+
+By default, your Daily Review will randomly select highlights from all books (and articles) contained in your library. If there’s a book you no longer want to revisit, you can exclude it from future Daily Reviews by selecting [Books](https://readwise.io/books) from the Readwise Dashboard, clicking the down arrow for the book in question, and then sliding the Review Frequency to “Never”. You can also conveniently disable a book _during_ a Daily Review by selecting the down arrow in the upper right corner and clicking "Never show me this book again".
+
+![tune-book-frequency](https://s3.amazonaws.com/readwiseio/2022/03/tune-book-frequency.gif) ([58](https://readwise.io/to_kindle?action=open&asin=null&location=58)) ^334466688
+
+---
+
+Basic Features ([59](https://readwise.io/to_kindle?action=open&asin=null&location=59)) ^334466689
+
+Note: .h1
+
+---
+
+Favoriting ([60](https://readwise.io/to_kindle?action=open&asin=null&location=60)) ^334466690
+
+Note: .h2
+
+---
+
+If you see a highlight your particularly love and/or you'd like to make easily retrievable, you can "favorite" it. You favorite in the Readwise Email by clicking the Favorite link underneath each highlight. You favorite in the Readwise web app by clicking the heart icon or using the keyboard shortcut f. You can view all these favorited highlights at any time by selecting [Favorites](https://readwise.io/favorites) from the [Readwise Dashboard](https://readwise.io/dashboard). Note: Once you have enough, you'll start receiving a special Daily Readwise on Sundays comprised only of your favorite highlights. ([61](https://readwise.io/to_kindle?action=open&asin=null&location=61)) ^334466691
+
+---
+
+Discarding ([62](https://readwise.io/to_kindle?action=open&asin=null&location=62)) ^334466692
+
+Note: .h2
+
+---
+
+Let's be honest: Many of our highlights are not so good. Maybe we highlighted a fragment because of Kindle's annoying refresh rate. Maybe we highlighted a passage that made sense in the moment, but makes no sense now. Either way, if Readwise resurfaces a highlight that's unlikely to have any future value to you, you should "discard" it. You discard in the Readwise Email by clicking the Discard link underneath each highlight. You discard in the Readwise web app by clicking the Discard button or using the keyboard shortcut d. Note: Discarded highlights are not permanently deleted. You can retrieve them any time by selecting [Discards](https://readwise.io/discards) from the [Readwise Dashboard](https://readwise.io/dashboard). ([63](https://readwise.io/to_kindle?action=open&asin=null&location=63)) ^334466693
+
+---
+
+Tagging ([64](https://readwise.io/to_kindle?action=open&asin=null&location=64)) ^334466694
+
+Note: .h2
+
+---
+
+Tags are a great way to organize your highlights by topic, keyword, or a variety of other use cases. You tag in the Readwise Email by clicking the Tag link underneath each highlight. You tag in the Readwise web app by clicking "Add tags" or using the keyboard shortcut t. You can then browse highlights on a tag-by-tag basis by selecting [Tags](https://readwise.io/tags) from the [Readwise Dashboard](https://readwise.io/dashboard). (You can also add tags while you read using a special Readwise feature called [Inline Tagging](https://blog.readwise.io/tag-your-highlights-while-you-read/)!) ([65](https://readwise.io/to_kindle?action=open&asin=null&location=65)) ^334466695
+
+---
+
+Noting ([66](https://readwise.io/to_kindle?action=open&asin=null&location=66)) ^334466696
+
+Note: .h2
+
+---
+
+We highly recommend taking notes alongside your highlights. After all, the best way to read between the lines is to write between the lines. Any notes you take in Kindle, iBooks, Instapaper, and elsewhere will be automatically imported to Readwise and attached to the respective highlight. You can edit this note in the Readwise web app by clicking the note icon, clicking into the body of the note itself, or using the keyboard shortcut n. Of course, you can also add notes to any highlight that doesn't have one already. ([67](https://readwise.io/to_kindle?action=open&asin=null&location=67)) ^334466697
+
+---
+
+Sharing to Twitter or Facebook ([68](https://readwise.io/to_kindle?action=open&asin=null&location=68)) ^334466698
+
+Note: .h2
+
+---
+
+It's easy to share particularly salient highlights on Twitter and Facebook through Readwise. Simply click the Share link underneath the noteworthy highlight in the Readwise Email or click the share icon in the Readwise web app and follow the instructions from there. (Pro tip: you can also use the keyboard shortcut s). Readwise will generate a "text shot" (an image as opposed to text) to which you can add your own commentary. We recommend tagging the original author to give him or her a little boost as well. ([69](https://readwise.io/to_kindle?action=open&asin=null&location=69)) ^334466699
+
+---
+
+Copying Highlight to Clipboard ([70](https://readwise.io/to_kindle?action=open&asin=null&location=70)) ^334466700
+
+Note: .h2
+
+---
+
+Want to quickly copy and paste a highlight for use elsewhere? Perhaps in an article you're writing, a Slack discussion, or a Twitter debate? Simply click the down arrow in the upper right of each highlight and select "Copy highlight text". Pro tip: You can also use the keyboard shortcuts cc and cx to copy a highlight to the clipboard. ([71](https://readwise.io/to_kindle?action=open&asin=null&location=71)) ^334466701
+
+---
+
+Opening in Kindle App ([72](https://readwise.io/to_kindle?action=open&asin=null&location=72)) ^334466702
+
+Note: .h2
+
+---
+
+Many times a highlight resurfaced in Readwise will not be enough. You'll want to return to the highlight in the context of the book or article. You can automatically launch the Kindle app (assuming it's installed) and open the book to the appropriate location by clicking the down arrow in the upper right of each highlight and selecting "Open this book in Kindle". Note: Due technical limitations, this only works on desktop (not mobile) and only from the web app (not email). ([73](https://readwise.io/to_kindle?action=open&asin=null&location=73)) ^334466703
+
+---
+
+Processing Highlights ([74](https://readwise.io/to_kindle?action=open&asin=null&location=74)) ^334466704
+
+Note: .h2
+
+---
+
+The first time you see a highlight resurfaced in Readwise, it will have a blue dot in the upper left corner. This indicates that the highlight is still "unprocessed" similar to an unread email. Once you read the highlight or perform an action, the highlight will then be considered "processed". This is helpful for readers wishing to systematically review all their highlights, either in whole or for particular books. You can also mouseover the dot to see additional data, such as when you originally took the highlight. ([75](https://readwise.io/to_kindle?action=open&asin=null&location=75)) ^334466705
+
+---
+
+Using Keyboard Shortcuts in the Web App ([76](https://readwise.io/to_kindle?action=open&asin=null&location=76)) ^334466706
+
+Note: .h2
+
+---
+
+Readwise is built for power readers so the web app has been designed for power users. This means, of course, that we have all kinds of keyboard shortcuts. There's not enough room to list them all here, but almost all shortcuts are discoverable if you hover over an action in the web app. ([77](https://readwise.io/to_kindle?action=open&asin=null&location=77)) ^334466707
+
+---
+
+Searching ([78](https://readwise.io/to_kindle?action=open&asin=null&location=78)) ^334466708
+
+Note: .h2
+
+---
+
+One of the nice things about having all your highlights synchronized in a single repository is that it's easy to retrieve the excerpt you're looking for. You can hunt for a particular highlight by browsing the particular [Book](https://readwise.io/library) or [Article](https://readwise.io/articles), by using your [Tags](https://readwise.io/tags), or, of course, by using good old fashioned search. A search box is displayed in the upper right corner of most Readwise screens. Alternatively, you can go to the [Search](https://readwise.io/search) page to query your entire Readwise catalog. ([79](https://readwise.io/to_kindle?action=open&asin=null&location=79)) ^334466709
+
+---
+
+Bonus Highlight ([80](https://readwise.io/to_kindle?action=open&asin=null&location=80)) ^334466710
+
+Note: .h2
+
+---
+
+At the end of every Daily Readwise, you'll discover a "bonus highlight" from a book recommended specifically for you. Our recommendation algorithm uses the books you've actually read, and how intensely you've read each, to predict books we think you'll actually love. In contrast, most online retailers try to predict books they think you'll buy. The bonus highlight is a feature and we do not make any affiliate revenue off of these links. You can turn off the bonus highlight any time by selecting [Preferences](https://readwise.io/preferences) from the [Readwise Dashboard](https://readwise.io/dashboard) and toggling the Bonus Highlights option.  ([81](https://readwise.io/to_kindle?action=open&asin=null&location=81)) ^334466711
+
+---
+
+Advanced Usage ([82](https://readwise.io/to_kindle?action=open&asin=null&location=82)) ^334466712
+
+Note: .h1
+
+---
+
+Scroll Mode versus Review Mode ([83](https://readwise.io/to_kindle?action=open&asin=null&location=83)) ^334466713
+
+Note: .h2
+
+---
+
+The Readwise web app has two views which we call "Scroll Mode" and "Review Mode". Scroll Mode displays highlights vertically. This is great for quick scanning, juxtaposing highlights, or Cmd/Ctrl + Fing with a search term. Review Mode displays highlights one at a time in a horizontal view. This is great for focusing all your attention on a single passage and taking actions, such as tagging, noting, or spaced repetition, before moving on to the next. You can switch between these views by toggling the button in the upper right corner of the Readwise web app or using the keyboard shortcut ll. ([84](https://readwise.io/to_kindle?action=open&asin=null&location=84)) ^334466714
+
+---
+
+Readwise Resurfacing Algorithm ([85](https://readwise.io/to_kindle?action=open&asin=null&location=85)) ^334466715
+
+Note: .h2
+
+---
+
+It's not uncommon for a Readwise user to have more than 10,000 highlights in his or her catalog. If this user reviews 10 highlights per Daily Readwise, it'd take nearly three years to go through them all (assuming no new highlights during that time!). Because of this, we've built a "resurfacing algorithm" which tries to show you the "right highlight at the right time" kind of like Spotify trying to serve up daily mixes based on your listening history. The Readwise algorithm also enables you to take control and manually "tune" many of its settings. You can do this by selecting the [Preferences](https://readwise.io/preferences) menu from the [Readwise Dashboard](https://readwise.io/dashboard) and toggling the various settings. ([86](https://readwise.io/to_kindle?action=open&asin=null&location=86)) ^334466716
+
+---
+
+Book Tuning ([87](https://readwise.io/to_kindle?action=open&asin=null&location=87)) ^334466717
+
+Note: .h2
+
+---
+
+Is there a particular book that pops up a little too frequently in your Daily Readwises? Or maybe there's a book that you wish you saw more often? You can increase or decrease the frequencies of each book or article using a feature called "tuning". Simply select the [Preferences](https://readwise.io/preferences) menu from the [Readwise Dashboard](https://readwise.io/dashboard) and toggle the Customize Books or Customize Articles option. For users with many books, this is one of the most powerful features in Readwise. Pro tip: You can also increase or decrease the frequency of a particular book conveniently during your Daily Readwise. ([88](https://readwise.io/to_kindle?action=open&asin=null&location=88)) ^334466718
+
+---
+
+In-Line Book Tuning ([89](https://readwise.io/to_kindle?action=open&asin=null&location=89)) ^334466719
+
+Note: .h2
+
+---
+
+Do you sometimes come across a profound highlight in your Daily Readwise that makes you wish that book were resurfaced more? Good news! You can instruct Readwise to "Show this book more often" by clicking the down arrow in the upper right corner of the web app (you can also use the keyboard shortcut: +). Going forward, the probability this book is resurfaced will be increased. You can tell Readwise to "Show this book less often" (keyboard shortcut: -) or even "Never show this book again" too. ([90](https://readwise.io/to_kindle?action=open&asin=null&location=90)) ^334466720
+
+---
+
+Why Retention? ([91](https://readwise.io/to_kindle?action=open&asin=null&location=91)) ^334466721
+
+Note: .h2
+
+---
+
+Why does Readwise focus so much on retention? For the same reasons that founders should reduce churn in a SaaS business before investing in growth; or investors should buffer their portfolios against losses before seeking gains; or bodybuilders should prevent muscle loss before adding lean mass. No matter what you’re doing, the best way to grow is to first prevent losses.
+
+Think of it this way: If you've got a leaky bucket, you're better off fixing the leak before pouring water in the top. For those of you who prefer numbers: If you start with a portfolio worth $100 and lose 50%, you now need to earn 100% to breakeven.
+This principle, of course, also extends to learning. ([92](https://readwise.io/to_kindle?action=open&asin=null&location=92)) ^334466722
+
+---
+
+Spaced Repetition Basics ([93](https://readwise.io/to_kindle?action=open&asin=null&location=93)) ^334466723
+
+Note: .h2
+
+---
+
+Readwise helps you remember more of what you read using two principles borrowed from cognitive science: [spaced repetition](https://en.wikipedia.org/wiki/Spaced_repetition) and [active recall](https://en.wikipedia.org/wiki/Active_recall). Spaced repetition is a scientifically proven method for efficient learning that progressively increases the time between reviews of previously learned material. Basically, we remember things better if we spread our reviews out over time rather than cramming. If you stop to think about it, reading a book is kind of like cramming. We intensely learn about a single subject for a few weeks. Then we move onto the next book. Readwise uses your highlights from to space out each book you've read into perpetuity. The result is that your retain profoundly more of what you read. ([94](https://readwise.io/to_kindle?action=open&asin=null&location=94)) ^334466724
+
+---
+
+Spaced Repetition Feedback Buttons ([95](https://readwise.io/to_kindle?action=open&asin=null&location=95)) ^334466725
+
+Note: .h2
+
+---
+
+When you start using Readwise, its proprietary [spaced repetition](https://en.wikipedia.org/wiki/Spaced_repetition) algorithm assumes by default that each of your highlights is of equal quality, equal relevance, and equal difficulty. For most people, this is not entirely true. Some highlights are better than average; some are below. Some highlights are especially relevant right now; some not so much. Some highlights are hard to remember; some are easy.
+
+You can take control of this algorithm by supplying feedback in the web app. If a highlight is better than average, especially relevant, or difficult, instruct Readwise "More" (keyboard shortcut 2). You'll see this highlight more often than average. If a highlight is in the middle, instruct Readwise "Later" (keyboard shortcut 3). You get the idea. If you consistently supply feedback, you'll watch the quality of your reviews steadily improve. In turn, you'll retain significantly more of what you read. ([96](https://readwise.io/to_kindle?action=open&asin=null&location=96)) ^334466726
+
+---
+
+Active Recall (Mastery) ([97](https://readwise.io/to_kindle?action=open&asin=null&location=97)) ^334466727
+
+Note: .h2
+
+---
+
+Readwise helps you remember more of what you read using two principles borrowed from cognitive science: [spaced repetition](https://en.wikipedia.org/wiki/Spaced_repetition) and [active recall](https://en.wikipedia.org/wiki/Active_recall). Active recall (also known as quizzing, testing, or retrieval) is the process by which we challenge our minds to retrieve a piece of information. Simply rereading a passage from time to time, on the other hand, is passive. Rereading is no doubt better than never revisiting the passage, but research has repeatedly shown that active recall is significantly more effective. So how can you take advantage of active recall in Readwise? For any highlight that you wish to deliberately commit to memory, hit the Master icon in the web app (keyboard shortcut m). You can then convert that highlight from a passive passage to be reread to a flashcard to be actively recalled. In turn, you'll retain vastly more of what you read. ([98](https://readwise.io/to_kindle?action=open&asin=null&location=98)) ^334466728
+
+---
+
+Cloze Deletion (Mastery) ([99](https://readwise.io/to_kindle?action=open&asin=null&location=99)) ^334466729
+
+Note: .h2
+
+---
+
+Readwise offers increasing degrees of active recall intensity (Mastery). The least demanding is a deceptively simple technique called [cloze deletion](https://en.wikipedia.org/wiki/Cloze_test), more commonly known as "fill in the blank". With cloze deletion, a salient keyword is hidden from the passage, giving you an opportunity to pause and actively recall the missing information. This might sound trivial, but the simple act forces you to focus on the surrounding context and search your mind. This effort, in turn, is scientifically proven to form stronger memories enabling you to retain profoundly more of what you've read. To apply cloze deletion to a highlight, hit the Master icon in the web app (keyboard shortcut m).  ([100](https://readwise.io/to_kindle?action=open&asin=null&location=100)) ^334466730
+
+---
+
+Question & Answer (Mastery) ([101](https://readwise.io/to_kindle?action=open&asin=null&location=101)) ^334466731
+
+Note: .h2
+
+---
+
+NEW! Readwise offers increasing degrees of active recall intensity (Mastery). The least demanding is cloze deletion, but the most powerful is question & answer. Q&A is exactly what it sounds like: You convert a passage containing a piece of wisdom you wish to master into a question paired with the answer. The next time you see the highlight, you'll be prompted with the question, forcing you to actively recall the answer. This is scientifically proven to form stronger memories enabling you to retain profoundly more of what you've read. To convert a highlight to Q&A, hit the Master icon in the web app (keyboard shortcut m).  ([102](https://readwise.io/to_kindle?action=open&asin=null&location=102)) ^334466732
+
+---
+
+Question & Answer Tag ([103](https://readwise.io/to_kindle?action=open&asin=null&location=103)) ^334466733
+
+Note: .h2
+
+---
+
+NEW! Not only can you convert a highlight to a Question & Answer flashcard while using Readwise, you can also create Q&A while you read. You create a flashcard by taking a special note while you read. Simply highlight the passage containing the memorable idea and add a note beginning .qa (for question & answer). Then type your question to your future self ending with a question mark followed by the answer. When this highlight is resurfaced in Readwise, it will be in the form of a question. Talk about retaining what you read! ([104](https://readwise.io/to_kindle?action=open&asin=null&location=104)) ^334466734
+
+---
+
+Terms (Mastery) ([105](https://readwise.io/to_kindle?action=open&asin=null&location=105)) ^334466735
+
+Note: .h2
+
+---
+
+COMING SOON! In addition to the general purpose methods for mastering a passive highlight in Readwise (cloze deletion and question & answer), there's also a special active recall method called term. If you pay attention, much of any nonfiction book is spent "coming to terms" in which the author carefully explains what he or she means by specific words. Sometimes authors even introduces new terms. For example, the term antifragile in Nassim Taleb's Antifragile. If you master the terms in a nonfiction book, your understanding will skyrocket compared to a passive reading. To convert a highlight to a term, hit the Master icon in the web app (keyboard shortcut m).  ([106](https://readwise.io/to_kindle?action=open&asin=null&location=106)) ^334466736
+
+---
+
+Inline Tagging ([107](https://readwise.io/to_kindle?action=open&asin=null&location=107)) ^334466737
+
+Note: .h2
+
+---
+
+Do you ever wish that your highlights were tagged with useful keywords and categories, but never bothered because the process of tagging is just too cumbersome? There's an easy way to tag your highlights, found only in Readwise called, inline tagging. An inline tag is a special note taken while you read that's automatically converted into a tag in Readwise. Tagging in the moment is much faster than tagging after the fact, and once your highlights have keywords and categories, they're much easier to review and reference. Simply highlight a passage and add a note beginning with a period (.) followed by a single word or abbreviation (with no spaces). You can also train Readwise to interpret shorthand! Read more here: [How to Tag Your Highlights While You Read](https://blog.readwise.io/tag-your-highlights-while-you-read/). ([108](https://readwise.io/to_kindle?action=open&asin=null&location=108)) ^334466738
+
+---
+
+Heading Tags (Creating a Table of Contents) ([109](https://readwise.io/to_kindle?action=open&asin=null&location=109)) ^334466739
+
+Note: .h2
+
+---
+
+Did you know you can add chapters to your highlights in Readwise? In addition, you can generate a nifty table of contents which you can use to quickly navigate a book and refresh your memory of the book's organization. You add this chapter data by taking a special note while you read. Simply highlight the title of each section and add a note beginning with a period (.) followed by an h (for "heading") and then the number 1 through 3 representing the section's position in the hierarchy.
+For example, with a book organized into parts, chapters, and sections, you would denote all parts as .h1, all chapters as .h2, and all sections as .h3. Read more here: [How to Add Chapters to Your Highlights in Readwise](https://blog.readwise.io/add-chapters-to-highlights/). ([110](https://readwise.io/to_kindle?action=open&asin=null&location=110)) ^334466740
+
+---
+
+Concatenation Tags (Combining Highlights) ([111](https://readwise.io/to_kindle?action=open&asin=null&location=111)) ^334466741
+
+Note: .h2
+
+---
+
+Have you ever found yourself highlighting an entire fluff-filled paragraph even though all you really wanted were the key sentences at the beginning and end? You can cut this fluff by taking special notes while you read. These notes instruct Readwise to combine multiple, non-adjacent highlights into a single annotation. Simply highlight the first string of text you want to combine and add the note .c1 ("c" for "concatenate"). Then, highlight the second string of text and add the note .c2. Upon importing into Readwise, these two highlights will be combined into a single annotation. Read more here: [How to Combine Highlights On-the-Fly with Readwise](https://blog.readwise.io/combine-highlights-on-the-fly/). ([112](https://readwise.io/to_kindle?action=open&asin=null&location=112)) ^334466742
+
+---
+
+Export to Evernote ([113](https://readwise.io/to_kindle?action=open&asin=null&location=113)) ^334466743
+
+Note: .h2
+
+---
+
+If you're an Evernote lover, you can use Readwise to automatically (and continuously) export all your highlights from all sources to Evernote. Simply select the Evernote Export option from the [Readwise Dashboard](https://readwise.io/dashboard) and follow the instructions from there. Note: Exporting to Evernote is a premium feature. ([114](https://readwise.io/to_kindle?action=open&asin=null&location=114)) ^334466744
+
+---
+
+Deleting Books ([115](https://readwise.io/to_kindle?action=open&asin=null&location=115)) ^334466745
+
+Note: .h2
+
+---
+
+There are two ways to handle books and articles you don't want to see in Readwise. The first method is to set the book's frequency to "Never" from the [Books](https://readwise.io/library) menu. The book will continue to be accessible from your library, but its highlights will not be resurfaced in your Daily Readwises. The second method is to delete the book so that it does not appear anywhere in Readwise. You can do this from the [Books](https://readwise.io/library) menu as well. Note that if you delete a book, Readwise will not re-import the book on subsequent resyncs. ([116](https://readwise.io/to_kindle?action=open&asin=null&location=116)) ^334466746
+
+---
+
+Export to Markdown ([117](https://readwise.io/to_kindle?action=open&asin=null&location=117)) ^334466747
+
+Note: .h2
+
+---
+
+Many modern note-taking apps such as [Notion](https://notion.so) (our favorite!) accept [Markdown](https://en.wikipedia.org/wiki/Markdown) as their preferred import format of choice. Accordingly, Readwise enables you to export to Markdown all your notes and highlights on a book-by-basis for use elsewhere. Simply head to the [Books](https://readwise.io/library) or [Articles](https://readwise.io/articles) menu from the [Readwise Dashboard](https://readwise.io/dashboard) and click the down arrow. ([118](https://readwise.io/to_kindle?action=open&asin=null&location=118)) ^334466748
+
+---
+
+Deleting Highlights in Kindle ([119](https://readwise.io/to_kindle?action=open&asin=null&location=119)) ^334466749
+
+Note: .h2
+
+---
+
+We're often asked: What happens if I delete a highlight in Readwise? Does it disappear in Kindle? Conversely, we're also asked: What happens if I delete a highlight in Kindle? Does it disappear in Readwise? In both cases, the answer is no. If you delete a highlight in Kindle, it will be preserved in Readwise. If you delete a highlight in Readwise, it will be preserved in Kindle. ([120](https://readwise.io/to_kindle?action=open&asin=null&location=120)) ^334466750
+
+---
+
+Kindle Highlight Limits ([121](https://readwise.io/to_kindle?action=open&asin=null&location=121)) ^334466751
+
+Note: .h2
+
+---
+
+If you're an avid highlighter of Kindle books, you've probably encountered the Kindle highlight limit. Basically, for copyright reasons, many publishers set limitations on how much of a book you can export through highlights. For example, if you highlight more than 10% of many books, those highlights above the limit will be truncated with a "...". We understand how incredibly frustrating this can be because often the books we highlight the most are the ones we most want to post-process! Unfortunately, we have no way around this limit at this time. ([122](https://readwise.io/to_kindle?action=open&asin=null&location=122)) ^334466752
+
+---
+
+Gift Readwise ([123](https://readwise.io/to_kindle?action=open&asin=null&location=123)) ^334466753
+
+Note: .h2
+
+---
+
+Struggling to come up with a gift idea for the voracious reader in your life? Give him or her the gift of Readwise by clicking [Gift Readwise](https://readwise.io/gift) in the footer. ([124](https://readwise.io/to_kindle?action=open&asin=null&location=124)) ^334466754
+
+---
+
+Highlights from PDFs ([125](https://readwise.io/to_kindle?action=open&asin=null&location=125)) ^334466755
+
+Note: .h2
+
+---
+
+Support for highlights from PDFs is one of our most requested features. Unfortunately, PDFs are a super fickle file format and there's no great existing solution that we know of for highlighting and exporting from PDF. That said, we intend to solve the PDF highlighting problem soon once we develop the Readwise native mobile app. ([126](https://readwise.io/to_kindle?action=open&asin=null&location=126)) ^334466756
+
+---
+
+Streaks ([127](https://readwise.io/to_kindle?action=open&asin=null&location=127)) ^334466757
+
+Note: .h2
+
+---
+
+As a little psychological nudge to help you build your daily review habit, we've built a streak counter. You maintain your streak by reviewing your daily highlights at least once per day (within the 24 hour window of your email send time). Check out the leaderboard here: [Top Readwise Streaks](https://readwise.io/highscores) ([128](https://readwise.io/to_kindle?action=open&asin=null&location=128)) ^334466758
+
+---

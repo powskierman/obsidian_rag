@@ -1,0 +1,42 @@
+# Lymphoma Treatment.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+  - medical
+---
+# Lymphoma Treatment
+Date: 2024-12-10
+
+### Backlink
+[[Lymphoma MoC]]
+
+### Reference
+- [[R-CHOP]]
+- [[Prednizone]]
+- [[#CAR-T Cell Therapy]]
+- [[Lymphoma/DA-EPOCH-R]]
+- [[Bispecific Antibody]]
+	- [[Glofitamab + GemOx]]
+-  [[Arthur C. Child Lymphoma Diagnosis Program.docx]]
+- [[High_Grade_B_Cell_Lymphoma_Fact_Sheet_2024.pdf]]
+- [[LRF-Cell-Therapy-Guide-2022_v03-1.pdf]]
+- [[Refractory_DLBCL_VF_Digital.pdf]]
+- [[Lymphoma/GCB DLBCL treatment alternatives]]
+- [[Lymphoma Treatment Summary]]
+- [[autologous stem cell transplant]]
+- [[Latest Treatment Options for DH DLBCL]]
+- [[How I treat DHL.pdf]]
+- 
+### Notes
+- Diffuse Large B-Cell Lymphoma (DLBCL) is an aggressive type of non-Hodgkin lymphoma originating from B lymphocytes. 
+- ==My lab report indicates the detection of a [[MYC]] rearrangement in 51% of the nuclei analyzed==, suggesting clonal evolution. This is a significant finding as ==[[MYC]] rearrangements are associated with aggressive forms of B-cell lymphoma, particularly high-grade B-cell lymphomas (HGBCL)==.
+- Furthermore, the FISH report indicates that I have:
+	-  ==High-grade B-cell lymphoma with [[MYC]] and [[BCL2]] rearrangements or "double hit lymphoma"== most likely [[Lymphoma/GCB DLBCL]]
+- Treatment Options:
+	•	==Standard first-line therapy such as [[R-CHOP]]== (rituximab, cyclophosphamide, doxorubicin, vincristine, prednisone) ==is often inadequate for [[MYC] rearranged lymphomas due to their aggressive nature.==
+	•	Because of my age and heart condition, Dr. [[Lymphoma/Dr. Jiri Slaby|Slaby]]has elected to start me off with a 7 day pretreatment of prednisone, followed by standard [[R-CHOP]].  It's a safer, less intrusive approach that I agree with.
+	•	Emerging therapies include ==targeted treatments such as [[lenalidomide]], which modulates [[MYC]] expression and may be used in combination with chemotherapy.==
+- [[Lymphoma - Novel Agents]]
+- [[Pseudoprogression following CAR-T]]

@@ -1,0 +1,62 @@
+# Lymphoma MoC.md
+
+---
+aliases:
+tags:
+  - lymphoma
+  - medical
+  - questions
+  - MoC
+---
+# Lymphoma MoC
+Date: 2024-12-10
+
+### Backlink
+[[]]
+
+- ### Reference
+- ==[[Lymphoma Treatment Contacts]]==
+- [[Diffuse large B-cell lymphoma.pdf]]
+- [Double - hit lymphoma : optimizing therapy](../Media/double%20hit%20lymphoma.pdf)
+- [[Difference between B Cells and T cells]]
+- [[High_Grade_B_Cell_Lymphoma_Fact_Sheet_2024.pdf]]
+- [[LRF-Cell-Therapy-Guide-2022_v03-1.pdf]]
+- [[Medication– Michel Lapointe – Medications 2024-12-13 1.pdf]]
+- [[Chemo Medication.xlsx]]
+- [[Arthur C. Child Cancer Centre.docx]]
+- [[Lymphoma/Fentanyl GI Tract Effects]]
+- [ABC, GCB, and Double-Hit Diffuse Large B-Cell Lymphoma](https://ascopubs.org/doi/10.14694/EdBook_AM.2015.35.e449)
+- [[lymphoma practice guidelines.pdf]]
+- [[Lymphoma/Cardiac Oncology Clinic]]
+- [[Lymphoma/Dr. Jiri Slaby]]
+- [[../Media/Dr. Mona Naiim Shafey|Dr. Mona Naiim Shafey]]
+- [[Novel Therapies and FDA Approvals]]
+- [[../Media/Double hit lymphoma - understanding and practices.pdf|Recent DH DLBCL Article]]
+- [[DHL Flowchart]]
+- [[media/LD.pdf|LD Graph]]
+- 
+
+### Notes
+- [[biopsy Result 1.docx]]
+- [[Biopsy results 2.docx]]
+- [[Scan - Cancer FISH - 17_Dec_2024.PDF]]
+- [[Scan - Cancer FISH - 20_Dec_2024.pdf]]
+- [[1st PET-CT scan result]][[media/PET-CT2.pdf]]
+- [[media/3rd PET Scan|3rd PET Scan]]
+- [[media/CT scan 08-18 English.pages.pdf| CT Scan Magog English translation]]
+- [[media/PATIENT_RESULTS_a8f783bd-be4d-deee-bd51-0576bc7a68c0.pdf|CT Scan Magog Francais]]
+- [[Diagnosis and Options]]
+- [[Arthur C. Child Lymphoma Diagnosis Program.docx]]
+-  [[Lymphoma Treatment]]
+- [[Questions for Dr. Slaby]]
+- [[Answers from Dr. Slaby]]
+- [[Questions for pharmacist]]
+- [[Lymphoma Prognosis]]
+- [[Lactate Dehydrogenase Test]]
+- [[Complications]]
+- [[autologous stem cell transplant]]
+  [[Latest Treatment Options for DH DLBCL]]
+- [[Additional insight about my lymphoma]]
+- [Relapse Detection](Relapse%20Detection)
+
+### Notes

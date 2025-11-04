@@ -1,0 +1,107 @@
+# Add Custom MCP server to Docker MCP toolkit.md
+
+---
+aliases:
+  - Custom Docker MCP server
+tags:
+  - docker
+  - mcp
+created: 2025-10-15 11:34
+ContentType:
+Backlink: "[[MCP MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- ## Filters and Topics
+
+___
+### docker mcp toolkit add custom server
+
+- To add a custom server to the Docker MCP Toolkit, you need to create your own catalog YAML file and then use the `docker mcp catalog add` command. This allows you to register and manage your own MCP servers alongside the official ones. 
+
+### Prerequisites 
+-   **A custom MCP server:** You need a working MCP server that is either running or can be started as a Docker container. For Docker containers, the image must be available locally or on Docker Hub.
+-   **Docker MCP Toolkit:** Ensure the MCP Toolkit is enabled and accessible in your Docker Desktop.
+-   **A custom server definition:** A YAML file that specifies the details of your custom server. 
+
+#### 1\. Create a catalog YAML file 
+
+First, create a new YAML file to define your custom server. This file acts as a small, local catalog that the MCP Toolkit can reference. For example, create a file named `my-catalog.yaml`: 
+
+**`my-catalog.yaml`** 
+
+```
+servers:
+  # The server name is used as an identifier in the UI
+  my-custom-server:
+    # A short, descriptive name
+    name: "My Custom Server"
+    # A longer description of what the server does
+    description: "An example custom server for my specific tools."
+    # The Docker image to use for this server
+    image: "my-custom-mcp-server:latest" 
+    # An optional category to help organize it in the UI
+    category: "Custom"
+    # The name of the Docker image that hosts the mcp-server.
+    command: ["--transport=stdio"]
+    # Required for `stdio` servers to function with the Docker MCP Gateway.
+    type: "mcp"
+    transport: "stdio"
+```
+
+-   **`image`:** Replace `my-custom-mcp-server:latest` with the name of your Docker image.
+-   **`command`:** The command required to run your server, which will depend on its implementation. The `--transport=stdio` argument is common for servers that communicate over standard input/output with the MCP gateway. 
+
+#### 2\. Add your custom catalog to the MCP Toolkit 
+Use the `docker mcp catalog add` command to register your custom server from the YAML file into a new or existing catalog. 
+
+1.  **Create your own catalog** (if you don't have one):
+    
+    ```
+    docker mcp catalog create my-catalog
+    ```
+    
+2.  **Add your custom server** to the new catalog, referencing your `my-catalog.yaml` file. The `--force` flag is useful to overwrite any existing entry.
+    
+    ```
+    docker mcp catalog add my-catalog my-custom-server ./my-catalog.yaml --force
+    ```
+    
+     
+
+#### 3\. Start your custom server 
+
+You can now start your custom server from the Docker Desktop UI. 
+
+1.  Open **Docker Desktop**.
+2.  Navigate to the **MCP Toolkit** extension in the left-hand sidebar.
+3.  Click the **Catalog** tab.
+4.  Find and enable your newly added server, **My Custom Server**.
+5.  Click the **Start Server** button. 
+
+Alternatively, you can run the server directly from the command line: 
+
+This command starts the MCP gateway and makes your custom server available to any connected clients. 
+
+#### 4\. Connect a client 
+
+Finally, connect your AI client to the MCP gateway to access your custom tools. For example, to connect a tool like Claude Code: 
+
+```
+docker mcp client connect claude-code
+```
+
+- Your client should now be able to discover and use the tools provided by your custom server. 
+
+## Search Results
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

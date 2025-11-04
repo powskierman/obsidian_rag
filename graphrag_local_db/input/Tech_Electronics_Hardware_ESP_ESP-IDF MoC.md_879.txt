@@ -1,0 +1,37 @@
+# ESP-IDF MoC.md
+
+---
+aliases: []
+tags:
+  - esp-idf
+  - MoC
+---
+# ESP-IDF MoC
+Date: 2022-11-12
+
+### Backlink
+[[]]
+
+### Reference
+- [Standard Toolchain Setup for Linux and macOS - ESP32 - — ESP-IDF Programming ](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html)
+- [Build System - ESP32 - — ESP-IDF Programming Guide v4.3 documentation](https://docs.espressif.com/projects/esp-idf/en/v4.3/esp32/api-guides/build-system.html)
+- [Add IDF_PATH to User Profile](https://docs.espressif.com/projects/esp-idf/en/v3.3.1/get-started/add-idf_path-to-profile.html)
+- [IDF Frontend - idf.py Programming Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/tools/idf-py.html)
+- [esp-prog_vscode_debug](https://github.com/makercrew/esp_prog_vscode_debug)
+- [ESP32 - How to create your First ESP IDF project (From Scratch) - YouTube](https://www.youtube.com/watch?v=oHHOCdmLiII)
+- [Video - ESP-Prog JTAG Debugging in VSCode](https://youtu.be/c6x4Xqlf3PU)
+- [[esp-idf courses]]
+- [ESP Local Control - ESP32 - — ESP-IDF Programming Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/protocols/esp_local_ctrl.html)
+- 
+### Notes
+- [[ESP-IDF Installation]]
+- [[ESP-IDF Uninstall]]
+- [[ESP-IDF Reinstall]]
+- [[ESP-IDF New Project]]
+- [[Debugging MoC]]
+- [Let’s Switch! - A complete Guide for beginners to switch from Arduino IDE to ESP-IDF and ESP-Rainmaker.  by Shrey Sharma  Medium](https://sharmashrey48.medium.com/lets-switch-arduino-to-esp-idf-rainmaker-d1e8ea2b9f9e)
+- [Getting started with ESP32 and ESP-IDF  LED Blinking](https://controllerstech.com/getting-started-with-esp32-and-esp-idf-led-blinking/)
+- [[ESP-IDF Error Handling]]
+- [[Not Enough IRAM]]
+- [[Splitting Cpp in esp-idf]]
+- [[C program to capture text]]

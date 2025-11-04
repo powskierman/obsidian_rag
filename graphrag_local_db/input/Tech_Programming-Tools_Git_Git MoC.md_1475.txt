@@ -1,0 +1,30 @@
+# Git MoC.md
+
+---
+aliases: 
+tags:
+  - git
+  - MoC
+---
+
+2022-06-24
+# Git MOC
+
+### Backlink
+[[Programming Tools MOC]]
+
+### Reference
+- [Good summary of main git commands](https://medium.com/@jake.page91/the-guide-to-git-i-never-had-a89048d4703a)
+
+### Notes
+-  [[Git-Tutorial]]
+- [[Git-Tutorial-2]]
+- [[Git-Workflow]]
+- [[Git Basic Commands]]
+- [[Git Most Used Commands]]
+- [[Git Troubleshooting]]
+- [[Git Branches]]
+- [[Git Merge]]
+-  [[Sourcetree|GUI for Git]]
+- [[Github MoC]]
+- [Git rebase Tutorial](https://blog.stackademic.com/git-rebase-explained-like-youre-new-to-git-263c19fa86ec)

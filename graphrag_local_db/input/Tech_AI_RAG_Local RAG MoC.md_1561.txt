@@ -1,0 +1,18 @@
+# Local RAG MoC.md
+
+---
+aliases: 
+tags:
+  - MoC
+created: 2025-10-20 12:39
+Backlink:
+---
+## Links
+- 
+## Related MoCs
+- [[]]
+- ## External Resources
+- 
+## Notes
+- Code can be found at:
+	- `/Users/michel/ai/RAG/obsidian_rag`

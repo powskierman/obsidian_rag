@@ -1,0 +1,94 @@
+---
+id: 16112688
+updated: 2022-06-18
+title: Tony Northrups DSLR Book
+author: Tony Northrup and Chelsea Northrup
+highlights: 16
+last_highlight: 2015-06-02
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112688
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51OHKbEod0L._SL500_.jpg)
+
+# About
+Title: [[Tony Northrups DSLR Book]]
+Authors: [[Tony Northrup]], [[Chelsea Northrup]]
+Category: #books
+Number of Highlights: ==16==
+Readwise URL: https://readwise.io/bookreview/16112688
+Date: [[2022-06-18]]
+Last Highlighted: *2015-06-02*
+
+---
+
+# Highlights
+
+For smaller subjects, including kids, dogs, and cats, kneel down to see them eye-to-eye. For flowers, lie on the ground and shoot up to show the sun or the sky in the background. ([520](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=520)) %% Color: yellow %% ^334464798
+
+---
+
+favorite tip for outdoor portraits: Have the model stand with their back to the sun and turn on flash. The sunlight will cause the hair to glow, and the flash will light your model’s face. ([561](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=561)) %% Color: yellow %% ^334464799
+
+---
+
+If you want to see more of the background, step closer and zoom out. If you want to focus on your subject, step back and zoom in. ([802](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=802)) %% Color: yellow %% ^334464800
+
+---
+
+Five elements determine a subject’s visual weight: Size. The bigger something is in the picture, the more visual weight it has. Brightness. Brighter subjects have more visual weight than darker subjects. Color. Brightly colored subjects have more visual weight than dull subjects. Sharpness. Subjects that are in focus have more visual weight than those out-of-focus. Direction. An object that’s moving, looking, or facing to one side carries its visual weight forward. Direction’s impact on visual weight is why the Rule of Space works. ([954](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=954)) %% Color: yellow %% ^334464801
+
+---
+
+You also need to provide a bit of negative space around the edges of your frame. Negative space is the area in your photo that’s not filled by the main subject. ([975](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=975)) %% Color: yellow %% ^334464802
+
+---
+
+Hard lighting is created by small or far-away light sources while soft lighting is created by large, nearby light sources. Because the sun is so far away, direct sunlight creates hard lighting with distinct shadows. On an overcast day, however, the clouds become their own light source, diffusing the harsh sunlight. ([1119](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1119)) %% Color: yellow %% ^334464803
+
+---
+
+Top lighting gives a natural appearance, but it casts unattractive shadows on faces. Front lighting is better for faces, but it removes texture and depth. Side lighting highlights texture and depth and casts long shadows. Back lighting creates the most dramatic effect but can be challenging to work with. ([1130](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1130)) %% Color: yellow %% ^334464804
+
+---
+
+Depending on the subject, the downward-pointing shadows created by top lighting can convey depth and form. Soft top lighting, such as that created outside on overcast days, can be ideal for flowers and wildlife. Though lighting from above is common, it’s quite unflattering for people. Top lighting casts deep shadows over the eyes and a long shadow below the nose—and hard top lighting is even more unflattering. Avoid top lighting by moving people into the shade or by using your flash to add front lighting. ([1136](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1136)) %% Color: yellow %% ^334464805
+
+---
+
+For people, front-lighting can be very flattering because it makes the nose appear smaller and hides bumps in the skin. To restore some of the depth that front-lighting removes, position the main light slightly off to the left or right of the camera. For architecture and landscape, front lighting is less than ideal because it removes depth. For wildlife photography, front lighting hides important texture in fur and feathers. ([1144](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1144)) %% Color: yellow %% ^334464806
+
+---
+
+When you use your camera’s built-in flash, you’re always using front lighting. To minimize the negative effects of front-lighting, use an external flash and move it to one side and up, at about a 30 degree angle to your subject. ([1148](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1148)) %% Color: yellow %% ^334464807
+
+---
+
+Side lighting (Figure 3-4) is the best way to show texture, form, and depth. ([1152](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1152)) %% Color: yellow %% ^334464808
+
+---
+
+Side lighting is notoriously unflattering for people. Pores and blemishes across the front of the face are exaggerated. One eye is highlighted while the other is in shadow. The nose casts a long shadow across the cheek. For those reasons, front lighting is a better choice for people. ([1155](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1155)) %% Color: yellow %% ^334464809
+
+---
+
+The most challenging type of light to work with, backlighting (Figure 3-5) can also make the most dramatic photos. ([1159](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1159)) %% Color: yellow %% ^334464810
+
+---
+
+For people, backlighting creates a ring of light around the face that can be very flattering. For flowers, backlighting passes through petals, making them glow. For animals, backlighting filters through the fur, creating a halo. Each of these effects helps to separate the subject from the background. ([1162](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1162)) %% Color: yellow %% ^334464811
+
+---
+
+Tip: If you ever want to reduce the amount of reflected light, put a polarizing filter on your lens. ([1193](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1193)) %% Color: yellow %% ^334464812
+
+---
+
+The golden hour is especially important when photographing fall colors. ([1207](https://readwise.io/to_kindle?action=open&asin=B006KY2VZ2&location=1207)) %% Color: yellow %% ^334464813
+
+---

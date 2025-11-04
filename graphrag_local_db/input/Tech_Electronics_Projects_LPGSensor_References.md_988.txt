@@ -1,0 +1,43 @@
+# References.md
+
+---
+aliases:
+tags:
+created: 2022-04-14 18:15
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1. 
+2. 
+3.  https://jayconsystems.com/blog/understanding-a-gas-sensor
+
+2.  <https://sandboxelectronics.com/?p=191>
+
+3.  <https://www.best-microcontroller-projects.com/tp4056.html>
+4. [Home Assistant Push notification ](https://siytek.com/home-assistant-push-notifications/)
+
+4.  2 programs
+
+    a.  Mq6Measure
+
+        i.  Takes measurement from MQ-6 sensor and prints them to console
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Mq6Calibration
+
+        i.  Calibrates sensor circuit
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

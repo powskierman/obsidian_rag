@@ -1,0 +1,18 @@
+# Netgear Orbi.md
+
+---
+aliases: []
+tags: []
+---
+# Netgear Orbi
+Date: 2023-10-18
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Credentials:
+	- user: admin
+	- password: 331Tra1l$ide

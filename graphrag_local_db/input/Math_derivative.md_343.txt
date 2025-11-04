@@ -1,0 +1,43 @@
+# derivative.md
+
+---
+aliases: [differenciate]
+---
+
+2022-02-23
+# Derivative
+
+### Backlink
+[[derivative MOC]]
+
+### Reference
+- [[Notes-Derivative-as-limit.pdf]]
+
+### Notes
+### Definitions
+[[Derivative Rules]]
+- [[point]]= $x_0,y_0$ 
+- A [[function]] defines the value of y at a given point x: $f(x_0)$
+- [[slope]] is defined as  $y-y_0=m(x-x_0$) = m = $f'(x)$
+- [[secant]] is a line that intersects 2 points of a curve
+- The [[tangent]] is where the limit of points p and q approaches 0 on a [[secant]] line.
+	- $\lim\limits_{p \to 0}$$\frac{\delta q} {\delta p}$
+	 a [[limit]] is used to calculate [[derivative MOC|derivative]]
+	- [[mean value theorem]] 
+		- the [[average rate of change]] for a smooth [[function]] is achieved as an “instantaneous [[rate of change]]” at some point within the interval.
+- The [[derivative MOC|derivative]] ($f'(x_0)$) at $f(x_0)$ is the [[slope]] of the [[tangent]] line at point $f(x_0)$.
+- The [[derivative MOC|derivative]]'s symbol is $dy \over dx$ ([[Liebniz notation]]) or $f'(x)$ ([[Newton]])
+- $dy \over dx$ denotes instantaneous [[average rate of change|rate of change]] while $\delta y \over \delta x$ denotes [[average rate of change]]
+- The [[derivative MOC|derivative]] measures the instantaneous [[average rate of change|rate of change]] of a function $f$ at a point x = a with the formula: 
+	-  $f'(x) =$$\lim\limits_{h \to 0}$$f(x+h)-f(x) \over h$ <-> $f'(x) =$$\lim\limits_{b \to x}$$f(b)-f(x) \over b-x$
+	- *Remember!: Rise over Run*
+- a [[2nd Derivative]] is the [[derivative MOC|derivative]] of a [[derivative MOC|derivative]]
+- a [[high-order derivative]] is a recursion of derivatives to nth degree
+- c is a *[[critical point]]* for a smooth function if $f'(c)$ = 0.  
+- a *local [[extremum]]* has the largest or smallest values compared to nearby points
+- an absolute [[extremum]] has the largest or smallest $f(x)$ overall
+- a [[saddle point]] is when the graph flattens out then resumes direction
+- The most important function of the [[derivative MOC|derivative]] is to find $f's$ extreme values.
+- [[Unlimited Growth Model]]: When $f'(x) = $f(x)$ the function is $ne^x$ where n is any constant
+- An [[autonomous differential equation]] is an equation of the form $\frac {dy}{dt}=f(y)$ 
+-

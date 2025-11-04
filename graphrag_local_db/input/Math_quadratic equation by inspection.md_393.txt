@@ -1,0 +1,30 @@
+# quadratic equation by inspection.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-01-29 11:56
+ContentType: Reference
+Backlink: "[[Quadratic Formula]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- 	- Look for numbers that add up to give the coefficient of $x$ and multiply to give the constant term.
+	- Works best when the coefficient of $x^2$ is 1
+	- Relies on the fact that:
+
+$$(x+a)(x+b) = x^2 +(a+b)x+ab$$
+	- Ex: $x2 + 4x − 12 = 0$
+		- $x=6,-2$
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

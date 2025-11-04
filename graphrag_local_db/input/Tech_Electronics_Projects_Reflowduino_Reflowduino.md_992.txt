@@ -1,0 +1,25 @@
+# Reflowduino.md
+
+---
+aliases: []
+---
+
+2022-06-27
+# Reflowduino
+
+### Backlink
+[[Projects MOC]]
+
+### Reference
+- [Reflowduino32 - ESP32](https://www.botletics.com/products/reflowduino32)
+- [Reflowduino Wiki · GitHub](https://github.com/botletics/Reflowduino/wiki)
+- [Reflowduino_ESP32_Demo.ino · GitHub](https://github.com/botletics/Reflowduino/blob/master/Example%20Code/Reflowduino_ESP32_Demo/Reflowduino_ESP32_Demo.ino)
+- [DIY Reflow Oven With Reflowduino  - Instructables](https://www.instructables.com/Reflowduino-DIY-BLE-Reflow-Oven-Controller/)
+- ![[Projects-PCBs-Reflowduino-Parameters-image1.png]]
+- ![[Projects-PCBs-Reflowduino-Parameters-image2.png]]
+-  [[Reflowduino-Parameters]]
+
+### Notes
+- Reflowduino is the application that controls a reflow oven.  In its latest iteration it uses an ESP32, MAX31855 temperature sensor and Nextion display  with custom code.
+- Source code can be found at /Volumes/Docs/Electronics/Projects/NH/Reflowduino/ReflowduinoPio and on Github.
+-

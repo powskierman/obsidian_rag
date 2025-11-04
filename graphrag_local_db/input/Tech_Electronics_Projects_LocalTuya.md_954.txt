@@ -1,0 +1,40 @@
+# LocalTuya.md
+
+---
+aliases: []
+---
+# LocalTuya
+Date: 2022-11-05
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+
+- #### Version 3.3 - Light Type (RGB)
+
+| DP ID | Function Point | Type | Range | Units |
+| --- | --- | --- | --- | --- |
+| 20 | Switch | bool | True/False |  |
+| 21 | Mode | enum | white,colour,scene,music |  |
+| 22 | Bright | integer | 10-1000\* |  |
+| 23 | Color Temp | integer | 0-1000 |  |
+| 24 | Color | hexstring | h:0-360,s:0-1000,v:0-1000 | hsv |
+| 25 | Scene | string | n/a |  |
+| 26 | Left time | integer | 0-86400 | s |
+| 27 | Music | string | n/a |  |
+| 28 | Debugger | string | n/a |  |
+| 29 | Debug | string | n/a |  | 
+- 
+- #### Version 3.3 - Dimmer Switch
+
+| DP ID | Function Point | Type | Range | Units |
+| --- | --- | --- | --- | --- |
+| 1 | Switch | bool | True/False |  |
+| 3 | Minimum of Brightness | integer | 25-255\* |  |
+
+
+### Notes
+-  Dimmer switch must be configured as light

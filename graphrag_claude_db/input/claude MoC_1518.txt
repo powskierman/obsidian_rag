@@ -1,0 +1,32 @@
+---
+aliases:
+tags:
+  - AI
+  - key
+  - claude
+  - token
+created: 2025-03-04 17:10
+Backlink: "[[AI Tools MoC|AI Tools MoC]]"
+---
+### Main Idea
+- 
+### References
+- [[Claude strategies]]
+- [Claude Tutorials](https://support.claude.com/en/)
+- [[Adding Persistent Memory to Claude]]
+- [[Claude Code Information Files]]
+- 
+### Notes
+- API key:
+	- `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`
+- HASS token for Claude:
+-   `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI1YWFhMjg3YWFmNWI0ZTMzYTc1ZmI3OGJlMGI4YjE2MCIsImlhdCI6MTc1OTI0NjIyOCwiZXhwIjoyMDc0NjA2MjI4fQ.irMS7jMwHnps_Ce2S5PclZGzREmgXjyeWrfzYUjGn0g`
+### Related Notes
+- [[Claude Code]]
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

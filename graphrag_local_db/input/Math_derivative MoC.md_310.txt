@@ -1,0 +1,21 @@
+# derivative MoC.md
+
+---
+aliases: [derivative]
+---
+2022-02-22
+# derivative MOC
+### Backlink
+[[Calculus MOC]]
+
+### Reference
+- [[MIT OCW Calculus lec1 Notes.pdf]]
+- [[Notes-Finding-derivatives.pdf]]
+- [[Notes-Limit-Laws.pdf]]
+- [[Notes-Derivative-as-limit.pdf]]
+- [[Notes-Differentials-and-applications.pdf]]
+- [[Notes-Leibniz-notation.pdf]]
+### Notes
+- [[derivative|Definitions]]
+- [[Derivative Notation|Notation]]
+- [[Derivative Rules|Rules]]

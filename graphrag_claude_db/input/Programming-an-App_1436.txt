@@ -1,0 +1,121 @@
+---
+aliases: []
+---
+
+2022-06-24
+# Programming-an-App
+
+### Backlink
+[[Tech/Programming-Tools/Swift/Swift MOC]]
+
+### Reference
+
+### Notes
+- https://stackoverflow.com/questions/4246883/what-is-method-property-and-function 
+-  # Programming an App
+
+1.  Create a new Xcode project.
+
+2.  Choose color scheme
+
+    a.  <http://colorhunt.co>
+
+```{=html}
+<!-- -->
+```
+1.  Insert element from object library.
+
+    a.  Labels
+
+    b.  Images
+
+    c.  Etc.
+
+```{=html}
+<!-- -->
+```
+1.  Add app icon
+
+    a.  Design at <http://canva.com>
+
+    b.  Generate icon at <http://appicon.co>
+
+    c.  Copy Assets.xcassets generated icons over original Assets.xcassets
+
+```{=html}
+<!-- -->
+```
+1.  Add code in viewController.swift
+
+    a.  Show Assistant view of the editor
+
+        i.  Go to top right of main.storyBoard windows
+
+            1.  Click on lines icon
+
+            2.  Choose Assistant
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Create IBOutlet (Interface Builder Outlet) to link image with code
+
+        i.  Press ctrl, wait a bit and drag inside the ViewController class.
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Rename an IBOutlet
+
+        i.  Never change the name in the code. The link will be broken.
+
+        ii. Right click; Refactor;Rename
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Create IBAction to link button with code
+
+        i.  Press ctrl, wait a bit and drag below the ViewController class.
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Arrays of objects
+
+        i.  Objects
+
+            1.  Who.What = Value
+
+        ```{=html}
+        <!-- -->
+        ```
+        i.  An array can be composed of images
+
+            1.  Use image literal
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Randomization
+
+        i.  [Random(in:)](https://developer.apple.com/documentation/swift/simd32/3140070-random)
+
+        ii. [RandomNumberGenerator](https://developer.apple.com/documentation/swift/randomnumbergenerator)
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  [Auto Layout](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/AutolayoutPG/LayoutUsingStackViews.html#//apple_ref/doc/uid/TP40010853-CH11-SW1)
+
+
+
+
+
+
+
+6.  Run the app
+
+    a.  Simulator
+
+    b.  iPhone

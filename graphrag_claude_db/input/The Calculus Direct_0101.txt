@@ -1,0 +1,214 @@
+---
+id: 16112729
+updated: 2022-06-18
+title: The Calculus Direct
+author: John Weiss
+highlights: 46
+last_highlight: 2013-03-26
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112729
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/41rEe96wD4L._SL500_.jpg)
+
+# About
+Title: [[The Calculus Direct]]
+Authors: [[John Weiss]]
+Category: #books
+Number of Highlights: ==46==
+Readwise URL: https://readwise.io/bookreview/16112729
+Date: [[2022-06-18]]
+Last Highlighted: *2013-03-26*
+
+---
+
+# Highlights
+
+the Calculus is the most important subject in modern education. Physics, engineering, biology, rocket science, and the electrical and computer systems that govern our lives derive all of their abilities from the calculus and not the algebras. ([36](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=36)) %% Color: yellow %% ^334466129
+
+---
+
+A vector has both magnitude (distance) and orientation (direction). The scalar of ten only consists of a group of units. However, the vector of 10 situated on the number line consists of both the distance from 0 to 10 and also a direction traveling to the right. ([90](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=90)) %% Color: yellow %% ^334466130
+
+---
+
+Mathematics main goal is to describe the relationship between the points on the numberline by internationally recognized symbols. ([101](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=101)) %% Color: yellow %% ^334466131
+
+---
+
+Algebra deals in the generalized application of logic rather than the specific instances of certain problems. ([110](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=110)) %% Color: yellow %% ^334466132
+
+---
+
+It is important to pull yourself away from concrete objects in mathematics and move towards malleable ideas. ([119](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=119)) %% Color: yellow %% ^334466133
+
+---
+
+This ability to interchange numbers when adding without affecting the final answer is known as the commutative property of addition.                             Commutative property of addition: Eq 1.1.1 ([135](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=135)) %% Color: yellow %% ^334466134
+
+---
+
+An equal sign is a powerful sign that defines an exact convergence between two ideas. The equal sign, already introduced, is so powerful because once two separate ideas are equated they may be substituted freely. ([150](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=150)) %% Color: yellow %% ^334466135
+
+---
+
+In mathematics there are operations, and then counter operations. For addition the counter operation is subtraction. ([186](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=186)) %% Color: yellow %% ^334466136
+
+---
+
+Mathematics consists of processes independent of the number. You must remove the number from your thinking and instead dwell on the idea and process of the underlying logic. The faster you do this, the quicker math will begin to make sense to you. ([240](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=240)) %% Color: yellow %% ^334466137
+
+---
+
+continuing…. ([267](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=267)) %% Color: yellow %% ^334466138
+
+---
+
+Since multiplication combines equal groups to create a new idea, division separates our idea into equal groups. ([291](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=291)) %% Color: yellow %% ^334466139
+
+---
+
+the divisional property of unity.   Eq 1.2.2 ([311](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=311)) %% Color: yellow %% ^334466140
+
+---
+
+This inability to divide by zero is a major downfall in algebra.                 Eq 1.2.3 ([317](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=317)) %% Color: yellow %% ^334466141
+
+---
+
+Recall multiplication is defined as the grouping of addition. So what if instead of two groups we wanted to describe only half a group? Using our multiplication notation we want one half of a group of d, or: ([321](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=321)) %% Color: yellow %% ^334466142
+
+---
+
+We can generalize this argument by replacing n with 2 as below.   Eq 1.2.4 ([326](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=326)) %% Color: yellow %% ^334466143
+
+---
+
+n groups of b units is the exact same amount as b groups of n units. In symbolic notation:   Eq 1.2.5 ([332](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=332)) %% Color: yellow %% ^334466144
+
+---
+
+Consider n groups of negative 1 added to itself.   Eq 1.2.6 ([356](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=356)) %% Color: yellow %% ^334466145
+
+---
+
+This is known as the Distributive property of multiplication over addition. ([380](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=380)) %% Color: yellow %% ^334466146
+
+---
+
+In the substitution method we simply choose an idea and substitute that idea for u. Observe: ([390](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=390)) %% Color: yellow %% ^334466147
+
+---
+
+when multiplying groups of addition together, every single term inside the first set of parenthesis must be multiplied by every single term within the next set of parenthesis. Always remember to combine like terms, a topic we will cover shortly. This method can be extended for any amount of summation groups Eq 1.2.8 ([397](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=397)) %% Color: yellow %% ^334466148
+
+---
+
+if we want to find the factorial of b we would denote it as:   Eq 1.2.9 ([405](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=405)) %% Color: yellow %% ^334466149
+
+---
+
+Eq 1.2.10 ([433](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=433)) %% Color: yellow %% ^334466150
+
+---
+
+all whole number pair of factors of 24 will reduce to this same string of prime factors, which they do. This is known as the Unique Prime Factorization. As the name sounds, the prime factors (3)(2)(2)(2) are unique to 24. No other number in the whole number system has this specific set of prime factors. Verify with the other factors. ([493](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=493)) %% Color: yellow %% ^334466151
+
+---
+
+to multiply fractions we simply multiply numerator to numerator and denominator to denominator.   Eq 1.3.1 ([523](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=523)) %% Color: yellow %% ^334466152
+
+---
+
+if we have a factor repeated in the numerator and denominator we can easily divide out that factor.   Eq 1.3.2 ([532](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=532)) %% Color: yellow %% ^334466153
+
+---
+
+if we placed d into a third of the answers group then the total size of that group would be 3 times the size of d. We can extend this to any number by replacing our fraction with an nth.                 Eq 1.3.3 ([550](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=550)) %% Color: yellow %% ^334466154
+
+---
+
+When dividing compound fractions, flip the second fraction then multiply. ([561](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=561)) %% Color: yellow %% ^334466155
+
+---
+
+if we had ‘a’ groups of ‘b’ units and we add ‘c’ more groups of the ‘b’ units, how many b units would we have? By simple addition we would have a + c groups of b units.   Eq 1.3.5 ([571](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=571)) %% Color: yellow %% ^334466156
+
+---
+
+Eq 1.3.6 ([602](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=602)) %% Color: yellow %% ^334466157
+
+---
+
+Here we see the idea of x multiplied by another x. Just as in multiplication we count the number of times the procedure is used. In this case twice, so we define x multiplied by x as x to the second power.   Eq 1.4.1 ([652](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=652)) %% Color: yellow %% ^334466158
+
+---
+
+Eq 1.4.2 This is known as the Product rule for exponents. When we multiply the same base with different exponents we simply add the exponents together. ([684](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=684)) %% Color: yellow %% ^334466159
+
+---
+
+mathematics is about starting small and trying to observe patterns let’s set k=2 and see what ([691](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=691)) %% Color: yellow %% ^334466160
+
+---
+
+All we are doing in mathematics is placing complex concepts into small consistent rules that were already proven. Mathematics then is a very easy subject. The one trick you must learn is to think of the mathematics as an interaction of ideas, not the interaction of numbers. ([700](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=700)) %% Color: yellow %% ^334466161
+
+---
+
+Eq 1.4.3 ([704](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=704)) %% Color: yellow %% ^334466162
+
+---
+
+Eq 1.4.4 ([713](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=713)) %% Color: yellow %% ^334466163
+
+---
+
+no matter how many x’s we have in the denominator we simply subtract that number from the amount of x’s in the numerator.   Eq 1.4.5 This is called the quotient rule of exponents. Thus when we encounter a quotient with the same base in the numerator and the denominator, then we use this rule to simplify the expression. ([733](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=733)) %% Color: yellow %% ^334466164
+
+---
+
+to make a negative exponent positive, simply switch which position (numerator or denominator) the variable is located at in the fraction.   Eq 1.4.6 The beauty of mathematics is that it isn’t dependent upon us to make sense. Mathematics simply is and we must accept that it is our understanding, and not it, that is flawed. ([754](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=754)) %% Color: yellow %% ^334466165
+
+---
+
+x raised to a power of zero is 1.   Eq 1.4.7 ([763](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=763)) %% Color: yellow %% ^334466166
+
+---
+
+Thus through these examples we have developed a general procedure: 1)                   Clear fractions by multiplying both sides by a common denominator 2)                  Simplify both sides 3)                  Separate our variables and constants onto opposite sides of the equation 4)                  Isolate our variable ([1102](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1102)) %% Color: yellow %% ^334466167
+
+---
+
+Suppose we want to find the value of f for a given x. We do this by simply substituting a chosen value for x every time we see x in our functional equation. ([1123](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1123)) %% Color: yellow %% ^334466168
+
+---
+
+To further simplify our answers notation we can employ the ordered pair. The ordered pair lists the substitution value of the independent variable followed by the evaluated answer for the function. It is always listed as (x,f(x)). ([1130](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1130)) %% Color: yellow %% ^334466169
+
+---
+
+Functions are simply entities like variables, and just like variables we don’t know what they are yet. ([1153](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1153)) %% Color: yellow %% ^334466170
+
+---
+
+A polynomial is a summation of ordered powers of a specific independent variable. ([1162](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1162)) %% Color: yellow %% ^334466171
+
+---
+
+Notice how we have made the negative sign a part of the second function. This will effectively distribute the negative sign to each term within the second polynomial, ([1168](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1168)) %% Color: yellow %% ^334466172
+
+---
+
+Multiplying or dividing a polynomial by a constant distributes that constant to each and every term of the polynomial. This is important to remember because we will use this argument during the development of the derivative. ([1202](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1202)) %% Color: yellow %% ^334466173
+
+---
+
+-                    In conclusion remember that we need pure multiplication coupled with pure division to reduce a fraction. ([1327](https://readwise.io/to_kindle?action=open&asin=B002V1I4FY&location=1327)) %% Color: yellow %% ^334466174
+
+---

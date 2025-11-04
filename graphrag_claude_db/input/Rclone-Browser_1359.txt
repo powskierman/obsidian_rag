@@ -1,0 +1,26 @@
+---
+aliases: []
+---
+> ### Tags: 
+
+2022-07-01
+# Rclone-Browser
+
+### Backlink
+[[Programming Tools MOC]]
+
+### Reference
+- [Github repository](https://github.com/kapitainsky/RcloneBrowser/releases)
+-  [Setup for OneDrive on rclone website](https://rclone.org/onedrive/)
+-  [Setup for OneDrive](https://itsfoss.com/use-onedrive-linux-rclone/)
+-  [Setup Instructions](https://itsfoss.com/rclone-browser/)
+-  [Setup video](https://www.youtube.com/watch?v=uXBlqEOE_lo)
+ 
+### Notes
+-  Rclone is a command-line program to manage files on cloud storage.  Rclone mounts any cloud storage as local directory
+-  Using it to mount OneDrive in MacOS and Raspbian
+	-  [Documentation](https://rclone.org/docs/)
+	-  [Linux install](https://linoxide.com/configure-rclone-linux-sync-cloud/)
+-  Backup IOTstack using rclone
+    -  rclone sync /home/pi/IOTstack/backups/ OneDrive:3SistersServer/Backups -P
+- 

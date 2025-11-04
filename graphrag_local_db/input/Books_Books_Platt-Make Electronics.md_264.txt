@@ -1,0 +1,301 @@
+# Platt-Make Electronics.md
+
+---
+bookId: "15463"
+title: "Make: Electronics: Learning Through Discovery"
+author: Charles Platt
+asin: B013PVRTEK
+lastAnnotatedDate: 2024-05-06
+highlightsCount: 95
+reference: https://www.amazon.com/dp/B013PVRTEK
+kindle_link: kindle://book?action=open&asin=B013PVRTEK
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/915tyDoBj+L._SY160.jpg)
+## Highlights
+The longer wire sticking out of the LED must receive a more positive voltage relative to the shorter wire. — location: [637](kindle://book?action=open&asin=B013PVRTEK&location=637) ^ref-58742
+
+---
+The positive voltage difference that you apply between the long wire and the short wire must not exceed the limit stated by the manufacturer. This is known as the forward voltage. — location: [638](kindle://book?action=open&asin=B013PVRTEK&location=638) ^ref-29827
+
+---
+The current passing into the LED through the long wire and out through the short wire must not exceed the limit stated by the manufacturer. This is known as the forward current. — location: [641](kindle://book?action=open&asin=B013PVRTEK&location=641) ^ref-42663
+
+---
+Disconnect the resistor from any other components, and apply the probes of your meter. — location: [660](kindle://book?action=open&asin=B013PVRTEK&location=660) ^ref-63562
+
+---
+When you put two equal-valued resistors in parallel, you cut the total resistance in half, because you’re giving the electricity two paths of equal resistance instead of one. — location: [837](kindle://book?action=open&asin=B013PVRTEK&location=837) ^ref-38263
+
+---
+Some people make the mistake of thinking that when they divide volts by amps to find the correct value for a series resistor, they should use the supply voltage (9V in this case). This is not correct, — location: [880](kindle://book?action=open&asin=B013PVRTEK&location=880) ^ref-37077
+
+---
+the coulomb, equal to the total charge on 6,241,509,629,152,650,000 electrons. — location: [1066](kindle://book?action=open&asin=B013PVRTEK&location=1066) ^ref-5393
+
+---
+1 ampere = 1 coulomb/second — location: [1069](kindle://book?action=open&asin=B013PVRTEK&location=1069) ^ref-48958
+
+---
+One volt can be defined as the amount of pressure that you need to create a flow of 1 ampere, which does 1 watt of work. — location: [1077](kindle://book?action=open&asin=B013PVRTEK&location=1077) ^ref-51787
+
+---
+1 volt = 1 watt / 1 ampere — location: [1079](kindle://book?action=open&asin=B013PVRTEK&location=1079) ^ref-54501
+
+---
+1 watt = 1 joule / second 1 joule = 1 newton force acting through 1 meter 1 newton accelerates 1kg by 1m / sec each second — location: [1081](kindle://book?action=open&asin=B013PVRTEK&location=1081) ^ref-53241
+
+---
+You tend to see conventional current moving from top to bottom, in schematics, while signals of some kind (such as the audio input to an amplifier) move from left to right. — location: [1486](kindle://book?action=open&asin=B013PVRTEK&location=1486) ^ref-5599
+
+---
+Two lines crossing each other do not indicate an electrical connection. — location: [1588](kindle://book?action=open&asin=B013PVRTEK&location=1588) ^ref-8852
+
+---
+Where lines intersect in a dot, there is an electrical connection. — location: [1589](kindle://book?action=open&asin=B013PVRTEK&location=1589) ^ref-1603
+
+---
+Electrolytic capacitors react very badly to being connected the wrong way around. They may self-destruct. Double-check the polarity. — location: [1830](kindle://book?action=open&asin=B013PVRTEK&location=1830) ^ref-21116
+
+---
+The speed with which a capacitor charges is measured with a function known as the “time constant.” The definition is very simple: T = R × C where T is the time constant, in seconds, if a capacitor of value C (measured in farads) is being charged through a resistor of R ohms. — location: [1979](kindle://book?action=open&asin=B013PVRTEK&location=1979) ^ref-35755
+
+---
+T, the time constant, is the number of seconds required for a capacitor to acquire 63% of the voltage being supplied to it, if it starts with zero volts. — location: [1986](kindle://book?action=open&asin=B013PVRTEK&location=1986) ^ref-48622
+
+---
+After five time constants, the charge on the capacitor will be so close to 100 percent, we can think of the process as being complete. — location: [2004](kindle://book?action=open&asin=B013PVRTEK&location=2004) ^ref-20683
+
+---
+A capacitor does block direct current (DC). The same capacitor will allow a brief fluctuation to pass through, regardless of which way the current is flowing. The capacitor then accumulates a charge, — location: [2104](kindle://book?action=open&asin=B013PVRTEK&location=2104) ^ref-34792
+
+---
+Because alternating current (AC) is a rapid series of relatively negative and relatively positive pulses, a capacitor will allow them through. — location: [2106](kindle://book?action=open&asin=B013PVRTEK&location=2106) ^ref-3832
+
+---
+A smaller capacitor will pass high-frequency fluctuations, but will block low-frequency fluctuations — location: [2109](kindle://book?action=open&asin=B013PVRTEK&location=2109) ^ref-65384
+
+---
+When a capacitor is positioned in a circuit to pass AC while blocking DC, we call it a coupling capacitor. — location: [2111](kindle://book?action=open&asin=B013PVRTEK&location=2111) ^ref-11842
+
+---
+When the base of an NPN transistor is slightly more positive than its emitter, the transistor allows positive current to flow in through the collector and out through the emitter. In this way, a very small current entering through the base of the transistor can control a larger current entering through the collector. — location: [2170](kindle://book?action=open&asin=B013PVRTEK&location=2170) ^ref-26897
+
+---
+The potentiometer is connected between the positive bus and the negative bus. In this orientation we call it a voltage divider. When the wiper is at one end of the track, it connects directly with the positive side of the power supply. At the other end of the track, it connects directly with negative ground. At positions in between, it divides the voltage. Potentiometers are often used in this way, to provide a full range of voltages. — location: [2208](kindle://book?action=open&asin=B013PVRTEK&location=2208) ^ref-58746
+
+---
+The bipolar transistor deducts some of the power as its fee for providing a service. It won’t respond unless the voltage at its base is higher than the voltage at its emitter (usually by around 0.7V). In this mode, the transistor is positively biased. — location: [2213](kindle://book?action=open&asin=B013PVRTEK&location=2213) ^ref-43593
+
+---
+This particular transistor amplifies the current entering its base by a factor of more than 200:1. This is called the beta value of a transistor, and leads me to a fundamental fact: A bipolar transistor amplifies current, not voltage. — location: [2232](kindle://book?action=open&asin=B013PVRTEK&location=2232) ^ref-19743
+
+---
+A transistor is a semiconductor, midway between being a conductor and an insulator. Its effective internal resistance varies, depending on the power that you apply to its base. All bipolar transistors have three connections: Collector, Base, and Emitter, abbreviated as C, B, and E on the manufacturer’s data sheet, which will identify the pins for you. — location: [2237](kindle://book?action=open&asin=B013PVRTEK&location=2237) ^ref-18488
+
+---
+NPN transistors are activated by positive voltage on the base relative to the emitter. PNP transistors are activated by negative voltage on the base relative to the emitter. — location: [2240](kindle://book?action=open&asin=B013PVRTEK&location=2240) ^ref-34510
+
+---
+In their passive state, both types block the flow of electricity between the collector and emitter, — location: [2241](kindle://book?action=open&asin=B013PVRTEK&location=2241) ^ref-64742
+
+---
+many multimeters have a function that will identify the emitter, collector, and base for you. Typically there are four holes labeled E, B, C, and E. When you have the emitter lead of your transistor inserted in either of the holes marked E, the base lead in B, and the collector lead in C, the meter will display the beta value of the transistor. In any other orientation, the meter reading will be unstable, or blank, or zero, or much lower than it should be (almost always below 50, and usually below 5). — location: [2248](kindle://book?action=open&asin=B013PVRTEK&location=2248) ^ref-40918
+
+---
+Transistors are easily damaged, and the damage will be permanent. Never apply a power supply directly between any two pins of a transistor. You can burn it out with too much current. Always limit the current flowing between the collector and the emitter of a transistor by using another component such as a resistor, in the same way you would protect an LED. Don’t apply voltage in reverse orientation. The collector of an NPN transistor should always be more positive than the base, which should be more positive than the emitter. — location: [2253](kindle://book?action=open&asin=B013PVRTEK&location=2253) ^ref-64565
+
+---
+When current into its base switches it “on,” its effective internal resistance drops very low. Consequently, if its emitter is grounded at approximately 0 volts, its collector will also be near 0 volts, and so will anything connected directly to the collector. — location: [2324](kindle://book?action=open&asin=B013PVRTEK&location=2324) ^ref-31388
+
+---
+When it switches “off,” the effective internal resistance of the transistor rises to at least 5K. Consequently, any component attached to its collector isn’t grounded through the transistor anymore, and can accumulate a positive charge. — location: [2327](kindle://book?action=open&asin=B013PVRTEK&location=2327) ^ref-34847
+
+---
+The key is that in Snapshots 2 and 4, a sudden voltage drop on one side of a capacitor creates an equal voltage drop on the other side — location: [2353](kindle://book?action=open&asin=B013PVRTEK&location=2353) ^ref-54714
+
+---
+Beyond 50 flashes per second, you have moved from a frequency that you can see to a frequency that you can hear. — location: [2390](kindle://book?action=open&asin=B013PVRTEK&location=2390) ^ref-47655
+
+---
+The resistor grounds the emitter of the transistor, because a transistor will only work if its emitter has a defined voltage lower than the voltage at its base. — location: [2393](kindle://book?action=open&asin=B013PVRTEK&location=2393) ^ref-17258
+
+---
+Transistors can switch a signal more than a million times per second, — location: [2400](kindle://book?action=open&asin=B013PVRTEK&location=2400) ^ref-49836
+
+---
+What if you put a capacitor across the loudspeaker, as shown in the lower part of Figure 2-119? Now the opposite effect occurs, because the capacitor is still passing higher frequencies, but routes them past the loudspeaker. In this orientation, you have a bypass capacitor. — location: [2408](kindle://book?action=open&asin=B013PVRTEK&location=2408) ^ref-52078
+
+---
+The diaphragm of a loudspeaker, also known as its cone, is designed to radiate sound. However, as it oscillates up and down, it emits sound from its back side as well as its front side. Because the sounds are opposite in phase, they tend to cancel each other out. — location: [2428](kindle://book?action=open&asin=B013PVRTEK&location=2428) ^ref-56002
+
+---
+use a heat sink in these circumstances: If you apply a 15-watt iron extremely close to a semiconductor for 20 seconds or more. If you apply a 30-watt iron within half an inch of resistors or capacitors for 10 seconds or more. (Never use it near semiconductors.) If you apply a 30-watt iron near anything meltable for 20 seconds or more. Meltable items include insulation on wires, plastic connectors, and plastic components inside switches. — location: [2999](kindle://book?action=open&asin=B013PVRTEK&location=2999) ^ref-64018
+
+---
+Rules for Heat Sinking Full-size copper alligator clips work best, but may not fit into tight corners. Ideally you should have small ones available too. Clamp the alligator clip as close as possible to the component and as far as possible from the solder joint that you are trying to make. The joint does need to get hot. Divert heat from the component, not from the joint. Make sure there is a metal-to-metal connection between the alligator clip and the wire to promote good heat transfer. — location: [3003](kindle://book?action=open&asin=B013PVRTEK&location=3003) ^ref-39619
+
+---
+you don’t find an error, apply power to the circuit, attach the black lead from your meter to the negative side, and then go around the circuit with the red lead, checking the presence of voltage. Every part of this circuit should show at least some voltage while it’s working. — location: [3084](kindle://book?action=open&asin=B013PVRTEK&location=3084) ^ref-17713
+
+---
+when a task is shared by two components, they can interfere with each other. — location: [3314](kindle://book?action=open&asin=B013PVRTEK&location=3314) ^ref-32968
+
+---
+a coil of wire stores energy when you apply power, and releases the energy when you disconnect the power. — location: [3336](kindle://book?action=open&asin=B013PVRTEK&location=3336) ^ref-41433
+
+---
+it is standard procedure to add a protection diode across a relay coil. — location: [3338](kindle://book?action=open&asin=B013PVRTEK&location=3338) ^ref-22276
+
+---
+The 555 is probably the most versatile chip that exists, — location: [3512](kindle://book?action=open&asin=B013PVRTEK&location=3512) ^ref-1855
+
+---
+Positive voltage on the trigger pin is ignored by the chip. A drop in voltage on the trigger pin will trigger the chip. — location: [3553](kindle://book?action=open&asin=B013PVRTEK&location=3553) ^ref-8274
+
+---
+The timer is triggered by a voltage on its trigger pin that is one-third of the supply voltage (or less). — location: [3559](kindle://book?action=open&asin=B013PVRTEK&location=3559) ^ref-36089
+
+---
+Pin 4 is the reset pin. When you ground it, you force the timer to interrupt whatever it is doing, — location: [3571](kindle://book?action=open&asin=B013PVRTEK&location=3571) ^ref-62548
+
+---
+Maintaining a low voltage on the trigger pin of the timer will retrigger it indefinitely. — location: [3574](kindle://book?action=open&asin=B013PVRTEK&location=3574) ^ref-51767
+
+---
+these are known as pullup resistors, because they hold the pins at a positive level. — location: [3576](kindle://book?action=open&asin=B013PVRTEK&location=3576) ^ref-15888
+
+---
+you must never allow an input pin to remain unconnected. An unconnected pin is said to be floating, and can cause trouble, — location: [3579](kindle://book?action=open&asin=B013PVRTEK&location=3579) ^ref-58508
+
+---
+the 555 timer needs pullup resistors, because pin 2 or pin 4 is kept in a normal state by positive voltage, and is activated by a low voltage. — location: [3582](kindle://book?action=open&asin=B013PVRTEK&location=3582) ^ref-24411
+
+---
+The 555 timer is triggered or reset by negative voltages on pins 2 and 4 respectively. — location: [3584](kindle://book?action=open&asin=B013PVRTEK&location=3584) ^ref-46508
+
+---
+pin 7 is known as the discharge pin: the timer discharges the capacitor through it. — location: [3594](kindle://book?action=open&asin=B013PVRTEK&location=3594) ^ref-10279
+
+---
+When the voltage on the timing capacitor reaches two-thirds of the supply voltage, the timer ends its output pulse. — location: [3595](kindle://book?action=open&asin=B013PVRTEK&location=3595) ^ref-35040
+
+---
+In monostable mode, the timer delivers only one pulse in response to a triggering event. In astable mode, the timer delivers a continuing series of pulses. — location: [3599](kindle://book?action=open&asin=B013PVRTEK&location=3599) ^ref-9019
+
+---
+Because we are not using this function yet, it’s good practice to put a capacitor on pin 5 to protect it from voltage fluctuations and prevent it from interfering with normal functioning. — location: [3602](kindle://book?action=open&asin=B013PVRTEK&location=3602) ^ref-21781
+
+---
+Resistor values below 1K should not be used. Resistor values below 10K are undesirable, as they increase power consumption. Capacitor values above 100µF may produce inaccurate results because leakage in the capacitor becomes comparable with its charging rate. — location: [3623](kindle://book?action=open&asin=B013PVRTEK&location=3623) ^ref-40146
+
+---
+what if you want a pulse duration that falls somewhere between the values in the table? You can use this simple formula, where T is the pulse time in seconds, R is the resistance in kilohms, and C is the capacitance is microfarads. T = R × C × 0.0011 — location: [3627](kindle://book?action=open&asin=B013PVRTEK&location=3627) ^ref-42542
+
+---
+When power is first applied to a timer that is configured in monostable mode, the timer tends to emit one pulse spontaneously before going dormant and waiting to be triggered again. This can be annoying in many circuits. One way to prevent it is by putting a 1µF capacitor between the Reset pin and negative ground. The capacitor sinks current from the Reset pin when the power is first turned on, and holds the pin low for a fraction of a second — just long enough to stop the timer from emitting its waking-up pulse. After the capacitor is charged, it doesn’t do anything more, and a 10K resistor holds the reset pin positive, so it won’t interfere with the running of the timer. — location: [3656](kindle://book?action=open&asin=B013PVRTEK&location=3656) ^ref-3161
+
+---
+This configuration is called bistable because it is stable when the output is high, and it is stable when the output is low. A simple flip-flop like this can also be called a latch. — location: [3692](kindle://book?action=open&asin=B013PVRTEK&location=3692) ^ref-46160
+
+---
+The 555 can run from a reasonably stable voltage source ranging from 5VDC to 16VDC. The absolute maximum is 18VDC. Many datasheet specifications are measured at 15VDC. The voltage does not have to be controlled by a voltage regulator. — location: [3726](kindle://book?action=open&asin=B013PVRTEK&location=3726) ^ref-27169
+
+---
+Most manufacturers recommend a range from 1K to 1M for the resistor attached to pin 7, but values below 10K draw a more significant amount of current. It’s a better idea to reduce the value of the capacitor than to reduce the value of the resistor. — location: [3728](kindle://book?action=open&asin=B013PVRTEK&location=3728) ^ref-1053
+
+---
+The capacitor value can go as high as you like, if you want to time really long intervals, but the accuracy of the timer will diminish because leakage in the capacitor becomes comparable with its charge rate. — location: [3730](kindle://book?action=open&asin=B013PVRTEK&location=3730) ^ref-16865
+
+---
+The timer imposes a voltage drop that is greater than the drop created by a transistor or a diode. The difference between supply voltage and output voltage will be 1V or more. — location: [3732](kindle://book?action=open&asin=B013PVRTEK&location=3732) ^ref-39447
+
+---
+The output is rated to source or sink 200mA, but an output current above 100mA will pull down the voltage and can affect the timing accuracy. — location: [3733](kindle://book?action=open&asin=B013PVRTEK&location=3733) ^ref-47728
+
+---
+astable mode — so called because the output fluctuates constantly between high and low, and does not remain stable in either of those states. — location: [3750](kindle://book?action=open&asin=B013PVRTEK&location=3750) ^ref-4255
+
+---
+How do the values for the timing capacitor and the resistors determine the frequency of the timer? If R1 and R2 are measured in kilohms, and C1 is measured in microfarads, the frequency f, in hertz, is given by: f = 1,440 / ( ( ( 2 × R2 ) + R1 ) × C1 ) — location: [3794](kindle://book?action=open&asin=B013PVRTEK&location=3794) ^ref-63858
+
+---
+A 1µF capacitor between the reset pin and negative ground will hold the reset pin in a low state just long enough to suppress the timer’s initial pulse. — location: [3872](kindle://book?action=open&asin=B013PVRTEK&location=3872) ^ref-29075
+
+---
+the basic steps that you will usually follow any time you develop something: Make a wish list. Decide which types of components are appropriate. Draw a schematic and make sure that you understand it. Modify it to fit the pattern of conductors on a breadboard. Install components on the breadboard and test the basic functions. Modify or enhance the circuit, and retest. Transfer to perforated board, test, and trace faults if necessary. Add switches, buttons, a power jack, and plugs or sockets to connect the circuit with the outside world. Mount everything in a box (and add labeling). — location: [4200](kindle://book?action=open&asin=B013PVRTEK&location=4200) ^ref-35790
+
+---
+Whether you are likely to zap a chip by handling it depends on factors such as the humidity in your location, the type of shoes you wear, and the type of floor covering in your work area. — location: [4220](kindle://book?action=open&asin=B013PVRTEK&location=4220) ^ref-4104
+
+---
+If you really feel you need to protect chips from this kind of discharge, the most thorough precaution is to ground yourself. The best way to do this is by using an anti-static wrist strap. — location: [4224](kindle://book?action=open&asin=B013PVRTEK&location=4224) ^ref-27766
+
+---
+Ideally you should pass the outputs from the counter through an array of transistors, to amplify them. You can buy a chip containing seven transistor pairs for exactly this purpose. It’s called a Darlington array. — location: [4300](kindle://book?action=open&asin=B013PVRTEK&location=4300) ^ref-51787
+
+---
+Pins 8 and 16 of the chip are for negative-ground and positive power, respectively. Almost all digital chips apply power to opposite corners in this — location: [4314](kindle://book?action=open&asin=B013PVRTEK&location=4314) ^ref-53832
+
+---
+way — location: [4315](kindle://book?action=open&asin=B013PVRTEK&location=4315) ^ref-41554
+
+---
+To keep an input pin normally high, connect it to the positive bus through a 10K resistor (at least, for the circuits in this book). When you need to pull it low, use a switch or other device that overrides the resistor by making a more direct connection to the negative bus. — location: [4328](kindle://book?action=open&asin=B013PVRTEK&location=4328) ^ref-52086
+
+---
+To keep an input pin normally low, connect it to the negative bus through a 10K resistor. When you need to push it high, use a switch or other device that overrides the resistor by making a more direct connection to the positive bus. — location: [4329](kindle://book?action=open&asin=B013PVRTEK&location=4329) ^ref-40407
+
+---
+All the inputs on a counter chip must have some kind of connection. Never allow any floating input pins! Unused output pins should be left unconnected. — location: [4331](kindle://book?action=open&asin=B013PVRTEK&location=4331) ^ref-14330
+
+---
+If you won’t be using an input pin, it must still have a defined state. You can deal with it by wiring it directly to the positive or negative side of the power supply. — location: [4335](kindle://book?action=open&asin=B013PVRTEK&location=4335) ^ref-29073
+
+---
+The chip doesn’t care how long the pulses are. It just responds by adding 1 to its count, — location: [4337](kindle://book?action=open&asin=B013PVRTEK&location=4337) ^ref-22678
+
+---
+Like all the other pins on the chip, this one is active-high, meaning it performs its function when it has a high state. — location: [4340](kindle://book?action=open&asin=B013PVRTEK&location=4340) ^ref-53274
+
+---
+When the clock disable pin is in a high state, it stops the counter from counting. When the clock disable pin is pulled down to negative ground, it allows the counter to count. — location: [4342](kindle://book?action=open&asin=B013PVRTEK&location=4342) ^ref-33034
+
+---
+the 555 timer accepts a power supply ranging from 5 to 15 volts, just like the 4026B, — location: [4354](kindle://book?action=open&asin=B013PVRTEK&location=4354) ^ref-19645
+
+---
+Logic gates are much fussier than the 555 timer or the 4026B counter that you used previously. The versions that we will be using demand a precise 5VDC, — location: [4490](kindle://book?action=open&asin=B013PVRTEK&location=4490) ^ref-3368
+
+---
+LM7805 voltage regulator. It delivers a well-controlled voltage of 5 volts if you supply it with a DC voltage of 7 volts or more. — location: [4492](kindle://book?action=open&asin=B013PVRTEK&location=4492) ^ref-44841
+
+---
+When an input or output associated with a 5V logic chip is near 0VDC, we say it is logic-low. When an input or output associated with a 5V logic chip is near 5VDC, we say it is logic-high. — location: [4536](kindle://book?action=open&asin=B013PVRTEK&location=4536) ^ref-29535
+
+---
+you can still find some of the old TTL chips around, especially in the LS series (with part numbers such as 74LS00 and 74LS08). However, they have become uncommon. — location: [4654](kindle://book?action=open&asin=B013PVRTEK&location=4654) ^ref-42874
+
+---
+74LSxx: Lower power Schottky series, still used occasionally. — location: [4672](kindle://book?action=open&asin=B013PVRTEK&location=4672) ^ref-11000
+
+---
+The 4000B series was improved but still susceptible to damage from static electricity. These chips are still commonly used, especially in hobby-electronics applications. — location: [4673](kindle://book?action=open&asin=B013PVRTEK&location=4673) ^ref-37618
+
+---
+It’s very important to check the pin functions of logic chips against the diagrams here or a manufacturer’s datasheet before using them. Interior connections may seem to follow similar patterns, but there are exceptions. — location: [4722](kindle://book?action=open&asin=B013PVRTEK&location=4722) ^ref-22952
+
+---
+Fundamentals: Rules for Connecting Logic Gates Permitted: You can connect the input of a gate directly to your regulated power supply, either positive side or negative side. You can connect the output from one gate directly to the input of another gate. The output from one gate can power the inputs of many other gates (this is known as “fanout”). The exact ratio depends on the chip, but in the 74HCxx series, you can always power at least ten inputs with one logic output. — location: [4725](kindle://book?action=open&asin=B013PVRTEK&location=4725) ^ref-42322
+
+---
+The output from a logic chip can drive the trigger (pin 2) of a 555 timer, so long as the timer shares the same 5VDC power supply. Low input doesn’t have to be zero. A 74HCxx logic gate will recognize any voltage up to 1 volt as “low.” High input doesn’t have to be 5 volts. A 74HCxx logic gate will recognize any voltage above 3.5 volts as “high.” — location: [4729](kindle://book?action=open&asin=B013PVRTEK&location=4729) ^ref-63940
+
+---
+Not permitted: No floating inputs! On CMOS chips, such as the HC family, you must always connect all input pins with a known voltage. This includes the input pins of gates that are unused on a chip. Any single-throw switch or pushbutton should be used with a pullup or pulldown resistor, so that when the contacts are open, the input to the chip is not floating. Don’t use an unregulated power supply, or more than 5 volts, or less than 5 volts, to power 74HCxx logic gates. Be careful when using the output from a 74HCxx logic chip to power an LED. You can draw as much as 20mA from the chip, but this will pull down the output voltage. If you are also connecting that voltage to the input of a second chip, the voltage may be pulled down so much by the LED that the second chip doesn’t recognize it as “high” anymore. — location: [4735](kindle://book?action=open&asin=B013PVRTEK&location=4735) ^ref-24910
+
+---
+Throughout this book, I am using low-current LEDs in conjunction with logic-chip outputs, because I think this is a good habit to acquire, in case an output powering an LED is also used as a logic input for another chip at some point in the future. Never apply a significant voltage or current to the output pin of a logic gate. In other words, don’t force an output into another output. For this reason, don’t tie the outputs together from two or more logic gates. — location: [4742](kindle://book?action=open&asin=B013PVRTEK&location=4742) ^ref-22845
+
+---

@@ -1,0 +1,21 @@
+---
+aliases: []
+---
+
+2022-02-28
+# Liebniz notation
+
+### Backlink
+[[]]
+
+### Reference
+- [[Notes-Leibniz-notation.pdf]]
+### Notes
+-  Differentials: $dy \over dx$
+-  $f'(x) =$$\lim\limits_{h \to 0}$$f(x+h)-f(x) \over h$ <=>$\lim\limits_{h \to 0}$$\frac{\Delta y} {\Delta x}$ <=>$dy \over dx$
+- If $y=k$ ->${dy \over dx}=0$
+- if $f(x)=mx+b$->${dy \over dx}=m$
+- The derivative is [[additive]]
+	- ex: $ax^2+bx+c$
+		-  $dy \over dx$= ${d \over dx}(ax^2)+{d \over dx}(bx)+{d \over dx}(c)$
+		- 

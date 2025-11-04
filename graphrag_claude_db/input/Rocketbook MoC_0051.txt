@@ -1,0 +1,19 @@
+---
+aliases: []
+tags:
+  - MoC
+---
+
+2022-06-24
+# Rocketbook MOC
+
+### Backlink
+[[Home]]
+
+### Reference
+
+### Notes
+- The Rocketbook system connects traditional handwriting surfaces with the power of the cloud.
+- [[1st-Notes]]
+- [How to use the Rocketbook App](https://getrocketbook.com/pages/how-to-use-the-rocketbook-app)
+- 

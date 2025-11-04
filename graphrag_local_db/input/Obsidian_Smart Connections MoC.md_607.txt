@@ -1,0 +1,27 @@
+# Smart Connections MoC.md
+
+---
+aliases: 
+tags:
+  - obsidian
+  - AI
+  - smart-connections
+---
+# Smart Connections MoC
+Date: 2025-02-10
+
+### Backlink
+[[Obsidian MOC]]
+
+### Reference
+-  [Github - Smart Connections](https://github.com/brianpetro/obsidian-smart-connections)
+- [Adding AI to your Obsidian Notes with SmartConnections and CoPilot](https://effortlessacademic.com/adding-ai-to-your-obsidian-notes-with-smartconnections-and-copilot/)
+- [# Obsidian + Smart Connection](https://www.ifb.me/en/blog/en/ai/obsidiansmartconnect)
+- [[Smart Connections Troubleshooting]]
+- 
+### Notes
+-  Spend less time linking, tagging and organizing because Smart Connections finds relevant notes so you don't have to!
+- Supports local chat models like Llama 3 through Ollama, LM Studio and many more.
+- 100s of API models including Anthropic Claude, Google Gemini, and OpenAI GPT-4.
+- Supports local embedding models.
+- Saves chats as notes (markdown) and canvas

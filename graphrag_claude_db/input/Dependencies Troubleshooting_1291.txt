@@ -1,0 +1,25 @@
+---
+aliases: 
+tags:
+  - dependency
+  - troubleshooting
+  - xcode
+  - Derived-data
+---
+# Dependencies Troubleshooting
+Date: 2023-10-07
+
+### Backlink
+[[Xcode MOC]]
+
+### Reference
+-  
+### Notes
+-  If you've renamed your Xcode project and are having issues with dependencies such as Starscream, it's possible that the project configuration or the file paths have been affected. Here's a step-by-step guide to potentially resolve this:
+- Clear Derived Data:
+	- Close your Xcode project.
+	- Navigate to the #Derived-Data folder and delete the folder related to your project. The default location is ~/Library/Developer/Xcode/DerivedData/, but you can check your specific path in Xcode's preferences (Preferences -> Locations).
+	- Reopen your project in Xcode.
+- Update Swift Package Manager (SPM) Dependencies:
+	- If you're using Swift Package Manager, go to File -> Swift Packages -> Update to Latest Package Versions.
+- If the issue persists, try removing Starscream from your project and re-adding it.

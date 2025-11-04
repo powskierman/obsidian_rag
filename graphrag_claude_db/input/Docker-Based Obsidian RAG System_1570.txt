@@ -1,0 +1,231 @@
+---
+aliases:
+tags:
+  - AI
+  - RAG
+  - obsidian
+  - docker
+  - knowledge-management
+created: 2025-11-02 18:24
+ContentType: Technical Documentation
+Backlink: "[[Building a Local Obsidian RAG System]]"
+---
+### Main Idea
+- Production Docker-based RAG system that indexes my entire Obsidian vault with triple search capabilities: semantic search (ChromaDB), graph-based search (LightRAG - deprecated), and advanced knowledge graph analysis (GraphRAG-Local-Ollama). Completely local, privacy-first, containerized architecture.
+
+### References
+- [ChromaDB Documentation](https://docs.trychroma.com/)
+- [LightRAG Repository](https://github.com/HKUDS/LightRAG) (deprecated)
+- [GraphRAG-Local-Ollama](https://github.com/TheAiSingularity/graphrag-local-ollama) ⭐ **Current**
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
+- [Sentence Transformers](https://www.sbert.net/)
+- **Original Implementation:** [[Building a Local Obsidian RAG System]]
+
+### Notes
+- **Current Stats:** 7,113 chunks from 1,605 markdown files + GraphRAG-Local indexing 1,607 files
+- **Architecture:** 4 Docker containers + Ollama host (added GraphRAG-Local service)
+- **Project Location:** `/Users/michel/iCloud Drive/ai/RAG/obsidian_rag`
+- **Vault Path:** `/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel`
+- **Latest Addition:** GraphRAG-Local-Ollama service (Port 8003) - Production Ready ✅
+
+## System Architecture
+
+### Docker Services
+1. **Embedding Service** (Port 8000)
+   - Sentence Transformers (`all-MiniLM-L6-v2`)
+   - ChromaDB vector database
+   - Semantic search capabilities
+   - REST API for embedding and querying
+
+2. **LightRAG Service** (Port 8001) - ⚠️ **DEPRECATED**
+   - Graph-based RAG with knowledge graphs
+   - Entity and relationship extraction
+   - **Status:** Deprecated due to event loop conflicts
+   - **Replacement:** GraphRAG-Local service (Port 8003)
+
+2b. **GraphRAG-Local Service** (Port 8003) - ✅ **PRODUCTION**
+   - Advanced knowledge graph construction with Microsoft GraphRAG
+   - Specialized Ollama integration (GraphRAG-Local-Ollama fork)
+   - Entity extraction optimized for medical terminology
+   - Community detection and hierarchical graph analysis
+   - Global and local search capabilities
+   - qwen2.5-coder:14b + nomic-embed-text integration
+
+3. **Streamlit UI** (Port 8501)
+   - Web interface for queries
+   - Model selection and parameters
+   - Source citations and relevance scores
+   - Export capabilities
+
+4. **Ollama Host** (Port 11434)
+   - Local LLM hosting
+   - **Primary Model:** qwen2.5-coder:14b (GraphRAG-Local optimized)
+   - Qwen 2.5 Coder 32B (traditional RAG)
+   - DeepSeek R1:14b (reasoning alternative)
+
+## Quick Start Guide
+
+### Prerequisites
+```bash
+# Ensure Docker Desktop is running
+docker --version
+docker-compose --version
+
+# Install Ollama models
+ollama pull qwen2.5-coder:14b      # GraphRAG-Local optimized
+ollama pull qwen2.5-coder:32b      # Traditional RAG
+ollama pull nomic-embed-text       # GraphRAG embeddings
+ollama pull deepseek-r1:14b        # Reasoning tasks
+```
+
+### Daily Operations
+```bash
+# Navigate to project
+cd "/Users/michel/iCloud Drive/ai/RAG/obsidian_rag"
+
+# Start all services
+./Scripts/docker_start.sh
+
+# Access interfaces
+open http://localhost:8501    # Main UI
+open http://localhost:8000    # Embedding API
+open http://localhost:8001    # LightRAG API (deprecated)
+open http://localhost:8003    # GraphRAG-Local API ⭐
+
+# Stop services
+./Scripts/docker_stop.sh
+```
+
+### Indexing Options
+```bash
+# Option 1: Simple semantic indexing
+python simple_scanner.py
+
+# Option 2: Advanced scanner with file watching
+python obsidian_scanner.py
+
+# Option 3: GraphRAG-Local indexing (RECOMMENDED) ⭐
+./scripts/index_with_graphrag_local.sh
+# OR: curl -X POST http://localhost:8003/index-vault
+
+# Option 4: LightRAG graph construction (DEPRECATED)
+curl -X POST http://localhost:8001/index-vault
+
+# Option 5: Direct CLI querying
+python query_vault.py "your query here"
+
+# Option 6: GraphRAG-Local Docker profile
+docker-compose --profile graphrag-local up -d
+```
+
+## Service Comparison
+
+| Feature | Embedding Service | LightRAG Service | GraphRAG-Local Service |
+|---------|------------------|------------------|----------------------|
+| **Port** | 8000 | 8001 | 8003 |
+| **Status** | ✅ Production | ⚠️ Deprecated | ✅ **RECOMMENDED** |
+| **Search Type** | Semantic similarity | Graph + Semantic | Advanced Knowledge Graph |
+| **Best For** | Quick lookups, document similarity | Complex relationships (unstable) | Medical timelines, multi-hop reasoning |
+| **Response Speed** | Fast (~1-2 seconds) | Variable (event loop issues) | Moderate (~3-5 seconds) |
+| **Context Understanding** | Document-level | Entity aware (buggy) | Community + Entity + Relationship |
+| **Setup Complexity** | Simple | Moderate | Moderate |
+| **Database** | ChromaDB | LightRAG GraphDB | GraphRAG + Parquet |
+| **Ollama Integration** | Basic | Custom implementation | **Native (optimized)** |
+| **Medical Optimization** | General embeddings | Limited | **Specialized entity extraction** |
+
+## Docker Architecture Benefits
+
+### Eliminated Issues
+- ✅ **Python version conflicts** (isolated containers)
+- ✅ **Dependency management** (each service has own environment)
+- ✅ **Port conflicts** (Docker Compose orchestration)
+- ✅ **NumPy installation issues** (pre-built containers)
+- ✅ **Service startup complexity** (single script deployment)
+
+### Production Features
+- **Persistent storage** via Docker volumes
+- **Service health checks** and automatic restarts
+- **Container networking** with service discovery
+- **Consistent deployment** across machines
+- **Easy backup** (volume snapshots)
+
+## Current File Structure
+```
+obsidian_rag/
+├── Scripts/                       # Management scripts
+│   ├── docker_start.sh           # Start all services
+│   ├── docker_stop.sh            # Stop all services
+│   ├── docker_status.sh          # Service status
+│   └── docker_rebuild.sh         # Rebuild images
+├── chroma_db/                     # Vector database (volume)
+├── lightrag_db/                   # Graph database (volume)
+├── embedding_service.py          # Semantic search service
+├── lightrag_service.py           # Graph-based RAG service
+├── streamlit_ui_docker.py        # Web interface
+├── obsidian_rag_mcp_fixed.py     # MCP server for Claude
+├── simple_scanner.py             # Basic vault indexer
+├── obsidian_scanner.py           # Advanced scanner
+├── query_vault.py                # CLI query tool
+├── docker-compose.yml            # Service orchestration
+├── Dockerfile.embedding          # Embedding container
+├── Dockerfile.lightrag           # LightRAG container
+├── Dockerfile.streamlit          # UI container
+└── requirements.txt              # Dependencies
+```
+
+## Advanced Usage
+
+### Query Strategies
+- **Simple lookups:** Use embedding service (8000)
+- **Relationship exploration:** Use LightRAG service (8001)
+- **Complex synthesis:** Use Streamlit UI with multiple sources
+- **Automated queries:** Use CLI tool or MCP integration
+
+### Model Selection
+- **Qwen 2.5 Coder 32B:** Best for medical + technical + coding queries
+- **DeepSeek R1:14b:** Excellent for pure reasoning tasks
+- **Context:** 128K tokens for comprehensive understanding
+
+### Monitoring
+```bash
+# Service status
+./Scripts/docker_status.sh
+
+# Database statistics
+curl http://localhost:8000/stats
+curl http://localhost:8001/health
+
+# Container logs
+docker-compose logs -f embedding-service
+docker-compose logs -f lightrag-service
+docker-compose logs -f streamlit-ui
+```
+
+### Related Notes
+- [[Building a Local Obsidian RAG System]] - Original implementation
+- [[AI Projects]] - Broader AI project context
+- [[Obsidian Workflow]] - Vault organization
+- [[Knowledge Management Systems]] - Comparative analysis
+- [[Privacy-First Tools]] - Local AI principles
+
+### Questions / Ideas for Further Exploration
+- How does graph-based search compare to pure semantic search for medical queries?
+- Can we combine both search methods in a single unified interface?
+- What's the optimal chunking strategy for technical documentation vs medical notes?
+- How effective is the entity extraction for my specific domain knowledge?
+- Could we add web search integration while maintaining privacy?
+
+### To-Do
+- [ ] Test LightRAG performance with medical terminology
+- [ ] Compare search quality between both services
+- [ ] Set up automated backup of Docker volumes
+- [ ] Create iOS Shortcuts integration for mobile queries
+- [ ] Benchmark response times with different model sizes
+- [ ] Document optimal query patterns for each service
+
+### Smart Connections Insights
+- This Docker implementation solved all the Python environment issues from the original
+- The dual-service architecture provides flexibility: speed vs sophistication
+- Container orchestration makes the system truly production-ready
+- Graph-based search opens new possibilities for knowledge discovery
+- The MCP integration enables seamless Claude Desktop integration

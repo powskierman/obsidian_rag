@@ -1,0 +1,23 @@
+---
+aliases:
+tags:
+created: 2022-06-26 10:15
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<<[workflow-of-version-control.pdf](workflow-of-version-control.pdf)>>
+
+![](Git-Workflow-image1.png){width="6.197916666666667in" height="43.84375in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

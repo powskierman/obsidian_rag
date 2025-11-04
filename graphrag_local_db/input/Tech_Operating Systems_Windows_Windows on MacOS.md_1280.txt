@@ -1,0 +1,18 @@
+# Windows on MacOS.md
+
+---
+aliases: 
+tags:
+  - windows
+  - macos
+---
+# Windows on MacOS
+Date: 2024-10-02
+
+### Backlink
+[[windows MOC]]
+
+### Reference
+-  
+### Notes
+-  [Windows 11  UTM Documentation](https://docs.getutm.app/guides/windows/)

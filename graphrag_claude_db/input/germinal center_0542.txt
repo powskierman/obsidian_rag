@@ -1,0 +1,21 @@
+---
+aliases: 
+tags:
+  - lymphoma
+---
+# germinal center
+Date: 2025-01-01
+
+### Backlink
+[[GCB DLBCL]]
+
+### Reference
+-  
+### Notes
+- ![[Pasted image 20250101195822.png]] 
+- Germinal centers (GCs) are specialized microstructures located within the B-cell zones (follicles) of secondary lymphoid organs, such as:
+	•	Lymph nodes
+	•	Spleen
+	•	Ileal Peyer’s patches (in the small intestine)
+	•	Tonsils and other mucosal-associated lymphoid tissues
+	[[Lymphoma/Bone Marrow Germinal Center]]

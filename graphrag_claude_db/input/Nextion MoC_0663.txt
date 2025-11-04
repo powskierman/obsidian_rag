@@ -1,0 +1,27 @@
+---
+aliases: 
+tags:
+  - nextion
+  - MoC
+---
+
+2022-06-29
+# Nextion MoC
+
+### Backlink
+[[Components MOC]]
+
+### Reference
+- [Esphome Nextion Reference](https://esphome.io/components/display/nextion/#nextion-on_touch)
+- [A guide for receiving and sending commands from Nextion displays](https://seithan.com/Easy-Nextion-Library/Use-Nextion-General-View/#SendCMD)
+- [[Easy-Nextion-Library]] 
+- [Instruction Set - Nextion](https://nextion.tech/instruction-set/)
+- [Home Assistant Nextion Handler](https://github.com/krizkontrolz/Home-Assistant-nextion_handler)
+- ![[Nextion Pinout.jpeg]]
+- [Esphome, Nextion Thermostat Example](https://olegtarasov.me/nextion-display-esphome/)
+- 
+
+### Notes
+-  [[Upload-from-ESP-to-Nextion]]: ESP8266 & ESP32 library for uploading .tft files to the Nextion display over serial. The ESP32 uses HardwareSerial and the ESP8266 uses SoftwareSerial. Pins are defined in the ESPNexUpload.cpp file.
+- [[Install Nextion Editor on MacOS]]
+- [[Transfer TFT file via esp32]]

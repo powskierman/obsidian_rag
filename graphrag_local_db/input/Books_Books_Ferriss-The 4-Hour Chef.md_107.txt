@@ -1,0 +1,22 @@
+# Ferriss-The 4-Hour Chef.md
+
+---
+bookId: "11615"
+title: "The 4-Hour Chef: The Simple Path to Cooking Like a Pro, Learning Anything, and Living the Good Life"
+author: Timothy Ferriss
+asin: B005NJU8PA
+lastAnnotatedDate: 2015-06-02
+highlightsCount: 2
+reference: https://www.amazon.com/dp/B005NJU8PA
+kindle_link: kindle://book?action=open&asin=B005NJU8PA
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81k2uFyUklL._SY160.jpg)
+## Highlights
+Career specialists can’t externalize what they’ve internalized. Second nature is hard to teach. — location: [547](kindle://book?action=open&asin=B005NJU8PA&location=547) ^ref-36896
+
+---
+Sometimes, whether in the world of fire-making or cooking, finding the path of least resistance is as easy as Googling “backward,” “upside-down,” or “reverse,” plus whatever skill you’re deconstructing. — location: [824](kindle://book?action=open&asin=B005NJU8PA&location=824) ^ref-27189
+
+---

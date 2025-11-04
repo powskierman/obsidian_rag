@@ -1,0 +1,42 @@
+---
+id: 16112616
+updated: 2022-06-18
+title: Make
+author: Charles Platt
+highlights: 3
+last_highlight: 2017-12-10
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112616
+Updated: 2022-06-18
+%%
+
+![]( https://m.media-amazon.com/images/I/91RqF68KbEL._SY500.jpg)
+
+# About
+Title: [[Make]]
+Authors: [[Charles Platt]]
+Category: #books
+Number of Highlights: ==3==
+Readwise URL: https://readwise.io/bookreview/16112616
+Date: [[2022-06-18]]
+Last Highlighted: *2017-12-10*
+
+---
+
+# Highlights
+
+various microcontroller chip families. I will suggest ways in which you can ([40](https://readwise.io/to_kindle?action=open&asin=B00K0TSI5U&location=40)) %% Color: yellow %% ^334462429
+
+---
+
+2N2222 transistor. This graph was derived from numbers in the table shown previously. ([593](https://readwise.io/to_kindle?action=open&asin=B00K0TSI5U&location=593)) %% Color: yellow %% ^334462430
+
+---
+
+Introducing the ([2028](https://readwise.io/to_kindle?action=open&asin=B00K0TSI5U&location=2028)) %% Color: yellow %% ^334462431
+
+---

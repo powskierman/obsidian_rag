@@ -1,0 +1,437 @@
+# Kicad-Basic-Operations.md
+
+---
+aliases: 
+tags:
+  - PCB
+  - Kicad
+---
+# Kicad-Basic-Operations
+Date: 2024-05-13
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  # Kicad Basic Operations
+
+![Image](Kicad-Basic-Operations-image1.jpg){width="6.25in" height="3.5104166666666665in"}
+
+1.  
+
+2.  Create New Project
+
+    a.  New project must be in its own folder with same name
+
+```{=html}
+<!-- -->
+```
+1.  Create new schema with EESchema
+
+    a.  Zoom in and out [scroll wheel]
+
+    b.  Help [shift ?]
+
+    c.  Set page settings {File} {Page Settings}
+
+        i.  Date
+
+        ii. Revision
+
+        iii. Title
+
+        iv. Comments
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Add component [A]
+
+![Machine generated alternative text: craete_any component ](Kicad-Basic-Operations-image2.png){width="6.395833333333333in" height="3.5in"}
+
+1.  Edit component [E]
+
+    a.  Move [M]
+
+    b.  Rotate [R]
+
+```{=html}
+<!-- -->
+```
+4.  Create new component
+
+![Open Library Editor {Tools} {Library Editor} v. Click Create new component Move name and symbol [M] Create frame Insert Pins 1) Name and pin number 2) Rotate label and connector [RI Create working library Load library 1) {Preferences] {Component Libraries} {Add} Add newly created component to schematic [Al ](Kicad-Basic-Operations-image3.png){width="4.708333333333333in" height="2.0104166666666665in"}
+
+1.  Clarify Schematic
+
+    a.  draw boxes around sub-circuits
+
+    b.  Add text headings to boxes (Loc 2315)
+
+
+
+2.  Wiring
+
+    a.  Add wires to pins [W]
+
+    b.  Add labels [L]
+
+    c.  Add bus [B]
+
+    d.  Add power flags [P] to power nets
+
+    e.  Add unconnected flags[Q]
+
+```{=html}
+<!-- -->
+```
+1.  Save project [CTRL] [S]
+
+2.  Annotate project {Tools} {Annotate schematic}
+
+3.  Electric Rules Check {Tools} {Electric Rules Checker}
+
+4.  Associate component with footprint
+
+    a.  Assign a footprint {Tools} {Assign Component Footprint}
+
+    b.  Select Component from middle column associate with part from right column
+
+    c.  Save [CTRL][S]
+
+```{=html}
+<!-- -->
+```
+1.  Create Custom Footprint [CTRL][F] from main screen
+
+![Machine generated alternative text: (active File Edit View Place Prefe Dimensions e.•'id: "A) mils mm) Help ATtiny85 In 0 Layer Render F paste paste B. CRYd F fab Z B.Fab Track Nodes z 7.89 Y -0.2m Nets "t 0.4717 ](Kicad-Basic-Operations-image4.png){width="6.25in" height="4.770833333333333in"}
+
+
+
+1.  ![v. Vill. Create new footprint Move annotations [M] Set grid to pin width Create pads spaced as per physical part Renumber pads according to part pin number [Ml [E] Refresh display [F3] Draw outside shape of component Label pins ](Kicad-Basic-Operations-image5.png){width="3.84375in" height="1.5208333333333333in"}
+
+2.  Save footprint to library
+
+    a.  Create new library {File}{Save Footprint in New Library}
+
+    b.  Add new library to Kicad {Preferences}{Footprint Libraries Wizard}
+
+    c.  Make library Active {File} {Set Active Library}
+
+    d.  Save[CTRL][S]
+
+```{=html}
+<!-- -->
+```
+8.  Associate component with new footprint. In EESchema: {Tools}{Assign Component Footprint}
+
+![](Kicad-Basic-Operations-image6.png){width="6.0in" height="3.0104166666666665in"}
+
+1.  From left column, pick library
+
+2.  From middle column, pick component
+
+3.  From right column, pick footprint; double click footprint
+
+4.  Check footprint by viewing footprint (3rd icon in toolbar)
+
+5.  Save associations [CTRL][S]
+
+```{=html}
+<!-- -->
+```
+9.  Create Netlist file
+
+    a.  From EESchema, {Tools}{Generate Netlist File}
+
+    b.  Save in project directory
+
+```{=html}
+<!-- -->
+```
+1.  Layout PCB From Main window, {Tools}{Run PCBNew} or [CTRL][P]
+
+![Machine generated alternative text: n RF24 conh_01Q08 ](Kicad-Basic-Operations-image7.png){width="6.0in" height="3.5in"}
+
+1.  Setup page settings {File}{Page Settings)
+
+2.  Read Netlist {Tools}{Read Netlist}
+
+3.  Move components to place them
+
+    a.  [RIGHT CLICK] anywhere in canvas and select "Spread out all footprints" from Global spread and place menu
+
+```{=html}
+<!-- -->
+```
+1.  Draw PCB edges
+
+    a.  In the right column
+
+        i.  Select Edge Cuts layer
+
+        ii. Click Add graphic line icon (Dotted line)
+
+        iii. Reduce size of trace to .001
+
+        iv. Use cross hair cursor by clicking 6th icon on left toolbar
+
+        v.  Measure dimensions of PCB
+
+            a.  Move cursor to one corner and press spacebar
+
+            b.  Move to opposite corner and read size bottom right
+
+```{=html}
+<!-- -->
+```
+1.  Create traces
+
+    a.  Manual method
+
+        i.  Switch canvas to default [F9]
+
+        ii. Choose layer (F.cu in right panel)
+
+        iii. X for routing
+
+        iv. Click on pad and draw trace to destination. Double click.
+
+        v.  Do a DRC check {Tools}{DRC}
+
+        vi. Export to DSN
+
+        vii. Edit DSN file with EditPlus
+
+             a.  Remove second layer:
+
+(layer F.cu
+
+(type power)
+
+(property
+
+(index 1)
+
+)
+
+)
+
+6.  Autorouting
+
+    a.  Install [autorouter](http://www.muonhunter.com/blog/installing-freerouting-on-kicad) from [github](https://github.com/nikropht/FreeRouting) with [jh.jar](https://github.com/kellertuer/Gravel/blob/master/javahelp/jh2.0/javahelp/lib/jh.jar) and [Java SE](http://www.oracle.com/technetwork/java/javase/downloads/jdk-netbeans-jsp-142931.html)
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Specify track widths with nets
+
+        i.  {Design Rules}{Design Rules Editor}
+
+        ii. Loc 1942 in Kindle book
+
+```{=html}
+<!-- -->
+```
+1.  Labelling
+
+    a.  Select F.siks layer and text icon
+
+    b.  Label pads and version
+
+```{=html}
+<!-- -->
+```
+1.  Adjust track width
+
+    a.  {Design Rules}{Design Rules}{Global Design Rules}
+
+    b.  Enter the following vias, custom track widths and minimum track width
+
+    c.  Change track width field (Upper Left) to required track width.
+
+```{=html}
+<!-- -->
+```
+1.  
+
+
+
+![](Kicad-Basic-Operations-image8.png){width="6.541666666666667in" height="4.583333333333333in"}
+
+1.  Right click track {Change Track Width}
+
+2.  There is a track width calculator.
+
+    a.  Main screen [CTRL][C]
+
+```{=html}
+<!-- -->
+```
+10. Copper fill
+
+    a.  Top layer Vcc plane, Bottom layer Grnd plane
+
+![n RF24 ](Kicad-Basic-Operations-image9.png){width="5.0in" height="2.9166666666666665in"}
+
+
+
+2.  Click Add filled zones icon
+
+![](Kicad-Basic-Operations-image10.png){width="0.10416666666666667in" height="0.10416666666666667in"}
+
+c.  Fill out form choosing layer and net
+
+d.  Fill the zone with copper [B]
+
+e.  DRC
+
+```{=html}
+<!-- -->
+```
+11. Add text to board as needed on front and back silkscreen layers
+
+12. Add Graphics
+
+    a.  Resize image in Photoshop to fit PCB
+
+    b.  Save as bmp
+
+    c.  On main screen run BitmapToComponent [CTRL]{b]
+
+    d.  Export
+
+    e.  Save to new .pretty directory
+
+    f.  Import component {Preferences}{Footprints Library Wizard} from new .pretty directory
+
+    g.  Append with wizard button
+
+    h.  Add footprint (step 6)
+
+    i.  Append with wizard
+
+
+
+11. Print Gerbers and upload to fab
+
+    a.  Click plotter button
+
+![](Kicad-Basic-Operations-image11.png){width="0.10416666666666667in" height="0.10416666666666667in"}
+
+![](Kicad-Basic-Operations-image12.png){width="0.10416666666666667in" height="0.10416666666666667in"}
+
+![](Kicad-Basic-Operations-image13.png){width="0.10416666666666667in" height="0.10416666666666667in"}
+
+![](Kicad-Basic-Operations-image14.png){width="0.10416666666666667in" height="0.10416666666666667in"}
+
+
+
+![・ 強 ま - ョ キ 一 凵 F 、 を ロ : 等 一 凵 F,CnYd 一 凵 ま EdgeCuts 一 凵 E ^ 0 一 ト エ 雲 F ま ロ FAdhe• - 第 一 第 ( 当 ー 当 0 -2- 、 一 0- ぐ 第 : ま ロ い 等 = 第 : 0 板 ョ - 簽 -- 0 ョ - ◎ な 一 に , 当 ) 口 に 象 を 1 当 ・ 」 ・ 0- en 0 ま 5 象 第 、 ヨ ・ ョ 、 一 0 ョ ョ よ ま ョ ! : - を 角 紀 ョ ョ ロ 00 10- ョ ′ ま ・ こ ミ 望 よ 旦 0- 0 ト ! に え , 当 ) 口 に ・ 、 0 - ニ ョ ヨ 一 - ](Kicad-Basic-Operations-image15.png){width="4.0in" height="4.84375in"}
+
+2.  Click proper layers and select output directory
+
+3.  Click Plot button
+
+4.  Click Generate Drill File
+
+    a.  Click Drill File
+
+```{=html}
+<!-- -->
+```
+1.  Inspect Files by opening directory
+
+2.  Zip all files
+
+3.  Inspect on gerblook.org
+
+4.  Upload to pc fabricator
+
+    a.  <https://oshpark.com/>
+
+    b.  <https://pcbs.io/>
+
+    c.  <Http://Jlcpcb.com>
+
+```{=html}
+<!-- -->
+```
+12. Etching with toner transfer
+
+    a.  Print from PCBNew with mirrored print
+
+    b.  Print to laser printer using Heat toner transfer paper
+
+    c.  Clean copper clad with steel wool or Dremel brass brush and acetone
+
+    d.  Tape printout to copper clad using masking tape
+
+    e.  Put through laminator on thickest setting
+
+    f.  Prepare a solution of 30cc H~2~O, 30cc HCL and 10cc H~2~O~2~
+
+        a.  Water first, then acid, then peroxide
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Once etched, drill holes .6mm
+
+    b.  A specialist in PCB etching supplies is <https://pcbfx.com>
+
+```{=html}
+<!-- -->
+```
+1.  Etching with laser on photoresist
+
+    a.  Install [laserweb 4.0](https://github.com/LaserWeb/LaserWeb4-Binaries/releases)
+
+    b.  Output PCB to SVG using plot
+
+    c.  Convert svg to png in Photoshop
+
+    d.  Convert png to svg in Inkscape
+
+        a.  Open png as link
+
+        b.  Select Image by clicking
+
+        c.  Path; Trace Bitmap
+
+        d.  Object; Ungroup
+
+        e.  File ; Save as; Optimized SVG; Save
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Open in laserweb
+
+        a.  [Tutorial](https://www.youtube.com/watch?v=4FzPfy6FFus)
+
+```{=html}
+<!-- -->
+```
+1.  SMT Solder Paste Mask
+
+    a.  Output Solder paste and outline layers to Gerber file
+
+    b.  Upload to <http://solder-stencil.me/>
+
+        a.  Thickness 0.3
+
+        b.  Height 1.2
+
+        c.  Gap 0.0
+
+        d.  Increase size 0.1
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  3d print with 0.2 nozzle using Stencil1 profile
+
+in

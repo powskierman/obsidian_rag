@@ -1,0 +1,29 @@
+---
+aliases: []
+tags: []
+---
+# Matter equivalents for Homekit Terminology
+Date: 2023-03-28
+
+### Backlink
+[[]]
+
+### Reference
+-  [Matter: Clusters, Attributes, Commands](https://blog.espressif.com/matter-clusters-attributes-commands-82b8ec1640a0)
+- 
+### Notes
+
+| HomeKit Terminology | Matter Equivalent |
+| --- | --- |
+| Accessory | Device |
+| Characteristic | Property |
+| Service | Cluster |
+| Action Set | Scene |
+| Trigger | Automation |
+| Home | Site |
+| Room | Zone |
+| Accessory Information Service | Device Information Cluster |
+| Pairing | Provisioning |
+
+![[Pasted image 20230328120302.png]]
+

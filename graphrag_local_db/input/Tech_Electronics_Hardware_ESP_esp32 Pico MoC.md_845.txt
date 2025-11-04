@@ -1,0 +1,20 @@
+# esp32 Pico MoC.md
+
+---
+aliases: []
+---
+# esp32 Pico MoC
+Date: 2022-11-29
+
+### Tags: 
+
+### Backlink
+[[Debugging - the rules]]
+
+### Reference
+-  [ESP32-PICO-KIT V4  V4.1 Getting Started Guide - ESP32 - — ESP-IDF ](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-pico-kit.html)
+- [ESP32 Pico Kit — PlatformIO latest documentation](https://docs.platformio.org/en/latest/boards/espressif32/pico32.html)
+- 
+### Notes
+-  No builtin LED[![ESP32-PICO-KIT (click to enlarge)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/_images/esp32-pico-kit-v4-pinout.png)
+`

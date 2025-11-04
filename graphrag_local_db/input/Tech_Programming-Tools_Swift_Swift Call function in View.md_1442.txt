@@ -1,0 +1,39 @@
+# Swift Call function in View.md
+
+---
+aliases: []
+---
+# Swift Call function in View
+Date: 2022-10-24
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- 
+### Notes
+- 4 ways:
+	```swift
+	    init() {
+	        self.testFunction()     // non always good, but can
+	    }
+	
+	    var body: some View {
+	        self.testFunction()            // 1)
+	        return VStack {
+	            Text("TextBox")
+	               .onTapGesture {
+	                  self.testFunction()    // 2)
+	               }
+	            Text("SecondTextBox")
+	        }
+	        .onAppear {
+	            self.testFunction()     // 3)
+	        }
+	        .onDisappear {
+	            self.testFunction()     // 4)
+	        }
+	    }
+	```

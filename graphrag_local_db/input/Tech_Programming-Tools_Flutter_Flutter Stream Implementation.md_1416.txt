@@ -1,0 +1,36 @@
+# Flutter Stream Implementation.md
+
+---
+aliases: []
+---
+# Flutter Stream Implementation
+Date: 2022-08-07
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+-
+### Notes
+
+```
+import 'dart:async';
+
+StreamController<Color> _controller = StreamController<Color>();
+Stream get onAlarmColor => _controller.stream;
+
+void sendAlarmColor() {
+  onAlarmColor.listen(
+    (newColor) {
+      SwitchClass.alarmColor;
+      Icon(Icons.alarm, size: 175, color: SwitchClass.alarmColor);
+      print(SwitchClass.alarmColor);
+    },
+  );
+} 
+
+_controller.add(alarmColor);
+```
+-

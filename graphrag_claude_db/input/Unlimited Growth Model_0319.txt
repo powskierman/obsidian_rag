@@ -1,0 +1,23 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-22 15:41
+ContentType: Reference
+Backlink: "[[Calculus MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Represents exponential [[Growth and Decay|growth]] without limits like predation
+- The [[general solution]] of this model
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

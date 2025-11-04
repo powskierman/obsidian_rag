@@ -1,0 +1,28 @@
+---
+aliases: []
+tags: []
+---
+# Thread UDP
+Date: 2023-06-23
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  We need 2 devices on the same network
+- Console into devices:
+	- screen /dev/cu.usbmodem14601 115200
+	- screen /dev/cu.usbmodem0010502041261 115200
+	- Device 1:
+		- ot ipaddr
+			- ex: fd5d:e45e:418b:1:582e:7c07:663:3c5d
+			- Used by device 2 to send to this device
+		- ot udp open
+		- ot udp bind :: 1234
+	- Device 2:
+		- ot ipaddr
+		- ot udp open
+		- Send command with ipv6 address, port and message
+			- ot udp send fd5d:e45e:418b:1:582e:7c07:663:3c5d 1234 Hello!

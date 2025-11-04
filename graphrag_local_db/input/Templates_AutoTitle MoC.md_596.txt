@@ -1,0 +1,64 @@
+# AutoTitle MoC.md
+
+---
+aliases:
+  - AutoTitle Map of Content
+tags:
+created: 2025-02-13 16:55
+ContentType: MoC
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<%*
+let title = '';
+// Try to get highlighted text first
+const highlightedText = await tp.file.selection();
+if (highlightedText) {
+    title = highlightedText;
+} else {
+    // If no highlight, try clipboard
+    title = await tp.system.clipboard();
+}
+
+// If both highlight and clipboard are empty, prompt for manual input
+if (!title) {
+    title = await tp.system.prompt("Enter a title for the note:");
+}
+
+// Clean up the title
+title = title.split('\n')[0].trim().substring(0, 50);
+
+// Rename the file
+if (title) {
+    await tp.file.rename(title);
+} else {
+    // If still no title, use a default
+    title = "Untitled Note";
+    await tp.file.rename(title);
+}
+-%>
+---
+tags: []
+created: <% tp.file.creation_date("YYYY-MM-DD HH:mm") %>
+---
+
+
+- 
+## Related MoCs
+- [[]]
+## External Resources
+- 
+## Notes
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2021-12-30 13:33
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+![](ESP32-Wroom-image1.jpeg){width="5.0in" height="3.8958333333333335in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

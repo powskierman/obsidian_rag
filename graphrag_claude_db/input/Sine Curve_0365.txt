@@ -1,0 +1,28 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-13 15:23
+ContentType: Reference
+Backlink: "[[Unit Circle]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- $y= \sin(x)$
+- !
+- One can get the cosine curve from the sine curve by translating
+the sine curve horizontally to the left by $\pi \over 2$ units 
+	-  $\cos(x)={\sin(x)+{\pi \over 2}}$
+	- $\sin(x)={\cos(x)-{\pi \over 2}}$
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

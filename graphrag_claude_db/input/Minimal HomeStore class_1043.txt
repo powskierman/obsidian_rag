@@ -1,0 +1,44 @@
+---
+aliases: []
+tags: []
+---
+# Minimal HomeStore class
+Date: 2023-03-09
+
+### Backlink
+[[Homekit MoC]]
+
+### Reference
+-  
+### Notes
+```
+//  HomeStore.swift
+
+import SwiftUI
+import HomeKit
+import Combine  
+
+class HomeStore: NSObject, ObservableObject, HMHomeManagerDelegate {
+    var homeManager: HMHomeManager
+    var cancellable: AnyCancellable?
+    @Published var homes: [HMHome] = []
+    @Published var homeNames: [String] = []
+    @Published var accessories: [HMAccessory] = []  
+
+    init(homeManager: HMHomeManager) {
+        self.homeManager = homeManager
+        super.init()
+        homeManager.delegate = self
+        homeManagerDidUpdateHomes(homeManager)
+    }  
+
+    func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
+        homes = manager.homes
+    }
+
+    func loadHomes() {
+        homes = homeManager.homes
+    }
+}
+```
+

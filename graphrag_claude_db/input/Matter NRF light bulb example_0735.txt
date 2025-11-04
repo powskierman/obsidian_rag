@@ -1,0 +1,23 @@
+---
+aliases: []
+tags: [
+ Matter
+ Lightbulb
+]
+---
+# Matter NRF light bulb example
+Date: 2023-05-25
+
+### Backlink
+[[]]
+
+### Reference
+- [Matter Light bulb — nRF Connect SDK 2.3.99](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/samples/matter/light_bulb/README.html)
+- [Testing Matter in the nRF Connect SDK — nRF Connect SDK 2.3.99](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/latest/nrf/protocols/matter/getting_started/testing/index.html)
+- [Matter light bulb example (from nRF SDK) Step-by-step implementation](https://devzone.nordicsemi.com/f/nordic-q-a/92821/matter-light-bulb-example-from-nrf-sdk-cannot-bind-cluster-8-to-light-switch-app-from-original-chip-repo)
+- [nRF52840 Dongle Programming Tutorial](https://devzone.nordicsemi.com/guides/short-range-guides/b/getting-started/posts/nrf52840-dongle-programming-tutorial)
+- 
+### Notes
+-  Once the DK is programmed with the lightbulb example, connect to the existing thread network using [[Thread Endpoint Setup]]
+- We can also use [[Dongle Matter Setup]]
+- Then commission into thread fabric using add device/Matter in Home Assistant

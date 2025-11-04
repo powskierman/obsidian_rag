@@ -1,0 +1,34 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-22 15:37
+ContentType: Reference
+Backlink: "[[derivative MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+[[derivative MOC]]
+- Used when the [[derivative MOC|derivative]] of products of two functions is needed
+-  The [[derivative MOC|derivative]] of the product of two functions is the first function times the [[derivative MOC|derivative]] of the second function plus the second function times the [[derivative MOC|derivative]] of the first function.
+- $d \over dx$ `[`$f(x)g(x)$`]` = $f(x)g'(x)$ + $g(x)f'(x)$
+-  
+
+Example 1:
+if $f(x) = xe^x$ find $f'(x)$
+
+By the Product Rule we have:
+$f'(xe^x)$ = $d \over dx$ $(xe^x)$ = $x$$d \over dx$$(e^x)$ + $e^x$$d \over dx$$(x)$ = $xe^x + e^x \cdot 1$ = $e^x(x+1)$
+- [[Product of Square Root]]
+	- Product of squaqre root is square root of product
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

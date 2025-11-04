@@ -1,0 +1,171 @@
+---
+bookId: "64212"
+title: Alice's Adventures in Wonderland [illustrated]
+author: Lewis Carroll, Peter Newell, Beasie Pease Guttman, John Tenniel, E. Gertrude Thompson, Brinsley Le Fanu, Charles Robinson, and Arthur Rackham
+asin: B005LDC7IY
+lastAnnotatedDate: 2016-09-11
+highlightsCount: 52
+reference: https://www.amazon.com/dp/B005LDC7IY
+kindle_link: kindle://book?action=open&asin=B005LDC7IY
+tags:
+  - book-notes
+  - novel
+---
+![](https://m.media-amazon.com/images/I/51n+G5YL60L._SY160.jpg)
+## Highlights
+'Dear, dear! How queer everything is to-day! And yesterday — location: [170](kindle://book?action=open&asin=B005LDC7IY&location=170) ^ref-28109
+
+---
+everything is queer to-day.' — location: [211](kindle://book?action=open&asin=B005LDC7IY&location=211) ^ref-15184
+
+---
+walrus — location: [213](kindle://book?action=open&asin=B005LDC7IY&location=213) ^ref-7072
+
+---
+inquisitively, — location: [218](kindle://book?action=open&asin=B005LDC7IY&location=218) ^ref-10192
+
+---
+daresay — location: [220](kindle://book?action=open&asin=B005LDC7IY&location=220) ^ref-28651
+
+---
+fright. — location: [222](kindle://book?action=open&asin=B005LDC7IY&location=222) ^ref-30900
+
+---
+hastily, — location: [222](kindle://book?action=open&asin=B005LDC7IY&location=222) ^ref-61741
+
+---
+perhaps — location: [225](kindle://book?action=open&asin=B005LDC7IY&location=225) ^ref-51701
+
+---
+sulky, — location: [256](kindle://book?action=open&asin=B005LDC7IY&location=256) ^ref-4966
+
+---
+thimble,' — location: [297](kindle://book?action=open&asin=B005LDC7IY&location=297) ^ref-6971
+
+---
+enough — location: [338](kindle://book?action=open&asin=B005LDC7IY&location=338) ^ref-56712
+
+---
+queer — location: [370](kindle://book?action=open&asin=B005LDC7IY&location=370) ^ref-31268
+
+---
+feeble, — location: [433](kindle://book?action=open&asin=B005LDC7IY&location=433) ^ref-60817
+
+---
+thistle — location: [461](kindle://book?action=open&asin=B005LDC7IY&location=461) ^ref-6911
+
+---
+hookah, — location: [474](kindle://book?action=open&asin=B005LDC7IY&location=474) ^ref-29608
+
+---
+sternly. — location: [485](kindle://book?action=open&asin=B005LDC7IY&location=485) ^ref-34626
+
+---
+piteous — location: [572](kindle://book?action=open&asin=B005LDC7IY&location=572) ^ref-5132
+
+---
+footman — location: [636](kindle://book?action=open&asin=B005LDC7IY&location=636) ^ref-57846
+
+---
+livery — location: [636](kindle://book?action=open&asin=B005LDC7IY&location=636) ^ref-669
+
+---
+cauldron — location: [670](kindle://book?action=open&asin=B005LDC7IY&location=670) ^ref-55643
+
+---
+grinning — location: [674](kindle://book?action=open&asin=B005LDC7IY&location=674) ^ref-14175
+
+---
+Cheshire — location: [677](kindle://book?action=open&asin=B005LDC7IY&location=677) ^ref-48974
+
+---
+This time there could be NO mistake about it: it was neither more nor less than a pig, and she felt that it would be quite absurd for her to carry it further. — location: [734](kindle://book?action=open&asin=B005LDC7IY&location=734) ^ref-63158
+
+---
+wearily. — location: [839](kindle://book?action=open&asin=B005LDC7IY&location=839) ^ref-4654
+
+---
+HIM.' — location: [841](kindle://book?action=open&asin=B005LDC7IY&location=841) ^ref-31636
+
+---
+contemptuously. — location: [842](kindle://book?action=open&asin=B005LDC7IY&location=842) ^ref-34639
+
+---
+mournfully. — location: [852](kindle://book?action=open&asin=B005LDC7IY&location=852) ^ref-37263
+
+---
+bawled — location: [867](kindle://book?action=open&asin=B005LDC7IY&location=867) ^ref-34673
+
+---
+treacle,' — location: [886](kindle://book?action=open&asin=B005LDC7IY&location=886) ^ref-3126
+
+---
+earnestly. — location: [891](kindle://book?action=open&asin=B005LDC7IY&location=891) ^ref-54281
+
+---
+oblong — location: [960](kindle://book?action=open&asin=B005LDC7IY&location=960) ^ref-52355
+
+---
+crimson — location: [964](kindle://book?action=open&asin=B005LDC7IY&location=964) ^ref-54013
+
+---
+giddy.' — location: [985](kindle://book?action=open&asin=B005LDC7IY&location=985) ^ref-50024
+
+---
+stamping — location: [1019](kindle://book?action=open&asin=B005LDC7IY&location=1019) ^ref-30822
+
+---
+doubtful — location: [1102](kindle://book?action=open&asin=B005LDC7IY&location=1102) ^ref-14440
+
+---
+wretched — location: [1468](kindle://book?action=open&asin=B005LDC7IY&location=1468) ^ref-31065
+
+---
+twinkling — location: [1472](kindle://book?action=open&asin=B005LDC7IY&location=1472) ^ref-38874
+
+---
+dunce? — location: [1475](kindle://book?action=open&asin=B005LDC7IY&location=1475) ^ref-37712
+
+---
+fumbled — location: [1516](kindle://book?action=open&asin=B005LDC7IY&location=1516) ^ref-44769
+
+---
+sprawling — location: [1525](kindle://book?action=open&asin=B005LDC7IY&location=1525) ^ref-33754
+
+---
+dismay, — location: [1527](kindle://book?action=open&asin=B005LDC7IY&location=1527) ^ref-29109
+
+---
+haste, — location: [1532](kindle://book?action=open&asin=B005LDC7IY&location=1532) ^ref-31555
+
+---
+melancholy — location: [1532](kindle://book?action=open&asin=B005LDC7IY&location=1532) ^ref-44336
+
+---
+diligently — location: [1535](kindle://book?action=open&asin=B005LDC7IY&location=1535) ^ref-46649
+
+---
+hastily — location: [1543](kindle://book?action=open&asin=B005LDC7IY&location=1543) ^ref-50177
+
+---
+queerest — location: [1565](kindle://book?action=open&asin=B005LDC7IY&location=1565) ^ref-29297
+
+---
+clever — location: [1571](kindle://book?action=open&asin=B005LDC7IY&location=1571) ^ref-43139
+
+---
+atom — location: [1611](kindle://book?action=open&asin=B005LDC7IY&location=1611) ^ref-12210
+
+---
+pun!' — location: [1627](kindle://book?action=open&asin=B005LDC7IY&location=1627) ^ref-48284
+
+---
+shriek — location: [1651](kindle://book?action=open&asin=B005LDC7IY&location=1651) ^ref-64136
+
+---
+reeds—the — location: [1655](kindle://book?action=open&asin=B005LDC7IY&location=1655) ^ref-30287
+
+---
+weird — location: [1711](kindle://book?action=open&asin=B005LDC7IY&location=1711) ^ref-28701
+
+---

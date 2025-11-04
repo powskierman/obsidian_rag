@@ -1,0 +1,91 @@
+# Xiaomi Mijia.md
+
+---
+aliases: 
+tags:
+  - Home-Assistant
+  - xiaomi
+  - mijia
+  - bthome
+---
+# Xiaomi Mijia
+Date: 2024-03-19
+
+### Backlink
+[[H]]
+
+### Reference
+-  [Home Asssistant Xiaomi Mijia LYWSD03MMC Temperature and Humidity Sensor Tutorial September 2022 - Community Guides - Home Assistant Community](https://community.home-assistant.io/t/home-asssistant-xiaomi-mijia-lywsd03mmc-temperature-and-humidity-sensor-tutorial-september-2022/456403)
+- 
+### Notes
+-  MAC address for Freezer
+	- MAC: `A4C1388B04DC`
+	- Mi Token:
+		- `B20626807B03535A6DED5605`
+	- Mi Bind Key:
+		- `1141937C877F0CE01019B885C4C6C78F`
+	- Bindkey: 
+		- `90e33f6f4c9f28ec60a2373c414e8187`
+- NHMeteo
+	- Device MAC [+ 2 Rand]:
+		- `A4C1389B2931148E`
+	- Mi Token:
+		- `cdef450184a1107005189b4b`
+	- Mi Bind Key:
+		- `99d4e2b71fed8588e0fc5bc954335f55`
+	- BindKey:
+		- `d4185a6327a6f3f5216b874f8a4502f1`
+- NHTemp
+	- Device ID:
+		  `blt.3.129vQt3Pmug00`
+	- Mi Token:
+		- `2f53132c9a481d71179b7023`
+	- Mi Bind Key:
+		- `2f53132c9a481d71179b7023`
+- Cuisine
+	- MAC
+		- `A4C1384F6A834B86`
+	- Advertised Name:
+		- `ATC_4F6A83`
+	- Mi Token:
+		- `92AF655782E57BA74999EF35`
+	- Mi Bind Key:
+		- `26AD5E6EA3624504F4142DA95892955B`
+	- BindKey
+		- `10253819fe18c9f34e2390ee599d0cef`
+- FridgeCave
+	- MAC:
+		- `A4C138AE72620782`
+	- Mi Token:
+		- `B5D37B311ED783838B3FF830`
+	- Mi Bind Key:
+		- `66694B9A1FEA4B763CA6397998EFC2E3`
+	- BindKey:
+		- `00355f9a92250d7a0604a5aa866fac2a`
+- Tombeau
+	- MAC
+		- `A4C13802A73AF3E0`
+	- Mi Token:
+		- `F28AFA983A639DD0D2447FB4`
+	- Mi Bind Key:
+		- `834F616218B023377B2D7066B2DBC1B8`
+	- BindKey:
+		- `416fee40d436d85a23586353c03e3c61`
+- Gazebo
+	- MAC
+		- `A4C138F0D52FE437`
+	- Mi Token:
+		- `5D4D04E9A598E77A312DA652`
+	- Mi Bind Key:
+		- `0A6B23FF77985E57016306D66D0B3579`
+	- BindKey:
+		- `9701f720354b5717c134a0bddef3ff35`
+- Garage
+	- MAC
+		- `A4C138D22FE9791B`
+	- MiToken
+		- `e28d98d193dd28a4823cf337`
+	- Mi Bind Key
+		- `738EB255921EC1D8D4017AEEC53F5F65`
+	- Bindkey
+		- `c65c45e2d429c9315739ed569030bcce`

@@ -1,0 +1,23 @@
+---
+aliases: 
+tags:
+  - hassFramework
+---
+# WebSocketManager
+Date: 2023-12-07
+
+### Backlink
+[[NHGarage]]
+
+### Reference
+-  
+### Notes
+-  WebSocketManager is a class that manages a WebSocket connection using the HassWebSocket class. 
+- WebSocketManager is a singleton, as indicated by the shared static constant. This means that only one instance of WebSocketManager exists in your application.
+- WebSocketManager conforms to the HassWebSocketDelegate protocol, which means it implements methods to handle events from a HassWebSocket instance.
+- The websocket property is an instance of [[HassWebSocket]], which is a class that handles the low-level details of a WebSocket connection.
+- The reconnectionAttempts property keeps track of how many times the application has tried to reconnect to the WebSocket.
+- The init method initializes the websocket property and sets the WebSocketManager instance as the delegate for the HassWebSocket instance.
+- The connectIfNeeded method checks if the WebSocket is disconnected, and if so, it attempts to connect.
+- The disconnectIfNeeded method checks if the WebSocket is connected, and if so, it disconnects.
+- The didReceive method is a delegate method that handles events from the HassWebSocket. In the provided code, it handles the .connected and .disconnected events, updating the connectionState of the websocket accordingly.

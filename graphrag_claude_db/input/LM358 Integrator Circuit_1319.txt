@@ -1,0 +1,36 @@
+---
+aliases: 
+tags:
+  - circuit
+  - LM358
+  - Alarm
+---
+# LM358 Integrator Circuit
+Date: 2023-09-30
+
+### Backlink
+[[Electronics MOC]]
+
+### Reference
+[LM358 Integrator Circuit](obsidian://open?vault=Michel&file=Pictures%2FLM358%20Integrator%20Circuit.png)
+[Op amp Integrator circuit - Wikipedia](https://en.wikipedia.org/wiki/Op_amp_integrator)
+
+
+- 
+### Notes
+-  The NH garage alarm system requires an integrator circuit to convert the pulsing 1HZ LED to a continuous signal
+- 1. **Integrator Functionality**: The basic idea of an integrator circuit is to produce an output voltage that is proportional to the accumulated value (or integral) of the input voltage. For this circuit, when a constant voltage is applied across the capacitor (via the non-inverting input), the output voltage of the op-amp will ramp up or down linearly over time, effectively integrating the input voltage.
+    
+2. **Capacitor's Role**: The capacitor's value determines the rate of the voltage change at the output. A larger capacitance will result in a slower rate of change for a given input voltage.
+    
+3. **Op-Amp's Role**: The op-amp strives to maintain balance between its inputs. Given that the inverting input is tied to the output, and the non-inverting input sees a voltage across the capacitor, the op-amp will work to produce an output voltage such that the voltage across the capacitor remains at zero. As the input voltage tries to change the voltage across the capacitor, the op-amp counters by adjusting its output, which results in an integrating effect.
+    
+4. **Applications**: Integrators are fundamental in many systems, including analog computers, control systems, and signal processing. In the realm of signal processing, for example, they're used to create low-pass filters.
+5. The presence of the 1.5KΩ resistor in parallel with the capacitor adds important functionality to the basic integrator circuit:
+6. **Controlled DC Gain**: Without the resistor, the integrator has infinite DC gain, which means even tiny DC offsets at the input will cause the output to drift over time, eventually saturating at one of the power rails. The parallel resistor adds a path for DC feedback, which makes the circuit behave as an integrator for AC signals and as a simple inverting amplifier for DC signals. This prevents the output from drifting away due to the op-amp's input offset voltage or low-frequency noise.
+7. **Stability**: The resistor stabilizes the circuit and ensures that the output doesn't drift to its limits due to minor offset voltages or leakages.
+8. **Low-frequency Cutoff**: The resistor and capacitor together form a high-pass RC filter. This sets a lower limit on the frequencies that the circuit will integrate. Signals with frequencies below this cutoff will not be integrated effectively. The cutoff frequency fcfc​ is given by: fc=12πRCfc​=2πRC1​ With R=1.5KΩR=1.5KΩ and assuming C=100µFC=100µF from your previous information, the cutoff frequency is approximately 1.06 Hz. This means that signals with frequencies below 1.06 Hz will not be integrated as effectively as those above this frequency.
+9. **Reset Functionality**: In some applications, the resistor can act as a reset mechanism. When the output gets too high or too low, the resistor provides a path to discharge (or charge) the capacitor, bringing the output voltage back to a reference level over time.
+10. 
+**In summary**, 
+One thing to note is that in a real-world integrator like this, due to the DC gain of the op-amp, any tiny offset voltage at the inputs will get integrated over time, and the output might drift to one of the supply rails.  Adding the 1.5KΩ resistor in parallel to the capacitor makes the integrator more practical and stable for real-world applications. It provides a balance between integration and stability and ensures that the circuit remains functional in the presence of real-world imperfections like input offset voltages. In many applications, a large-value resistor is added in parallel with the feedback capacitor to provide a controlled DC path and prevent this drift, turning the pure integrator into a more stable, practical integrator with a finite DC gain.

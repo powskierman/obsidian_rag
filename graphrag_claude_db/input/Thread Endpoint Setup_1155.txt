@@ -1,0 +1,77 @@
+---
+aliases: []
+tags: [
+ thread
+ endpoint
+ dongle
+]
+---
+# Thread Endpoint Setup
+Date: 2023-05-24
+
+### Backlink
+[[Tech/Networking/Thread MoC|Thread MoC]]
+
+### Reference
+- [[../Electronics/Software/Home-Assistant/media/Home-Assistant Matter Installation Guide]]
+- [Thread border router required with Matter - Configuration - Home Assistant](https://community.home-assistant.io/t/thread-border-router-required-with-eve-and-matter/562937/12)
+- [zigbeelight_bulb_dongle example](https://github.com/martelmy/NCS_examples/tree/main/zigbee/light_bulb_dongle)
+- 
+### Notes
+#### Setup Procedure
+- setup ESP32-H2 or C6 with the [ot-cli example](https://openthread.io/codelabs/esp-openthread-hardware#3)
+- Use Postman  to retrieve thread network credentials 
+	- OpenThread/Get Thread Network Credentials
+- Manually configure the esp32 to join the network:
+	- ```
+	dataset networkkey <your_network_key> 
+	dataset panid <your_pan_id> 
+	dataset commit active 
+	ifconfig up 
+	thread start
+```
+
+-  Use the #Home-Assistant #border-router as #commissioner:
+	- Go to web gui: 192.168.0.14:8080
+	- Commissioner tab
+	- Add Joiner PSKd: J01NER
+		- Note:  If commission fails, change PSKd. ex: J01NUS
+	- Or use CLI:
+```
+sudo ot-ctl
+
+commissioner start
+
+commissioner joiner add * J01NME
+
+```
+- Then on the #DK or #Dongle:
+```
+ot factoryreset 
+
+ot ifconfig up
+
+ot joiner start J01NME
+
+ot thread start
+```
+- To view connected devices, go to #OTBR web page at the OTBR's IP, or Home Assistant, port 8080 under the topology tab
+- Using CLI on edge device:
+	- ot state
+		- Needs to be in disabled state for commissioning
+	- Once commissioned, 
+		- ot dataset active provides the following information:
+```
+Active Timestamp: 1
+Channel: 15
+Channel Mask: 0x07fff800
+Ext PAN ID: 0fb51bb1791e19d5
+Mesh Local Prefix: fdd3:4f5a:1b64:8b08::/64
+Network Key: 9ecd03c14316b8dc93c9f6779e97ca8f
+Network Name: home-assistant
+PAN ID: 0xf8ce
+PSKc: 079be2fef6714fd435f9c5511eb967e0
+Security Policy: 672 onrc
+```
+
+- [[Thread UDP]]

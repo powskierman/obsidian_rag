@@ -1,0 +1,65 @@
+# Home Assistant SwiftUI Library Flowchart.md
+
+---
+aliases: []
+tags: []
+---
+# Home Assistant SwiftUI Library Flowchart
+Date: 2023-09-29
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+```mermaid
+graph TB
+
+A[HomeAssistantWebSocket]
+A --> B[Initialize WebSocket with serverURL]
+B --> C[Set WebSocket Delegate to HomeAssistantWebSocket]
+
+A --> D[Invoke socket.connect]
+D --> E[WebSocket Events Triggered]
+
+A --> F[Send Authentication Message to WebSocket]
+
+A --> G[Send Subscription Message to WebSocket]
+
+A --> H[Invoke socket.disconnect]
+
+E --> I[Connected Event]
+I --> J[Call onConnected]
+J --> K[Print WebSocket connected]
+
+E --> L[Text Event]
+L --> M[Process received text]
+
+E --> N[Binary Event]
+N --> O[Print binary data]
+
+E --> P[Ping Event]
+P --> Q[Print received ping]
+
+E --> R[Pong Event]
+R --> S[Print received pong]
+
+E --> T[ViabilityChanged Event]
+T --> U[Print viability changed]
+
+E --> V[ReconnectSuggested Event]
+V --> W[Print reconnect suggested]
+
+E --> X[Cancelled Event]
+X --> Y[Print WebSocket cancelled]
+
+E --> Z[Error Event]
+Z --> AA[Print error]
+
+E --> AB[PeerClosed Event]
+AB --> AC[Print peer closed the WebSocket]
+
+E --> AD[Disconnected Event]
+
+```

@@ -1,0 +1,17 @@
+---
+bookId: "57225"
+title: The Black Death
+author: Philip Ziegler
+asin: B01N7CVTMQ
+lastAnnotatedDate: 2020-09-02
+highlightsCount: 1
+reference: https://www.amazon.com/dp/B01N7CVTMQ
+kindle_link: kindle://book?action=open&asin=B01N7CVTMQ
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81Og6qkH4dL._SY160.jpg)
+## Highlights
+The fourteenth-century plague is unique because in its drive across Europe, it changed from pneumonic to bubonic with the seasons of the year. — location: [35](kindle://book?action=open&asin=B01N7CVTMQ&location=35) ^ref-30173
+
+---

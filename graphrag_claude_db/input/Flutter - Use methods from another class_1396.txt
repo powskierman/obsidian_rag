@@ -1,0 +1,20 @@
+---
+aliases: []
+---
+# Flutter - Use methods from another class
+Date: 2022-08-16
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+-
+### Notes
+-  Use Static:
+	class test {
+	    static void foo() {
+	        print("1234");
+	    }
+	} 

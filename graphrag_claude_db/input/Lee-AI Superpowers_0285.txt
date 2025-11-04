@@ -1,0 +1,80 @@
+---
+bookId: "27876"
+title: "AI Superpowers: China, Silicon Valley, and the New World Order"
+author: Kai-Fu Lee
+asin: B0795DNWCF
+lastAnnotatedDate: 2019-04-01
+highlightsCount: 22
+reference: https://www.amazon.com/dp/B0795DNWCF
+kindle_link: kindle://book?action=open&asin=B0795DNWCF
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71mzyO3+NjL._SY160.jpg)
+## Highlights
+Deep learning is what’s known as “narrow AI”—intelligence that takes data from one specific domain and applies it to optimizing one specific outcome. — location: [229](kindle://book?action=open&asin=B0795DNWCF&location=229) ^ref-59176
+
+---
+from the age of discovery to the age of implementation, and from the age of expertise to the age of data. — location: [254](kindle://book?action=open&asin=B0795DNWCF&location=254) ^ref-56477
+
+---
+successful AI algorithms need three things: big data, computing power, and the work of strong—but not necessarily elite—AI algorithm engineers. — location: [283](kindle://book?action=open&asin=B0795DNWCF&location=283) ^ref-65507
+
+---
+Elite AI researchers still have the potential to push the field to the next level, but those advances have occurred once every several decades. While we wait for the next breakthrough, the burgeoning availability of data will be the driving force behind deep learning’s disruption of countless industries around the world. — location: [290](kindle://book?action=open&asin=B0795DNWCF&location=290) ^ref-39542
+
+---
+Moving from discovery to implementation reduces one of China’s greatest weak points (outside-the-box approaches to research questions) and also leverages the country’s most significant strength: scrappy entrepreneurs with sharp instincts for building robust businesses. — location: [299](kindle://book?action=open&asin=B0795DNWCF&location=299) ^ref-16458
+
+---
+They live in a world where speed is essential, copying is an accepted practice, and competitors will stop at nothing to win a new market. — location: [308](kindle://book?action=open&asin=B0795DNWCF&location=308) ^ref-62736
+
+---
+If one’s only edge is a single novel idea, that idea will invariably be copied, your key employees will be poached, and you’ll be driven out of business by VC-subsidized competitors. — location: [311](kindle://book?action=open&asin=B0795DNWCF&location=311) ^ref-27076
+
+---
+the rise of China’s super-app, WeChat, a kind of digital Swiss Army knife for modern life. — location: [331](kindle://book?action=open&asin=B0795DNWCF&location=331) ^ref-32511
+
+---
+PricewaterhouseCoopers estimates AI deployment will add $15.7 trillion to global GDP by 2030. — location: [355](kindle://book?action=open&asin=B0795DNWCF&location=355) ^ref-48490
+
+---
+As deep learning washes over the global economy, it will indeed wipe out billions of jobs up and down the economic ladder: accountants, assembly line workers, warehouse operators, stock analysts, quality control inspectors, truckers, paralegals, and even radiologists, just to name a few. — location: [365](kindle://book?action=open&asin=B0795DNWCF&location=365) ^ref-9161
+
+---
+within fifteen years, artificial intelligence will technically be able to replace around 40 to 50 percent of jobs in the United States. — location: [370](kindle://book?action=open&asin=B0795DNWCF&location=370) ^ref-57358
+
+---
+AI naturally trends toward winner-take-all economics within an industry. — location: [377](kindle://book?action=open&asin=B0795DNWCF&location=377) ^ref-59519
+
+---
+AI-driven automation in factories will undercut the one economic advantage developing countries historically possessed: cheap labor. — location: [392](kindle://book?action=open&asin=B0795DNWCF&location=392) ^ref-60792
+
+---
+The AI world order will combine winner-take-all economics with an unprecedented concentration of wealth in the hands of a few companies in China and the United States. This, I believe, is the real underlying threat posed by artificial intelligence: tremendous social disorder and political collapse stemming from widespread unemployment and gaping inequality. — location: [395](kindle://book?action=open&asin=B0795DNWCF&location=395) ^ref-49172
+
+---
+Rigorous copying of perfection was seen as the route to true mastery. — location: [497](kindle://book?action=open&asin=B0795DNWCF&location=497) ^ref-6913
+
+---
+Combine these three currents—a cultural acceptance of copying, a scarcity mentality, and the willingness to dive into any promising new industry—and you have the psychological foundations of China’s internet ecosystem. — location: [510](kindle://book?action=open&asin=B0795DNWCF&location=510) ^ref-37016
+
+---
+U.S. federal funding for math and computer science research amounts to less than half of Google’s own R&D budget. — location: [1533](kindle://book?action=open&asin=B0795DNWCF&location=1533) ^ref-27590
+
+---
+Of the top one hundred AI researchers and engineers, around half are already working for Google. — location: [1535](kindle://book?action=open&asin=B0795DNWCF&location=1535) ^ref-6729
+
+---
+Alibaba has taken the lead on “City Brains”: massive AI-driven networks that optimize city services by drawing on data from video cameras, social media, public transit, and location-based apps. — location: [1548](kindle://book?action=open&asin=B0795DNWCF&location=1548) ^ref-39725
+
+---
+Alibaba is using advanced object-recognition and predictive transit algorithms to constantly tweak the patterns for red lights and alert emergency services to traffic accidents. — location: [1550](kindle://book?action=open&asin=B0795DNWCF&location=1550) ^ref-44566
+
+---
+The “grid” approach is trying to commoditize AI. It aims to turn the power of machine learning into a standardized service that can be purchased by any company—or even be given away for free for academic or personal use—and accessed via cloud computing platforms. In this model, cloud computing platforms act as the grid, performing complex machine-learning optimizations on whatever data problems users require. The companies behind these platforms—Google, Alibaba, and Amazon—act as the utility companies, managing the grid and collecting the fees. — location: [1563](kindle://book?action=open&asin=B0795DNWCF&location=1563) ^ref-32215
+
+---
+Google’s TensorFlow, an open-source software ecosystem for building deep learning-models, — location: [1568](kindle://book?action=open&asin=B0795DNWCF&location=1568) ^ref-58003
+
+---

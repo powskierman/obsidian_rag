@@ -1,0 +1,34 @@
+---
+aliases: 
+tags:
+  - Kicad
+---
+# Kicad Best Practice
+Date: 2024-06-10
+
+### Backlink
+[[Kicad MoC]]
+
+### Reference
+-  
+### Notes
+- Use reference design
+- Datasheets have examples featuring typical application
+- Open source design
+- Development board
+- Work in blocks
+- Move, rotate, repeat
+- Importance traces first
+- Trace width calculator
+- Use net labels
+- Print layout on paper with ratio 1:1, check with real components
+- Check the components relationship, eg. USB stick can be plug in in the same time or not.
+- Extra footprints: make test points
+- Add extra ground pads around the board to have an easy reference while probing signals .
+- Use the 3D viewer
+- Use the DRC
+- Inspect you gerbers using a different tool
+- Home printers very often do not print a true 100%, AKA 1:1 scale.
+	- Draw two 100mm lines on the comments layer of the PCB page, just outside the edge cut lines, on both the X and Y axis. 
+	- Print the PCB page, include the comments layer, so that the lines print. 
+	- Measure both lines with a good ruler. Reprint the PCB at the correct scale. 

@@ -1,0 +1,103 @@
+# Transfer TFT file via esp32.md
+
+---
+aliases:
+tags:
+  - nextion
+  - esp32
+created: 2025-09-26 22:20
+ContentType:
+Backlink: "[[Nextion MoC]]"
+---
+### Main Idea
+- 
+### References
+- This Arduino file transfers the .tft file automatically:
+	- `/Users/michel/Documents/Arduino/NextionUpload/NextionUpload.ino`
+	- It comes from the HttpClient example in ESPNexUpload library:
+		- `https://github.com/Nredor/ESPNexUpload`
+- 
+### Notes
+# Updating a Nextion display's TFT file using an ESP32 and ESPHome. 
+
+## Method 1: ESPHome with Home Assistant
+
+### Prerequisites:
+
+-   ESP32 development board
+-   Nextion display connected to ESP32
+-   Home Assistant with ESPHome add-on installed
+-   TFT file ready for upload
+
+### Step-by-Step Instructions:
+
+#### Step 1: Prepare the TFT File
+
+1.  Place your `.tft` file in Home Assistant's `www` folder
+    -   Path: `/config/www/your_display.tft`
+    -   This makes it accessible via HTTP at `http://your-ha-ip:8123/local/your_display.tft`
+
+#### Step 2: Create/Update ESPHome Configuration
+
+Create or modify your ESP32's YAML configuration file:
+
+
+
+``` yaml
+esphome:
+  name: nextion-controller
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+wifi:
+  ssid: "NH2"
+  password: "seawolfpilot01"
+  manual_ip:
+    static_ip: 192.168.0.242
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+logger:
+
+api:
+  services:
+    - service: update_nextion
+      then:
+        - lambda: 'id(nextion1)->upload_tft();'
+
+ota:
+  platform: esphome
+
+uart:
+  tx_pin: GPIO17 # Adjust pins as needed
+  rx_pin: GPIO16 # Adjust pins as needed
+  baud_rate: 9600
+
+display:
+  - platform: nextion
+    id: nextion1
+    tft_url: "http://192.168.0.11:8123/local/gazeboV3.tft"
+    update_interval: 5s```
+
+#### Step 3: Flash and Configure
+
+1.  Flash this configuration to your ESP32 using ESPHome
+2.  Ensure the ESP32 connects to your WiFi network
+3.  Verify it appears in Home Assistant
+
+#### Step 4: Trigger the Update
+
+1.  In Home Assistant, go to Developer Tools → Services
+2.  Select service: `esphome.nextion_controller_update_nextion`
+3.  Call the service to start the TFT upload
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

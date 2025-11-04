@@ -1,0 +1,92 @@
+# The Adobe Photoshop CC Book for Digital Photographers.md
+
+---
+id: 16112636
+updated: 2022-06-18
+title: The Adobe Photoshop CC Book for Digital Photographers
+author: Scott Kelby
+highlights: 15
+last_highlight: 2016-11-29
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112636
+Updated: 2022-06-18
+%%
+
+![]( https://m.media-amazon.com/images/I/5108ZriwP-L._SY500.jpg)
+
+# About
+Title: [[The Adobe Photoshop CC Book for Digital Photographers]]
+Authors: [[Scott Kelby]]
+Category: #books
+Number of Highlights: ==15==
+Readwise URL: https://readwise.io/bookreview/16112636
+Date: [[2022-06-18]]
+Last Highlighted: *2016-11-29*
+
+---
+
+# Highlights
+
+The white balance is usually the very first thing I adjust in my own Camera Raw workflow, because getting the white balance right will eliminate 99% of your color problems right off the bat. ([447](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=447)) %% Color: yellow %% ^334463104
+
+---
+
+White balance is a creative decision, and the most important thing is that your photo looks good to you. ([485](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=485)) %% Color: yellow %% ^334463105
+
+---
+
+you can see a quick before/after of your white balance edit by pressing the letter P on your keyboard to toggle the preview on/off). ([491](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=491)) %% Color: yellow %% ^334463106
+
+---
+
+The next thing I fix (after adjusting the white balance) is the photo’s exposure. ([499](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=499)) %% Color: yellow %% ^334463107
+
+---
+
+exposure in Camera Raw isn’t just the Exposure slider. It’s actually five sliders: Exposure (midtones), Blacks (deep shadows), Shadows (regular shadows), Highlights (well-named), and Whites (extreme highlights). ([501](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=501)) %% Color: yellow %% ^334463108
+
+---
+
+recommend (and so does Adobe) starting with the top tonal slider in the Basic panel (Exposure) and working your way down through the other sliders in order, ([504](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=504)) %% Color: yellow %% ^334463109
+
+---
+
+adjusting the Exposure and then the Contrast slider (if necessary)—should be your starting points every time. ([517](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=517)) %% Color: yellow %% ^334463110
+
+---
+
+If you see a red, yellow, magenta, etc., color warning triangle (rather than white), it’s not great, but it’s not nearly as bad as white. It means you’re clipping just that one color channel (and there’s still detail in the other channels). ([535](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=535)) %% Color: yellow %% ^334463111
+
+---
+
+So, let’s start with the Whites and Blacks. All you have to do is press-and-hold the Shift key, double-click on the Whites slider knob, and it sets the white point for you. Done. Set. Do the same with the Blacks slider. ([595](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=595)) %% Color: yellow %% ^334463112
+
+---
+
+If you want Auto White Balance, just go up, press-and-hold the Shift key, and double-click on the Temperature slider knob. ([599](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=599)) %% Color: yellow %% ^334463113
+
+---
+
+The Clarity slider (which is well-named) basically increases the midtone contrast in a way that gives your photo more punch and impact, without actually sharpening the image. ([605](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=605)) %% Color: yellow %% ^334463114
+
+---
+
+Any image I edit where I want to emphasize the texture (landscapes, cityscapes, sports photos, etc.) gets between +25 and +50 Clarity, ([618](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=618)) %% Color: yellow %% ^334463115
+
+---
+
+Another advantage of the Parametric curve is that you can use the region divider controls (under the curve) to choose how wide a range each of the four sliders covers. ([678](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=678)) %% Color: yellow %% ^334463116
+
+---
+
+Clicking Open Object makes your image open in Photoshop as a smart object ([907](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=907)) %% Color: yellow %% ^334463117
+
+---
+
+If you’re emailing the image, or posting it on the web, choose sRGB as your color space—that way it pretty much maintains the colors that you saw while you were in Camera Raw (if you left it at ProPhoto RGB, or even Adobe RGB [1998], the colors on the web, or in the email, will probably look drab and washed out). ([1467](https://readwise.io/to_kindle?action=open&asin=B00PISVNAU&location=1467)) %% Color: yellow %% ^334463118
+
+---

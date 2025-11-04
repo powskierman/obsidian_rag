@@ -1,0 +1,18 @@
+---
+aliases: []
+tags: []
+---
+# Auto-Startup
+Date: 2024-06-08
+
+### Backlink
+[[ras]]
+
+### Reference
+-  
+### Notes
+-  # Auto Startup
+
+1.  [Tutorial](https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/)
+
+2.  [systemd](https://community.home-assistant.io/t/autostart-using-systemd/199497)

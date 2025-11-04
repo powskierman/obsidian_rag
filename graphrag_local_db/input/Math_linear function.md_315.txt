@@ -1,0 +1,24 @@
+# linear function.md
+
+---
+aliases: [linear expression]
+---
+
+2022-02-27
+# linear function
+
+### Backlink
+[cuemath, linear functions](https://www.cuemath.com/calculus/linear-functions/)
+
+### Reference
+
+### Notes
+- A linear function is a function that represents a straight line on the coordinate plane. 
+-  A **linear function** is of the form $f(x) = mx + b$ where $m$ and $b$ are [real numbers](https://www.cuemath.com/numbers/real-numbers/). Where,
+	-   'm' is the slope of the line and the [[derivative]] so,
+		- $f'(x)=m$ and,
+			- $f(x)=b =>f'(x)=0$ and,
+			- $f(x)=x =>f'(x)=1$
+	-   'b' is the y-intercept of the line
+	-   'x' is the independent variable
+	-   'y' (or f(x)) is the dependent variable![[linear function graph.png]]

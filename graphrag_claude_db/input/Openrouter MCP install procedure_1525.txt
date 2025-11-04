@@ -1,0 +1,134 @@
+---
+aliases:
+tags:
+  - claude
+  - mcp
+  - openrouter
+created: 2025-10-18 13:53
+ContentType:
+Backlink:
+---
+### Main Idea
+-  Installing and Configuring OpenRouter MCP for Claude Desktop
+### References
+- 
+### Notes
+## Overview
+
+OpenRouter MCP enables Claude Desktop to connect with models through the OpenRouter API, expanding Claude’s capabilities to hundreds of available AI models.
+
+This guide documents the full installation and configuration process to integrate OpenRouter MCP into Claude Desktop.
+
+---
+
+## Prerequisites
+
+Before starting:
+
+- Claude Desktop (≥ v0.7.0)
+    
+- Node.js (≥ v18, recommended v20 LTS)
+    
+- An OpenRouter account and API key
+    
+- Docker (optional if running OpenRouter in a container)
+    
+
+---
+
+## Installation Options
+
+### Helton Teixeira’s OpenRouterAI (fork, stable)
+
+bash
+
+`npm install -g @mcpservers/openrouterai`
+
+This version fixes the early-exit and timeout bugs and offers full STDIO compatibility.
+
+---
+
+## Claude Desktop Configuration
+
+Locate your config:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+    
+- **Windows:** `%APPDATA%/Claude/claude_desktop_config.json`
+    
+- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+    
+
+Add the OpenRouter MCP entry:
+
+json
+
+`{   "mcpServers": {     "openrouterai": {       "command": "/opt/homebrew/bin/npx",       "args": ["-y", "@mcpservers/openrouterai"],       "env": {         "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",         "OPENROUTER_API_KEY": "sk-or-...",         "OPENROUTER_DEFAULT_MODEL": "qwen/qwen2.5-vl-32b-instruct:free",         "MCP_MODE": "stdio",         "LOG_LEVEL": "debug"       },       "timeout": 30000     }   } }`
+
+Restart Claude Desktop and verify with:
+
+text
+
+`list mcp servers`
+
+You should see:
+
+text
+
+`openrouterai`
+
+---
+
+## Troubleshooting
+
+**Server disconnects / timeout** → Update to latest OpenRouterAI build (≥ v0.4.5) and add `MCP_MODE=stdio`.
+
+**"npx not found" error** → Specify the absolute path (`/opt/homebrew/bin/npx`) or add `PATH` in `env`.
+
+**No connection** → Confirm Claude has Full Disk Access  
+(System Settings → Privacy & Security → Full Disk Access → Claude).
+
+Logs: `~/Library/Logs/Claude/mcp.log`
+
+---
+
+## Optional: Docker Gateway Integration
+
+If using the **Docker MCP Toolkit**, add:
+
+json
+
+`"docker-gateway": {   "command": "docker",   "args": ["mcp", "gateway", "run"] }`
+
+Then Claude can access remote servers, including OpenRouter.
+
+---
+
+## Example Usage
+
+text
+
+`use openrouterai model qwen/qwen2.5-vl-32b-instruct to summarize this text`
+
+---
+
+## References
+
+- Playbooks OpenRouter Listing (2025-03-26)
+    
+- Anthropic Desktop MCP Docs (2024-12-31)
+    
+- Helton Teixeira GitHub `@mcpservers/openrouterai`
+    
+- Docker MCP Toolkit v2 Guide (2025-09-29)
+    
+
+---
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

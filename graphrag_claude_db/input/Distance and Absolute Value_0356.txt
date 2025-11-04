@@ -1,0 +1,34 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-01-24 14:15
+ContentType: Reference
+Backlink: "[[Algebra MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Absolute value: If α ∈ R then the absolute value or magnitude of α, denoted by |α|, is the distance from α to 0, regarded as points on the real number line, so that $$
+|\alpha|=\left\{\begin{aligned}
+\alpha & \text { if } \alpha \geq 0 \\
+-\alpha & \text { if } \alpha<0
+\end{aligned}\right.
+$$
+-  Useful laws, including the : The following laws hold, for all $α,β,γ ∈ \mathbb R$, with $γ \ne 0$:  $\{|−α| = |α| = \sqrt {α^2}\} , \{|αβ| = |α||β|\}, \{|α/γ| = |α|/|γ|\}, \{|α+β| ≤ |α|+|β|\}$, the last of which is known as the .
+- When solving absolutes, separate the problem into two separate equations:
+	- $|x+1| = 3$
+		- $\begin{cases} x+1=3\\ x+1=-3 \end{cases}$
+		- and solve:
+		- $\begin{cases} x=2\\ x=-4 \end{cases}.$
+		-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

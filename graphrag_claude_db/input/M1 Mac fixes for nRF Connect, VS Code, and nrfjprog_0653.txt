@@ -1,0 +1,15 @@
+---
+aliases: []
+tags: []
+---
+# M1 Mac fixes for nRF Connect, VS Code, and nrfjprog
+Date: 2023-06-18
+
+### Backlink
+[[]]
+
+### Reference
+-  [M1 Mac fixes for nRF Connect, VS Code, and nrfjprog](https://devzone.nordicsemi.com/f/nordic-q-a/87696/m1-mac-fixes-for-nrf-connect-vs-code-and-nrfjprog?pifragment-684=1)
+- 
+### Notes
+-  

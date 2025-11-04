@@ -1,0 +1,88 @@
+# LightRAG Overview.md
+
+---
+aliases:
+  - What is LightRAG
+tags:
+  - AI
+  - RAG
+  - knowledge-graph
+  - LightRAG
+created: 2025-10-21 15:31
+ContentType: concept
+Backlink: "[[GraphRAG & LightRAG MoC]]"
+---
+### Main Idea
+
+LightRAG transforms traditional RAG from retrieval-based to knowledge graph-based, using a dual-level retrieval system that understands entity relationships and enables multi-hop reasoning.
+
+### Core Features
+
+**Dual-Level Retrieval System:**
+- **Low-level**: Entity extraction + relationships
+- **High-level**: Concept clustering + themes  
+- **Graph-based**: Connects information semantically
+
+**Key Difference:**
+- Traditional RAG: Retrieve chunks → answer
+- LightRAG: Build knowledge graph → traverse relationships → answer
+
+### Technical Stack
+
+```python
+from lightrag import LightRAG
+from lightrag.llm import ollama_model_complete, ollama_embedding
+
+rag = LightRAG(
+    working_dir="./lightrag_db",
+    llm_model_func=ollama_model_complete,
+    embedding_func=ollama_embedding,
+    llm_model_name="qwen2.5-coder:32b"
+)
+```
+
+### References
+
+- LightRAG GitHub: https://github.com/HKUDS/LightRAG
+- Package: `lightrag-hku`
+- [[GraphRAG & LightRAG MoC]]
+
+### Notes
+
+**Query Modes:**
+1. **Naive**: Traditional vector search (baseline)
+2. **Local**: Entity-focused search for specific items
+3. **Global**: Concept/theme search for broader topics
+4. **Hybrid**: Combines graph + vector (recommended)
+
+**Resource Requirements (with 36GB RAM):**
+- Storage: +100MB for knowledge graph database
+- RAM: +2GB during indexing and queries
+- Indexing time: +20 minutes for initial graph construction
+- Query time: +5 seconds for graph traversal
+
+### Related Notes
+
+- [[LightRAG vs Traditional RAG Comparison]]
+- [[Knowledge Graph RAG Architecture]]
+- [[LightRAG Query Modes]]
+- [[Obsidian RAG System MoC]]
+
+### Questions / Ideas for Further Exploration
+
+- How does graph quality improve with larger vaults?
+- Can incremental updates avoid full re-indexing?
+- What's the optimal chunk size for entity extraction?
+- How to visualize the knowledge graph?
+
+### To-Do
+
+- [ ] Install lightrag-hku package
+- [ ] Test on medical notes subset (200 files)
+- [ ] Compare query results with current RAG
+- [ ] Measure performance metrics
+- [ ] Document entity extraction quality
+
+### Smart Connections Insights
+
+LightRAG excels at relationship-based queries that current vector RAG struggles with, making it ideal for medical timeline tracking and causal reasoning across interconnected notes.

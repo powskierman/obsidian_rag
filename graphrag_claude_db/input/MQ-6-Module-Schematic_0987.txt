@@ -1,0 +1,23 @@
+---
+aliases:
+tags:
+created: 2022-01-01 13:42
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Board Schematic
+
+![](MQ-6-Module-Schematic-image1.gif){width="5.0in" height="2.2291666666666665in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

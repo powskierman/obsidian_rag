@@ -1,0 +1,72 @@
+# Digital Restoration From Start to Finish.md
+
+---
+id: 16112680
+updated: 2022-06-18
+title: Digital Restoration From Start to Finish
+author: Ctein
+highlights: 10
+last_highlight: 2015-06-22
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112680
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51YMACJHCYL._SL500_.jpg)
+
+# About
+Title: [[Digital Restoration From Start to Finish]]
+Authors: [[Ctein]]
+Category: #books
+Number of Highlights: ==10==
+Readwise URL: https://readwise.io/bookreview/16112680
+Date: [[2022-06-18]]
+Last Highlighted: *2015-06-22*
+
+---
+
+# Highlights
+
+Even when I’m working with a “B&W” original, I still scan in full-color mode. ([1914](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=1914)) %% Color: yellow %% ^334464527
+
+---
+
+When I’m ready to convert the scan of a monochrome photograph to grayscale, I almost never use the Desaturate adjustment or grayscale mode conversion. Instead, I use the Channel Mixer with the monochrome option selected. ([1942](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=1942)) %% Color: yellow %% ^334464528
+
+---
+
+In Photoshop, click Image/Adjustments/Channel Mixer.… That opens up a control panel that displays the conversion options (Figure 4-16). Click the Monochrome option at the bottom of the panel. Although the file stays in RGB mode, it turns gray. ([1956](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=1956)) %% Color: yellow %% ^334464529
+
+---
+
+Adjust the channel sliders to emphasize the color(s) you want to most retain and deemphasize the one(s) you want to get rid of. ([1960](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=1960)) %% Color: yellow %% ^334464530
+
+---
+
+if you want to increase or decrease brightness, raise or lower the curve. If you want to increase or decrease contrast, make the slope of the curve greater (steeper) or lower (more horizontal). ([2412](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=2412)) %% Color: yellow %% ^334464531
+
+---
+
+When you use the Curves tool, the cursor automatically becomes an eyedropper; clicking the eyedropper anywhere on the photograph overlays an open-circle indicator on the curve at the tonal value of that point in the photograph ([2444](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=2444)) %% Color: yellow %% ^334464532
+
+---
+
+Numerical readouts below the graph report the exact value at that point (Input) and what it will change to when the curve is applied (Output). ([2446](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=2446)) %% Color: yellow %% ^334464533
+
+---
+
+Photoshop’s Info window, shown in Figure 5-11, will also tell you the numerical values for the photograph under your cursor; ([2449](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=2449)) %% Color: yellow %% ^334464534
+
+---
+
+If you shift-click on a point in the photograph with the eyedropper, it adds a readout point to the photograph; ([2452](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=2452)) %% Color: yellow %% ^334464535
+
+---
+
+You can set adjustment points on the curve by Command-clicking (Control-clicking under Windows) on the tone in the photograph that you want to modify. Once you set a point, you can drag it up or down and to the left or right to alter the tones. ([2454](https://readwise.io/to_kindle?action=open&asin=B00BMTIE60&location=2454)) %% Color: yellow %% ^334464536
+
+---

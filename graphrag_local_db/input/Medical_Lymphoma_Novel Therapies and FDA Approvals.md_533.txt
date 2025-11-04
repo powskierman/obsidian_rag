@@ -1,0 +1,36 @@
+# Novel Therapies and FDA Approvals.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+created: 2025-03-08 13:14
+---
+### Main Idea
+- Most recent treatment options
+### References
+- 
+### Notes
+- #### Novel Therapies and FDA Approvals
+	•	Polatuzumab Vedotin (Pola-R-CHP): Polatuzumab vedotin combined with R-CHP has emerged as a new frontline treatment option, challenging R-CHOP’s long-standing dominance. It has shown improved progression-free survival in clinical trials and is now recommended for certain high-risk DLBCL patients.
+	•	Bispecific Antibodies: ==Glofitamab and Epcoritamab were approved in 2023 for relapsed or refractory DLBCL after two or more lines of therapy. These therapies engage T-cells to target CD20-expressing lymphoma cells, offering new options for difficult-to-treat cases.==
+	•	#CAR-T Cell Therapy: CAR-T therapies like lisocabtagene maraleucel (liso-cel) continue to be refined. Recent studies focus on improving manufacturing efficiency and reducing toxicities, making these therapies more accessible and safer.
+#### Clinical Trials and Research
+•	At least 15 randomized trials are underway to evaluate novel frontline treatments for high-risk DLBCL subtypes, including double-hit cases. These trials explore combinations of targeted therapies, immunotherapies, and response-adapted strategies using circulating tumor DNA.
+	•	Tafasitamab plus lenalidomide has shown durable responses in relapsed/refractory DLBCL, with ongoing research into its use in earlier treatment lines.
+	- Research is focusing on targeted agents such as **BTK inhibitors (e.g., ibrutinib)**, **BCL-2 inhibitors (e.g., venetoclax)**, and **PI3K inhibitors** to improve outcomes in double-hit DLBCL.
+
+- **#CAR-T cell therapy** (e.g., axicabtagene ciloleucel and tisagenlecleucel) has shown promise in refractory or relapsed DLBCL, including double-hit cases.
+#### Personalized Medicine
+	•	Advances in genetic profiling are enabling more tailored approaches to treatment. For example, therapies targeting specific mutations or molecular subtypes (e.g., [[BCL2]] translocations in double-hit DLBCL) are being developed and tested.
+- **#CAR-T cell therapy** (e.g., axicabtagene ciloleucel and tisagenlecleucel) has shown promise in refractory or relapsed DLBCL, including double-hit cases.
+These developments reflect significant progress since 2021 in treating DLBCL, including double-hit variants, with a focus on novel immunotherapies, targeted agents, and personalized treatment strategies.
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,19 @@
+# Thakur-Measurement Made Simple with Arduino.md
+
+---
+bookId: "2531"
+title: "Measurement Made Simple with Arduino: 21 different measurements covers all physical and electrical parameter with code and circuit"
+author: Manoj R. Thakur
+asin: B01EY3NURS
+lastAnnotatedDate: 2019-03-21
+highlightsCount: 1
+reference: https://www.amazon.com/dp/B01EY3NURS
+kindle_link: kindle://book?action=open&asin=B01EY3NURS
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71fdCovBGQL._SY160.jpg)
+## Highlights
+Over voltage protection circuit can be created by adding Zener diode across 1K resistor. — location: [282](kindle://book?action=open&asin=B01EY3NURS&location=282) ^ref-46772
+
+---

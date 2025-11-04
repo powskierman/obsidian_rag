@@ -1,0 +1,15 @@
+---
+aliases: []
+---
+
+2022-06-24
+# codepen
+
+### Backlink
+[[]]
+
+### Reference
+- [[codepen.io]]
+### Notes
+- CodePen is a social development environment for front-end designers and developers.
+-  

@@ -1,0 +1,27 @@
+# Circle equations.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-01-29 15:28
+ContentType: Reference
+Backlink: "[[Completing the Square]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+[Complete the square: Circles](https://www.purplemath.com/modules/sqrcircle.htm)
+- Completing the square is used to turn a quadratic into the sum of a squared binomial and a number: $(x – a)^2 + b$. The center-radius form of the circle equation is in the format $(x – h)^2 + (y – k)^2 = r^2$, with the center being at the point (h, k) and the radius being "r". 
+-  !
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

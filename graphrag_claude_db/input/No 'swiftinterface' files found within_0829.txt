@@ -1,0 +1,18 @@
+---
+aliases: 
+tags:
+  - xcode
+  - xcframework
+  - troubleshooting
+---
+# No 'swiftinterface' files found within
+Date: 2023-11-19
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Add BUILD_LIBRARY_FOR_DISTRIBUTION =  in Build Settings
+	- If you can't find it, choose all combined before search

@@ -1,0 +1,40 @@
+# This Explains Everything.md
+
+---
+id: 16112728
+updated: 2022-06-18
+title: This Explains Everything
+author: John Brockman
+highlights: 2
+last_highlight: 2013-05-28
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112728
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51vToW7-HCL._SL500_.jpg)
+
+# About
+Title: [[This Explains Everything]]
+Authors: [[John Brockman]]
+Category: #books
+Number of Highlights: ==2==
+Readwise URL: https://readwise.io/bookreview/16112728
+Date: [[2022-06-18]]
+Last Highlighted: *2013-05-28*
+
+---
+
+# Highlights
+
+explanation for the mysterious injection of aesthetics into science. The upshot would be that explanations aren’t satisfying because they’re beautiful; rather, they’re beautiful because they’re satisfying. ([683](https://readwise.io/to_kindle?action=open&asin=B0089LOGDO&location=683)) %% Color: yellow %% ^334466118
+
+---
+
+If gravity affects everything equally, it’s not right to think of gravity as a “force” at all. Rather, gravity is a feature of spacetime itself, through which all objects move. In particular, gravity is the curvature of spacetime. ([853](https://readwise.io/to_kindle?action=open&asin=B0089LOGDO&location=853)) %% Color: yellow %% ^334466119
+
+---

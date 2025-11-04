@@ -1,0 +1,19 @@
+---
+aliases: []
+---
+# Github Access Tokens
+Date: 2022-09-30
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- 
+### Notes
+-  xcode token
+	- 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
+		- passphrase: 40H1ghl@nd
+- Perplexity MCP token
+	- `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`

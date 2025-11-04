@@ -1,0 +1,77 @@
+---
+aliases: []
+tags: [
+ delete-node
+]
+---
+# Modify partition in overlay file
+Date: 2023-07-22
+
+### Backlink
+[[]]
+
+### Reference
+-  [How to Optimize Zephyr Configuration and Overlays](https://www.zephyrproject.org/how-to-optimize-zephyr-configuration-and-overlays/)
+- 
+### Notes
+-  Here is an example of changing the partition table in an overlay file.  First, the old partitions is deleted, then commented out, and the new partitions are added:
+```
+/delete-node/ &slot0_partition;  
+/delete-node/ &slot1_partition;  
+/delete-node/ &scratch_partition;  
+&flash0 {  
+/*  
+* For more information, see:  
+* [http://docs.zephyrproject.org/latest/guides/dts/index.html#flash-partitions](http://docs.zephyrproject.org/latest/guides/dts/index.html#flash-partitions)  
+*/  
+partitions {  
+compatible = "fixed-partitions";  
+#address-cells = <1>;  
+#size-cells = <1>;  
+  
+boot_partition: partition@0 {  
+label = "mcuboot";  
+reg = <0x000000000 0x0000C000>;  
+};  
+/*  
+slot0_partition: partition@c000 {  
+label = "image-0";  
+reg = <0x0000C000 0x000067000>;  
+};  
+slot1_partition: partition@73000 {  
+label = "image-1";  
+reg = <0x00073000 0x000067000>;  
+};  
+scratch_partition: partition@da000 {  
+label = "image-scratch";  
+reg = <0x000da000 0x0001c000>;  
+};  
+*/  
+slot0_partition: partition@c000 {  
+label = "image-0";  
+reg = <0x0000C000 0x000075000>;  
+};  
+slot1_partition: partition@81000 {  
+label = "image-1";  
+reg = <0x00081000 0x000075000>;  
+};  
+  
+blob_partition: partition@f7f00 {  
+label = "image-blob";  
+reg = <0x000f7f00 0x00000100>;  
+};  
+  
+/*  
+* The flash starting at 0x000f8000 and ending at (32kB)  
+* 0x000fffff is reserved for use by the application.  
+*/  
+  
+/* Storage partition will be used by FCB/NFFS/NVS if enabled. */  
+storage_partition: partition@f8000 {  
+label = "storage";  
+reg = <0x000f8000 0x00008000>;  
+};  
+};  
+};
+```
+

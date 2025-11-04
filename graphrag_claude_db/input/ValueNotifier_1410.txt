@@ -1,0 +1,40 @@
+---
+aliases: [ValueListenableBuilder, changeNotifier]
+---
+# ValueNotifier
+Date: 2022-09-05
+
+### Tags: 
+
+### Backlink
+[[Flutter State Management]]
+
+### Reference
+- https://api.flutter.dev/flutter/widgets/ValueListenableBuilder-class.html
+- [Flutter Provide 5 changeNotifier Example video](https://youtu.be/A1qu8X7f36k)
+- [Explore ValueListenableBuilder in Flutter](https://medium.flutterdevs.com/exploring-valuelistenablebuilder-in-flutter-9a16fc4c4c5b)
+- [Flutter: ValueNotifier and ValueListenableBuilder](https://medium.com/@avnishnishad/flutter-communication-between-widgets-using-valuenotifier-and-valuelistenablebuilder-b51ef627a58b)
+- [ValueListenableBuilder T class](https://api.flutter.dev/flutter/widgets/ValueListenableBuilder-class.html)
+- 
+### Notes
+-  If scaffold and button are in different widgets
+- this way is not dependent on setState so you can use it in both stateless and stateful widgets
+	- Change type of color to ValueNotifier<Color>,
+		-  optional: name types using UpperCamelCase
+
+```
+class CustomColors {
+  static ValueNotifier<Color> bgColor = ValueNotifier(const Color(0xfff8f8f8));
+}
+wrap scaffold with a ValueListenableBuilder and access color with value property
+    MaterialApp(
+      home: ValueListenableBuilder<Color>(
+        valueListenable: CustomColors.bgColor,
+        builder: (context, value, child) => Scaffold(
+          backgroundColor: value,
+
+to change color:
+onPressed: () {
+    CustomColors.bgColor.value = Colors.red;
+} 
+```

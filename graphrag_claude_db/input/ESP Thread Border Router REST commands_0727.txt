@@ -1,0 +1,50 @@
+---
+aliases: 
+tags:
+  - OTBR
+  - openthread
+  - REST
+  - ESP-Thread-Border-Router
+---
+# ESP Thread Border Router REST commands
+Date: 2024-08-20
+
+### Backlink
+[[Tech/Networking/Thread MoC|Thread MoC]]
+
+### Reference
+-  [[OTBR REST API]]
+- 
+### Notes
+#### list of available REST API commands for the ESP Thread Border Router:
+Node Information:
+`GET http://192.168.0.220:80/node`
+Available Networks:
+`GET http://192.168.0.220:80/available_network`
+Get Properties:
+`GET http://192.168.0.220:80/get_properties`
+Node Information (alternative endpoint):
+`GET http://192.168.0.220:80/node_information`
+Topology:
+`GET http://192.168.0.220:80/topology`
+Join Network (POST request):
+POST http://192.168.0.220:80/join_network
+Form Network (POST request):
+POST http://192.168.0.220:80/form_network
+Add Prefix (POST request):
+POST http://192.168.0.220:80/add_prefix
+Delete Prefix (POST request):
+POST http://192.168.0.220:80/delete_prefix
+Additional Thread REST APIs mentioned (GET requests):
+10. /diagnostics
+11. /node/rloc
+12. /node/rloc16
+13. /node/ext-address
+14. /node/state
+15. /node/network-name
+16. /node/leader-data
+17. /node/num-of-router
+18. /node/ext-panid
+19. /node/ba-id
+20. /node/dataset/active
+21. /node/dataset/pending

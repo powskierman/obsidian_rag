@@ -1,0 +1,56 @@
+---
+aliases:
+tags:
+  - msg2704640
+  - msg3344172
+  - msg3024342
+created: 2021-12-29 14:18
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Unlocking:
+
+Steps I took to liberate the scope:
+-   Verified installed FW is version 01.03.00.01 *build date May 18, 2020* (Utility => System => About)
+-   Copied three files, that can be extracted from attached .7z archive, to root of empty 8GB FAT32 USB drive
+-   Started up scope
+-   Inserted drive to front panel USB port
+-   Utility => System => Help => Local upgrade
+-   "Upgrade system firmware?" => OK
+-   Let the scope do its thing - takes a minute or two, or five, go with the flow
+-   Reboot scope
+-   Verified all options now licensed ...forever... (Utility => System => Help => Option list)
+-   Bob's your uncle
+
+I suppose I should recalibrate now too, which according to Olliver goes like this:
+-   Make sure that the instrument has been operating for at least 30 minutes
+-   Disconnect all input channels (including probes)
+-   Utility => System => Self-Cal => Start
+-   Self calibration takes ~ 35 minutes to complete
+-   When complete, reboot the scope
+
+I verified that all options were upgraded ***...forever...*** (notwithstanding what the effects may be of any future official FW updates I may decide to apply). I did *not* verify that the patch disables the "phone home" firmware upgrade check, but I have no reason to think it doesn't. This patch does not enable the sshd daemon. To ssh as root into the scope, follow mabl's instructions - which needs to be reapplied after each scope reboot whenever you want SSH access.
+
+
+
+This is not going to work for you if your installed FW is not version 01.03.00.01 and having build date May 18, 2020. In that case you will need to adjust the patch.txt file in accordance with instructions that can be found in other posts.
+
+
+
+Where the files and info came from:
+-   Basic GEL file from mabl <https://www.eevblog.com/forum/testgear/hacking-the-rigol-mso5000-series-oscilloscopes/msg2704640/#msg2704640>
+-   Modification to disable "call home" FW updates from typoknig <https://www.eevblog.com/forum/testgear/hacking-the-rigol-mso5000-series-oscilloscopes/msg3024342/#msg3024342>
+-   Modification for FW version 01.03.00.01 May 2020 build from omgoleus <https://www.eevblog.com/forum/testgear/hacking-the-rigol-mso5000-series-oscilloscopes/msg3344172/#msg3344172>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

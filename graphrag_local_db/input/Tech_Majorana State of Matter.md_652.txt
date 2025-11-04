@@ -1,0 +1,31 @@
+# Majorana State of Matter.md
+
+---
+aliases: 
+tags:
+  - quantum
+  - majorana
+created: 2025-02-21 09:58
+---
+### Main Idea
+- A new 5th state of matter that enables stable quantum computing
+### References
+- 
+### Notes
+- Key Features of the Majorana State in Quantum Computing
+1. Topological Superconductivity
+	•	Achieved by cooling a hybrid material (indium arsenide and aluminum) to near absolute zero (-400°F) and applying magnetic fields.
+	•	Forms nanowires with MZMs (Majorana Zero Modes) at their ends, which store quantum information in a topologically protected state.
+2. Stability Advantages
+	•	Unlike traditional qubits, MZMs are less prone to decoherence (loss of quantum information when measured).
+	•	Information is encoded in the spatial arrangement of particles, making it resilient to local disturbances.
+3. Scalability
+	•	Microsoft's [Majorana 1](https://azure.microsoft.com/en-us/blog/quantum/2025/02/19/microsoft-unveils-majorana-1-the-worlds-first-quantum-processor-powered-by-topological-qubits/) currently uses 8 qubits but is designed to scale to 1 million qubits, a threshold expected to unlock revolutionary computational power for AI, energy research, and medicine.
+### Related Notes
+- [[Quantum Computing]]
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

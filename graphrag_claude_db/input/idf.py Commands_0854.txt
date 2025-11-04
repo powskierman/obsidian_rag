@@ -1,0 +1,16 @@
+---
+aliases: 
+tags:
+  - idf_py
+---
+# idf.py Commands
+Date: 2023-09-15
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  esptool.py flash_id
+	- This will query the chip and print out details including the flash size.

@@ -1,0 +1,215 @@
+# Sync.md
+
+---
+tags: 
+---
+# [[2022-07-05]] *(4:55pm)*
+- [[The Palace Papers]] *(2 highlights)*
+- [[The Elements of Pizza]] *(15 highlights)*
+- [[Brain Rules]] *(5 highlights)*
+- [[Modern Manners]] *(17 highlights)*
+- [[Spqr]] *(5 highlights)*
+- [[A Land So Strange]] *(1 highlights)*
+- [[How to Take Smart Notes]] *(70 highlights)*
+- [[Jacqueline Kennedy]] *(50 highlights)*
+- [[Docker Quick Start Guide]] *(25 highlights)*
+- [[Docker Deep Dive]] *(24 highlights)*
+- [[C++ Primer]] *(17 highlights)*
+- [[The Nine of Us]] *(15 highlights)*
+- [[Wonderful Life]] *(68 highlights)*
+- [[Rick Steves Switzerland]] *(105 highlights)*
+- [[Once Upon a Time]] *(23 highlights)*
+- [[C++ Primer Plus]] *(33 highlights)*
+- [[C++ for Beginners]] *(46 highlights)*
+- [[The Great Warming]] *(4 highlights)*
+- [[Linux Pocket Guide]] *(23 highlights)*
+- [[After Camelot]] *(31 highlights)*
+- [[Jackie, Ethel, Joan]] *(58 highlights)*
+- [[Rage]] *(1 highlights)*
+- [[The Black Death]] *(1 highlights)*
+- [[The Joy of X]] *(7 highlights)*
+- [[Infinite Powers]] *(28 highlights)*
+- [[The Complete Autobiographies of Frederick Douglass]] *(1 highlights)*
+- [[My Heart Is Africa]] *(1 highlights)*
+- [[Upheaval]] *(1 highlights)*
+- [[The Cardinal of the Kremlin]] *(1 highlights)*
+- [[A Mind for Numbers]] *(11 highlights)*
+- [[Stretch]] *(1 highlights)*
+- [[A Photographic Guide to the Birds of Hawaii]] *(2 highlights)*
+- [[Patriot Games]] *(0 highlights)*
+- [[The RBG Workout]] *(1 highlights)*
+- [[iOS 12 Programming Fundamentals With Swift]] *(38 highlights)*
+- [[Jackie, Janet & Lee]] *(16 highlights)*
+- [[Talking to Strangers]] *(0 highlights)*
+- [[iOS Apps for Masterminds 4th Edition]] *(51 highlights)*
+- [[Jacqueline Bouvier Kennedy Onassis]] *(38 highlights)*
+- [[AI Superpowers]] *(22 highlights)*
+- [[Measurement Made Simple With Arduino]] *(1 highlights)*
+- [[Living the Good Long Life]] *(19 highlights)*
+- [[Upstairs at the White House]] *(2 highlights)*
+- [[How to Read a Book]] *(13 highlights)*
+- [[Jackies Girl]] *(15 highlights)*
+- [[Thinking, Fast and Slow]] *(57 highlights)*
+- [[Ever Since Darwin]] *(22 highlights)*
+- [[The Fifth Risk]] *(2 highlights)*
+- [[Fear]] *(2 highlights)*
+- [[DIY Lithium Batteries]] *(6 highlights)*
+- [[Jackie Kennedy Onassis]] *(16 highlights)*
+- [[Fusion 360 for Makers]] *(31 highlights)*
+- [[Elizabeth the Queen]] *(36 highlights)*
+- [[The Real Simple Method to Organize Every Room]] *(1 highlights)*
+- [[The Restless Wave]] *(1 highlights)*
+- [[Wallis in Love]] *(41 highlights)*
+- [[Travels of Marco Polo]] *(0 highlights)*
+- [[A Higher Loyalty]] *(2 highlights)*
+- [[OneNote 2013 for Dummies]] *(2 highlights)*
+- [[Fire and Fury]] *(34 highlights)*
+- [[Make]] *(95 highlights)*
+- [[Leonardo Da Vinci]] *(10 highlights)*
+- [[Trumps Brain]] *(2 highlights)*
+- [[Sapiens]] *(218 highlights)*
+- [[Books/sagacité]] *(14 highlights)*
+- [[Seven Brief Lessons on Physics]] *(10 highlights)*
+- [[Voyages en Egypte Et en Nubie]] *(7 highlights)*
+- [[The Big Picture]] *(105 highlights)*
+- [[Make]] *(3 highlights)*
+- [[The Spectrum of Hope]] *(15 highlights)*
+- [[ESP8266 Weather Station]] *(4 highlights)*
+- [[Stalin]] *(16 highlights)*
+- [[Getting Started With 3D Printing]] *(1 highlights)*
+- [[Raspberry Pi User Guide]] *(81 highlights)*
+- [[Functional Design for 3D Printing 2nd Edition]] *(10 highlights)*
+- [[The Sixth Extinction]] *(56 highlights)*
+- [[Oeuvres De Champollion]] *(10 highlights)*
+- [[Meathead]] *(32 highlights)*
+- [[Ubuntu Unleashed 2017 Edition]] *(16 highlights)*
+- [[For All the Tea in China]] *(54 highlights)*
+- [[The Last Lion Box Set]] *(149 highlights)*
+- [[The Better Angels of Our Nature]] *(93 highlights)*
+- [[Spark Joy]] *(38 highlights)*
+- [[Hawaii the Big Island Revealed]] *(41 highlights)*
+- [[Wonderland]] *(2 highlights)*
+- [[Adobe Photoshop Lightroom CC6 - The Missing FAQ - Real Answers to Real Questions Asked by Lightroom Users]] *(7 highlights)*
+- [[Essential Photoshop]] *(15 highlights)*
+- [[The Adobe Photoshop CC Book for Digital Photographers]] *(15 highlights)*
+- [[Juliet]] *(4 highlights)*
+- [[The Complete Works of Lewis Carroll With All the Original Illustrations + the Life and Letters of Lewis Carroll]] *(52 highlights)*
+- [[Alices Adventures in Wonderland [Illustrated]]] *(52 highlights)*
+- [[The Vital Question]] *(129 highlights)*
+- [[The Lost World]] *(10 highlights)*
+- [[Jurassic Park]] *(7 highlights)*
+- [[A Brief History of Time]] *(128 highlights)*
+- [[In the Heart of the Sea]] *(17 highlights)*
+- [[Moby Dick]] *(9 highlights)*
+- [[Eating on the Wild Side]] *(10 highlights)*
+- [[Getting Started With the Photon]] *(28 highlights)*
+- [[The Mind Club]] *(2 highlights)*
+- [[The Butlers Guide to Running the Home and Other Graces]] *(18 highlights)*
+- [[Burn Math Class]] *(2 highlights)*
+- [[The Butler Speaks]] *(43 highlights)*
+- [[What Should a Clever Moose Eat]] *(4 highlights)*
+- [[Thomas Jefferson]] *(2 highlights)*
+- [[Le Journal dAnne Frank]] *(66 highlights)*
+- [[The Post-American World]] *(29 highlights)*
+- [[Oxygen]] *(214 highlights)*
+- [[How to Diagnose and Fix Everything Electronic]] *(15 highlights)*
+- [[The 36-Hour Day]] *(19 highlights)*
+- [[The Wayfinders]] *(9 highlights)*
+- [[The Einstein Theory of Relativity]] *(1 highlights)*
+- [[The Emperor of All Maladies]] *(11 highlights)*
+- [[The Epigenetics Revolution]] *(145 highlights)*
+- [[Our Mathematical Universe]] *(49 highlights)*
+- [[The Everything Healthy Pressure Cooker Cookbook]] *(3 highlights)*
+- [[The Neanderthals Rediscovered]] *(62 highlights)*
+- [[The Life-Changing Magic of Tidying Up]] *(3 highlights)*
+- [[The Innovators]] *(32 highlights)*
+- [[The Iliad]] *(6 highlights)*
+- [[The Wright Brothers]] *(6 highlights)*
+- [[Johannesburg & Kruger National Park]] *(1 highlights)*
+- [[David Buschs Canon EOS 7D Guide to Digital Photography, 1st Ed]] *(5 highlights)*
+- [[Babylon]] *(79 highlights)*
+- [[Digital Restoration From Start to Finish]] *(10 highlights)*
+- [[Photoshop for Lightroom Users]] *(10 highlights)*
+- [[Consciousness and the Brain]] *(74 highlights)*
+- [[The Ark Before Noah]] *(24 highlights)*
+- [[When Life Nearly Died]] *(76 highlights)*
+- [[Lucifers Legacy]] *(59 highlights)*
+- [[Tony Northrups DSLR Book]] *(16 highlights)*
+- [[The 4-Hour Chef]] *(2 highlights)*
+- [[David and Goliath]] *(2 highlights)*
+- [[Blink]] *(18 highlights)*
+- [[Powerful Inspirations]] *(36 highlights)*
+- [[Frommers Washington, D.C. 2013]] *(3 highlights)*
+- [[Stress Test]] *(44 highlights)*
+- [[Shock Waves]] *(3 highlights)*
+- [[The Ultimate Hikers Gear Guide]] *(16 highlights)*
+- [[The China Study]] *(27 highlights)*
+- [[The Universe in the Rearview Mirror]] *(188 highlights)*
+- [[The Grand Design]] *(131 highlights)*
+- [[Speedliters Handbook]] *(21 highlights)*
+- [[Tony Northrups Photography Buying Guide]] *(7 highlights)*
+- [[Exposure and Understanding the Histogram]] *(12 highlights)*
+- [[The Hidden Reality]] *(53 highlights)*
+- [[Einsteins Cosmos]] *(86 highlights)*
+- [[The Tell-Tale Brain]] *(12 highlights)*
+- [[Tony Northrups Adobe Photoshop Lightroom 5 Video Book]] *(1 highlights)*
+- [[Bryan Petersons Understanding Composition Field Guide]] *(12 highlights)*
+- [[The Accidental Mind]] *(70 highlights)*
+- [[Moose Hunting]] *(6 highlights)*
+- [[The Epic of Gilgamesh, the Teachings of Siduri and How Siduris Ancient Advice Can Help Guide Us to a Happier Life]] *(5 highlights)*
+- [[Your Inner Fish]] *(44 highlights)*
+- [[The Universe Within]] *(41 highlights)*
+- [[The Genius of the Beast]] *(5 highlights)*
+- [[Raspberry Pi Media Center]] *(1 highlights)*
+- [[Relativity]] *(2 highlights)*
+- [[In Cold Blood]] *(1 highlights)*
+- [[The World Until Yesterday]] *(7 highlights)*
+- [[The Thinker’s Guide to Analytic Thinking]] *(21 highlights)*
+- [[The Denial of Death]] *(43 highlights)*
+- [[The Orvis Fly-Fishing Guide, Completely]] *(1 highlights)*
+- [[This Explains Everything]] *(2 highlights)*
+- [[The Calculus Direct]] *(46 highlights)*
+- [[WHY THE HOLOCAUST - Hitler’s Darwinistic Messianic Genocide]] *(22 highlights)*
+- [[Consciousness]] *(41 highlights)*
+- [[Unleashing Your Brilliance]] *(3 highlights)*
+- [[The Wisdom of Psychopaths]] *(8 highlights)*
+- [[The Social Conquest of Earth]] *(92 highlights)*
+- [[Moonwalking With Einstein]] *(11 highlights)*
+- [[Complexity]] *(22 highlights)*
+- [[Power, Sex, Suicide]] *(108 highlights)*
+- [[Life Ascending]] *(26 highlights)*
+- [[Kindle DX Users Guide]] *(1 highlights)*
+- [[The Humans Who Went Extinct]] *(12 highlights)*
+- [[War Made New]] *(14 highlights)*
+- [[Deep Ancestry]] *(38 highlights)*
+- [[Wired for War]] *(2 highlights)*
+- [[How to Use Readwise]] *(62 highlights)*
+- [[The Swift Programming Language]] *(1 highlights)*
+- [[Swift Apprentice]] *(176 highlights)*
+- [[Hacking With iOS]] *(21 highlights)*
+- [[Take Control of Automating Your Mac]] *(3 highlights)*
+- [[SwiftUI by Example]] *(2 highlights)*
+- [[Six Easy Pieces]] *(1 highlights)*
+- [[The Markdown Guide]] *(4 highlights)*
+- [[Understanding Swift]] *(8 highlights)*
+- [[Develop Great Images in Lightroom]] *(1 highlights)*
+- [[SwiftUI by Tutorials]] *(5 highlights)*
+- [[Hacking With iOS]] *(87 highlights)*
+
+# [[2022-11-11]] *(10:22am)*
+- [[The Palace Papers]] *(27 highlights)*
+- [[The Last Lion Box Set]] *(149 highlights)*
+- [[Babylon]] *(112 highlights)*
+- [[Modern Etiquette Made Easy]] *(1 highlights)*
+- [[SwiftUI for Masterminds 3rd Edition 2022]] *(9 highlights)*
+- [[Dart]] *(22 highlights)*
+- [[Flutter Cookbook]] *(0 highlights)*
+
+# [[2022-11-12]] *(1:33pm)*
+- [[Modern Etiquette Made Easy]] *(2 highlights)*
+
+# [[2022-11-19]] *(11:46am)*
+- [[Modern Etiquette Made Easy]] *(8 highlights)*
+
+# [[2022-11-24]] *(12:12pm)*
+- [[Modern Etiquette Made Easy]] *(10 highlights)*

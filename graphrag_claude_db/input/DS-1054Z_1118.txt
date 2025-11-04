@@ -1,0 +1,27 @@
+---
+aliases:
+tags:
+created: 2022-01-23 17:15
+ContentType: Reference
+Backlink: "[[Rigol-DS1054Z Links]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- 
+
+- 
+- 
+- 
+-  
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

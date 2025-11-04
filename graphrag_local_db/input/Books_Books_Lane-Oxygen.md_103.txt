@@ -1,0 +1,660 @@
+# Lane-Oxygen.md
+
+---
+bookId: "22367"
+title: "Oxygen: The molecule that made the world (Popular Science)"
+author: Nick Lane
+asin: B00AAUBP3G
+lastAnnotatedDate: 2016-03-13
+highlightsCount: 214
+reference: https://www.amazon.com/dp/B00AAUBP3G
+kindle_link: kindle://book?action=open&asin=B00AAUBP3G
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/9196oN5tjNL._SY160.jpg)
+## Highlights
+Far from coalescing from a primordial soup, the new story goes, life might have begun in hot sulphurous vents known as black smokers, deep in the midocean trenches. Paradoxically, the last common ancestor of all known life, tenderly known as LUCA (the Last Universal Common Ancestor), is thought to have used trace amounts of oxygen to respire, even before her descendants learnt to photosynthesize (at least to generate oxygen). Instead of muddling along by fermentation, the first cells are thought to have extracted energy from a range of inorganic elements and compounds including nitrate, nitrite, sulphate and sulphite — and oxygen. — location: [456](kindle://book?action=open&asin=B00AAUBP3G&location=456) ^ref-15476
+
+---
+The first sacred cow to be sacrificed was the Jupiter-like composition of Earth’s primordial atmosphere. In fact, life must have evolved under an atmosphere that contained very little methane, hydrogen or ammonia. The evidence for this is direct and comes from geology. — location: [473](kindle://book?action=open&asin=B00AAUBP3G&location=473) ^ref-42306
+
+---
+Neon is the seventh most abundant element in the Universe. — location: [491](kindle://book?action=open&asin=B00AAUBP3G&location=491) ^ref-6320
+
+---
+Where, then, did our modern atmosphere come from? The answer seems to be volcanoes. As well as emitting sulphurous fumes (which would have precipitated in the rain), volcanic gases include nitrogen and carbon dioxide (in about the right balance), tiny amounts of neon, and almost no methane, ammonia or oxygen. — location: [495](kindle://book?action=open&asin=B00AAUBP3G&location=495) ^ref-12807
+
+---
+The oxygen released by the photosynthesizers is almost completely (99.99 per cent) used up by the animals, fungi and bacteria which feed on the remains of the producers, or on each other. The apparently trivial 0.01 per cent discrepancy, however, is in fact responsible for all life as we know it. — location: [515](kindle://book?action=open&asin=B00AAUBP3G&location=515) ^ref-49577
+
+---
+Over billions of years, the loss of water through the effects of ultraviolet radiation is thought to have cost Mars and Venus their oceans.4 Today, both are dry and sterile, their crusts oxidized and their atmospheres filled with carbon dioxide. — location: [537](kindle://book?action=open&asin=B00AAUBP3G&location=537) ^ref-43442
+
+---
+Life itself saved the Earth from the sterile fate of Mars and Venus. The injection of oxygen from photosynthesis overwhelmed the available exposed reactants in the Earth’s crust and oceans, allowing free oxygen to accumulate in the atmosphere. Once present, free oxygen stops the loss of water. The reason is that it reacts with most of the hydrogen split from water to regenerate water, so preserving the oceans on Earth. — location: [544](kindle://book?action=open&asin=B00AAUBP3G&location=544) ^ref-34593
+
+---
+The Precambrian, then, was a time of spectacular metabolic innovation. Microbes learnt to harness the power of the Sun, as well as the oxidizing power of oxygen, and to generate energy from an array of sulphur, nitrogen and metal compounds. — location: [634](kindle://book?action=open&asin=B00AAUBP3G&location=634) ^ref-25906
+
+---
+photosynthetic cells using carbon dioxide from the air or sea to make organic matter prefer to use carbon-12. This is because the lighter carbon-12 atoms have a slightly greater vibrational energy, which means that a smaller input of energy (activational energy) is needed for a reaction to take place. — location: [665](kindle://book?action=open&asin=B00AAUBP3G&location=665) ^ref-8490
+
+---
+Throughout the Precambrian period, most cyanobacteria lived in communal structures called stromatolites: great domes of living rock, which grew to heights of metres. — location: [689](kindle://book?action=open&asin=B00AAUBP3G&location=689) ^ref-16981
+
+---
+photo-synthetic bacteria were already colonizing the early Earth at least 3.5 billion years ago. — location: [695](kindle://book?action=open&asin=B00AAUBP3G&location=695) ^ref-43625
+
+---
+oxygen-producing cyanobacteria and the first representatives of our own eukaryotic ancestors coexisted not less than 2.7 billion years ago. — location: [707](kindle://book?action=open&asin=B00AAUBP3G&location=707) ^ref-55408
+
+---
+The surface waters, however, were home to photosynthetic bacteria at least 2.7 billion years ago, and perhaps as long as 3.8 billion years ago. — location: [782](kindle://book?action=open&asin=B00AAUBP3G&location=782) ^ref-45352
+
+---
+that there was a small rise in oxygen levels 2.7 billion years ago, followed by a much larger rise about 2.2 billion years ago. — location: [829](kindle://book?action=open&asin=B00AAUBP3G&location=829) ^ref-44516
+
+---
+2.2 to 2.3 billion years ago. The Earth plummeted into the first ever ice age. This was no trivial ice age, to be compared with the recent Pleistocene cold snap, but a global freeze that may have covered the tropics in glaciers a kilometre [3280 feet] thick — in Joseph Kirsch-vink’s memorable phrase, a ‘snowball Earth’. — location: [896](kindle://book?action=open&asin=B00AAUBP3G&location=896) ^ref-62659
+
+---
+As it built up in the air, oxygen would have reacted with methane (produced in large amounts by bacteria), and so removed this important greenhouse gas from the early atmosphere. As the greenhouse effect was undermined, temperatures plummeted and the Earth succumbed to the grip of an ice age. — location: [900](kindle://book?action=open&asin=B00AAUBP3G&location=900) ^ref-48999
+
+---
+The tendency to approach a stable equilibrium is antithetical to life, which might almost be defined as a state of dynamic disequilibrium. — location: [919](kindle://book?action=open&asin=B00AAUBP3G&location=919) ^ref-49440
+
+---
+Life on Earth was saved from an interminable ecological balance between iron-loving bacteria, stromatolites and cyanobacteria by the sudden punctuation of the snowball Earth, a shock that rocked it from slumbering complacency with a second big injection of oxygen. — location: [924](kindle://book?action=open&asin=B00AAUBP3G&location=924) ^ref-29314
+
+---
+mitochondria, evolved from a strain of purple bacteria. — location: [937](kindle://book?action=open&asin=B00AAUBP3G&location=937) ^ref-41874
+
+---
+the chloroplast — which is derived from cyanobacteria. — location: [939](kindle://book?action=open&asin=B00AAUBP3G&location=939) ^ref-31200
+
+---
+In summary: the first signs of life, the carbon signatures in the rocks of western Greenland, date back to 3.85 billion years ago. By 3.5 billion years ago we find microscopic fossils, resembling modern cyanobacteria, and large stromatolites. If appearances are not deceptive, these cyanobacteria were already producing oxygen. However, it is not until nearly a billion years later, 2.7 billion years ago, that we have the first definitive evidence of cyanobacteria, as well as the first signs of our own ancestors, the eukaryotes, in the form of tell-tale biochemical fingerprints in the rocks. These eukaryotes made sterols for their membranes, a task that requires oxygen. From the activity of sulphate-reducing bacteria we know that oxygen levels rose at this time, perhaps to around 1 per cent of present atmospheric levels. Another 500 million years later, 2.2 billion years ago, oxygen levels rose again, following hard on the heels of the snowball Earth. In the period of geological unrest that followed, huge banded iron formations precipitated from the oceans all around the world. Free oxygen was probably needed for the genesis of at least some of these formations. At the same time, around 2.1 billion years ago, we see the earliest fossils of eukaryotes. By 2 billion years ago, we have rock-hard evidence of oxygen accumulating in the air: fossil soils, continental red-beds and uranium reactors. Oxygen levels reached around 5 to 18 per cent of present atmospheric concentration. In the rocks, we see a sudden explosion of diversity in fossil eukaryotes. Many have mitochondria. All the elements of the modern world, bar true multicellular organisms, are in place. — location: [983](kindle://book?action=open&asin=B00AAUBP3G&location=983) ^ref-34596
+
+---
+indicate that an ancient set of genes, which controls the embryological development of all animals today, were already fully operational in the earliest Cambrian animals. These genes are known as the Hox genes. — location: [1076](kindle://book?action=open&asin=B00AAUBP3G&location=1076) ^ref-22455
+
+---
+the Cambrian explosion was above all a diversification of segmented bilateral animals similar to modern-day crustaceans. — location: [1101](kindle://book?action=open&asin=B00AAUBP3G&location=1101) ^ref-11093
+
+---
+and duplication of Hox genes allowed existing genes to take on new responsibilities. The number of Hox genes correlates roughly with morphological complexity. Thus, nematodes have one cluster of four Hox genes (and are simple in structure), whereas mammals have 38 Hox genes arranged in four clusters. Goldfish, rather surprisingly, have 48 Hox genes in seven clusters; biology never stoops to a perfect correlation. — location: [1104](kindle://book?action=open&asin=B00AAUBP3G&location=1104) ^ref-31024
+
+---
+another series of snowball Earths, starting about 750 million years ago. This time the cataclysm was not a singular event, caused by the exhaustion of a greenhouse gas such as methane, but a 160-million-year roller-coaster ride, comprising possibly as many as four great ice ages, two of which, the Sturtian (at around 750 million years ago) and the Varanger (at around 600 million years ago) were arguably the most severe in Earth’s history. — location: [1115](kindle://book?action=open&asin=B00AAUBP3G&location=1115) ^ref-21694
+
+---
+in today’s world, where there are large land masses at or around the poles, any spread of the polar glaciers towards the Equator is offset by a greenhouse effect that gets stronger whenever the glaciers advance, and weaker whenever they retreat. — location: [1128](kindle://book?action=open&asin=B00AAUBP3G&location=1128) ^ref-10764
+
+Could this stabilize modern global warming?
+
+---
+the whole crazy snowballing and melting repeated itself as many as four times before the continents were finally dispersed to the four corners of the Earth by the forces of plate tectonics. — location: [1144](kindle://book?action=open&asin=B00AAUBP3G&location=1144) ^ref-29285
+
+---
+a build-up of perhaps 350 times the current levels of carbon dioxide would be required to melt the ice. Once the reflectance of the snowball Earth had been overcome in this way, however, the extreme levels of carbon dioxide would swing the global climate from an ice-box to an oven in a matter of a few hundred years. — location: [1152](kindle://book?action=open&asin=B00AAUBP3G&location=1152) ^ref-54866
+
+---
+near-extinction of all living things either during or immediately after each ice age, when carbon dioxide was being scrubbed from the skies and the oceans were an acid bath. — location: [1167](kindle://book?action=open&asin=B00AAUBP3G&location=1167) ^ref-44847
+
+---
+All these nutrients, all this empty space, must have stimulated the greatest blooming of cyanobacteria and algae the world has ever seen: a world of blue-green ocean. These blooms must have produced prodigious amounts of free oxygen in a short period, oxygenating the surface oceans and air between each of the ice ages. — location: [1177](kindle://book?action=open&asin=B00AAUBP3G&location=1177) ^ref-35469
+
+---
+a rise in atmospheric oxygen to nearly modern levels in the final years of the Precambrian. — location: [1250](kindle://book?action=open&asin=B00AAUBP3G&location=1250) ^ref-60337
+
+---
+the length of any food chain is determined by the amount of energy lost from one level of the chain to the next. This, in turn, depends on the efficiency of energy metabolism. Energy metabolism is generally less than 10 per cent efficient in the absence of oxygen (that is, less than 10 per cent of the total energy available in the food is extracted). If this organism is eaten in turn, the energy available to the predator is less than 1 per cent of that originally synthesized by the primary producer. This is the end of the food chain: below a 1 per cent threshold, there is simply not enough energy available to eke out a living. — location: [1305](kindle://book?action=open&asin=B00AAUBP3G&location=1305) ^ref-19238
+
+---
+In contrast, oxygen-powered respiration is about 40 per cent efficient in energy extraction. This means that the 1 per cent energy threshold is crossed only at the sixth level of the food chain. — location: [1310](kindle://book?action=open&asin=B00AAUBP3G&location=1310) ^ref-17411
+
+---
+Ozone is good at absorbing ultraviolet rays, so once a thick ozone layer has built up, the penetration of damaging ultraviolet rays into the lower atmosphere is cut by a factor of 30 or more. — location: [1329](kindle://book?action=open&asin=B00AAUBP3G&location=1329) ^ref-2497
+
+---
+The Earth stagnated for two prolonged periods, which between them account for half its history. From 3.5 to 2.3 billion years ago, the world was dominated by bacteria. Then, after the violent upheavals of 2.3 to 2.0 billion years ago, another equilibrium was established, in which the oxygen levels remained between 5 and 18 per cent of present atmospheric levels. — location: [1350](kindle://book?action=open&asin=B00AAUBP3G&location=1350) ^ref-688
+
+---
+The deadlock was broken by a second series of snowball Earths, which started 750 million years ago and catapulted oxygen to modern levels. — location: [1355](kindle://book?action=open&asin=B00AAUBP3G&location=1355) ^ref-33645
+
+---
+this relationship between life and environmental conditions should sound a note of caution to those who seek intelligent life elsewhere in the Universe. We must look beyond the mere presence of water to the presence of volcanoes, plate tectonics and oxygen. — location: [1357](kindle://book?action=open&asin=B00AAUBP3G&location=1357) ^ref-48931
+
+---
+there is a big difference between our modern oxygen level of about 21 per cent, and the postulated Carboniferous high point of 35 per cent, around 300 million years ago. — location: [1362](kindle://book?action=open&asin=B00AAUBP3G&location=1362) ^ref-34365
+
+---
+Bolsover dragonfly, — location: [1371](kindle://book?action=open&asin=B00AAUBP3G&location=1371) ^ref-2181
+
+---
+oxygen can accumulate in the air only if there is an imbalance between the amount of oxygen produced by photosynthesis and the amount consumed by respiration, rocks and volcanic gases. — location: [1419](kindle://book?action=open&asin=B00AAUBP3G&location=1419) ^ref-46733
+
+---
+some 400 million tons of methane are emitted into the atmosphere each year by swamp bacteria — location: [1431](kindle://book?action=open&asin=B00AAUBP3G&location=1431) ^ref-13967
+
+---
+Although carbon dioxide levels generally fall as oxygen rises, most geologists agree that carbon dioxide fell from a high point of about 3000 parts per million in the Devonian (385 million years ago) to a low point of 300 parts per million by the end of the Permian (245 million years ago) — location: [1481](kindle://book?action=open&asin=B00AAUBP3G&location=1481) ^ref-3488
+
+---
+Ninety per cent of the world’s coal reserves date to a period that accounts for less than 2 per cent of the Earth’s history. — location: [1488](kindle://book?action=open&asin=B00AAUBP3G&location=1488) ^ref-26732
+
+---
+The unparallelled rate of coal formation in the Carboniferous and early Permian is explained, then, by an exceptionally high rate of lignin production, an exceptionally low rate of lignin breakdown, and nearly perfect conditions for preserving organic matter on an unprecedented scale. — location: [1505](kindle://book?action=open&asin=B00AAUBP3G&location=1505) ^ref-12148
+
+---
+Most large plants at the time had deep tubers, thick bark with a high lignin content, succulent leaves and branches high above the ground, out of reach of any fire that might have swept through the brushwood. And there were few hanging vines or fronds that would enable ground fire to move into the canopy. — location: [1688](kindle://book?action=open&asin=B00AAUBP3G&location=1688) ^ref-27076
+
+---
+Some coals contain over 15 per cent fossil charcoal by volume — an extraordinary amount if we consider that coal beds are formed in swamps, which under modern conditions virtually never catch fire. — location: [1698](kindle://book?action=open&asin=B00AAUBP3G&location=1698) ^ref-16202
+
+---
+Coals that formed during periods of hypothetically high oxygen, such as the Carboniferous and Cretaceous, contain more than twice as much charcoal as the coals that formed during low-oxygen periods like the Eocene (54 to 38 million years ago). — location: [1706](kindle://book?action=open&asin=B00AAUBP3G&location=1706) ^ref-8887
+
+---
+The shininess of fossil charcoals from both the Carboniferous and Cretaceous implies that they formed at searing temperatures, almost certainly above 400°C and perhaps as high as 600°C, in fires of exceptional intensity. — location: [1711](kindle://book?action=open&asin=B00AAUBP3G&location=1711) ^ref-57892
+
+---
+iridium was mixed with soot at 12 sites from the United States, Europe, North Africa and New Zealand. She argued, on the basis of the isotopic uniformity of the carbon, that the soot had been deposited by a single global fire in the wake of the impact itself. Simple calculations suggested that about 25 per cent of terrestrial biomass of the planet had perished in the flames. — location: [1723](kindle://book?action=open&asin=B00AAUBP3G&location=1723) ^ref-28057
+
+---
+In 1994, Michael Kruge and his colleagues at the University of Southern Illinois described a belt of fossil charcoal 3 metres [10 feet] thick in Mimbral in northern Mexico, and argued, from its curious cocktail of terrestrial and marine sediments, that terrestrial plants must have charred in a firestorm (ignited by the passage of the meteorite through the skies), then drowned in the deep sea by the backwash from a giant tsunami, or megawave, caused by the impact of the meteorite in shallow tropical seas. — location: [1728](kindle://book?action=open&asin=B00AAUBP3G&location=1728) ^ref-25415
+
+---
+If indeed there was such a fire, then a high-oxygen atmosphere may have sealed the fate of the dinosaurs. — location: [1732](kindle://book?action=open&asin=B00AAUBP3G&location=1732) ^ref-15851
+
+---
+We now have two independent empirical models — the mass balance and isotope models — which concur that oxygen levels reached 35 per cent during the Carboniferous and early Permian. — location: [1738](kindle://book?action=open&asin=B00AAUBP3G&location=1738) ^ref-26746
+
+---
+the tracheal system may be primitive, but it is far from inefficient — with it, flying insects achieve the highest metabolic rates in the whole of the animal kingdom. — location: [1758](kindle://book?action=open&asin=B00AAUBP3G&location=1758) ^ref-27732
+
+---
+Almost without exception, insect flight is totally aerobic, — location: [1759](kindle://book?action=open&asin=B00AAUBP3G&location=1759) ^ref-61823
+
+---
+Sprinters cannot breathe in enough oxygen to power their efforts and their muscle cells must instead resort to the less efficient process of energy production by anaerobic glucose breakdown, or glycolysis, which produces a mild poison, lactic acid, as a by-product. — location: [1761](kindle://book?action=open&asin=B00AAUBP3G&location=1761) ^ref-63171
+
+---
+For insects, there are two ways of ventilating the trachea, known as abdominal pumping and autoconvective ventilation. Most ‘modern’ insects, including wasps, honeybees and houseflies, rely on abdominal pumping, in which the insects contract their abdomens rhythmically to squeeze air through the tracheal network. — location: [1777](kindle://book?action=open&asin=B00AAUBP3G&location=1777) ^ref-39732
+
+---
+Dragonflies, locusts and some beetles rely on the second, more primitive, means of ventilation — autoconvective ventilation. This is a splendidly opaque way of saying that they create draughts when they flap their wings. — location: [1783](kindle://book?action=open&asin=B00AAUBP3G&location=1783) ^ref-55744
+
+---
+in today’s atmosphere, dragonfly flight is limited by oxygen insufficiency. — location: [1794](kindle://book?action=open&asin=B00AAUBP3G&location=1794) ^ref-19746
+
+---
+It seems that the Bolsover dragonfly really was only able to fly, and so hunt its prey and survive, in an oxygen-rich atmosphere. — location: [1796](kindle://book?action=open&asin=B00AAUBP3G&location=1796) ^ref-3169
+
+---
+Dragonflies were not the only giants of the Carboniferous — many other creatures attained sizes never matched again. Some mayflies had wing-spans of nearly half a metre [19 inches], millipedes stretched for over a metre [39 inches], and the Megarachne, a spider-like arachnid with a leg-span of nearly half a metre [18 inches], would have chilled the marrow of Indiana Jones. Even more terrifyingly, scorpions reached lengths of a metre, — location: [1797](kindle://book?action=open&asin=B00AAUBP3G&location=1797) ^ref-33585
+
+---
+it seems likely that inadequate oxygen availability limits size in many species, or conversely, that high oxygen raises the barrier to gigantism. — location: [1831](kindle://book?action=open&asin=B00AAUBP3G&location=1831) ^ref-14967
+
+---
+giant amphipods will be among the first species to disappear if global temperatures rise, or if oxygen levels decline. — location: [1839](kindle://book?action=open&asin=B00AAUBP3G&location=1839) ^ref-56284
+
+---
+This conclusion stands in opposition to Lovelock’s Gaia theory, which argues that the living biosphere has regulated the levels of oxygen in the atmosphere over the past 500 million years. While this may be true for much of the time, there have surely been periods when the biosphere lost control over oxygen levels. — location: [1842](kindle://book?action=open&asin=B00AAUBP3G&location=1842) ^ref-33424
+
+---
+Most of the giants of the Carboniferous, for example, failed to survive until the end of the Permian period, when Robert Berner’s calculations suggest that oxygen levels plummeted to 15 per cent as the climate became cooler and drier. — location: [1852](kindle://book?action=open&asin=B00AAUBP3G&location=1852) ^ref-12179
+
+---
+Radium is present in such small quantities that, even today, world production amounts to only a few hundred grams. — location: [1900](kindle://book?action=open&asin=B00AAUBP3G&location=1900) ^ref-18299
+
+---
+Forty per cent of the early researchers in radioactivity died of cancer. — location: [1921](kindle://book?action=open&asin=B00AAUBP3G&location=1921) ^ref-55489
+
+---
+50 per cent of the miners working in Europe’s only uranium mine, in Bohemia in northern Czechoslovakia, had lung cancer, which was attributed to their inhalation of radon gas, — location: [1923](kindle://book?action=open&asin=B00AAUBP3G&location=1923) ^ref-23205
+
+---
+For 30 years after the nuclear bomb, the number of cases of leukaemia in Hiroshima remained 15 times higher than the rest of Japan. The incidence of other cancers with longer incubation periods, such as lung, breast and thyroid cancer, all began to rise after about 15 years. — location: [1950](kindle://book?action=open&asin=B00AAUBP3G&location=1950) ^ref-32915
+
+---
+both ageing and the diseases of old age are caused essentially by slow oxygen poisoning. — location: [1969](kindle://book?action=open&asin=B00AAUBP3G&location=1969) ^ref-30870
+
+---
+free radicals are reactive forms of oxygen, produced continuously at low levels by respiration. — location: [1981](kindle://book?action=open&asin=B00AAUBP3G&location=1981) ^ref-19954
+
+---
+Becquerel had classified the known radioactive emanations according to their penetrating power. Emissions that are stopped by a sheet of paper were termed alpha rays (they are in fact helium nuclei); those stopped by a millimetre-thin sheet of metal were called beta rays (now known to be fast-moving electrons); and those penetrating a centimetre [2/5 inch] of metal were called gamma rays (electromagnetic rays, analogous to x-rays). All three types of radiation displace electrons from atoms, which gives the atoms an electric charge. — location: [1984](kindle://book?action=open&asin=B00AAUBP3G&location=1984) ^ref-49656
+
+---
+Becquerel discovered that radium emits alpha rays and gamma rays. — location: [1991](kindle://book?action=open&asin=B00AAUBP3G&location=1991) ^ref-59221
+
+---
+A free radical is loosely defined as any molecule capable of independent existence that has an unpaired electron. — location: [2005](kindle://book?action=open&asin=B00AAUBP3G&location=2005) ^ref-65489
+
+---
+Radiation can interact directly with all kinds of molecule, but in our bodies it is most likely to interact with water. — location: [2017](kindle://book?action=open&asin=B00AAUBP3G&location=2017) ^ref-46581
+
+---
+The three intermediates formed by irradiating water, the hydroxyl radicals, hydrogen peroxide and superoxide radicals, react in very different ways. — location: [2023](kindle://book?action=open&asin=B00AAUBP3G&location=2023) ^ref-18629
+
+---
+Indeed, the three actually work together as part of an insidious catalytic system. — location: [2024](kindle://book?action=open&asin=B00AAUBP3G&location=2024) ^ref-40359
+
+---
+Hydroxyl radicals react so quickly that they attack the first molecule they meet, — location: [2030](kindle://book?action=open&asin=B00AAUBP3G&location=2030) ^ref-63370
+
+---
+We are all familiar with free-radical chain reactions when they happen in fatty foods such as butter: they are responsible for rancidity. The fats in the butter oxidize and taste disgusting. — location: [2040](kindle://book?action=open&asin=B00AAUBP3G&location=2040) ^ref-38727
+
+---
+Free-radical damage is less obvious when it affects proteins or DNA, but free-radical damage to DNA is one of the main causes of genetic mutation, and accounts for the high rates of cancer suffered by radiation victims. — location: [2043](kindle://book?action=open&asin=B00AAUBP3G&location=2043) ^ref-31429
+
+---
+a single gram of freon will often destroy as much as 70 kilograms of ozone. — location: [2049](kindle://book?action=open&asin=B00AAUBP3G&location=2049) ^ref-49124
+
+---
+If radiation strips a second electron from water, the next fleeting intermediate is hydrogen peroxide (H2O2) — location: [2054](kindle://book?action=open&asin=B00AAUBP3G&location=2054) ^ref-18915
+
+---
+the main reason that hydrogen peroxide is toxic is because it produces hydroxyl radicals in the presence of dissolved iron. — location: [2070](kindle://book?action=open&asin=B00AAUBP3G&location=2070) ^ref-51489
+
+---
+The insidious infiltration of hydrogen peroxide means that it is more dangerous than the hydroxyl radicals produced outside the nucleus. — location: [2074](kindle://book?action=open&asin=B00AAUBP3G&location=2074) ^ref-50367
+
+---
+the three intermediates between water and oxygen operate as an insidious catalytic system that damages biological molecules in the presence of iron. Superoxide radicals release iron from storage depots and convert it into the soluble form. Hydrogen peroxide reacts with soluble iron to generate hydroxyl radicals. Hydroxyl radicals attack all proteins, lipids and DNA indiscriminately, initiating destructive free-radical chain reactions that spread damage and destruction. — location: [2089](kindle://book?action=open&asin=B00AAUBP3G&location=2089) ^ref-7053
+
+---
+These same intermediates are also formed from the oxygen that we breathe. — location: [2093](kindle://book?action=open&asin=B00AAUBP3G&location=2093) ^ref-26673
+
+---
+Water is chemically stable. Taking electrons from water requires a large input of energy, which can be provided by ionizing radiation, ultraviolet rays, or by sunlight in the case of photosynthesis. Oxygen, on the other hand, releases energy when it reacts — location: [2101](kindle://book?action=open&asin=B00AAUBP3G&location=2101) ^ref-20933
+
+---
+125 grams [4 oz] of sugar (the amount required to make a sponge cake) will produce 1790 kilojoules [428 kilocalories] of energy: enough to boil 3 litres [6.3 US pints] of water or light a 100-watt bulb for 5 hours. — location: [2105](kindle://book?action=open&asin=B00AAUBP3G&location=2105) ^ref-16486
+
+---
+liquid oxygen (and indeed ozone, O3) was attracted to the poles of a magnet. — location: [2117](kindle://book?action=open&asin=B00AAUBP3G&location=2117) ^ref-17904
+
+---
+Estimates suggest that, at rest, about 1 or 2 per cent of the total oxygen consumed by cells escapes as superoxide radicals, while during vigorous exercise this total might rise to as much as 10 per cent. — location: [2152](kindle://book?action=open&asin=B00AAUBP3G&location=2152) ^ref-45037
+
+---
+From superoxide we can go on to produce hydrogen peroxide and hydroxyl radicals by way of the reactions discussed earlier. — location: [2156](kindle://book?action=open&asin=B00AAUBP3G&location=2156) ^ref-23995
+
+---
+Our bodies have evolved efficient mechanisms for eliminating both superoxide radicals and hydrogen peroxide before they can react with iron to produce hydroxyl radicals — location: [2158](kindle://book?action=open&asin=B00AAUBP3G&location=2158) ^ref-53721
+
+---
+the damage done by breathing for one year is equivalent to a whole-body radiation dose of 1 sievert (or 1 joule energy per kilogram). As a typical chest x-ray delivers 50 micro-sieverts of radiation, breathing for a year would seem to be 10 000 times more dangerous than a chest x-ray, or 50 times as dangerous as all the radiation that we normally receive from all sources in the course of an entire lifetime. — location: [2186](kindle://book?action=open&asin=B00AAUBP3G&location=2186) ^ref-59219
+
+---
+the genes activated by radiation also protect against oxygen poisoning, malaria or lead poisoning. — location: [2232](kindle://book?action=open&asin=B00AAUBP3G&location=2232) ^ref-9191
+
+---
+This shared pathology is a rise in oxidative stress. Oxidative stress is defined as an imbalance between free-radical production and antioxidant protection. — location: [2234](kindle://book?action=open&asin=B00AAUBP3G&location=2234) ^ref-58812
+
+---
+The integration of protective mechanisms against oxidative stress raises the possibility that life might have evolved ways of dealing with oxygen toxicity long before there was any oxygen in the atmosphere — ionizing radiation alone might do the trick. — location: [2238](kindle://book?action=open&asin=B00AAUBP3G&location=2238) ^ref-37308
+
+---
+We can infer that hydroxyl radicals, hydrogen peroxide and superoxide radicals were formed over the aeons by ultraviolet rays splitting traces of water vapour in the Martian atmosphere or soil. Without surface water, these intermediates would have reacted with iron and other minerals in the soil to produce the rusty oxides that give the red planet its colour. — location: [2261](kindle://book?action=open&asin=B00AAUBP3G&location=2261) ^ref-54845
+
+---
+oxygenic photosynthesis evolved more than 2.7 billion years ago. — location: [2310](kindle://book?action=open&asin=B00AAUBP3G&location=2310) ^ref-50925
+
+---
+The different forms of photosynthesis are united only in that they all use light energy to make chemical energy (in the form of ATP) needed to cobble hydrogen onto carbon dioxide to form sugars. They differ in the source of the hydrogen, which might come from water, hydrogen sulphide or iron salts, or indeed any other chemical with hydrogen attached. — location: [2325](kindle://book?action=open&asin=B00AAUBP3G&location=2325) ^ref-31030
+
+---
+plant photosynthesis converts carbon dioxide (CO2) from the air into simple organic molecules such as sugars (general formula CH2O). These are subsequently burnt by the plant in its mitochondria — location: [2328](kindle://book?action=open&asin=B00AAUBP3G&location=2328) ^ref-29998
+
+---
+In oxygenic photosynthesis, then, hydrogen atoms (or rather, the protons (H+) and electrons (e–) that constitute hydrogen atoms) are extracted from water, leaving the ‘husk’ — the oxygen — to be jettisoned into the air. — location: [2348](kindle://book?action=open&asin=B00AAUBP3G&location=2348) ^ref-1194
+
+---
+Bacterial genes are naked, in that the DNA thread is not wrapped around with proteins. Bacteria have a fraction of the number of genes of most eukaryotes — a few thousand, instead of tens of thousands. — location: [2612](kindle://book?action=open&asin=B00AAUBP3G&location=2612) ^ref-15299
+
+---
+and carry very little junk DNA. — location: [2613](kindle://book?action=open&asin=B00AAUBP3G&location=2613) ^ref-45164
+
+---
+In comparison with the eukaryotes, which lumber like battleships, bacteria have the evolutionary speed and agility of fighter aircraft. — location: [2617](kindle://book?action=open&asin=B00AAUBP3G&location=2617) ^ref-7367
+
+---
+All life is right-handed in its molecular preference. The only sensible explanation for this extreme conservatism is that LUCA herself was right-handed — a historical accident — and that all her descendants have been obliged to follow suit. — location: [2639](kindle://book?action=open&asin=B00AAUBP3G&location=2639) ^ref-59613
+
+---
+When did LUCA give rise to her diverse offspring? Cells resembling modern prokaryotes date back 3.5 billion years, to the stromatolites in south-western Australia, — location: [2641](kindle://book?action=open&asin=B00AAUBP3G&location=2641) ^ref-19603
+
+---
+The first signs of eukaryotic cells, the biomarkers of membrane sterols, date to about 2.7 billion years ago. — location: [2643](kindle://book?action=open&asin=B00AAUBP3G&location=2643) ^ref-61329
+
+---
+chloroplasts and mitochondria (the energy ‘power-houses’ of eukaryotic cells) were once free-living bacteria. Many details betray their former status. Both, for example, retain a genetic apparatus, including their own DNA, messenger RNA, transfer RNA and ribosomes. — location: [2654](kindle://book?action=open&asin=B00AAUBP3G&location=2654) ^ref-53641
+
+---
+Mitochondrial DNA, for example, like bacterial DNA, comes packaged as a single circular chromosome, and is naked (not wrapped in proteins). The sequence of letters in its genes is closely related to the equivalent genes in a class of purple bacteria called the alphaproteobacteria.2 — location: [2657](kindle://book?action=open&asin=B00AAUBP3G&location=2657) ^ref-56613
+
+---
+Two billion years of shared evolution have left the mitochondrial genome with little to call its own. Its closest bacterial relatives, the alpha-proteobacteria, have at least 1500 genes, whereas the mitochondria of most species have retained less than a hundred. — location: [2662](kindle://book?action=open&asin=B00AAUBP3G&location=2662) ^ref-8804
+
+---
+90 per cent of the genes that determine mitochondrial structure and function now reside in the cell nucleus. — location: [2666](kindle://book?action=open&asin=B00AAUBP3G&location=2666) ^ref-44259
+
+---
+Our gene for cytochrome c is approximately 1 per cent different from chimpanzees, 13 per cent different from kangaroos, 30 per cent different from tuna fish and 65 per cent different from that in the fungus Neurospora. — location: [2692](kindle://book?action=open&asin=B00AAUBP3G&location=2692) ^ref-21007
+
+---
+We have seen that proteins are built on ribosomes. Ribosomes themselves are made from a mixture of proteins and yet another form of RNA, called ribosomal RNA. Both the proteins and the ribosomal RNA are encoded by DNA and so both are subject to the restraints of natural selection. — location: [2707](kindle://book?action=open&asin=B00AAUBP3G&location=2707) ^ref-1111
+
+---
+ribosomes were the closest approximation to a cantilever — absolutely indispensable to all aspects of cellular function — and were therefore highly unlikely to undergo rapid mutation or wander around the gene pool. Furthermore, because the sequence of letters in ribosomal RNA is an exact replica of the gene, ribosomal RNA sequences could be compared directly, without recourse to the genes themselves. — location: [2709](kindle://book?action=open&asin=B00AAUBP3G&location=2709) ^ref-65284
+
+---
+Today, instead of five kingdoms, we recognize three great domains of life: the Bacteria, the Archaea and the Eukaryotes. — location: [2727](kindle://book?action=open&asin=B00AAUBP3G&location=2727) ^ref-33194
+
+---
+Archaea are obviously comparable to bacteria in that they lack a cell nucleus, and so are defined as prokaryotes. The organization of their genes is also similar to that of bacteria: they have a single circular chromosome, they cluster groups of related genes into operons, and they carry little junk DNA. Other aspects of their organization, such as the structure and function of proteins in the cell membranes, bear a more superficial resemblance to bacteria. Most archaea have a cell wall but, unlike bacteria, a few do not. Again unlike bacteria, the cell wall contains no peptidoglycans. — location: [2730](kindle://book?action=open&asin=B00AAUBP3G&location=2730) ^ref-29423
+
+---
+In other respects, the archaea lie much closer to the eukaryotes. Although they do not have as many genes as eukaryotes, archaea have on average more than twice as many genes as bacteria. The DNA of archaea is not naked, but is wrapped in proteins similar to those used by eukaryotes. The detailed mechanism of DNA replication and protein synthesis is much closer to that of the eukaryotes. — location: [2734](kindle://book?action=open&asin=B00AAUBP3G&location=2734) ^ref-10426
+
+---
+The protein constituents of the ribosomes also resemble those of the eukaryotes in their structure. Other details of ribosomal function, including the initiation of protein synthesis, the elongation of protein chains, and the termination steps, parallel the eukaryotic process. — location: [2738](kindle://book?action=open&asin=B00AAUBP3G&location=2738) ^ref-7377
+
+---
+It seems likely that the split between the Archaea and the Bacteria occurred very early in the history of life, perhaps 3.8 to 4 billion years ago. — location: [2762](kindle://book?action=open&asin=B00AAUBP3G&location=2762) ^ref-24015
+
+---
+eukaryotes split from archaea later, perhaps around 2.5 to 3 billion years ago, — location: [2764](kindle://book?action=open&asin=B00AAUBP3G&location=2764) ^ref-60520
+
+---
+eukaryotes acquired mitochondria and chloroplasts around 2 billion years ago by engulfing bacteria. — location: [2765](kindle://book?action=open&asin=B00AAUBP3G&location=2765) ^ref-61331
+
+---
+The development of the eukaryotes seems to have been a singular event, possibly propelled by the unique environmental conditions around the time of the snowball Earth of 2.3 billion years ago — location: [2769](kindle://book?action=open&asin=B00AAUBP3G&location=2769) ^ref-50426
+
+---
+Of the genes involved in energy production through respiration (aerobic or anaerobic), at least 16 have been found in both archaea and bacteria. — location: [2789](kindle://book?action=open&asin=B00AAUBP3G&location=2789) ^ref-53575
+
+---
+LUCA, it seems, could not photosynthesize. No form of photosynthesis based on chlorophyll is found in any archaea. — location: [2802](kindle://book?action=open&asin=B00AAUBP3G&location=2802) ^ref-41831
+
+---
+the 16 respiratory genes must have been present in LUCA, and were later vertically inherited by different lines of bacteria and archaea. — location: [2810](kindle://book?action=open&asin=B00AAUBP3G&location=2810) ^ref-5851
+
+---
+lakes and sheltered ocean basins on the early Earth were probably under oxidative stress from ultraviolet radiation, which split water to produce oxygen free radicals and hydrogen peroxide. Antioxidant enzymes such as superoxide dismutase (SOD) are found in all three domains of life, and may well have been present in LUCA. — location: [2839](kindle://book?action=open&asin=B00AAUBP3G&location=2839) ^ref-46684
+
+---
+haemoglobin is usually 95 per cent saturated with oxygen. The pressure exerted by oxygen is about 100 mmHg. — location: [2882](kindle://book?action=open&asin=B00AAUBP3G&location=2882) ^ref-58341
+
+---
+As blood leaves the heart, the oxygen pressure has already fallen to about 85 mmHg; — location: [2883](kindle://book?action=open&asin=B00AAUBP3G&location=2883) ^ref-47093
+
+---
+in the capillary networks in our organs to about 50 mmHg. — location: [2884](kindle://book?action=open&asin=B00AAUBP3G&location=2884) ^ref-58267
+
+---
+In most cells, the oxygen pressure is approximately 1–10 mmHg. — location: [2886](kindle://book?action=open&asin=B00AAUBP3G&location=2886) ^ref-23598
+
+---
+The oxygen pressure inside the mitochondria is typically less than 0.5 mmHg. In percentage terms, this is less than 0.3 per cent of atmospheric oxygen levels, or 0.07 per cent of total atmospheric pressure. — location: [2888](kindle://book?action=open&asin=B00AAUBP3G&location=2888) ^ref-21598
+
+---
+haemoglobin-like molecules may have been present in LUCA. — location: [2896](kindle://book?action=open&asin=B00AAUBP3G&location=2896) ^ref-63557
+
+---
+molecule that regulates oxygen storage and supply. — location: [2898](kindle://book?action=open&asin=B00AAUBP3G&location=2898) ^ref-52803
+
+---
+The haemoglobinlike molecule that they discovered in Halobacterium salinarum functions as an oxygen sensor, which enables the archaeon to sense oxygen levels and to migrate towards zones with ideal oxygen concentrations. — location: [2905](kindle://book?action=open&asin=B00AAUBP3G&location=2905) ^ref-58746
+
+---
+The eukaryotes must have evolved from a lineage that had lost the genes for most respiratory proteins, including cytochrome oxidase, before regaining some of them from the purple bacteria that ultimately evolved into mitochondria. — location: [2912](kindle://book?action=open&asin=B00AAUBP3G&location=2912) ^ref-27074
+
+---
+here’s a summary of the new evolutionary scheme. LUCA lived in a world scorched by radiation. This in itself suggests that wherever life might have originated, LUCA herself must have lived, at least part of the time, in the surface oceans. As the archaea evolved from LUCA (rather than the other way around) the sulphurous, heat-loving extremophiles cannot truly represent the earliest forms of life, as some have argued. On the contrary: if LUCA was metabolically versatile, then she must have lived in a world demanding versatility, and this must have included the surface layer of the oceans. The effect of radiation on the ocean surface was far from the barren sterility often portrayed. By splitting water to generate free radicals and hydrogen peroxide, ultraviolet radiation provided an additional source of energy. Hydrogen peroxide was stable enough to build up in shallow seas and lakes before dissociating to produce water and oxygen. Oxygen generated in this way within cells could be captured and stored, using haemoglobin. This oxygen was later released for energy production using cytochrome oxidase. The ubiquitous haem chemical group, a component of cytochrome oxidase and haemoglobin, may even have been the basis for the evolution of the chemically closely related chlorophylls, which could capture light energy and convert it into sugars using variants of the existing respiratory pathways.6 The first photosynthesizers probably split hydrogen sulphide or iron salts, but as these resources were depleted, in sheltered environments, by oxidative stress (see Chapter 7), selective pressure drove the adaptation to alternatives: hydrogen peroxide and finally water. Once oxygenic photosynthesis had evolved, free oxygen began to build up in the atmosphere and oceans, transforming the world for ever. Yet the ideal oxygen levels for respiratory metabolism remained close to those in which the respiratory enzymes had evolved in the first place. Even today, our own cytochrome oxidase functions best at an oxygen concentration of less than 0.3 per cent of atmospheric oxygen pressure. Our bodies strive to maintain mitochondrial oxygen concentrations at this level. — location: [2922](kindle://book?action=open&asin=B00AAUBP3G&location=2922) ^ref-26106
+
+---
+The continuous strain between external and internal oxygen levels lies at the root of many human ailments — a strain that is ultimately worked out in the antioxidant balance of individual cells. The retention of a primordial antioxidant balance is analogous to the salt composition of fluids in the human body, which still parallels the sea water in which our single-celled ancestors once swam. — location: [2939](kindle://book?action=open&asin=B00AAUBP3G&location=2939) ^ref-48217
+
+---
+The combination of SOD with some sort of enzyme to remove hydrogen peroxide is almost mandatory if cells are to defuse free radicals before too much damage is done. — location: [3540](kindle://book?action=open&asin=B00AAUBP3G&location=3540) ^ref-51099
+
+---
+Many of the best-known antioxidants, including carotenoids, flavenoids, phenols and tannins, must be obtained in the diet from plants. — location: [3551](kindle://book?action=open&asin=B00AAUBP3G&location=3551) ^ref-11452
+
+---
+people with the highest levels of uric acid in their blood stream are also at the greatest risk of a heart attack. — location: [3563](kindle://book?action=open&asin=B00AAUBP3G&location=3563) ^ref-9583
+
+---
+NFKB marshals the ‘stress’ response by activating a mixture of offensive (inflammatory) and defensive (antioxidant) genes. — location: [3619](kindle://book?action=open&asin=B00AAUBP3G&location=3619) ^ref-62439
+
+---
+the effects of radiation on biological molecules are mediated largely by the splitting of water (by the radiation) to produce oxygen free radicals such as hydroxyl radicals. — location: [3797](kindle://book?action=open&asin=B00AAUBP3G&location=3797) ^ref-22330
+
+---
+ageing could be seen as the result of the accumulation of deleterious late-acting mutations over many generations, not within an individual lifetime. — location: [4209](kindle://book?action=open&asin=B00AAUBP3G&location=4209) ^ref-31190
+
+---
+many genes have more than one effect: they are pleiotropic. — location: [4214](kindle://book?action=open&asin=B00AAUBP3G&location=4214) ^ref-19121
+
+---
+The theory of antagonistic pleiotropy assumes that rather than being merely a rubbish bin of late-acting mutations, individual genes involved in ageing would have beneficial actions early in life and detrimental actions later. — location: [4218](kindle://book?action=open&asin=B00AAUBP3G&location=4218) ^ref-34506
+
+---
+insulin and its cousins control the triangle of nutrition, reproduction and longevity. — location: [4296](kindle://book?action=open&asin=B00AAUBP3G&location=4296) ^ref-24302
+
+---
+The actions of insulin are countered by the hormone glucagon, which restores blood glucose levels to normal. — location: [4299](kindle://book?action=open&asin=B00AAUBP3G&location=4299) ^ref-34931
+
+---
+Far from living longer, people with type 2 diabetes are at high risk of heart attacks, stroke, blindness, renal failure, gangrene and limb amputation. Average lifespan is at least ten years shorter than the general population. — location: [4330](kindle://book?action=open&asin=B00AAUBP3G&location=4330) ^ref-33225
+
+---
+all populations with lactose tolerance have a low susceptibility to diabetes. Conversely, all populations that are lactose intolerant are highly susceptible to diabetes. — location: [4377](kindle://book?action=open&asin=B00AAUBP3G&location=4377) ^ref-2100
+
+---
+If we measure the heart rate of a mouse and multiply it by the lifespan, we get a number that is similar for most other mammals, whether horse, cow, cat, dog or guinea-pig. — location: [4406](kindle://book?action=open&asin=B00AAUBP3G&location=4406) ^ref-34420
+
+---
+If we compare the metabolic rates and maximum lifespans of different animals, the relationship is striking. A horse has a maximum lifespan of about 35 years and a basal metabolic rate of about 0.2 litres of oxygen per kilogram per hour. Over a lifetime, it consumes around 60000 litres of oxygen per kilogram. — location: [4410](kindle://book?action=open&asin=B00AAUBP3G&location=4410) ^ref-54090
+
+---
+The correlation holds surprisingly well for most mammals. The ‘constant’ is known as the lifetime energy potential. At first, the lifetime energy potential was thought of in terms of the rate of chemical reactions. Later, a connection was made between the rate of metabolism and the rate of free-radical production. The reasoning is as follows. A small proportion of the oxygen consumed in cellular metabolism (a few per cent) leaks out of the mitochondria in the form of super-oxide radicals (see Chapter 6). Over a lifetime, such continuous leakage should account for a substantial production of superoxide radicals — perhaps as much as 2000 litres per kilogram. — location: [4413](kindle://book?action=open&asin=B00AAUBP3G&location=4413) ^ref-47977
+
+---
+if the free-radical theory is correct, birds must produce fewer free radicals than mammals, even though they consume far more oxygen. — location: [4452](kindle://book?action=open&asin=B00AAUBP3G&location=4452) ^ref-51750
+
+---
+isolated pigeon mitochondria consumed three times as much oxygen as rat mitochondria isolated from the equivalent tissues. Despite such high oxygen consumption, pigeon mitochondria produced only one third as much hydrogen peroxide under the same conditions. Barja concluded that the proportion of oxygen converted into free radicals in pigeons is nearly 10 per cent that of rats, corresponding to the nearly tenfold longer lifespan of pigeons. — location: [4455](kindle://book?action=open&asin=B00AAUBP3G&location=4455) ^ref-44112
+
+---
+The disposable soma theory argues that longevity is a trade-off between the resources committed to reproduction and those committed to bodily maintenance. We maintain our bodies in two ways — by preventing damage from happening in the first place, and by repairing any damage actually done. The amount of damage prevented depends, in large part, on the intrinsic rates of production and elimination of free radicals. The amount of damage repaired depends on the rate of turnover of DNA, membranes and proteins, in which damaged molecules are replaced new for old. The repair work can only be performed efficiently if the machinery is not itself damaged. Free radicals are undiscriminating, and damage the repair machinery, and the DNA encoding it, as easily as anything else. In the end, then, poor prevention leads to poor repair. — location: [4560](kindle://book?action=open&asin=B00AAUBP3G&location=4560) ^ref-25433
+
+---
+stress can be avoided either through the countering action of stress proteins, or by lowering the rate of respiration and the intensity of inflammation. Either way, the secret of a long life is low metabolic stress. — location: [4574](kindle://book?action=open&asin=B00AAUBP3G&location=4574) ^ref-48045
+
+---
+The potential number of divisions that a single cell can make before dying (or more precisely, the number of population doublings) became known as the Hayflick limit. Different cell types have different Hayflick limits, but we now know that essentially all somatic cells senesce and finally die. — location: [4657](kindle://book?action=open&asin=B00AAUBP3G&location=4657) ^ref-47354
+
+---
+Because of the way the biochemical machinery for replicating DNA works, it is impossible to replicate the extreme ends of a linear DNA molecule. As a result, the chromosome gets shorter each time it is copied. — location: [4676](kindle://book?action=open&asin=B00AAUBP3G&location=4676) ^ref-58997
+
+---
+Human fibroblasts lose all their telomeres after a maximum of about 70 cell divisions. — location: [4682](kindle://book?action=open&asin=B00AAUBP3G&location=4682) ^ref-9401
+
+---
+This limit is determined by the original length of the telomere and the rate at which it is used up — but in general, the longer it was at the beginning, the more cell divisions are possible. — location: [4683](kindle://book?action=open&asin=B00AAUBP3G&location=4683) ^ref-14479
+
+---
+How do cancer cells escape? It seems they make use of an enzyme, called telomerase, which regenerates the telomeres, so that their length is not perpetually truncated. Telomerase is thought to be present in all cancer cells. — location: [4685](kindle://book?action=open&asin=B00AAUBP3G&location=4685) ^ref-54101
+
+---
+The brain, heart, major arteries and the ‘skeletal’ muscles that enable us to move are composed largely of specialized cells that have a job to do, that do not divide and are not easily replaced. A centenarian’s brain has nerve cells (neurons) that are 100 years old. — location: [4705](kindle://book?action=open&asin=B00AAUBP3G&location=4705) ^ref-39590
+
+---
+Fibroblasts taken from elderly donors can usually still divide between 20 and 50 times before becoming senescent and dying: clearly they never reached their limit in the body. — location: [4718](kindle://book?action=open&asin=B00AAUBP3G&location=4718) ^ref-48436
+
+---
+There is a poor correlation between telomere length and the maximum lifespan of different species. Mice have far longer telomeres than humans, even though we live 25 times longer. — location: [4721](kindle://book?action=open&asin=B00AAUBP3G&location=4721) ^ref-43751
+
+---
+Liver, kidney and heart-muscle cells have as many as 2000 mitochondria each, — location: [4754](kindle://book?action=open&asin=B00AAUBP3G&location=4754) ^ref-40925
+
+---
+Cancer cells become less differentiated as they multiply, and lose their mitochondria in the process. They thrive on anaerobic respiration. — location: [4762](kindle://book?action=open&asin=B00AAUBP3G&location=4762) ^ref-46880
+
+---
+Some evidence suggests that a large proportion of embryos fail to develop past the early stages of pregnancy because of a problem with their mitochondria. — location: [4842](kindle://book?action=open&asin=B00AAUBP3G&location=4842) ^ref-5793
+
+---
+Ageing is not simply the accumulation of late-acting mutations, as argued by the theory of antagonistic pleiotropy (see Chapter 12, page 239). Even without succumbing to genetic disease, we will eventually die of mitochondrial wear and tear. It is quite plausible that the time required for mitochondrial burn-out in long-lived cells, such as neurons, heart and skeletal muscle cells, is close to the maximum human lifespan of 115 to 120 years. — location: [4911](kindle://book?action=open&asin=B00AAUBP3G&location=4911) ^ref-42468
+
+---
+how can Oedipus be said to have sinned, he who was condemned by an oracle before his own birth? — location: [4941](kindle://book?action=open&asin=B00AAUBP3G&location=4941) ^ref-52237
+
+---
+We accept the inevitability of genetics in the same way that the Greeks accepted the inevitability of fate. — location: [4953](kindle://book?action=open&asin=B00AAUBP3G&location=4953) ^ref-45460
+
+---
+The different working versions of a gene are known as polymorphic alleles. — location: [4978](kindle://book?action=open&asin=B00AAUBP3G&location=4978) ^ref-17601
+
+---
+People who reach the age of 100 in good health often have a similar accumulation of damage to their DNA, lipids and proteins as people in poor health at the age of 50. — location: [5086](kindle://book?action=open&asin=B00AAUBP3G&location=5086) ^ref-28096
+
+---
+old age is not a function of time, but a function of oxidative stress, which tends to rise over time. — location: [5092](kindle://book?action=open&asin=B00AAUBP3G&location=5092) ^ref-38264
+
+---
+To find a cure for dementia, we should forget about the genes that increase our susceptibility to dementia, and look instead for genes — or other factors — that can protect us against oxidative stress. — location: [5094](kindle://book?action=open&asin=B00AAUBP3G&location=5094) ^ref-14651
+
+---
+There are two critical points to take home from this. First, age-related diseases are connected with being old, regardless of how much time has elapsed. Second, factors that change the underlying rate of ageing affect when we suffer from disease. If ageing is slowed down, age-related diseases are postponed; if ageing is sped up, the diseases are upon us in middle age. — location: [5110](kindle://book?action=open&asin=B00AAUBP3G&location=5110) ^ref-8473
+
+---
+oxidative stress rises as we get older, but we can only gain limited protection from dietary antioxidants. — location: [5142](kindle://book?action=open&asin=B00AAUBP3G&location=5142) ^ref-18883
+
+---
+some sort of oxidative stress is a necessary signal for cells to marshal their genetic response to physiological stress. If we block oxidative stress, we may make ourselves more vulnerable to infection. Seen in this light, it is quite conceivable that we are ‘refractory’ to large doses of dietary antioxidants because they interfere with our response to stress. — location: [5153](kindle://book?action=open&asin=B00AAUBP3G&location=5153) ^ref-36264
+
+---
+In effect, the diseases of old age are the price we pay for the way in which we are set up to handle infections and other forms of stress in our youth. — location: [5169](kindle://book?action=open&asin=B00AAUBP3G&location=5169) ^ref-55069
+
+---
+The problem is that oxidative stress is a necessary part of our response to infection: without it, we are unable to mount a genetic defence against pathogens. — location: [5173](kindle://book?action=open&asin=B00AAUBP3G&location=5173) ^ref-15495
+
+---
+In the young cell (a), infections (an external reversible trigger) cause a rise in oxidative stress within the cell. Oxidative stress activates NFΚB, which migrates to the nucleus, where it orchestrates the transcription of ‘retaliatory’ genes. These genes code for stress proteins and proteins that mediate inflammation, such as tumour necrosis factor and nitric oxide synthase. Active inflammation resolves the infection. Once the trigger is removed, oxidative stress returns to normal. In the old cell (b), an equivalent rise in oxidative stress is brought about by leaky mitochondria (an internal irreversible trigger), which also activate NFΚB and the inflammatory response. In this case, it is impossible to resolve the trigger, so the inflammatory response becomes chronic. This contributes to the diseases of old age, and also attenuates the acute response to infections and other physical stresses. Because oxidative stress is pivotal to our recovery from infections in youth, and therefore affects our likelihood of surviving to have children, it is positively selected for by natural selection to our own detriment in old age. — location: [5193](kindle://book?action=open&asin=B00AAUBP3G&location=5193) ^ref-51854
+
+---
+Infectious diseases cause a rise in oxidative stress, which is largely responsible for coordinating our genetic response to the infection. As we age, mitochondrial respiration also causes a rise in oxidative stress, which activates essentially the same genes through a common mechanism that involves transcription factors like NFΚB. Unlike infections, however, ageing is not easily reversed: mitochondrial damage accumulates continuously. The stress response and inflammation therefore persist, and this creates a harsh environment for the expression of ‘normal’ genes. The expression of normal genes in an oxidized environment is the basis of their negative pleiotropic effects in old age — location: [5245](kindle://book?action=open&asin=B00AAUBP3G&location=5245) ^ref-38561
+
+---
+tau protein only coagulates when oxidized. Conversely, if oxidation is prevented by antioxidants, tau will not coagulate.10 In other words, tangles, like plaques, usually form under conditions of oxidative stress. — location: [5319](kindle://book?action=open&asin=B00AAUBP3G&location=5319) ^ref-64670
+
+---
+One antioxidant proved to delay the onset of Alzheimer’s disease is vitamin E. — location: [5346](kindle://book?action=open&asin=B00AAUBP3G&location=5346) ^ref-63416
+
+---
+amyloid plaques are formed through the action of free radicals on amyloid, and then exert their toxic effects by producing more free radicals. They are free-radical amplifiers. — location: [5352](kindle://book?action=open&asin=B00AAUBP3G&location=5352) ^ref-42262
+
+---
+The indirect toxicity of both tangles and plaques almost certainly results from inflammation. Plaques and tangles are recognized as alien by the brain’s resident inflammatory cells, the microglial cells, which attempt to engulf the ‘invaders’ and attack them with chemicals, including free radicals. — location: [5355](kindle://book?action=open&asin=B00AAUBP3G&location=5355) ^ref-39606
+
+---
+By the time that Alzheimer’s disease can be diagnosed by standard clinical criteria, a quarter of the brain’s neurons — 25 billion of them — are dead. This vicious circle of inflammation is so important that the Canadian researchers Patrick and Edith McGeer have described Alzheimer’s disease as arthritis of the brain. — location: [5361](kindle://book?action=open&asin=B00AAUBP3G&location=5361) ^ref-17906
+
+---
+Activation of NFΚB in Alzheimer’s disease, as in an infection, has two complementary effects: it fans the fires of inflammation, and at the same time shields our healthy cells from the same flames. — location: [5386](kindle://book?action=open&asin=B00AAUBP3G&location=5386) ^ref-36790
+
+---
+The difference in Alzheimer’s disease is that the storm is never-ending, albeit less violent. The inflammatory glial cells in the brain are incited by chemical messengers to attack the plaques and tangles, but healthy neurons are threatened with collateral damage. — location: [5391](kindle://book?action=open&asin=B00AAUBP3G&location=5391) ^ref-20864
+
+---
+If NFΚB is ‘switched off, healthy neurons are more vulnerable to damage — of course, they no longer have their sandbags to protect them — but then the inflammation may at least come to an end, so there is less need of protection. The balance is delicate and unpredictable. A practical solution is to block the activation of NFΚB only in inflammatory cells. To some extent this can be achieved using aspirin or non-steroidal anti-inflammatory drugs (NSAIDs).11 Several studies have shown that people prescribed aspirin or NSAIDs over a number of years to control rheumatic pain have less than half the risk of dementia, compared with their contemporaries. — location: [5396](kindle://book?action=open&asin=B00AAUBP3G&location=5396) ^ref-38170
+
+---
+what have we learnt from Alzheimer’s disease? First, the known genetic mutations affect a small fraction of people with Alzheimer’s disease and their effects are delayed until middle age. This delay implies that, as in mice and monkeys, oxidative stress must cross a threshold before neurons die en masse and dementia can be diagnosed clinically. Second, all other known risk factors for Alzheimer’s disease, including Down syndrome, ApoE4 and herpes simplex infection, are associated with a rise in oxidative stress. Third, oxidative stress alone is sufficient to cause dementia in old age in people with no known risk factors (about half the people who succumb to dementia in old age). Fourth, factors that lower oxidative stress, such as aspirin and vitamin E, can postpone the onset of dementia by a few years, if not indefinitely. — location: [5404](kindle://book?action=open&asin=B00AAUBP3G&location=5404) ^ref-35251
+
+---
+Alzheimer’s disease is linked with age because age is a function of oxidative stress. — location: [5410](kindle://book?action=open&asin=B00AAUBP3G&location=5410) ^ref-10022
+
+---
+ageing and age-related diseases are degenerative conditions brought about by the combination of mitochondrial leakage, oxidative stress and chronic inflammation. — location: [5419](kindle://book?action=open&asin=B00AAUBP3G&location=5419) ^ref-19167
+
+---
+Cigarette smoke is dangerous because it is the most dastardly free-radical generator known — location: [5424](kindle://book?action=open&asin=B00AAUBP3G&location=5424) ^ref-21773
+
+---
+Many chemicals in cigarette smoke, including semiquinones, polyphenols and carbonyl sulphide, react with oxygen to form superoxide radicals, hydroxyl radicals and hydrogen peroxide, as well as nitric oxide and peroxynitrite. — location: [5425](kindle://book?action=open&asin=B00AAUBP3G&location=5425) ^ref-8614
+
+---
+Up to 80 per cent of people with cardiovascular disease are infected with Chlamydia, but whether this is a cause or an effect of heart disease is still disputed. — location: [5444](kindle://book?action=open&asin=B00AAUBP3G&location=5444) ^ref-9584
+
+---
+the cause of atherosclerosis is oxidative stress, and the process can be started, or perpetuated, by smoking, AGEs, oxidized cholesterol, ApoE4, infections, or just old age. Any one of these factors makes the others more likely. All are united by oxidative stress, and converted into the common currency of inflammation by NFΚB and its kin. Because many of these factors are ‘external’ (not produced within our own cells by mitochondrial leakage) they are more responsive to antioxidant therapies than is mitochondrial ageing, which cannot be easily reversed. This is why a healthy diet, or possibly antioxidant supplements, can postpone the onset or progression of heart disease, but do not ultimately prevent ageing. — location: [5446](kindle://book?action=open&asin=B00AAUBP3G&location=5446) ^ref-48317
+
+---
+High levels of activated NFΚB are found in most cancers and may be necessary for the transformation of a normal cell into a cancer cell. — location: [5466](kindle://book?action=open&asin=B00AAUBP3G&location=5466) ^ref-24243
+
+---
+the mutation rate of mitochondrial genes is higher than the mutation rate of nuclear genes by an order of magnitude. — location: [5557](kindle://book?action=open&asin=B00AAUBP3G&location=5557) ^ref-27632
+
+---
+Water retention was the first gift of photosynthesis. — location: [5590](kindle://book?action=open&asin=B00AAUBP3G&location=5590) ^ref-38500
+
+---
+The balance between sex and survival, between passing genes on to the next generation and surviving long enough to do so, underlies the evolution of an optimal lifespan. — location: [5625](kindle://book?action=open&asin=B00AAUBP3G&location=5625) ^ref-22204
+
+---
+Lifespan therefore varies according to the rate of free-radical production and the degree of protection against their effects.3 Birds have high metabolic rates, but live a long time because they leak relatively few free radicals from their mitochondria (good primary prevention) and have good repair systems. We also live a long time, despite leaking more free radicals than birds, because we have invested more in antioxidant defences (good secondary prevention) and, like birds, have good repair systems. Rats live a short time because they have a high metabolic rate, leaky mitochondria, poor antioxidant defences, and rudimentary repair systems. — location: [5647](kindle://book?action=open&asin=B00AAUBP3G&location=5647) ^ref-51536
+
+---
+Free radicals are therefore dynamic indicators of the energy levels and general ‘health’ of the cell. — location: [5673](kindle://book?action=open&asin=B00AAUBP3G&location=5673) ^ref-36745
+
+---
+In old age, oxidative stress rises as our mitochondria leak free radicals into the cell. The body perceives this as a threat and responds accordingly. Unlike infections, however, the new threat cannot be eliminated: — location: [5700](kindle://book?action=open&asin=B00AAUBP3G&location=5700) ^ref-57400
+
+---
+there is no cure for broken mitochondria. Instead, the chronic inflammatory response is perpetuated indefinitely and contributes to our physical and mental demise. — location: [5702](kindle://book?action=open&asin=B00AAUBP3G&location=5702) ^ref-63368
+
+---
+Bird mitochondria hardly leak any free radicals. — location: [5830](kindle://book?action=open&asin=B00AAUBP3G&location=5830) ^ref-8687
+
+---
+people with the Mt5178A variant are more likely to survive to a hundred and less likely to suffer from age-related diseases than people with the normal version. — location: [5842](kindle://book?action=open&asin=B00AAUBP3G&location=5842) ^ref-55214
+
+---
+it is a single-letter substitution in a mitochondrial gene — location: [5850](kindle://book?action=open&asin=B00AAUBP3G&location=5850) ^ref-22767
+
+---
+We have about 35 000 genes, of which a mere 13 protein-coding genes are in the mitochondria instead of the nucleus. Of these 13 genes, a single-letter change in one of them is enough to halve our risk of getting any age-related disease, and virtually double our chance of living to a hundred. — location: [5851](kindle://book?action=open&asin=B00AAUBP3G&location=5851) ^ref-10548
+
+---
+One difference between species that correlates well with longevity is the lipid composition of mitochondrial membranes. — location: [5892](kindle://book?action=open&asin=B00AAUBP3G&location=5892) ^ref-50803
+
+---
+Animals with long lifespans had low levels of highly unsaturated fatty acids, such as docosahexanoic acid (with six double bonds) and arachidonic acid (with four double bonds) but much higher levels of slightly unsaturated fatty acids with two or three double bonds, such as linoleic acid. In other words, the longer the lifespan, the lower the level of unsaturation. — location: [5907](kindle://book?action=open&asin=B00AAUBP3G&location=5907) ^ref-28663
+
+---
+Animals get ‘more unsaturated’ as they age. — location: [5913](kindle://book?action=open&asin=B00AAUBP3G&location=5913) ^ref-2617
+
+---
+To reverse the changes that take place as we age, we need to reverse the changes in gene expression, and this is much easier than altering the sequence of the genes themselves. — location: [5920](kindle://book?action=open&asin=B00AAUBP3G&location=5920) ^ref-50941
+
+---
+Exercise itself benefits mitochondria. — location: [5939](kindle://book?action=open&asin=B00AAUBP3G&location=5939) ^ref-62668
+
+---
+When we exercise, the higher demand for energy stimulates mitochondrial replication. The healthiest mitochondria now replicate fastest, and this regenerates the stock of viable mitochondria. As usual, there is a catch: vigorous exercise often causes more oxidative damage than it cures, — location: [5942](kindle://book?action=open&asin=B00AAUBP3G&location=5942) ^ref-58577
+
+---
+oxygen is not just the engine of evolution and life, but also the single most important cause of ageing and age-related disease. — location: [5983](kindle://book?action=open&asin=B00AAUBP3G&location=5983) ^ref-54260
+
+---

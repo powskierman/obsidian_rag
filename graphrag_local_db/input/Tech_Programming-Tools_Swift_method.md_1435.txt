@@ -1,0 +1,17 @@
+# method.md
+
+---
+aliases: [methods]
+---
+
+2022-06-24
+# method
+
+### Backlink
+[[Object Oriented Programming|OOP]]
+
+### Reference
+
+### Notes
+- A method is a function associated with a class (Within the curly braces of the class) 
+-

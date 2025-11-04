@@ -1,0 +1,34 @@
+# Dataview commands.md
+
+---
+aliases: []
+---
+# Dataview commands
+Date: 2022-07-05
+
+### Tags: 
+
+### Backlink
+[[Dataview MOC]]
+
+### Reference
+- [Dataview in-depth Tutorial Part 1](https://youtu.be/sEgzrRNkgsE)
+- [Dataview in-depth Tutorial, Part 2](https://youtu.be/jW5pD4SioFM)
+- [Dataview Github page](https://blacksmithgu.github.io/obsidian-dataview/)
+- 
+### Notes
+-  The general format for queries is:
+	(3 backticks)dataview
+	TABLE|LIST|TASK <field> [AS "Column Name"], <field>, ..., <field> FROM <source>
+	WHERE <expression>
+	SORT <expression> [ASC/DESC] ...
+	other data commands (3 backticks)
+- from:
+	- from [[Tech MOC]]
+	- from outgoing([[Tech MOC]])
+- The 3 logical operators can be used:
+	- AND
+	- OR
+	- - (not)
+- A file path can be listed
+	- LIST "File Path: "+file.path
