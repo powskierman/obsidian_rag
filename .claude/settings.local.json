@@ -29,7 +29,8 @@
       "Bash(timeout:*)",
       "Bash(ollama list:*)",
       "WebSearch",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
