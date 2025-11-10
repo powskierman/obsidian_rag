@@ -31,6 +31,8 @@
 .Python
 .coverage
 .env
+.env.*
+.env.claude
 .hypothesis/
 .idea/
 .pytest_cache/
