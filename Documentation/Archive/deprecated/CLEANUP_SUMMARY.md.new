@@ -1,0 +1,189 @@
+# 🧹 Codebase Cleanup Summary
+
+**Date**: November 7, 2025  
+**Purpose**: Remove deprecated local graph indexing (LightRAG, GraphRAG, FastGraph) and simplify to current architecture
+
+## ✅ What Was Removed
+
+### Services Removed
+1. **LightRAG Service** (`lightrag-service`)
+   - Removed from `docker-compose.yml`
+   - Removed Dockerfile references
+   - Removed from Streamlit UI
+
+2. **FastGraph Service** (`fastgraph-service`)
+   - Removed from `docker-compose.yml`
+   - Removed Dockerfile references
+   - Removed from Streamlit UI
+
+3. **LightRAG GPT-OSS Service** (`lightrag-gpt-oss-service`)
+   - Removed from `docker-compose.yml`
+
+### UI Options Removed
+- `graph-naive` (LightRAG)
+- `graph-local` (LightRAG)
+- `graph-global` (LightRAG)
+- `graph-hybrid` (LightRAG)
+- `graph-fast` (FastGraph)
+
+### Code Removed
+- LightRAG service health checks
+- FastGraph service health checks
+- LightRAG query handlers
+- FastGraph query handlers
+- Related service URLs and environment variables
+
+## ✅ What Was Added
+
+### New Services
+1. **Claude Graph Service** (`graph-service`)
+   - Added to `docker-compose.yml`
+   - Port 8002
+   - Uses `Dockerfile.graph`
+   - Loads graph from `graph_data/` directory
+
+### New Files
+- `graph_query_service.py` - Flask service for Claude graph queries
+- `Dockerfile.graph` - Docker image for graph service
+
+## 📝 Files Modified
+
+### Core Application Files
+1. **`streamlit_ui_docker.py`**
+   - Removed LightRAG and FastGraph search modes
+   - Kept only `vector` and `graph-claude`
+   - Removed service health checks for deprecated services
+   - Updated help text and documentation
+
+2. **`docker-compose.yml`**
+   - Removed `lightrag-service`
+   - Removed `fastgraph-service`
+   - Removed `lightrag-gpt-oss-service`
+   - Added `graph-service`
+   - Updated dependencies
+   - Removed `lightrag_db` volume
+
+3. **`graph_query_service.py`**
+   - Updated to look in `graph_data/` directory
+   - Added multiple path fallback logic
+   - Improved error handling
+
+4. **`Dockerfile.graph`**
+   - Added curl for health checks
+   - Updated to use main directory structure
+
+## 🗂️ Current Architecture
+
+### Active Services
+1. **Embedding Service** (Port 8000)
+   - ChromaDB vector search
+   - Local, free
+
+2. **Claude Graph Service** (Port 8002)
+   - Claude Haiku API
+   - Knowledge graph queries
+   - Paid (~$0.0014/chunk)
+
+3. **Streamlit UI** (Port 8501)
+   - Web interface
+   - Two search modes: vector, graph-claude
+
+### Search Modes
+- **vector**: Fast semantic search with Ollama
+- **graph-claude**: Claude Haiku-powered knowledge graph
+
+## 📊 Impact
+
+### Before Cleanup
+- 7 search modes (vector + 6 graph modes)
+- 4 services (embedding, lightrag, fastgraph, streamlit)
+- Complex UI with multiple graph options
+- Mixed local/cloud graph indexing
+
+### After Cleanup
+- 2 search modes (vector, graph-claude)
+- 3 services (embedding, graph-service, streamlit)
+- Simplified UI
+- Clear separation: local vector, cloud graph
+
+## 🎯 Benefits
+
+1. **Simplified Architecture**
+   - Easier to understand
+   - Fewer services to maintain
+   - Clearer user choices
+
+2. **Better Performance**
+   - Removed slow local graph indexing
+   - Faster startup times
+   - Less resource usage
+
+3. **Cost Clarity**
+   - Vector search: Free (local)
+   - Graph search: Paid (Claude Haiku)
+   - No confusion about local vs cloud
+
+4. **Maintainability**
+   - Less code to maintain
+   - Fewer dependencies
+   - Clearer documentation
+
+## 📁 Files That Can Be Archived
+
+These files are no longer used but kept for reference:
+
+### Dockerfiles
+- `Dockerfile.lightrag` - Can be archived
+- `Dockerfile.fastgraph` - Can be archived
+
+### Service Files
+- `lightrag_service.py` - Can be archived
+- `fastgraph_service.py` - Can be archived
+
+### Data Directories
+- `lightrag_db/` - Can be archived (contains old LightRAG data)
+
+### Documentation
+- `GRAPH_IMPLEMENTATION_SUMMARY.md` - References old architecture
+- `STREAMLIT_GRAPH_INTEGRATION.md` - May need updates
+
+## ✅ Verification Checklist
+
+- [x] Streamlit UI shows only 2 search modes
+- [x] Docker compose has only 3 services
+- [x] Graph service loads from `graph_data/`
+- [x] No references to LightRAG in UI
+- [x] No references to FastGraph in UI
+- [x] Documentation updated
+- [x] Architecture document created
+
+## 🚀 Next Steps
+
+1. **Test the cleaned up system:**
+   ```bash
+   docker-compose up -d
+   docker ps  # Verify 3 services running
+   ```
+
+2. **Verify UI:**
+   - Open http://localhost:8501
+   - Check sidebar shows only 2 search modes
+   - Test both vector and graph-claude modes
+
+3. **Optional: Archive old files**
+   - Move unused Dockerfiles to `Archive/`
+   - Move unused service files to `Archive/`
+   - Archive `lightrag_db/` if not needed
+
+## 📝 Notes
+
+- All graph data is now in `graph_data/` directory
+- Graph must be built before graph-claude mode works
+- Use `build_knowledge_graph.py` to build/rebuild graph
+- Resume function available if build interrupted
+
+---
+
+**Status**: ✅ Cleanup Complete  
+**Architecture**: Simplified to Vector (Ollama) + Graph (Claude Haiku)
+

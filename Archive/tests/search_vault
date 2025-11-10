@@ -1,0 +1,11 @@
+#!/bin/bash
+# Simple wrapper to search your Obsidian vault via CLI
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$SCRIPT_DIR/venv"
+
+# Activate virtual environment and run the query script
+source "$VENV_DIR/bin/activate"
+python "$SCRIPT_DIR/query_vault.py" "$@"
+

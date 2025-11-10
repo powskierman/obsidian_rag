@@ -1,0 +1,13 @@
+[server]
+# Increase message size limit and timeout settings
+maxMessageSize = 1000
+maxUploadSize = 1000
+enableWebsocketCompression = false
+
+[browser]
+# Browser-level timeout settings
+gatherUsageStats = false
+
+[logger]
+# Logging settings
+level = "info"

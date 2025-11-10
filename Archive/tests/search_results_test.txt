@@ -1,0 +1,3309 @@
+================================================================================
+Result 1
+================================================================================
+
+Filename: Core Concepts.md
+Path: Tech/AI/Sequential Thinking/Core Concepts.md
+Relevance: 96.6%
+
+Content:
+mport XCTest
+      @testable import MyFramework
+
+      class MyFrameworkTests: XCTestCase {
+          func testExampleFunction() {
+              // Your test code here
+          }
+      }
+      ```
+
+3. **Run the Tests**:
+    - Click on the diamond-shaped play button next to each test in the editor or use the `Product` > `Test` menu option to run all tests.
+    - Tests will be executed, and Xcode will display the results.
+
+Both methods will allow you to test the functionality of your framework on a simulator. The best method often depends on the specific nature of your framework and your testing requirements.
+
+================================================================================
+Result 2
+================================================================================
+
+Filename: Kahneman-Thinking, Fast and Slow.md
+Path: Books/Books/Kahneman-Thinking, Fast and Slow.md
+Relevance: 63.7%
+
+Content:
+e app and observe the results in the simulator.
+
+### 2. **Using Unit Tests**:
+
+You can also use unit tests to test the functionality of your framework without needing to create a separate test app.
+
+1. **Add a Test Target to Your Framework**:
+    - Select your framework project in the Project Navigator.
+    - Go to `File` > `New` > `Target`.
+    - Select `iOS` > `Unit Testing Bundle` and click `Next`.
+    - Follow the on-screen instructions to add the test target.
+
+2. **Write Unit Tests**:
+    - Open the test target you just created.
+    - Import your framework and write unit tests for its functionalities.
+    - For example:
+      ```swift
+      import XCTest
+      @testable import MyFramework
+
+      class MyFrameworkTests: XCTestCase {
+          func testExampleFunction() {
+              // Your test code here
+          }
+      }
+      ```
+
+3
+
+================================================================================
+Result 3
+================================================================================
+
+Filename: Advanced Techniques.md
+Path: Tech/AI/Sequential Thinking/Advanced Techniques.md
+Relevance: 25.0%
+
+Content:
+2022-02-02
+# Vertical Line Test
+[[]]
+
+### Reference
+
+### Notes
+-  For a function to be valid, a vertical line must pass through the curve of a function only once.
+-  If we can pass a horizontal and a vertical line through the graph of the function, it is [[inverse function|invertible]]
+-
+
+================================================================================
+Result 4
+================================================================================
+
+Filename: Xcode - Testing a Framework.md
+Path: Tech/Electronics/Hardware/Raspberry-Pi/PiServer/Xcode - Testing a Framework.md
+Relevance: 23.5%
+
+Content:
+2022/01/18
+# constant test
+[[cons]]
+[[Constant rule]]: A constant can move in and out of a [[derivative]]
+- [[Sum Rule]]: The sum of the derivatives = the [[derivative MOC|derivative]] of the sums
+- The [[product rule]] is used when the [[derivative]] of products of two functions is needed
+- The [[power rule]]  allows us to [[differenciation|differentiate]] expressions of the form $x^n$
+	- $d \over dx$$x^n$ = $nx^{n-1}$
+	-
+
+================================================================================
+Result 5
+================================================================================
+
+Filename: Prototyping.md
+Path: Tech/Programming-Tools/Prototyping.md
+Relevance: 6.9%
+
+Content:
+# Xcode - Testing a Framework
+Date: 2023-10-03
+
+### Backlink
+[[../../../../Programming-Tools/Xcode/Xcode MOC]]
+
+### Reference
+-  
+### Notes
+-  To test a framework on a simulator, you can't run the framework directly since it's not an executable project (like an app). Instead, you create a test app or use unit tests. Here's how you can do both:
+
+### 1. **Using a Test App**:
+
+1. **Create a New App within the Same Workspace**:
+    - Open your framework project in Xcode.
+    - Go to `File` > `New` > `Project`.
+    - Select `iOS` > `App` and click `Next`.
+    - Give it a name (e.g., `FrameworkTestApp`) and save it in the same directory as your framework.
+
+2. **Link Your Framework to the Test App**:
+    - Select the `FrameworkTestApp` target in Xcode.
+    - Go to the `General` tab.
+    - Under `Frameworks, Libraries, and Embedded Content`, click `+`.
+    - Add your framework.
+
+3
+
+================================================================================
+Result 6
+================================================================================
+
+Filename: Kicad 9.4 - Expanding the Schematic to Include the ESP32 and Peripherals.md
+Path: Tech/Electronics/Software/Kicad/Kicad 9.4 - Expanding the Schematic to Include the ESP32 and Peripherals.md
+Relevance: -64.8%
+
+Content:
+ion: [1331](kindle://book?action=open&asin=B00555X8OA&location=1331) ^ref-56355
+
+---
+deliberate search for confirming evidence, known as positive test strategy, is also how System 2 tests a hypothesis. Contrary to the rules of philosophers of science, who advise testing hypotheses by trying to refute them, people (and scientists, quite often) seek data that are likely to be compatible with the beliefs they currently hold. — location: [1333](kindle://book?action=open&asin=B00555X8OA&location=1333) ^ref-55824
+
+---
+An essential design feature of the associative machine is that it represents only activated ideas. Information that is not retrieved (even unconsciously) from memory might as well not exist. — location: [1408](kindle://book?action=open&asin=B00555X8OA&location=1408) ^ref-60719
+
+---
+The measure of success for System 1 is the coherence of the story it manages to create. The amount and quality of the data on which the story is based are largely irrelevant
+
+================================================================================
+Result 7
+================================================================================
+
+Filename: HalcyonHass Flowchart.md
+Path: Tech/Electronics/Hardware/Raspberry-Pi/PiServer/HalcyonHass Flowchart.md
+Relevance: -76.7%
+
+Content:
+# iPhone Hearing Test
+Date: 2024-10-31
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Enter this url in safari to access hearing test:
+`x-apple-health://HearingAppPlugin.healthplugin/HearingTest`
+![[IMG_0043.jpeg]]
+
+- Results:
+```Left Average: Little to No Loss 18 dBHL
+
+Right Average: Little to No Loss 18 dBHL
+
+* About Hearing Test Results:
+
+Hearing test results (audiograms) display the result of a pure-tone audiometry test. It shows how loud sounds need to be in order for you to hear them. The result is an average for each ear based on four frequencies (500Hz, 1kHz, 2kHz, 4kHz).
+```
+
+- There are four frequencies important for understanding speech. Hearing loss is classified based on the average loss across those frequencies. The World Health Organization classifies loss into five levels.
+
+```
+Little to No Loss
+
+At less than 25 dB of loss, you should have almost no problem hearing. You can hear a whisper.
+
+Mild Loss
+
+================================================================================
+Result 8
+================================================================================
+
+Filename: Limitations and Troubleshooting.md
+Path: Tech/AI/Sequential Thinking/Limitations and Troubleshooting.md
+Relevance: -107.0%
+
+Content:
+for warnings/errors
+- [ ] Verify uptime is increasing (no crashes)
+- [ ] Test manual override modes
+- [ ] Check WiFi signal strength
+- [ ] Confirm settings persist after testing
+
+### Monthly (Ongoing)
+
+- [ ] Full functional test (all modes)
+- [ ] Clean temperature sensor
+- [ ] Test emergency procedures
+- [ ] Review and optimize hysteresis
+- [ ] Check relay operation
+- [ ] Update ESPHome if new version available
+
+### Quarterly
+
+- [ ] Deep clean all sensors
+- [ ] Inspect all wiring connections
+- [ ] Test sensor calibration
+- [ ] Review automation performance
+- [ ] Backup configuration files
+- [ ] Document any customizations made
+
+### Annually
+
+- [ ] Full system inspection
+- [ ] Professional propane system check
+- [ ] Replace any aging components
+- [ ] Review and update documentation
+- [ ] Test all safety features
+- [ ] Update to latest ESPHome version
+
+---
+
+## 🏆 Project Completion Checklist
+
+### ✅ Implementation Complete
+
+================================================================================
+Result 9
+================================================================================
+
+Filename: LightRAG Implementation Guide.md
+Path: Tech/AI/RAG/LightRAG Implementation Guide.md
+Relevance: -149.0%
+
+Content:
+# 2nd [[derivative MOC|Derivative]]
+- Used to determine if we have a local or absolute min or max [[extremum]]
+	- if $f(x)$ = 0 we have a local [[extremum]]
+- the [[2nd derivative test]] measures the [[average rate of change|rate of change]] of the 1st [[derivative MOC|derivative]]
+	- It can tell us if the point is a local [[extremum]]
+	- It can't tell us if it is a global [[extremum]]
+
+================================================================================
+Result 10
+================================================================================
+
+Filename: Rollback Procedures.md
+Path: Obsidian/Optimization/Rollback Procedures.md
+Relevance: -155.4%
+
+Content:
+ration and testing:
+
+```
+1. Generate 3-4 competing hypotheses
+2. Define testable predictions for each
+3. Test each systematically
+4. Revise based on evidence
+5. Converge on most likely explanation
+```
+
+**Best for:**
+- Debugging complex systems
+- Root cause analysis
+- Scientific reasoning
+- Medical diagnosis (conceptual)
+
+**Key Principle:** Generate multiple hypotheses before testing any.
+
+---
+
+### 3. Iterative Refinement Pattern
+
+Start rough, refine progressively:
+
+```
+Iteration 1: Rough solution (satisfices)
+Iteration 2: Add detail (handles edge cases)
+Iteration 3: Optimize (efficiency)
+Iteration 4: Polish (production ready)
+```
+
+**When to use:**
+- System design
+- Architecture decisions
+- Process improvement
+- Creative solutions
+
+**Tip:** Make each iteration a distinct thought with explicit improvements.
+
+---
+
+### 4. Constraint-Driven Design
+
+Use constraints to guide exploration:
+
+================================================================================
+Result 11
+================================================================================
+
+Filename: Parameters Reference.md
+Path: Tech/AI/Sequential Thinking/Parameters Reference.md
+Relevance: -156.0%
+
+Content:
+**
+1. **Backup before every major change**
+2. **Test on small scale first**
+3. **One change at a time**
+4. **Verify before proceeding**
+5. **Document everything**
+6. **Don't rush**
+
+---
+
+## Status Log
+
+### 2025-10-16
+- ✅ Document created
+- ⏳ Needs review before Phase 0
+- ⏳ Test procedures need validation
+
+### Next Review: [Before Phase 1 execution]
+
+---
+
+**Document Owner:** Vault Optimization Project  
+**Emergency Contact:** [Your method to reach yourself/reminder system]  
+**Last Tested:** [Date when procedures were last tested]
+
+================================================================================
+Result 12
+================================================================================
+
+Filename: Cardiac Oncology Clinic.md
+Path: Medical/Lymphoma/Cardiac Oncology Clinic.md
+Relevance: -173.9%
+
+Content:
+asier than editing JSON directly.
+
+You can also add custom slash commands pretty easily. To add commands, just create a `.claude/commands` folder, add the command name as a file with a `.md` extension. You just write these in natural language and you can use the `$ARGUMENTS` string to place arguments into the prompt.
+
+For example, if I want to output a test, I can create `.claude/commands/test.md`:
+
+```
+# .claude/hooks/test.md
+Please create comprehensive tests for: $ARGUMENTS
+
+Test requirements:
+- Use Jest and React Testing Library
+- Place tests in __tests__ directory
+- Mock Firebase/Firestore dependencies
+- Test all major functionality
+- Include edge cases and error scenarios
+- Test MobX observable state changes
+- Verify computed values update correctly
+- Test user interactions
+- Ensure proper cleanup in afterEach
+- Aim for high code coverage
+```
+
+Then `/test MyButton` does exactly what you'd expect
+
+================================================================================
+Result 13
+================================================================================
+
+Filename: IMPLEMENTATION_REPORT.md
+Path: Tech/Electronics/Projects/GazeboWX/media/IMPLEMENTATION_REPORT.md
+Relevance: -179.6%
+
+Content:
+main points that we can extract from this article are:
+
+- It is possible to acquire crucial information from user testing of lo-fi prototypes early in the design process (layout and navigation flow).
+
+- According to the level of fidelity of the prototype, we can gain different types of information (cognitive or visual) from user testing.
+
+- It is fundamental to gather cognitive design information before other issues, such as attractive visual assets.
+
+At different stages of the development process, there are various tools that user experience designers can use to validate their concepts or designs. But, whatever prototype we may use, testing it is the only way that will help us learn about user interactions to enhance the user experience.
+
+App design project on Behance.
+
+================================================================================
+Result 14
+================================================================================
+
+Filename: Claude Code.md
+Path: Tech/AI/Claude Code.md
+Relevance: -202.3%
+
+Content:
+me}")
+
+# Test queries
+test_queries = [
+    "How does Yescarta relate to my current monitoring plan?",
+    "What factors led to choosing CAR-T over transplant?",
+    "Visualize my treatment timeline"
+]
+
+for query in test_queries:
+    print(f"\nQuery: {query}")
+    result = rag.query(query, mode="hybrid")
+    print(f"Result: {result[:200]}...")
+```
+
+**Resource Requirements:**
+- Storage: +100MB for graph database
+- RAM: +2GB during operations (36GB available ✅)
+- Initial indexing: ~30 minutes for 1,584 files
+- Query time: +5 seconds for graph traversal
+
+================================================================================
+Result 15
+================================================================================
+
+Filename: Vertical Line Test.md
+Path: Math/Vertical Line Test.md
+Relevance: -254.6%
+
+Content:
+─────────────┬───────────────┘
+                            ↓
+                    Thought 5: Compare branches
+                            ↓
+                    Thought 6: Select Branch B
+                            ↓
+                    Thought 7: Final solution ✓
+```
+
+### Use Cases for Branching
+- **Design decisions**: Compare architectural approaches
+- **Scenario planning**: Optimistic vs. pessimistic cases
+- **Trade-off analysis**: Performance vs. maintainability
+- **Risk assessment**: Different risk profiles
+
+---
+
+## Hypothesis Testing
+
+### Scientific Method in Action
+
+Sequential Thinking enables **explicit hypothesis testing**:
+
+```
+1. Observe symptoms
+2. Generate hypothesis
+3. Test hypothesis
+4. If failed → Generate new hypothesis (go to step 2)
+5. If succeeded → Verify thoroughly
+6. Provide answer with confidence
+```
+
+### Example Process
+```
+Thought 1: "API returning errors - observing patterns"
+Thought 2: "Hypothesis: Database connection issue"
+Thought 3: "Testing..
+
+================================================================================
+Result 16
+================================================================================
+
+Filename: Note-taking apps for iPad.md
+Path: Obsidian/media/Note-taking apps for iPad.md
+Relevance: -277.5%
+
+Content:
+oze_test), more commonly known as "fill in the blank". With cloze deletion, a salient keyword is hidden from the passage, giving you an opportunity to pause and actively recall the missing information. This might sound trivial, but the simple act forces you to focus on the surrounding context and search your mind. This effort, in turn, is scientifically proven to form stronger memories enabling you to retain profoundly more of what you've read. To apply cloze deletion to a highlight, hit the Master icon in the web app (keyboard shortcut m).  ([100](https://readwise.io/to_kindle?action=open&asin=null&location=100)) ^334466730
+
+---
+
+Question & Answer (Mastery) ([101](https://readwise.io/to_kindle?action=open&asin=null&location=101)) ^334466731
+
+Note: .h2
+
+---
+
+NEW! Readwise offers increasing degrees of active recall intensity (Mastery). The least demanding is cloze deletion, but the most powerful is question & answer
+
+================================================================================
+Result 17
+================================================================================
+
+Filename: How to Use Readwise.md
+Path: Books/Books/How to Use Readwise.md
+Relevance: -290.1%
+
+Content:
+://readwise.io/to_kindle?action=open&asin=null&location=96)) ^334466726
+
+---
+
+Active Recall (Mastery) ([97](https://readwise.io/to_kindle?action=open&asin=null&location=97)) ^334466727
+
+Note: .h2
+
+---
+
+Readwise helps you remember more of what you read using two principles borrowed from cognitive science: [spaced repetition](https://en.wikipedia.org/wiki/Spaced_repetition) and [active recall](https://en.wikipedia.org/wiki/Active_recall). Active recall (also known as quizzing, testing, or retrieval) is the process by which we challenge our minds to retrieve a piece of information. Simply rereading a passage from time to time, on the other hand, is passive. Rereading is no doubt better than never revisiting the passage, but research has repeatedly shown that active recall is significantly more effective. So how can you take advantage of active recall in Readwise? For any highlight that you wish to deliberately commit to memory, hit the Master icon in the web app (keyboard shortcut m)
+
+================================================================================
+Result 18
+================================================================================
+
+Filename: Perplexity.md
+Path: Tech/AI/Perplexity.md
+Relevance: -304.4%
+
+Content:
+horoughly
+6. Provide answer with confidence
+```
+
+### Example Process
+```
+Thought 1: "API returning errors - observing patterns"
+Thought 2: "Hypothesis: Database connection issue"
+Thought 3: "Testing... DB connections normal. Hypothesis rejected."
+Thought 4: "New hypothesis: Network timeout issue"
+Thought 5: "Testing... Service C timeout at 5s, response time 8s"
+Thought 6: "Hypothesis confirmed! Now finding root cause..."
+```
+
+### Why This Matters
+- **Structured debugging**: Systematic rather than random
+- **Evidence-based**: Conclusions based on verification
+- **Confidence**: Know WHY the answer is correct
+- **Reproducible**: Others can follow the same logic
+
+---
+
+## Comparison: Regular vs. Sequential
+
+### Side-by-Side Example
+
+**Regular Conversation**:
+> "The bottleneck is in your database queries. You're missing indexes on foreign keys, and you have N+1 query problems. Add indexes on user_id, post_id, and created_at columns, and change your ORM queries to use eager loading."
+
+================================================================================
+Result 19
+================================================================================
+
+Filename: Stress Test.md
+Path: Books/Books/Stress Test.md
+Relevance: -317.7%
+
+Content:
+alistic] "6% growth, moderate volatility"
+Thought 8: [Realistic] "ROI: 85% over 5 years"
+Thought 9: "Comparing scenarios: Even in pessimistic case, positive ROI"
+Thought 10: "Decision: Proceed with realistic expectations"
+```
+
+---
+
+### 2. Debugging Production Issues
+
+Use systematic hypothesis testing:
+
+**Pattern**:
+```
+Generate 3-4 hypotheses upfront
+Test each systematically
+Revise based on evidence
+Converge on root cause
+```
+
+**Example**:
+```
+Thought 1: "Production outage - 503 errors"
+Thought 2: "Four hypotheses: DB, cache, network, code bug"
+Thought 3: [Test 1] "DB metrics: normal. Hypothesis 1 rejected"
+Thought 4: [Test 2] "Cache hit rate: 95%. Hypothesis 2 rejected"
+Thought 5: [Test 3] "Network latency: p99 at 5s. Hypothesis 3 confirmed!"
+Thought 6: "Root cause: Network timeout between services"
+Thought 7: "Solution: Increase timeout + add retry logic"
+```
+
+---
+
+### 3. System Design
+
+Use iterative refinement with constraints:
+
+================================================================================
+Result 20
+================================================================================
+
+Filename: Requesting Guide.md
+Path: Tech/AI/Sequential Thinking/Requesting Guide.md
+Relevance: -353.7%
+
+Content:
+s preview my code blocks before executing them to ensure that the formatting is correct and it works as intended.
+-   Executing the code block through the "Run" button is a crucial step in the process. I use it to make sure my code block functions as expected.
+-   And using the "Test" button is the cherry on top. I test my code blocks in specific contexts to guarantee that they work in the environment I need them to.
+
+These tips have been effective for me in ensuring the quality of my code blocks.
+
+## Conclusion
+
+In conclusion, incorporating code blocks into your Obsidian notes can greatly enhance the readability and organization of your code. They provide a visual cue that separates your code from the rest of your notes and make it easier to understand at a glance. By following the tips and tricks outlined in this guide, you can take your note-taking game to the next level.
+
+So, give it a try and let us know in the comments how code blocks have helped you in your note-taking process
+
+================================================================================
+Result 21
+================================================================================
+
+Filename: Usage Patterns.md
+Path: Tech/AI/Sequential Thinking/Usage Patterns.md
+Relevance: -366.5%
+
+Content:
+in Thought 1 was wrong..."
+```
+
+### 2. Adaptive Planning
+
+The number of thoughts can change mid-stream:
+```
+Started with 5 thoughts → Realized need 8 → Finished in 7
+```
+
+### 3. Branching Exploration
+
+Explore multiple paths simultaneously:
+```
+Branch A: Synchronous approach
+Branch B: Async approach
+Compare and choose best
+```
+
+### 4. Hypothesis-Driven
+
+Generate and test hypotheses:
+```
+Hypothesis: "The bottleneck is in the database"
+Test: Check database metrics
+Result: Confirmed/Rejected
+```
+
+### 5. Explicit Verification
+
+Don't just conclude - verify:
+```
+Final thought must verify solution against all constraints
+```
+
+---
+
+## When the Magic Happens
+
+Sequential Thinking truly shines when:
+
+1. **The path isn't clear** - You need to explore to find the solution
+2. **Assumptions might be wrong** - You need flexibility to revise
+3. **Multiple approaches exist** - You need to compare alternatives
+4. **The problem is complex** - Simple answers won't cut it
+5
+
+================================================================================
+Result 22
+================================================================================
+
+Filename: Quick Reference Card.md
+Path: Tech/AI/Sequential Thinking/Quick Reference Card.md
+Relevance: -370.7%
+
+Content:
+🔗 Complementary Tools
+
+```
+Web Search → Gather info
+     ↓
+Sequential Thinking → Reason about it
+     ↓
+Analysis Tool (REPL) → Test with code
+     ↓
+Regular Conversation → Communicate results
+```
+
+---
+
+## 📊 Parameter Examples
+
+### Basic Thought
+```json
+{
+  "thought_number": 3,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Analyzing the database performance..."
+}
+```
+
+### Revision
+```json
+{
+  "thought_number": 5,
+  "total_thoughts": 7,
+  "is_revision": true,
+  "revises_thought": 3,
+  "next_thought_needed": true,
+  "thought": "Actually, my analysis in T3 was wrong because..."
+}
+```
+
+### Branching
+```json
+{
+  "thought_number": 4,
+  "total_thoughts": 8,
+  "branch_from_thought": 2,
+  "branch_id": "async_approach",
+  "next_thought_needed": true,
+  "thought": "Exploring asynchronous alternative..."
+}
+```
+
+================================================================================
+Result 23
+================================================================================
+
+Filename: Lymphoma - Novel Agents.md
+Path: Medical/Lymphoma/Lymphoma - Novel Agents.md
+Relevance: -389.1%
+
+Content:
+|
+|-----------|-----------------------|
+| *RED*     | RAILS_ENV=development |
+| *REP*     | RAILS_ENV=production  |
+| *RET*     | RAILS_ENV=test        |
+
+**Upgrade**
+
+To upgrade .oh-my-zsh, run:
+
+upgrade_oh_my_zsh
+
+================================================================================
+Result 24
+================================================================================
+
+Filename: How I use Claude Code (+ my best tips).md
+Path: Tech/AI/How I use Claude Code (+ my best tips).md
+Relevance: -398.3%
+
+Content:
+erval Tasks:** 4 (10s, 2s, 60s, 30s)
+- **Home Assistant Entities:** 20
+  - Climate: 1
+  - Sensors: 4
+  - Binary Sensors: 4
+  - Switches: 3
+  - Numbers: 6
+  - Text Sensors: 2
+
+### Documentation Metrics
+
+- **Documentation Files:** 8
+- **Total Pages (printed):** ~60
+- **Total Words:** ~15,000
+- **Code Examples:** 40+
+- **Diagrams:** 8
+- **Tables:** 30+
+
+### Requirements Coverage
+
+- **Total Requirements:** 13
+- **Implemented:** 13 (100%)
+- **Acceptance Criteria:** 76
+- **Met:** 73 (96%)
+- **Partial:** 3 (4%)
+- **Failed:** 0 (0%)
+
+### Testing Coverage
+
+- **Hardware Tests:** 6 categories
+- **Functional Tests:** 8 categories
+- **Integration Tests:** 6 categories
+- **Safety Tests:** 6 categories
+- **Total Test Items:** 80+
+
+---
+
+## 🎓 Technical Specifications
+
+### Software Requirements
+
+- **ESPHome:** 2024.6.0 or later
+- **Home Assistant:** Any recent version (2023.1+)
+- **Python:** 3.9+ (for ESPHome)
+- **Nextion Editor:** 1.65.1+ (for display editing)
+
+### Performance Specifications
+
+================================================================================
+Result 25
+================================================================================
+
+Filename: RAG Memory System.md
+Path: Tech/AI/RAG/RAG Memory System.md
+Relevance: -406.5%
+
+Content:
+cessfully!
+Entity 'input_number.interesting_testnumber_1' renamed to 'input_number.just_another_number' successfully!
+Entity 'input_text.interesting_testtext_1' renamed to 'input_text.just_another_text' successfully!
+
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-
+
+================================================================================
+Result 26
+================================================================================
+
+Filename: Obsidian Vault Structure.md
+Path: Obsidian/Optimization/Obsidian Vault Structure.md
+Relevance: -444.1%
+
+Content:
+erns]] - Pattern matching for your use case
+
+**For Deep Work:**
+- [[Advanced Techniques]] - Complex scenarios
+- [[Limitations and Troubleshooting]] - When things go wrong
+
+### Key Concepts at a Glance
+
+- **Adaptive Planning**: Adjust thought count as complexity emerges
+- **Revision Capability**: Question and revise earlier thinking
+- **Branching**: Explore alternative approaches in parallel
+- **Hypothesis Testing**: Generate and verify solutions explicitly
+- **Transparency**: Every reasoning step is visible
+
+### When to Use
+
+✅ Complex multi-step problems
+✅ Problems with unclear scope  
+✅ Planning and design requiring iteration
+✅ Analysis requiring course correction
+✅ Filtering complex information
+
+❌ Simple questions
+❌ Casual conversation
+❌ Quick factual lookups
+---
+aliases:
+  - Sequential Thinking Hub
+  - ST MoC
+tags:
+  - MoC
+  - AI
+  - tools
+  - sequential-thinking
+created: 2025-10-17
+Backlink: "[[AI Tools MoC]]"
+---
+
+## 🎯 Overview
+
+================================================================================
+Result 27
+================================================================================
+
+Filename: The Denial of Death.md
+Path: Books/Books/The Denial of Death.md
+Relevance: -450.2%
+
+Content:
+for unusual conditions
+- ERROR level for failures
+
+✅ **Health Monitoring**
+- System uptime tracking
+- WiFi signal strength monitoring
+- Sensor error counting
+- Regular health checks (every 60 seconds)
+
+✅ **Status Reporting**
+- Clear, human-readable status messages
+- Binary sensors for critical states
+- Text sensors for detailed information
+
+✅ **Configuration Persistence**
+- All settings survive power loss
+- Automatic restore on boot
+- No reconfiguration needed after outage
+
+### User Safety Reminders
+
+⚠️ **CRITICAL SAFETY WARNINGS** ⚠️
+
+1. **Carbon Monoxide Detection**
+   - Install CO detectors in all sleeping areas
+   - Test detectors monthly
+   - Replace batteries annually
+   - Never disable detectors
+
+2. **Manual Control**
+   - Always know how to manually control your stove
+   - Have physical cutoff switches accessible
+   - Test emergency shutdown procedures
+   - Don't rely solely on automation
+
+3
+
+================================================================================
+Result 28
+================================================================================
+
+Filename: Template Review - Recommendations.md
+Path: Obsidian/Optimization/Template Review - Recommendations.md
+Relevance: -459.0%
+
+Content:
+amples have no concept or navigation logic. Moreover, they are hard or impossible to code in a reasonable amount of time. So be careful about these aesthetically pleasant but nonfunctional interfaces.
+
+Conclusion
+The process described in this article is the approach I usually conduct when I design a user experience, but of course, the use of the most appropriate type of prototype depends on various factors. It is evident that low-fi is used to test cognitive aspects of the design, such as the layout of controls and the navigation flow, but not physical aspects such as tactile, auditory, and visual feedback that requires a higher level of fidelity.
+
+The three main points that we can extract from this article are:
+
+- It is possible to acquire crucial information from user testing of lo-fi prototypes early in the design process (layout and navigation flow).
+
+================================================================================
+Result 29
+================================================================================
+
+Filename: HassFramework Improvements.md
+Path: Tech/Programming-Tools/Swift/HassFramework Improvements.md
+Relevance: -465.9%
+
+Content:
+stments
+  
+- [ ] **Monitoring**
+  - [ ] Set up status notifications
+  - [ ] Track sensor health
+  - [ ] Monitor WiFi connectivity
+  - [ ] Log heating cycles
+
+### Phase 7: Documentation & Maintenance 📚
+
+- [ ] **Document Your Setup**
+  - [ ] Note your DS18B20 address
+  - [ ] Record your schedules
+  - [ ] Document any customizations
+  - [ ] Save backup configuration
+  
+- [ ] **Safety Verification**
+  - [ ] CO detectors installed and tested
+  - [ ] Manual stove control accessible
+  - [ ] Emergency shutoff tested
+  - [ ] Family knows how to operate
+  
+- [ ] **Maintenance Schedule**
+  - [ ] Weekly: Check temperature accuracy
+  - [ ] Monthly: Test manual overrides
+  - [ ] Quarterly: Clean sensor, check wiring
+  - [ ] Annually: Full system inspection
+
+## 📊 Control Logic Flow
+
+```
+┌─────────────────────────────────────────┐
+│         Manual Stop Active
+
+================================================================================
+Result 30
+================================================================================
+
+Filename: Sapolsky-Determined.md
+Path: Books/Books/Sapolsky-Determined.md
+Relevance: -481.0%
+
+Content:
+# Calculus MOC
+- [[average rate of change]]
+- [[derivative MOC]]
+-  [[2nd Derivative]]
+- [[composition]]
+- [[chain rule]]
+- [[Constant rule]]
+- [[constant test]]
+
+================================================================================
+Result 31
+================================================================================
+
+Filename: LightRAG vs Traditional RAG Comparison.md
+Path: Tech/AI/RAG/LightRAG vs Traditional RAG Comparison.md
+Relevance: -506.8%
+
+Content:
+and measuring the differences that already exist between different groups of people. ([993](https://readwise.io/to_kindle?action=open&asin=B002361MJC&location=993)) %% Color: yellow %% ^334464978
+
+---
+
+We intervene, for example, when testing for the safety and efficacy of drugs. One group of people is given the drug and a second group a placebo ([1000](https://readwise.io/to_kindle?action=open&asin=B002361MJC&location=1000)) %% Color: yellow %% ^334464979
+
+---
+
+correlation does not equal causation. ([1020](https://readwise.io/to_kindle?action=open&asin=B002361MJC&location=1020)) %% Color: yellow %% ^334464980
+
+---
+
+The China Study, for example, has over 8,000 statistically significant correlations, ([1022](https://readwise.io/to_kindle?action=open&asin=B002361MJC&location=1022)) %% Color: yellow %% ^334464981
+
+---
+
+A finding is said to be statistically significant when there is less than 5% probability that it is due to chance
+
+================================================================================
+Result 32
+================================================================================
+
+Filename: Rainmaker CLI.md
+Path: Tech/Programming-Tools/Visual-Studio-Code/Rainmaker CLI.md
+Relevance: -539.5%
+
+Content:
+### Main Idea
+- 
+### References
+- 
+### Notes
+- ## 🎯 **Quick Reference Card**
+
+### **Daily Commands**
+
+bash
+
+```bash
+./start_obsidian_rag.sh      # Start
+./check_status.sh             # Check
+./stop_obsidian_rag.sh        # Stop
+```
+
+### **Logs**
+
+bash
+
+```bash
+tail -f embedding_service.log  # Search engine
+tail -f streamlit.log          # Web UI
+tail -f scanner.log            # File watcher
+```
+
+### **Maintenance**
+
+bash
+
+```bash
+./backup.sh                    # Backup everything
+./test.sh                      # Run system tests
+./clean.sh                     # Clean logs/cache
+```
+
+### **Memory Management**
+
+bash
+
+~~~bash
+python rag_with_memory.py init          # Initialize
+python rag_with_memory.py interactive   # Interactive Q&A
+```
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-
+
+================================================================================
+Result 33
+================================================================================
+
+Filename: LightRAG Knowledge Graphs.md
+Path: Tech/AI/RAG/LightRAG Knowledge Graphs.md
+Relevance: -541.0%
+
+Content:
+ents (e.g., for testing, code review, or documentation). This:
+		•	Keeps the main session’s memory clear
+		•	Isolates context for specialized tasks
+		•	Lets agents “swap in” focused memory on demand
+5. (Optional) Integrate a Memory MCP Server
+	For truly persistent, cross-session memory:
+		•	Connect Claude Code with a compatible Model Context Protocol [[MCP memory server]]
+		•	Use the server’s API or built-in integrations for semantic search and automatic context retention
+		•	Enables seamless recall of information from prior sessions, even across projects
+These structured steps enable persistent, self-refreshing context in Claude Code, dramatically improving project continuity and developer productivity.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-
+
+================================================================================
+Result 34
+================================================================================
+
+Filename: Roboform License.md
+Path: Important Documents/Licenses/Roboform License.md
+Relevance: -553.2%
+
+Content:
+the fact that there were alternatives. Conscious doubt is not in the repertoire of System 1; it requires maintaining incompatible interpretations in mind at the same time, which demands mental effort. Uncertainty and doubt are the domain of System 2. — location: [1314](kindle://book?action=open&asin=B00555X8OA&location=1314) ^ref-50312
+
+---
+when System 2 is otherwise engaged, we will believe almost anything. System 1 is gullible and biased to believe, System 2 is in charge of doubting and unbelieving, but System 2 is sometimes busy, and often lazy. — location: [1328](kindle://book?action=open&asin=B00555X8OA&location=1328) ^ref-31030
+
+---
+The operations of associative memory contribute to a general confirmation bias. — location: [1331](kindle://book?action=open&asin=B00555X8OA&location=1331) ^ref-56355
+
+---
+deliberate search for confirming evidence, known as positive test strategy, is also how System 2 tests a hypothesis
+
+================================================================================
+Result 35
+================================================================================
+
+Filename: esp32 c3 MoC.md
+Path: Tech/Electronics/Hardware/ESP/esp32 c3 MoC.md
+Relevance: -556.8%
+
+Content:
+b Search
+- **Sequential**: Internal reasoning about known information
+- **Web Search**: Retrieves new external information
+- **Use together**: Search for facts, Sequential to reason about them
+
+### vs. Extended Thinking
+- **Sequential**: Explicit, visible, interactive reasoning process
+- **Extended**: Long-form, internal, summary-only reasoning
+- **Key difference**: Sequential shows every step; Extended shows only conclusion
+
+---
+
+## Complementary Usage Pattern
+
+The most powerful approach combines tools:
+
+```
+1. Web Search → Gather facts and data
+2. Sequential Thinking → Reason about the data systematically
+3. REPL → Test hypotheses with code
+4. Regular Conversation → Communicate results clearly
+```
+
+### Example Workflow
+```
+Problem: "Should we migrate to microservices?"
+
+================================================================================
+Result 36
+================================================================================
+
+Filename: prReview.prompt.md
+Path: Tech/AI/media/kiro-workflow-prompts/prReview.prompt.md
+Relevance: -569.9%
+
+Content:
+7 thoughts** - Adjust as needed
+2. **Batch related analyses** - Combine when clear
+3. **Verify before finishing** - Always double-check
+4. **Use clear branch names** - "async_approach" not "option2"
+5. **Skip obvious steps** - Don't narrate everything
+6. **Express uncertainty** - "I'm not certain..." is OK
+7. **Filter irrelevant info** - Explicitly note what you're ignoring
+
+---
+
+## 📐 Best Practices
+
+### Starting
+- Estimate conservatively (5-7 thoughts)
+- State all constraints upfront
+- Plan your approach
+
+### During
+- Adjust `total_thoughts` dynamically
+- Revise when assumptions prove wrong
+- Branch for alternatives
+- Add checkpoints every 5 thoughts (if long)
+
+### Finishing
+- Verify solution against requirements
+- Check edge cases
+- Only finish when truly satisfied
+
+---
+
+## 🔗 Complementary Tools
+
+```
+Web Search → Gather info
+     ↓
+Sequential Thinking → Reason about it
+     ↓
+Analysis Tool (REPL) → Test with code
+     ↓
+Regular Conversation → Communicate results
+```
+
+---
+
+================================================================================
+Result 37
+================================================================================
+
+Filename: 2nd Derivative.md
+Path: Math/2nd Derivative.md
+Relevance: -589.1%
+
+Content:
+lex aggregations, and have a team experienced with SQL. Use sequential thinking to compare options."
+```
+
+---
+
+## What to Expect
+
+### 1. Claude Will Show Each Thought
+
+You'll see the reasoning unfold:
+
+```
+Thought 1: Understanding the problem...
+Thought 2: Analyzing potential causes...
+Thought 3: Actually, let me reconsider...
+Thought 4: Testing this hypothesis...
+Thought 5: Verified! Here's the solution...
+```
+
+---
+
+### 2. Claude May Revise Its Thinking
+
+This is normal and good:
+
+```
+Thought 3: The issue is the database queries
+Thought 4: Actually, after checking metrics, it's the cache configuration [REVISION]
+```
+
+---
+
+### 3. Claude May Explore Alternatives
+
+Through branching:
+
+```
+Thought 3 [Approach A]: Using synchronous processing...
+Thought 4 [Approach B]: Using async queues instead...
+Thought 5: Comparing approaches → B is better
+```
+
+---
+
+### 4. The Plan May Adjust
+
+Claude might extend or shorten:
+
+================================================================================
+Result 38
+================================================================================
+
+Filename: GraphRAG Benefits.md
+Path: Tech/AI/RAG/GraphRAG Benefits.md
+Relevance: -591.6%
+
+Content:
+*Solution**: Dynamically adjust estimates
+
+### 4. Over-Branching
+
+**Problem**: Creating too many branches without synthesis
+
+**Solution**: Limit to 2-3 meaningful branches
+
+### 5. Lack of Verification
+
+**Problem**: Proposing solution without testing against constraints
+
+**Solution**: Always add verification step
+
+---
+
+## Progression Indicators
+
+### How to Track Progress
+
+```
+[1/5]  - Early (20%)
+[3/5]  - Midpoint (60%)
+[5/5]  - Complete (100%)
+[3/8]  - Adjusted complexity (37.5%)
+```
+
+**Tip**: Progress indicators help users follow along.
+
+---
+
+## Quality Checklist
+
+Before setting `next_thought_needed = false`, verify:
+
+- [ ] Problem fully understood
+- [ ] All constraints identified
+- [ ] Solution addresses root cause
+- [ ] Solution verified against constraints
+- [ ] Edge cases considered
+- [ ] Alternative approaches evaluated
+- [ ] No outstanding doubts
+
+---
+
+### Related Notes
+
+================================================================================
+Result 39
+================================================================================
+
+Filename: The Accidental Mind.md
+Path: Books/Books/The Accidental Mind.md
+Relevance: -626.1%
+
+Content:
+ication"
+Thought 8: [Verify 3] "Checking replication lag: <100ms ✓"
+Thought 9: "All verifications passed - final solution complete"
+```
+
+---
+
+## Advanced Use Cases
+
+### 1. Algorithmic Trading Strategy
+
+```
+Thought 1: "Design momentum trading strategy"
+Thought 2: "Constraints: Max 2% drawdown, 20% annual target"
+Thought 3: [Signal] "Use 20/50 day MA crossover"
+Thought 4: [Risk] "Position sizing: 2% account risk per trade"
+Thought 5: [Testing] "Backtesting on 10 years data..."
+Thought 6: [Results] "Sharpe ratio 1.5, max drawdown 3%"
+Thought 7: [REVISION] "Max drawdown exceeds constraint"
+Thought 8: [Adjustment] "Reduce position size to 1.5%"
+Thought 9: [Retest] "Max drawdown now 1.8% ✓, returns 18%"
+Thought 10: "Final strategy validated"
+```
+
+---
+
+### 2. Legal Contract Analysis
+
+================================================================================
+Result 40
+================================================================================
+
+Filename: Building AI RAG Agents - No Code Guide v2.md
+Path: Tech/AI/RAG/Building AI RAG Agents - No Code Guide v2.md
+Relevance: -632.2%
+
+Content:
+IP indemnity - ISSUE"
+Thought 9: "Two major issues found: Missing patent + uncapped indemnity"
+Thought 10: "Recommendation: Renegotiate before signing"
+```
+
+---
+
+### 3. Medical Diagnosis (Conceptual)
+
+```
+Thought 1: "Patient symptoms: fever, rash, joint pain"
+Thought 2: "Differential diagnosis: viral, bacterial, autoimmune"
+Thought 3: [Viral] "Could be dengue, chikungunya, or Zika"
+Thought 4: [Test results] "WBC normal rules out severe bacterial"
+Thought 5: [Travel history] "Recent travel to endemic area"
+Thought 6: [Narrowing] "Most likely: dengue or chikungunya"
+Thought 7: [Timing] "Rash appeared day 3 - classic for dengue"
+Thought 8: [Confirmation] "Request dengue IgM/IgG test"
+Thought 9: "Working diagnosis: Dengue fever"
+Thought 10: "Management plan: Supportive care, monitor platelets"
+```
+
+---
+
+## Combining with Other Tools
+
+### Sequential Thinking + REPL
+
+```
+1. Sequential Thinking: Design algorithm
+2. REPL: Implement and test
+3
+
+================================================================================
+Result 41
+================================================================================
+
+Filename: createTask.prompt.md
+Path: Tech/AI/media/kiro-workflow-prompts/createTask.prompt.md
+Relevance: -635.1%
+
+Content:
+local")
+    
+    elif is_simple_lookup(question):
+        # "What is X?"
+        return current_rag.query(question)
+    
+    else:
+        # Complex: use both!
+        graph_context = lightrag.query(question)
+        vector_context = current_rag.query(question)
+        return synthesize(graph_context, vector_context)
+```
+
+### Related Notes
+
+- [[LightRAG Implementation Guide]]
+- [[LightRAG Query Modes]]
+- [[LightRAG vs Traditional RAG Comparison]]
+
+### Questions / Ideas for Further Exploration
+
+- How to handle incremental graph updates when notes change?
+- What's the optimal balance between graph and vector search?
+- Can we cache graph traversal results?
+- How to handle conflicting information in the graph?
+
+### To-Do
+
+- [ ] Design smart router decision logic
+- [ ] Implement hybrid query system
+- [ ] Test query routing performance
+- [ ] Monitor resource usage during dual-system queries
+- [ ] Document query patterns for each system
+
+### Smart Connections Insights
+
+================================================================================
+Result 42
+================================================================================
+
+Filename: Blynk-local-server-auth-token.md
+Path: Tech/Electronics/Projects/Halcyon/Blynk-local-server-auth-token.md
+Relevance: -654.0%
+
+Content:
+tive observations
+
+**Examples**:
+```
+"Breaking down the problem: We need to optimize database queries 
+that are timing out. Three possible causes: missing indexes, 
+inefficient joins, or N+1 queries."
+
+"Wait - my assumption in thought 3 was incorrect. The bottleneck 
+isn't the query itself but the connection pooling configuration."
+
+"I'm noticing a pattern here that suggests this problem is actually 
+simpler than I first thought. Let me reconsider..."
+
+"Hypothesis: The issue is caused by memory leaks in Service C. 
+Let me test this against the observed symptoms."
+```
+
+**Best Practices**:
+- Be specific and concrete
+- State your reasoning clearly
+- Note when changing direction
+- Admit uncertainty when present
+- Reference previous thoughts when relevant
+
+---
+
+### `thought_number` (integer, minimum: 1)
+
+**Purpose**: Tracks your current position in the reasoning sequence.
+
+================================================================================
+Result 43
+================================================================================
+
+Filename: Rainmaker REST.md
+Path: Tech/Programming-Tools/Visual-Studio-Code/Rainmaker REST.md
+Relevance: -673.7%
+
+Content:
+%%
+ID: 16112695
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51BehwxP90L._SL500_.jpg)
+
+# About
+Title: [[Stress Test]]
+Authors: [[Timothy F. Geithner]]
+Category: #books
+Number of Highlights: ==44==
+Readwise URL: https://readwise.io/bookreview/16112695
+Date: [[2022-06-18]]
+Last Highlighted: *2015-06-02*
+
+---
+
+# Highlights
+
+The recession of 2007 to 2009 was still the most painful since the Depression. At its depths, $15 trillion in household wealth had disappeared, ravaging the pensions and college funds of Americans who had thought their money was in good hands. Nearly 9 million workers lost jobs; 9 million people slipped below the poverty line; 5 million homeowners lost homes. ([279](https://readwise.io/to_kindle?action=open&asin=B00IN73B9E&location=279)) %% Color: yellow %% ^334464902
+
+---
+
+stability can produce excessive confidence, which produces the seeds of future instability
+
+================================================================================
+Result 44
+================================================================================
+
+Filename: Kicad-Shortcuts.md
+Path: Tech/Electronics/Software/Kicad/Kicad-Shortcuts.md
+Relevance: -734.4%
+
+Content:
+goodness of some behavior. Both types of assessments activated the same region (the orbitofrontal cortex, or OFC); the more beautiful or good, the more OFC activation (and the less insula activation). — location: [829](kindle://book?action=open&asin=B0BSKQ5ZDM&location=829) ^ref-3373
+
+---
+the brain hasn’t had enough time yet to evolve separate circuits for evaluating morality and aesthetics.[6] — location: [837](kindle://book?action=open&asin=B0BSKQ5ZDM&location=837) ^ref-12214
+
+---
+lying orally (via voice mail) increased the desire for mouthwash, while lying by hand (via email) made hand sanitizers more desirable. — location: [842](kindle://book?action=open&asin=B0BSKQ5ZDM&location=842) ^ref-65219
+
+---
+the longer it had been since judges had eaten, the less likely they were to grant a prisoner parole. — location: [863](kindle://book?action=open&asin=B0BSKQ5ZDM&location=863) ^ref-35132
+
+---
+oxytocin and vasopressin strengthen the bond in females and males, respectively
+
+================================================================================
+Result 45
+================================================================================
+
+Filename: Kotkin-Stalin.md
+Path: Books/Books/Kotkin-Stalin.md
+Relevance: -741.0%
+
+Content:
+Required Field Validation
+
+- `thought`: Must be non-empty string
+- `thought_number`: Must be ≥ 1
+- `total_thoughts`: Must be ≥ 1
+- `next_thought_needed`: Must be boolean
+
+### Optional Field Validation
+
+- `revises_thought`: Must be < current `thought_number`
+- `branch_from_thought`: Must be < current `thought_number`
+- `branch_id`: Should be descriptive string
+- `is_revision`: Should be `true` when `revises_thought` is set
+
+### Logical Validation
+
+- `total_thoughts` should be ≥ `thought_number` (usually)
+- Final thought should have `next_thought_needed = false`
+- `revises_thought` should only be set when `is_revision = true`
+
+---
+
+## Common Parameter Patterns
+
+================================================================================
+Result 46
+================================================================================
+
+Filename: Kitchen-Bread Illustrated.md
+Path: Books/Books/Kitchen-Bread Illustrated.md
+Relevance: -752.0%
+
+Content:
+hts
+-
+
+================================================================================
+Result 47
+================================================================================
+
+Filename: Complexity.md
+Path: Books/Books/Complexity.md
+Relevance: -767.9%
+
+Content:
+23
+
+================================================================================
+Result 48
+================================================================================
+
+Filename: Cartesian Plane.md
+Path: Math/Cartesian Plane.md
+Relevance: -768.7%
+
+Content:
+ixed it.
+
+## Troubleshooting Code Block Issues in Obsidian
+
+Here are a few solutions to common problems, as I see it:
+
+-   **The code block isn't appearing**. This might occur if the formatting is off. Double check that the code block is surrounded by backticks (\`\`\`).
+-   **The formatting is off**. This could happen if the code block isn't indented properly. Ensure the code block is indented four spaces.
+-   **The code block isn't functioning**. This could occur if the code block isn't run correctly. Ensure that it's run with the appropriate language.
+
+### Tips for testing and validating code blocks in different contexts
+
+I personally find these few tips helpful for validating my code blocks:
+
+-   For me, the "Preview" button is a lifesaver. I always preview my code blocks before executing them to ensure that the formatting is correct and it works as intended.
+-   Executing the code block through the "Run" button is a crucial step in the process
+
+================================================================================
+Result 49
+================================================================================
+
+Filename: Shock Waves.md
+Path: Books/Books/Shock Waves.md
+Relevance: -770.6%
+
+Content:
+y more effective. So how can you take advantage of active recall in Readwise? For any highlight that you wish to deliberately commit to memory, hit the Master icon in the web app (keyboard shortcut m). You can then convert that highlight from a passive passage to be reread to a flashcard to be actively recalled. In turn, you'll retain vastly more of what you read. ([98](https://readwise.io/to_kindle?action=open&asin=null&location=98)) ^334466728
+
+---
+
+Cloze Deletion (Mastery) ([99](https://readwise.io/to_kindle?action=open&asin=null&location=99)) ^334466729
+
+Note: .h2
+
+---
+
+Readwise offers increasing degrees of active recall intensity (Mastery). The least demanding is a deceptively simple technique called [cloze deletion](https://en.wikipedia.org/wiki/Cloze_test), more commonly known as "fill in the blank". With cloze deletion, a salient keyword is hidden from the passage, giving you an opportunity to pause and actively recall the missing information
+
+================================================================================
+Result 50
+================================================================================
+
+Filename: Unleashing Your Brilliance.md
+Path: Books/Books/Unleashing Your Brilliance.md
+Relevance: -782.4%
+
+Content:
+l-a44e93ba14e3)
+
+================================================================================
+Result 51
+================================================================================
+
+Filename: Sequential Thinking MoC.md
+Path: Tech/AI/Sequential Thinking/Sequential Thinking MoC.md
+Relevance: -844.0%
+
+Content:
+.io/
+
+================================================================================
+Result 52
+================================================================================
+
+Filename: The Thinker’s Guide to Analytic Thinking.md
+Path: Books/Books/The Thinker’s Guide to Analytic Thinking.md
+Relevance: -850.0%
+
+Content:
+lete solution
+- No outstanding questions
+
+### Bad Indicators ❌
+- Unverified assumptions
+- Incomplete analysis
+- Unexplored alternatives
+- Low confidence (<90%)
+- Missing verification
+
+## Anti-Patterns
+
+❌ **Analysis Paralysis**: Too many thoughts, no progress
+❌ **Premature Conclusion**: Stopping without verification
+❌ **Revision Spiral**: Constant revision, no forward movement
+❌ **Ignoring Constraints**: Not checking requirements
+❌ **Branching Overload**: Too many branches to track
+
+## Pattern Selection Guide
+
+| Problem Type | Pattern |
+|--------------|---------|
+| Debugging | Hypothesis-Driven |
+| System Design | Divide and Conquer |
+| API Design | Iterative Refinement |
+| Tech Choice | Comparative Analysis |
+| Optimization | Iterative Refinement |
+
+================================================================================
+Result 53
+================================================================================
+
+Filename: Obsidian Codeblocks.md
+Path: Obsidian/Obsidian Codeblocks.md
+Relevance: -853.0%
+
+Content:
+es
+
+================================================================================
+Result 54
+================================================================================
+
+Filename: Home Assistant Renamer.md
+Path: Tech/Electronics/Software/Home-Assistant/media/Home Assistant Renamer.md
+Relevance: -868.7%
+
+Content:
+6067
+
+---
+
+================================================================================
+Result 55
+================================================================================
+
+Filename: A Mind for Numbers.md
+Path: Books/Books/A Mind for Numbers.md
+Relevance: -879.7%
+
+Content:
+5: Proposed solution
+T6: Verify against all constraints
+T7: Confirmed complete (next_thought_needed = false)
+```
+
+---
+
+### Issue 2: Analysis Paralysis
+
+**Symptom**: Too many thoughts without progress.
+
+**Example**:
+```
+T10: Still exploring options...
+T11: Another consideration...
+T12: But what about...
+```
+
+**Solution**: Set decision point:
+```
+T8: Will decide by T10 based on current info
+T9: Final analysis
+T10: Decision made (next_thought_needed = false)
+```
+
+---
+
+### Issue 3: Lost in Branches
+
+**Symptom**: Too many branches without synthesis.
+
+**Example**:
+```
+Branch A, Branch B, Branch C, Branch D...
+[Never compared or chose]
+```
+
+**Solution**: Limit branches and synthesize:
+```
+T5 [Branch A]
+T6 [Branch B]  
+T7: Compare A and B → Choose B
+```
+
+---
+
+### Issue 4: Revision Confusion
+
+**Symptom**: Unclear what's being revised.
+
+**Example**:
+```
+T6: Actually that was wrong (is_revision=true)
+[But which thought? What was wrong?]
+```
+
+================================================================================
+Result 56
+================================================================================
+
+Filename: Building a Local Obsidian RAG System.md
+Path: Tech/AI/RAG/Local Obsidian RAG/Building a Local Obsidian RAG System.md
+Relevance: -888.0%
+
+Content:
+low %% ^334465782
+
+---
+
+the ventral tegmental area is a reward center of the brain that is responsible for intensely pleasurable sensations. It is one of the key regions activated by heroin or cocaine. ([2092](https://readwise.io/to_kindle?action=open&asin=B00AQLFQHA&location=2092)) %% Color: yellow %% ^334465783
+
+---
+
+Love is a very powerful drug, but it only works for a while, a few months to a year—kind of like crack. ([2095](https://readwise.io/to_kindle?action=open&asin=B00AQLFQHA&location=2095)) %% Color: yellow %% ^334465784
+
+---
+
+Orgasm, as a physiological phenomenon, is remarkably similar in women and men. In both sexes, orgasm involves a rising heart rate, an increase in blood pressure, involuntary muscle contractions, and an intensely pleasurable sensation
+
+================================================================================
+Result 57
+================================================================================
+
+Filename: Commissioning Thread Edge Device.md
+Path: Tech/Networking/Commissioning Thread Edge Device.md
+Relevance: -890.7%
+
+Content:
+![[84827815-4DF2-42D1-A26B-99558607A997.png]]
+
+================================================================================
+Result 58
+================================================================================
+
+Filename: Medical Timeline with GraphRAG.md
+Path: Tech/AI/RAG/Medical Timeline with GraphRAG.md
+Relevance: -894.8%
+
+Content:
+s
+    }
+}
+```
+
+================================================================================
+Result 59
+================================================================================
+
+Filename: Dehaene-Consciousness and the Brain.md
+Path: Books/Books/Dehaene-Consciousness and the Brain.md
+Relevance: -910.8%
+
+Content:
+conclusions you come to. Inferring is what the mind does in figuring something out. ([213](https://readwise.io/to_kindle?action=open&asin=B005XCRHYC&location=213)) %% Color: yellow %% ^334466058
+
+---
+
+Our conclusions are often distorted by our self-serving interests, which disengage our sense of justice. Make sure that your conclusions are based on all the relevant information and that you haven’t excluded information that does not support your preconceptions. ([221](https://readwise.io/to_kindle?action=open&asin=B005XCRHYC&location=221)) %% Color: yellow %% ^334466059
+
+---
+
+Assumptions are beliefs you take for granted. They usually operate at the subconscious or unconscious level of thought. ([224](https://readwise.io/to_kindle?action=open&asin=B005XCRHYC&location=224)) %% Color: yellow %% ^334466060
+
+---
+
+The root of problems in thinking often lies with false assumptions
+
+================================================================================
+Result 60
+================================================================================
+
+Filename: 2nd derivative test.md
+Path: Math/2nd derivative test.md
+Relevance: -921.8%
+
+Content:
+mer Method — location: [1135](kindle://book?action=open&asin=B01BBQ33K0&location=1135) ^ref-5159
+
+---
+penmanship. — location: [1135](kindle://book?action=open&asin=B01BBQ33K0&location=1135) ^ref-34405
+
+---
+mimeograph machine — location: [1152](kindle://book?action=open&asin=B01BBQ33K0&location=1152) ^ref-50725
+
+---
+innately — location: [1214](kindle://book?action=open&asin=B01BBQ33K0&location=1214) ^ref-8807
+
+---
+Expert’s Rhythm Drill — location: [1366](kindle://book?action=open&asin=B01BBQ33K0&location=1366) ^ref-18691
+
+---
+We — location: [1544](kindle://book?action=open&asin=B01BBQ33K0&location=1544) ^ref-21724
+
+---
+has been said, “time heals all wounds.” I do not agree. The wounds remain. In time, the mind, protecting its sanity, covers them with scar tissue and the pain lessens. But it is never gone. — location: [2017](kindle://book?action=open&asin=B01BBQ33K0&location=2017) ^ref-22481
+
+---
+Amy — location: [2156](kindle://book?action=open&asin=B01BBQ33K0&location=2156) ^ref-30792
+
+================================================================================
+Result 61
+================================================================================
+
+Filename: Flutter MQTT.md
+Path: Tech/Programming-Tools/Flutter/Flutter MQTT.md
+Relevance: -933.2%
+
+Content:
+Checking hypothesis... DB pool at 60%, not the issue"
+Thought 4: "Hypothesis B: Downstream service timeout"
+Thought 5: "Service C has p99 latency of 8s, timeout set to 5s"
+Thought 6: "Root cause found! Now investigating why Service C is slow"
+Thought 7: "Service C has memory leak causing GC pauses"
+Thought 8: "Complete diagnosis with solution" ✓
+```
+
+### Benefits of Transparency
+- **Verify reasoning**: See if Claude's logic matches your understanding
+- **Catch errors early**: Spot wrong assumptions before final answer
+- **Learn the process**: Understand how to approach similar problems
+- **Trust the answer**: See the evidence trail
+- **Collaborate**: Interject if reasoning goes off track
+
+---
+
+## Revision and Self-Correction
+
+### The Power of Revision
+
+One of the most powerful features is the ability to **revise earlier thinking**:
+
+================================================================================
+Result 62
+================================================================================
+
+Filename: IMPLEMENTATION_SUMMARY.md
+Path: Tech/Electronics/Projects/GazeboWX/media/IMPLEMENTATION_SUMMARY.md
+Relevance: -934.1%
+
+Content:
+```
+
+================================================================================
+Result 63
+================================================================================
+
+Filename: The China Study.md
+Path: Books/Books/The China Study.md
+Relevance: -934.6%
+
+Content:
+↓ NO
+Is speed more important? → YES → Use regular conversation
+                        ↓ NO
+Is the solution path unclear? → YES → ✅ USE SEQUENTIAL THINKING
+Multiple approaches to compare? → YES → ✅ USE SEQUENTIAL THINKING
+Need to revise as I go? → YES → ✅ USE SEQUENTIAL THINKING
+Complex verification needed? → YES → ✅ USE SEQUENTIAL THINKING
+```
+
+---
+
+## 🔄 Typical Flow Template
+
+```
+Thought 1: Understand the problem
+- What are we solving?
+- What are the constraints?
+- Initial complexity estimate
+
+Thought 2-4: Explore and analyze
+- Consider approaches
+- Identify issues
+- Revise if needed
+
+Thought N-1: Generate solution
+- Propose complete solution
+- Address all requirements
+
+Thought N: Verify and conclude
+- Verify against constraints
+- Confirm completeness
+- Set next_thought_needed = false
+```
+
+---
+
+## ✅ Quality Checklist
+
+Before setting `next_thought_needed = false`:
+
+================================================================================
+Result 64
+================================================================================
+
+Filename: Pogo-Jig.md
+Path: Tech/Electronics/Projects/PCBs/Pogo-Jig.md
+Relevance: -942.0%
+
+Content:
+### Research and Analysis
+
+- Literature review
+- Competitive analysis
+- Market research
+
+**Why it excels:** Divide and conquer with synthesis.
+
+---
+
+## Pro Tips
+
+### Tip 1: Name Your Branches Clearly
+
+```
+Good: branch_id = "async_with_queue"
+Bad: branch_id = "option2"
+```
+
+---
+
+### Tip 2: Use Checkpoints in Long Sequences
+
+Every 5 thoughts in sequences > 10 thoughts total.
+
+---
+
+### Tip 3: Explicitly State What You're Skipping
+
+```
+"Skipping analysis of edge case X as it only affects 0.1% of users..."
+```
+
+---
+
+### Tip 4: Front-Load Verification Criteria
+
+```
+T1: "Solution must satisfy: < 100ms latency, < $500/month cost, handles 10K req/s"
+```
+
+---
+
+### Tip 5: Use Revision Purposefully
+
+Not every wrong turn needs explicit revision - only significant redirections.
+
+---
+
+## Advanced Patterns Library
+
+### Pattern: Red Team Analysis
+
+```
+T1: Propose solution
+T2-T3: [Branch Defense]: Defend solution
+T4-T5: [Branch Attack]: Find weaknesses
+T6: Synthesis - improved solution
+```
+
+---
+
+================================================================================
+Result 65
+================================================================================
+
+Filename: Minimal HomeStore class.md
+Path: Tech/Electronics/Software/Homekit/Minimal HomeStore class.md
+Relevance: -944.6%
+
+Content:
+5: "Checking database metrics: CPU at 80%, queries taking 2s average.
+            This confirms DB is bottleneck."
+```
+
+---
+
+### Strategic Revision
+
+**Pattern**: Revise early to avoid cascading errors
+
+```
+Thought 3: "Approach A looks good"
+Thought 4: "Starting to implement details of A..."
+Thought 5: [EARLY REVISION] "Wait - Approach A violates constraint X.
+            Better to catch this now than after 5 more thoughts."
+```
+
+Vs. late revision:
+```
+Thoughts 3-8: Build on approach A
+Thought 9: "Oh no, A violates constraint X"
+// Wasted 6 thoughts!
+```
+
+---
+
+### Incremental Verification
+
+**Pattern**: Verify continuously, not just at end
+
+================================================================================
+Result 66
+================================================================================
+
+Filename: Kondō-The Life-Changing Magic of Tidying Up.md
+Path: Books/Books/Kondō-The Life-Changing Magic of Tidying Up.md
+Relevance: -948.6%
+
+Content:
+| Casual conversation |
+| Planning with uncertainty | Quick lookups |
+| Need to revise approach | Speed is critical |
+| Debugging complex issues | Trivial calculations |
+
+---
+
+## 🔧 Required Parameters
+
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `thought` | string | Current thinking step | "Analyzing the problem..." |
+| `thought_number` | integer | Current position (1, 2, 3...) | `3` |
+| `total_thoughts` | integer | Estimated total (adjustable!) | `7` |
+| `next_thought_needed` | boolean | Continue or finish? | `true` / `false` |
+
+---
+
+## ⚙️ Optional Parameters
+
+| Parameter | Type | When to Use |
+|-----------|------|-------------|
+| `is_revision` | boolean | Correcting earlier thought |
+| `revises_thought` | integer | Which thought to revise |
+| `branch_from_thought` | integer | Exploring alternative path |
+| `branch_id` | string | Naming the branch |
+| `needs_more_thoughts` | boolean | Need to extend sequence |
+
+---
+
+================================================================================
+Result 67
+================================================================================
+
+Filename: Sonenshein-Stretch.md
+Path: Books/Books/Sonenshein-Stretch.md
+Relevance: -948.9%
+
+Content:
+2Fpums%2Fpums_invoice.php%3Fid%3D2201191335%26key%3D402eba157e1f8f4bac09f77929434e32%26lang%3Den%26type%3D1&data=04%7C01%7C%7C5d2a911b246d4d2c2db408d9db7a90bb%7C84df9e7fe9f640afb435aaaaaaaaaaaa%7C1%7C0%7C637782141733065855%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C3000&sdata=4XG1%2BzS2blay22W4KfvQxO27G0WAmPbXoOwt5jbns%2F4%3D&reserved=0")**  
+  
+**■ [View Printable Invoice >>](https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.roboform.com%2Fphp%2Fpums%2Fpums_invoice.php%3Fid%3D2201191335%26key%3D402eba157e1f8f4bac09f77929434e32%26lang%3Den%26type%3D2&data=04%7C01%7C%7C5d2a911b246d4d2c2db408d9db7a90bb%7C84df9e7fe9f640afb435aaaaaaaaaaaa%7C1%7C0%7C637782141733065855%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C3000&sdata=%2B4LhJ91UTiGcfnPBwxrAtrZWxwgdqGmZj4QhzMd2u7U%3D&reserved=0 "https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fwww.roboform.com%2Fphp%2Fpums
+
+================================================================================
+Result 68
+================================================================================
+
+Filename: Roasted-Asparagus.md
+Path: Recipes/Vegetables/Roasted-Asparagus.md
+Relevance: -949.1%
+
+Content:
+N+1
+```
+
+### When Each Is Better
+
+**Use Regular Conversation when**:
+- Problem is straightforward
+- You trust Claude's expertise
+- Speed matters more than transparency
+- You don't need to see the work
+
+**Use Sequential Thinking when**:
+- Problem is complex or ambiguous
+- You want to verify the reasoning
+- Multiple approaches need evaluation
+- Learning the process matters
+- Stakes are high and errors costly
+
+---
+
+## The Meta-Cognitive Advantage
+
+### Thinking About Thinking
+
+Sequential Thinking enables **meta-cognition** - thinking about your thinking:
+
+```
+Thought 5: "I'm spending too much time on this detail"
+          "Let me step back and reconsider the big picture"
+          
+Thought 6: "Actually, this detail doesn't matter for the solution"
+          "Ignoring it and moving forward"
+```
+
+### Self-Awareness in Action
+- Recognize when stuck in wrong direction
+- Identify when making unwarranted assumptions
+- Notice when missing key information
+- Realize when overthinking
+
+---
+
+================================================================================
+Result 69
+================================================================================
+
+Filename: McCubbin-My Travels with Mrs. Kennedy.md
+Path: Books/Books/McCubbin-My Travels with Mrs. Kennedy.md
+Relevance: -955.0%
+
+Content:
+### Main Idea
+Common patterns and flows for using Sequential Thinking effectively.
+
+### References
+- [[Sequential Thinking Tool]]
+- [[Core Concepts]]
+- [[Parameters Reference]]
+
+### Notes
+
+## Basic Flow Patterns
+
+### Linear Flow
+```
+1. Understand problem [1/5]
+2. Identify constraints [2/5]
+3. Consider solution [3/5]
+4. Evaluate solution [4/5]
+5. Final answer [5/5] ✓
+```
+
+### Flow with Revision
+```
+1. Understand problem [1/5]
+2. Try approach A [2/5]
+3. [REVISION] A won't work [3/6]
+4. Try approach B [4/6]
+5. Verify B [5/6]
+6. Final answer [6/6] ✓
+```
+
+### Flow with Branching
+```
+1. Problem [1/5]
+2. Two approaches [2/7]
+3. [Branch A] Explore sync [3/7]
+4. [Branch A] Issues [4/7]
+5. [Branch B] Explore async [5/7]
+6. [Branch B] Works! [6/7]
+7. Select B [7/7] ✓
+```
+
+### Flow with Dynamic Adjustment
+```
+1. Initial analysis [1/5]
+2. More complex, adjust to 8 [2/8]
+3-4. Exploring [3-4/8]
+5. Found shortcut, reduce to 6 [5/6]
+6. Final answer [6/6] ✓
+```
+
+## Common Reasoning Patterns
+
+### 1
+
+================================================================================
+Result 70
+================================================================================
+
+Filename: Local RAG Quick Reference Card.md
+Path: Tech/AI/RAG/Local Obsidian RAG/Local RAG Quick Reference Card.md
+Relevance: -956.0%
+
+Content:
+(thoroughness > speed)
+
+**When problematic**:
+- Quick questions
+- Casual conversation
+- Time-sensitive queries
+
+---
+
+### ⚠️ Context Window
+
+**Issue**: Very long thought sequences can consume context.
+
+**Impact**:
+- After 15-20 thoughts, context pressure increases
+- May need to summarize earlier thoughts
+- Risk of losing important details
+
+**Mitigation**:
+- Keep thoughts focused and concise
+- Aim for 5-10 thoughts for most problems
+- Reserve 15+ thought sequences for truly complex issues
+
+---
+
+## Common Issues & Solutions
+
+### Issue 1: Premature Conclusion
+
+**Symptom**: Finishing before thorough verification.
+
+**Example**:
+```
+T5: Found solution! (next_thought_needed = false)
+[But didn't verify against constraints]
+```
+
+**Solution**: Always add verification step:
+```
+T5: Proposed solution
+T6: Verify against all constraints
+T7: Confirmed complete (next_thought_needed = false)
+```
+
+---
+
+### Issue 2: Analysis Paralysis
+
+**Symptom**: Too many thoughts without progress.
+
+================================================================================
+Result 71
+================================================================================
+
+Filename: Calculus MoC.md
+Path: Math/Calculus MoC.md
+Relevance: -958.8%
+
+Content:
+esis..."
+}
+
+// Finished reasoning
+{
+  "thought_number": 8,
+  "total_thoughts": 8,
+  "next_thought_needed": false,
+  "thought": "Solution verified against all constraints. Final answer: ..."
+}
+```
+
+---
+
+## Optional Parameters
+
+These parameters enable advanced reasoning patterns:
+
+### `is_revision` (boolean)
+
+**Purpose**: Signals that this thought revises or reconsiders previous thinking.
+
+**When to Use**:
+- Discovered error in earlier reasoning
+- Initial assumption was wrong
+- New information contradicts earlier thoughts
+- Need to correct the reasoning path
+
+**Example**:
+```json
+{
+  "thought_number": 5,
+  "is_revision": true,
+  "revises_thought": 3,
+  "thought": "Actually, my assumption in thought 3 was wrong. 
+             The bottleneck isn't the database but the cache layer."
+}
+```
+
+**Benefits**:
+- Makes corrections explicit
+- Shows self-awareness
+- Improves final answer quality
+- Demonstrates critical thinking
+
+---
+
+### `revises_thought` (integer)
+
+================================================================================
+Result 72
+================================================================================
+
+Filename: urolift.md
+Path: Medical/urolift.md
+Relevance: -960.8%
+
+Content:
+ehaviorally, as a result of testosterone circulating from their brothers in utero. ([2279](https://readwise.io/to_kindle?action=open&asin=B00AQLFQHA&location=2279)) %% Color: yellow %% ^334465796
+
+---
+
+Gay men have brains the structure and function of which are, in some respects, like those of straight women. Conversely, lesbians have brains that are, in some respects, like those of straight men. ([2285](https://readwise.io/to_kindle?action=open&asin=B00AQLFQHA&location=2285)) %% Color: yellow %% ^334465797
+
+---
+
+the volume of INAH3 was two to three times larger in the straight men than in the straight women. The really interesting finding was that the average volume of INAH3 in the gay men was similar to that of straight women: two to three times smaller than that of straight men. ([2291](https://readwise.io/to_kindle?action=open&asin=B00AQLFQHA&location=2291)) %% Color: yellow %% ^334465798
+
+---
+
+================================================================================
+Result 73
+================================================================================
+
+Filename: Doughty-Boyd-Hawaii The Big Island Revealed.md
+Path: Books/Books/Doughty-Boyd-Hawaii The Big Island Revealed.md
+Relevance: -961.5%
+
+Content:
+nections Insights
+-
+
+================================================================================
+Result 74
+================================================================================
+
+Filename: Carroll_et_al-Alices Adventures in Wonderland (illustrated).md
+Path: Books/Books/Carroll_et_al-Alices Adventures in Wonderland (illustrated).md
+Relevance: -961.5%
+
+Content:
+7}  // was 5
+{"thought": "This is more complex than expected..."}
+
+// Decreasing complexity
+{"thought_number": 5, "total_thoughts": 6}  // was 8
+{"thought": "Found a shortcut that simplifies this..."}
+
+// Extension at the end
+{"thought_number": 8, "total_thoughts": 10} // was 8
+{"thought": "Need more verification before finalizing..."}
+```
+
+**Best Practices**:
+- Don't be afraid to adjust frequently
+- Increase when discovering complexity
+- Decrease when finding simpler paths
+- Extend when more verification needed
+- Be honest about what you don't know yet
+
+---
+
+### `next_thought_needed` (boolean)
+
+**Purpose**: Indicates whether reasoning should continue.
+
+**Values**:
+- `true`: Continue reasoning, more thoughts needed
+- `false`: Reasoning complete, ready for final answer
+
+**Critical Rule**: Only set to `false` when **truly satisfied** with the solution.
+
+================================================================================
+Result 75
+================================================================================
+
+Filename: Gladwell-Blink.md
+Path: Books/Books/Gladwell-Blink.md
+Relevance: -965.6%
+
+Content:
+rical contingency, and we would probably never arise again even if life’s tape could be replayed a thousand times. — location: [3513](kindle://book?action=open&asin=B00H987FS6&location=3513) ^ref-6508
+
+---
+Critics claim that our motto “survival of the fittest” is a meaningless tautology because fitness is defined by survival, — location: [3560](kindle://book?action=open&asin=B00H987FS6&location=3560) ^ref-8688
+
+---
+The greatest impediment to scientific innovation is usually a conceptual lock, not a factual lack. — location: [4261](kindle://book?action=open&asin=B00H987FS6&location=4261) ^ref-24483
+
+---
+The resolution of history must be rooted in the reconstruction of past events themselves—in their own terms—based on narrative evidence of their own unique phenomena. — location: [4289](kindle://book?action=open&asin=B00H987FS6&location=4289) ^ref-21093
+
+---
+the central principle of all history—contingency
+
+================================================================================
+Result 76
+================================================================================
+
+Filename: Russell-OneNote 2013 For Dummies.md
+Path: Books/Books/Russell-OneNote 2013 For Dummies.md
+Relevance: -966.2%
+
+Content:
+(July 2025)
+- 6-month scan (October 2025)
+- Technical interests (3D printing, Raspberry Pi)
+- Privacy preferences (local-only)
+
+---
+
+## Usage
+
+### Initialize
+```bash
+python rag_with_memory.py init
+```
+
+### Query with Memory
+```python
+from rag_with_memory import MemoryRAG
+rag = MemoryRAG()
+result = rag.query("What should I expect at my scan?")
+```
+
+### View Memories
+```python
+memories = rag.get_all_memories()
+```
+
+### Interactive Mode
+```bash
+python rag_with_memory.py interactive
+```
+
+---
+
+## Example
+
+**First conversation:**
+```
+You: "Tell me about my treatment"
+RAG: [Full context about DLBCL, R-CHOP, Yescarta]
+```
+
+**Later:**
+```
+You: "What about side effects?"
+RAG: [Knows you mean Yescarta, no re-explanation]
+```
+
+---
+
+## Related
+- [[Obsidian RAG System MoC]]
+- [[Obsidian RAG Quick Start]]
+
+---
+
+## Tags
+#AI #RAG #memory #Mem0
+
+================================================================================
+Result 77
+================================================================================
+
+Filename: New Note From Highlight.md
+Path: Templates/New Note From Highlight.md
+Relevance: -968.4%
+
+Content:
+└─ Chosen ✓
+               ← because → High-grade DLBCL
+               ← because → Double-hit status
+               ← because → Refractory to R-CHOP
+               ← because → Strong evidence base
+```
+
+**Biomarker Tracking:**
+
+**Query:** "Track my SUV max values over time"
+
+**Timeline Graph:**
+```
+Pre-treatment:     SUV max 18.5 (highly active)
+   ↓
+Post R-CHOP:       SUV max 8.2 (partial response)
+   ↓
+Post Yescarta 3mo: SUV max 2.1 (complete response)
+   ↓
+6-month follow-up: SUV max 1.8 (continued remission)
+
+Trend: ↓ Excellent response trajectory
+Status: Below threshold (<2.5) indicating no active disease
+```
+
+**Doctor Visit Preparation:**
+
+LightRAG can generate comprehensive visit summaries:
+```
+"Generate summary for oncologist visit"
+
+================================================================================
+Result 78
+================================================================================
+
+Filename: Hacking With iOS.md
+Path: Books/Books/Hacking With iOS.md
+Relevance: -968.8%
+
+Content:
+ecomes confusing.
+
+---
+
+## Revision Strategies
+
+### Early Revision
+
+Catch errors early:
+
+```
+T1: Initial understanding
+T2: First approach
+T3: Actually, T1 was wrong (REVISE)
+T4: Corrected approach
+```
+
+**Benefit:** Prevents building on false premises.
+
+---
+
+### Late Revision
+
+Discover issues near completion:
+
+```
+T1-T5: Build solution
+T6: Verify... wait, doesn't handle edge case X
+T7 [REVISE T5]: Adjusted solution for edge case
+T8: Re-verify - now complete
+```
+
+**Benefit:** Ensures thorough validation.
+
+---
+
+### Multiple Revisions
+
+Don't hesitate to revise repeatedly:
+
+```
+T1: Understanding
+T2: Approach A
+T3 [REVISE T2]: Actually, approach B
+T4: Details of B
+T5 [REVISE T3]: Wait, hybrid A+B is better
+T6: Final hybrid approach
+```
+
+**Benefit:** Shows genuine problem-solving process.
+
+---
+
+## Efficiency Techniques
+
+### 1. Batch Related Thoughts
+
+Combine closely related analyses:
+
+================================================================================
+Result 79
+================================================================================
+
+Filename: Gould-Wonderful Life.md
+Path: Books/Books/Gould-Wonderful Life.md
+Relevance: -973.4%
+
+Content:
+se with which they are retrieved from memory—and this is largely determined by the extent of coverage in the media. — location: [126](kindle://book?action=open&asin=B00555X8OA&location=126) ^ref-41828
+
+---
+This is the essence of intuitive heuristics: when faced with a difficult question, we often answer an easier one instead, usually without noticing the substitution. — location: [204](kindle://book?action=open&asin=B00555X8OA&location=204) ^ref-35739
+
+---
+System 1 operates automatically and quickly, with little or no effort and no sense of voluntary control. System 2 allocates attention to the effortful mental activities that demand it, including complex computations. The operations of System 2 are often associated with the subjective experience of agency, choice, and concentration. — location: [275](kindle://book?action=open&asin=B00555X8OA&location=275) ^ref-55392
+
+================================================================================
+Result 80
+================================================================================
+
+Filename: The Social Conquest of Earth.md
+Path: Books/Books/The Social Conquest of Earth.md
+Relevance: -980.6%
+
+Content:
+tion=open&asin=B0056BSJLA&location=3638)) %% Color: yellow %% ^334466193
+
+---
+
+The magnitude of the self-preservation instinct corresponds to the two most powerful motivations in life: hunger and love. While the [fulfillment] satisfaction of the eternal hunger guarantees self-preservation, the gratification of love secures its furtherance. In truth, these two impulses are the rulers of life. ([3683](https://readwise.io/to_kindle?action=open&asin=B0056BSJLA&location=3683)) %% Color: yellow %% ^334466194
+
+---
+
+The same laws that determine the life of the individual, and to which it is subject, are therefore valid for the people. Self-preservation and continuity are the major impulses for any kind of behavior, ([3692](https://readwise.io/to_kindle?action=open&asin=B0056BSJLA&location=3692)) %% Color: yellow %% ^334466195
+
+---
+
+================================================================================
+Result 81
+================================================================================
+
+Filename: Zakaria-The Post-American World.md
+Path: Books/Books/Zakaria-The Post-American World.md
+Relevance: -989.8%
+
+Content:
+true,
+  "next_thought_needed": true,
+  "thought": "Approaching my initial estimate but realizing I need 
+             more analysis before concluding. Extending to verify 
+             edge cases."
+}
+
+// Next thought
+{
+  "thought_number": 9,
+  "total_thoughts": 11,  // Adjusted upward
+  "next_thought_needed": true,
+  "thought": "Now checking edge case A..."
+}
+```
+
+**Difference from Adjusting total_thoughts**:
+- `needs_more_thoughts`: Signals intent to extend
+- Adjusting `total_thoughts`: Actually extends
+
+Both are typically used together.
+
+---
+
+## Technical Details
+
+### Tool Parameters Schema
+
+================================================================================
+Result 82
+================================================================================
+
+Filename: Moonwalking With Einstein.md
+Path: Books/Books/Moonwalking With Einstein.md
+Relevance: -990.7%
+
+Content:
+e scope is unclear
+- Debugging complex issues
+
+❌ **Don't use for:**
+- Simple questions with direct answers
+- Casual conversation
+- Quick factual lookups
+- When speed > thoroughness
+
+### How to Request
+
+Simply ask:
+```
+"Can you use sequential thinking to debug why my API is slow?"
+"Please use sequential thinking to design an algorithm for this problem."
+"I need you to think through this complex decision step by step."
+```
+
+---
+
+## 📊 Quick Reference
+
+| Aspect | Sequential Thinking | Regular Response |
+|--------|---------------------|------------------|
+| **Visibility** | Every step visible | Thinking is hidden |
+| **Revision** | Can revise any thought | Hard to backtrack |
+| **Planning** | Adaptive, adjusts as needed | Fixed approach |
+| **Branching** | Can explore alternatives | Linear only |
+| **Complexity** | Excels at complex problems | Best for simple questions |
+
+---
+
+## 🔗 Related Tools
+
+================================================================================
+Result 83
+================================================================================
+
+Filename: Complete-OhMyZsh-Cheatsheet.md
+Path: Tech/Operating Systems/MacOS/Notes/OhMyZsh/Notes/Complete-OhMyZsh-Cheatsheet.md
+Relevance: -996.9%
+
+Content:
+n=B014EOUMZA&location=4466) ^ref-28706
+
+---
+how we think into two modes of thought, dubbed System 1 and System 2. — location: [4838](kindle://book?action=open&asin=B014EOUMZA&location=4838) ^ref-29604
+
+---
+System 1 includes all the various modules churning away below the surface of our conscious awareness. It is automatic, “fast,” intuitive thinking, driven by unconscious reactions and heuristics—rough-and-ready strategies shaped by prior experience. When you manage to make your coffee in the morning or drive from home to work without really paying attention to what you are doing, it’s System 1 that is in charge. System 2 is our conscious, “slow,” rational mode of thinking. It demands attention; when you’re concentrating on a hard math problem, that’s System 2’s job. — location: [4839](kindle://book?action=open&asin=B014EOUMZA&location=4839) ^ref-58536
+
+================================================================================
+Result 84
+================================================================================
+
+Filename: Claude Code Hooks.md
+Path: Tech/AI/Claude Code Hooks.md
+Relevance: -1004.0%
+
+Content:
+python`
+
+================================================================================
+Result 85
+================================================================================
+
+Filename: Claude Code Information Files.md
+Path: Tech/AI/Claude Code Information Files.md
+Relevance: -1005.4%
+
+Content:
+cause and effect, mechanism and physical law. ([1236](https://readwise.io/to_kindle?action=open&asin=B002SAUBWC&location=1236)) %% Color: yellow %% ^334466394
+
+---
+
+================================================================================
+Result 86
+================================================================================
+
+Filename: Doré-Amandine.md
+Path: Recipes/Fish/Doré-Amandine.md
+Relevance: -1009.8%
+
+Content:
+nnections Insights
+-
+
+================================================================================
+Result 87
+================================================================================
+
+Filename: Vector Databases for RAG.md
+Path: Tech/AI/RAG/Local Obsidian RAG/Vector Databases for RAG.md
+Relevance: -1017.9%
+
+Content:
+ts` should be ≥ `thought_number` (usually)
+- Final thought should have `next_thought_needed = false`
+- `revises_thought` should only be set when `is_revision = true`
+
+---
+
+## Common Parameter Patterns
+
+### Linear Progression
+```json
+T1: {thought_number: 1, total_thoughts: 5, next_thought_needed: true}
+T2: {thought_number: 2, total_thoughts: 5, next_thought_needed: true}
+T3: {thought_number: 3, total_thoughts: 5, next_thought_needed: true}
+T4: {thought_number: 4, total_thoughts: 5, next_thought_needed: true}
+T5: {thought_number: 5, total_thoughts: 5, next_thought_needed: false}
+```
+
+### With Revision
+```json
+T1: {thought_number: 1, total_thoughts: 5}
+T2: {thought_number: 2, total_thoughts: 5}
+T3: {thought_number: 3, total_thoughts: 6, is_revision: true, revises_thought: 2}
+T4: {thought_number: 4, total_thoughts: 6}
+```
+
+================================================================================
+Result 88
+================================================================================
+
+Filename: iPhone Hearing Test.md
+Path: Medical/iPhone Hearing Test.md
+Relevance: -1020.8%
+
+Content:
+se but the cache layer."
+}
+```
+
+**Benefits**:
+- Makes corrections explicit
+- Shows self-awareness
+- Improves final answer quality
+- Demonstrates critical thinking
+
+---
+
+### `revises_thought` (integer)
+
+**Purpose**: Specifies which thought number is being reconsidered.
+
+**Requirements**:
+- Only used when `is_revision = true`
+- Must reference a previous thought number
+- Must be less than current `thought_number`
+
+**Example Revision Flow**:
+```json
+// Thought 3: Original
+{
+  "thought_number": 3,
+  "thought": "The issue is caused by database queries"
+}
+
+// Thought 6: Revision
+{
+  "thought_number": 6,
+  "is_revision": true,
+  "revises_thought": 3,
+  "thought": "After checking metrics, thought 3 was incorrect. 
+             The issue is actually the cache layer, not database."
+}
+```
+
+**Multiple Revisions**:
+You can revise the same thought multiple times:
+```json
+// First revision
+{"thought_number": 5, "is_revision": true, "revises_thought": 2}
+
+================================================================================
+Result 89
+================================================================================
+
+Filename: constant test.md
+Path: Math/constant test.md
+Relevance: -1021.1%
+
+Content:
+ising) previous ones:
+
+```
+Thought 1: Understand the problem
+Thought 2: Consider approach A
+Thought 3: Wait, approach A has issues... (revision)
+Thought 4: Try approach B instead
+Thought 5: This works! Generate hypothesis
+Thought 6: Verify hypothesis against constraints
+Thought 7: Confirmed - provide final answer
+```
+
+### Dynamic Planning
+
+Unlike a rigid plan, Sequential Thinking is **adaptive**:
+
+- **Start**: Estimate 5 thoughts needed
+- **Midway**: Realize it's more complex, adjust to 8 thoughts
+- **Later**: Find a simpler path, reduce to 6 thoughts
+- **End**: Realize more validation needed, extend to 9 thoughts
+
+---
+
+## Advantages Over Regular Reasoning
+
+================================================================================
+Result 90
+================================================================================
+
+Filename: system_profiler.md
+Path: Tech/Operating Systems/MacOS/Notes/Commands/system_profiler.md
+Relevance: -1034.1%
+
+Content:
+tes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-
+
+================================================================================
+Result 91
+================================================================================
+
+Filename: ASCT Poor Outcome Studies.md
+Path: Medical/Lymphoma/ASCT Poor Outcome Studies.md
+Relevance: -1034.8%
+
+Content:
+tart on the first task when you are."
+
+================================================================================
+Result 92
+================================================================================
+
+Filename: Knowledge Graph RAG Architecture.md
+Path: Tech/AI/RAG/Knowledge Graph RAG Architecture.md
+Relevance: -1036.4%
+
+Content:
+s
+```
+
+---
+
+## The Core Philosophy
+
+### Embrace Uncertainty
+- Start without knowing the full path
+- Question your own assumptions
+- Revise when you learn something new
+- Extend when complexity emerges
+
+### Make Thinking Visible
+- Every step has a reason
+- Every revision has a cause
+- Every branch has a purpose
+- Every conclusion has evidence
+
+### Value Process Over Speed
+- Better to think carefully than quickly
+- Better to revise than persist with errors
+- Better to explore than commit too early
+- Better to verify than assume
+
+---
+
+### Related Notes
+- [[Sequential Thinking Tool|Sequential Thinking Tool]]
+- [[Parameters Reference]]
+- [[Usage Patterns]]
+- [[Examples]]
+
+### Questions / Ideas for Further Exploration
+- How does explicit revision compare to implicit self-correction?
+- What's the optimal depth of branching before it becomes counterproductive?
+- Can meta-cognitive awareness be trained through sequential thinking practice?
+
+================================================================================
+Result 93
+================================================================================
+
+Filename: Carroll-The Complete Works of Lewis Carroll With All the Original Illustrations + The Life and Letters of Lewis Carroll All the Novels, Stories and Poems.md
+Path: Books/Books/Carroll-The Complete Works of Lewis Carroll With All the Original Illustrations + The Life and Letters of Lewis Carroll All the Novels, Stories and Poems.md
+Relevance: -1037.5%
+
+Content:
+ellow %% ^334466353
+
+---
+
+================================================================================
+Result 94
+================================================================================
+
+Filename: Gladwell-David and Goliath.md
+Path: Books/Books/Gladwell-David and Goliath.md
+Relevance: -1039.1%
+
+Content:
+n=open&asin=B00DF35VNA&location=837) ^ref-34802
+
+---
+
+================================================================================
+Result 95
+================================================================================
+
+Filename: Carroll-The Big Picture.md
+Path: Books/Books/Carroll-The Big Picture.md
+Relevance: -1043.9%
+
+Content:
+# Doré Amandine
+
+![](Doré-Amandine-image1.png){width="8.5625in" height="11.0625in"}
+
+================================================================================
+Result 96
+================================================================================
+
+Filename: ChatGPT Coding Best Practice.md
+Path: Tech/Electronics/Software/ChatGPT Coding Best Practice.md
+Relevance: -1044.8%
+
+Content:
+![](https://m.media-amazon.com/images/I/A1H5ySsZDgL._SY160.jpg)
+## Highlights
+The indicator for when many doughs are properly fermented is when it has doubled in size—the point at which most of the available sugars have been consumed. — location: [725](kindle://book?action=open&asin=B01D7CEGPM&location=725) ^ref-36442
+
+---
+
+================================================================================
+Result 97
+================================================================================
+
+Filename: How to Read a Book.md
+Path: Books/Books/How to Read a Book.md
+Relevance: -1045.7%
+
+Content:
+%%
+ID: 16112735
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51emzVxdvWL._SL500_.jpg)
+
+# About
+Title: [[Moonwalking With Einstein]]
+Authors: [[Joshua FOER]]
+Category: #books
+Number of Highlights: ==11==
+Readwise URL: https://readwise.io/bookreview/16112735
+Date: [[2022-06-18]]
+Last Highlighted: *2012-03-24*
+
+---
+
+# Highlights
+
+“What we have been doing over the last century is defining memory incorrectly, understanding it incompletely, applying it inappropriately, and condemning it because it doesn’t work and isn’t enjoyable,” ([186](https://readwise.io/to_kindle?action=open&asin=B004H4XID6&location=186)) %% Color: yellow %% ^334466355
+
+---
+
+the brain records everything to which it pays any degree of conscious attention, and that this recording is permanent. ([400](https://readwise.io/to_kindle?action=open&asin=B004H4XID6&location=400)) %% Color: yellow %% ^334466356
+
+---
+
+================================================================================
+Result 98
+================================================================================
+
+Filename: Specialized Turbo Creo.md
+Path: Important Documents/Purchases/Specialized Turbo Creo.md
+Relevance: -1050.2%
+
+Content:
+ach..."
+```
+
+---
+
+### Ask Follow-up Questions After
+
+Once Claude finishes, you can:
+
+```
+"Can you elaborate on Thought 5 about the caching strategy?"
+
+"What would change if we had budget constraints?"
+
+"Can you explore the alternative you mentioned in Thought 3?"
+```
+
+---
+
+## When NOT to Request It
+
+### Simple Questions
+
+```
+❌ "Use sequential thinking to tell me what 2+2 is"
+✅ "What's 2+2?"
+```
+
+---
+
+### Quick Lookups
+
+```
+❌ "Use sequential thinking to find the capital of France"
+✅ "What's the capital of France?"
+```
+
+---
+
+### Casual Chat
+
+```
+❌ "Use sequential thinking to chat about the weather"
+✅ "How's the weather been?"
+```
+
+---
+
+### When Time is Critical
+
+```
+❌ "Production is down! Use sequential thinking..."
+✅ "Production is down! Quick diagnosis needed!" 
+    [Then maybe detailed analysis later]
+```
+
+---
+
+## Combining with Other Requests
+
+### With Code Generation
+
+```
+"Use sequential thinking to design the algorithm, then write the implementation."
+```
+
+---
+
+================================================================================
+Result 99
+================================================================================
+
+Filename: Smith-The Nine of Us.md
+Path: Books/Books/Smith-The Nine of Us.md
+Relevance: -1054.3%
+
+Content:
+![](https://m.media-amazon.com/images/I/71lp0IEZl5L._SY160.jpg)
+## Highlights
+convince you of the benefits of stretching, I will introduce studies and stories that explain how to find success and satisfaction that’s hard to get from chasing. People who routinely stretch, those I call stretchers, ask what more they can do with what they have, instead of asking what’s missing. — location: [393](kindle://book?action=open&asin=B01FQQ6EMU&location=393) ^ref-6845
+
+---
+
+================================================================================
+Result 100
+================================================================================
+
+Filename: Martha-Stewart-Chewy-Chocolate-Gingerbread-Cookies.md
+Path: Recipes/Desserts/Martha-Stewart-Chewy-Chocolate-Gingerbread-Cookies.md
+Relevance: -1062.2%
+
+Content:
+this revising earlier thought?
+  revises_thought?: number;           // Which thought to revise?
+  branch_from_thought?: number;       // Branching point
+  branch_id?: string;                 // Branch identifier
+  needs_more_thoughts?: boolean;      // Need to extend reasoning?
+}
+```
+
+---
+
+## Parameter Decision Tree
+
+### Starting a Sequence
+
+```
+1. Set thought_number = 1
+2. Estimate total_thoughts (usually 5-7)
+3. Write your first thought
+4. Set next_thought_needed = true
+```
+
+### Continuing
+
+```
+1. Increment thought_number
+2. Adjust total_thoughts if needed
+3. Write next thought
+4. Set next_thought_needed = true (unless done)
+```
+
+### Revising
+
+```
+1. Set is_revision = true
+2. Set revises_thought = <number>
+3. Write revised thinking
+4. Adjust total_thoughts if needed
+```
+
+### Branching
+
+```
+1. Set branch_from_thought = <number>
+2. Set branch_id = "<name>"
+3. Write alternative approach
+4. Continue branch or merge back
+```
+
+### Finishing
+
+```
+1. Verify solution is complete
+2
+

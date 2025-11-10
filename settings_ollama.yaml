@@ -1,0 +1,52 @@
+llm:
+  api_type: openai_chat
+  api_base: http://host.docker.internal:11434/v1
+  api_key: "none"
+  model: qwen2.5-coder:14b
+  max_tokens: 4000
+  temperature: 0.1
+  request_timeout: 180.0
+  concurrent_requests: 1
+
+embeddings:
+  api_type: openai_embedding
+  api_base: http://host.docker.internal:11434/v1
+  api_key: "none"
+  model: nomic-embed-text
+  request_timeout: 180.0
+  concurrent_requests: 1
+
+chunks:
+  size: 1200
+  overlap: 100
+
+entity_extraction:
+  entity_types:
+    - person
+    - organization
+    - location
+    - event
+    - concept
+    - technology
+    - medical_condition
+    - treatment
+    - medication
+    - procedure
+
+input:
+  file_type: text
+  storage:
+    type: file
+    base_dir: input
+
+output:
+  type: file
+  base_dir: output
+
+reporting:
+  type: file
+  base_dir: logs
+
+cache:
+  type: file
+  base_dir: cache

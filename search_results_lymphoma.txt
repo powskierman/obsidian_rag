@@ -1,0 +1,120 @@
+================================================================================
+Result 1
+================================================================================
+
+Filename: 1st PET-CT scan result.md
+Path: Medical/Lymphoma/1st PET-CT scan result.md
+Relevance: 165.3%
+
+Content:
+# Lymphoma MoC
+Date: 2024-12-10
+
+### Backlink
+[[]]
+
+- ### Reference
+- ==[[Lymphoma Treatment Contacts]]==
+- [[Diffuse large B-cell lymphoma.pdf]]
+- [Double - hit lymphoma : optimizing therapy](../Media/double%20hit%20lymphoma.pdf)
+- [[Difference between B Cells and T cells]]
+- [[High_Grade_B_Cell_Lymphoma_Fact_Sheet_2024.pdf]]
+- [[LRF-Cell-Therapy-Guide-2022_v03-1.pdf]]
+- [[Medication– Michel Lapointe – Medications 2024-12-13 1.pdf]]
+- [[Chemo Medication.xlsx]]
+- [[Arthur C. Child Cancer Centre.docx]]
+- [[Lymphoma/Fentanyl GI Tract Effects]]
+- [ABC, GCB, and Double-Hit Diffuse Large B-Cell Lymphoma](https://ascopubs.org/doi/10.14694/EdBook_AM.2015.35.e449)
+- [[lymphoma practice guidelines.pdf]]
+- [[Lymphoma/Cardiac Oncology Clinic]]
+- [[Lymphoma/Dr. Jiri Slaby]]
+- [[../Media/Dr. Mona Naiim Shafey|Dr
+
+================================================================================
+Result 2
+================================================================================
+
+Filename: Kymriah.md
+Path: Medical/Lymphoma/Kymriah.md
+Relevance: 93.6%
+
+Content:
+ted, indicating high metabolic activity typically seen in lymphoma.
+	2.	Marrow Lesion in the Right Humerus:
+	•	A small but intensely FDG avid lesion was found in the bone marrow of your distal right humerus (upper arm bone). This lesion has an SUV max of 11.0, also suggesting lymphomatous involvement.
+	•	The lesion measures approximately 1 cm in width and extends over a length of 2 cm.
+	3.	Spleen, Other Lymph Nodes, and Organs:
+	•	The spleen appears normal in size and metabolic activity, with no signs of disease.
+	•	No other hypermetabolic lymph nodes were detected above the diaphragm (in areas like the chest or neck).
+	•	Other major organs, including the liver, pancreas, adrenal glands, kidneys, and lungs, show no abnormal FDG uptake or suspicious findings.
+	•	There are minor findings such as mild diverticulosis (a benign condition affecting the colon) and bilateral renal cysts (non-cancerous fluid-filled sacs on the kidneys).
+	4.	Prostate:
+	•	The prostate is described as “bulky,” whi
+
+================================================================================
+Result 3
+================================================================================
+
+Filename: Diagnosis and Options.md
+Path: Medical/Lymphoma/Diagnosis and Options.md
+Relevance: 90.4%
+
+Content:
+# Lymphoma Prognosis
+Date: 2025-01-12
+
+### Backlink
+[[Diagnosis and Options]]
+
+### Reference
+-  
+### Notes
+-  Survival probabilities for high-grade B-cell lymphoma (HGBL) with [[MYC]], [[BCL2]], and/or BCL6 rearrangements vary depending on the treatment approach, response to therapy, and individual factors like age, fitness, and disease stage. Here’s an evidence-based overview of survival probabilities at 1 year, 2 years, and 5 years:
+
+Without #CAR-T or Emerging Therapies
+
+If treated with standard chemotherapy (e.g., [[R-CHOP]] or DA-EPOCH-R) without access to advanced or emerging therapies:
+	•	1-year survival: ~50–60%.
+	•	2-year survival: ~30–40%.
+	•	5-year survival: ~20–25%.
+	•	Relapses often occur within the first 1–2 years, leading to poor long-term outcomes.
+
+===With Intensive Chemotherapy + Autologous Stem Cell Transplant (#ASCT)===
+
+================================================================================
+Result 4
+================================================================================
+
+Filename: Frontline Treatment Recommendations GC DLBCL.md
+Path: Medical/Lymphoma/Frontline Treatment Recommendations GC DLBCL.md
+Relevance: 80.8%
+
+Content:
+h as mild diverticulosis (a benign condition affecting the colon) and bilateral renal cysts (non-cancerous fluid-filled sacs on the kidneys).
+	4.	Prostate:
+	•	The prostate is described as “bulky,” which may suggest enlargement but does not indicate FDG avidity or malignancy based on this scan.
+Impression
+	•	The findings strongly suggest lymphoma involving:
+	1.	A large retroperitoneal lymph node mass.
+	2.	A secondary site in the bone marrow of the right humerus.
+	•	No other significant areas of disease were detected elsewhere in the body.
+What Does This Mean?
+	•	The PET/CT scan supports a diagnosis of lymphoma, consistent with my biopsy results.
+	•	The retroperitoneal mass is likely the primary site of involvement.
+	•	The lesion in your right humerus indicates that lymphoma has spread to at least one additional site (bone marrow involvement).
+	•	The absence of other FDG avid abnormalities suggests that the disease has not widely spread to other organs or lymph nodes above the diaphragm.
+
+================================================================================
+Result 5
+================================================================================
+
+Filename: Breyanzi.md
+Path: Medical/Lymphoma/Breyanzi.md
+Relevance: 11.8%
+
+Content:
+]], and IGH/[[BCL2]] rearrangements, Dr. Slaby has recommended #ASCT. The genetic findings suggest a complex B-cell lymphoma, possibly with high-risk features that might benefit from intensive therapy. Before proceeding with this treatment, it’s essential I understand the comprehensive picture of benefits, risks, and potential side effects associated with this procedure.
+##### Benefits of Autologous Stem Cell Transplantation
+- Potential for Durable Remission and Improved Survival
+- High-dose chemotherapy followed by #ASCT remains a feasible and effective approach for patients with high-risk or relapsed aggressive B-cell lymphomas. This treatment can induce durable remissions and is potentially curative for many lymphoma patients. Studies have demonstrated significant survival benefits, with one analysis showing 3-year progression-free survival (PFS) and overall survival (OS) rates of 63% and 68%, respectively
+

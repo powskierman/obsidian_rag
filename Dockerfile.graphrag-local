@@ -1,0 +1,42 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install GraphRAG 2.7.0 with LiteLLM support
+RUN pip install graphrag==2.7.0
+
+# Install additional dependencies (including LiteLLM)
+RUN pip install flask litellm requests pandas numpy
+
+# Copy service wrapper and configurations
+COPY graphrag_local_service_v2.py ./graphrag_local_service.py
+COPY graphrag_openai_service.py ./graphrag_openai_service.py
+COPY graphrag_claude_service.py ./graphrag_claude_service.py
+COPY settings_graphrag_2_7.yaml ./settings.yaml
+COPY settings_graphrag_openai.yaml ./settings_openai.yaml
+COPY settings_graphrag_claude.yaml ./settings_claude.yaml
+
+# Create directories
+RUN mkdir -p /app/ragtest/input /app/vault /app/ragtest/output /app/ragtest/cache
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV GRAPHRAG_API_KEY=ollama
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8001/health || exit 1
+
+# Expose port
+EXPOSE 8001
+
+# Run GraphRAG service
+CMD ["python", "graphrag_local_service.py"]

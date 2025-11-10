@@ -1,0 +1,86 @@
+================================================================================
+Result 1
+================================================================================
+
+Filename: Home-Assistant MoC.md
+Path: Tech/Electronics/Software/Home-Assistant/media/Home-Assistant MoC.md
+Relevance: 626.9%
+
+Content:
+# Home Assistant ssh
+Date: 2024-01-20
+
+### Backlink
+[[Home-Assistant MoC]]
+
+### Reference
+-  
+### Notes
+-  [Debugging the Home Assistant Operating System  Home Assistant Developer Docs](https://developers.home-assistant.io/docs/operating-system/debugging/)
+
+================================================================================
+Result 2
+================================================================================
+
+Filename: $13 voice assistant for Home Assistant.md
+Path: Instapaper Notes/$13 voice assistant for Home Assistant.md
+Relevance: 624.3%
+
+Content:
+# Home-Assistant OS
+Date: 2022-11-06
+
+### Tags: 
+
+### Backlink
+[[Home-Assistant MoC]]
+
+### Reference
+-  [Installation - Home Assistant](https://www.home-assistant.io/installation/)
+- 
+### Notes
+-  [[Home-Assistant Apple Watch]]
+
+================================================================================
+Result 3
+================================================================================
+
+Filename: Home-Assistant OS.md
+Path: Tech/Electronics/Software/Home-Assistant/media/Home-Assistant OS.md
+Relevance: 585.1%
+
+Content:
+2022-07-01
+# Home-Assistant MOC
+
+### Backlink
+[[Raspberry Pi Projects MOC]]
+
+### Reference
+- [Home Assistant Website](https://www.home-assistant.io/)
+- [[Home-Assistant Apple Watch]]
+- [[Home Assistant Matter MoC]]
+- [[Home Assistant VSCode]]
+- [[../../../Software/Home-Assistant/Esphome/ESPHome Install]]
+- [[Recover Non-Responsive Tuya Device]]
+- [[Home Assistant Renamer]]
+- [[Home Assistant Modular Configuration]]
+
+### Notes
+-  [[Home Assistant troubleshooting]]
+- [[Home Assistant ssh]]
+- [[Home-Assistant Installation]]
+- [[Home-Assistant - Controlling motion detection devices locally]]
+- [[Home-Assistant - Alexa Integration]]
+- [[Home-Assistant - Card-Mod Integration]]
+- [Home Assistant - Custom Sensor](https://opensource.com/article/21/2/home-assistant-custom-sensors)
+- [[HACS]]
+- [[Home Assistant Backups]]
+- [[Home Assistant Maintenance]]
+- 
+- Weather Sensor
+
+    a.  Use sensoriot [RTL_433 Docker](https://sensorsiot.github.io/IOTstack/Containers/RTL_433-docker/)
+
+    b
+

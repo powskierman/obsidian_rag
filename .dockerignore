@@ -1,0 +1,33 @@
+# Ignore local environment and build junk
+venv/
+venv_python313/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Ignore data and caches
+lightrag_db/
+chroma/
+node_modules/
+.cache/
+*.sqlite
+*.log
+
+# Ignore user content and vaults
+*.md
+vault/
+.obsidian/
+
+# Ignore Git and Docker metadata
+.git/
+.gitignore
+Dockerfile
+
+# Local databases
+chroma_db/
+mem0_db/
+
+# Mac + system junk
+.DS_Store

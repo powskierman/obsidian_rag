@@ -1,0 +1,18 @@
+# Additional requirements for Claude API support
+# Install with: pip install -r requirements_claude.txt
+
+anthropic>=0.34.0
+openai>=1.0.0
+
+# These are already in requirements.txt, but listed for reference:
+# flask==3.0.0
+# streamlit==1.29.0
+# chromadb==0.4.18
+# sentence-transformers>=2.3.0
+# watchdog==3.0.0
+# requests==2.31.0
+# torch>=2.2.0
+# transformers>=4.35.0
+# python-dotenv==1.0.0
+# pyyaml==6.0.1
+

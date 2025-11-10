@@ -1,0 +1,15 @@
+# Requirements for Claude-Powered Knowledge Graph Builder
+
+# Core dependencies
+anthropic>=0.39.0         # Claude API
+networkx>=3.2            # Graph data structure
+tqdm>=4.66.0             # Progress bars
+chromadb>=0.4.0          # For reading ChromaDB directly
+
+# For graph service (Docker)
+flask>=3.0.0             # REST API
+flask-cors>=4.0.0        # CORS support
+
+# For visualization (optional)
+# matplotlib>=3.8.0      # Graph plotting
+# pyvis>=0.3.2           # Interactive graph visualization

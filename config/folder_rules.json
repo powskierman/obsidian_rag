@@ -1,0 +1,25 @@
+{
+  "folder_mapping": {
+    "Medical": "Medical",
+    "Tech": "Tech",
+    "Important Documents": "Important Documents",
+    "Books": "Books",
+    "Recipes": "Recipes"
+  },
+  "subfolder_rules": {
+    "Medical": {
+      "lymphoma": "Medical/Lymphoma"
+    },
+    "Tech": {
+      "ai": "Tech/AI",
+      "rag": "Tech/AI",
+      "home assistant": "Tech/Electronics/Software/Home-Assistant",
+      "homekit": "Tech/Electronics/Software/Home-Assistant",
+      "esp": "Tech/Electronics/Hardware/ESP",
+      "esp32": "Tech/Electronics/Hardware/ESP"
+    }
+  },
+  "preserve_existing_structure": true,
+  "min_similar_notes_for_folder_suggestion": 2
+}
+

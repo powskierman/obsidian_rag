@@ -1,0 +1,83 @@
+services:
+  # ChromaDB Embedding Service
+  embedding-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.embedding
+    container_name: obsidian-embedding
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./chroma_db:/app/chroma_db:rw,cached
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+
+  # Claude Knowledge Graph Service
+  graph-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.graph
+    container_name: obsidian-graph-service
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./graph_data:/app/graph_data:ro
+      - ./claude_graph_builder.py:/app/claude_graph_builder.py:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+
+  # Streamlit UI
+  streamlit-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: obsidian-ui
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit.log:/app/streamlit.log:rw
+      - ./streamlit_ui_docker.py:/app/streamlit_ui_docker.py:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - EMBEDDING_SERVICE_URL=http://embedding-service:8000
+      - CLAUDE_GRAPH_SERVICE_URL=http://graph-service:8002
+      # LLM Provider Configuration
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
+      - USE_GPT_OSS=${USE_GPT_OSS:-false}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    networks:
+      - rag-network
+    depends_on:
+      - embedding-service
+      - graph-service
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  chroma_db:
