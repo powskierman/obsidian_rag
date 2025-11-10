@@ -65,15 +65,18 @@ docker-compose down
 
 If you have Claude Desktop or Cursor configured with MCP:
 
-1. Make sure `knowledge_graph_mcp.py` is configured in your MCP settings
+1. Configure `obsidian_rag_unified_mcp.py` in your MCP settings (see `Documentation/MCP_SETUP_INSTRUCTIONS.md`)
 2. The graph will auto-load from `graph_data/knowledge_graph_full.pkl`
 3. Ask Claude questions like:
-   - "Query my knowledge graph: What treatments are mentioned?"
-   - "Get entity info for Home Assistant"
-   - "Find paths between ESP32 and Raspberry Pi"
+   - "Search my vault for CAR-T therapy"
+   - "What treatments are mentioned in my notes?"
+   - "How does ESP32 relate to Home Assistant?"
 
-**MCP Tools Available:**
-- `query_knowledge_graph` - Ask questions
+**MCP Tools Available (Unified Server):**
+- `obsidian_semantic_search` - Enhanced vault search (5-10 results with content snippets)
+- `obsidian_graph_query` - Query knowledge graph
+- `obsidian_vault_stats` - Vault statistics
+- `query_knowledge_graph` - Ask questions about relationships
 - `get_entity_info` - Explore specific entities
 - `find_entity_path` - Find connections between entities
 - `search_entities` - Search for entities by name

@@ -1,8 +1,8 @@
-# Improved Graph Builder - Guide
+# Graph Builder Guide
 
 ## Overview
 
-The improved graph builder (`claude_graph_builder_improved.py`) provides:
+The graph builder (`claude_graph_builder.py`) provides:
 
 ✅ **Better Error Handling**
 - Multiple JSON parsing strategies
@@ -53,10 +53,10 @@ python retry_failed_chunks.py
 If you have `graph_data/failed_chunks.pkl` from a previous run:
 
 ```python
-from claude_graph_builder_improved import ImprovedClaudeGraphBuilder
+from claude_graph_builder import ClaudeGraphBuilder
 import os
 
-builder = ImprovedClaudeGraphBuilder(
+builder = ClaudeGraphBuilder(
     api_key=os.environ.get("ANTHROPIC_API_KEY"),
     model="claude-sonnet-4-5-20250929",  # Use Sonnet for better results
     max_retries=3
@@ -137,15 +137,15 @@ python retry_failed_chunks.py
 # - Use Sonnet: no (for first pass, yes for second pass)
 ```
 
-### Example 2: Use Improved Builder for New Builds
+### Example 2: Use Graph Builder for New Builds
 
 ```python
-from claude_graph_builder_improved import ImprovedClaudeGraphBuilder
+from claude_graph_builder import ClaudeGraphBuilder
 from build_knowledge_graph import get_chunks_from_filesystem
 import os
 
 # Initialize with Sonnet for better reliability
-builder = ImprovedClaudeGraphBuilder(
+builder = ClaudeGraphBuilder(
     api_key=os.environ.get("ANTHROPIC_API_KEY"),
     model="claude-sonnet-4-5-20250929",  # More reliable
     max_retries=3

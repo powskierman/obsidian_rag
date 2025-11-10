@@ -49,12 +49,11 @@ Based on my comprehensive review of your Obsidian RAG project, here are
 
   5. Code Duplication
 
-  Three graph builder implementations:
-  - claude_graph_builder.py (33KB)
-  - claude_graph_builder_improved.py (24KB)
+  Graph builder implementation:
+  - claude_graph_builder.py - Core builder (includes all improvements: retry logic, checkpointing, error handling)
   - Legacy versions in Archive/
 
-  Recommendation: Consolidate to single implementation, remove old versions
+  Status: ✅ Consolidated - all improvements merged into main builder
 
   6. Inconsistent Error Handling
 

@@ -38,44 +38,9 @@ The unified server combines:
 - ✅ All in one place
 - ✅ Single configuration point
 
-## Implementation Options
+## Current Implementation: Unified Server
 
-### Option 1: Enhanced Existing Server (Quick Fix)
-
-Improve `obsidian_rag_mcp_fixed.py` to:
-- Increase result limit (3 → 10+)
-- Return full content snippets
-- Add better error handling
-- Keep it simple
-
-**Pros:** Quick, minimal changes
-**Cons:** Still separate from knowledge graph
-
-### Option 2: Unified MCP Server (Recommended)
-
-Create `obsidian_rag_unified_mcp.py` that combines:
-- Enhanced vault search
-- Knowledge graph queries
-- Single configuration point
-
-**Pros:** 
-- One server to manage
-- All tools in one place
-- Better organization
-- Easier maintenance
-
-**Cons:** Requires creating new file
-
-### Option 3: Keep Separate (Current)
-
-Keep both servers separate but improve vault search.
-
-**Pros:** Minimal changes
-**Cons:** Two servers to manage, duplicate configuration
-
-## Recommended Approach: Unified Server
-
-I recommend **Option 2** - creating a unified MCP server that:
+The unified MCP server (`obsidian_rag_unified_mcp.py`) is now the recommended and active implementation. It provides:
 
 1. **Enhanced Vault Search**
    - Returns 5-10 results (configurable)
@@ -92,31 +57,15 @@ I recommend **Option 2** - creating a unified MCP server that:
    - One server to manage
    - Cleaner Claude Desktop config
 
-## Quick Start: Using Your Current Setup
+## Quick Start: Setup Instructions
 
-### Current Configuration
-
-Your `claude_desktop_config_with_obsidian.json` has:
-
-```json
-{
-  "mcpServers": {
-    "obsidian-rag": {
-      "command": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python",
-      "args": ["/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/obsidian_rag_mcp_fixed.py"],
-      "env": {
-        "VAULT_PATH": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel",
-        "LIGHTRAG_DIR": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/lightrag_db"
-      }
-    }
-  }
-}
-```
+See `Documentation/MCP_SETUP_INSTRUCTIONS.md` for complete setup instructions.
 
 ### How to Use in Claude Desktop
 
-1. **Restart Claude Desktop** after adding MCP server
-2. **Ask Claude directly:**
+1. **Configure** the unified server in Claude Desktop config (see `MCP_SETUP_INSTRUCTIONS.md`)
+2. **Restart Claude Desktop** after adding MCP server
+3. **Ask Claude directly:**
 
 ```
 Search my vault for "CAR-T therapy"
@@ -142,9 +91,7 @@ Find information about "ESP32" in my vault
 
 ## Next Steps
 
-1. **Quick Fix:** Enhance `obsidian_rag_mcp_fixed.py` to return more results
-2. **Best Solution:** Create unified `obsidian_rag_unified_mcp.py`
-3. **Update Config:** Add unified server to Claude Desktop config
+The unified server (`obsidian_rag_unified_mcp.py`) is already implemented and active. See `Documentation/MCP_SETUP_INSTRUCTIONS.md` for setup.
 
 ## Comparison: MCP vs Other Methods
 

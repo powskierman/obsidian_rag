@@ -63,8 +63,8 @@ python build_knowledge_graph.py
 
 ### Option 3: MCP (Claude Desktop/Cursor)
 
-1. Configure `knowledge_graph_mcp.py` in your MCP settings
-2. Ask Claude: "Query my knowledge graph: What treatments are mentioned?"
+1. Configure `obsidian_rag_unified_mcp.py` in your MCP settings (see `Documentation/MCP_SETUP_INSTRUCTIONS.md`)
+2. Ask Claude: "Search my vault for CAR-T therapy" or "What treatments are mentioned in my notes?"
 
 ## Checkpoints
 
