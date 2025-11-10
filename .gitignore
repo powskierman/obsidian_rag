@@ -1,64 +1,58 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-venv_*/
 
-# Logs
-*.log
-Scripts/logs/
-
+!config/*.json
+# Archive databases
+# Compiled files
 # Databases
+# IDE
+# Logs
+# OS
+# Output files (script results, analysis data)
+# Python
+# Temporary files
+# Testing
+*$py.class
+*.bak
+*.cover
+*.json
+*.log
+*.orig
+*.py[cod]
+*.pyc
+*.pyd
+*.pyo
+*.so
+*.swo
+*.swp
+*.tmp
+*~
+.AppleDouble
+.DS_Store
+.LSOverride
+.Python
+.coverage
+.env
+.hypothesis/
+.idea/
+.pytest_cache/
+.tox/
+.vscode/
+Archive/old_databases/
+Scripts/logs/
+__pycache__/
 chroma_db/
 chroma_db_backup_*/
+cleanup_analysis.md
+coverage.xml
+graph_data/**/*.json
+graph_data/**/*.pkl
+graph_data/*.json
+graph_data/*.pkl
+graphrag_claude_db/
+graphrag_db/
+graphrag_local_db/
+htmlcov/
 lightrag_db/
 lightrag_db_backup_*/
 mem0_db/
-graph_data/**/*.pkl
-graph_data/**/*.json
-graphrag_local_db/
-graphrag_claude_db/
-graphrag_db/
-
-# Archive databases
-Archive/old_databases/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Temporary files
-*.tmp
-*.bak
-*.orig
-cleanup_analysis.md
-
-# Output files (script results, analysis data)
-*.json
-!config/*.json
-
-# Compiled files
-*.pyc
-*.pyo
-*.pyd
-.env
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-coverage.xml
-.tox/
-*.cover
-.hypothesis/
+venv/
+venv_*/
