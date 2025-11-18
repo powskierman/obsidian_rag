@@ -8,6 +8,17 @@ import streamlit as st
 import requests
 from datetime import datetime
 import json
+import os
+from pathlib import Path
+
+# Load environment variables from .env.local if it exists
+try:
+    from dotenv import load_dotenv
+    env_file = Path('.env.local')
+    if env_file.exists():
+        load_dotenv(env_file)
+except ImportError:
+    pass  # python-dotenv is optional for UI
 
 st.set_page_config(
     page_title="Obsidian RAG",

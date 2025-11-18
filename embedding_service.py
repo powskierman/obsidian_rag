@@ -11,6 +11,21 @@ import os
 from datetime import datetime
 import time
 import numpy as np
+from pathlib import Path
+
+# Load environment variables from .env.local if it exists
+try:
+    from dotenv import load_dotenv
+    env_file = Path('.env.local')
+    if env_file.exists():
+        load_dotenv(env_file)
+        print(f"✅ Loaded environment from {env_file}")
+    else:
+        # Try to load from .env as fallback
+        load_dotenv()
+except ImportError:
+    print("⚠️  python-dotenv not installed. Using only system environment variables.")
+
 from query_feedback import log_query, save_feedback, get_metrics, get_all_mode_performance, get_database_stats
 
 app = Flask(__name__)
