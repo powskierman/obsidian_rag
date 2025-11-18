@@ -1,0 +1,21 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install --no-cache-dir \
+    anthropic \
+    flask \
+    flask-cors \
+    networkx \
+    tqdm
+
+# Copy service files
+COPY claude_graph_builder.py /app/
+COPY graph_query_service.py /app/
+
+# Expose port
+EXPOSE 8002
+
+# Run service
+CMD ["python", "graph_query_service.py"]

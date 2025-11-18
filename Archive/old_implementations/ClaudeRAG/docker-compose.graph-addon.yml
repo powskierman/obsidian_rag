@@ -1,0 +1,31 @@
+# Add this to your existing docker-compose.yml
+
+services:
+  # ... your existing services (embedding-service, streamlit-ui, etc.) ...
+  
+  graph-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.graph
+    container_name: obsidian-graph-service
+    ports:
+      - "8002:8002"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GRAPH_PATH=/app/knowledge_graph.pkl
+    volumes:
+      - ./knowledge_graph.pkl:/app/knowledge_graph.pkl:ro
+      - ./claude_graph_builder.py:/app/claude_graph_builder.py:ro
+      - ./graph_query_service.py:/app/graph_query_service.py:ro
+    networks:
+      - obsidian-rag-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  obsidian-rag-network:
+    driver: bridge

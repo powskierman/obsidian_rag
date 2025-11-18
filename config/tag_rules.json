@@ -1,0 +1,19 @@
+{
+  "domain_keywords": {
+    "medical": ["medical", "health", "treatment", "therapy", "diagnosis", "symptom", "disease", "patient", "doctor", "hospital", "lymphoma", "cancer", "medication", "prescription"],
+    "tech": ["code", "programming", "software", "development", "api", "github", "git", "python", "swift", "javascript", "tech", "technology"],
+    "hardware": ["esp32", "raspberry pi", "arduino", "circuit", "electronics", "sensor", "microcontroller", "hardware"],
+    "home-automation": ["home assistant", "homekit", "smart home", "automation", "zigbee", "thread", "matter"],
+    "ai": ["ai", "machine learning", "llm", "gpt", "claude", "rag", "embedding", "vector"]
+  },
+  "type_keywords": {
+    "project": ["project", "setup", "install", "configure", "build"],
+    "tutorial": ["tutorial", "guide", "how to", "step by step"],
+    "reference": ["reference", "cheatsheet", "documentation", "api"],
+    "meeting": ["meeting", "agenda", "notes"],
+    "question": ["question", "questions", "faq"]
+  },
+  "max_tags_per_note": 10,
+  "min_tag_length": 2
+}
+

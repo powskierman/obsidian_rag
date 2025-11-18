@@ -1,0 +1,19 @@
+{
+  "vault_path": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel",
+  "templates": {
+    "moc_template": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel/Templates/MoC Template.md",
+    "new_note_template": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel/Templates/New Note Template.md"
+  },
+  "graph_data": {
+    "graph_path": "./graph_data/knowledge_graph_full.pkl",
+    "chroma_db_path": "./chroma_db"
+  },
+  "output": {
+    "analysis_report": "Documentation/vault_analysis_report.json",
+    "moc_list": "moc_list.json",
+    "regular_notes_list": "regular_notes_list.json",
+    "tag_suggestions": "tag_suggestions.json",
+    "folder_suggestions": "folder_suggestions.json"
+  }
+}
+
