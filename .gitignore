@@ -38,3 +38,4 @@ cleanup_analysis.md
 *.pyc
 *.pyo
 *.pyd
+.env.claude
