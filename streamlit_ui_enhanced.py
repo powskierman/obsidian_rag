@@ -70,7 +70,7 @@ with st.sidebar:
         "Retrieval Mode",
         ["vector", "claude-graph"],
         value="vector",
-        help="vector=fast semantic search | claude-graph=Claude reasoning over results"
+        help="vector=fast semantic search | claude-graph=graph reasoning via Claude"
     )
 
     num_sources = st.slider(
