@@ -30,7 +30,12 @@
       "Bash(ollama list:*)",
       "WebSearch",
       "Bash(python3:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(lsof:*)",
+      "Bash(docker:*)",
+      "WebFetch(domain:levelup.gitconnected.com)",
+      "WebFetch(domain:medium.com)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

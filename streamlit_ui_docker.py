@@ -135,19 +135,25 @@ with st.sidebar:
     # Check GraphRAG service
     try:
         graphrag_stats = requests.get(f'{GRAPHRAG_SERVICE}/stats', timeout=2).json()
-        artifacts = graphrag_stats.get('indexed_artifacts', 0)
-        if artifacts > 0:
-            st.success(f"✅ GraphRAG-Local: {artifacts} artifacts")
-        else:
+        if graphrag_stats.get('indexed'):
+            artifacts = graphrag_stats.get('indexed_artifacts', 0)
+            st.success(f"✅ GraphRAG: Indexed ({artifacts} artifacts)")
+        elif graphrag_stats.get('database_exists'):
             st.warning("⚠️ GraphRAG not indexed")
             if st.button("🔄 Index Vault for GraphRAG", key="graphrag_index"):
-                with st.spinner("Building GraphRAG knowledge graph..."):
-                    response = requests.post(f'{GRAPHRAG_SERVICE}/build-index', json={})
+                with st.spinner("Building GraphRAG knowledge graph (this may take 10-30 minutes)..."):
+                    response = requests.post(f'{GRAPHRAG_SERVICE}/index-vault', json={})
                     if response.status_code == 200:
                         st.success("✅ GraphRAG indexed!")
                         st.rerun()
-    except:
-        st.error("⚠️ GraphRAG service offline")
+                    else:
+                        st.error(f"Indexing failed: {response.text}")
+        else:
+            st.info("ℹ️ GraphRAG: Not initialized")
+    except requests.exceptions.ConnectionError:
+        st.info("ℹ️ GraphRAG service not available. Start with: docker-compose --profile graphrag up -d")
+    except Exception as e:
+        st.info(f"ℹ️ GraphRAG: {str(e)[:50]}...")
     
     # Check Ollama
     try:
@@ -284,7 +290,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                     context_text = "\n\n---\n\n".join(context_parts)
             
             elif search_mode.startswith('graphrag-'):
-                # Use GraphRAG-Local-Ollama search
+                # Use GraphRAG search
                 graphrag_mode = 'local' if search_mode == 'graphrag-local' else 'global'
                 progress_text = f"🧠 Querying GraphRAG ({graphrag_mode} mode)..."
                 if graphrag_mode == 'global':
@@ -298,19 +304,32 @@ if prompt := st.chat_input("Ask about your notes..."):
                                 "query": prompt,
                                 "mode": graphrag_mode
                             },
-                            timeout=300  # Increased timeout for GraphRAG processing
+                            timeout=300  # 5 minutes for GraphRAG processing
                         )
 
                         if graphrag_response.status_code != 200:
-                            st.error("GraphRAG query failed")
+                            result_data = graphrag_response.json()
+                            error_msg = result_data.get('error', 'Unknown error')
+                            if 'not found' in error_msg.lower() or 'index' in error_msg.lower():
+                                st.error(f"📊 GraphRAG index not found. Please index your vault first using the sidebar button.")
+                            else:
+                                st.error(f"GraphRAG query failed: {error_msg}")
                             st.stop()
 
                         graphrag_result = graphrag_response.json()
                         context_text = graphrag_result.get('result', '')
-                        sources_list = [{"filename": "GraphRAG Knowledge Graph", "filepath": "GraphRAG-Local-Ollama", "relevance": 100}]
+                        
+                        if not context_text or context_text.strip() == "":
+                            st.warning("GraphRAG returned empty results. Try re-indexing or using a different query.")
+                            st.stop()
+                        
+                        sources_list = [{"filename": "GraphRAG Knowledge Graph", "filepath": "GraphRAG Unified", "relevance": 100}]
 
                     except requests.exceptions.Timeout:
                         st.error("⏱️ GraphRAG query timed out. Try using 'graphrag-local' mode for faster results, or simplify your query.")
+                        st.stop()
+                    except requests.exceptions.ConnectionError:
+                        st.error("🔌 Cannot connect to GraphRAG service. Make sure it's running (docker-compose --profile graphrag up -d)")
                         st.stop()
                     except requests.exceptions.RequestException as e:
                         st.error(f"GraphRAG query failed: {str(e)}")

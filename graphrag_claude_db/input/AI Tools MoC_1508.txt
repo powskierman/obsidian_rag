@@ -32,5 +32,6 @@ Date: 2023-03-01
 - [[Chain of Draft]]
 - [[Sequential Thinking Tool Guide]]
 - [[LLM Access]]
+- [[Specification Tools]]
 ---
 

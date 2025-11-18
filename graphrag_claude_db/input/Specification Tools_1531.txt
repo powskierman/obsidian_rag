@@ -1,9 +1,12 @@
 ---
-aliases: 
-tags: 
+aliases:
+tags:
+  - AI
+  - spec-driven
+  - tools
 created: 2025-10-30 16:28
 ContentType:
-Backlink:
+Backlink: "[[AI Tools MoC]]"
 ---
 ### Main Idea
 - 

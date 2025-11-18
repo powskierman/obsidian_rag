@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 # Configuration
 WORKING_DIR = os.getenv("GRAPHRAG_DIR", "./graphrag_db")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
+EMBED_HOST = os.getenv("EMBED_HOST", "http://host.docker.internal:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:14b")
 EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 
@@ -95,7 +96,7 @@ GRAPHRAG_EMBEDDING_MODEL={EMBED_MODEL}
                 },
                 "embeddings": {
                     "api_type": "openai_embedding",
-                    "api_base": f"{OLLAMA_HOST}/v1",
+                    "api_base": f"{EMBED_HOST}/v1",
                     "api_key": "not_required",  # Ollama doesn't need auth
                     "model": EMBED_MODEL,
                     "request_timeout": 180.0,

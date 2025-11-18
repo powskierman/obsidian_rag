@@ -59,21 +59,22 @@ services:
       dockerfile: Dockerfile.graphrag
     container_name: obsidian-graphrag
     ports:
-      - "8002:8001"  # Different external port to avoid conflicts
+      - "8002:8002"  # Updated to match service port
     volumes:
-      - ./graphrag_db:/app/graphrag_db:rw
+      - ./graphrag_db:/app/graphrag_db:rw,cached
       - "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
       - OLLAMA_HOST=http://host.docker.internal:11434
-      - LLM_MODEL=${LLM_MODEL:-Llama3.1:8b}
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5-coder:14b}
       - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
       - GRAPHRAG_DIR=/app/graphrag_db
+      - VAULT_PATH=/app/vault
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -148,6 +149,39 @@ services:
       - graphrag-claude
     command: ["python", "graphrag_claude_service.py"]
 
+  # GraphRAG-GPT-OSS Service (Docker Model Runner)
+  graphrag-gpt-oss-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.graphrag
+    container_name: obsidian-graphrag-gpt-oss
+    ports:
+      - "8005:8001"  # Different external port
+    volumes:
+      - ./graphrag_gpt_oss_db:/app/graphrag_db:rw
+      - "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel:/app/vault:ro"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OLLAMA_HOST=http://host.docker.internal:12434/engines/llama.cpp
+      - LLM_MODEL=ai/gpt-oss:latest
+      - EMBED_MODEL=nomic-embed-text
+      - EMBED_HOST=http://host.docker.internal:11434
+      - GRAPHRAG_DIR=/app/graphrag_db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+    depends_on:
+      - embedding-service
+    profiles:
+      - graphrag-gpt-oss
+
   # Streamlit UI
   streamlit-ui:
     build:
@@ -162,7 +196,7 @@ services:
       - PYTHONUNBUFFERED=1
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - LIGHTRAG_SERVICE_URL=http://lightrag-service:8001
-      - GRAPHRAG_SERVICE_URL=http://graphrag-local-service:8001
+      - GRAPHRAG_SERVICE_URL=http://graphrag-service:8002
       - OLLAMA_HOST=http://host.docker.internal:11434
       - GRAPH_SERVICE=${GRAPH_SERVICE:-lightrag}
     extra_hosts:
@@ -181,4 +215,5 @@ volumes:
   chroma_db:
   lightrag_db:
   graphrag_db:
+  graphrag_gpt_oss_db:
 
