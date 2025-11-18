@@ -68,9 +68,9 @@ with st.sidebar:
 
     retrieval_mode = st.selectbox(
         "Retrieval Mode",
-        ["vector", "graph-naive", "graph-local", "graph-global", "graph-hybrid"],
+        ["vector", "claude-graph"],
         value="vector",
-        help="vector=fast | graph=better reasoning"
+        help="vector=fast semantic search | claude-graph=Claude reasoning over results"
     )
 
     num_sources = st.slider(
@@ -193,60 +193,87 @@ if prompt := st.chat_input("Ask about your notes..."):
     # Generate response
     with st.chat_message("assistant"):
         try:
-            # Query vault
-            with st.spinner(f"🔍 Searching vault ({retrieval_mode})..."):
-                query_params = {
-                    "query": prompt,
-                    "n_results": num_sources,
-                    "reranking": use_reranking,
-                    "deduplicate": deduplicate,
-                    "mode": retrieval_mode
-                }
+            # Query vault based on retrieval mode
+            with st.spinner(f"🔍 Searching vault with {retrieval_mode}..."):
+                if retrieval_mode == "claude-graph":
+                    # Use Claude reasoning mode
+                    try:
+                        from claude_graph_reasoner import claude_graph_query
 
-                if tag_filter:
-                    query_params["filters"] = {"tags": tag_filter}
+                        result = claude_graph_query(prompt, n_results=num_sources)
 
-                vault_response = requests.post(
-                    'http://localhost:8000/query',
-                    json=query_params,
-                    timeout=10
-                )
-                
-                if vault_response.status_code != 200:
-                    st.error("Failed to search vault")
-                    st.stop()
-                
-                results = vault_response.json()
-                documents = results.get('documents', [[]])[0]
-                metadatas = results.get('metadatas', [[]])[0]
-                distances = results.get('distances', [[]])[0]
-                query_id = results.get('query_id')  # For feedback system
+                        if 'error' in result:
+                            st.error(f"Claude reasoning error: {result['error']}")
+                            st.stop()
 
-            if not documents:
-                st.warning("No relevant notes found. Try a different query.")
-                st.stop()
-            
-            # Build context
-            context_parts = []
-            sources_list = []
-            
-            for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
-                relevance = (1 - dist) * 100
-                filename = meta.get('filename', 'unknown')
-                filepath = meta.get('filepath', 'unknown')
-                
-                context_parts.append(f"Source {i} - {filename} ({relevance:.0f}% relevant):\n{doc}")
-                sources_list.append({
-                    "filename": filename,
-                    "filepath": filepath,
-                    "relevance": relevance
-                })
-            
-            context_text = "\n\n---\n\n".join(context_parts)
-            
-            # Generate response with LLM
-            with st.spinner(f"💭 Thinking with {model_option}..."):
-                system_prompt = f"""You are an AI assistant helping Michel understand his Obsidian knowledge base.
+                        # Extract reasoning and sources
+                        response_text = result.get('reasoning', '')
+                        sources_list = []
+                        for source in result.get('sources', []):
+                            sources_list.append({
+                                'filename': source.get('filename', 'unknown'),
+                                'filepath': source.get('filepath', 'unknown'),
+                                'relevance': source.get('relevance', 0)
+                            })
+                        query_id = None  # Claude reasoning doesn't use query_id
+
+                    except ImportError:
+                        st.error("Claude reasoner not available. Please ensure claude_graph_reasoner.py is in the directory.")
+                        st.stop()
+                else:
+                    # Use vector search mode
+                    query_params = {
+                        "query": prompt,
+                        "n_results": num_sources,
+                        "reranking": use_reranking,
+                        "deduplicate": deduplicate,
+                        "mode": retrieval_mode
+                    }
+
+                    if tag_filter:
+                        query_params["filters"] = {"tags": tag_filter}
+
+                    vault_response = requests.post(
+                        'http://localhost:8000/query',
+                        json=query_params,
+                        timeout=10
+                    )
+
+                    if vault_response.status_code != 200:
+                        st.error("Failed to search vault")
+                        st.stop()
+
+                    results = vault_response.json()
+                    documents = results.get('documents', [[]])[0]
+                    metadatas = results.get('metadatas', [[]])[0]
+                    distances = results.get('distances', [[]])[0]
+                    query_id = results.get('query_id')  # For feedback system
+
+                    if not documents:
+                        st.warning("No relevant notes found. Try a different query.")
+                        st.stop()
+
+                    # Build context for vector search response
+                    context_parts = []
+                    sources_list = []
+
+                    for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                        relevance = (1 - dist) * 100
+                        filename = meta.get('filename', 'unknown')
+                        filepath = meta.get('filepath', 'unknown')
+
+                        context_parts.append(f"Source {i} - {filename} ({relevance:.0f}% relevant):\n{doc}")
+                        sources_list.append({
+                            "filename": filename,
+                            "filepath": filepath,
+                            "relevance": relevance
+                        })
+
+                    context_text = "\n\n---\n\n".join(context_parts)
+
+                    # Generate response with LLM for vector search
+                    with st.spinner(f"💭 Thinking with {model_option}..."):
+                        system_prompt = f"""You are an AI assistant helping Michel understand his Obsidian knowledge base.
 
 Michel has:
 - High-grade B-cell DLBCL (double-hit lymphoma)
@@ -269,26 +296,26 @@ Provide a thorough, compassionate answer that:
 
 Answer:"""
 
-                ollama_response = requests.post(
-                    'http://localhost:11434/api/generate',
-                    json={
-                        'model': model_option,
-                        'prompt': system_prompt,
-                        'stream': False,
-                        'options': {
-                            'temperature': temperature,
-                            'num_ctx': 65536  # Use large context window
-                        }
-                    },
-                    timeout=180
-                )
-                
-                if ollama_response.status_code != 200:
-                    st.error("Failed to generate response")
-                    st.stop()
-                
-                response_text = ollama_response.json().get('response', '')
-            
+                        ollama_response = requests.post(
+                            'http://localhost:11434/api/generate',
+                            json={
+                                'model': model_option,
+                                'prompt': system_prompt,
+                                'stream': False,
+                                'options': {
+                                    'temperature': temperature,
+                                    'num_ctx': 65536
+                                }
+                            },
+                            timeout=180
+                        )
+
+                        if ollama_response.status_code != 200:
+                            st.error("Failed to generate response")
+                            st.stop()
+
+                        response_text = ollama_response.json().get('response', '')
+
             # Display response
             st.markdown(response_text)
 
@@ -299,70 +326,71 @@ Answer:"""
                         st.write(f"**{source['filename']}** - {source['relevance']:.0f}% relevant")
                         st.caption(source['filepath'])
 
-            # Feedback buttons
-            st.divider()
-            st.markdown("**Was this answer helpful?**")
-            feedback_cols = st.columns([1, 1, 1, 1, 1, 2])
+            # Feedback buttons (only for vector search mode)
+            if query_id:
+                st.divider()
+                st.markdown("**Was this answer helpful?**")
+                feedback_cols = st.columns([1, 1, 1, 1, 1, 2])
 
-            with feedback_cols[0]:
-                if st.button("😞", key=f"bad_{query_id}", help="Not helpful"):
-                    try:
-                        requests.post(
-                            'http://localhost:8000/feedback',
-                            json={"query_id": query_id, "rating": 1},
-                            timeout=5
-                        )
-                        st.success("Feedback saved!")
-                    except:
-                        st.warning("Could not save feedback")
+                with feedback_cols[0]:
+                    if st.button("😞", key=f"bad_{query_id}", help="Not helpful"):
+                        try:
+                            requests.post(
+                                'http://localhost:8000/feedback',
+                                json={"query_id": query_id, "rating": 1},
+                                timeout=5
+                            )
+                            st.success("Feedback saved!")
+                        except:
+                            st.warning("Could not save feedback")
 
-            with feedback_cols[1]:
-                if st.button("🙁", key=f"poor_{query_id}", help="Partially helpful"):
-                    try:
-                        requests.post(
-                            'http://localhost:8000/feedback',
-                            json={"query_id": query_id, "rating": 2},
-                            timeout=5
-                        )
-                        st.success("Feedback saved!")
-                    except:
-                        st.warning("Could not save feedback")
+                with feedback_cols[1]:
+                    if st.button("🙁", key=f"poor_{query_id}", help="Partially helpful"):
+                        try:
+                            requests.post(
+                                'http://localhost:8000/feedback',
+                                json={"query_id": query_id, "rating": 2},
+                                timeout=5
+                            )
+                            st.success("Feedback saved!")
+                        except:
+                            st.warning("Could not save feedback")
 
-            with feedback_cols[2]:
-                if st.button("😐", key=f"ok_{query_id}", help="Somewhat helpful"):
-                    try:
-                        requests.post(
-                            'http://localhost:8000/feedback',
-                            json={"query_id": query_id, "rating": 3},
-                            timeout=5
-                        )
-                        st.success("Feedback saved!")
-                    except:
-                        st.warning("Could not save feedback")
+                with feedback_cols[2]:
+                    if st.button("😐", key=f"ok_{query_id}", help="Somewhat helpful"):
+                        try:
+                            requests.post(
+                                'http://localhost:8000/feedback',
+                                json={"query_id": query_id, "rating": 3},
+                                timeout=5
+                            )
+                            st.success("Feedback saved!")
+                        except:
+                            st.warning("Could not save feedback")
 
-            with feedback_cols[3]:
-                if st.button("😊", key=f"good_{query_id}", help="Helpful"):
-                    try:
-                        requests.post(
-                            'http://localhost:8000/feedback',
-                            json={"query_id": query_id, "rating": 4},
-                            timeout=5
-                        )
-                        st.success("Feedback saved!")
-                    except:
-                        st.warning("Could not save feedback")
+                with feedback_cols[3]:
+                    if st.button("😊", key=f"good_{query_id}", help="Helpful"):
+                        try:
+                            requests.post(
+                                'http://localhost:8000/feedback',
+                                json={"query_id": query_id, "rating": 4},
+                                timeout=5
+                            )
+                            st.success("Feedback saved!")
+                        except:
+                            st.warning("Could not save feedback")
 
-            with feedback_cols[4]:
-                if st.button("😍", key=f"excellent_{query_id}", help="Very helpful"):
-                    try:
-                        requests.post(
-                            'http://localhost:8000/feedback',
-                            json={"query_id": query_id, "rating": 5},
-                            timeout=5
-                        )
-                        st.success("Feedback saved!")
-                    except:
-                        st.warning("Could not save feedback")
+                with feedback_cols[4]:
+                    if st.button("😍", key=f"excellent_{query_id}", help="Very helpful"):
+                        try:
+                            requests.post(
+                                'http://localhost:8000/feedback',
+                                json={"query_id": query_id, "rating": 5},
+                                timeout=5
+                            )
+                            st.success("Feedback saved!")
+                        except:
+                            st.warning("Could not save feedback")
 
             # Save to history
             st.session_state.messages.append({
