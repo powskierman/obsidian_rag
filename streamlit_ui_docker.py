@@ -199,10 +199,10 @@ mode_emoji = {
 st.caption(f"{mode_emoji.get(search_mode, '🔍')} Using: **{search_mode}** search")
 
 # Display chat history
-for message in st.session_state.messages:
+for idx, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        
+
         if message["role"] == "assistant" and "sources" in message and show_sources:
             with st.expander("📚 Sources", expanded=True):
                 if not message["sources"]:
@@ -219,19 +219,73 @@ for message in st.session_state.messages:
                                     st.text(source["snippet"][:200] + "..." if len(source.get("snippet", "")) > 200 else source.get("snippet", ""))
                             st.divider()
 
+    # Phase 1: Rating buttons for assistant messages (OUTSIDE chat_message context)
+    if message["role"] == "assistant":
+        st.caption("Rate this response:")
+        rating_emojis = ["😞", "😕", "😐", "😊", "😍"]
+        rating_labels = ["Poor", "Fair", "OK", "Good", "Excellent"]
+
+        # Centered compact layout
+        cols = st.columns([2, 1, 1, 1, 1, 1, 2])
+        for i, (emoji, label) in enumerate(zip(rating_emojis, rating_labels)):
+            with cols[i + 1]:
+                if st.button(emoji, key=f"rate_{idx}_{i+1}", help=label, use_container_width=True):
+                    st.toast(f"✅ Rated: {label}")
+
 # Chat input
 if prompt := st.chat_input("Ask about your notes..."):
     # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
+
     with st.chat_message("user"):
         st.markdown(prompt)
-    
+
+    # Phase 3c: Auto-select search mode based on query patterns
+    import re
+
+    # Synthesis patterns that suggest graph-claude mode
+    synthesis_patterns = [
+        r'\bhow\s+(have|has|did|do|does|would)\b',
+        r'\bwhy\b',
+        r'\brelat(e|ed|ion|ionship)\b',
+        r'\bconnect(ed|ion)\b',
+        r'\bpattern\b',
+        r'\btrend\b',
+        r'\bcompare\b',
+        r'\bsynthesiz(e|ed)\b',
+        r'\banalyze\b',
+        r'\binfer\b',
+        r'\brelationship between\b',
+        r'\bhow.*over time\b',
+        r'\bjourney\b',
+        r'\bprogression\b',
+        r'\bhistory\b',
+        r'\bevolution\b',
+        r'\btimeline\b',
+        r'\b(has|have)\s+been\b',
+        r'\bsummar(y|ize)\b',
+        r'\boverview\b',
+        r'\bbenchmark(s)?\b',
+        r'\bmilestone(s)?\b',
+        r'\bmajor\s+(events?|steps?|changes?)\b',
+    ]
+
+    # Check if query matches synthesis patterns
+    query_lower = prompt.lower()
+    is_synthesis = any(re.search(pattern, query_lower) for pattern in synthesis_patterns)
+
+    # Override search mode if synthesis query detected
+    if is_synthesis:
+        search_mode = 'graph-claude'
+        st.caption(f"🧠 Auto-selected **graph-claude** mode (synthesis query detected)")
+    else:
+        search_mode = st.session_state.search_mode
+
     # Generate response
     with st.chat_message("assistant"):
         try:
             sources_list = []
-            
+
             # Step 1: Retrieve context based on search mode
             if search_mode == 'vector':
                 # Use vector search (ChromaDB)
@@ -381,7 +435,7 @@ Answer:"""
                             
                             # Extract just the question from system_prompt
                             claude_response = client.messages.create(
-                                model="claude-3-5-sonnet-20241022",
+                                model="claude-sonnet-4-5",
                                 max_tokens=4000,
                                 temperature=temperature,
                                 system=f"You are an AI assistant helping Michel understand his Obsidian knowledge base.\n\nContext from notes:\n{context_text}",
@@ -462,7 +516,7 @@ Answer:"""
                 "sources": sources_list,
                 "search_mode": search_mode
             })
-        
+
         except requests.exceptions.Timeout:
             st.error("⏱️ Request timed out")
         except Exception as e:
@@ -470,6 +524,22 @@ Answer:"""
             import traceback
             with st.expander("🐛 Debug"):
                 st.code(traceback.format_exc())
+
+    # Phase 1: Rating buttons for the CURRENT response (OUTSIDE chat_message context)
+    if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] == "assistant":
+        st.caption("Rate this response:")
+        rating_emojis = ["😞", "😕", "😐", "😊", "😍"]
+        rating_labels = ["Poor", "Fair", "OK", "Good", "Excellent"]
+
+        # Use unique key based on current message count
+        msg_idx = len(st.session_state.messages) - 1
+
+        # Centered compact layout
+        cols = st.columns([2, 1, 1, 1, 1, 1, 2])
+        for i, (emoji, label) in enumerate(zip(rating_emojis, rating_labels)):
+            with cols[i + 1]:
+                if st.button(emoji, key=f"rate_current_{msg_idx}_{i+1}", help=label, use_container_width=True):
+                    st.toast(f"✅ Rated: {label}")
 
 # Footer
 st.markdown("---")
