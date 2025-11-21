@@ -56,5 +56,6 @@ htmlcov/
 lightrag_db/
 lightrag_db_backup_*/
 mem0_db/
+data/vault_processing/
 venv/
 venv_*/
