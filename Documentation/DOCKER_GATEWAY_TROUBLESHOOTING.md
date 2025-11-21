@@ -1,123 +1,57 @@
-# Docker MCP Gateway Troubleshooting Guide
+# Docker Gateway Troubleshooting
 
-## Issue: Claude Desktop Can't Access Docker Gateway Servers
+## Quick Fix
 
-### Problem Summary
-The Docker MCP Gateway is configured in Claude Desktop, but Claude cannot access the MCP servers exposed through the gateway.
+**Problem**: Claude Desktop can't access Docker MCP servers
 
-### Root Causes Identified
+**Solution**: Remove broken `n8n-mcp` entry from registry
 
-1. **Missing n8n-mcp Image**: The gateway registry references `n8n-mcp` but the Docker image doesn't exist, causing errors during startup.
-
-2. **Gateway Configuration**: The gateway outputs verbose configuration messages to stderr (which is fine), but there may be connection issues.
-
-### Solutions Applied
-
-#### 1. Fixed n8n-mcp Registry Issue
-- **File**: `~/.docker/mcp/registry.yaml`
-- **Change**: Removed the `n8n-mcp` entry since the image doesn't exist
-- **Status**: ✅ Fixed
-
-#### 2. Verified Docker Images
-All required MCP images are present with correct digests:
-- ✅ `docker:cli@sha256:625d9431a9f54c5a2bc90f24f0e1c3d55b1349fd857dd85035f98c2c9acbdd4d`
-- ✅ `mcp/obsidian@sha256:0eba4c05742ad35faeb91eca40b792454d440d86449c9f1b3cb6c387a510651b`
-- ✅ `mcp/postman@sha256:53fb05f7a2f053e56ca6b007825eb2aae45895ebff7ab0695694d204504b5df4`
-- ✅ All other MCP images present
-
-### Current Configuration
-
-**Claude Desktop Config** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "docker-gateway": {
-      "command": "docker",
-      "args": ["mcp", "gateway", "run"]
-    }
-  }
-}
+```bash
+# Edit registry file
+nano ~/.docker/mcp/registry.yaml
+# Remove the n8n-mcp section
 ```
 
-### Testing the Gateway
+## Common Issues
 
-1. **Test Gateway Startup**:
-   ```bash
-   docker mcp gateway run --dry-run
-   ```
-   Should show no errors about missing servers.
+### 1. "MCP server not found: n8n-mcp"
+✅ **Fixed**: Removed from `~/.docker/mcp/registry.yaml`
 
-2. **Test MCP Connection**:
-   The gateway should start and wait for JSON-RPC messages on stdin.
+### 2. Claude Desktop can't connect
+**Check**:
+```bash
+docker ps  # Is Docker running?
+docker mcp gateway run --dry-run  # Test gateway
+```
 
-### Common Issues and Fixes
+**Logs**: `~/Library/Application Support/Claude/Logs/`
 
-#### Issue: "MCP server not found: n8n-mcp"
-**Fix**: Remove `n8n-mcp` from `~/.docker/mcp/registry.yaml` (already done)
+### 3. Use wrapper script instead
 
-#### Issue: Gateway outputs to stdout
-**Status**: Gateway correctly outputs config to stderr, MCP protocol uses stdout ✅
-
-#### Issue: Claude Desktop can't connect
-**Possible Causes**:
-1. Docker not running
-2. Gateway taking too long to initialize
-3. Claude Desktop timeout
-
-**Debug Steps**:
-1. Check Docker is running: `docker ps`
-2. Test gateway manually: `docker mcp gateway run --dry-run`
-3. Check Claude Desktop logs: `~/Library/Application Support/Claude/Logs/`
-
-### Alternative: Use Wrapper Script
-
-If direct connection doesn't work, you can use the wrapper script:
-
-**Update Claude Desktop Config**:
+Update `claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
     "docker-gateway": {
-      "command": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Scripts/docker_gateway_wrapper.sh",
+      "command": "/path/to/docker_gateway_wrapper.sh",
       "args": []
     }
   }
 }
 ```
 
-### Available MCP Servers Through Gateway
+## Available MCP Servers
 
-The gateway exposes these servers (when images are available):
-- `brave` - Brave Search
-- `context7` - Context7
-- `docker` - Docker CLI
-- `duckduckgo` - DuckDuckGo Search
-- `fetch` - HTTP Fetch
-- `filesystem` - File System Access
-- `git` - Git Operations
-- `markdownify` - Markdown Conversion
-- `obsidian` - Obsidian Vault Access
-- `openweather` - Weather API
-- `perplexity-ask` - Perplexity AI
-- `postman` - Postman API
-- `puppeteer` - Browser Automation
-- `sequentialthinking` - Sequential Thinking
+Via gateway: `docker`, `obsidian`, `filesystem`, `git`, `fetch`, `brave`, `duckduckgo`, etc.
 
-### Next Steps
+## Config Files
 
-1. **Restart Claude Desktop** after making config changes
-2. **Check Claude Desktop Logs** for connection errors
-3. **Test Individual Servers**: Try enabling specific servers with `--servers` flag
-4. **Verify Docker Access**: Ensure Docker is accessible from Claude Desktop's environment
+- Gateway: `~/.docker/mcp/config.yaml`
+- Registry: `~/.docker/mcp/registry.yaml`
+- Claude: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-### Configuration Files Location
+## Next Steps
 
-- Gateway Config: `~/.docker/mcp/config.yaml`
-- Gateway Registry: `~/.docker/mcp/registry.yaml`
-- Gateway Catalogs: `~/.docker/mcp/catalogs/`
-- Claude Desktop Config: `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-
-
-
-
+1. Restart Claude Desktop
+2. Check logs for errors
+3. Test with `--servers obsidian` flag
