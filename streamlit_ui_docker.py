@@ -20,6 +20,24 @@ LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 
 # Detect GPT-OSS endpoint
+def extract_entities_from_graph(graph_text: str) -> list:
+    """Extract key entities from graph response text."""
+    import re
+    
+    # Extract capitalized phrases (likely entities)
+    entities = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', graph_text)
+    
+    # Common words to filter out
+    stopwords = {'The', 'This', 'That', 'These', 'Those', 'There', 'Here', 
+                 'When', 'Where', 'What', 'How', 'Why', 'Based', 'Your'}
+    
+    # Filter and deduplicate
+    entities = [e for e in entities if e not in stopwords]
+    entities = list(set(entities))[:10]  # Top 10 unique entities
+    
+    return entities
+
+# Detect GPT-OSS endpoint
 def is_gpt_oss_endpoint(host: str) -> bool:
     """Check if host is GPT-OSS endpoint"""
     return "/engines/llama.cpp" in host or "/v1" in host or ":12434" in host
@@ -55,11 +73,12 @@ with st.sidebar:
     st.subheader("🔍 Search Mode")
     search_mode = st.radio(
         "Choose search method:",
-        ["vector", "graph-claude"],
-        index=0,
+        ["vector", "graph-claude", "hybrid"],
+        index=2,
         help="""
         - **vector**: Fast semantic search with Ollama (ChromaDB) 🔍
         - **graph-claude**: Claude Haiku-powered knowledge graph 🧠
+        - **hybrid**: Best of both - graph-guided vector search 🔗
         """
     )
     st.session_state.search_mode = search_mode
@@ -83,7 +102,37 @@ with st.sidebar:
     # Show API key status for Claude
     if selected_provider == "claude":
         if ANTHROPIC_API_KEY:
-            st.success("✅ Claude API key configured")
+            # Validate the key (cache result in session state to avoid repeated API calls)
+            validation_key = f"claude_key_validated_{ANTHROPIC_API_KEY[:20]}"
+            if validation_key not in st.session_state:
+                # Validate the key
+                try:
+                    from anthropic import Anthropic
+                    client = Anthropic(api_key=ANTHROPIC_API_KEY)
+                    # Quick validation call
+                    test_response = client.messages.create(
+                        model="claude-haiku-4-5",
+                        max_tokens=1,
+                        messages=[{"role": "user", "content": "Hi"}]
+                    )
+                    st.session_state[validation_key] = True
+                    st.success("✅ Claude API key configured and validated")
+                except Exception as e:
+                    error_msg = str(e)
+                    st.session_state[validation_key] = False
+                    if "401" in error_msg or "authentication" in error_msg.lower():
+                        st.error("❌ Claude API key is INVALID (401 error)")
+                        st.warning("💡 Your API key may be expired or revoked. Please:")
+                        st.info("1. Get a new key from: https://console.anthropic.com/\n2. Update `.env` file: `ANTHROPIC_API_KEY=sk-ant-...`\n3. Restart container: `docker-compose restart streamlit-ui`")
+                    else:
+                        st.warning(f"⚠️ Could not validate API key: {error_msg[:100]}")
+            else:
+                # Use cached validation result
+                if st.session_state[validation_key]:
+                    st.success("✅ Claude API key configured and validated")
+                else:
+                    st.error("❌ Claude API key is INVALID")
+                    st.info("💡 Update `.env` and restart: `docker-compose restart streamlit-ui`")
         else:
             st.error("❌ Set ANTHROPIC_API_KEY in .env file or docker-compose.yml")
             st.info("💡 Create a `.env` file in the project root with:\n```\nANTHROPIC_API_KEY=your-key-here\n```")
@@ -118,45 +167,57 @@ with st.sidebar:
     except:
         st.warning("⚠️ Claude Graph: Offline")
     
-    # Check LLM service (Ollama or GPT-OSS)
+    # Check LLM service (Ollama or GPT-OSS) and get available models
+    available_models = []
     try:
         if LLM_PROVIDER == "GPT-OSS":
             # Check GPT-OSS
             gpt_oss_response = requests.get(f'{LLM_HOST}/v1/models', timeout=2)
             if gpt_oss_response.status_code == 200:
-                models = gpt_oss_response.json().get('data', [])
-                st.success(f"✅ GPT-OSS: {len(models)} models")
+                models_data = gpt_oss_response.json().get('data', [])
+                available_models = [m.get('id', m.get('name', 'unknown')) for m in models_data]
+                st.success(f"✅ GPT-OSS: {len(available_models)} models")
             else:
                 st.warning("⚠️ GPT-OSS unavailable")
+                available_models = ["ai/gpt-oss:latest"]  # Fallback
         else:
-            # Check Ollama
+            # Check Ollama and get model list
             ollama_response = requests.get(f'{OLLAMA_HOST}/api/tags', timeout=2)
             if ollama_response.status_code == 200:
-                models = ollama_response.json().get('models', [])
-                st.success(f"✅ Ollama: {len(models)} models")
+                models_data = ollama_response.json().get('models', [])
+                available_models = [m.get('name', 'unknown') for m in models_data]
+                if available_models:
+                    st.success(f"✅ Ollama: {len(available_models)} models available")
+                else:
+                    st.warning("⚠️ No Ollama models found")
+                    available_models = ["llama3.2:3b"]  # Fallback
             else:
                 st.warning("⚠️ Ollama unavailable")
-    except:
-        st.error(f"⚠️ {LLM_PROVIDER} offline")
+                available_models = ["qwen2.5-coder:14b", "deepseek-r1:14b", "llama3.2:3b"]  # Fallback
+    except Exception as e:
+        st.error(f"⚠️ {LLM_PROVIDER} offline: {str(e)[:50]}")
+        # Fallback models
+        if LLM_PROVIDER == "GPT-OSS":
+            available_models = ["ai/gpt-oss:latest"]
+        else:
+            available_models = ["qwen2.5-coder:14b", "deepseek-r1:14b", "llama3.2:3b"]
     
     st.markdown("---")
     
     # Model selection
     st.subheader("⚙️ Settings")
     
-    if LLM_PROVIDER == "GPT-OSS":
-        # GPT-OSS models
+    if available_models:
         model_option = st.selectbox(
             "Model",
-            ["ai/gpt-oss:latest"],
-            help="GPT-OSS model for generating responses"
+            available_models,
+            help=f"Choose from {len(available_models)} available models"
         )
     else:
-        # Ollama models
         model_option = st.selectbox(
             "Model",
-            ["qwen2.5-coder:14b", "deepseek-r1:14b", "llama3.2:3b"],
-            help="LLM for generating responses"
+            ["No models available"],
+            help="No models found. Please check your Ollama/GPT-OSS connection."
         )
     
     num_sources = st.slider("Sources", 1, 20, 5)
@@ -184,7 +245,7 @@ with st.sidebar:
                 )
     
     with col2:
-        if st.button("🗑️ Clear"):
+        if st.button("🗑️ Clear Conversation"):
             st.session_state.messages = []
             st.rerun()
 
@@ -194,7 +255,8 @@ st.title("💬 Chat with Your Knowledge Base")
 # Display search mode indicator
 mode_emoji = {
     'vector': '🔍',
-    'graph-claude': '🧠'
+    'graph-claude': '🧠',
+    'hybrid': '🔗'
 }
 st.caption(f"{mode_emoji.get(search_mode, '🔍')} Using: **{search_mode}** search")
 
@@ -266,8 +328,12 @@ if prompt := st.chat_input("Ask about your notes..."):
                     context_parts = []
                     for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
                         # Handle negative distances (higher is better)
-                        relevance = abs(dist) * 100 if dist < 0 else (1 - dist) * 100
-                        relevance = min(100, max(0, relevance))  # Clamp between 0-100
+                        if dist < 0:
+                            relevance = abs(dist) * 100
+                        else:
+                            # Improved relevance: 1/(1+d) decay so 1.0 distance = 50% instead of 0%
+                            relevance = (1 / (1 + dist)) * 100
+                        relevance = min(100, max(0, relevance))
                         filename = meta.get('filename', 'unknown')
                         filepath = meta.get('filepath', 'unknown')
                         
@@ -284,6 +350,159 @@ if prompt := st.chat_input("Ask about your notes..."):
                     
                     context_text = "\n\n---\n\n".join(context_parts)
             
+            elif search_mode == 'hybrid':
+                # Hybrid: Graph-guided vector search
+                with st.spinner("🔗 Performing hybrid search..."):
+                    # Step 1: Query graph for entities
+                    try:
+                        graph_response = requests.post(
+                            f'{CLAUDE_GRAPH_SERVICE}/query',
+                            json={"query": prompt, "max_entities": 20},
+                            timeout=30
+                        )
+                        
+                        if graph_response.status_code == 200:
+                            graph_result = graph_response.json()
+                            graph_context = graph_result.get('answer', '')
+                            
+                            # Step 2: Extract entities from graph response
+                            entities = extract_entities_from_graph(graph_context)
+                            
+                            # Step 3: Enhanced vector search with entities
+                            enhanced_query = f"{prompt} {' '.join(entities)}"
+                            
+                            query_params = {
+                                "query": enhanced_query,
+                                "n_results": num_sources,
+                                "reranking": True,
+                                "deduplicate": True
+                            }
+                            
+                            vault_response = requests.post(
+                                f'{EMBEDDING_SERVICE}/query',
+                                json=query_params,
+                                timeout=30
+                            )
+                            
+                            # Process vector results (same as vector mode)
+                            results = vault_response.json()
+                            documents = results.get('documents', [[]])[0]
+                            metadatas = results.get('metadatas', [[]])[0]
+                            distances = results.get('distances', [[]])[0]
+                            
+                            context_parts = []
+                            for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                                relevance = abs(dist) * 100 if dist < 0 else (1 - dist) * 100
+                                relevance = min(100, max(0, relevance))
+                                filename = meta.get('filename', 'unknown')
+                                filepath = meta.get('filepath', 'unknown')
+                                snippet = doc[:200] + "..." if len(doc) > 200 else doc
+                                
+                                context_parts.append(f"Source {i} - {filename} ({relevance:.0f}% relevant):\n{doc}")
+                                sources_list.append({
+                                    "filename": filename,
+                                    "filepath": filepath,
+                                    "relevance": relevance,
+                                    "snippet": snippet
+                                })
+                            
+                            # Add graph context as additional source
+                            context_parts.insert(0, f"Graph Context:\n{graph_context}")
+                            sources_list.insert(0, {
+                                "filename": "Knowledge Graph",
+                                "filepath": "Graph Relationships",
+                                "relevance": 100
+                            })
+                            
+                            context_text = "\n\n---\n\n".join(context_parts)
+                        else:
+                            # Fallback to vector-only if graph fails
+                            st.warning("Graph unavailable, using vector search only")
+                            # We'll just let it fall through or copy vector logic? 
+                            # For simplicity, let's just error out or maybe better to copy vector logic.
+                            # Actually, let's just duplicate the vector logic here for fallback or better yet, 
+                            # refactor vector logic into a function? 
+                            # Given the constraints, I'll just implement a simple fallback message and stop for now, 
+                            # or better, just run the vector search without graph context.
+                            
+                            # Fallback: Standard vector search
+                            query_params = {
+                                "query": prompt,
+                                "n_results": num_sources,
+                                "reranking": True,
+                                "deduplicate": True
+                            }
+                            vault_response = requests.post(
+                                f'{EMBEDDING_SERVICE}/query',
+                                json=query_params,
+                                timeout=30
+                            )
+                            if vault_response.status_code == 200:
+                                results = vault_response.json()
+                                documents = results.get('documents', [[]])[0]
+                                metadatas = results.get('metadatas', [[]])[0]
+                                distances = results.get('distances', [[]])[0]
+                                context_parts = []
+                                for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                                    relevance = abs(dist) * 100 if dist < 0 else (1 - dist) * 100
+                                    relevance = min(100, max(0, relevance))
+                                    filename = meta.get('filename', 'unknown')
+                                    filepath = meta.get('filepath', 'unknown')
+                                    snippet = doc[:200] + "..." if len(doc) > 200 else doc
+                                    context_parts.append(f"Source {i} - {filename} ({relevance:.0f}% relevant):\n{doc}")
+                                    sources_list.append({
+                                        "filename": filename,
+                                        "filepath": filepath,
+                                        "relevance": relevance,
+                                        "snippet": snippet
+                                    })
+                                context_text = "\n\n---\n\n".join(context_parts)
+                            else:
+                                st.error("Vector search failed")
+                                st.stop()
+
+                    except Exception as e:
+                        st.warning(f"Hybrid search error: {e}, falling back to vector")
+                        # Fallback: Standard vector search
+                        query_params = {
+                            "query": prompt,
+                            "n_results": num_sources,
+                            "reranking": True,
+                            "deduplicate": True
+                        }
+                        try:
+                            vault_response = requests.post(
+                                f'{EMBEDDING_SERVICE}/query',
+                                json=query_params,
+                                timeout=30
+                            )
+                            if vault_response.status_code == 200:
+                                results = vault_response.json()
+                                documents = results.get('documents', [[]])[0]
+                                metadatas = results.get('metadatas', [[]])[0]
+                                distances = results.get('distances', [[]])[0]
+                                context_parts = []
+                                for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                                    relevance = abs(dist) * 100 if dist < 0 else (1 - dist) * 100
+                                    relevance = min(100, max(0, relevance))
+                                    filename = meta.get('filename', 'unknown')
+                                    filepath = meta.get('filepath', 'unknown')
+                                    snippet = doc[:200] + "..." if len(doc) > 200 else doc
+                                    context_parts.append(f"Source {i} - {filename} ({relevance:.0f}% relevant):\n{doc}")
+                                    sources_list.append({
+                                        "filename": filename,
+                                        "filepath": filepath,
+                                        "relevance": relevance,
+                                        "snippet": snippet
+                                    })
+                                context_text = "\n\n---\n\n".join(context_parts)
+                            else:
+                                st.error("Vector search failed")
+                                st.stop()
+                        except:
+                            st.error("Vector search failed")
+                            st.stop()
+
             elif search_mode == 'graph-claude':
                 # Use Claude-powered knowledge graph
                 with st.spinner("🧠 Querying Claude knowledge graph..."):
@@ -381,7 +600,7 @@ Answer:"""
                             
                             # Extract just the question from system_prompt
                             claude_response = client.messages.create(
-                                model="claude-3-5-sonnet-20241022",
+                                model="claude-haiku-4-5",
                                 max_tokens=4000,
                                 temperature=temperature,
                                 system=f"You are an AI assistant helping Michel understand his Obsidian knowledge base.\n\nContext from notes:\n{context_text}",
