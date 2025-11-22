@@ -9,6 +9,12 @@ import requests
 from datetime import datetime
 import json
 import os
+import sys
+
+# Ensure we can import from local modules
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from deep_thinking.orchestrator import DeepThinkingRAG
 
 # Service URLs (configurable via environment)
 EMBEDDING_SERVICE = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
@@ -73,12 +79,13 @@ with st.sidebar:
     st.subheader("🔍 Search Mode")
     search_mode = st.radio(
         "Choose search method:",
-        ["vector", "graph-claude", "hybrid"],
+        ["vector", "graph-claude", "hybrid", "Deep Thinking (Agentic)"],
         index=2,
         help="""
         - **vector**: Fast semantic search with Ollama (ChromaDB) 🔍
         - **graph-claude**: Claude Haiku-powered knowledge graph 🧠
         - **hybrid**: Best of both - graph-guided vector search 🔗
+        - **deep thinking**: Agentic multi-step reasoning 🕵️‍♂️
         """
     )
     st.session_state.search_mode = search_mode
@@ -347,6 +354,7 @@ if prompt := st.chat_input("Ask about your notes..."):
     with st.chat_message("assistant"):
         try:
             sources_list = []
+            context_text = ""
 
             # Step 1: Retrieve context based on search mode
             if search_mode == 'vector':
@@ -608,17 +616,105 @@ if prompt := st.chat_input("Ask about your notes..."):
                     except Exception as e:
                         st.error(f"Graph query error: {e}")
                         st.stop()
+
+            elif search_mode == 'Deep Thinking (Agentic)':
+                # Deep Thinking Mode
+                if not ANTHROPIC_API_KEY:
+                    st.error("❌ Claude API key required for Deep Thinking mode")
+                    st.stop()
+                
+                from anthropic import Anthropic
+                client = Anthropic(api_key=ANTHROPIC_API_KEY)
+                
+                # Initialize Orchestrator
+                orchestrator = DeepThinkingRAG(
+                    anthropic_client=client,
+                    vector_service_url=EMBEDDING_SERVICE,
+                    graph_service_url=LIGHTRAG_SERVICE
+                )
+                
+                # Create a container for progress updates
+                progress_container = st.container()
+                status_text = progress_container.empty()
+                details_expander = progress_container.expander("🧠 Research Process", expanded=True)
+                
+                # Callback for UI updates
+                def ui_status_callback(msg, details=None):
+                    status_text.markdown(f"**{msg}**")
+                    if details:
+                        # If it's a plan, show it nicely
+                        if "plan" in details:
+                            with details_expander:
+                                st.markdown("### 📋 Research Plan")
+                                for step in details["plan"]:
+                                    st.markdown(f"- **Step {step['step_number']}**: {step['sub_question']} ({step['search_strategy']})")
+                                st.divider()
+                    
+                    # If it's a step update (heuristic based on msg content)
+                    if msg.startswith("👣 Step"):
+                        with details_expander:
+                            st.markdown(f"**{msg}**")
+                    elif msg.startswith("   Found"):
+                        with details_expander:
+                            st.caption(msg)
+                    elif msg.startswith("   Insight"):
+                        with details_expander:
+                            st.info(msg)
+                            st.divider()
+                    elif msg.startswith("⚖️ Policy"):
+                        with details_expander:
+                            st.markdown(f"_{msg}_")
+
+                try:
+                    result = orchestrator.query(
+                        question=prompt,
+                        max_iterations=7,
+                        status_callback=ui_status_callback
+                    )
+                    
+                    # Clear progress container content but keep expander closed/open as user left it? 
+                    # Actually, let's just clear the status text
+                    status_text.empty()
+                    
+                    # Set context_text to the final answer so it falls through to display
+                    # But wait, Deep Thinking returns the FINAL answer, not context for an LLM.
+                    # We need to handle this differently than the other modes which prepare context.
+                    
+                    response_text = result["answer"]
+                    
+                    # Prepare sources list
+                    for citation in result["citations"]:
+                        sources_list.append({
+                            "filename": citation,
+                            "filepath": "Deep Thinking Citation",
+                            "relevance": 100,
+                            "type": "Agent"
+                        })
+                        
+                    # Add retrieved docs to sources if not already there (optional, might be too many)
+                    # For now, let's just stick to the citations generated by the agent
+                    
+                    # We need to bypass the standard LLM generation block below
+                    # A simple way is to set a flag or structure the code to skip
+                    
+                except Exception as e:
+                    st.error(f"Deep Thinking error: {e}")
+                    import traceback
+                    st.code(traceback.format_exc())
+                    st.stop()
             
             
-            if not context_text or context_text.strip() == "":
+            if search_mode != 'Deep Thinking (Agentic)' and (not context_text or context_text.strip() == ""):
                 st.warning("No relevant information found")
                 st.stop()
             
-            # Step 2: Generate response with LLM
-            # For Claude graph, the answer is already synthesized, so we can display it directly
+            # For Claude graph and Deep Thinking, the answer is already synthesized
             if search_mode == 'graph-claude':
                 # Claude graph already provides a complete answer from Claude
                 response_text = context_text
+            elif search_mode == 'Deep Thinking (Agentic)':
+                # Already generated above
+                pass
             else:
                 # For other modes, use LLM to generate response
                 with st.spinner(f"💭 Thinking with {model_option} ({LLM_PROVIDER})..."):

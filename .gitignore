@@ -59,3 +59,6 @@ mem0_db/
 data/vault_processing/
 venv/
 venv_*/
+lightrag_db_small_1024/
+test_key.py
+test_model.py
