@@ -15,7 +15,7 @@ A comprehensive RAG (Retrieval-Augmented Generation) system for your Obsidian va
 ### 1. Build the Knowledge Graph
 
 ```bash
-python build_knowledge_graph.py
+python src/indexing/build_knowledge_graph.py
 ```
 
 Choose your options:
@@ -28,7 +28,7 @@ Choose your options:
 If graph building was interrupted:
 
 ```bash
-python retry_failed_chunks.py
+python src/indexing/retry_failed_chunks.py
 ```
 
 The script will:
@@ -46,49 +46,64 @@ docker-compose up -d
 
 **CLI:**
 ```bash
-python build_knowledge_graph.py
+python src/indexing/build_knowledge_graph.py
 # Choose Option 5: Interactive query
 ```
 
 **MCP (Claude Desktop/Cursor):**
-- Configure `knowledge_graph_mcp.py` in your MCP settings
+- Configure `src/mcp/knowledge_graph_mcp.py` in your MCP settings
 - Ask Claude: "Query my knowledge graph: What treatments are mentioned?"
 
 ## Project Structure
 
 ```
 obsidian_rag/
-├── build_knowledge_graph.py      # Main graph building script
-├── retry_failed_chunks.py        # Resume interrupted builds
-├── claude_graph_builder.py        # Core graph builder (ClaudeGraphBuilder) - includes retry logic
-├── graph_query_service.py        # Graph query service
-├── embedding_service.py          # Vector search service
-├── streamlit_ui_docker.py        # Web UI
-├── obsidian_rag_unified_mcp.py   # Unified MCP server (vault search + graph queries)
-├── knowledge_graph_mcp.py        # Graph-only MCP server (alternative)
+├── src/                          # Source code
+│   ├── indexing/                 # Graph building scripts
+│   │   ├── build_knowledge_graph.py   # Main graph building script
+│   │   ├── retry_failed_chunks.py     # Resume interrupted builds
+│   │   ├── find_latest_checkpoint.py  # Find checkpoint files
+│   │   ├── index_vault.py             # Vault indexing
+│   │   └── query_vault.py             # Query interface
+│   ├── services/                 # HTTP services
+│   │   ├── claude_graph_builder.py    # Core graph builder with retry logic
+│   │   ├── embedding_service.py       # Vector search service (port 8000)
+│   │   ├── graph_query_service.py     # Graph query service (port 8002)
+│   │   └── graphrag_claude_service.py # GraphRAG wrapper
+│   ├── mcp/                      # MCP servers
+│   │   ├── obsidian_rag_unified_mcp.py   # Unified MCP (vault + graph)
+│   │   └── knowledge_graph_mcp.py        # Graph-only MCP
+│   ├── ui/                       # User interfaces
+│   │   └── streamlit_ui_docker.py     # Web UI (port 8501)
+│   └── utils/                    # Utilities
+│       ├── logging_config.py
+│       └── validate_claude_api_key.py
+├── config/                       # Configuration files
+│   ├── docker/                   # Docker configs and Dockerfiles
+│   ├── examples/                 # Example .env files
+│   └── *.json                    # Rule configurations
+├── Scripts/                      # Utility scripts
+│   ├── docker/                   # Docker management scripts
+│   ├── maintenance/              # Maintenance scripts
+│   └── *.py, *.sh                # Various utilities
 ├── Documentation/                # All documentation
-│   ├── Graph/                    # Graph building guides
-│   ├── Setup/                    # Setup and quickstart guides
-│   ├── Troubleshooting/          # Troubleshooting guides
-│   └── Embedding/                # Embedding model docs
 ├── graph_data/                   # Graph checkpoints and final graph
-├── chroma_db/                    # Vector database
-└── Scripts/                      # Utility scripts
+└── chroma_db/                    # Vector database
 ```
 
 ## Core Components
 
-### Graph Building
+### Graph Building (`src/indexing/`)
 - **`claude_graph_builder.py`**: Core builder with ClaudeGraphBuilder and ClaudeGraphQuerier (includes retry logic, checkpointing, and error handling)
 - **`build_knowledge_graph.py`**: Main entry point for building graphs
 - **`retry_failed_chunks.py`**: Resume interrupted builds
 
-### Services
+### Services (`src/services/`)
 - **`embedding_service.py`**: HTTP service for semantic search (port 8000)
-- **`graph_query_service.py`**: HTTP service for graph queries (port 8001)
+- **`graph_query_service.py`**: HTTP service for graph queries (port 8002)
 - **`streamlit_ui_docker.py`**: Web interface (port 8501)
 
-### MCP Integration
+### MCP Integration (`src/mcp/`)
 - **`obsidian_rag_unified_mcp.py`**: Unified MCP server combining vault search and graph queries (recommended)
 - **`knowledge_graph_mcp.py`**: Graph-only MCP server (alternative if you only need graph queries)
 
@@ -144,7 +159,7 @@ The graph builder saves checkpoints every 10 chunks by default. Checkpoints are 
 
 To find the latest checkpoint:
 ```bash
-python find_latest_checkpoint.py
+python src/indexing/find_latest_checkpoint.py
 ```
 
 ## License

@@ -8,27 +8,30 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT" || exit 1
 
 # Verify we're in the right directory
-if [ ! -f "embedding_service.py" ]; then
-    echo "❌ Error: embedding_service.py not found. Are you in the right directory?"
+if [ ! -f "src/services/embedding_service.py" ]; then
+    echo "❌ Error: src/services/embedding_service.py not found. Are you in the right directory?"
     exit 1
 fi
 
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
+# Ensure log directory exists
+mkdir -p Scripts/logs
+
 # Handle streamlit.log BEFORE venv activation (in case venv script has issues)
-STREAMLIT_LOG_FILE="streamlit.log"
+STREAMLIT_LOG_FILE="Scripts/logs/streamlit.log"
 if [ -d "$STREAMLIT_LOG_FILE" ]; then
     echo "⚠️ Warning: streamlit.log is a directory, removing it..."
     rm -rf "$STREAMLIT_LOG_FILE" || {
         echo "⚠️ Could not remove directory, using streamlit_ui.log instead"
-        STREAMLIT_LOG_FILE="streamlit_ui.log"
+        STREAMLIT_LOG_FILE="Scripts/logs/streamlit_ui.log"
     }
 fi
 
 # Create empty log file if it doesn't exist (to ensure it's a file, not directory)
 touch "$STREAMLIT_LOG_FILE" 2>/dev/null || {
     echo "⚠️ Could not create log file $STREAMLIT_LOG_FILE, using streamlit_ui.log"
-    STREAMLIT_LOG_FILE="streamlit_ui.log"
+    STREAMLIT_LOG_FILE="Scripts/logs/streamlit_ui.log"
     touch "$STREAMLIT_LOG_FILE" 2>/dev/null || {
         echo "❌ Error: Could not create log file. Check permissions."
         exit 1
@@ -53,7 +56,7 @@ fi
 
 # Start embedding service
 echo "Starting embedding service..."
-python embedding_service.py > embedding_service.log 2>&1 &
+python src/services/embedding_service.py > Scripts/logs/embedding_service.log 2>&1 &
 EMBED_PID=$!
 echo "  PID: $EMBED_PID"
 sleep 5  # Increased wait time for service to start
@@ -61,7 +64,7 @@ sleep 5  # Increased wait time for service to start
 # Check if embedding service started successfully
 if ! kill -0 $EMBED_PID 2>/dev/null; then
     echo "❌ Error: Embedding service failed to start"
-    echo "Check embedding_service.log for details"
+    echo "Check Scripts/logs/embedding_service.log for details"
     echo ""
     echo "Common fixes:"
     echo "  1. Fix dependencies: pip install --upgrade importlib-metadata setuptools"
@@ -73,19 +76,17 @@ fi
 sleep 2
 if ! curl -s http://localhost:8000/health > /dev/null 2>&1; then
     echo "⚠️ Warning: Embedding service started but not responding yet"
-    echo "It may still be initializing. Check logs: tail -f embedding_service.log"
+    echo "It may still be initializing. Check logs: tail -f Scripts/logs/embedding_service.log"
 fi
 
 # Determine which Streamlit UI file to use
 STREAMLIT_UI=""
-if [ -f "streamlit_ui_docker.py" ]; then
-    STREAMLIT_UI="streamlit_ui_docker.py"
-elif [ -f "streamlit_ui_enhanced.py" ]; then
-    STREAMLIT_UI="streamlit_ui_enhanced.py"
-elif [ -f "obsidian_rag_ui.py" ]; then
-    STREAMLIT_UI="obsidian_rag_ui.py"
+if [ -f "src/ui/streamlit_ui_docker.py" ]; then
+    STREAMLIT_UI="src/ui/streamlit_ui_docker.py"
+elif [ -f "src/ui/streamlit_ui_enhanced.py" ]; then
+    STREAMLIT_UI="src/ui/streamlit_ui_enhanced.py"
 else
-    echo "❌ Error: No Streamlit UI file found"
+    echo "❌ Error: No Streamlit UI file found in src/ui/"
     kill $EMBED_PID 2>/dev/null
     exit 1
 fi
@@ -115,10 +116,10 @@ echo "📊 Embedding Service: http://localhost:8000 (PID: $EMBED_PID)"
 echo "💬 Chat Interface: http://localhost:8501 (PID: $STREAMLIT_PID)"
 echo ""
 echo "Logs:"
-echo "  tail -f embedding_service.log"
+echo "  tail -f Scripts/logs/embedding_service.log"
 echo "  tail -f $STREAMLIT_LOG_FILE"
 echo ""
-echo "To stop: ./Scripts/stop_obsidian_rag.sh"
+echo "To stop: Scripts/stop_obsidian_rag.sh"
 echo ""
 echo "Note: If services show as offline, they may still be initializing."
 echo "      Wait a few seconds and refresh the UI."

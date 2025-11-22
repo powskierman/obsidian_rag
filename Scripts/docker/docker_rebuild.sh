@@ -23,7 +23,7 @@ sleep 10
 echo ""
 echo "✅ Rebuild complete!"
 echo ""
-echo "📊 Check status: ./Scripts/docker_status.sh"
+echo "📊 Check status: Scripts/docker/docker_status.sh"
 echo "🌐 Access UI:    http://localhost:8501"
 
 

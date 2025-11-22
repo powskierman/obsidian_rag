@@ -18,6 +18,9 @@ from typing import Dict, List, Optional, Set
 import pickle
 import os
 
+# Add src directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
 # Try to import optional dependencies
 try:
     import chromadb
@@ -26,7 +29,7 @@ except ImportError:
     CHROMADB_AVAILABLE = False
 
 try:
-    from claude_graph_builder import ClaudeGraphBuilder
+    from services.claude_graph_builder import ClaudeGraphBuilder
     GRAPH_BUILDER_AVAILABLE = True
 except ImportError:
     GRAPH_BUILDER_AVAILABLE = False

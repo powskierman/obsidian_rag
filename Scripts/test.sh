@@ -2,8 +2,11 @@
 echo "🧪 Testing Obsidian RAG System"
 echo ""
 
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Check if services are running
-./check_status.sh
+"$SCRIPT_DIR/check_status.sh"
 
 echo ""
 echo "Running quick tests..."

@@ -17,6 +17,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 import os
 
+# Add src directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
 # Try to import optional dependencies
 try:
     import chromadb
@@ -25,7 +28,7 @@ except ImportError:
     CHROMADB_AVAILABLE = False
 
 try:
-    from claude_graph_builder import ClaudeGraphBuilder
+    from services.claude_graph_builder import ClaudeGraphBuilder
     GRAPH_BUILDER_AVAILABLE = True
 except ImportError:
     GRAPH_BUILDER_AVAILABLE = False
@@ -270,7 +273,7 @@ def classify_folders_for_all_notes(
     if graph_path:
         print("Loading knowledge graph...")
         try:
-            from claude_graph_builder import ClaudeGraphBuilder
+            from services.claude_graph_builder import ClaudeGraphBuilder
             graph_file = Path(graph_path)
             if not graph_file.exists():
                 script_dir = Path(__file__).parent.parent

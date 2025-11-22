@@ -17,7 +17,7 @@
 ### Step 2: Build the Graph
 
 ```bash
-python build_knowledge_graph.py
+python src/indexing/build_knowledge_graph.py
 ```
 
 **Options:**
@@ -32,7 +32,7 @@ python build_knowledge_graph.py
 If the build was interrupted:
 
 ```bash
-python retry_failed_chunks.py
+python src/indexing/retry_failed_chunks.py
 ```
 
 The script will:
@@ -42,7 +42,7 @@ The script will:
 
 **Find latest checkpoint manually:**
 ```bash
-python find_latest_checkpoint.py
+python src/indexing/find_latest_checkpoint.py
 ```
 
 ## Querying Your Graph
@@ -57,20 +57,20 @@ docker-compose up -d
 ### Option 2: CLI
 
 ```bash
-python build_knowledge_graph.py
+python src/indexing/build_knowledge_graph.py
 # Choose Option 5: Interactive query
 ```
 
 ### Option 3: MCP (Claude Desktop/Cursor)
 
-1. Configure `obsidian_rag_unified_mcp.py` in your MCP settings (see `Documentation/MCP_SETUP_INSTRUCTIONS.md`)
+1. Configure `src/mcp/obsidian_rag_unified_mcp.py` in your MCP settings (see `Documentation/MCP/MCP_SETUP_INSTRUCTIONS.md`)
 2. Ask Claude: "Search my vault for CAR-T therapy" or "What treatments are mentioned in my notes?"
 
 ## Checkpoints
 
 Checkpoints are saved every 10 chunks in `graph_data/graph_checkpoint_*.pkl`.
 
-The latest checkpoint is automatically detected by `retry_failed_chunks.py`.
+The latest checkpoint is automatically detected by `src/indexing/retry_failed_chunks.py`.
 
 ## Troubleshooting
 

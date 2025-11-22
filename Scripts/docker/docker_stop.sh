@@ -10,7 +10,7 @@ echo ""
 echo "✅ All services stopped"
 echo ""
 echo "To remove volumes (data):  docker-compose down -v"
-echo "To restart:                ./Scripts/docker_start.sh"
+echo "To restart:                Scripts/docker/docker_start.sh"
 
 
 

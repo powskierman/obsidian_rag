@@ -10,7 +10,7 @@ if lsof -Pi :8000 -sTCP:LISTEN -t >/dev/null ; then
     curl -s http://localhost:8000/stats 2>/dev/null | python3 -c "import sys, json; data=json.load(sys.stdin); print(f\"{data['total_documents']} chunks, ~{data.get('estimated_notes', int(data['total_documents']/4.4))} notes\")" 2>/dev/null || echo "unavailable"
 else
     echo "❌ Embedding Service: STOPPED"
-    echo "   Start: python embedding_service.py"
+    echo "   Start: python src/services/embedding_service.py"
 fi
 
 echo ""
@@ -21,7 +21,7 @@ if lsof -Pi :8501 -sTCP:LISTEN -t >/dev/null ; then
     echo "   URL: http://localhost:8501"
 else
     echo "❌ Streamlit UI: STOPPED"
-    echo "   Start: streamlit run obsidian_rag_ui.py"
+    echo "   Start: streamlit run src/ui/streamlit_ui_docker.py"
 fi
 
 echo ""
@@ -64,7 +64,7 @@ echo ""
 echo "======================================================================"
 echo ""
 echo "Quick Actions:"
-echo "  Start:  ./start_obsidian_rag.sh"
-echo "  Stop:   ./stop_obsidian_rag.sh"
-echo "  Watch:  ./start_with_watcher.sh"
-echo "  Logs:   tail -f *.log"
+echo "  Start:  Scripts/start_obsidian_rag.sh"
+echo "  Stop:   Scripts/stop_obsidian_rag.sh"
+echo "  Watch:  Scripts/start_with_watcher.sh"
+echo "  Logs:   tail -f Scripts/logs/*.log"
