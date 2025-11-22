@@ -1,0 +1,95 @@
+# Switch to a Native Python Environment.md
+
+---
+aliases: 
+tags: 
+created: 2025-03-25 11:13
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- If the output of `python -c "import platform; print(platform.processor())"` is `i386`, it means you are using an x86 version of Python running under Rosetta 2 on your ARM-based Mac. To switch to a native Python environment for Apple Silicon (ARM architecture), follow these steps:
+
+### **Steps to Install Native Python for Apple Silicon**
+
+1. **Uninstall Existing Python (Optional)**:
+   - If you want to avoid conflicts, uninstall the current Python version installed via Homebrew or other methods:
+     ```bash
+     brew uninstall python
+     ```
+
+2. **Install `pyenv`**:
+   - Use `pyenv` to manage Python versions and ensure compatibility with Apple Silicon:
+     ```bash
+     brew install pyenv
+     ```
+   - Add the following lines to your shell configuration file (`~/.zprofile` for Zsh):
+     ```bash
+     export PYENV_ROOT="$HOME/.pyenv"
+     [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+     eval "$(pyenv init --path)"
+     ```
+   - Restart your terminal or run:
+     ```bash
+     source ~/.zprofile
+     ```
+
+3. **Install Native Python Version**:
+   - Install a Python version compatible with ARM architecture using `pyenv`:
+     ```bash
+     pyenv install 3.11.5
+     pyenv global 3.11.5
+     ```
+   - Verify the installation:
+     ```bash
+     python --version
+     python -c "import platform; print(platform.processor())"
+     ```
+   - The output should now display `arm64`.
+
+4. **Alternative: Install Python via Miniforge**:
+   - Miniforge is optimized for Apple Silicon and provides a clean environment:
+     ```bash
+     curl -L https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh -o Miniforge3.sh
+     bash Miniforge3.sh
+     ```
+   - Follow the prompts to complete installation.
+
+5. **Verify Native Environment**:
+   - Confirm that the installed Python version is running natively on ARM by checking its processor architecture:
+     ```bash
+     python -c "import platform; print(platform.processor())"
+     ```
+
+By following these steps, you will have a native Python environment optimized for your MacBook Pro's Apple Silicon processor.
+
+Sources
+[1] How can I run Python 3.9.1 natively on M1 Mac? - Stack Overflow https://stackoverflow.com/questions/65559632/how-can-i-run-python-3-9-1-natively-on-m1-mac
+[2] How to Install Python in MacOS M1/M2 - YouTube https://www.youtube.com/watch?v=6V6L1lrGHPY
+[3] How to run Python as X86 with Rosetta2 on ARM MacOS machine https://stackoverflow.com/questions/71691598/how-to-run-python-as-x86-with-rosetta2-on-arm-macos-machine
+[4] 5. Using Python on macOS — Python 3.13.2 documentation https://docs.python.org/3/using/mac.html
+[5] "Safe" way to install Python 3 on MBA M1 - Reddit https://www.reddit.com/r/Python/comments/u4uji2/safe_way_to_install_python_3_on_mba_m1/
+[6] Set up a clean python environment for ARM-based Mac in 2023 https://www.asterhu.com/post/2023-02-21-set-up-python-environment-for-arm-based-mac/
+[7] Mac Python PATH · Mac Install Guide · 2025 https://mac.install.guide/python/path
+[8] Python on ARM laptops - Reddit https://www.reddit.com/r/Python/comments/1djtma4/python_on_arm_laptops/
+[9] Python's path on MacOS : r/learnpython - Reddit https://www.reddit.com/r/learnpython/comments/1azfh5r/pythons_path_on_macos/
+[10] Install Python on macOS - Coding for Entrepreneurs https://www.codingforentrepreneurs.com/guides/install-python-on-macos
+[11] python environment setup on Apple Silicon - YouTube https://www.youtube.com/watch?v=2Acht_5_HTo
+[12] Python for m1 Mac - Apple Support Communities https://discussions.apple.com/thread/253047045
+[13] Why Python native on M1 Max is gre… | Apple Developer Forums https://forums.developer.apple.com/forums/thread/695963
+[14] The Ultimate Python and Tensorflow Set-Up Guide for Apple Silicon ... https://towardsdatascience.com/the-ultimate-python-and-tensorflow-set-up-guide-for-apple-silicon-macs-m1-m2-e9ef304a2c06/
+[15] What is the Status of Native ARM-Apple Silicon Python Versions? https://discuss.python.org/t/what-is-the-status-of-native-arm-apple-silicon-python-versions/42464
+[16] Env creation from python 3.7 not working M1 Apple Silicon Mac ... https://github.com/conda/conda/issues/12206
+[17] How to Install Python on Mac - YouTube https://www.youtube.com/watch?v=nhv82tvFfkM
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

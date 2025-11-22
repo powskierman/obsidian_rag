@@ -1,0 +1,36 @@
+# In Cold Blood.md
+
+---
+id: 16112722
+updated: 2022-06-18
+title: In Cold Blood
+author: Truman Capote
+highlights: 1
+last_highlight: 2013-12-03
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112722
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/41bPrLNrrYL._SL500_.jpg)
+
+# About
+Title: [[In Cold Blood]]
+Authors: [[Truman Capote]]
+Category: #books
+Number of Highlights: ==1==
+Readwise URL: https://readwise.io/bookreview/16112722
+Date: [[2022-06-18]]
+Last Highlighted: *2013-12-03*
+
+---
+
+# Highlights
+
+Nothing is more usual than to feel that others have shared in our failures, just as it is an ordinary reaction to forget those who have shared in our achievements. ([2371](https://readwise.io/to_kindle?action=open&asin=B000FC1IRM&location=2371)) %% Color: yellow %% ^334466041
+
+---

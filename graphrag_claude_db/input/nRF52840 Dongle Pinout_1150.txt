@@ -1,0 +1,14 @@
+---
+aliases: []
+tags: []
+---
+# nRF52840 Dongle Pinout
+Date: 2023-07-01
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  ![[nrf52840-mdk-usb-dongle-pinout.png]]

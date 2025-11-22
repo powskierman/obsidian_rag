@@ -1,0 +1,17 @@
+---
+aliases: []
+---
+# ESP32 PRO S3
+Date: 2022-12-01
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [Introducing the ProS3 by Unexpected Maker](https://esp32s3.com/pros3.html) 
+- [Reinstall factory firmware](https://esp32s3.com/install_uf2.html)
+### Notes
+-  JTAG pins in dark green
+- ![[49349308-B271-4208-9C8E-ACDB336A3FC9.jpeg]]

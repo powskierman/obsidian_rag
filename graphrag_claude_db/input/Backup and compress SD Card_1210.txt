@@ -1,0 +1,25 @@
+---
+aliases: []
+---
+# Backup and compress SD Card
+Date: 2022-07-07
+
+### Tags: 
+
+### Backlink
+[[Mac Troubleshooting MOC]]
+
+### Reference
+-  
+### Notes
+-  Insert SD and find out where it is mounted
+	- diskutil list
+- To compress it:
+	- sudo dd if=/dev/disk9 bs=1m status=progress | gzip > ~/Desktop/sdcard.img.gz
+-  Or if you don't want to compress it:
+	- sudo dd if=/dev/disk9 of=~/Desktop/sdcard.img bs=1m status=progress
+- To restore it, first unmount the SD
+	- diskutil unmountDisk /dev/disk9
+	- gzip -dc ~/Desktop/sdcard.img.gz | sudo dd of=/dev/disk9 bs=1m status=progress
+- Or if it is not compressed:
+	- sudo dd if=~/Desktop/sdcard.img of=/dev/disk9 bs=1m status=progress

@@ -1,0 +1,78 @@
+# ThermoX Flowchart for setup().md
+
+---
+aliases: 
+tags:
+  - thermoX
+  - gazebo
+  - flowchart
+---
+# ThermoX Flowchart for setup()
+Date: 2024-09-01
+
+### Backlink
+[[GazeboWX MoC]]
+
+### Reference
+-  
+### Notes
+-  Flowchart for the setup() function
+```mermaid Ti:"Flowchart" FOLD
+graph TD
+    A[Start] --> B[Initialize Serial]
+    B --> C[Connect to WiFi]
+    C --> D[Initialize Blynk]
+    D --> E[Initialize Access Point]
+    E --> F[Setup OTA]
+    F --> G[Check WiFi Connection]
+    G --> H[Initialize Fan Relay]
+    H --> I[Load Settings from EEPROM]
+    I --> J[Reset Menu]
+    J --> K[Setup Intervals]
+    K --> L[Get Time from NTP]
+    L --> M[Start DS18B20 Sensor]
+    M --> N[Print Current Weather]
+    N --> O[End]
+```
+Or:
+```mermaid Ti:"Flowchart" FOLD
+flowchart TD
+
+    A[Start] --> B[Setup]
+
+    B --> C[Connect to Wi-Fi]
+
+    C -->|Connected| D[Initialize Blynk and Load Settings]
+
+    C -->|Not Connected| E[Retry Connection]
+
+    E --> C
+
+    D --> F[Initialize Fan Relay]
+
+    F --> G[Load Settings from EEPROM]
+
+    G --> H[Main Loop]
+
+    H --> I{Wi-Fi Connected?}
+
+    I -->|Yes| J[Run Blynk and Timer]
+
+    I -->|No| K[Reboot System]
+
+    J --> L{Temperature Change?}
+
+    L -->|Yes| M[Adjust Fan]
+
+    L -->|No| N[Check for Other Commands]
+
+    N --> O[Handle Other Commands]
+
+    O --> H
+
+  
+
+    M --> H
+
+    K --> C
+```

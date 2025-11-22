@@ -1,0 +1,24 @@
+# Graphic-Resources.md
+
+---
+aliases: 
+tags:
+  - icon
+---
+> ### Tags: 
+
+2022-07-01
+# Graphic-Resources
+
+### Backlink
+- [[Tech/Programming-Tools/Swift/Swift MOC]]
+- [Configuring your app icon](https://developer.apple.com/documentation/xcode/configuring-your-app-icon/)
+- 
+
+### Reference
+- [Convert graphics to icons](http://appicon.co)
+- [Color Schemes](http://colorhunt.co)
+- [Animate](https://blog.usejournal.com/beautifying-your-ios-app-with-core-animation-fec66cc3fced)
+-  
+### Notes
+-

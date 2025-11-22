@@ -1,0 +1,39 @@
+---
+aliases: []
+tags: [
+ ESP32
+ ESP32-S3
+ Debugging
+ ESP-PROG
+ PlatformIO
+]
+---
+# ESP32-S3 Debugging
+Date: 2023-04-06
+
+### Backlink
+[[]]
+
+### Reference
+-  [[Debugging MoC]]
+- [Debugging ESP32 Arduino & ESP-IDF Projects using ESP-Prog and PlatformIO](https://www.circuitstate.com/tutorials/debugging-esp32-arduino-esp-idf-projects-using-esp-prog-and-platformio/)
+- [JTAG Debugging](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-guides/jtag-debugging/index.html#)
+- 
+### Notes
+- By default, ESP32-S3 JTAG interface is connected to the [built-in USB_SERIAL_JTAG peripheral](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/configure-builtin-jtag.html). To use an external JTAG adapter instead, you need to switch the JTAG interface to the GPIO pins. This can be done by burning eFuses using `espefuse.py` tool.
+	- [Configure Other JTAG Interfaces - ESP32-S3](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/configure-other-jtag.html)
+	- [espefuse.py - ESP32-S3](https://docs.espressif.com/projects/esptool/en/latest/esp32s3/espefuse/index.html)
+- Burning `DIS_USB_JTAG` eFuse will permanently disable the connection between USB_SERIAL_JTAG and the JTAG port of the ESP32-S3.
+```
+espefuse.py --port /dev/cu.usbmodem101 burn_efuse DIS_USB_JTAG
+```
+- JTAG interface can then be connected to GPIO39-GPIO42.
+	- This has been set with ProS3 with pin headers
+- Burning `STRAP_JTAG_SEL` eFuse will enable selection of JTAG interface by a strapping pin, GPIO3.
+	- This has been set with ProS3 with pin headers, but previous has precedent.
+	- If pin is low when ESP32-S3 is reset, JTAG interface will use GPIO39-GPIO42.
+	- If pin is high, USB_SERIAL_JTAG will be used as the JTAG interface.
+	- This has been done with ProS3 with pin headers
+	- When debugging, GPIO3 needs to be shorted to ground whenever the ProS3 is rebooted or reset.
+- If unusual problems with espefuse.py, [reinstall esp-idf from latest version](https://docs.espressif.com/projects/esp-idf/en/v4.4.4/esp32/get-started/index.html#get-started-get-esp-idf)
+	- first rm .espressif and esp-idf

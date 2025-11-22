@@ -1,0 +1,35 @@
+---
+aliases:
+tags:
+created: 2022-01-02 22:40
+ContentType: Note
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1. [Excalidraw Presentations]([Excalidraw Presentations in Obsidian.mp4)
+2. [Excalidraw Walkthrough Part 1 ](Obsidian-Excalidraw 1.2.0 Walkthrough Part 1 10  Getting Started.mp4)
+3. [Excalidraw Walkthrough Part 2 ](Obsidian-Excalidraw 1.2.0 Walkthrough Part 2 10 Basic shapes and features.mp4)
+4. [Excalidraw Walkthrough Part 3](Obsidian-Excalidraw 1.2.0 Walkthrough Part 3 10 Groups, layers, alignment and more.mp4)
+5. [Excalidraw 1.2.0 Walkthrough Part 4](Obsidian-Excalidraw 1.2.0 Walkthrough Part 4 10  The Stencil Library.mp4)
+6. [Excalidraw 1.2.0 Walkthrough Part 5](Obsidian-Excalidraw 1.2.0 Walkthrough Part 5 10 Embedding and portability.mp4)
+7. [Excalidraw 1.2.0 Walkthrough Part 6](Obsidian-Excalidraw 1.2.0 Walkthrough Part 6 10 Links and block transclusions (2).mp4)
+8. [Excalidraw 1.2.0 Walkthrough Part 7](Obsidian-Excalidraw 1.2.0 Walkthrough Part 7 10 Markdown Features.mp4)
+9. [Excalidraw 1.2.0 Walkthrough Part 8](Obsidian-Excalidraw 1.2.0 Walkthrough Part 8 10 Templates.mp4)
+10. [Excalidraw Walkthrough Part 9](Obsidian-Excalidraw Walkthrough Part 9 10 Excalidraw Automate.mp4)
+11. [Excalidraw 1.2.0 Walkthrough Part 10](Obsidian-Excalidraw 1.2.0 Walkthrough Part 10 10 Miscellaneaus items.mp4)
+12. [Excalidraw 1.2.10 WYSIWYG LINK support.mp4](Obsidian-Excalidraw 1.2.10 Release WYSIWYG LINK support.mp4)
+
+1. [Processing an Article in Real-Time in Obsidian.mp4](Processing an Article in Real-Time in Obsidian.mp4)
+2.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

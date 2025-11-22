@@ -1,0 +1,51 @@
+# iPhone Hearing Test.md
+
+---
+aliases: []
+tags: []
+---
+# iPhone Hearing Test
+Date: 2024-10-31
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Enter this url in safari to access hearing test:
+`x-apple-health://HearingAppPlugin.healthplugin/HearingTest`
+![[IMG_0043.jpeg]]
+
+- Results:
+```Left Average: Little to No Loss 18 dBHL
+
+Right Average: Little to No Loss 18 dBHL
+
+* About Hearing Test Results:
+
+Hearing test results (audiograms) display the result of a pure-tone audiometry test. It shows how loud sounds need to be in order for you to hear them. The result is an average for each ear based on four frequencies (500Hz, 1kHz, 2kHz, 4kHz).
+```
+
+- There are four frequencies important for understanding speech. Hearing loss is classified based on the average loss across those frequencies. The World Health Organization classifies loss into five levels.
+
+```
+Little to No Loss
+
+At less than 25 dB of loss, you should have almost no problem hearing. You can hear a whisper.
+
+Mild Loss
+
+At 26-40 dB of loss, you can hear and repeat words spoken in a normal voice from three feet away.
+
+Moderate Loss
+
+At 41-60 dB of loss, you can hear and repeat words spoken in a raised voice from three feet away.
+
+Severe Loss
+
+At 61-80 dB of loss, you are able to hear some words when they're shouted into your better ear.
+
+Profound Loss
+
+At 81 dB or more of loss, you are unable to hear shouted words.```

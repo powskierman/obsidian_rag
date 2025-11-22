@@ -1,0 +1,34 @@
+# Join existing Thread network.md
+
+---
+aliases: []
+tags: []
+---
+# Join existing Thread network
+Date: 2024-05-05
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+To get network credentials:
+- Using Postman with REST API:
+	- get 192.168.0.12:8081/node/dataset/active
+	- [[OTBR REST API]]
+- Using CoolTerm:
+	- Connect to Thread device
+	- No need to enter ot-ctl, just the command
+```
+ot-ctl dataset clear
+ot-ctl dataset panid 0xABCD    # Replace ABCD with the correct PAN ID
+ot-ctl dataset masterkey 00112233445566778899aabbccddeeff  # Replace with the actual key
+ot-ctl dataset networkname MyThreadNetwork  # Replace with the actual network name
+ot-ctl dataset channel 15  # Replace 15 with the correct channel if needed
+ot-ctl dataset commit active
+
+ot-ctl ifconfig up
+ot-ctl thread start
+
+```

@@ -1,0 +1,44 @@
+# Thread MoC.md
+
+---
+aliases: 
+tags:
+  - Nordic
+  - NRF
+  - nrf52
+  - thread
+  - nrfConnect
+  - MoC
+---
+# Thread MoC
+Date: 2023-05-24
+
+### Backlink
+[[]]
+
+### Reference
+-  [CLI Command Reference    OpenThread](https://openthread.io/reference/cli/commands#neighbor_conntime)
+- [[RPI Thread Border Router]]
+- [OpenThread CLI Example](https://youtu.be/FY2-wISlNWI)
+- [[Openthread ot commands]]
+- [ESP32-C6 and H2 Thread CLI](https://youtu.be/I5Ih-g1_Ltw?si=MFE-edRM1xDRhB-_)
+- [[ESP Border Router Dev Kit]]
+-  [Youtube - OpenThread CLI Example with Nordic nRF52840-dk](https://youtu.be/CUvA_5jd5c4)
+- [[NH Thread Network Nodes]]
+- [[Thread Network Keys]]
+- 
+### Notes
+- [Form thread network tutorial ](https://openthread.io/codelabs/esp-openthread-hardware#1)
+- [[Form Openthread Network]]
+- [[Retrieve Thread Network Key]]
+- [[Thread network light switch project]]
+- [[Thread Endpoint Setup]]
+- [[Thread Network Keys]]
+- [[Easily Set Thread Network Credentials]]
+- [[ESP Thread Border Router REST commands]]
+- [[Thread and MQTT-SN on Nordic nRF52840]]
+- [[Thread Endpoint Setup]]
+- [[nRF Thread Topology Monitor ]]
+- [[Border-Router MoC]]
+- [[../Electronics/Software/Home-Assistant/media/Inovelli White Matter Switch]]
+- [[../Electronics/Software/Home-Assistant/Eve Light Switch]]>)

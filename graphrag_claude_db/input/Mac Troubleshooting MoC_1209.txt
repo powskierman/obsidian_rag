@@ -1,0 +1,45 @@
+---
+aliases: []
+Tags: 
+[
+ Recovery
+ Configurator
+ Troubleshooting
+]
+---
+# Mac Troubleshooting MOC
+Date: 2022-08-09
+
+
+### Backlink
+[[MacOS MOC]]
+
+
+### Reference
+- 
+### Notes
+1. [[Watch-not-unlocking-Mac]]
+2. Where is Icloud Drive?
+	1. /Users/Michel/Library/Mobile/ Documents/com~apple~CloudDocs/
+3. [[Backup and compress SD Card]]
+4. [4 Ways to Find and Delete Large Files on Mac ](https://www.drbuho.com/how-to/find-large-files-on-mac)
+5.  [Clean install macOS Ventura](https://macpaw.com/how-to/clean-install-macos-ventura)
+6. [How To Reset NVRAM On An M1](https://www.macworld.com/article/676207/how-to-reset-nvram-on-an-m1-or-intel-mac.html)
+7. [Fix a crazy high kernel_task CPU usage in macOS 13 Ventura](https://swissmacuser.ch/macos-kernel_task-high-cpu-fix-after-upgrade/#nvram-reset)
+	1. Successfully taking load off the macOS «kernel_task»
+```SMC Reset
+
+1.  **Shutdown** your Mac
+2.  **Disconnect the Power cord** from the Mac
+3.  **Wait 1 minute**
+4.  **Reconnect** the power cord
+5.  **Wait 15 seconds**
+6.  **Start** the Mac
+7.  (_Optional_) Immediately proceed to **trigger the [NVRAM reset](https://swissmacuser.ch/macos-kernel_task-high-cpu-fix-after-upgrade/#nvram-reset)**
+
+```
+- [How to Mount and Access Ext4 Partition in Mac](https://www.maketecheasier.com/mount-access-ext4-partition-mac/)
+- [How to recover Mac using another Mac](https://support.apple.com/en-ca/guide/apple-configurator-mac/apdd5f3c75ad/mac)
+- [[Copying shared cache symbols from iPhone takes forever]]
+- [[../../Error building for macOS-x86_64|Error building for macOS-x86_64]]
+- 

@@ -1,0 +1,28 @@
+# Difference of 2 squares.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-01-21 20:58
+ContentType: Reference
+Backlink: [[Algebra MOC]]
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+# Difference of 2 squares
+[[Algebra MOC]]
+
+- Differences of two squares formula: 
+	- a2 −b2 = (a+b)(a−b)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

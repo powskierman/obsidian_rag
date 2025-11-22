@@ -1,0 +1,36 @@
+---
+aliases: 
+tags:
+  - thread
+  - monitor
+  - NRF
+  - Nordic
+  - nrf52840dk
+---
+# nRF Thread Topology Monitor
+Date: 2024-04-15
+
+### Backlink
+[[Tech/Networking/Thread MoC|Thread MoC]]
+
+### Reference
+-  [nRF Thread Topology Monitor](https://www.nordicsemi.com/Products/Development-tools/nRF-Thread-topology-monitor)
+- 
+### Notes
+- Installation:
+	- Download from above link
+	- Only on Windows
+	- Install hex file:
+		- For the nRF52840 DK the correct file is:
+		`nrf52840_xxaa_pca10056_uart.hex` in:
+			`c:\nordic\Topology\nRF_TTM-win32-x64\hex`
+		Upload it to the DK using nRF Connect Programmer
+	- Test the install:
+		- Using the monitor in nRF Connect:
+			- send: `state`
+			- state should be `disconnected`
+	- Connect to the Thread network:
+		- [[Thread Endpoint Setup]]
+	- run nRF_TTM.exe
+		- Select com3:
+		- Start scan

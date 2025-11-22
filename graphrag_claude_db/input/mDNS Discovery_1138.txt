@@ -1,0 +1,16 @@
+---
+aliases: []
+tags: [mDNS]
+---
+# mDNS Discovery
+Date: 2023-05-24
+
+### Backlink
+[[]]
+
+### Reference
+-   [mDNS Discovery    OpenThread](https://openthread.io/guides/border-router/mdns-discovery.md)
+- 
+### Notes
+- 
+- 

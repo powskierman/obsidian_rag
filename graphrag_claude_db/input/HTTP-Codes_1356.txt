@@ -1,0 +1,31 @@
+---
+aliases:
+tags:
+  - tech
+created: 2022-06-26 10:15
+ContentType: Reference
+Backlink: "[[Web Development MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+![](HTTP-Codes-image1.png){width="8.322916666666666in" height="6.4375in"}
+
+---
+tags: 
+  - http
+  - web-development
+  - reference
+created: 2025-01-16 12:00
+ContentType: Reference
+---
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

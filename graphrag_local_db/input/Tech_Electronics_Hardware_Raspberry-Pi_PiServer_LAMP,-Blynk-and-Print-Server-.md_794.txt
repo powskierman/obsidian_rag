@@ -1,0 +1,80 @@
+# LAMP,-Blynk-and-Print-Server-.md
+
+---
+aliases:
+tags:
+created: 2021-12-31 11:27
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Installing PiServer
+
+
+
+PiServer is a print, file and Blynk server. To install:
+
+1.  Install Raspbian image
+
+    a.  Format SDCard using on S Card Formatter
+
+    b.  Copy Raspian image to SDCard using win32diskimager
+
+```{=html}
+<!-- -->
+```
+1.  Install LAMP (Linux,Apache,MySQL,PHP) server
+
+    a.  <https://projects.raspberrypi.org/en/projects/lamp-web-server-with-wordpress>
+
+```{=html}
+<!-- -->
+```
+1.  Install Printer Server:
+
+    a.  <https://pimylifeup.com/raspberry-pi-print-server/>
+
+        a.  <https://johnathan.org/configure-a-raspberry-pi-as-a-print-server-for-dymo-label-printers/>
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Install Printer in Windows
+
+        a.  Open File Explorer and click on PiServer in Network
+
+        b.  A driver file will be requested the inf file needs to be extracted from the dymo msi file using 7-zip
+
+        c.  Completely uninstall Dymo Label using Revo
+
+        d.  Reinstall Dymo Label
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Troubleshooting
+
+        a.  <https://forums.linuxmint.com/viewtopic.php?t=293487>
+
+        b.  <https://wiki.ubuntu.com/DebuggingPrintingProblems>
+
+```{=html}
+<!-- -->
+```
+1.  Install Blynk Server
+
+    a.  <https://github.com/blynkkk/blynk-server>
+
+    b.  <https://diyprojects.io/blynk-how-to-install-a-private-local-server-on-raspberry-pi-3-unlimited-energy-test-wemos-dht22/>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

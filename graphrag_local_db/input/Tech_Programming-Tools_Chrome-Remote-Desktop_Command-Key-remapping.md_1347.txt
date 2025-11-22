@@ -1,0 +1,33 @@
+# Command-Key-remapping.md
+
+---
+aliases:
+tags:
+created: 2022-06-26 10:15
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+N.B: Access to sidebar is small blue arrow mid-right edge
+
+
+
+My solution to this problem is to leverage the handy "Configure Key Mapping" command provided by the latest version of Chrome Remote Desktop (v. 77.0 at the time of writing). The option is available in the sidebar as shown below.
+
+![enter image description here](Command-Key-remapping-image1.png){width="2.78125in" height="6.5in"}
+
+
+
+*From <<https://stackoverflow.com/questions/13518963/chrome-remote-desktop-keyboard-shortcut-needed>>*
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

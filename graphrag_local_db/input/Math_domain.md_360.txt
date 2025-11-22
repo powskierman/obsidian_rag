@@ -1,0 +1,39 @@
+# domain.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-02-26 14:27
+ContentType: Reference
+Backlink: "[[Domain and Range]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- The domain is what you start with ($x$); 
+	- The domain is all possible $x$ values 
+- #### Rules to Find the Domain of a Function
+	- $f(x)$ = polynomial: the domain is the set of all real numbers.
+	- $f(x) = {1\over x}$: The set of all real numbers except x≠0.
+	- $f(x) = \sqrt x$: The set of all real numbers such that x ≥ 0.
+	- $f(x) = \ln x$: The set of all real numbers such that x > 0.
+			$$y=−\sqrt{−2x+3y}$$
+- Procedure:
+		- Set the insides $>=0$. That is the domain:
+				- $–2x + 3 ≥ 0$
+				- $–2x ≥ -3$
+				- $2x ≤ 3$
+				- $x ≤ 3/2 = 1.5$
+				- The domain is "all $x \ge {3\over2}$
+- Is there an ?
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

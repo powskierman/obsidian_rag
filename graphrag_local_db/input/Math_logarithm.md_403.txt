@@ -1,0 +1,52 @@
+# logarithm.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-03-26 10:57
+ContentType: Reference
+Backlink: "[[Algebra MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- https://www.purplemath.com/modules/logs3.htm 
+ - 
+-   
+- 
+- natural logarithms are the inverse of natural exponentiation
+- Logarithm laws:
+	-  $\log_a(zw)=\log_a z + \log_a w$
+	- $\log_a{z \over w} = \log_a z - \log_a w$
+	- $log_a z^k = k \log_a z$
+- Logarithms decrease complexity
+	- ##### Product Rule
+		- $log(a) + log(b) = log(ab)$
+		- multiplication becomes addition
+	- ##### Quotient Rule
+		- $log(a) - log(b) =log(a/b)$
+		- division becomes substraction
+	- ##### Power Rule
+		- exponentiation becomes multiplication
+		- $log(a)^b = (b) (log(a))$
+- Logarithms reduce all exponential expressions to natural logarithms and exponentials
+	- $a^b=e^{b \ln a}$ (see )
+	- $x = a^{\log_a x}$ so $x = e^{ln x}$
+	-  Since $2^5 =32$ and $3^7 =2,187$ we have:
+		- $\log_2(32) = \log_2(2^5) = 5$
+		- $\log_3(2,187) = \log_3(3^7) = 7$
+- To workout log of any base, $\log_a x= \ln x/\ln a$
+-  Using properties of logarithms, we quickly simplify the following expression:
+	- $\log(\sqrt 1000) = \log (1,000^{1/2}) = {1 \over 2}\log(1,000) = {1 \over 2}\log (10^3) = {3 \over 2}$
+	-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

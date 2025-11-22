@@ -1,0 +1,31 @@
+---
+aliases:
+tags:
+  - tech
+created: 2022-01-23 17:11
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Registered product license code
+
+| **Key: 33C12127617DC722**      |                                    |
+|--------------------------------|-------------------------------------|
+| **Serial No.: DS1ZA192409907** |                                    |
+| **Software licensing code：**  | **DDDGQRT-K6SG47A-CUBAPLN-3YYWRNA** |
+
+
+
+*From < <http://licenseen.rigol.com/CustomerService/LicenseKeyAndDown_EN/33C12127617DC722>>*
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

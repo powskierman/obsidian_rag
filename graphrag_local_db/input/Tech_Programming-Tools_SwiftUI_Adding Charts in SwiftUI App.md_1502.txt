@@ -1,0 +1,80 @@
+# Adding Charts in SwiftUI App.md
+
+---
+aliases: 
+tags:
+  - Halcyon
+  - Home-Assistant
+  - charts
+---
+# Adding Charts in SwiftUI App
+Date: 2024-03-20
+
+### Backlink
+[[Tech/Programming-Tools/SwiftUI/SwiftUI MoC|SwiftUI MoC]]
+
+### Reference
+-  
+### Notes
+-  Displaying a graph of temperature data for the last 24 hours when you press the "Temp" button in your SwiftUI application is certainly possible, but it involves several steps. Here's a high-level overview of how you can achieve this:
+
+1. Fetching the Data
+First, you'll need to fetch the historical temperature data from Home Assistant. Home Assistant provides various ways to access historical data, typically through its REST API or possibly through integrations that store historical data. You would use an endpoint that allows you to query the state history of your temperature sensor entity for the last 24 hours.
+
+2. Preparing the Data
+Once you have fetched the data, you'll need to parse it and prepare it for display. This might involve converting timestamps and temperature values into a format suitable for graphing.
+
+3. Displaying the Graph
+For displaying the graph in SwiftUI, you have a few options:
+
+Using SwiftUI Shapes and Paths: You can directly use SwiftUI's drawing tools to create a custom graph. This approach gives you full control over the appearance of the graph but requires more work to handle scaling, axis drawing, and data point visualization.
+Using a Third-Party Library: There are several Swift packages and libraries designed for displaying charts and graphs, such as Charts or SwiftUICharts. These libraries can simplify the process of rendering the graph but may add external dependencies to your project.
+Using Core Plot: Core Plot is a plotting framework for iOS, macOS, and tvOS. It's more complex and customizable than many SwiftUI-native options but can be integrated into SwiftUI views.
+Example: Integrating with a Third-Party Library
+Assuming you decide to use a library like SwiftUICharts for simplicity, your implementation might look something like this:
+
+Fetching and Storing Data
+
+Add logic to HalcyonViewModel to fetch the historical temperature data and store it in a format that the graph library can use, such as an array of (time: Date, temperature: Double) tuples.
+
+Updating the View
+
+Add a state in your ContentView that tracks whether to show the temperature graph, and use it to conditionally display a graph view populated with the data from your view model.
+
+swift
+Copy code
+struct ContentView: View {
+    @ObservedObject var viewModel = HalcyonViewModel.shared
+    @State private var showTemperatureGraph = false
+
+    var body: some View {
+        VStack {
+            Button("Temp") {
+                viewModel.fetchTemperatureHistory() // Implement this method
+                showTemperatureGraph = true
+            }
+
+            if showTemperatureGraph {
+                TemperatureGraphView(temperatureData: viewModel.temperatureHistory)
+                    .frame(height: 200)
+            }
+        }
+    }
+}
+Creating the Graph View
+
+Create a TemperatureGraphView SwiftUI view that takes the temperature data and uses the graph library to render it.
+
+swift
+Copy code
+struct TemperatureGraphView: View {
+    var temperatureData: [(time: Date, temperature: Double)]
+
+    var body: some View {
+        // Use the library's API to create the graph
+        // This is a placeholder; you'll need to replace it with actual library usage
+        Text("Graph Placeholder")
+    }
+}
+Summary
+Creating a graph of temperature data over the last 24 hours involves fetching the historical data, preparing it for display, and then using either SwiftUI or a third-party library to render the graph. The exact implementation details will vary based on how you choose to fetch and display the data, and which libraries (if any) you use to help with the graph rendering.

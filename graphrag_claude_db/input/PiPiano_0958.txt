@@ -1,0 +1,22 @@
+---
+aliases: []
+---
+
+2022-06-26
+# PiPiano
+
+### Backlink
+[[Projects MOC]]
+
+### Reference
+-  PianoPi Image is at: /Volumes/Docs/Electronics/Projects/NH/PianoPi/PianoPi.img
+- xpmidi can be downloaded from: [XPMIDI](https://www.mellowood.ca/xpmidi/index.html)
+- Documentation on 3rd party tools is at: /Volumes/Docs/NH/Disklavier
+
+### Notes
+- PiPiano is an implementation of xpmidi on a Raspberry Pi accessed through remote desktop.  It is used to play midi files on Yamaha Disklavier.
+- It is accessed using VNC Viewer at 192.168.0.128:5901
+- Double click on PianoPi icon on desktop or in the command bar.  Open the Music directory or load a playlist.
+- Instructions are in smb://Jumbo/Applications/RaspberryPi/PiPiano/xpmidi-5.1/xpmidi-5.1/README
+- 
+![[Raspberry-Pi-PiPiano-Midi-on-Raspbian-image1.png]]-  

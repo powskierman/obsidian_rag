@@ -1,0 +1,31 @@
+# Laser-Stencils.md
+
+---
+aliases:
+tags:
+created: 2022-03-12 14:06
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<http://www.juanjchong.com/2014/cutting-mylar-solder-stencils-from-expresspcb-and-eaglecad-files/>
+
+
+
+<https://hackaday.com/2014/06/27/how-to-laser-cut-mylar-solder-stencils/>
+
+
+
+<https://lowpowerlab.com/2013/02/11/diy-smd-metal-stencils-the-definitive-tutorial/>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

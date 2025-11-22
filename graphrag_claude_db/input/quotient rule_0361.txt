@@ -1,0 +1,23 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-03-13 15:48
+ContentType: Reference
+Backlink: "[[derivative MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- The reciprocal of a function $g(x)$ is the  of $g(x)$ with $f(x)$= $1 \over x$  ^18ab55
+- $d \over dx$`[`$f(x) \over g(x)$`]` = $\frac {g(x)f'(x) - f(x)g'(x)}{g(x)^2}$
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

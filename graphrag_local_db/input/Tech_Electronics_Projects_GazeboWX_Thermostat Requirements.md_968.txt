@@ -1,0 +1,194 @@
+# Thermostat Requirements.md
+
+---
+aliases:
+tags:
+  - gazebo
+  - esphome
+created: 2025-10-11 14:45
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- # Requirements Document: Arduino/Blynk to ESPHome Thermostat Conversion
+
+## Introduction
+
+This document outlines the requirements for converting an existing Arduino-based thermostat system using Blynk for remote control to an ESPHome-based system integrated with Home Assistant. The thermostat controls a propane stove with features including temperature sensing, scheduled operation, manual overrides, hysteresis control for cold climates, and Nextion display integration.
+
+## Requirements
+
+### Requirement 1: Temperature Sensing and Monitoring
+
+**User Story:** As a homeowner, I want accurate temperature readings from my DS18B20 sensor so that the thermostat can make proper heating/cooling decisions.
+
+#### Acceptance Criteria
+
+1. WHEN the DS18B20 sensor is queried THEN the system SHALL read and report temperature in Celsius
+2. WHEN a sensor read fails THEN the system SHALL increment a bad read counter and skip that reading
+3. WHEN three consecutive bad reads occur THEN the system SHALL log an error and alert the user
+4. WHEN a valid temperature is read THEN the system SHALL apply temperature correction offset
+5. WHEN temperature averaging is enabled THEN the system SHALL average current reading with previous reading
+6. WHEN temperature changes by more than 1°C between reads THEN the system SHALL limit the change to 1°C maximum per update cycle
+7. WHEN temperature is successfully read THEN the system SHALL expose it to Home Assistant as a sensor entity
+8. WHEN temperature is successfully read THEN the system SHALL update the Nextion display (if connected)
+
+### Requirement 2: Temperature Correction and Calibration
+
+**User Story:** As a homeowner, I want to calibrate my temperature sensor so that displayed temperatures match other trusted thermometers in my home.
+
+#### Acceptance Criteria
+
+1. WHEN a temperature correction value is set THEN the system SHALL add this offset to all sensor readings
+2. WHEN the correction value is changed THEN the system SHALL immediately apply it to current readings
+3. WHEN the correction value is between -10°C and +10°C THEN the system SHALL accept and store it
+4. IF the correction value is outside valid range THEN the system SHALL reject it and use previous value
+5. WHEN the system restarts THEN the system SHALL restore the last saved correction value
+
+### Requirement 3: Propane Stove Control with Relay
+
+**User Story:** As a homeowner, I want the system to control my propane stove via relay based on temperature and settings so that my home maintains comfortable temperature.
+
+#### Acceptance Criteria
+
+1. WHEN the relay is activated THEN the system SHALL switch the relay to turn the stove ON
+2. WHEN the relay is deactivated THEN the system SHALL switch the relay to turn the stove OFF
+3. WHEN relay state changes THEN the system SHALL report the new state to Home Assistant
+4. WHEN relay state changes THEN the system SHALL update visual indicators (Nextion display, LED)
+5. WHEN in manual stop mode THEN the system SHALL NOT activate relay regardless of temperature
+
+### Requirement 4: Heating Mode Operation
+
+**User Story:** As a homeowner, I want automatic heating so that my home stays warm when I’m present and scheduled.
+
+#### Acceptance Criteria
+
+1. WHEN I am home AND timer is active AND actual temp < desired temp THEN the system SHALL activate stove
+2. WHEN actual temp >= (desired temp + hysteresis) THEN the system SHALL deactivate stove
+3. WHEN timer is inactive THEN the system SHALL deactivate stove
+4. WHEN I am away THEN the system SHALL deactivate stove
+5. WHEN heating is active THEN the system SHALL display red indicators on UI and Home Assistant
+
+### Requirement 5: Hysteresis Control
+
+**User Story:** As a homeowner, I want a temperature deadband for heating so that the stove doesn’t cycle too frequently.
+
+#### Acceptance Criteria
+
+1. WHEN the stove turns on THEN it SHALL remain on until temp reaches (desired temp + hysteresis)
+2. WHEN hysteresis value is set between 0°C and 5°C THEN the system SHALL accept and store it
+3. IF hysteresis value is outside valid range THEN the system SHALL reject it and use previous value
+4. WHEN hysteresis value is changed THEN it SHALL be exposed as a configurable parameter in Home Assistant
+5. WHEN temperature reaches turn-off threshold THEN the system SHALL deactivate stove and wait until temp drops below desired temp to restart
+
+### Requirement 6: Desired Temperature Control
+
+**User Story:** As a homeowner, I want to set my desired temperature from Home Assistant or the Nextion display so that I can easily adjust comfort levels.
+
+#### Acceptance Criteria
+
+1. WHEN desired temperature is changed from Home Assistant THEN the system SHALL update its target and sync to Nextion
+2. WHEN desired temperature is changed from Nextion THEN the system SHALL update its target and sync to Home Assistant
+3. WHEN desired temperature is set between 10°C and 35°C THEN the system SHALL accept it
+4. IF desired temperature is outside valid range THEN the system SHALL reject it and maintain previous value
+5. WHEN desired temperature changes THEN the system SHALL immediately re-evaluate HVAC state
+
+### Requirement 7: Time-Based Scheduling
+
+**User Story:** As a homeowner, I want to schedule when the thermostat operates so that I can save energy when heating/cooling isn’t needed.
+
+#### Acceptance Criteria
+
+1. WHEN current time is between start time and end time THEN the timer SHALL be considered active
+2. WHEN current time is outside scheduled window THEN the timer SHALL be considered inactive
+3. WHEN timer is inactive AND heating mode is active THEN the system SHALL NOT activate stove
+4. WHEN timer status changes THEN the system SHALL report the new status to Home Assistant
+5. WHEN schedule times are configured in Home Assistant THEN they SHALL be converted to seconds from midnight
+6. WHEN day of week is selected THEN the schedule SHALL only apply on selected days
+7. WHEN timer becomes inactive while stove is running THEN the system SHALL immediately deactivate stove
+
+### Requirement 8: Home/Away Presence Detection
+
+**User Story:** As a homeowner, I want the thermostat to know when I’m home so that it only runs when I’m present to save energy.
+
+#### Acceptance Criteria
+
+1. WHEN home status is set to Away THEN the system SHALL deactivate stove regardless of temperature
+2. WHEN home status is set to Home THEN the system SHALL allow normal temperature-based operation
+3. WHEN home status changes THEN the system SHALL immediately re-evaluate stove state
+4. WHEN home status is reported to Home Assistant THEN it SHALL appear as a binary sensor
+5. WHEN Home Assistant presence detection changes THEN it SHALL update the thermostat’s home status
+
+### Requirement 9: Manual Override Modes
+
+**User Story:** As a homeowner, I want to manually override the thermostat to force it on or off so that I have direct control when needed.
+
+#### Acceptance Criteria
+
+1. WHEN manual run mode is activated THEN the system SHALL activate stove regardless of temperature or schedule
+2. WHEN manual stop mode is activated THEN the system SHALL deactivate stove regardless of temperature or schedule
+3. WHEN either manual mode is active THEN automatic temperature control SHALL be disabled
+4. WHEN manual mode is deactivated THEN the system SHALL return to automatic temperature-based control
+5. WHEN manual modes are changed THEN their status SHALL be reported to Home Assistant
+6. WHEN manual run has been active for configurable duration THEN the system SHALL automatically return to normal mode
+
+### Requirement 10: Nextion Display Integration
+
+**User Story:** As a homeowner, I want to see thermostat status and control it from a wall-mounted touchscreen so that I have local control without opening an app.
+
+#### Acceptance Criteria
+
+1. WHEN actual temperature changes THEN the system SHALL update the Nextion display value (n1.val)
+2. WHEN desired temperature changes THEN the system SHALL update the Nextion display value (n0.val)
+3. WHEN desired temperature is changed via Nextion slider THEN the system SHALL read and apply the new value
+4. WHEN Nextion communication fails THEN the system SHALL continue operating with last known values
+5. WHEN Nextion sends invalid data (777777) THEN the system SHALL ignore it and use previous value
+6. WHEN stove state changes THEN the system SHALL update Nextion visual indicators
+
+### Requirement 11: System Health Monitoring
+
+**User Story:** As a homeowner, I want to know if the thermostat is experiencing problems so that I can address issues before they affect comfort.
+
+#### Acceptance Criteria
+
+1. WHEN bad sensor reads exceed threshold THEN the system SHALL report sensor failure to Home Assistant
+2. WHEN Nextion display is unresponsive THEN the system SHALL report display communication error
+3. WHEN system restarts unexpectedly THEN the system SHALL report uptime and restart reason
+4. WHEN WiFi connection is lost THEN the system SHALL report offline status
+5. WHEN system recovers from any error THEN the system SHALL report normal status
+
+### Requirement 12: Configuration Persistence
+
+**User Story:** As a homeowner, I want my thermostat settings to survive power outages so that I don’t have to reconfigure everything after a restart.
+
+#### Acceptance Criteria
+
+1. WHEN any configuration value changes THEN the system SHALL save it to non-volatile storage
+2. WHEN the system restarts THEN the system SHALL restore all saved configuration values
+3. WHEN factory reset is triggered THEN the system SHALL restore all values to defaults
+4. WHEN configuration is saved THEN it SHALL include: desired temp, hysteresis value, correction offset, timer settings
+
+### Requirement 13: Home Assistant Integration
+
+**User Story:** As a homeowner, I want full integration with Home Assistant so that I can control and monitor the thermostat from my home automation system.
+
+#### Acceptance Criteria
+
+1. WHEN integrated with Home Assistant THEN the system SHALL expose a climate entity with heat mode
+2. WHEN integrated with Home Assistant THEN the system SHALL expose sensors for: actual temp, desired temp, timer status
+3. WHEN integrated with Home Assistant THEN the system SHALL expose switches for: manual run, manual stop, home/away
+4. WHEN integrated with Home Assistant THEN the system SHALL expose configuration inputs for: hysteresis, correction
+5. WHEN Home Assistant is unavailable THEN the system SHALL continue operating with last known settings
+6. WHEN Home Assistant reconnects THEN the system SHALL sync current state
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,45 @@
+# Breyanzi.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+---
+# Breyanzi
+Date: 2025-01-15
+
+### Backlink
+[[Diagnosis and Options]]
+
+### Reference
+-  
+### Notes
+-  Breyanzi (lisocabtagene maraleucel) is a CAR T-cell therapy used to treat certain types of relapsed or refractory non-Hodgkin lymphoma. It is a personalized treatment that uses the patient’s own immune cells, which are genetically modified to target and destroy cancer cells.
+#### Indications
+Breyanzi is approved for adults with the following conditions:
+	•	Large B-cell lymphoma (LBCL), including diffuse large B-cell lymphoma (DLBCL), high-grade B-cell lymphoma, primary mediastinal large B-cell lymphoma (PMBCL), and follicular lymphoma grade 3B (FL3B).
+	•	Chronic lymphocytic leukemia (CLL)/small lymphocytic lymphoma (SLL) after at least two prior lines of therapy.
+	•	Mantle cell lymphoma (MCL) and follicular lymphoma (FL) after two or more prior systemic treatments.
+It is typically used when prior treatments, such as chemotherapy or stem cell transplants, have failed or the cancer has relapsed.
+#### How It Works
+Breyanzi is a genetically modified autologous T-cell immunotherapy. The treatment process involves:
+	1.	Collecting the patient’s T cells through a process called leukapheresis.
+	2.	Genetically engineering these T cells in a lab to express a chimeric antigen receptor (CAR) that targets the CD19 protein found on cancerous B cells.
+	3.	Reinfusing the modified T cells into the patient to attack and kill cancer cells.
+Before infusion, patients undergo preparatory chemotherapy to clear existing white blood cells and create space for the CAR T cells.
+#### Efficacy
+Clinical trials have shown promising results:
+	•	In studies with DLBCL patients who had failed previous treatments, 53% achieved complete remission, and 73% showed at least partial response.
+	•	Patients treated with Breyanzi lived longer without disease progression compared to those receiving standard treatments (average of 10.1 months vs. 2.3 months).
+#### Administration
+Breyanzi is administered as a single intravenous infusion in certified treatment centers. Patients must remain close to the treatment center for at least four weeks post-infusion for monitoring due to potential side effects.
+Side Effects
+Breyanzi can cause serious, potentially life-threatening side effects, including:
+	•	Cytokine Release Syndrome (CRS): Symptoms include fever, chills, fast heart rate, low blood pressure, and difficulty breathing.
+	•	Neurological Toxicity: Symptoms may include confusion, seizures, or difficulty speaking. Other common side effects include fatigue, nausea, diarrhea, and infections.
+To manage risks like CRS, medications such as tocilizumab must be available during treatment.
+#### Warnings and Precautions
+	•	Breyanzi is not recommended for patients with primary central nervous system lymphoma.
+	•	It should only be administered in specialized healthcare facilities equipped to handle severe side effects.
+	•	Patients are advised to stay near their treatment center for close monitoring after infusion.
+Breyanzi represents a significant advancement in personalized cancer care by leveraging genetic engineering to harness the body’s immune system against aggressive cancers.

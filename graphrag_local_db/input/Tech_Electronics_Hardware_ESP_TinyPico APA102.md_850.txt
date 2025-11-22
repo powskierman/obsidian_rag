@@ -1,0 +1,36 @@
+# TinyPico APA102.md
+
+---
+aliases: []
+---
+# TinyPico APA102
+Date: 2022-11-23
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [TinyPico with the DotStar (APA102)  Espruino](https://forum.espruino.com/conversations/366442/)
+- [SPI Master Driver - ESP32 - — ESP-IDF Programming Guide latest documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/peripherals/spi_master.html)
+- [ESP32 SPI Master Slave Communication with ESP-IDF](https://esp32tutorials.com/esp32-spi-master-slave-communication-esp-idf/)
+- 
+### Notes
+-   For Espruino, the following is required to activate the LED:
+
+```
+digitalWrite(IO9, 0); // set this to 1 to cut power to the LED completelydigitalWrite(IO13, 0); // Power transistor
+SPI1.setup({mosi:D2, sck:D12});
+```
+
+Once that's set up, you can just write to it - for example:
+
+```
+SPI1.write([  
+		0,0,0,0, // header, probably not necessary, useful for chaining
+		0xE0 | 5, // brightness, replace 5 with anything from 1 - 31 
+		10, 127, 255, // blue, green, red  0,0,0,0 // footer - some of this is needed I think])
+```
+
+(Of course, you SHOULD use a Uint8Array... and be a bit more consistent with whether you're using hex or decimals... but for testing it out, this works beautifully)

@@ -1,0 +1,19 @@
+---
+aliases: 
+tags:
+  - esphome
+  - troubleshooting
+  - Home-Assistant
+---
+# ESPHome troubleshooting
+Date: 2024-08-30
+
+### Backlink
+[[ESPHome MoC]]
+
+### Reference
+-  
+### Notes
+-  If the ESPHome device is not receiving data from Home Assistant:
+	- `HA Settings → Devices & Services → Integrations → ESPHome → → Configure →  “Allow the device to make Home Assistant Service Actions”`
+- [[ESPHome Device Not Shown in ESPHome Dashboard]]

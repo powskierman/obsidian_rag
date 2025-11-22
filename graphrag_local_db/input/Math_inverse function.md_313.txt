@@ -1,0 +1,51 @@
+# inverse function.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-03-01 17:45
+ContentType: Reference
+Backlink: "[[Calculus MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- - Inverting a function is using the output as input and vice versa.
+- Inverting a function inverts [[domain]] and [[range]]
+	- The domain becomes the range in the inverted function and vice versa
+- A function is invertible if a horizontal line intersects with the function only once.
+- The inverse of $f(x)$ is $1 \over{f(x)}$ or $f(x){^{-1}}$
+	- $y=f(x)$<==> $x=f{^{-1}}(y)$
+	- if $f(x)=x^2$ for $x\ge 0$ then $f{^{-1}}(y)=\sqrt x$
+	- if $f(x)=x^2$ for $x\le 0$ then $f{^{-1}}(y)=-\sqrt x$
+	-  if $f(x)={1 \over x}$  then $f{^{-1}}(x)=f(x)$
+	- ![[1 over x.png|500]]
+
+- The inverse of a function has all the same points as the original function, except that the _x_'s and _y_'s have been reversed.
+	- Ex: { (1, 0), (–3, 5), (0, 4) }. Then the inverse is given by this set of point: { (0, 1), (5, –3), (4, 0) }
+	- Ex2: $\sqrt [3]x$ = $x^{1\over3}$ (the reciprocal of the exponent) = the inverse of $x^3$
+- The inverse is a reflection in the line $y = x$. 
+	- $y=3x-2$
+	- Solve for $x$: $x={y+2\over 3}$
+	- replace the $x$ with $y$ and $y$ with $x$: $y={x+2\over 3}$
+	- ![[Inverse function mirror.png|600]]
+-  A function $g$ is the inverse of function $f$ if for $y=f(x)$ $x=g(y)$
+	- Example:  $y=2+{1 \over{1-x}}$ = ${-x+3}\over {-x+2}$
+		- Replace $x$ with $y$
+		- $x=2+{1 \over{1-y}}$
+		- Solve for $y$
+		- y = ${-x+3}\over {-x+2}$
+ 
+- [Inverse Circular Functions](Notes-Inverse-circular-functions.pdf)
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,49 @@
+# openwebui.md
+
+---
+aliases: 
+tags:
+  - deepseek
+  - AI
+  - openwebui
+  - ollama
+---
+# openwebui
+Date: 2025-02-13
+
+### Backlink
+[[Deepseek MoC]]---
+aliases: []
+tags: []
+---
+# openwebui
+Date: 2025-02-13
+
+### Backlink
+[[]]
+
+### Reference
+-  -  [open-webuiopen-webui - github)](https://github.com/open-webui/open-webui)
+- 
+### Notes
+-  http://localhost:3000
+OpenWebUI can be accessed at:
+	- `http://localhost:3000`
+- Follow these steps to install Open WebUI with Docker.
+### Installation:
+
+- ##### Step 1: Pull the Open WebUI Image
+
+	- Start by pulling the latest Open WebUI Docker image from the GitHub Container Registry.
+
+```
+docker pull ghcr.io/open-webui/open-webui:main
+```
+
+- ##### Step 2: Run the Container
+
+	- Run the container with default settings. This command includes a volume mapping to ensure persistent data storage.
+
+```
+docker run -d -p 3000:8080 -v open-webui:/app/backend/data --name open-webui ghcr.io/open-webui/open-webui:main
+```

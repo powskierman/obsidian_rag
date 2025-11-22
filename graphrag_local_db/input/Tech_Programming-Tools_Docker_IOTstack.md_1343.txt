@@ -1,0 +1,77 @@
+# IOTstack.md
+
+---
+aliases:
+tags:
+  - clonePiBuilder
+created: 2021-12-31 11:20
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1. [Building a Raspberry Pi from bare metal to ready-to-run IOTstack](https://github.com/Paraphraser/PiBuilder?tab=readme-ov-file#clonePiBuilder)
+2. Create image using iotstack
+
+    a.  <https://sensorsiot.github.io/IOTstack/>
+
+        i.  forked from: <https://github.com/gcgarner/IOTstack/wiki/Getting-Started>
+
+    a.  Image is created from contents of Dockerfile
+
+    b.  cd ~/IOTstack
+
+    c.  ./menu.sh
+
+    d.  Select the first option and follow the prompts
+
+    e.  Build the docker-compose file
+
+        i.  Run through the menu to select the options you want to install.
+
+            i.  Portainer
+
+            ii. Portainer agent
+
+            iii. Blynk server
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Start stack
+
+        i.  docker-compose up -d
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Stop stack
+
+        i.  docker-compose stop
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Stop and delete containers
+
+        i.  docker-compose down
+
+```{=html}
+<!-- -->
+```
+1.  Copy persistent data to IOTstack/volumes/<app folder>/data
+
+2.  Modify [compose-override](https://sensorsiot.github.io/IOTstack/Custom/) file to add or modify functionality
+
+    a.  Modify existing application
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

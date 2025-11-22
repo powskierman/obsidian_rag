@@ -1,0 +1,171 @@
+---
+aliases: []
+tags: []
+---
+# Sending messages from Home Assistant to SwiftUI app
+Date: 2024-06-11
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  To update your SwiftUI app's state whenever the state of Home Assistant sensors changes using webhooks, you can follow these steps:
+
+#### Step 1: Create a Webhook in Home Assistant
+
+1. **Go to Home Assistant**:
+   - Open your Home Assistant dashboard.
+
+2. **Create a Webhook**:
+   - Navigate to **Settings** > **Automations & Scenes**.
+   - Click on **Create Automation** and then choose **Start with an empty automation**.
+   - Give your automation a name.
+   - Add a **Trigger** and select **State**. Configure it to monitor the state changes of your desired sensors.
+   - Add an **Action** and choose **Call Service**. Select the **Webhook** service.
+   - In the **Webhook ID** field, provide a unique identifier for your webhook (e.g., `sensor_update_webhook`).
+   - Save the automation.
+
+#### Step 2: Set Up a Webhook Receiver in Your SwiftUI App
+
+3. **Create a SwiftUI View**:
+   - Create a SwiftUI view that will handle the sensor data.
+
+   ```swift
+   import SwiftUI
+
+   struct SensorDataView: View {
+       @State private var sensorData: String = "Waiting for updates..."
+
+       var body: some View {
+           Text(sensorData)
+               .padding()
+       }
+
+       func updateSensorData(newData: String) {
+           sensorData = newData
+       }
+   }
+   ```
+
+4. **Configure a URL Session**:
+   - Set up a URLSession to receive webhook calls.
+
+   ```swift
+   import Foundation
+
+   class WebhookManager: ObservableObject {
+       @Published var sensorData: String = "Waiting for updates..."
+
+       func handleWebhook(_ request: URLRequest) {
+           // Handle the incoming request
+           if let data = request.httpBody, let json = try? JSONSerialization.jsonObject(with: data, options: []), let dict = json as? [String: Any] {
+               DispatchQueue.main.async {
+                   self.sensorData = dict["new_state"] as? String ?? "Unknown"
+               }
+           }
+       }
+   }
+   ```
+
+5. **Create a Local Web Server**:
+   - Use a local web server to listen for incoming webhooks.
+
+   ```swift
+   import Foundation
+   import GCDWebServer
+
+   class LocalWebServer: NSObject {
+       var webServer: GCDWebServer?
+
+       override init() {
+           super.init()
+           webServer = GCDWebServer()
+           webServer?.addDefaultHandler(forMethod: "POST", request: GCDWebServerDataRequest.self) { request in
+               let dataRequest = request as! GCDWebServerDataRequest
+               let json = try? JSONSerialization.jsonObject(with: dataRequest.data, options: [])
+               let response = GCDWebServerDataResponse(jsonObject: ["status": "ok"])
+               response?.setValue("application/json", forAdditionalHeader: "Content-Type")
+               return response!
+           }
+
+           webServer?.start(withPort: 8080, bonjourName: "GCD Web Server")
+       }
+   }
+   ```
+
+6. **Integrate the Server in SwiftUI**:
+   - Use the `LocalWebServer` and `WebhookManager` in your SwiftUI view.
+
+   ```swift
+   @main
+   struct YourApp: App {
+       @StateObject private var webhookManager = WebhookManager()
+       @State private var localWebServer: LocalWebServer?
+
+       var body: some Scene {
+           WindowGroup {
+               SensorDataView()
+                   .environmentObject(webhookManager)
+                   .onAppear {
+                       localWebServer = LocalWebServer()
+                   }
+           }
+       }
+   }
+   ```
+
+#### Step 3: Update App State on Webhook Trigger
+
+7. **Update the View on Webhook Trigger**:
+   - Modify the `handleWebhook` method to update the SwiftUI view.
+
+   ```swift
+   import Combine
+
+   class WebhookManager: ObservableObject {
+       @Published var sensorData: String = "Waiting for updates..."
+
+       func handleWebhook(_ request: URLRequest) {
+           if let data = request.httpBody, let json = try? JSONSerialization.jsonObject(with: data, options: []), let dict = json as? [String: Any] {
+               DispatchQueue.main.async {
+                   self.sensorData = dict["new_state"] as? String ?? "Unknown"
+               }
+           }
+       }
+   }
+   ```
+
+   - In `LocalWebServer`, call `handleWebhook` when a POST request is received.
+
+   ```swift
+   webServer?.addDefaultHandler(forMethod: "POST", request: GCDWebServerDataRequest.self) { request in
+       let dataRequest = request as! GCDWebServerDataRequest
+       self.webhookManager.handleWebhook(request)
+       let response = GCDWebServerDataResponse(jsonObject: ["status": "ok"])
+       response?.setValue("application/json", forAdditionalHeader: "Content-Type")
+       return response!
+   }
+   ```
+
+#### Step 4: Test the Integration
+
+8. **Run Your App**:
+   - Ensure your app and Home Assistant are on the same network.
+   - Update the automation in Home Assistant to send webhook requests to your local server's IP and port (e.g., `http://your-local-ip:8080`).
+
+   ```yaml
+   action:
+     - service: rest_command.call_webhook
+       data:
+         webhook_id: sensor_update_webhook
+         json: >
+           {
+             "new_state": "{{ states('sensor.your_sensor') }}"
+           }
+   ```
+
+#### Summary
+
+You have now set up a SwiftUI app to receive real-time updates from Home Assistant sensors using webhooks. This involves creating a webhook in Home Assistant, setting up a local web server in your SwiftUI app to receive webhook calls, and updating the app's state based on the received data.

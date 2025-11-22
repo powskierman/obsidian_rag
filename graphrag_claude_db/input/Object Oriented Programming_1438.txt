@@ -1,0 +1,90 @@
+---
+aliases: [OOP]
+---
+
+2022-06-24
+# Object Oriented Programming
+
+### Backlink
+[[Programming Tools MOC]]
+
+### Reference
+- [[OOP Definitions]]
+### Notes
+- *From <<https://www.raywenderlich.com/599-object-oriented-programming-in-swift>>*
+- 
+1.  A program is broken down into objects that message each other
+2. Example:
+    a.  class Instrument {
+    b.  let brand = String
+    c.  init(brand: String) {
+    d.  self.brand = brand
+	}
+}
+
+3.  A [[class]] defines a blueprint
+
+    a.  The name of the class is capitalized
+
+    b.  Stored properties are declared
+
+    c.  Create an initializer. It constructs new instances by initializing stored properties
+
+    d.  You set the stored property to the passed parameter.
+
+Since the property and the parameter have the same name, you use theselfkeyword to distinguish between them.
+
+e.  Functions defined inside a [[class]] are called [[method|methods]] because they have access to properties
+
+f.  Swift [[class|classes]] use an initialization process called two-phase-initialization to guarantee that all properties are initialized before you use them.
+4.  Encapsulation: Organizing properties and related operations in a class
+
+Class types are said to encapsulate data (e.g. stored properties) and behavior (e.g. [[methods]]).
+
+5.  [[Inheritance]]: A class created as a subclass of a parent class
+
+Example:
+
+class Piano: Instrument {
+let hasPedals: Bool
+// 2
+static let whiteKeys = 52
+static let blackKeys = 36
+
+// 3
+init(brand: String, hasPedals: Bool = false) {
+self.hasPedals = hasPedals
+// 4
+super.init(brand: brand)
+}
+
+// 5
+override func tune() -> String {
+return "Piano standard tuning for (brand)."
+}
+
+override func play(_ music: Music) -> String {
+// 6
+let preparedNotes = super.play(music)
+return "Piano playing (preparedNotes)"
+}
+}
+
+a.  class Piano: Instrument {}
+
+All of the stored properties and methods are automatically**inherited**by thePiano**child class**and available for use.
+
+b.  static let whiteKeys = 52
+
+The associated values of their corresponding properties*don't*change dynamically, so you mark the properties as static in order to reflect this
+
+c.  super.init(brand: brand)
+
+You use the super keyword to call the parent class initializer after setting the child class stored propertyhasPedals. The super class initializer takes care of initializing inherited properties --- in this case, brand.
+
+d.  override:
+
+You **override** the inheritedtune()method's implementation with the 
+override keyword. This provides an implementation of tune()that doesn't callfatalError(), but rather does something specific toPiano.
+
+

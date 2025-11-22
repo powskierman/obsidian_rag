@@ -1,0 +1,21 @@
+---
+aliases: []
+tags: []
+---
+# PiServer 2.0 Backup and Recovery
+Date: 2023-05-10
+
+### Backlink
+[[PiServer-2.0]]
+
+### Reference
+-  [PiServer backup and recovery](https://www.cyberciti.biz/faq/how-to-create-disk-image-on-mac-os-x-with-dd-command/)
+### Notes
+-  If needed, reinstall [Berryboot](https://berryterminal.com/doku.php/berryboot) to sdcard
+- Copy backup to USB stick from: 
+	- //jumbo/Docs/Electronics/Projects/NH/PiServer/PiServer2 Backup
+- Boot from BerryBoot sd card
+	- Go to backup
+	- Recover Backup
+- NH: Username: pi; password: xlap8911
+- Canmore:  Username: pi; password: 40H1ghl@nd

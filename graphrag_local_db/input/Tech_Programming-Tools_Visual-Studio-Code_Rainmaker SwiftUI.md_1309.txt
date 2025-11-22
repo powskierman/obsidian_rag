@@ -1,0 +1,68 @@
+# Rainmaker SwiftUI.md
+
+---
+aliases: 
+tags:
+  - Rainmaker
+  - swiftui
+---
+# Rainmaker SwiftUI
+Date: 2023-09-22
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  This SwiftUI app turns a switch on and off using the ESP RainMaker REST API:
+
+```swift TI:"Switch App" "FOLD"
+import SwiftUI
+
+struct ContentView: View {
+@State private var isOn = false
+
+var body: some View {
+    VStack {
+        Toggle(isOn: $isOn) {
+            Text("Switch")
+        }
+        .onReceive(isOn.publisher) { newValue in
+            // Turn the switch on or off depending on the value of `isOn`.
+            let url = URL(string: "https://<rainmaker_server>/api/v1/devices/<device_id>/params/<power_param_id>/value")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("Bearer <auth_token>", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try! JSONSerialization.data(withJSONObject: ["value": newValue], options: [])
+
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print(error)
+                } else if let response = response as? HTTPURLResponse {
+                    if response.statusCode == 200 {
+                        print("Switch successfully turned \(isOn ? "on" : "off").")
+                    } else {
+                        print("Failed to turn switch on or off. Error code: \(response.statusCode)")
+                    }
+                }
+            }.resume()
+        }
+    }
+}
+}
+```
+- To use this code, replace the following placeholders:
+	- <rainmaker_server>: The address of your ESP RainMaker server.
+	- <device_id>: The ID of the device that you want to control.
+	- <power_param_id>: The ID of the power parameter for the device
+	- <auth_token>: Your ESP RainMaker authentication token.
+- You can find the device ID and power parameter ID using the ESP RainMaker API.
+- The ESP RainMaker authentication token can be found in the ESP RainMaker console.
+- The app will display a toggle switch that you can use to turn the switch on and off.
+- Sources
+github.com/starsite/SwiftFM  subject to license (Apache - 2.0)
+ios.developreference.com/article/10402067/post+array+of+json+with+alamofire+swift
+github.com/BilelBou/FitApp
+github.com/adam-fowler/afcore  subject to license (MIT)](https://bard.google.com/chat/f36fc69621b126c3)

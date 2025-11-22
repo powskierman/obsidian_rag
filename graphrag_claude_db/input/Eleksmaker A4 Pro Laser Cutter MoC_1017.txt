@@ -1,0 +1,37 @@
+---
+aliases: 
+tags:
+  - laser
+  - eleksmaker
+created: 2021-12-27 17:59
+Backlink:
+---
+### Main Idea
+- 
+### References
+- [Marco Reps - Eleksmaker for PCBs](https://youtu.be/1hFNj86L7sk?si=0iSPMYpRnfMIiGEx)
+- [Marco Reps - Eleksmaker Upgrades](https://youtu.be/ZzO9skEYqwY?si=K1SVkA9SQcJs6Rb0)
+- [Laserweb4 - Initial Configuration GRBL 1.1](https://github.com/LaserWeb/LaserWeb4/wiki/2.1-Initial-Configuration-GRBL-1.1)
+- [[Eleksmaker Firmware Install]]
+- [Eleksmaker laser upgrade - Rebuilding with new BEST diodes laser](https://endurancelasers.com/rebuilding-an-eleksmaker-laser-engraver/)
+- [[Eleksmaker Laser How to]]
+- [[Design-to-PCB]]
+- [Eleksmaker settings](https://itink.it/wiki/doku.php?id=en:tinkering:laser:eleksmakera3pro)
+- 
+
+### Notes
+- Focusing the laser:
+```
+M3       ; constant laser power mode
+$32=0    ; turn laser mode off temporarily
+S10      ; set to low power (adjust number as needed)
+```
+- Maximum precisio with 405nm laser: 0.3nm
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

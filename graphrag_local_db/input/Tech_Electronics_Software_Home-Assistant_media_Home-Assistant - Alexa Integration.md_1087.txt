@@ -1,0 +1,74 @@
+# Home-Assistant - Alexa Integration.md
+
+---
+aliases: 
+tags:
+  - Home-Assistant
+  - alexa
+---
+# Home-Assistant - Alexa Integration
+Date: 2023-10-29
+
+### Backlink
+[[Home-Assistant MoC]]
+
+### Reference
+-  
+### Notes
+-  -  Alexa Integration
+
+    - a.  [haaska](https://github.com/mike-grant/haaska/wiki/Downloading-and-Preparing-haaska)
+    - b. [auchterhaaska Home Assistant Alexa Skill Adapter](https://github.com/auchter/haaska)
+    - 
+
+        i.  Home assistant token:
+
+            1.  eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI4NTQxYzRiOGNkNzY0ZjhkOTJlNzZhNzBhMDVjNzdkYiIsImlhdCI6MTYxNTkxNjg3NCwiZXhwIjoxOTMxMjc2ODc0fQ.h3VnHuF6ksAH06XciLnzJxV2Mg69qLHbuhEPOiUCleE
+
+- hass-cli token:
+	  `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmOTU4NTUwNjg3YjE0ZTIzOTMwOWUzMzFjMmRjMTEyZiIsImlhdCI6MTc1OTY3NDQyNCwiZXhwIjoyMDc1MDM0NDI0fQ.wKWrzVjoOc7qS80p1fDV9X8FxZJOfrU2SqqkP8I_qjs`
+        i.  Amazon Developer Console
+
+            1.  Haaska Security Profile
+
+                a.  Client ID
+
+                    i.  amzn1.application-oa2-client.18377556fbcb4b9082f5f87310e35a7f
+
+                    i.  950587a739b5f19356dba9d665d0507aba9e8535298f007a3054555dcbe4946e
+
+            1.  Alexa
+
+                a.  Skill ID:
+
+                    i.  amzn1.ask.skill.369c0348-390b-4571-95aa-409dcd392214
+  
+                a.  ARN:
+
+                    i.  arn:aws:lambda:us-east-1:128854164886:function:haaska
+
+                    ii. Redirect URLs:
+
+                        1.  <https://pitangui.amazon.com/api/skill/link/M1J1WIHIMJ5MCT>
+
+                        2.  <https://alexa.amazon.co.jp/api/skill/link/M1J1WIHIMJ5MCT>
+
+                        3.  <https://layla.amazon.com/api/skill/link/M1J1WIHIMJ5MCT>
+
+                a.  Endpoint:
+
+                    i.  a1oy8y5mouk0sf-ats.iot.us-east-1.amazonaws.com
+
+        i.  Important! Add to configuration.yaml
+
+alexa:
+
+smart_home:
+
+2.  [Nabu Casa](https://www.nabucasa.com/)
+
+3.  Add tuya integration
+
+    a.  mlapoint99@hotmail.com
+
+    b.  40H1ghl@nd

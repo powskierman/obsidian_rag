@@ -1,0 +1,17 @@
+---
+aliases: []
+---
+
+2022-06-26
+# Raspberry Pi OpenSprinkler
+
+### Backlink
+[[Raspberry Pi Projects MOC]]
+
+### Reference
+- [OpenSprinkler Website](https://opensprinkler.com/)
+- [[Opensprinkler-manual_2.1.9_rev9.pdf|OpenSprinkler Manual]]
+- 
+### Notes
+-  Opensprinkler is an open source implementation of a sprinkler controller.  NH has two Opensprinkler controllers. One in the pool house and one in the driveway flower bed.
+- 

@@ -1,0 +1,19 @@
+---
+aliases: []
+tags: [
+ chip
+ connectedhomeip
+ matter
+ checkout
+]
+---
+# Unable to checkout in submodule path 'third_party
+Date: 2023-06-14
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- git submodule sync --recursive

@@ -1,0 +1,31 @@
+# Preparing iPhone.md
+
+---
+aliases: 
+tags:
+  - iphone
+  - xcode
+  - troubleshooting
+---
+# Preparing iPhone
+Date: 2023-12-27
+
+### Backlink
+[[Xcode Troubleshooting]]
+
+### Reference
+-  
+### Notes
+-  Xcode will continue when the operation completes.  Troubleshooting:
+	- ** Important:  Quit ExpressVPN
+	- plug in your iPhone.
+	- Open Xcode
+	- go to window -> Devices and Simulators
+	- Right click on your device
+	- click Unpair Device and unplug it.
+	- restart Xcode
+	- restart your iPhone.
+	- Connect your iPhone via USB
+	- run your app
+	- then unplug it, and it should run via the wifi again.
+	-

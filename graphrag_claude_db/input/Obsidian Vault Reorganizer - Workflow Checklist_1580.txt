@@ -1,0 +1,297 @@
+---
+title: Obsidian Vault Reorganizer - Workflow Checklist
+aliases: [Vault Reorganizer Checklist, Reorganization Checklist]
+tags: [obsidian, workflow, vault-management, checklist]
+created: 2025-10-25
+---
+
+### Main Idea
+- Interactive checklist for executing the complete vault reorganization workflow
+- Track progress through each phase with checkboxes
+- Provides quick reference for each step without detailed instructions
+
+---
+
+## Pre-Flight Checklist
+
+- [x] **Backup vault** - Create full backup before starting
+- [ ] **Close Obsidian** - Ensure no files are locked
+- [ ] **MCP connected** - Verify Obsidian MCP server is running
+- [ ] **Test environment** - Consider testing on a small vault first
+- [ ] **Review workflow** - Read [[Obsidian Vault Reorganizer - Complete Workflow]]
+- [ ] **Define template** - Prepare new note frontmatter template
+- [ ] **Define folder structure** - Plan out category-to-folder mappings
+
+---
+
+## Phase 1: Vault Discovery & Analysis
+
+### 1.1 Gather Statistics
+- [ ] Run `obsidian_vault_stats()`
+- [ ] Record total notes: ______
+- [ ] Record total entities: ______
+- [ ] Record relationship count: ______
+
+### 1.2 Build File Inventory
+- [ ] Run `obsidian_list_files_in_vault()`
+- [ ] Count total .md files: ______
+- [ ] Document existing folder structure
+- [ ] Identify system files to exclude (templates, etc.)
+
+### 1.3 Batch Analyze Notes
+- [ ] Get first batch of files (20 at a time)
+- [ ] For each note, classify as:
+  - [ ] Empty (< 20 chars)
+  - [ ] Missing frontmatter
+  - [ ] Has frontmatter
+  - [ ] Well-formed
+- [ ] Count notes in each category
+- [ ] Extract existing tags and categories
+
+### 1.4 Find Orphaned Notes
+- [ ] Run `obsidian_graph_query()` for zero backlinks
+- [ ] Filter out intentional orphans (templates, daily notes)
+- [ ] Record orphan count: ______
+- [ ] Save orphan list for Phase 4
+
+### Analysis Complete
+- [ ] **Empty notes:** ______ files
+- [ ] **Missing frontmatter:** ______ files  
+- [ ] **Orphaned notes:** ______ files
+- [ ] **Well-formed notes:** ______ files
+- [ ] **Review findings with user**
+
+---
+
+## Phase 2: Empty Note Cleanup
+
+### 2.1 Review Empty Notes
+- [ ] Review list of empty notes
+- [ ] Preview each empty note (first 100 chars)
+- [ ] Decide deletion strategy:
+  - [ ] Delete all empty notes
+  - [ ] Review each individually
+  - [ ] Skip cleanup
+
+### 2.2 Execute Deletions
+- [ ] For each empty note to delete:
+  - [ ] Preview content one last time
+  - [ ] Confirm deletion
+  - [ ] Run `obsidian_delete_file(confirm=True)`
+  - [ ] Log deletion with timestamp
+
+### 2.3 Verify Cleanup
+- [ ] Count remaining files
+- [ ] Verify deleted count matches
+- [ ] Save deletion log
+- [ ] Update working inventory
+
+### Cleanup Complete
+- [ ] **Files deleted:** ______
+- [ ] **Deletion log saved:** ______
+- [ ] **Inventory updated**
+
+---
+
+## Phase 3: Frontmatter Standardization
+
+### 3.1 Define Frontmatter Template
+- [ ] Create standard frontmatter template
+- [ ] Define required fields:
+  - [ ] title
+  - [ ] created
+  - [ ] modified
+  - [ ] tags
+  - [ ] categories
+  - [ ] backlinks (if needed)
+- [ ] Test template on one note
+
+### 3.2 Process Notes Without Frontmatter
+For each note without frontmatter:
+- [ ] Read full content with `obsidian_get_file_contents()`
+- [ ] Extract inline tags (#tag format)
+- [ ] Infer categories from content
+- [ ] Generate title from filename
+- [ ] Set creation/modification dates
+
+### 3.3 Add Frontmatter
+Process in batches of 10:
+- [ ] Batch 1 (files 1-10)
+  - [ ] Generate frontmatter for each
+  - [ ] Review generated frontmatter
+  - [ ] Apply with `obsidian_patch_content()`
+  - [ ] Verify frontmatter added
+- [ ] Batch 2 (files 11-20)
+  - [ ] (repeat steps)
+- [ ] Batch 3... (continue as needed)
+
+### 3.4 Update Existing Frontmatter
+- [ ] Identify notes with incomplete frontmatter
+- [ ] Add missing required fields
+- [ ] Standardize field names
+- [ ] Verify consistency
+
+### Frontmatter Complete
+- [ ] **Notes processed:** ______
+- [ ] **Errors encountered:** ______
+- [ ] **All notes have frontmatter**
+
+---
+
+## Phase 4: Backlink Identification & Addition
+
+### 4.1 Process Orphaned Notes
+For each orphaned note:
+- [ ] Read note content
+- [ ] Extract key concepts (title + first paragraph)
+- [ ] Remove stopwords
+- [ ] Identify top 5 keywords
+
+### 4.2 Find Related Notes
+- [ ] Run `obsidian_simple_search()` with key concepts
+- [ ] Review top 10 results
+- [ ] Rank by relevance score
+- [ ] Select 3-5 best backlink candidates
+
+### 4.3 Add Backlinks to Frontmatter
+For each orphaned note:
+- [ ] Select appropriate backlinks (3-5 notes)
+- [ ] Format as `[[Note Title]]`
+- [ ] Add to frontmatter with `obsidian_patch_content()`
+- [ ] Verify backlinks added correctly
+
+### 4.4 Optional: Create Bidirectional Links
+- [ ] Identify appropriate placement in related notes
+- [ ] Add "See also" or "Related" sections
+- [ ] Insert reciprocal links
+- [ ] Verify bidirectional connections
+
+### Backlink Complete
+- [ ] **Orphans processed:** ______
+- [ ] **Backlinks added:** ______
+- [ ] **Notes still orphaned:** ______
+- [ ] **Graph query shows improvement**
+
+---
+
+## Phase 5: Categorical Folder Organization
+
+### 5.1 Analyze Categories
+- [ ] Run `obsidian_complex_search()` to extract all categories
+- [ ] Build category frequency map
+- [ ] Identify major categories (>10 notes): ______
+- [ ] Identify minor categories: ______
+- [ ] Create category hierarchy
+
+### 5.2 Design Folder Structure
+- [ ] Map categories to folders
+- [ ] Define folder hierarchy:
+  ```
+  /_____________/
+    /_____________/
+    /_____________/
+  /_____________/
+    /_____________/
+  ```
+- [ ] Get user approval for structure
+- [ ] Document category → folder mappings
+
+### 5.3 Create Folders
+- [ ] Create each folder in hierarchy
+- [ ] Verify folders created
+- [ ] Set folder metadata (if using)
+
+### 5.4 Map Notes to Folders
+For each note:
+- [ ] Identify primary category
+- [ ] Map to target folder
+- [ ] Handle multi-category notes
+- [ ] Preview proposed moves
+
+### 5.5 Execute File Moves
+Move in batches of 20:
+- [ ] Batch 1 - Move files
+  - [ ] Preview moves
+  - [ ] Execute moves
+  - [ ] Verify new locations
+  - [ ] Log moves (old → new)
+- [ ] Batch 2... (continue)
+
+### 5.6 Update Wikilinks
+- [ ] Find all wikilinks with `obsidian_complex_search()`
+- [ ] Update links to moved files
+- [ ] Verify with `obsidian_graph_query()` for broken links
+- [ ] Fix any broken links
+
+### Organization Complete
+- [ ] **Notes moved:** ______
+- [ ] **Folders created:** ______
+- [ ] **Broken links:** ______ (should be 0)
+- [ ] **Move log saved**
+
+---
+
+## Phase 6: Verification & Wrap-Up
+
+### 6.1 Run Final Checks
+- [ ] Run `obsidian_vault_stats()` again
+- [ ] Compare before/after statistics
+- [ ] Check for orphaned notes
+- [ ] Check for broken links
+- [ ] Verify all notes have frontmatter
+
+### 6.2 Generate Report
+- [ ] Document statistics:
+  - [ ] Files processed: ______
+  - [ ] Files deleted: ______
+  - [ ] Files moved: ______
+  - [ ] Backlinks added: ______
+  - [ ] Folders created: ______
+- [ ] List any errors or issues
+- [ ] Note improvements to workflow
+
+### 6.3 Open Obsidian
+- [ ] Close MCP tools
+- [ ] Open Obsidian
+- [ ] Verify vault loads correctly
+- [ ] Check sample notes from each folder
+- [ ] Verify links work
+- [ ] Test graph view
+
+### 6.4 Final Cleanup
+- [ ] Archive operation logs
+- [ ] Update vault documentation
+- [ ] Remove temporary files
+- [ ] Celebrate! 🎉
+
+### Verification Complete
+- [ ] **Vault reorganization successful**
+- [ ] **All checks passed**
+- [ ] **Report generated**
+- [ ] **Vault ready for use**
+
+---
+
+## Rollback Procedure (If Needed)
+
+If something goes wrong:
+- [ ] **Stop immediately** - Don't continue with errors
+- [ ] **Check backup** - Verify backup is intact
+- [ ] **Review logs** - Check operation logs for details
+- [ ] **Restore backup** - If needed, restore from backup
+- [ ] **Identify issue** - Determine what went wrong
+- [ ] **Fix and retry** - Address issue and retry from checkpoint
+
+---
+
+## Related Notes
+- [[Obsidian Vault Reorganizer - Complete Workflow]]
+- [[Obsidian Vault Reorganizer - MCP Tools Reference]]
+- [[Obsidian Vault Reorganizer - Overview]]
+
+## Tips
+- Save this checklist and check items as you go
+- Take breaks between phases
+- Test each phase on a small subset first
+- Keep detailed logs of all operations
+- Don't rush - quality over speed

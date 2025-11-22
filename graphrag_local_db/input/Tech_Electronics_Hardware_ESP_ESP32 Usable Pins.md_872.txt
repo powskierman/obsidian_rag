@@ -1,0 +1,20 @@
+# ESP32 Usable Pins.md
+
+---
+aliases: [ESP32 pins]
+---
+
+2022-03-10
+# ESP32 Usable Pins
+
+### Backlink
+[[Tech/Electronics/Hardware/ESP/ESP MOC]]
+
+### Reference
+- [Choosing GPIOs](https://www.techtonions.com/esp32-pinout-simplified-no-more-confusion-when-choosing-gpios/)
+- 
+- ![[ESP32-Usable-Pins-image1.jpeg]]
+![[ESP32-Usable-Pins-image2.jpeg]]
+### Notes
+-  
+-

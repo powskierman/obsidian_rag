@@ -1,0 +1,37 @@
+# Other-Apple-references.md
+
+---
+aliases:
+tags:
+created: 2022-06-24 14:21
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Apple Developer Forum
+
+<https://forums.developer.apple.com/>
+
+Apple API Reference
+
+<https://developer.apple.com/reference/>
+
+Apple Guides and Sample Code
+
+<https://developer.apple.com/library/content/navigation/>
+
+
+
+*From <<https://www.udemy.com/ios-12-app-development-bootcamp/learn/v4/t/lecture/10928988?start=0>>*
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,25 @@
+---
+aliases:
+tags:
+created: 2021-12-31 13:09
+ContentType: Reference
+Backlink: "[[Kirchhoffs Circuit Laws]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  [Transistor Circuits](https://dlb.sa.edu.au/rehsmoodle/file.php/466/kpsec.freeuk.com/trancirc.htm)
+
+2.  [Transistor Switch](https://www.baldengineer.com/low-side-vs-high-side-transistor-switch.html)
+
+3.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

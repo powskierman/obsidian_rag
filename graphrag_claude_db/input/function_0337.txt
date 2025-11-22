@@ -1,0 +1,22 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-01-12 12:28
+ContentType: Reference
+Backlink: "[[Math MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+A function assigns a specific y value ($f(x)$) for any given x
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,19 @@
+---
+aliases: []
+tags: [
+ thread
+ mqtt
+ nrf52840
+]
+---
+# Thread and MQTT-SN on Nordic nRF52840
+Date: 2023-07-06
+
+### Backlink
+[[Tech/Networking/Thread MoC|Thread MoC]]
+
+### Reference
+-  
+### Notes
+- [Playing with Thread and MQTT-SN on Nordic nRF52840 - Electronut Labs](https://electronut.in/playing-with-thread-and-mqtt-sn-on-nordic-nrf52840/)
+- [Nordic nRF52840 QR Code based Thread Commissioning - Electronut Labs](https://electronut.in/nordic-nrf52840-qr-code-based-thread-commissioning/)

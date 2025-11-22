@@ -1,0 +1,33 @@
+# Frontmatter.md
+
+---
+aliases: []
+Tags: [
+ dataview
+ frontmatter
+]
+---
+# Frontmatter
+Date: 2022-07-06
+
+
+ 
+
+### Backlink
+[[Dataview MOC]]
+
+### Reference
+- [Adding Metadata - Dataview](https://blacksmithgu.github.io/obsidian-dataview/annotation/add-metadata/)
+- 
+ 
+### Notes
+-  - Frontmatter is a Markdown extension to add YAML metadata to the top of a page. All YAML fields will be available as Dataview fields. ex:
+```
+3-
+	alias: "document"
+	last-reviewed: 2021-08-17
+	thoughts:
+	    rating: 8
+	    reviewable: false
+	3-
+```

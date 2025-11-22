@@ -1,0 +1,57 @@
+# Champollion-Oeuvres de Champollion.md
+
+---
+bookId: "12457"
+title: Oeuvres de Champollion (French Edition)
+author: Jean-François Champollion
+asin: B008H5U302
+lastAnnotatedDate: 2017-07-14
+highlightsCount: 10
+reference: https://www.amazon.com/dp/B008H5U302
+kindle_link: kindle://book?action=open&asin=B008H5U302
+tags:
+  - book-notes
+  - history
+---
+![](https://m.media-amazon.com/images/I/6154PIF74oL._SY160.jpg)
+## Highlights
+démotique — location: [1354](kindle://book?action=open&asin=B008H5U302&location=1354) ^ref-18136
+
+l'écriture Égypte avec des sons
+
+---
+idéographiques — location: [1356](kindle://book?action=open&asin=B008H5U302&location=1356) ^ref-28135
+
+idées et objets représentatifs 
+
+---
+Le monument de Rosette nous présente l’application de ce système auxiliaire d’écriture que nous avons appelé phonétique, c’est-à-dire exprimant les sons, dans les noms propres des — location: [1359](kindle://book?action=open&asin=B008H5U302&location=1359) ^ref-53363
+
+rosette est écrit en deux langues 
+
+---
+Vous avez sans doute remarqué, Monsieur, dans mon Mémoire sur l’écriture démotique égyptienne, que ces noms étrangers étaient exprimés phonétiquement au moyen de signes plutôt syllabiques qu’alphabétiques. — location: [1365](kindle://book?action=open&asin=B008H5U302&location=1365) ^ref-46107
+
+---
+l’hiéroglyphique pure, devait avoir aussi un certain nombre de ses signes doués de la faculté d’exprimer les sons ; en un mot, qu’il existait également une série d’hiéroglyphes phonétiques. — location: [1372](kindle://book?action=open&asin=B008H5U302&location=1372) ^ref-2640
+
+---
+hiéroglyphique — location: [1377](kindle://book?action=open&asin=B008H5U302&location=1377) ^ref-23548
+
+hiéroglyphes 
+
+---
+démotique, — location: [1390](kindle://book?action=open&asin=B008H5U302&location=1390) ^ref-19205
+
+l'écriture  de l'Égypte astique 
+
+---
+Cléopâtre, — location: [1402](kindle://book?action=open&asin=B008H5U302&location=1402) ^ref-24827
+
+---
+Ptolémée. — location: [1403](kindle://book?action=open&asin=B008H5U302&location=1403) ^ref-11420
+
+---
+diphtongues — location: [1414](kindle://book?action=open&asin=B008H5U302&location=1414) ^ref-54702
+
+---

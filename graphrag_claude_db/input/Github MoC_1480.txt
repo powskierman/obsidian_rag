@@ -1,0 +1,29 @@
+---
+aliases: 
+tags:
+  - git
+  - github
+  - MoC
+---
+# Github MoC
+Date: 2022-12-30
+
+### Backlink
+[[Tech/Programming-Tools/Git/Git MOC|Git MOC]]
+
+### Reference
+-  
+### Notes
+Since 2021-08-13, GitHub no longer accepts account passwords when authenticating Git operations (includes GitHub). You need to add a PAT (Personal Access Token) instead, and you can follow the below method to add a PAT on your system.
+
+Creating a personal access token. Log in to your Github & in the upper-right corner of any page, click your profile photo, then click Settings. In the left sidebar, click Developer settings. In the left sidebar, click Personal access tokens. Click Generate new token.
+
+Copy this and paste into password field
+
+-  Tokens
+	- xcode: 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
+	- Sourcegraph:
+		- `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`
+	- Github:
+		  `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`
+  

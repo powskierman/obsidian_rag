@@ -1,0 +1,32 @@
+---
+aliases: []
+tags: []
+---
+# Format ESP32
+Date: 2023-03-13
+
+### Backlink
+[[]]
+
+### Reference
+-  [Esptool.py Documentation ](https://docs.espressif.com/projects/esptool/en/latest/esp32/)
+- [Troubleshooting - ESP32-S3](https://docs.espressif.com/projects/esptool/en/latest/esp32s3/troubleshooting.html)
+- [Factory Reset  Adafruit ESP32-S3 TFT Feather](https://learn.adafruit.com/adafruit-esp32-s3-tft-feather/factory-reset)
+- [ESP32 Erase Flash Memory (Factory Reset)](https://randomnerdtutorials.com/esp32-erase-flash-memory/)
+- 
+### Notes
+- List USB ports: 
+```
+ls /dev/cu*
+``` 
+- **Important!** The ESP32 will persist changes such as network credentials, ACLs or NOCs on the flash.  Erase with esptool with Matter and when in doubt.
+- Normally, reflashing with new firmware erases the flash completely.  Otherwise:
+- esptool.py --chip esp32s3 --port /dev/cu.usbmodem4401  erase_flash
+	- If this doesn't work, use web tool:
+		- Use Chrome or Edge
+		- Go to: https://espressif.github.io/esptool-js/
+			- Click connect and choose appropriate USB port
+			- Click format
+				- **Important!**:  esp32s3 memory start position is 0
+				- Need to flash this file then erase flash
+					- ~/esp/bootloader/bootloader.bin

@@ -1,0 +1,16 @@
+---
+aliases: []
+tags: []
+---
+# Home Assistant over https
+Date: 2023-09-24
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  In esphome addon, you can get "You are not browsing the dashboard over a secure connection (HTTPS"
+- To install:
+	- Add [[duckdns]] 

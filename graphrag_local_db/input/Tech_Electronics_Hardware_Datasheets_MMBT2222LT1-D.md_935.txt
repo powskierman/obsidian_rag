@@ -1,0 +1,25 @@
+# MMBT2222LT1-D.md
+
+---
+aliases:
+tags:
+created: 2022-03-12 13:49
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<<[MMBT2222LT1-D.PDF](Tech/Electronics/Hardware/Datasheets/media/MMBT2222LT1-D.PDF)>>
+
+![](MMBT2222LT1-D-image1.png){width="6.375in" height="8.25in"}![C 当 ま す G ー 7 新 & 要 P - 0 ど 鰄 、 を - 0 当 0 に 0 工 ARAC - 工 16S ELECTRWAL 0 工 ARACTE STICS 、 ⅱ 256 - ー 1 ー w - あ 一 当 一 を ー S 画 富 - ロ 18 G ど コ お ー E ] ュ 第 ー = 、 ・ ま コ ま を 、 ー 8 4 一 8 ・ 82 C ミ を 第 一 《 《 E ・ ・ 0 、 - 《 E 堅 を 当 ・ 、 一 要 一 物 「 2222A - 5 ′ 参 -81 、 222 第 ・ -0 ョ ・ 門 E ・ 10 VOC. 「 1 ヒ ・ 一 ■ 1 ] 、 、 VCE ・ 10 - き 「 言 k 工 ュ ■ 1 0 ゴ ・ 第 ■ 10 《 . 「 1 - 0 ・ エ 、 一 ・ ョ ・ 門 E ・ 8 《 1 ・ -8 MHZ) ・ 1 ョ 、 - ■ こ ョ ・ 一 早 ⅱ - お ョ 、 . ⅱ ま ョ 物 暑 一 を ・ 58 n 、 - 、 0 「 ・ 10 、 ラ 0 ー 4 一 ■ 1 0 ゴ ・ ⅱ 01 コ 、 黔 ー " 10 CO ・ 5 《 - ′ ・ 一 ・ 1 ト 峯 を " 10 《 、 ⅱ 1 - 0 ・ エ 、 一 要 要 BT2222 「 要 要 BT2222A 「 SMMBT2222AL ′ = 、 - 「 222N 第 参 デ T 22 第 ′ = ま 「 2222A. 第 タ 市 12222 第 M' 第 T? 心 要 - 第 ま 市 T 心 22 第 ′ = 物 「 222N 書 第 WdT に 22 第 ′ = 、 a12222A. 第 タ 市 12222 第 ′ = 、 a12222A. 第 タ 市 12222 第 ′ = 、 a12222A. 第 タ 市 12222 第 ′ = 、 a12222A. 第 タ 市 12222 第 ミ 、 B 「 22 A - 第 タ 市 1222 第 、 BT22 A - 第 第 、 BT 心 22 第 ′ = き T22 A - 第 、 BT 心 22 第 物 1 2A. 第 当 22 第 ′ 市 222A ](media/MMBT2222LT1-D-image2.png){width="6.375in" height="8.25in"}![ммвтппи, ммвт2222АЦ SMMBT2222AL CHARACTEmsT1cs СТ, 2S:c (К: 1.юкнц ИНД м»ЕТ2222А, вта22А мввттп„ м мвт2222А, SMMBT2222A сускЕ • F'gw• 1 „ Ту Е С og---ted SWITCMNG EaUIVALEMT TEST Ы:аре •Tat' сарасйаг--- стистов (ц 3. ОС СУСИ ](MMBT2222LT1-D-image3.png){width="6.375in" height="8.25in"}![MMBT2222L, MMBT2222AL„ SMMBT2222AL ons 10 20 V COLLECTOR cuRÆNT Turn ---On Tin* 0.2 •s ease Satmuon SO 10 zo sn 20 so to 2m so COLLECTOR cuRO" Figure 6. Time 102.0 SO 7. Freqwncy 20i R, souKE RESISTANCE Figure 8. Effects ](MMBT2222LT1-D-image4.png){width="6.375in" height="8.25in"}!['c.COLLECTORCIRRENT(A) MMBT2222 「 MMBT2222Al„ SMMBT2222AL E - G 「 12 , B E tt - n VO 9 VS. , 14 ; · m at · CO 一 · nt , COLLECTOR C R ; COL NT 、 一 ](MMBT2222LT1-D-image5.png){width="6.375in" height="8.25in"}![](MMBT2222LT1-D-image6.png){width="6.375in" height="8.25in"}![](MMBT2222LT1-D-image7.png){width="6.375in" height="8.25in"}![](MMBT2222LT1-D-image8.png){width="6.375in" height="8.25in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,63 @@
+# RTL_433-Setup-Without-Docker.md
+
+---
+aliases:
+tags:
+created: 2021-12-27 17:59
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Sudo apt-get update
+
+2.  Sudo apt-get upgrade
+
+3.  Mkdir sdr
+
+4.  Cd sdr
+
+5.  Sudo apt-get install git cmake libusb-1.0-0-dev buil-essential
+
+6.  git clone git://git.osmocom.org/rtl-sdr.git
+
+7.  Cd rtl-sdr
+
+8.  Mkdir build
+
+9.  Cd build
+
+10. cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
+
+11. Make
+
+12. Sudo make install
+
+13. sudo ldconfig
+
+14. cd ../..
+
+15. git clone <https://github.com/merbanan/rtl_433.git>
+
+16. cd rtl_433
+
+17. mkdir build
+
+18. cd build
+
+19. cmake ../
+
+20. Make
+
+21. Sudo make install
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

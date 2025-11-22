@@ -1,0 +1,22 @@
+---
+aliases: []
+tags: []
+---
+# SwiftUI Pop up one level
+Date: 2023-02-19
+
+### Backlink
+[[../../../../Programming-Tools/SwiftUI/SwiftUI MoC]]
+
+### Reference
+-  
+### Notes
+```
+struct BView: View {
+    @Environment(\.presentationMode) var mode: Binding<PresentationMode>
+    var body: some View {
+        Button(action: { self.mode.wrappedValue.dismiss() })
+        { Text("Come back to A") }
+    }
+}
+```

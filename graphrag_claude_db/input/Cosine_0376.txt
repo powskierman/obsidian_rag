@@ -1,0 +1,30 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-07 14:07
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+[[]]
+
+
+- Adjacent over Hypotenuse $a \over c$ 
+-  !
+	- $\cos(45)={1 \over \sqrt 2}$
+	- $\cos(30)={\sqrt3 \over 2}$
+	- $\cos(60)={1 \over 2}$
+	-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

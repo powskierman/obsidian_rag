@@ -1,0 +1,37 @@
+---
+aliases: 
+tags:
+  - AI
+  - MoC
+---
+# AI Tools MoC
+Date: 2023-03-01
+
+### Backlink
+[[]]
+
+### Reference
+-  [[AI Tools.docx]]
+- [[the_prompt_engineering_cheat_sheet.pdf]]
+- [Use ChatGPT to create an iPhone app](https://medium.com/@willdjthrill/using-chatgpt-to-create-an-iphone-app-af4346fc77b4)
+
+### Notes
+-  [[Perplexity]]
+- [[ChatGPT MoC]]
+- [[Code Llama2]]
+- [[claude MoC]]
+- [[n8n]]
+- [[phind]]
+- [Claude  code extension](https://jamesrochabrun.medium.com/swiftui-prototyping-with-claude-3-and-xcode-80537c23bfa8)
+- [[Deepseek MoC]]
+- [[Smolagents]]
+- [[Crawl4AI]]
+- [[Ollama MoC]]
+- [[openwebui]]
+- [[lmstudio]]
+- [[Chain of Draft]]
+- [[Sequential Thinking Tool Guide]]
+- [[LLM Access]]
+- [[Specification Tools]]
+---
+

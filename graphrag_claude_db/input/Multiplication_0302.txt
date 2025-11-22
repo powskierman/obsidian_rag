@@ -1,0 +1,26 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-01-22 13:11
+ContentType: Reference
+Backlink: "[[Algebra MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- The product of two real [[Numbers]] is negative if and only if one of the [[Numbers]] is positive and the other is negative.
+- When encountering equations with fractions, eliminate the fractions by multiplying each side of the equation by the lowest common multiple of the denominators in that equation.
+- Multiplication and areas of rectangles: 
+	- The product ab may be represented, geometrically, by the area of a rectangle with side lengths a and b. [Notes: Equations and Inequalities](Notes-Equations-and-Inequalities.pdf)
+	- 
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

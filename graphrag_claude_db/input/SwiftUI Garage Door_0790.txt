@@ -1,0 +1,21 @@
+---
+aliases: 
+tags:
+  - Home-Assistant
+  - garage
+  - swiftui
+  - postman
+---
+# SwiftUI Garage Door
+Date: 2023-09-26
+
+### Backlink
+[[]]
+
+### Reference
+-  [SwiftUI and WebSocket connectivity](https://medium.com/@ios_guru/swiftui-and-websocket-connectivity-478aa5fddfc7)
+- [Youtube -  Home Assistant websockets and Postman](https://youtu.be/Qk9A0QbG5-I?si=31COhrNTxQRO0yu9)
+- [[HassFramework]]
+- 
+### Notes
+-  [[../../../Software/Home-Assistant/media/Home Assistant - websocket Command Chain]]

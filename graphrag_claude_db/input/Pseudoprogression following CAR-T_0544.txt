@@ -1,0 +1,28 @@
+---
+aliases:
+tags:
+  - CAR-T
+  - yescarta
+  - lymphoma
+created: 2025-11-03 12:31
+ContentType:
+Backlink: "[[Lymphoma Treatment]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Pseudoprogression after CAR-T therapy can present as new or increased metabolic activity in areas previously involved with disease, driven by immune cell infiltration and inflammation rather than viable tumor. This phenomenon is well documented—especially within months after infusion—and can mimic progression on PET scans.
+	•	It is more likely when accompanied by stable or shrinking mass size, as in your case, rather than unequivocal growth.
+	•	Pseudoprogression is typically a diagnosis of exclusion. Clinical context—including symptoms, timing, and prior response—are important. If you are asymptomatic and other markers support ongoing response, this increases suspicion for pseudoprogression.
+	•	Follow-up imaging (usually 4-8 weeks later), or in ambiguous situations, biopsy of the new foci, can help distinguish viable lymphoma from inflammatory response.
+### Related Notes
+- [Pseudoprogression article](https://pmc.ncbi.nlm.nih.gov/articles/PMC11750779/)
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

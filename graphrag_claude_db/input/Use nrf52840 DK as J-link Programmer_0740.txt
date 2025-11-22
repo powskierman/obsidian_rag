@@ -1,0 +1,35 @@
+---
+aliases: []
+tags: [
+ nrf52840
+ dongle
+ dk
+ j-link
+ programmer
+ flash
+ MBR
+]
+---
+# Use nrf52840 DK as J-link Programmer
+Date: 2023-06-10
+
+### Backlink
+[[NRF52840 MoC]]
+
+### Reference
+-  [External programming Using nRF52840-DK](https://devzone.nordicsemi.com/f/nordic-q-a/14058/external-programming-using-nrf52-dk)
+- 
+### Notes
+-  Connect the DK with the Dongle:
+	- P20 VDD nrf to Dongle Vdd Out
+	- P20 Vdd nrf to P20 SWD sel
+	- P20 SWD IO to Dongle SWD IO
+	- P20 SWD CLK to Dongle SWD CLK
+	- DK GRD to Dongle GRD
+- Connect DK to USB
+- The MBR for nrf52840 can be found at: 
+```
+/Users/michel/Documents/Nordic/nRF5_SDK_17.1.0_ddde560/components/softdevice/mbr/hex/mbr_nrf52_2.4.1_mbr.hex
+```
+
+- 

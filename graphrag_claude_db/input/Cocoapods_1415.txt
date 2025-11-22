@@ -1,0 +1,19 @@
+---
+aliases: []
+---
+# Cocoapods
+Date: 2022-10-04
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [CocoaPods](https://cocoapods.org/)
+- [CocoaPods Guides - Using CocoaPods](https://guides.cocoapods.org/using/using-cocoapods.html) 
+- [Carthage: A simple, decentralized dependency manager for Cocoa](https://github.com/Carthage/Carthage#quick-start)
+- 
+
+### Notes
+-  

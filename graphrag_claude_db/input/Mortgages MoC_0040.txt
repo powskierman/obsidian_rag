@@ -1,0 +1,19 @@
+---
+aliases: 
+tags:
+  - mortgage
+---
+# Mortgages MoC
+Date: 2025-01-12
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- [[Hypothèques 31 décembre 2024 AB et NH.pdf]]
+- [[Hypotheque Canmore 1.pdf]]
+- [[Hypotheque Canmore 2.pdf]]
+- [[Hypotheque NH 1.pdf]]
+- [[Hypotheque NH 2.pdf]]

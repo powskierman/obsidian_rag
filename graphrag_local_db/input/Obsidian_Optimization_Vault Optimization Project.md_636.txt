@@ -1,0 +1,261 @@
+# Vault Optimization Project.md
+
+---
+aliases:
+  - Vault Cleanup
+  - PKM Optimization
+tags:
+  - optimization
+  - project
+  - obsidian
+created: 2025-10-16 00:00
+ContentType: Project Plan
+Backlink: "[[../Obsidian MoC|Obsidian MoC]]"
+---
+
+### Main Idea
+Systematic optimization and cleanup of my Obsidian vault to improve organization, discoverability, and maintainability. This project addresses years of organic growth and implements a sustainable knowledge management system.
+
+### References
+- [[Home]]
+- [[Maps of Content]]
+- [[notes without frontmatter]]
+
+### Notes
+
+## Project Overview
+
+**Status**: 🟡 In Progress  
+**Started**: 2025-10-16  
+**Goal**: Transform a large, organically-grown vault into a well-organized, maintainable knowledge management system
+
+---
+
+## Optimization Goals
+
+1. **Standardization**: Consistent frontmatter, naming, and structure
+2. **Discoverability**: Better linking, tags, and MoC coverage  
+3. **Maintenance**: Identify outdated, duplicate, or low-value notes
+4. **Organization**: Optimal folder structure and MoC hierarchy
+5. **Automation**: Create systems to maintain organization going forward
+
+---
+
+## Project Phases
+
+### Phase 1: Assessment ⏳
+**Priority**: High | **Effort**: Medium
+
+- [ ] Document current vault state
+- [ ] Identify major organizational issues  
+- [ ] Count notes without proper frontmatter
+- [ ] List orphaned notes (no backlinks)
+- [ ] Inventory poorly named files (Untitled, created, etc.)
+- [ ] Analyze folder structure effectiveness
+- [ ] Map existing MoC coverage
+- [ ] Create priority matrix (impact vs. effort)
+- [ ] Define success metrics
+
+**Deliverables**:
+- Vault health report
+- Issues list with priorities
+- Phase 1 completion checklist
+
+---
+
+### Phase 2: Quick Wins 🎯
+**Priority**: High | **Effort**: Low
+
+- [ ] Rename poorly named files
+  - [ ] Untitled.md → [Meaningful name]
+  - [ ] created.md → [Meaningful name]
+  - [ ] MoC Test2.md → Review/delete
+- [ ] Delete or archive test files
+- [ ] Move misplaced root-level files to appropriate folders
+  - [ ] Technical notes → Tech/
+  - [ ] Development files → proper categories
+- [ ] Fix obvious typos in filenames
+- [ ] Remove duplicate files
+
+**Automation Opportunity**: n8n workflow to flag files matching "untitled", "test", etc.
+
+---
+
+### Phase 3: Standardization 📋
+**Priority**: High | **Effort**: High
+
+#### 3.1 Naming Convention
+- [ ] Define naming standards for each category:
+  - Technical/dev notes: `[Technology] - [Topic].md`
+  - Personal knowledge: `[Subject] - [Subtopic].md`
+  - Project notes: `[Project Name] - [Component].md`
+  - Reference materials: `[Source] - [Title].md`
+- [ ] Apply naming convention vault-wide
+- [ ] Document the convention for future reference
+
+#### 3.2 Frontmatter Standardization
+- [ ] Define required frontmatter fields per content type
+- [ ] Add missing frontmatter to existing notes
+- [ ] Standardize date formats
+- [ ] Implement consistent tag taxonomy
+- [ ] Add ContentType field to all notes
+
+#### 3.3 Folder Structure
+- [ ] Evaluate current structure
+- [ ] Design optimal hierarchy
+- [ ] Plan folder consolidation/creation
+- [ ] Execute folder reorganization
+- [ ] Update all internal links
+
+**Automation Opportunity**: 
+- n8n workflow to add frontmatter templates
+- Bulk frontmatter updates
+- Link validation after moves
+
+---
+
+### Phase 4: MoC Optimization 🗺️
+**Priority**: Medium | **Effort**: Medium
+
+- [ ] Design optimal MoC hierarchy
+  - [ ] Identify top-level MoCs needed
+  - [ ] Define MoC relationships
+  - [ ] Create MoC connection map
+- [ ] Create missing MoCs:
+  - [ ] Development MoC (consolidate Tech, programming)
+  - [ ] Health & Wellness MoC
+  - [ ] Projects MoC
+  - [ ] Learning MoC (books, courses)
+  - [ ] Personal MoC
+- [ ] Link notes to appropriate MoCs
+- [ ] Implement MoC navigation system
+- [ ] Add MoC tags consistently
+- [ ] Create MoC index page
+
+**Existing MoCs to Review**:
+- Tech MOC
+- Rocketbook MOC  
+- HassFramework MoC
+- Photomator MoC
+- Maps of Content (meta-MoC)
+
+---
+
+### Phase 5: Automation & Maintenance 🤖
+**Priority**: Medium | **Effort**: Medium
+
+#### n8n Workflows to Create:
+
+1. **New Note Setup** (High Priority)
+   - Trigger: New file created
+   - Action: Add appropriate frontmatter template
+   - Action: Suggest tags based on folder/content
+
+2. **Vault Health Monitor** (High Priority)
+   - Trigger: Weekly schedule
+   - Action: Generate health report
+   - Report: Notes without frontmatter, orphaned notes, naming issues
+   - Action: Create task list in vault
+
+3. **Link Checker** (Medium Priority)
+   - Trigger: Weekly schedule  
+   - Action: Find broken links
+   - Action: Create report in vault
+
+4. **Tag Suggester** (Low Priority)
+   - Trigger: Note modified
+   - Action: Analyze content
+   - Action: Suggest relevant tags
+
+5. **MoC Updater** (Medium Priority)
+   - Trigger: New note in watched folder
+   - Action: Add to relevant MoC automatically
+
+#### Templates to Create:
+- [ ] Standard note template (enhanced)
+- [ ] MoC template (standardized)
+- [ ] Project note template
+- [ ] Meeting note template
+- [ ] Book notes template
+
+[[---]]
+
+## Known Issues Inventory
+
+### High Priority
+1. Notes without proper frontmatter
+2. Files with poor names (Untitled, created, etc.)
+3. Root-level files that should be categorized
+4. Inconsistent naming conventions
+
+### Medium Priority  
+5. Potential duplicate content
+6. Orphaned notes (no backlinks)
+7. Folder structure optimization needed
+8. Missing MoC coverage in some areas
+
+### Low Priority
+9. Outdated information that needs archiving
+10. Empty or stub notes
+11. Inconsistent tag usage
+
+---
+
+## Success Metrics
+
+**Before State** (Baseline - to be measured):
+- Total notes: [TBD]
+- Notes without frontmatter: [TBD]
+- Orphaned notes: [TBD]
+- Files needing rename: [TBD]
+
+**Target State**:
+- 100% of notes have proper frontmatter
+- 95%+ of notes linked to at least one MoC
+- 0 orphaned notes (or archived if intentional)
+- Consistent naming convention applied vault-wide
+- Automated health monitoring in place
+
+---
+
+## Progress Log
+
+### 2025-10-16
+- ✅ Created project plan
+- ✅ Set up Claude Project for optimization
+- ✅ Connected n8n to Obsidian REST API
+- ⏳ Starting Phase 1: Assessment
+
+### Next Actions
+1. Run vault analysis to get baseline metrics
+2. Create comprehensive issues list
+3. Set up first n8n workflow (vault health monitor)
+
+---
+
+## Resources & Tools
+## Resources & Tools
+
+**Active Tools**:
+- Obsidian Local REST API (configured)
+- n8n (connected to vault)
+- Claude Projects (optimization assistant)
+- Base plugin (database queries)
+- Dataview (for reports)
+- Templater (templates)
+
+**Useful Query Examples** (reference only - remove triple backticks to use):
+
+*Find notes without frontmatter:*
+```
+TABLE created, tags
+WHERE !file.frontmatter
+SORT file.name
+```
+
+*Find orphaned notes (no backlinks):*
+```
+TABLE file.outlinks as "Links Out", file.inlinks as "Backlinks"
+WHERE length(file.inlinks) = 0
+SORT file.name
+```

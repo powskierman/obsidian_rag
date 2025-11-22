@@ -1,0 +1,57 @@
+# ChatGPT Coding Best Practice.md
+
+---
+aliases: []
+tags: []
+---
+# ChatGPT Coding Best Practice
+Date: 2023-10-20
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  [[ChatGPT Coding Prompts]]
+- Chat GPT has a fixed context length. GPT4 has a context length of around **5,000 to 6,000 words**
+- Writing an effective ChatGPT prompt is essential to get the desired responses from the model. The key is to provide clear and context-rich input that helps guide the model in generating relevant and coherent replies. Here are some guidelines and instructions on how to write an effective ChatGPT prompt:
+
+1. Start with a Greeting:
+    
+    - Begin your prompt with a polite greeting, like "Hello" or "Hi," to set a friendly tone for the conversation.
+2. Be Clear and Specific:
+    
+    - Clearly state your query or request. Avoid vague or ambiguous language that might confuse the model.
+    - If you have a specific question or task in mind, be explicit about it. For example, instead of saying "Tell me about dogs," you can say "Please provide information about the history and breeds of dogs."
+3. Provide Context:
+    
+    - If your prompt refers to previous messages or context within the conversation, make sure to include that context. This helps the model understand and respond appropriately.
+    - You can refer to prior messages like, "As we discussed earlier," or "Regarding your previous answer."
+4. Use Proper Grammar and Punctuation:
+    
+    - Write your prompts using correct grammar and punctuation. Clear and well-structured sentences are more likely to yield coherent responses.
+5. Specify the Format:
+    
+    - If you have a specific format in mind for the response (e.g., a list, a summary, a comparison), mention it in your prompt. For example, "Please provide a list of advantages and disadvantages of solar energy."
+6. Ask Open-Ended Questions:
+    
+    - If you want the model to generate a more detailed response or engage in a creative discussion, ask open-ended questions that require more than a simple yes/no answer.
+7. Experiment and Iterate:
+    
+    - Don't hesitate to experiment with different phrasings and prompts to see which one elicits the response you desire. ChatGPT can sometimes be sensitive to the wording of prompts, so iteration can be helpful.
+8. Use System Messages:
+    
+    - You can use system-level instructions to guide the model's behavior. For example, you can start your prompt with "You are a helpful assistant that knows a lot about science."
+9. Be Patient:
+    
+    - If the initial response from the model is not what you expected, you can politely ask for clarification or rephrase your question to provide additional context.
+10. Use Stop Tokens:
+    
+    - You can include a stop token like "Stop" or "That's enough" at the end of your prompt to ensure that the model doesn't generate excessively long responses.
+11. Avoid Offensive or Harmful Prompts:
+    
+    - OpenAI has implemented content filtering to prevent the model from generating harmful or inappropriate content. Please use ChatGPT responsibly and refrain from submitting offensive or harmful prompts.
+12. Review and Edit Responses:
+    
+    - After receiving a response, review it for accuracy and appropriateness. You may need to edit or refine the model's output to make it more suitable for your needs.

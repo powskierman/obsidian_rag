@@ -1,0 +1,24 @@
+---
+aliases: []
+tags: [
+ menuconfig
+ guiconfig
+]
+---
+# menuconfig or guiconfig
+Date: 2023-08-03
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  To run menuconfig or guiconfig:
+	- source the zephyr environment:
+```
+. /opt/nordic/ncs/v2.4.0/zephyr/zephyr-env.sh
+```
+- build the app:
+	- west build -t menuconfig -b xiao_ble
+	- west build -t guiconfig -b xiao_ble

@@ -1,0 +1,16 @@
+---
+aliases: []
+tags:
+  - C++
+  - extern
+---
+# extern
+Date: 2023-09-14
+
+### Backlink
+[[C++ MOC]]
+
+### Reference
+-  
+### Notes
+-  In C, the extern keyword is called a storage class specifier. It is used to declare a variable or a function in a way that indicates it is defined in another source file. This allows you to use variables or functions that are defined in one source file in another source file.

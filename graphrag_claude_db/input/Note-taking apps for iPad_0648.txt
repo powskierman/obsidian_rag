@@ -1,0 +1,31 @@
+---
+aliases: 
+tags:
+  - note-taking
+  - apple-pencil
+  - clipboard
+---
+# Note-taking apps for iPad
+Date: 2023-12-27
+
+### Backlink
+[[Note Taking MoC]]
+
+### Reference
+-  [The 7 best note-taking apps for iPad in 2023](https://zapier.com/blog/best-note-taking-app-for-ipad-iphone/?utm_source=google&utm_medium=cpc&utm_campaign=gaw-gbl-nua-evr-search_nb_alldev_blog_prospecting_core-ads&utm_adgroup=DSA-BestApps-Form_Builder&utm_term=&utm_content=9001307&gad_source=1&gclid=CjwKCAiAs6-sBhBmEiwA1Nl8s6lLrxh324qendLqe1t5J34iQQhk34lwN4FvzdvQLImXMZXUSGUqKxoCJEgQAvD_BwE)
+- 
+### Notes
+-  Apple Notes 
+	- for text notes
+- Zoho Notebook 
+	- for variety of formats
+- GoodNotes 
+	- for the most paper-like notebook experience
+- Freeform 
+	- for brainstorming and mind-mapping
+- Milanote 
+	- for creative project planning
+- Nebo 
+	- for handwriting-to-text
+- Noteful 
+	- for layered notes

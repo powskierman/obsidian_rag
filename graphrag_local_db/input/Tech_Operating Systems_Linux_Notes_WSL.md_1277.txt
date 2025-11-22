@@ -1,0 +1,71 @@
+# WSL.md
+
+---
+aliases:
+tags:
+  - meslo
+  - install
+created: 2022-12-04 23:46
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Windows System for Linux
+
+2.  GUI
+
+    a.  Install WSL
+
+        i.  [Install](https://docs.microsoft.com/en-us/windows/wsl/install-win10#:~:text=%20Windows%20Subsystem%20for%20Linux%20Installation%20Guide%20for,using%20an%20ARM64%20machine%2C%20please%20download...%20More%20)
+
+        ii. Go to Microsoft store and download Ubuntu
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Install desktop environment
+
+        i.  [Install](https://www.makeuseof.com/tag/linux-desktop-windows-subsystem/)
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Install oh-my-zsh
+
+        i.  [Install](https://ohmyz.sh/#install)
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Install Powerlevel10k
+
+        i.  [Install](https://github.com/romkatv/powerlevel10k#meslo-nerd-font-patched-for-powerlevel10k)
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Install Swift
+
+        i.  [Install](https://itsfoss.com/use-swift-linux/)
+
+        ii. Install dependencies
+
+sudo apt-**get** install clang libicu-dev libcurl4-openssl-dev libpython2.7
+
+*From <<https://forums.swift.org/t/ubuntu-required-dependencies-for-swift/15314/3>>*
+
+6.  Install unzip
+
+    a.  sudo apt-get install unzip
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

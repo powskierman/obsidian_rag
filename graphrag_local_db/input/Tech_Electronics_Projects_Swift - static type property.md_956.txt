@@ -1,0 +1,16 @@
+# Swift - static type property.md
+
+---
+aliases: []
+tags: []
+---
+# Swift - static type property
+Date: 2023-03-07
+
+### Backlink
+[[]]
+
+### Reference
+-  [Where and how to use static variable in swift](https://www.tutorialspoint.com/where-and-how-to-use-static-variable-in-swift)
+### Notes
+-  Static properties are those properties whose values are shared among all the instance or object of a class.

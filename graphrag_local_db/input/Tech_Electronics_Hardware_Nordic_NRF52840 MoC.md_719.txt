@@ -1,0 +1,26 @@
+# NRF52840 MoC.md
+
+---
+aliases: []
+tags: [
+ nrf52840 sniffer OTBR matter xiao
+]
+---
+# NRF52840 MoC
+Date: 2023-05-17
+
+### Backlink
+[[]]
+
+### Reference
+-  [NRF52840 Get Started Guide](https://tejachintalapati.medium.com/an-abosulte-beginners-guide-to-nrf52840-b579cfe1fc1c)
+- [NRFConnect Programmer User Guide](https://infocenter.nordicsemi.com/pdf/nRF_Connect_Programmer_User_Guide_v1.1.pdf)
+- [nRF Sniffer](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fug_sniffer_802154%2FUG%2Fsniffer_802154%2Finstalling_sniffer_802154.html)
+- [Thread CLI Example](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fsdk_tz_v4.1.0%2Fthread_cli_example.html)
+- [[nRF52840 Dongle Pinout]]
+- [Xiao Ble nRF52840 Pinout](https://cdn.cnx-software.com/wp-content/uploads/2021/12/XIAO-nRF52840-pinout.jpg?lossy=1&w=2560&ssl=1)
+- 
+### Notes
+-  [[RPI Thread Border Router]]
+- [[Step by step nrf52840DK Matter endpoint]]
+- [[Seeed Studio Xiao nrf52840]]

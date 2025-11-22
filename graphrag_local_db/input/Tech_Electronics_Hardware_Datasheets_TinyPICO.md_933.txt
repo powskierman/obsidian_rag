@@ -1,0 +1,20 @@
+# TinyPICO.md
+
+---
+aliases: []
+---
+
+2022-06-26
+# TinyPICO
+### Backlink
+[[]]
+
+### Reference
+- [TinyPICO](https://www.tinypico.com/)
+- [TinyPICO — PlatformIO v6.1 documentation](https://docs.platformio.org/en/stable/boards/espressif32/tinypico.html)
+- [TinyPICO-Schematic](TinyPICO-Schematic.pdf)
+- [tinypico-apa102-cycle.ino](https://wokwi.com/projects/308012505806930496)
+- 
+### Notes
+- [[Control Addressable LEDs with an ESP32]]
+- [[TinyPico APA102]]

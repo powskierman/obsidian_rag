@@ -1,0 +1,18 @@
+---
+aliases: []
+---
+
+2022-02-25
+# Continuity
+
+### Backlink
+[[Discontinuity]]
+
+### Reference
+
+### Notes
+- A function is continuous if it can be drawn by not lifting the pen from paper
+ 
+-  the domain of a rational function is continuous except a 0
+- the [[domain]] of an exponential function is $\mathbb R$
+- 

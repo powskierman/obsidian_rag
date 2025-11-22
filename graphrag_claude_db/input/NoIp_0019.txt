@@ -1,0 +1,30 @@
+---
+aliases: 
+tags:
+  - password
+---
+# NoIp
+Date: 2023-10-16
+
+### Backlink
+[[Passwords]]
+
+### Reference
+-  
+### Notes
+- Credentials:
+	- user: mlapoint99@hotmail.com
+	- password: 331Tra1l$ide
+2FA Backup Codes
+```code
+JrvG3mQR-ptxb288m
+d2vltcMj-5n5gG4nf
+kROHBPT7-g9J4CyHN
+5PZdHqYp-l51UzYuS
+TR3HMXfE-902NzVC4
+MZ3HnQXr-r1dNk7hs
+DC0k9fVw-LHYIASRW
+UUoV2myN-G0d3Ldhr
+rtXa6Try-y7Ee3mQW
+3tg4A9zJ-cZKZq7l8
+```

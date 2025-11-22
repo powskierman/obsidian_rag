@@ -1,0 +1,148 @@
+# Convert .ino to .cpp.md
+
+---
+aliases: []
+tags:
+  - arduino
+  - split
+---
+# Convert .ino to .cpp
+Date: 2023-09-07
+
+### Backlink
+[[]]
+
+### Reference
+-  [VisualMicro video on converting .ino to .cpp](https://youtu.be/PYMIQwDY1eY?si=RL4icZ1PHKsUv2Ai)
+- [Tutorial for creating multi cpp file arduino project](https://community.platformio.org/t/tutorial-for-creating-multi-cpp-file-arduino-project/5830/13)
+- 
+### Notes
+>[!Warning]- This is a kludge:
+>  you could mimic the standard Arduino-IDE behaviour by editing files like this:
+>
+>1.  Rename your “main”-file with the `setup` and `loop` functions to `*.cpp` and add `#include "Arduino.h"` at the very top of this file
+>2.  Rename all other `*.ino`\-files that are part of your project to `*.h`
+>3.  At the end of your “main”-`*.cpp`\-file write `#include "foo.h"`, `#include "bar.h"`, etc. for every `*.h`\-file you have where `foo` and `bar` are the actual names of the needed files
+>4.  Create function prototypes in a separate file. To do this, create a new file called `prototypes.h` and add a prototype for each function defined in one of your other `*.h`\-files there.
+>5.  Include the created `prototypes.h` (`#include "prototypes.h"`) at the top of your “main”-`*.cpp`\-file right below `#include "Arduino.h"`
+>
+>Now you are ready to go…  
+>Example:
+>
+>
+>main.ino:
+>
+>```cpp
+>void setup() {
+ >   ;
+>}
+>
+>void loop() {
+ >   ;
+>}
+>```
+>library.ino:
+>```cpp
+>int add(int a, int b) {
+>    return (a+b);
+>}
+>```
+>Those get turned into  
+>main.cpp:
+>```cpp
+>#include "Arduino.h"
+>#include "prototypes.h"
+>
+>void setup() {
+>  ;
+>}
+>
+>void loop() {
+  >  ;
+>}
+>```
+>prototypes.h:
+>
+>```cpp
+>int add(int a, int b); // This is a function prototype - basically the function-head without a {}-block ended by a semicolon, you need one of those for each function you want to use
+>```
+>>[!Caution!]
+>I really want to point out that this style isn’t particulary beautiful… no, it really is bad, very bad as it could cause a lot of errors… but it seems this is the “easy” way to convert a `*.ino`\-project quickly.
+>
+>
+>-   Why does this work?  
+ >   `#include` is a so called preprocessor directive. Before you code gets translated to something your Arduino can work with (by a compiler and a linker), the preprocessor does some simple stuff (like text replacement). By telling the preprocessor to `include` something (everything in your source-code beginning with an `#` is a preprocessor directive) you basically tell him to simply copy/insert the text from the included file at that point. The file created is simply a text-file with all the included files copied together into one…
+ >   
+>-   Why do you need those strange function prototypes?  
+  >  The compiler translating your source code works top-to-bottom. When you include the `*.h` at the end of your “main”-file the moment you might call the function `add()` in your `loop` the compiler doesn’t know there is a `add()`\-function defined; you get an error. To prevent that you have a prototype at the top so the compiler knows that somewhere there is a definition of that function and he doesn’t care about it anymore, no matter where the actual definition is.
+>
+>```cpp
+>void add(int a, int b); // A function prototype or declaration to "please the compiler"
+>
+>void add(int a, int) { // The actual function definition with the logic
+ >   return (a+b);
+>}
+>```
+>
+>-   Why not just `#include` all those `*.h`\-files at the top of my “main” so I don’t need prototypes?  
+   > Well, idk, this is a bad style either way, I just stuck with the explenation given [here 404](https://www.visualmicro.com/page/User-Guide.aspx?doc=INOs-and-CPPs.html). Just make sure you include other files AFTER the `Arduino.h` so all following files inserted “have access” to it.
+>
+>In the end I still recommend:  
+>**Just do it the proper way and learn splitting into multi-file projects the “normal” C/C++ style; it’s not even that big of a step from what I just wrote… You can not just place functions in other files but global variables and classes too, not to mention that it provides a way clearer structure for large projects, maybe even projects with multiple people.**
+ 
+>[!Proper Way to Split Cpp Program]- 
+>In general, you should define the functions in the two separate `.c` files (say, `A.c` and `B.c`), and put their prototypes in the corresponding headers (`A.h`, `B.h`, remember the [include guards](http://en.wikipedia.org/wiki/Include_guard)).
+>
+>Whenever in a `.c` file you need to use the functions defined in another `.c`, you will `#include` the corresponding header; then you'll be able to use the functions normally.
+>
+>All the `.c` and `.h` files must be added to your project; if the IDE asks you if they have to be compiled, you should mark only the `.c` for compilation.
+>
+>Quick example:
+>
+>**_Functions.h_**
+>
+```c
+#ifndef FUNCTIONS_H_INCLUDED
+#define FUNCTIONS_H_INCLUDED
+/* ^^ these are the include guards */
+
+/* Prototypes for the functions */
+/* Sums two ints */
+int Sum(int a, int b);
+
+#endif
+```
+
+**_Functions.c_**
+
+```c
+/* In general it's good to include also the header of the current .c,
+   to avoid repeating the prototypes */
+#include "Functions.h"
+
+int Sum(int a, int b)
+{
+    return a+b;
+}
+```
+
+**_Main.c_**
+
+```c
+#include <stdio.h>
+/* To use the functions defined in Functions.c I need to #include Functions.h */
+#include "Functions.h"
+
+int main(void)
+{
+    int a, b;
+    printf("Insert two numbers: ");
+    if(scanf("%d %d", &a, &b)!=2)
+    {
+        fputs("Invalid input", stderr);
+        return 1;
+    }
+    printf("%d + %d = %d", a, b, Sum(a, b));
+    return 0;
+}
+```

@@ -1,0 +1,19 @@
+# Flutter - Null Safety.md
+
+---
+aliases: []
+---
+# Flutter - Null Safety
+Date: 2022-08-16
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+-
+### Notes
+-  - [Flutter Unsound null safety](https://dart.dev/null-safety/unsound-null-safety)
+- [flutter - Use a non null safety package inside a null safety enabled app](https://stackoverflow.com/questions/68518068/use-a-non-null-saftey-package-inside-a-null-saftey-enabled-app-dart)
+-[The library 'package:flutter/material.dart' is legacy, and should not be imported into a null safe library](https://stackoverflow.com/questions/65949032/the-library-packageflutter-material-dart-is-legacy-and-should-not-be-importe)

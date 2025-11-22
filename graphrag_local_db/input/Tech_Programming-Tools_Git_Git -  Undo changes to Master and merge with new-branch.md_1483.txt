@@ -1,0 +1,33 @@
+# Git -  Undo changes to Master and merge with new-branch.md
+
+---
+aliases: 
+tags:
+  - git
+  - troubleshooting
+---
+# Git -  Undo changes to Master and merge with new-branch
+Date: 2024-01-02
+
+### Backlink
+[[Tech/Programming-Tools/Git/Git MOC|Git MOC]]
+
+### Reference
+-  
+### Notes
+To discard changes made to master after your last push and making new-branch your new master branch, you can follow these steps. 
+- Step 1: Switch to the master Branch
+First, make sure you are on the master branch:
+`git checkout master`
+- Step 2: Reset master to the Last Known Good State
+You mentioned that origin/master represents the last state you want to keep. Reset your local master to match origin/master:
+`git reset --hard origin/master`
+This command will discard all commits to master after the point where origin/master is currently.
+- Step 3: Merge new-branch into master
+Now, merge the going-back branch into master. Since master is now reset to the point of origin/master, it will fast-forward to the state of going-back:
+`git merge new-branch`
+This step will bring all the changes from new-branch into master.
+- Step 4: Push the Changes to the Remote Repository
+Finally, push the updated master branch to the remote repository. If you're certain that the changes are what you want and you understand the implications, you can use the force push command:
+`git push origin master --force`
+Caution: Force pushing (--force) will overwrite the remote master branch and can affect anyone else who is using this branch. Ensure that this is communicated to all team members and that you have a backup of your current state.

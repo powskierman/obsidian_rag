@@ -1,0 +1,26 @@
+---
+aliases:
+tags:
+created: 2022-07-04 09:03
+ContentType: Note
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+```dataview
+TASK
+FROM "Tech"
+SORT file.size DESC
+LIMIT 10
+```
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

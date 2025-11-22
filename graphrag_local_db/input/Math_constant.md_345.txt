@@ -1,0 +1,17 @@
+# constant.md
+
+---
+aliases: [constants]
+---
+
+2022-02-27
+# constant
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+- differentiate 
+-

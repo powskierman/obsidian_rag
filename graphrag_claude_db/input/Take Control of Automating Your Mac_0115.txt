@@ -1,0 +1,42 @@
+---
+id: 16131169
+updated: 2022-06-19
+title: Take Control of Automating Your Mac
+author: Joe Kissell
+highlights: 3
+last_highlight: 2021-02-07
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16131169
+Updated: 2022-06-19
+%%
+
+![]( https://readwise-assets.s3.amazonaws.com/static/images/default-book-icon-5.25188386e520.png)
+
+# About
+Title: [[Take Control of Automating Your Mac]]
+Authors: [[Joe Kissell]]
+Category: #books
+Number of Highlights: ==3==
+Readwise URL: https://readwise.io/bookreview/16131169
+Date: [[2022-06-19]]
+Last Highlighted: *2021-02-07*
+
+---
+
+# Highlights
+
+Adding Shift to a shortcut often reverses its meaning ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) %% Color: yellow %% ^334747081
+
+---
+
+Adding Option to a shortcut often applies the command to a broader scope ([1](https://readwise.io/to_kindle?action=open&asin=null&location=1)) %% Color: yellow %% ^334747082
+
+---
+
+Adding multiple modifiers to a shortcut often means “the same thing, but with different options.” For example, ⌘-V is Paste, but in most apps, ⌘-Option-Shift-V (or sometimes just ⌘-Shift-V) is Paste as Plain Text ([2](https://readwise.io/to_kindle?action=open&asin=null&location=2)) %% Color: yellow %% ^334747083
+
+---

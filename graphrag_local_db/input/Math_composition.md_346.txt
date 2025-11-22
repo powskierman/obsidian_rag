@@ -1,0 +1,55 @@
+# composition.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-02-01 13:04
+ContentType: Reference
+Backlink: "[[Algebra MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- [[Notes-Composite-functions.pdf]]
+- [Purple Math, Composition](https://www.purplemath.com/modules/fcncomp.htm)
+- [Composition Calculator](https://www.almostfun.org/lessons/function-composition/)
+- 
+- Composition is a chain of functions where the first function's output becomes the second function's input, and so on.
+- The composition operator is: $\circ$ (of).
+-  Composition of functions: We can build new functions out of old ones using composition: if f and g are functions then the composite function $f \circ g$ is defined by the rule $$y = f\circ g(x) = (f\circ g)(x) = f(g(x))$$
+-   Functions are processes.  Order is very important.
+- ### How to Evaluate Function Composition
+
+When a variable is in the second set of parentheses.
+
+Ex. $f(g(x))$
+
+##### Step 1. Plug in the inside function wherever the variable shows up in the outside function. 
+- The inside function is the input for the outside function
+	- $f(x)=2x−3$
+		⇓
+	- $f(g(x))=2(g(x))−3$
+- Now, replace every $g(x)$ on the right side with the function you entered in for $g(x)$:
+	- $f(g(x))=2(g(x))−3$
+	- ⇓
+	- $f(g(x))=2(x^2)−3$
+
+##### Step 2. Simplify the expression.
+- $f(g(x))={1 \over 2}(\sqrt 6 -2x)(2x+\sqrt 6)$
+
+##### Step 3. Plug in the input. 
+- Plug in the input everywhere the variable shows up in the composite function.
+
+##### Step 4. Calculate the output. 
+- Use order of operations ([[PEMDAS]]) to calculate the output.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

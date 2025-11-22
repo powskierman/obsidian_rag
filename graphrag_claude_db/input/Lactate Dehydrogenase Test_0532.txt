@@ -1,0 +1,30 @@
+---
+aliases: 
+tags:
+  - lymphoma
+  - blood-test
+---
+# Lactate Dehydrogenase Test
+Date: 2025-01-29
+
+### Backlink
+[[Lymphoma MoC]]
+
+### Reference
+-  
+### Notes
+### Lactate Dehydrogenase (LDH) Test
+#### Purpose and Function
+The LDH test measures the levels of lactate dehydrogenase, an enzyme found in most body tissues, including the heart, liver, kidneys, muscles, and blood cells. LDH plays a role in energy production by converting sugar into energy for cells. When tissues are damaged or diseased, LDH is released into the bloodstream or other body fluids, leading to elevated levels.
+#### Why It’s Done
+The LDH test is used to:
+	•	Detect tissue damage.
+	•	Monitor conditions like anemia, liver disease, kidney disease, and certain cancers, including lymphoma.
+	•	Evaluate the effectiveness of treatments for these conditions.
+#### Procedure
+A blood sample is typically drawn from a vein in the arm. In some cases, LDH levels may be measured in other body fluids (e.g., cerebrospinal fluid or pleural fluid) to investigate specific conditions.
+#### Interpreting Results
+	•	Normal LDH levels vary by age and laboratory standards but are generally between 125–220 IU/L for adults.
+	•	Elevated LDH levels may indicate tissue damage due to conditions such as cancer (e.g., lymphoma or leukemia), heart attack, liver disease, or infections.
+	•	In cancer patients, high LDH levels can suggest tumor activity or progression and may be used to monitor treatment response.
+	

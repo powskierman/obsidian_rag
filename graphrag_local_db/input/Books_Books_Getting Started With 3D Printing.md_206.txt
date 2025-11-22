@@ -1,0 +1,36 @@
+# Getting Started With 3D Printing.md
+
+---
+id: 16112621
+updated: 2022-06-18
+title: Getting Started With 3D Printing
+author: Liza Wallach Kloski, Nick Kloski
+highlights: 1
+last_highlight: 2017-09-21
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112621
+Updated: 2022-06-18
+%%
+
+![]( https://m.media-amazon.com/images/I/91O59rRdBXL._SY500.jpg)
+
+# About
+Title: [[Getting Started With 3D Printing]]
+Authors: [[Liza Wallach Kloski]], [[Nick Kloski]]
+Category: #books
+Number of Highlights: ==1==
+Readwise URL: https://readwise.io/bookreview/16112621
+Date: [[2022-06-18]]
+Last Highlighted: *2017-09-21*
+
+---
+
+# Highlights
+
+Because you have symmetry turned on, all of the other faces will turn inward as well. ([2038](https://readwise.io/to_kindle?action=open&asin=B01EXOX4P6&location=2038)) %% Color: yellow %% ^334462485
+
+---

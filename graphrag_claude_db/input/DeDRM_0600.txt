@@ -1,0 +1,44 @@
+---
+tags: ebooks
+---
+- aliases: []
+  tags: []
+
+  created: 2025-02-17 13:15
+  ---
+  ### Main Idea
+  - Remove DRM from Kindle ebooks
+  ### References
+  - 
+  ### Notes
+  - Using Calibre with DeDRM Plugin
+	1.	Install Calibre:
+	•	Download Calibre from its official website (Calibre download page).
+	2.	Install the DeDRM Plugin:
+	•	Download the DeDRM plugin from its GitHub repository (DeDRM Tools).
+	•	In Calibre, go to Preferences > Plugins > Load plugin from file.
+	•	Select the DeDRM plugin `.zip` file and install it.
+	3.	Install the KFX Input Plugin (if dealing with KFX files):
+	•	Download the KFX Input plugin (KFX Input Plugin).
+	•	Install it similarly to the DeDRM plugin.
+	4.	Download Kindle Books:
+	•	Use an older version of Kindle for PC/Mac (e.g., version 1.24 or earlier) to download your books. Disable automatic updates to avoid compatibility issues.
+	5.	Import Books to Calibre:
+	•	Add your downloaded Kindle books to Calibre. The DRM removal will happen automatically if the plugins are configured correctly.
+Using Any eBook Converter
+	3.	Install Any eBook Converter (Any eBook Converter).
+	2.	Connect your Kindle device or load downloaded books into the software.
+	3.	Choose an output format (e.g., PDF, EPUB).
+	4.	Click “Convert” to remove DRM and save the DRM-free file.
+Important Notes
+	•	Ensure you have legal rights to remove DRM; this process should only be used for personal use.
+	•	If your files are not recognized by these tools, verify their origin and format compatibility.
+If yjr and yjf files are unrelated to Kindle’s standard formats, additional clarification about their source or intended use would be needed to assist further.
+  ### Related Notes
+  - 
+  ### Questions / Ideas for Further Exploration
+  - 
+  ### To-Do
+  - 
+  ### Smart Connections Insights
+  - 

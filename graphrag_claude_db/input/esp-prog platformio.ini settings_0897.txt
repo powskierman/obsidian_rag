@@ -1,0 +1,25 @@
+---
+aliases: []
+---
+# esp-prog platformio.ini settings
+Date: 2022-12-02
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- 
+### Notes
+-  ```[env:pico32]
+
+platform = espressif32
+board = pico32
+framework = arduino
+upload_port = /dev/cu.usbserial-0001
+
+upload_protocol = esp-prog
+debug_tool = esp-prog
+debug_init_break = tbreak setup
+```

@@ -1,0 +1,27 @@
+# Chrome Remote Desktop Keyboard-Shortcuts.md
+
+---
+aliases: []
+---
+
+2022-07-01
+# Chrome Remote Desktop Keyboard-Shortcuts
+
+### Backlink
+[[Chrome Remote Desktop]]
+
+### Reference
+- Modifier key: Right Ctrl
+	- Neither this key nor any key pressed in combination with it will be sent to the remote computer.
+- Right Ctrl + Activates...
+	- Q: Disconnect
+	- F: Toggle full-screen
+	- Backspace and Delete: Press "Ctrl+Alt+Del"
+	- P: Press "Print Screen"
+	- M: Toggle relative mouse mode
+	- U: Upload file
+	- D: Download file
+	- O: Show options
+ 
+### Notes
+-

@@ -1,0 +1,548 @@
+# The Vital Question.md
+
+---
+id: 16112640
+updated: 2022-06-18
+title: The Vital Question
+author: Nick Lane
+highlights: 129
+last_highlight: 2016-08-20
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112640
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/41JQMgnwiyL._SL500_.jpg)
+
+# About
+Title: [[The Vital Question]]
+Authors: [[Nick Lane]]
+Category: #books
+Number of Highlights: ==129==
+Readwise URL: https://readwise.io/bookreview/16112640
+Date: [[2022-06-18]]
+Last Highlighted: *2016-08-20*
+
+---
+
+# Highlights
+
+Ribosomes are orders of magnitude smaller still. You have 13 million of them in a single cell from your liver. ([142](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=142)) %% Color: yellow %% ^334463230
+
+---
+
+mitochondria and chloroplasts were indeed derived from bacteria by endosymbiosis, but that the other parts of complex cells probably evolved by conventional means. ([178](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=178)) %% Color: yellow %% ^334463231
+
+---
+
+A tiny proportion of our own genome, less than 2%, codes for proteins; a larger portion is regulatory; and the function of the rest is liable to cause intemperate rows among otherwise polite scientists. ([336](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=336)) %% Color: yellow %% ^334463232
+
+---
+
+some salamander genomes being 40 times larger than our own, ([343](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=343)) %% Color: yellow %% ^334463233
+
+---
+
+by 3.2 billion years ago there are large-scale geological features, hundreds of square miles in area and tens of metres deep, notably banded iron formations and carbon-rich shales. ([408](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=408)) %% Color: yellow %% ^334463234
+
+---
+
+‘oxygenic’ photosynthesis arose between 2.9 and 2.4 billion years ago, ([422](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=422)) %% Color: yellow %% ^334463235
+
+---
+
+Worldwide glaciations, known as a ‘snowball earth’, were followed by the widespread oxidation of terrestrial rocks, around 2.2 billion years ago, ([423](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=423)) %% Color: yellow %% ^334463236
+
+---
+
+By oxidising methane, oxygen removed a potent greenhouse gas from the air, triggering the global freeze.3 ([425](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=425)) %% Color: yellow %% ^334463237
+
+---
+
+We can infer that the last eukaryotic common ancestor already had mitochondria, ([589](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=589)) %% Color: yellow %% ^334463238
+
+---
+
+population of morphologically complex eukaryotic cells arose on a single occasion – and all plants, animals, algae and fungi evolved from this founder population. ([595](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=595)) %% Color: yellow %% ^334463239
+
+---
+
+All eukaryotes have straight chromosomes, capped with ‘telomeres’, ([623](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=623)) %% Color: yellow %% ^334463240
+
+---
+
+tiny but perfectly formed cells known as picoeukaryotes, as small as bacteria yet still featuring a scaled-down nucleus and midget mitochondria. ([641](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=641)) %% Color: yellow %% ^334463241
+
+---
+
+Evolutionary theory makes a simple prediction. Complex traits arise via a series of small steps, each new step offering a small advantage over the last. Selection of the best-adapted traits means loss of the less well-adapted traits, so selection continuously eliminates intermediates. ([666](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=666)) %% Color: yellow %% ^334463242
+
+---
+
+Heat is the motion of molecules, their jostling and molecular disorder. Entropy. ([879](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=879)) %% Color: yellow %% ^334463243
+
+---
+
+ΔG = ΔH – TΔS. ([936](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=936)) %% Color: yellow %% ^334463244
+
+---
+
+ΔG is the change in Gibbs free energy, named after the great reclusive nineteenth-century American physicist J. Willard Gibbs. It is the energy that is ‘free’ to drive mechanical work such as muscle contraction or anything happening in the cell. ([938](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=938)) %% Color: yellow %% ^334463245
+
+---
+
+The bottom line is that, to drive growth and reproduction – living! – some reaction must continuously release heat into the surroundings, making them more disordered. Just think of the stars. They pay for their ordered existence by releasing vast amounts of energy into the universe. In our own case, we pay for our continued existence by releasing heat from the unceasing reaction that is respiration. We are continuously burning food in oxygen, releasing heat into the environment. That heat loss is not waste – it is strictly necessary for life to exist. The greater the heat loss, the greater the possible complexity. ([951](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=951)) %% Color: yellow %% ^334463246
+
+---
+
+A single cell consumes around 10 million molecules of ATP every second! ([972](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=972)) %% Color: yellow %% ^334463247
+
+---
+
+There are about 40 trillion cells in the human body, giving a total turnover of ATP of around 60–100 kilograms per day – roughly our own body weight. In fact, we contain only about 60 grams of ATP, so we know that every molecule of ATP is recharged once or twice a minute. ([973](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=973)) %% Color: yellow %% ^334463248
+
+---
+
+We use about 2 milliwatts of energy per gram – or some 130 watts for an average person weighing 65 kg, a bit more than a standard 100 watt light bulb. That may not sound like a lot, but per gram it is a factor of 10,000 more than the sun (only a tiny fraction of which, at any one moment, is undergoing nuclear fusion). ([984](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=984)) %% Color: yellow %% ^334463249
+
+---
+
+In the end, respiration and burning are equivalent; the slight delay in the middle is what we know as life. ([1003](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1003)) %% Color: yellow %% ^334463250
+
+---
+
+reductions are sometimes defined as the transfer of a hydrogen atom. ([1005](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1005)) %% Color: yellow %% ^334463251
+
+---
+
+Life could have been driven by thermal or mechanical energy, or radioactivity, or electrical discharges, or UV radiation, the imagination is the limit; but no, all life is driven by redox chemistry, via remarkably similar respiratory chains. ([1015](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1015)) %% Color: yellow %% ^334463252
+
+---
+
+It amounts to a wire, insulated by proteins and lipids, channelling the current of electrons from ‘food’ to oxygen. Welcome to the respiratory chain! ([1063](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1063)) %% Color: yellow %% ^334463253
+
+---
+
+For each pair of electrons that passes through the first complex of the respiratory chain, four protons cross the membrane. ([1075](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1075)) %% Color: yellow %% ^334463254
+
+---
+
+For each pair of electrons stripped from food, ten protons are ferried across the membrane. ([1079](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1079)) %% Color: yellow %% ^334463255
+
+---
+
+A little less than half the energy released by flow of electrons to oxygen is saved in the proton gradient. ([1079](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1079)) %% Color: yellow %% ^334463256
+
+---
+
+One mitochondrion contains tens of thousands of copies of each respiratory complex. A single cell contains hundreds or thousands of mitochondria. Your 40 trillion cells contain at least a quadrillion mitochondria, with a combined convoluted surface area of about 14,000 square metres; about four football fields. ([1081](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1081)) %% Color: yellow %% ^334463257
+
+---
+
+there is an electrochemical potential difference across the membrane, in the order of 150 to 200 millivolts. Because the membrane is very thin (around 6 nm thick) this charge is extremely intense across a short distance. Shrink yourself back down to the size of an ATP molecule again, and the intensity of the electric field you would experience in the vicinity of the membrane – the field strength – is 30 million volts per metre, equal to a bolt of lightning, or a thousand times the capacity of normal household wiring. ([1104](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1104)) %% Color: yellow %% ^334463258
+
+---
+
+For every ten protons that pass through the ATP synthase, the rotating head makes one complete turn, and three newly minted ATP molecules are released into the matrix. The head can spin at over a hundred revolutions per second. ([1127](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1127)) %% Color: yellow %% ^334463259
+
+---
+
+The ATP synthase and the proton-motive force are also conserved universally across life. ([1129](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1129)) %% Color: yellow %% ^334463260
+
+---
+
+Respiration pushes protons across a thin membrane, against a concentration gradient, and hence is chemiosmotic. ([1142](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1142)) %% Color: yellow %% ^334463261
+
+---
+
+bacteria can ‘eat’ rocks or minerals or gases, using basically the same protein equipment that we use in respiration. ([1211](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1211)) %% Color: yellow %% ^334463262
+
+---
+
+There is about the same metabolic versatility in the entire eukaryotic domain – all plants, animals, algae, fungi and protists – as there is in a single bacterial cell. ([1218](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1218)) %% Color: yellow %% ^334463263
+
+---
+
+Life exploits these kinetic barriers, and in so doing increases entropy faster than would otherwise happen. ([1229](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1229)) %% Color: yellow %% ^334463264
+
+---
+
+Tapping into the energy of the sun changed the world, but in molecular terms all it did was set electrons flowing faster down respiratory chains. ([1244](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1244)) %% Color: yellow %% ^334463265
+
+---
+
+The great advantage of respiration, then, is its immense versatility. Essentially any redox couple (any pair of electron donor and electron acceptor) can be used to set electrons flowing down respiratory chains. ([1246](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1246)) %% Color: yellow %% ^334463266
+
+---
+
+the detailed mechanisms of DNA replication, including almost all the enzymes needed, turn out to be totally different in bacteria and archaea. ([1274](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1274)) %% Color: yellow %% ^334463267
+
+---
+
+In modern cells, chemiosmotic coupling only works if the membrane is almost impermeable to protons. ([1305](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1305)) %% Color: yellow %% ^334463268
+
+---
+
+From an energetic point of view, the power of enzymes is not so much that they speed up reactions, but that they channel their force, maximising the output. ([1379](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1379)) %% Color: yellow %% ^334463269
+
+---
+
+for every gram of new biomass produced, the energy-releasing reactions that support this production must generate at least 40 grams of waste. Life is a side reaction of a main energy-releasing reaction. ([1384](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1384)) %% Color: yellow %% ^334463270
+
+---
+
+sustained and predictable physical structures can be produced by energy flux. ([1458](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1458)) %% Color: yellow %% ^334463271
+
+---
+
+This continuous flux of energy and matter is precisely what is missing from the primordial soup. There is nothing in soup that can drive the formation of the dissipative structures that we call cells, nothing to make these cells grow and divide, and come alive, all in the absence of enzymes that channel and drive metabolism. ([1467](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1467)) %% Color: yellow %% ^334463272
+
+---
+
+The problem of waste removal is another fundamental difficulty with the idea of a primordial soup, in which reactants and waste marinade together. There is no forward momentum, no driving force for new chemistry. ([1535](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1535)) %% Color: yellow %% ^334463273
+
+---
+
+Hydrothermal vents are exactly the kind of dissipative structures that we seek – continuous flow, far-from-equilibrium electrochemical reactors. ([1574](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1574)) %% Color: yellow %% ^334463274
+
+---
+
+Rocks derived from the mantle, rich in minerals such as olivine, react with water to become the hydrated mineral serpentinite. ([1653](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1653)) %% Color: yellow %% ^334463275
+
+---
+
+Polished serpentinite is commonly used as an ornamental stone, like green marble, in public buildings, including the United Nations in New York. ([1655](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1655)) %% Color: yellow %% ^334463276
+
+---
+
+Mantle rocks are rarely exposed directly – water percolates down beneath the sea floor, sometimes to depths of several kilometres, where it reacts with olivine. ([1661](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1661)) %% Color: yellow %% ^334463277
+
+---
+
+Thermal currents through microporous labyrinths have a remarkable capacity to concentrate organic molecules (including amino acids, fatty acids and nucleotides) to extreme levels, thousands or even millions of times the starting concentration, by way of a process known as thermophoresis. ([1692](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1692)) %% Color: yellow %% ^334463278
+
+---
+
+The power of thermophoresis depends in part on molecular size: large molecules, such as nucleotides, are retained better than smaller ones. ([1698](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1698)) %% Color: yellow %% ^334463279
+
+---
+
+thermophoresis drives the formation of dissipative structures within vent pores, by promoting interactions between organics. These can spontaneously precipitate fatty acids into vesicles, and possibly polymerise amino acids and nucleotides into proteins and RNA. ([1701](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1701)) %% Color: yellow %% ^334463280
+
+---
+
+Two broad principles govern chemistry: thermodynamics and kinetics. Thermodynamics determines which states of matter are more stable – which molecules will form, given unlimited time. Kinetics relates to speed – which products will form in a limited time. ([1733](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1733)) %% Color: yellow %% ^334463281
+
+---
+
+between 25 and 125°C, the formation of total cell biomass (amino acids, fatty acids, carbohydrates, nucleotides and so on) from H2 and CO2 is actually exergonic. ([1744](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1744)) %% Color: yellow %% ^334463282
+
+---
+
+The sequence of amino acids in a protein is specified by a gene, in DNA. A polypeptide is a string of amino acids joined together by the same type of bond, but is usually much shorter (perhaps just a few amino acids) and their sequence does not need to be specified by a gene. ([1899](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1899)) %% Color: yellow %% ^334463283
+
+---
+
+as much as 30% of the genome can vary in different strains of E. coli – that’s 10 times the variation between us and chimpanzees, yet we still call them the same species! ([1977](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=1977)) %% Color: yellow %% ^334463284
+
+---
+
+LUCA really was chemiosmotic, with an ATP synthase, but really did not have a modern membrane, or any of the large respiratory complexes that modern cells use to pump protons. She really did have DNA, and the universal genetic code, transcription, translation and ribosomes, but really had not evolved a modern method of DNA replication. ([2053](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2053)) %% Color: yellow %% ^334463285
+
+---
+
+The fit between the geochemistry of alkaline vents and the biochemistry of methanogens and acetogens is so close that the word analogous does not do it justice. ([2093](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2093)) %% Color: yellow %% ^334463286
+
+---
+
+The proton gradient drives the acetyl CoA pathway, by way of an iron–sulphur protein embedded within the membrane – the energy-converting hydrogenase, or Ech for short. ([2155](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2155)) %% Color: yellow %% ^334463287
+
+---
+
+both carbon and energy metabolism are driven by proton gradients, exactly what the vents provided for free. ([2166](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2166)) %% Color: yellow %% ^334463288
+
+---
+
+if we take a cyanide pill: it jams up the final proton pump of the respiratory chain in our mitochondria. ([2175](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2175)) %% Color: yellow %% ^334463289
+
+---
+
+the possible environments on the early earth that were conducive to the origin of life. We narrowed these down to alkaline hydrothermal vents, where a steady carbon and energy flux is combined with mineral catalysts and natural compartmentalisation. But these vents face a problem: the carbon and energy flux comes in the form of H2 and CO2, which do not react together easily. We saw that geochemical proton gradients across thin semiconducting barriers in vent pores could potentially break down the energy barrier to their reaction. By producing reactive thioesters such as methyl thioacetate (functionally equivalent to acetyl CoA) proton gradients could drive the origins of both carbon and energy metabolism, leading to the accumulation of organic molecules within vent pores, while facilitating ‘dehydration’ reactions that form complex polymers including DNA, RNA and proteins. ([2349](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2349)) %% Color: yellow %% ^334463290
+
+---
+
+methanogens are archaea, while acetogens are bacteria ([2370](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2370)) %% Color: yellow %% ^334463291
+
+---
+
+Bacteria attach their DNA to the cell membrane during cell division, at a site called the replicon; the attachment enables each daughter cell to receive a copy of the genome. ([2432](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2432)) %% Color: yellow %% ^334463292
+
+---
+
+Prokaryotic chromosomes are usually circular, and DNA replication begins at a particular point on that ring (the replicon). ([2535](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2535)) %% Color: yellow %% ^334463293
+
+---
+
+roughly one-third of eukaryotic genes do have equivalents in prokaryotes. These genes must share a common ancestor with their prokaryotic cousins; they’re said to be homologous. Here’s what’s interesting. Different genes in the same eukaryotic organism do not all share the same ancestor. Around three-quarters of eukaryotic genes that have prokaryotic homologues apparently have bacterial ancestry, whereas the remaining quarter seem to derive from archaea. ([2575](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2575)) %% Color: yellow %% ^334463294
+
+---
+
+at least 25 different groups of modern bacteria appear to have contributed genes to eukaryotes. Much the same goes for archaea, although fewer archaeal groups look to have contributed. ([2609](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2609)) %% Color: yellow %% ^334463295
+
+---
+
+It looks like the first eukaryotes picked up thousands of genes from prokaryotes, but then ceased to ply any trade in prokaryotic genes. ([2613](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2613)) %% Color: yellow %% ^334463296
+
+---
+
+fermentation is the only known alternative to chemiosmotic coupling. ([2675](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2675)) %% Color: yellow %% ^334463297
+
+---
+
+eukaryotes have up to 200,000 times more energy per gene than prokaryotes. ([2722](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2722)) %% Color: yellow %% ^334463298
+
+---
+
+There are about 13,000 ribosomes in an average bacterium such as E. coli; and at least 13 million in a single liver cell, ([2745](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2745)) %% Color: yellow %% ^334463299
+
+---
+
+On average, bacteria have around 5,000 genes, eukaryotes have about 20,000, ranging up to 40,000 in the case of large protozoa, like the familiar pond-dwelling paramecium ([2747](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2747)) %% Color: yellow %% ^334463300
+
+---
+
+The average eukaryote has 1,200 times as much energy per gene as the average prokaryote. If we correct for the number of genes by scaling up the bacterial genome of 5,000 genes to a eukaryote-sized genome of 20,000 genes, the bacterial energy-per-gene falls to nearly 5,000 times less than the average eukaryote. In other words, eukaryotes can support a genome 5,000 times larger than bacteria, or alternatively, they could spend 5,000 times more ATP on expressing each gene, for example by producing many more copies of each protein; or a mixture of the two, which is in fact the case. ([2748](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2748)) %% Color: yellow %% ^334463301
+
+---
+
+Over time, genome size stabilises at the smallest feasible size, while individual cells have access to a much larger ‘metagenome’ ([2869](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2869)) %% Color: yellow %% ^334463302
+
+---
+
+endosymbioses are rare between prokaryotes, which are not capable of engulfing other cells by phagocytosis. ([2879](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2879)) %% Color: yellow %% ^334463303
+
+---
+
+The smallest bacterial genomes are usually found in endosymbionts. ([2883](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2883)) %% Color: yellow %% ^334463304
+
+---
+
+Mitochondria lost nearly all their genes. We have retained just 13 protein-coding genes, along with all other animals. ([2920](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2920)) %% Color: yellow %% ^334463305
+
+---
+
+Over evolutionary time, they lost more than 99% of their genome. ([2922](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2922)) %% Color: yellow %% ^334463306
+
+---
+
+eukaryotic cells have multibacteria power, but save on the costs of protein synthesis. ([2925](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2925)) %% Color: yellow %% ^334463307
+
+---
+
+the earliest eukaryotes had about 3,000 new gene families compared with bacteria. Gene loss from mitochondria enabled the accumulation of new genes in the nucleus at no energetic cost. ([2930](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2930)) %% Color: yellow %% ^334463308
+
+---
+
+There is no benefit in terms of energy per gene from becoming larger, except when large size is attained by endosymbiosis. ([2994](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=2994)) %% Color: yellow %% ^334463309
+
+---
+
+Eukaryotic genes are a mess. They are composed of relatively short sequences that code for bits of proteins, broken up by long tracts of non-coding DNA, known as introns. There are typically several introns per gene (which is usually defined as a stretch of DNA encoding a single protein). ([3196](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3196)) %% Color: yellow %% ^334463310
+
+---
+
+So introns are parasitic genes, which splice themselves in and out of bacterial genomes. ([3225](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3225)) %% Color: yellow %% ^334463311
+
+---
+
+A typical bacterial genome is unlikely to contain more than about 30 mobile introns (in 4,000 genes) compared with tens of thousands of introns in eukaryotes. ([3237](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3237)) %% Color: yellow %% ^334463312
+
+---
+
+Eukaryotic genes are composed of exons (sequences that encode proteins) and introns – long, non-coding sequences inserted into genes, which are spliced out from the RNA code-script before the protein is synthesised. ([3248](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3248)) %% Color: yellow %% ^334463313
+
+---
+
+thousands of introns are inserted into exactly the same positions in hundreds of shared genes across all eukaryotes ([3279](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3279)) %% Color: yellow %% ^334463314
+
+---
+
+We can distinguish between different types of gene, known as orthologs and paralogs. Orthologs are basically the same genes doing the same job in different species, inherited from a common ancestor, as in the example we’ve just considered. So all eukaryotes have an ortholog of the gene for citrate synthase, which we all inherited from our common ancestor. The second group of genes, paralogs, also share a common ancestor, but in this case the ancestral gene was duplicated within the same cell, often on multiple occasions, to give a gene family. ([3284](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3284)) %% Color: yellow %% ^334463315
+
+---
+
+In essence, orthologs are equivalent genes in different species, while paralogs are members of a gene family in the same organism. ([3290](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3290)) %% Color: yellow %% ^334463316
+
+---
+
+the first eukaryotes suffered a bombardment of genetic parasites from their own endosymbionts. ([3331](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3331)) %% Color: yellow %% ^334463317
+
+---
+
+ribosomes work at a furious pace – up to 10 amino acids per second. It takes barely half a minute to make a standard bacterial protein, about 250 amino acids in length. ([3336](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3336)) %% Color: yellow %% ^334463318
+
+---
+
+The nuclear membrane is a barrier separating transcription from translation – inside the nucleus, genes are transcribed into RNA codescripts; outside the nucleus, the RNAs are translated into proteins on the ribosomes. ([3340](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3340)) %% Color: yellow %% ^334463319
+
+---
+
+You and I are diploid, along with most other multicellular eukaryotes. That means we have two copies of each of our genes, one from each parent. More specifically, we have two copies of each chromosome, known as sister chromosomes. ([3379](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3379)) %% Color: yellow %% ^334463320
+
+---
+
+During the formation of gametes, the chromosomes are recombined, fusing bits of one with pieces of another, giving new combinations of genes that have most likely never been seen before ([3381](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3381)) %% Color: yellow %% ^334463321
+
+---
+
+sex increases the variance (the difference) between gametes, making them more visible to selection, so eliminating mutations and favouring beneficial variants over time. ([3398](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3398)) %% Color: yellow %% ^334463322
+
+---
+
+These two processes – accumulation of mildly damaging mutations, and loss of variation in selective sweeps – are together known as selective interference. ([3430](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3430)) %% Color: yellow %% ^334463323
+
+---
+
+sex is far more widespread than seems reasonable. This is probably because the last common ancestor of eukaryotes was already sexual, and hence all her descendants were sexual too. ([3446](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3446)) %% Color: yellow %% ^334463324
+
+---
+
+totally unconstrained, a single E. coli bacterium, doubling every 30 minutes, would produce a colony with the mass of the earth in three days ([3452](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3452)) %% Color: yellow %% ^334463325
+
+---
+
+Both archaea and bacteria usually have a single circular chromosome, whereas eukaryotes have multiple straight chromosomes. Why? A simple answer is that introns can cause errors as they splice themselves in and out of the genome. If they fail to rejoin the two ends of a chromosome after cutting themselves out, that leaves a break in the chromosome. A single break in a circular chromosome gives a straight chromosome; several breaks give several straight chromosomes. So recombinatorial errors produced by mobile introns could have produced multiple straight chromosomes in the early eukaryotes. ([3484](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3484)) %% Color: yellow %% ^334463326
+
+---
+
+for respiration to work properly, genes in the mitochondria and the nucleus need to cooperate with each other, and mutations in either genome can undermine physical fitness. ([3554](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3554)) %% Color: yellow %% ^334463327
+
+---
+
+We have hundreds or thousands of mitochondria in each cell. ([3620](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3620)) %% Color: yellow %% ^334463328
+
+---
+
+mitochondrial genes evolve some 10–50 times faster than genes in the nucleus. ([3622](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3622)) %% Color: yellow %% ^334463329
+
+---
+
+the greatest mutational health hazard in the population is fertile old men. ([3688](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3688)) %% Color: yellow %% ^334463330
+
+---
+
+mitochondria are instrumental in controlling cell death (apoptosis), cancer, degenerative disease, fertility, and more. ([3730](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3730)) %% Color: yellow %% ^334463331
+
+---
+
+The view from evolution sees mitochondria as equal partners in the origin of complex life. ([3734](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3734)) %% Color: yellow %% ^334463332
+
+---
+
+40 trillion pieces making up the wonderful three-dimensional mosaic that is a human being. ([3796](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3796)) %% Color: yellow %% ^334463333
+
+---
+
+The great respiratory proteins, which transfer electrons from food to oxygen while pumping protons across the mitochondrial membrane, are mosaics of numerous subunits. The largest, complex I, is composed of 45 separate proteins, each one made up of hundreds of amino acids ([3797](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3797)) %% Color: yellow %% ^334463334
+
+---
+
+If just one amino acid is out of place – a single stone in the full mosaic – the consequences may be a crippling degeneration of the muscles and brain, and an early death: a mitochondrial disease. ([3802](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3802)) %% Color: yellow %% ^334463335
+
+---
+
+Most of the core proteins in the mitochondrial inner membrane, shown in darker shade, are encoded by genes located in the mitochondria themselves. The remaining proteins (lighter shading) are encoded by genes in the nucleus. ([3809](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3809)) %% Color: yellow %% ^334463336
+
+---
+
+electrons hop by a process known as quantum tunnelling. ([3829](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3829)) %% Color: yellow %% ^334463337
+
+---
+
+For each ångström increase in distance between redox centres, the speed of electron transfer falls about 10-fold. ([3835](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3835)) %% Color: yellow %% ^334463338
+
+---
+
+Sex is needed to maintain the function of individual genes in large genomes, whereas two sexes help maintain the quality of mitochondria. ([3844](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3844)) %% Color: yellow %% ^334463339
+
+---
+
+Excepting the 13 protein-coding genes that remain in our mitochondria (<1% of their initial genome), the nuclear copy was retained and the mitochondrial copy lost in every case. ([3861](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3861)) %% Color: yellow %% ^334463340
+
+---
+
+the electrical potential across the thin inner mitochondrial membrane is 150–200 millivolts, giving a field strength of 30 million volts per metre, equal to a bolt of lightning. Genes are needed to control this colossal membrane potential in response to changes in electron flux, oxygen availability, ADP and ATP ratios, number of respiratory proteins, and more. ([3873](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3873)) %% Color: yellow %% ^334463341
+
+---
+
+nearly all the mitochondrial genes were either lost altogether or transferred to the nucleus, leaving a handful of critical genes in the mitochondria. ([3880](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=3880)) %% Color: yellow %% ^334463342
+
+---
+
+Many reptiles and amphibians don’t have sex chromosomes at all, but define their sexes on the basis of temperature; eggs incubated at a warmer temperature develop into males, or occasionally vice versa. ([4026](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4026)) %% Color: yellow %% ^334463343
+
+---
+
+the SRY gene, speeds up the growth rate by turning on a number of growth factors. There is nothing sex specific about these growth factors: they are normally active in both males and females, it’s just that their activity is set at a higher level in males than females. ([4037](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4037)) %% Color: yellow %% ^334463344
+
+---
+
+How could a neuron be replaced? Our life’s experience is written into synaptic networks, each neuron forming as many as 10,000 different synapses. If the neuron dies by apoptosis, those synaptic connections are lost forever, along with all the experience and personality that might have been written into them. ([4089](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4089)) %% Color: yellow %% ^334463345
+
+---
+
+the detailed pattern of the plumage signals the mitochondrial type: sharp demarcations in pattern are postulated to reflect sharp demarcations in mitochondrial DNA type. ([4147](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4147)) %% Color: yellow %% ^334463346
+
+---
+
+the vibrancy of colour reflects mitochondrial function, as most pigments are synthesised in the mitochondria. ([4149](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4149)) %% Color: yellow %% ^334463347
+
+---
+
+The optimal space distribution in aerobic muscle is around a third for myofibrils, a third for mitochondria, and a third for capillaries. ([4162](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4162)) %% Color: yellow %% ^334463348
+
+---
+
+The cost of high aerobic capacity is low fertility. More embryos that could have survived some lesser purpose must be sacrificed on the altar of perfection. ([4181](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4181)) %% Color: yellow %% ^334463349
+
+---
+
+The performance of mitochondria depends in large measure on their DNA. Different sequences of DNA support different levels of performance. Some will work better in cooler environments than hotter ones, or in greater humidity, or burning up a fatty diet, and so on. ([4200](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4200)) %% Color: yellow %% ^334463350
+
+---
+
+40% of pregnancies end in what is known as ‘early occult miscarriage ([4243](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4243)) %% Color: yellow %% ^334463351
+
+---
+
+The free-radical theory of ageing argues that ageing is caused by free-radical leak: the faster the rate of free-radical leak, the faster we age. ([4259](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4259)) %% Color: yellow %% ^334463352
+
+---
+
+The free-radical theory of ageing is one of those beautiful ideas killed by ugly facts. And boy, are the facts ugly. Not one tenet of the theory, as it was originally formulated, has withstood the scrutiny of experimental testing. There are no systematic measurements of an increase in free-radical leak from the mitochondria as we age. There is a small increase in the number of mitochondrial mutations, but with the exception of limited regions of tissue, they are typically found at surprisingly low levels, well below those known to cause mitochondrial diseases. Some tissues show evidence of accumulating damage, but nothing that resembles an error catastrophe, and the chain of causality is questionable. Antioxidants most certainly do not prolong life or prevent disease. Quite the contrary. The idea has been so pervasive that hundreds of thousands of patients have enrolled in clinical trials over the past few decades. The findings are clear. Taking high-dose antioxidant supplements carries a modest but consistent risk. You are more likely to die early if you take antioxidant supplements. ([4285](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4285)) %% Color: yellow %% ^334463353
+
+---
+
+mitochondria spend much of their time fusing together and then splitting apart again, making more complexes (and more copies of mitochondrial DNA) ([4302](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4302)) %% Color: yellow %% ^334463354
+
+---
+
+In the body, massive doses of antioxidants such as vitamin C are barely absorbed; they tend to cause diarrhoea. Any excess that does get into the blood is swiftly excreted in the urine. Blood levels are stable. That’s not to say you should avoid dietary antioxidants, especially vegetables and fruit – you need them. You might even benefit from taking supplementary antioxidants, if you have a poor diet or a vitamin deficiency. But cramming antioxidant supplements on top of a balanced diet (which includes pro-oxidants as well as antioxidants) is counterproductive. If the body allowed high levels of antioxidants into cells, they would cause havoc and potentially kill us through an energy deficiency. So the body doesn’t let them in. ([4325](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4325)) %% Color: yellow %% ^334463355
+
+---
+
+The best way to clear out bad mitochondria is to force the body to use them, increasing their turnover rate. For example, a high-fat diet tends to force the use of mitochondria, whereas a high-carbohydrate diet allows us to provide more energy by fermentation, without using our mitochondria as heavily. But if you have a mitochondrial disease (and we all develop faulty mitochondria with age) then the switch can be too much. Some patients with mitochondrial disease who have adopted a ‘ketogenic diet’ have collapsed into a coma because their damaged mitochondria can’t provide the energy needed for normal life without help from fermentation. ([4484](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4484)) %% Color: yellow %% ^334463356
+
+---
+
+would be amazed if we did not find bacteria right across the universe, including our own solar system, all working in much the same way, powered by redox chemistry and proton gradients across membranes. ([4596](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4596)) %% Color: yellow %% ^334463357
+
+---
+
+you pump 1021 protons per second, every second, without pause. Your mitochondria were passed on from your mother, in her egg cell, her most precious gift, the gift of living that goes back unbroken, unceasing, generation on generation, to the first stirrings of life in hydrothermal vents, 4 billion years ago. ([4629](https://readwise.io/to_kindle?action=open&asin=B00OD8Z4JW&location=4629)) %% Color: yellow %% ^334463358
+
+---

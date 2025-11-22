@@ -1,0 +1,39 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-10 11:50
+ContentType: Reference
+Backlink: "[[Algebra MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+[Notes-Coordinate-Systems](Notes-Coordinate-Systems.pdf]])
+
+- Cartesian plane: The Cartesian plane or xy-plane consists of all ordered pairs (x, y) as x and y range over all reals numbers, denoted by:$$\mathbb{R}^{2}=\{(x, y) \mid x, y \in \mathbb{R}\}$$
+- View coordinates in space:  Add a 3rd axis Z, which we think of as the new ‘vertical’, which is perpendicular to the xy-plane.$$
+\mathbb{R}^{3}=\{(a, b, c) \mid a, b, c \in \mathbb{R}\}
+$$
+- 
+- Line in the plane
+	- A line is defined by 2 points
+	- $ax+by=c$
+		- $x$ and $y$ are variables that define the horizontal and vertical coordinates respectively
+		- $a$, $b$ and $c$ are constants
+- 
+- 
+- 
+- 
+- 
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

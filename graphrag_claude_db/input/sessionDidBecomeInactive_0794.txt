@@ -1,0 +1,24 @@
+---
+aliases: []
+tags: []
+---
+# sessionDidBecomeInactive
+Date: 2023-11-19
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Because the delegate methods sessionDidDeactivate and sessionDidBecomeInactive are marked as unavailable on watchOS you will have to make the compiler ignore those pieces of code in the shared class. You can do so using the following preprocessor macro:
+
+
+```swift TI:"#if os" "FOLD"
+#if os(iOS)
+public func sessionDidBecomeInactive(_ session: WCSession) { }  
+public func sessionDidDeactivate(_ session: WCSession) {
+    session.activate()
+}
+#endif ```
+

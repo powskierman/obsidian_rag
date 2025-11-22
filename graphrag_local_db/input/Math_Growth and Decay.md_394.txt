@@ -1,0 +1,39 @@
+# Growth and Decay.md
+
+---
+aliases: [growth,decay]
+---
+2022-02-06
+# Growth and Decay
+### Backlink
+[[Exponential Functions]]
+[[logarithm]]
+
+### Reference
+
+### Notes
+- ### Growth and Decay
+-  General form of an exponential function is: $y = f(x) = Ae^{(kx)}$
+	- A and k are nonzero constants. 
+		- A is typically positive and represents initial size or population
+		- k represents the growth rate if positive and decay rate if negative
+		- x represents time
+		- $f(x)$ models:
+			- exponential growth when k > 0, 
+			- and exponential decay when k < 0.
+ 
+ ### Example
+- Find the decay rate of Radon
+	- Exponential decay formula
+		- $f(x) = Ae^{(-kx)}$
+	-  Replace $f(x) with 0.5a and t with 3.8.
+		- $0.5a=Ae^{-(k)(3.8)}$
+	-  Divide each side by a.
+		- $0.5 = e^{-k(3.8))}$
+	- Apply logarithm powers property
+		- $ln(0.5)=(3.8)k$
+	-  Divide each side by –3.8.
+		- $-{ln 0.5 \over 3.8} = k$
+		- $k = -{ln 0.5 \over 3.8}$
+		- $k = 0.1824$
+		-

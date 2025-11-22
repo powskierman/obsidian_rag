@@ -1,0 +1,50 @@
+---
+id: 16131175
+updated: 2022-06-19
+title: SwiftUI by Tutorials
+author: By Audrey Tam
+highlights: 5
+last_highlight: 2020-09-06
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16131175
+Updated: 2022-06-19
+%%
+
+![]( https://readwise-assets.s3.amazonaws.com/static/images/default-book-icon-0.c6917d331b03.png)
+
+# About
+Title: [[SwiftUI by Tutorials]]
+Authors: [[By Audrey Tam]]
+Category: #books
+Number of Highlights: ==5==
+Readwise URL: https://readwise.io/bookreview/16131175
+Date: [[2022-06-19]]
+Last Highlighted: *2020-09-06*
+
+---
+
+# Highlights
+
+For the value variable, you use @Binding instead of @State, because the ColorSlider view doesn't own this data — it receives an initial value from its parent view and mutates it. ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) %% Color: yellow %% ^334747208
+
+---
+
+A modifier is a method that creates a new view from the existing view ([1](https://readwise.io/to_kindle?action=open&asin=null&location=1)) %% Color: yellow %% ^334747209
+
+---
+
+You can chain modifiers like a pipeline to customize any view. ([2](https://readwise.io/to_kindle?action=open&asin=null&location=2)) %% Color: yellow %% ^334747210
+
+---
+
+padding() is one of those modifiers that can be applied to any type of view. ([3](https://readwise.io/to_kindle?action=open&asin=null&location=3)) %% Color: yellow %% ^334747211
+
+---
+
+You need the self because showAlert is inside a closure ([4](https://readwise.io/to_kindle?action=open&asin=null&location=4)) %% Color: yellow %% ^334747212
+
+---

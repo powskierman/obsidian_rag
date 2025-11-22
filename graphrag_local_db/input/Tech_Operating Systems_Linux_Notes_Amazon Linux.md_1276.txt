@@ -1,0 +1,23 @@
+# Amazon Linux.md
+
+---
+aliases: []
+tags: []
+---
+# Amazon Linux
+Date: 2023-01-18
+
+### Backlink
+[[Linux MOC]]
+
+### Reference
+-  
+### Notes
+-  Amazon Linux based AMI uses the `yum` command instead of `apt-get`.
+- To list Kernel/architecture (as mentioned previously):
+
+```
+uname -a
+```
+- [[Connect to instance]]
+- [[Add public key to keychain]]

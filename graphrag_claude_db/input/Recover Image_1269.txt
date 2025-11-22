@@ -1,0 +1,69 @@
+---
+aliases: []
+tags: []
+---
+# Recover Image
+Date: 2024-02-01
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  To recover data files from a disk backup image of a Raspberry Pi filesystem using another Raspberry Pi (in this case, you mentioned having access to both Raspberry Pi 4 and Raspberry Pi 5 with Debian Bookworm installed), follow these detailed instructions. The process involves mounting the disk image on your Raspberry Pi so that you can access its contents.
+
+Step 1: Transfer the Disk Image to Your Raspberry Pi
+First, you need to transfer the .img file (PiServer2-2022.07-previous.img) to your Raspberry Pi. You can do this using a USB drive, through a network share, or by downloading it directly to your Raspberry Pi if it's available online.
+
+Step 2: Open a Terminal on Your Raspberry Pi
+Access the terminal on your Raspberry Pi. You can do this directly if you have a monitor and keyboard connected, or remotely via SSH if you're accessing it from another computer.
+
+Step 3: Locate the Disk Image
+Navigate to the directory where you've transferred your .img file. If you transferred it via a USB drive, mount the USB drive and note the path. For example:
+
+bash
+Copy code
+cd /path/to/directory/with/img
+Replace /path/to/directory/with/img with the actual path to your .img file.
+
+Step 4: Create a Mount Point
+Create a directory to serve as a mount point for the filesystem contained within your disk image:
+
+bash
+Copy code
+mkdir ~/img_mount
+Step 5: Mount the Image
+Before you mount the image, you need to find out the offset of the partition you want to access. Disk images can contain multiple partitions (like boot and root partitions in Raspberry Pi images), and you need to specify the correct offset to mount the partition containing your data.
+
+Find the Partition Offset: Use the fdisk command to list the partitions within the image. You'll use this information to calculate the offset needed to mount the partition.
+bash
+Copy code
+sudo fdisk -l PiServer2-2022.07-previous.img
+Look for the start sector of the partition you want to access. If you're unsure, the largest partition is typically the root filesystem containing user data.
+Calculate the Offset: The offset is calculated by multiplying the start sector number of the partition by the sector size (usually 512 bytes). For example, if the start sector is 8192, the offset is 8192 * 512 = 4194304.
+Mount the Partition: Use the mount command with the offset to mount the partition to the directory you created. Replace offset_value with your calculated offset.
+bash
+Copy code
+sudo mount -o loop,offset=offset_value PiServer2-2022.07-previous.img ~/img_mount
+Ensure you replace offset_value with the actual offset calculated from the previous step.
+Step 6: Access and Recover Your Files
+Once mounted, you can access the contents of the image:
+
+bash
+Copy code
+cd ~/img_mount
+ls
+You can now browse the filesystem, find your data files, and copy them to a safe location on your Raspberry Pi or an external storage device.
+
+Step 7: Unmount the Image
+After you've recovered your files, don't forget to unmount the image:
+
+bash
+Copy code
+sudo umount ~/img_mount
+Additional Tips
+If you encounter file system type issues during mount (e.g., if the image uses an ext4 filesystem), ensure you specify the type with -t ext4 in the mount command.
+If the Raspberry Pi auto-mounts your USB drive to a different directory, adjust the paths in the instructions accordingly.
+For Raspberry Pi images, you'll likely be interested in the second partition (the root filesystem) for file recovery, as the first partition usually contains boot files.
+By following these steps, you should be able to access the contents of your Raspberry Pi disk backup image and recover your data files using another Raspberry Pi.

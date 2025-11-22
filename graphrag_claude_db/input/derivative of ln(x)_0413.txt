@@ -1,0 +1,15 @@
+---
+aliases: []
+---
+
+2022-03-22
+# derivative of ln(x)
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+- The derivative of ln(x) is 1/x. 
+-  

@@ -1,0 +1,29 @@
+# Exponential Functions.md
+
+---
+aliases:[exponent, exponential]
+---
+2022-02-03
+# Exponential Functions
+### Backlink
+[[Algebra MOC]]
+
+### Reference
+- [[Notes-Exponential-Functions.pdf]]
+- [Purple Math, Exponentials](https://www.purplemath.com/modules/expofcns.htm)
+
+- The simplest form of an exponential function $f$ is $y = f(x) = a^x$ where $a$ is some fixed positive real number. 
+- 
+ ### Exponential laws: 
+- For all x and y, and for all positive a and b:
+	-  $a^x a^y = a^{x+y}$
+	-  $a^x \over a^y$ = $a^{x−y}$
+	- $(a^x)^y = a^{xy}$
+	-  $a^xb^x$ = $(ab)^x$
+- The exponent can also be a fraction:
+	- $x^{m \over n}$ = $(x^{1 \over n})^m$ = $(\sqrt[n] x)^m$
+		- ex: $32^{4 \over 5}$ = $(32^{1 \over 5})^4$ = $2^4$ = $8$
+	- $x^{-n}$ = $1 \over x^n$
+		- ex: $32^{-3 \over 5}$ = $\LARGE 1 \over 32^{3 \over 5}$ = $\LARGE 1 \over 32^({1 \over 5})^3$ = $\large{1 \over 8}$
+- Exponential functions and [[Euler's Number]]
+[[Growth and Decay]]

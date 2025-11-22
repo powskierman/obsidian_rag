@@ -1,0 +1,24 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-01-31 12:09
+ContentType: Reference
+Backlink: "[[Algebra MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+-  Product of square root is square root of product
+	- $\sqrt 5 \times \sqrt 3$ = $\sqrt {5 \times 3}$
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,24 @@
+# Web Development MoC.md
+
+---
+aliases: []
+---
+
+2022-06-24
+# Web Development MOC
+
+### Backlink
+[[Programming Tools MOC]]
+
+### Reference
+- [Udemy - Javascript](https://www.udemy.com/course/modern-javascript-from-the-beginning/learn/lecture/8757142?start=0#overview)
+- [Udemy - Web development bootcamp](https://www.udemy.com/course/the-complete-web-development-bootcamp/learn/lecture/12638830#overview)
+	-  [[Web-Development-Course-Resources]]
+- [[HTTP-Codes]]
+- [[HTML MOC]]
+- [[Emmet]]
+- [[codepen]]
+- 
+### Notes
+- 
+-

@@ -1,0 +1,34 @@
+# esptool.md
+
+---
+aliases: []
+---
+# esptool
+Date: 2022-12-01
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [esptool.py latest documentation](https://docs.espressif.com/projects/esptool/en/latest/esp32/esptool/basic-options.html)
+- [Basic Commands - ESP32-S3 - — esptool.py latest documentation](https://docs.espressif.com/projects/esptool/en/latest/esp32s3/esptool/basic-commands.html#erase-flash-erase-flash-erase-region)
+- 
+### Notes
+-  If there is a weird error, download latest version of esptool
+- Erase flash:
+	- esptool.py --port /dev/ttyUSB0 erase_flash 
+	- ex: esptool.py --chip esp32s3 --port /dev/cu.usbmodem4401  erase_flash
+	- Flash ESP32 
+	```esptool.py --chip esp32s3 --**port /dev/cu.usbmodem4401** --baud 460800 --before default_reset --after hard_reset \
+
+write_flash -z --flash_mode dio --flash_freq 40m --flash_size detect \
+
+0x01000 bootloader.bin \
+
+0x08000 partition-table.bin \
+
+0xe0000 ota_data_initial.bin
+```
+[[bootloader.bin]]

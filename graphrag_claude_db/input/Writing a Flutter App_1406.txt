@@ -1,0 +1,43 @@
+---
+aliases: []
+---
+# Writing a Flutter App
+Date: 2022-08-03
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [[Flutter Widgets]]
+- [1 hour Flutter Intro](https://youtu.be/C-fKAzdTrLU)
+- 
+### Notes
+- Keyboard Shortcuts
+	- Ctrl+b = Minimize/Maximize the Visual Studio Side Bar 
+	- Ctrl+j = Minimize/Maximize the Console 
+	- Alt+Shift+f = Format Document 
+		- (Structure the code and make sure to add commas) 
+	- Refactor (Right Click) = Wrap with a Widget
+- Create new flutter app
+	- shift-cmd-P (Palette)
+	- Flutter: New Project
+-  Delete all but first 5 lines of example app
+- Create stateless widget
+	- statelessw
+		- Modify name for MyApp
+	- Change return for MaterialApp
+	- Add home: Scaffold()
+- Create stateful widget
+	- statefulw
+- Replace name with RootPage
+- Replace return Container with return Scaffold
+- Add appBar: Appbar() next line after Scaffold
+	- cmd-d to select all name
+- Replace Scaffold with RootPage
+- Add theme: ThemeData(primarySwatch: Colors.blue) after MaterialApp (line 12)
+- Add  debugShowCheckedModeBanner: false, after MaterialApp
+- 
+- Launch app with F5
+- to print to console debugPrint()

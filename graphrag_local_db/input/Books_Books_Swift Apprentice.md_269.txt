@@ -1,0 +1,899 @@
+# Swift Apprentice.md
+
+---
+id: 16131167
+updated: 2022-06-19
+title: Swift Apprentice
+author: By Ray Fix
+highlights: 176
+last_highlight: 2021-02-12
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16131167
+Updated: 2022-06-19
+%%
+
+![]( https://readwise-assets.s3.amazonaws.com/static/images/default-book-icon-2.dae1dc4d332b.png)
+
+# About
+Title: [[Swift Apprentice]]
+Authors: [[By Ray Fix]]
+Category: #books
+Number of Highlights: ==176==
+Readwise URL: https://readwise.io/bookreview/16131167
+Date: [[2022-06-19]]
+Last Highlighted: *2021-02-12*
+
+---
+
+# Highlights
+
+collections are flexible "containers" that let you store any number of values together. ([1](https://readwise.io/to_kindle?action=open&asin=null&location=1)) %% Color: yellow %% ^334746992
+
+---
+
+Arrays are the most common collection type you’ll run into in Swift. Arrays are typed, just like regular variables and constants, and store multiple values like a simple list. ([2](https://readwise.io/to_kindle?action=open&asin=null&location=2)) %% Color: yellow %% ^334746993
+
+---
+
+An array is an ordered collection of values of the same type. ([3](https://readwise.io/to_kindle?action=open&asin=null&location=3)) %% Color: yellow %% ^334746994
+
+---
+
+Arrays are useful when you want to store your items in a particular order ([4](https://readwise.io/to_kindle?action=open&asin=null&location=4)) %% Color: yellow %% ^334746995
+
+---
+
+The easiest way to create an array is by using an array literal ([5](https://readwise.io/to_kindle?action=open&asin=null&location=5)) %% Color: yellow %% ^334746996
+
+---
+
+An array literal is a list of values separated by commas and surrounded by square brackets.
+let evenNumbers = [2, 4, 6, 8] ([78](https://readwise.io/to_kindle?action=open&asin=null&location=78)) %% Color: yellow %% ^334746997
+
+---
+
+You can create an empty using the empty array literal []. Because the compiler isn’t able to infer a type from this, you need to use a type annotation to make the type explicit:
+var subscribers: [String] = [] ([7](https://readwise.io/to_kindle?action=open&asin=null&location=7)) %% Color: yellow %% ^334746998
+
+---
+
+It’s also possible to create an array with all of its values set to a default value:
+let allZeros = Array(repeating: 0, count: 5) // [0, 0, 0, 0, 0] ([81](https://readwise.io/to_kindle?action=open&asin=null&location=81)) %% Color: yellow %% ^334746999
+
+---
+
+You can use the isEmpty property to check if there’s at least one player:
+print(players.isEmpty) ([9](https://readwise.io/to_kindle?action=open&asin=null&location=9)) %% Color: yellow %% ^334747000
+
+---
+
+The print() method realizes currentPlayer is optional and generates a warning. To suppress the warning, simply add as Any to the type to be printed ([10](https://readwise.io/to_kindle?action=open&asin=null&location=10)) %% Color: yellow %% ^334747001
+
+---
+
+The first and last properties and the min() and max() methods aren’t unique to arrays. Every collection type has these properties and methods, in addition to a plethora of others. ([11](https://readwise.io/to_kindle?action=open&asin=null&location=11)) %% Color: yellow %% ^334747002
+
+---
+
+Big-O notation is a way to describe running time, or how long an operation takes to complete. ([12](https://readwise.io/to_kindle?action=open&asin=null&location=12)) %% Color: yellow %% ^334747003
+
+---
+
+swapping elements, by using swapAt(_:_:):
+players.swapAt(1, 3) ([14](https://readwise.io/to_kindle?action=open&asin=null&location=14)) %% Color: yellow %% ^334747004
+
+---
+
+to sort the entire array, you should use sort():
+players.sort() ([15](https://readwise.io/to_kindle?action=open&asin=null&location=15)) %% Color: yellow %% ^334747005
+
+---
+
+you need the index of each element, you can iterate over the return value of the array’s enumerated() method, which returns tuples with each element’s index and value:
+for (index, player) in players.enumerated() {
+  print("\(index + 1). \(player)")
+} ([16](https://readwise.io/to_kindle?action=open&asin=null&location=16)) %% Color: yellow %% ^334747006
+
+---
+
+Arrays are stored as a contiguous block in memory ([17](https://readwise.io/to_kindle?action=open&asin=null&location=17)) %% Color: yellow %% ^334747007
+
+---
+
+The cost of fetching an element is cheap, meaning that it happens in a fixed or constant time. Sometimes this is written O(1). Since all the values are sequential, it’s easy to use random access and fetch a value at a particular index ([18](https://readwise.io/to_kindle?action=open&asin=null&location=18)) %% Color: yellow %% ^334747008
+
+---
+
+If you add to the beginning of the array, Swift requires time proportional to the size of the array because it has to shift all of the elements over by one to make room. This is called linear time and sometimes written O(n). ([19](https://readwise.io/to_kindle?action=open&asin=null&location=19)) %% Color: yellow %% ^334747009
+
+---
+
+A dictionary is an unordered collection of pairs, where each pair comprises a key and a value. ([20](https://readwise.io/to_kindle?action=open&asin=null&location=20)) %% Color: yellow %% ^334747010
+
+---
+
+keys are unique. The same key can’t appear twice in a dictionary, but different keys may point to the same value. All keys have to be of the same type, and all values have to be of the same type. ([21](https://readwise.io/to_kindle?action=open&asin=null&location=21)) %% Color: yellow %% ^334747011
+
+---
+
+Dictionaries are useful when you want to look up values by means of an identifier. ([22](https://readwise.io/to_kindle?action=open&asin=null&location=22)) %% Color: yellow %% ^334747012
+
+---
+
+With an array, you can only fetch a value by its index, which has to be an integer, and all indexes have to be sequential. In a dictionary, the keys can be of any type and in no particular order. ([23](https://readwise.io/to_kindle?action=open&asin=null&location=23)) %% Color: yellow %% ^334747013
+
+---
+
+After you create a dictionary, you can define its capacity:
+pairs.reserveCapacity(20) ([24](https://readwise.io/to_kindle?action=open&asin=null&location=24)) %% Color: yellow %% ^334747014
+
+---
+
+If the dictionary doesn’t find the key, it will return nil. ([25](https://readwise.io/to_kindle?action=open&asin=null&location=25)) %% Color: yellow %% ^334747015
+
+---
+
+With arrays, out-of-bounds subscript access causes a runtime error, but dictionaries are different since their results are wrapped in an optional ([26](https://readwise.io/to_kindle?action=open&asin=null&location=26)) %% Color: yellow %% ^334747016
+
+---
+
+If you just want to know whether a dictionary has elements or not, it is always better to use the isEmpty property. ([105](https://readwise.io/to_kindle?action=open&asin=null&location=105)) %% Color: yellow %% ^334747017
+
+---
+
+you’d do it:
+bobData.updateValue("CA", forKey: "state")
+There’s even a shorter way to add pairs, using subscripting:
+bobData["city"] = "San Francisco" ([28](https://readwise.io/to_kindle?action=open&asin=null&location=28)) %% Color: yellow %% ^334747018
+
+---
+
+change his name from Bob to Bobby:
+bobData.updateValue("Bobby", forKey: "name") // Bob ([29](https://readwise.io/to_kindle?action=open&asin=null&location=29)) %% Color: yellow %% ^334747019
+
+---
+
+updateValue(_:forKey:) replaces the value of the given key with the new value and returns the old value. If the key doesn’t exist, this method will add a new pair and return nil.
+As with adding, you can do this with less code by using subscripting:
+bobData["profession"] = "Mailman ([30](https://readwise.io/to_kindle?action=open&asin=null&location=30)) %% Color: yellow %% ^334747020
+
+---
+
+Assigning nil as a key’s associated value removes the pair from the dictionary. ([107](https://readwise.io/to_kindle?action=open&asin=null&location=107)) %% Color: yellow %% ^334747021
+
+---
+
+the items in a dictionary are pairs, you need to use a tuple:
+for (player, score) in namesAndScores {
+  print("\(player) - \(score)")
+} ([32](https://readwise.io/to_kindle?action=open&asin=null&location=32)) %% Color: yellow %% ^334747022
+
+---
+
+It’s also possible to iterate over just the keys:
+for player in namesAndScores.keys {
+  print("\(player), ", terminator: "") ([33](https://readwise.io/to_kindle?action=open&asin=null&location=33)) %% Color: yellow %% ^334747023
+
+---
+
+You can iterate over just the values in the same manner with the values property of the dictionary ([34](https://readwise.io/to_kindle?action=open&asin=null&location=34)) %% Color: yellow %% ^334747024
+
+---
+
+A set is an unordered collection of unique values of the same type ([35](https://readwise.io/to_kindle?action=open&asin=null&location=35)) %% Color: yellow %% ^334747025
+
+---
+
+You can declare a set explicitly by writing Set followed by the type inside angle brackets:
+let setOne: Set<Int> = [1] ([36](https://readwise.io/to_kindle?action=open&asin=null&location=36)) %% Color: yellow %% ^334747026
+
+---
+
+Sets don’t have their own literals. You use array literals to create a set with initial values ([37](https://readwise.io/to_kindle?action=open&asin=null&location=37)) %% Color: yellow %% ^334747027
+
+---
+
+You can use contains(_:) to check for the existence of a specific element: ([38](https://readwise.io/to_kindle?action=open&asin=null&location=38)) %% Color: yellow %% ^334747028
+
+---
+
+You can also use the first and last properties ([39](https://readwise.io/to_kindle?action=open&asin=null&location=39)) %% Color: yellow %% ^334747029
+
+---
+
+You can use insert(_:) to add elements to a set. ([40](https://readwise.io/to_kindle?action=open&asin=null&location=40)) %% Color: yellow %% ^334747030
+
+---
+
+You can remove the element from the set like this:
+let removedElement = someSet.remove(1) ([41](https://readwise.io/to_kindle?action=open&asin=null&location=41)) %% Color: yellow %% ^334747031
+
+---
+
+Are most useful when you need to know whether something is included in the collection or not ([42](https://readwise.io/to_kindle?action=open&asin=null&location=42)) %% Color: yellow %% ^334747032
+
+---
+
+Sets
+Are unordered collections of unique values of the same type. ([43](https://readwise.io/to_kindle?action=open&asin=null&location=43)) %% Color: yellow %% ^334747033
+
+---
+
+Arrays:
+Are ordered collections of values of the same type. ([44](https://readwise.io/to_kindle?action=open&asin=null&location=44)) %% Color: yellow %% ^334747034
+
+---
+
+Are unordered collections of key-value pairs ([45](https://readwise.io/to_kindle?action=open&asin=null&location=45)) %% Color: yellow %% ^334747035
+
+---
+
+A closure is simply a function with no name ([111](https://readwise.io/to_kindle?action=open&asin=null&location=111)) %% Color: yellow %% ^334747036
+
+---
+
+a closure can access the values of any variable or constant from the surrounding context. Variables and constants used within the body of a closure are said to have been captured by the closure. ([47](https://readwise.io/to_kindle?action=open&asin=null&location=47)) %% Color: yellow %% ^334747037
+
+---
+
+To use a closure, you first have to assign it to a variable or constant. ([48](https://readwise.io/to_kindle?action=open&asin=null&location=48)) %% Color: yellow %% ^334747038
+
+---
+
+The type of a closure is a function type. ([49](https://readwise.io/to_kindle?action=open&asin=null&location=49)) %% Color: yellow %% ^334747039
+
+---
+
+the closure has no external names for the parameters ([50](https://readwise.io/to_kindle?action=open&asin=null&location=50)) %% Color: yellow %% ^334747040
+
+---
+
+if the closure consists of a single return statement, you can leave out the return keyword ([115](https://readwise.io/to_kindle?action=open&asin=null&location=115)) %% Color: yellow %% ^334747041
+
+---
+
+you can even omit the parameter list if you want. Swift lets you refer to each parameter by number, starting at zero, like so:
+multiplyClosure = {
+  $0 * $1
+} ([52](https://readwise.io/to_kindle?action=open&asin=null&location=52)) %% Color: yellow %% ^334747042
+
+---
+
+The + operator is just a function that takes two arguments and returns one result so you can write:
+operateOnNumbers(4, 2, operation: +) ([53](https://readwise.io/to_kindle?action=open&asin=null&location=53)) %% Color: yellow %% ^334747043
+
+---
+
+you’ve removed the operation label and pulled the braces outside of the function call parameter list. This is called trailing closure syntax. ([54](https://readwise.io/to_kindle?action=open&asin=null&location=54)) %% Color: yellow %% ^334747044
+
+---
+
+Type in the name of the method (or code complete it) and then press the return key twice. The code completion function will fill out trailing closure syntax for you. ([55](https://readwise.io/to_kindle?action=open&asin=null&location=55)) %% Color: yellow %% ^334747045
+
+---
+
+The closure’s type is () -> Void. The empty parentheses denote there are no parameters. You must declare a return type, so Swift knows you’re declaring a closure. This is where Void comes in handy, and it means exactly what its name suggests: the closure returns nothing. ([56](https://readwise.io/to_kindle?action=open&asin=null&location=56)) %% Color: yellow %% ^334747046
+
+---
+
+the defining characteristic of a closure: it can access the variables and constants from within its own scope. ([57](https://readwise.io/to_kindle?action=open&asin=null&location=57)) %% Color: yellow %% ^334747047
+
+---
+
+Lazy collections are extremely useful when the collection is huge (even infinite) or expensive to generate. It saves the computation until precisely when it is needed. ([58](https://readwise.io/to_kindle?action=open&asin=null&location=58)) %% Color: yellow %% ^334747048
+
+---
+
+Another function allows you to filter out certain elements, like so:
+var prices = [1.5, 10, 4.99, 2.30, 8.19]
+
+let largePrices = prices.filter {
+  $0 > 5
+} ([59](https://readwise.io/to_kindle?action=open&asin=null&location=59)) %% Color: yellow %% ^334747049
+
+---
+
+If you’re only interested in the first element that satisfies a certain condition, you can use first(where:). For example, using a trailing closure:
+let largePrice = prices.first {
+  $0 > 5
+} ([60](https://readwise.io/to_kindle?action=open&asin=null&location=60)) %% Color: yellow %% ^334747050
+
+---
+
+magine you’re having a sale and want to discount all items to 90% of their original price. There’s a handy function named map that can achieve this:
+let salePrices = prices.map {
+  $0 * 0.9
+} ([61](https://readwise.io/to_kindle?action=open&asin=null&location=61)) %% Color: yellow %% ^334747051
+
+---
+
+The map function can also be used to change the type. You can do that like so:
+let userInput = ["0", "11", "haha", "42"]
+
+let numbers1 = userInput.map {
+  Int($0)
+} ([62](https://readwise.io/to_kindle?action=open&asin=null&location=62)) %% Color: yellow %% ^334747052
+
+---
+
+If you want to filter out the invalid (missing) values, you can use compactMap like so:
+let numbers2 = userInput.compactMap {
+  Int($0)
+} ([63](https://readwise.io/to_kindle?action=open&asin=null&location=63)) %% Color: yellow %% ^334747053
+
+---
+
+There's also a flatMap operation which has a similar name to map and compactMap, however does something a little different. Let's see it in action:
+let userInputNested = [["0", "1"], ["a", "b", "c"], ["🐕"]]
+let allUserInput = userInputNested.flatMap {
+  $0
+}
+You will notice that allUserInput is ["0", "1", "a", "b", "c", "🐕"]. ([64](https://readwise.io/to_kindle?action=open&asin=null&location=64)) %% Color: yellow %% ^334747054
+
+---
+
+Another handy function is called reduce. This function takes a starting value and a closure. The closure takes two values: the current value and an element from the array. The closure returns the next value that should be passed into the closure as the current value parameter ([65](https://readwise.io/to_kindle?action=open&asin=null&location=65)) %% Color: yellow %% ^334747055
+
+---
+
+The dropFirst function takes a single parameter that defaults to 1 and returns an array with the required number of elements removed from the front. Results are as follows:
+removeFirst = [10, 4.99, 2.30, 8.19]
+removeFirstTwo = [4.99, 2.30, 8.19] ([66](https://readwise.io/to_kindle?action=open&asin=null&location=66)) %% Color: yellow %% ^334747056
+
+---
+
+there also exists dropLast which removes elements from the end of the array ([67](https://readwise.io/to_kindle?action=open&asin=null&location=67)) %% Color: yellow %% ^334747057
+
+---
+
+You can select just the first or last elements of an array as shown below:
+let firstTwo = prices.prefix(2)
+let lastTwo = prices.suffix(2) ([68](https://readwise.io/to_kindle?action=open&asin=null&location=68)) %% Color: yellow %% ^334747058
+
+---
+
+you can remove all elements in a collection by using removeAll() qualified by a closure, or unconditionally:
+prices.removeAll() { $0 > 2 } // prices is now [1.5]
+prices.removeAll() // prices is now an empty array ([69](https://readwise.io/to_kindle?action=open&asin=null&location=69)) %% Color: yellow %% ^334747059
+
+---
+
+parentheses are required both when declaring and when invoking the function ([1](https://readwise.io/to_kindle?action=open&asin=null&location=1)) %% Color: yellow %% ^334747086
+
+---
+
+You assign a different external name by writing it in front of the parameter name ([2](https://readwise.io/to_kindle?action=open&asin=null&location=2)) %% Color: yellow %% ^334747087
+
+---
+
+Double.pi which is a constant Swift provides us, ready-made with pi to as much precision as is possible ([3](https://readwise.io/to_kindle?action=open&asin=null&location=3)) %% Color: yellow %% ^334747088
+
+---
+
+Float takes up less memory than a Double but generally, memory use for numbers isn’t a huge issue and you’ll see Double used in most places. ([4](https://readwise.io/to_kindle?action=open&asin=null&location=4)) %% Color: yellow %% ^334747089
+
+---
+
+In Swift, you can optionally use underscores to make larger numbers more human-readable ([5](https://readwise.io/to_kindle?action=open&asin=null&location=5)) %% Color: yellow %% ^334747090
+
+---
+
+In Swift, you can even use the full range of Unicode characters ([6](https://readwise.io/to_kindle?action=open&asin=null&location=6)) %% Color: yellow %% ^334747091
+
+---
+
+tuples which allow you to make your own types made up of multiple values of any type. ([7](https://readwise.io/to_kindle?action=open&asin=null&location=7)) %% Color: yellow %% ^334747092
+
+---
+
+Swift disallows you from assigning a value of one type to another ([8](https://readwise.io/to_kindle?action=open&asin=null&location=8)) %% Color: yellow %% ^334747093
+
+---
+
+Swift, you can’t apply the * operator to mixed types ([9](https://readwise.io/to_kindle?action=open&asin=null&location=9)) %% Color: yellow %% ^334747094
+
+---
+
+Swift forces you to be explicit about what you mean when you want an Int multiplied by a Double, because the result can be only one type ([10](https://readwise.io/to_kindle?action=open&asin=null&location=10)) %% Color: yellow %% ^334747095
+
+---
+
+let wantADouble = 3
+Here, Swift infers the type of wantADouble as Int. But what if you wanted Double instead?
+The first thing you could do is the following:
+let actuallyDouble = Double(3)
+This is like you saw before with type conversion.
+Another option would be to not use type inference at all and do the following:
+let actuallyDouble: Double = 3
+There is a third option, like so:
+let actuallyDouble = 3 as Double ([12](https://readwise.io/to_kindle?action=open&asin=null&location=12)) %% Color: yellow %% ^334747096
+
+---
+
+A tuple is a type that represents data composed of more than one value of any type ([13](https://readwise.io/to_kindle?action=open&asin=null&location=13)) %% Color: yellow %% ^334747097
+
+---
+
+Swift allows you to name the individual parts of a tuple, and you can be explicit about what each part represents. For example:
+let coordinatesNamed = (x: 2, y: 3)
+// Inferred to be of type (x: Int, y: Int) ([14](https://readwise.io/to_kindle?action=open&asin=null&location=14)) %% Color: yellow %% ^334747098
+
+---
+
+If you want to ignore a certain element of the tuple, you can replace the corresponding part of the declaration with an underscore ([15](https://readwise.io/to_kindle?action=open&asin=null&location=15)) %% Color: yellow %% ^334747099
+
+---
+
+An Int is represented with 64 bits on most modern hardware and with 32 bits on older, or more resource-constrained systems ([16](https://readwise.io/to_kindle?action=open&asin=null&location=16)) %% Color: yellow %% ^334747100
+
+---
+
+Modern hardware has been optimized for Double, so it should be your go-to unless there is good reason to use a Float. ([17](https://readwise.io/to_kindle?action=open&asin=null&location=17)) %% Color: yellow %% ^334747101
+
+---
+
+One of the truly great features of Swift is that it formalizes the idea of type commonality using what are known as protocols ([18](https://readwise.io/to_kindle?action=open&asin=null&location=18)) %% Color: yellow %% ^334747102
+
+---
+
+Swift is the first protocol-based language ([19](https://readwise.io/to_kindle?action=open&asin=null&location=19)) %% Color: yellow %% ^334747103
+
+---
+
+Type aliases can be used to create a new type that is simply a new name for another type. ([20](https://readwise.io/to_kindle?action=open&asin=null&location=20)) %% Color: yellow %% ^334747104
+
+---
+
+Protocols are how types are organized in Swift. They describe the common operations that multiple types share. ([21](https://readwise.io/to_kindle?action=open&asin=null&location=21)) %% Color: yellow %% ^334747105
+
+---
+
+Tuples can either be unnamed or named. Their elements are accessed with index numbers for unnamed tuples, or programmer given names for named tuples. ([22](https://readwise.io/to_kindle?action=open&asin=null&location=22)) %% Color: yellow %% ^334747106
+
+---
+
+nested if statements test multiple conditions one by one until a true condition is found. Only the code associated with that first true condition is executed, regardless of whether subsequent else-if conditions are true. In other words, the order of your conditions matters! ([23](https://readwise.io/to_kindle?action=open&asin=null&location=23)) %% Color: yellow %% ^334747107
+
+---
+
+each scope can use variables and constants from its parent scope ([24](https://readwise.io/to_kindle?action=open&asin=null&location=24)) %% Color: yellow %% ^334747108
+
+---
+
+The three dots (...) indicate that this range is closed, which means the range goes from 0 to 5 inclusive ([25](https://readwise.io/to_kindle?action=open&asin=null&location=25)) %% Color: yellow %% ^334747109
+
+---
+
+Both open and half-open ranges must always be increasing ([26](https://readwise.io/to_kindle?action=open&asin=null&location=26)) %% Color: yellow %% ^334747110
+
+---
+
+for <CONSTANT> in <COUNTABLE RANGE> {
+  <LOOP CODE> ([27](https://readwise.io/to_kindle?action=open&asin=null&location=27)) %% Color: yellow %% ^334747111
+
+---
+
+sometimes you only want to loop a certain number of times, so you don’t need to use the loop constant at all.
+In that case, you can employ the underscore to indicate you’re ignoring it ([28](https://readwise.io/to_kindle?action=open&asin=null&location=28)) %% Color: yellow %% ^334747112
+
+---
+
+sum = 0
+for i in 1...count where i % 2 == 1 {
+  sum += i
+}
+The previous loop has a where clause in the for loop statement. The loop still runs through all values in the range 1 to count, but it will only execute the loop’s code block when the where condition is true ([29](https://readwise.io/to_kindle?action=open&asin=null&location=29)) %% Color: yellow %% ^334747113
+
+---
+
+Just like break, continue works with both for loops and while loops. ([30](https://readwise.io/to_kindle?action=open&asin=null&location=30)) %% Color: yellow %% ^334747114
+
+---
+
+sum = 0
+
+rowLoop: for row in 0..<8 {
+  columnLoop: for column in 0..<8 {
+    if row == column {
+      continue rowLoop
+    }
+    sum += row * column
+  }
+}
+The previous code block makes use of labeled statements, labeling the two loops as rowLoop and the columnLoop, respectively ([31](https://readwise.io/to_kindle?action=open&asin=null&location=31)) %% Color: yellow %% ^334747115
+
+---
+
+you need to use labeled statements if you want to manipulate an outer loop ([32](https://readwise.io/to_kindle?action=open&asin=null&location=32)) %% Color: yellow %% ^334747116
+
+---
+
+Cases can never be empty, so you must write some code, even if it’s just a break! ([33](https://readwise.io/to_kindle?action=open&asin=null&location=33)) %% Color: yellow %% ^334747117
+
+---
+
+This switch statement uses the let-where syntax, meaning the case will match only when a certain condition is true. The let part binds a value to a name, while the where part provides a Boolean condition that must be true for the case to match ([34](https://readwise.io/to_kindle?action=open&asin=null&location=34)) %% Color: yellow %% ^334747118
+
+---
+
+The method by which you can match values based on conditions is known as pattern matching. ([35](https://readwise.io/to_kindle?action=open&asin=null&location=35)) %% Color: yellow %% ^334747119
+
+---
+
+You are allowed to use number in the where clause, and replace the binding with an underscore to ignore it. ([36](https://readwise.io/to_kindle?action=open&asin=null&location=36)) %% Color: yellow %% ^334747120
+
+---
+
+This switch statement makes use of partial matching ([37](https://readwise.io/to_kindle?action=open&asin=null&location=37)) %% Color: yellow %% ^334747121
+
+---
+
+you don’t want to ignore the value, then you can bind it and use it in your switch statement.
+Here’s an example of how to do this:
+switch coordinates {
+case (0, 0, 0):
+  print("Origin")
+case (let x, 0, 0):
+  print("On the x-axis at x = \(x)")
+case (0, let y, 0):
+  print("On the y-axis at y = \(y)")
+case (0, 0, let z):
+  print("On the z-axis at z = \(z)")
+case let (x, y, z):
+  print("Somewhere in space at x = \(x), y = \(y), z = \(z)")
+}
+Here, the axis cases use the let syntax to pull out the pertinent values. The code then prints the values using string interpolation to build the string.
+Notice how you don’t need a default in this switch statement. This is because the final case is essentially the default; it matches anything, because there are no constraints on any part of the tuple. If the switch statement exhausts all possible values with its cases, then no default is necessary.
+Also notice how you could use a single let to bind all values of the tuple: let (x, y, z) ([38](https://readwise.io/to_kindle?action=open&asin=null&location=38)) %% Color: yellow %% ^334747122
+
+---
+
+function lets you define a block of code that performs a task ([39](https://readwise.io/to_kindle?action=open&asin=null&location=39)) %% Color: yellow %% ^334747123
+
+---
+
+In any function, the parentheses contain what’s known as the parameter list ([40](https://readwise.io/to_kindle?action=open&asin=null&location=40)) %% Color: yellow %% ^334747124
+
+---
+
+A function declares its parameters in its parameter list. When you call a function, you provide values as arguments for the functions’ parameters. ([41](https://readwise.io/to_kindle?action=open&asin=null&location=41)) %% Color: yellow %% ^334747125
+
+---
+
+It’s also possible to return multiple values through the use of tuples ([42](https://readwise.io/to_kindle?action=open&asin=null&location=42)) %% Color: yellow %% ^334747126
+
+---
+
+For longer functions you need the return because you might make the function return in many different places ([43](https://readwise.io/to_kindle?action=open&asin=null&location=43)) %% Color: yellow %% ^334747127
+
+---
+
+inout before the parameter type indicates that this parameter should be copied in, that local copy used within the function, and copied back out when the function returns. ([44](https://readwise.io/to_kindle?action=open&asin=null&location=44)) %% Color: yellow %% ^334747128
+
+---
+
+Add an ampersand (&) before the argument, which makes it clear at the call site that you are using copy-in copy-out:
+var value = 5
+incrementAndPrint(&value)
+print(value) ([45](https://readwise.io/to_kindle?action=open&asin=null&location=45)) %% Color: yellow %% ^334747129
+
+---
+
+you used the same function name for several different functions ([46](https://readwise.io/to_kindle?action=open&asin=null&location=46)) %% Color: yellow %% ^334747130
+
+---
+
+This is called overloading and lets you define similar functions using a single name ([47](https://readwise.io/to_kindle?action=open&asin=null&location=47)) %% Color: yellow %% ^334747131
+
+---
+
+However, the compiler must still be able to tell the difference between these functions ([48](https://readwise.io/to_kindle?action=open&asin=null&location=48)) %% Color: yellow %% ^334747132
+
+---
+
+Whenever you call a function, it should always be clear which function you’re calling. This is usually achieved through a difference in the parameter list:
+A different number of parameters.
+Different parameter types.
+Different external parameter names, such as the case with printMultipleOf.
+You can also overload a function name based on a different return type, like so:
+func getValue() -> Int {
+  31
+}
+
+func getValue() -> String {
+  "Matt Galloway"
+} ([49](https://readwise.io/to_kindle?action=open&asin=null&location=49)) %% Color: yellow %% ^334747133
+
+---
+
+Only use overloading for functions that are related and similar in behavior ([50](https://readwise.io/to_kindle?action=open&asin=null&location=50)) %% Color: yellow %% ^334747134
+
+---
+
+functions in Swift are simply another data type. You can assign them to variables and constants just as you can any other type of value, such as an Int or a String. ([51](https://readwise.io/to_kindle?action=open&asin=null&location=51)) %% Color: yellow %% ^334747135
+
+---
+
+The fact that you can assign functions to variables comes in handy because it means you can pass functions to other functions. Here’s an example of this in action:
+func printResult(_ function: (Int, Int) -> Int, _ a: Int, _ b: Int) {
+  let result = function(a, b)
+  print(result)
+}
+printResult(add, 4, 2) ([52](https://readwise.io/to_kindle?action=open&asin=null&location=52)) %% Color: yellow %% ^334747136
+
+---
+
+Functions let you solve many problems. The best do one simple task , making them easier to mix, match, and model into more complex behaviors. ([53](https://readwise.io/to_kindle?action=open&asin=null&location=53)) %% Color: yellow %% ^334747137
+
+---
+
+Swift has a very easy way to document functions which integrates well with Xcode’s code completion and other features.
+It uses the defacto Doxygen commenting standard used by many other languages outside of Swift. Let’s take a look at how you can document a function: ([54](https://readwise.io/to_kindle?action=open&asin=null&location=54)) %% Color: yellow %% ^334747138
+
+---
+
+Swift copies the value before passing it to the function, a behavior known as pass-by-value. ([55](https://readwise.io/to_kindle?action=open&asin=null&location=55)) %% Color: yellow %% ^334747139
+
+---
+
+Notice the special return type Never, indicating that this function will never return ([56](https://readwise.io/to_kindle?action=open&asin=null&location=56)) %% Color: yellow %% ^334747140
+
+---
+
+Calculates the average of three values
+/// - Parameters:
+///   - a: The first value.
+///   - b: The second value.
+///   - c: The third value.
+/// - Returns: The average of the three values.
+func calculateAverage(of a: Double, and b: Double, and c: Double) -> Double {
+  let total = a + b + c
+  let average = total / 3
+  return average
+}
+calculateAverage(of: 1, and: 3, and: 5)
+Instead of the usual double-/, you use triple-/ instead. Then the first line is the description of what the function does. Following that is a list of the parameters and finally a description of the return value.
+If you forget the format of a documentation comment, simply highlight the function and press "Option-Command-/" in Xcode. The Xcode editor will insert a comment template for you that you can then fill out ([57](https://readwise.io/to_kindle?action=open&asin=null&location=57)) %% Color: yellow %% ^334747141
+
+---
+
+You can add an external name to a function parameter to change the label you use in a function call, or you can use an underscore to denote no label.
+Parameters are passed as constants, unless you mark them as inout, in which case they are copied-in and copied-out.
+Functions can have the same name with different parameters. This is called overloading ([58](https://readwise.io/to_kindle?action=open&asin=null&location=58)) %% Color: yellow %% ^334747142
+
+---
+
+Functions can have a special Never return type to inform Swift that this function will never exit.
+You can assign functions to variables and pass them to other functions. ([59](https://readwise.io/to_kindle?action=open&asin=null&location=59)) %% Color: yellow %% ^334747143
+
+---
+
+Function documentation can be created by prefixing the function with a comment section using ///. ([60](https://readwise.io/to_kindle?action=open&asin=null&location=60)) %% Color: pink %% ^334747144
+
+---
+
+That’s one of the built-in safety features of Swift: If the type says Int or String, then there’s an actual integer or string there, guaranteed. ([61](https://readwise.io/to_kindle?action=open&asin=null&location=61)) %% Color: yellow %% ^334747145
+
+---
+
+optionals, a special Swift type that can represent not just a value, but also the absence of a value ([62](https://readwise.io/to_kindle?action=open&asin=null&location=62)) %% Color: yellow %% ^334747146
+
+---
+
+A value that represents a special condition such as the absence of a value is known as a sentinel value ([63](https://readwise.io/to_kindle?action=open&asin=null&location=63)) %% Color: yellow %% ^334747147
+
+---
+
+Nil is the name given to the absence of a value ([64](https://readwise.io/to_kindle?action=open&asin=null&location=64)) %% Color: yellow %% ^334747148
+
+---
+
+if you are using an optional type, then you know you must handle the nil case. ([65](https://readwise.io/to_kindle?action=open&asin=null&location=65)) %% Color: yellow %% ^334747149
+
+---
+
+An optional is allowed to hold either a value or nil. ([66](https://readwise.io/to_kindle?action=open&asin=null&location=66)) %% Color: yellow %% ^334747150
+
+---
+
+You declare a variable of an optional type by using the following syntax:
+var errorCode: Int? ([67](https://readwise.io/to_kindle?action=open&asin=null&location=67)) %% Color: yellow %% ^334747151
+
+---
+
+You can add a question mark after any type to create an optional type. This optional type is said to wrap the regular non-optional type ([68](https://readwise.io/to_kindle?action=open&asin=null&location=68)) %% Color: yellow %% ^334747152
+
+---
+
+You should use force unwrapping sparingly ([69](https://readwise.io/to_kindle?action=open&asin=null&location=69)) %% Color: yellow %% ^334747153
+
+---
+
+optional binding is much safer than force unwrapping ([70](https://readwise.io/to_kindle?action=open&asin=null&location=70)) %% Color: yellow %% ^334747154
+
+---
+
+it’s common practice to give the unwrapped constant the same name as the optional ([71](https://readwise.io/to_kindle?action=open&asin=null&location=71)) %% Color: yellow %% ^334747155
+
+---
+
+The guard statement comprises guard followed by a condition that can include both Boolean expressions and optional bindings, followed by else, followed by a block of code. The block of code covered by the else will execute if the condition is false ([72](https://readwise.io/to_kindle?action=open&asin=null&location=72)) %% Color: yellow %% ^334747156
+
+---
+
+double question mark (??), known as the nil coalescing operator ([73](https://readwise.io/to_kindle?action=open&asin=null&location=73)) %% Color: yellow %% ^334747157
+
+---
+
+several collection types in Swift, but three important ones are arrays, dictionaries and sets ([74](https://readwise.io/to_kindle?action=open&asin=null&location=74)) %% Color: yellow %% ^334747158
+
+---
+
+An array is an ordered collection of values of the same type ([75](https://readwise.io/to_kindle?action=open&asin=null&location=75)) %% Color: yellow %% ^334747159
+
+---
+
+The elements in the array are zero-indexed ([76](https://readwise.io/to_kindle?action=open&asin=null&location=76)) %% Color: yellow %% ^334747160
+
+---
+
+Arrays are useful when you want to store your items in a particular order. You may want the elements sorted, or you may need to fetch elements by index without iterating through the entire array. ([77](https://readwise.io/to_kindle?action=open&asin=null&location=77)) %% Color: yellow %% ^334747161
+
+---
+
+This type is written as [Int]. ([79](https://readwise.io/to_kindle?action=open&asin=null&location=79)) %% Color: yellow %% ^334747162
+
+---
+
+An empty array can be created using the empty array literal []. Because the compiler isn’t able to infer a type from this, you need to use a type annotation to make the type explicit:
+var subscribers: [String] = [] ([80](https://readwise.io/to_kindle?action=open&asin=null&location=80)) %% Color: yellow %% ^334747163
+
+---
+
+Properties”. For now, just think of them as variables that are built in to values. To access a property, place a dot after the name of the constant or variable that holds the value and follow it by the name of the property you want to access. ([82](https://readwise.io/to_kindle?action=open&asin=null&location=82)) %% Color: yellow %% ^334747164
+
+---
+
+The property first actually returns an optional, because if the array were empty, first would return nil. The print() method realizes currentPlayer is optional and generates a warning. To suppress the warning, simply add as Any to the type to be printed ([83](https://readwise.io/to_kindle?action=open&asin=null&location=83)) %% Color: yellow %% ^334747165
+
+---
+
+Methods”. For now, just think of them as functions that are built in to values ([84](https://readwise.io/to_kindle?action=open&asin=null&location=84)) %% Color: yellow %% ^334747166
+
+---
+
+This line means mustHaveResult will equal either the value inside optionalInt, or 0 if optionalInt contains nil ([85](https://readwise.io/to_kindle?action=open&asin=null&location=85)) %% Color: yellow %% ^334747167
+
+---
+
+var mustHaveResult = optionalInt ?? 0 ([86](https://readwise.io/to_kindle?action=open&asin=null&location=86)) %% Color: yellow %% ^334747168
+
+---
+
+When you use subscripts, you don’t have to worry about optionals, since trying to access a non-existing index doesn’t return nil; it simply causes a runtime error. ([87](https://readwise.io/to_kindle?action=open&asin=null&location=87)) %% Color: yellow %% ^334747169
+
+---
+
+The constant upcomingPlayersSlice is actually an ArraySlice of the original array ([88](https://readwise.io/to_kindle?action=open&asin=null&location=88)) %% Color: yellow %% ^334747170
+
+---
+
+It is also easy to make a brand-new, zero-indexed Array from an ArraySlice like so:
+let upcomingPlayersArray = Array(players[1...2]) ([89](https://readwise.io/to_kindle?action=open&asin=null&location=89)) %% Color: yellow %% ^334747171
+
+---
+
+You can check if there’s at least one occurrence of a specific element in an array by using contains(_:), which returns true if it finds the element in the array, and false otherwise. ([90](https://readwise.io/to_kindle?action=open&asin=null&location=90)) %% Color: yellow %% ^334747172
+
+---
+
+You can make all kinds of changes to mutable arrays, such as adding and removing elements, updating existing values, and moving elements around into a different order ([91](https://readwise.io/to_kindle?action=open&asin=null&location=91)) %% Color: yellow %% ^334747173
+
+---
+
+You can add Eli to the end of the array using the append(_:) method:
+players.append("Eli") ([92](https://readwise.io/to_kindle?action=open&asin=null&location=92)) %% Color: yellow %% ^334747174
+
+---
+
+another way, by using the += operator:
+players += ["Gina"] ([93](https://readwise.io/to_kindle?action=open&asin=null&location=93)) %% Color: yellow %% ^334747175
+
+---
+
+you can use the insert(_:at:) method:
+players.insert("Frank", at: 5)
+The at argument defines where you want to add the element ([94](https://readwise.io/to_kindle?action=open&asin=null&location=94)) %% Color: yellow %% ^334747176
+
+---
+
+you can remove her easily with the removeLast() method:
+var removedPlayer = players.removeLast()
+print("\(removedPlayer) was removed")
+// > Gina was removed
+This method does two things: It removes the last element and then returns it ([95](https://readwise.io/to_kindle?action=open&asin=null&location=95)) %% Color: yellow %% ^334747177
+
+---
+
+players[0...1] = ["Donna", "Craig", "Brian", "Anna"] ([96](https://readwise.io/to_kindle?action=open&asin=null&location=96)) %% Color: yellow %% ^334747178
+
+---
+
+This code replaces the first two players, Alice and Bob, with the four players in the new players array ([97](https://readwise.io/to_kindle?action=open&asin=null&location=97)) %% Color: yellow %% ^334747179
+
+---
+
+the size of the range doesn’t have to be equal to the size of the array that holds the values you’re adding. ([98](https://readwise.io/to_kindle?action=open&asin=null&location=98)) %% Color: yellow %% ^334747180
+
+---
+
+swapping elements, by using swapAt(_:_:): ([99](https://readwise.io/to_kindle?action=open&asin=null&location=99)) %% Color: yellow %% ^334747181
+
+---
+
+to sort the entire array, you should use sort(): ([100](https://readwise.io/to_kindle?action=open&asin=null&location=100)) %% Color: yellow %% ^334747182
+
+---
+
+If you’d like to leave the original array untouched and return a sorted copy instead, use sorted() instead of sort(). ([101](https://readwise.io/to_kindle?action=open&asin=null&location=101)) %% Color: yellow %% ^334747183
+
+---
+
+Dictionaries are useful when you want to look up values by means of an identifier ([102](https://readwise.io/to_kindle?action=open&asin=null&location=102)) %% Color: yellow %% ^334747184
+
+---
+
+With an array, you can only fetch a value by its index, which has to be an integer, and all indexes have to be sequential ([103](https://readwise.io/to_kindle?action=open&asin=null&location=103)) %% Color: yellow %% ^334747185
+
+---
+
+Dictionaries, like arrays, conform to Swift’s Collection protocol ([104](https://readwise.io/to_kindle?action=open&asin=null&location=104)) %% Color: yellow %% ^334747186
+
+---
+
+updateValue(_:forKey:) replaces the value of the given key with the new value and returns the old value. If the key doesn’t exist, this method will add a new pair and return nil. ([106](https://readwise.io/to_kindle?action=open&asin=null&location=106)) %% Color: yellow %% ^334747187
+
+---
+
+remove(_:) returns the removed element if it’s in the set, or nil otherwise. ([108](https://readwise.io/to_kindle?action=open&asin=null&location=108)) %% Color: yellow %% ^334747188
+
+---
+
+Sets
+Are unordered collections of unique values of the same type.
+Are most useful when you need to know whether something is included in the collection or not.
+Dictionaries
+Are unordered collections of key-value pairs.
+The keys are all of the same type, and the values are all of the same type.
+Use subscripting to get values and to add, update or remove pairs.
+If a key is not in a dictionary, lookup returns nil.
+The key of a dictionary must be a type that conforms to the Hashable protocol.
+Basic Swift types such as String, Int, Double are Hashable out of the box.
+Arrays:
+Are ordered collections of values of the same type.
+Use subscripting, or one of the many properties and methods, to access and update elements.
+Be wary of accessing an index that’s out of bounds. ([109](https://readwise.io/to_kindle?action=open&asin=null&location=109)) %% Color: yellow %% ^334747189
+
+---
+
+available at the printed book’s source code link listed in the introduction.
+Challenge 1: Which is valid
+Which of the following are ([110](https://readwise.io/to_kindle?action=open&asin=null&location=110)) %% Color: yellow %% ^334747190
+
+---
+
+a closure can access, store and manipulate the value of any variable or constant from the surrounding context. ([112](https://readwise.io/to_kindle?action=open&asin=null&location=112)) %% Color: yellow %% ^334747191
+
+---
+
+you can even omit the parameter list if you want. Swift lets you refer to each parameter by number, starting at zero, ([113](https://readwise.io/to_kindle?action=open&asin=null&location=113)) %% Color: yellow %% ^334747192
+
+---
+
+you can use Swift’s type inference to shorten the syntax even more by removing the type information ([114](https://readwise.io/to_kindle?action=open&asin=null&location=114)) %% Color: yellow %% ^334747193
+
+---

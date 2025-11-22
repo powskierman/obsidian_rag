@@ -1,0 +1,17 @@
+---
+aliases: [DCDG]
+---
+# Dsrt Class Diagram Generator
+Date: 2022-09-05
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [DCDG -pub.dev](https://pub.dev/packages/dcdg) 
+- [Generate Class Diagram From Flutter (Dart) Code](https://khurramali63.medium.com/generate-class-diagram-from-flutter-dart-code-9b8c2b49c026)
+- 
+### Notes
+-  

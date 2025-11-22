@@ -1,0 +1,22 @@
+---
+aliases: 
+tags:
+  - Kicad
+  - MoC
+---
+# Kicad MoC
+Date: 2024-06-10
+
+### Backlink
+[[]]
+
+### Reference
+-  [[Software/Kicad/Designing a 4-Layer IoT Development Board with KiCad 9]]
+### Notes
+- [[Kicad-Basic-Operations]]
+- [[Kicad-Workflow]]
+- [[Kicad-Shortcuts]]
+- [[Kicad-Plug-ins]]
+- [[Autorouting]]
+- [[Kicad-Appearance]]
+- [[Kicad Best Practice]]

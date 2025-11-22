@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2022-06-25 10:35
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<https://medium.com/better-programming/an-easy-way-to-create-custom-alerts-in-swiftui-8a6b3dda8633>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

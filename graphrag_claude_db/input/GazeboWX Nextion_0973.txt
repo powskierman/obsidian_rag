@@ -1,0 +1,36 @@
+---
+aliases:
+tags:
+  - gazebo
+  - nextion
+  - esphome
+created: 2025-09-20 14:01
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- #### Nextion Integration:
+  - Display Component: Updates every 5 seconds with
+  thermostat data
+  - Touch Controls: Two binary sensors for temperature
+  up/down buttons
+  - Proper Structure: All components in their correct YAML
+   sections
+   - The Nextion display will:
+	  - Show real-time temperature, desired temp, mode,
+	  heating status, and hysteresis
+	  - Respond to touch events on components 2 and 3 to
+	  adjust temperature
+	  - Log all interactions for debugging
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

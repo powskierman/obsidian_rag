@@ -1,0 +1,18 @@
+---
+aliases: []
+---
+
+2022-02-23
+# asymptote
+
+### Backlink
+[[]]
+
+### Reference
+- [finding asymptotes](http://www.rasmus.is/uk/t/F/Su41k03.htm)
+- 
+### Notes
+- Vertical asymptotes can occur when the denominator $n(x)$ is zero.  
+ - They can be found by solving the equation $n(x) = 0$ where $n(x)$
+- A rational function in which the degree of the denominator is higher than the degree of the numerator has the x axis as a horizontal asymptote.
+-  divide numerator by denominator to find slant asymptote

@@ -1,0 +1,39 @@
+---
+aliases:
+tags:
+  - tech
+created: 2021-12-30 15:07
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  [ESP8266](https://github.com/esp8266/Arduino)
+
+2.  [ESP32](https://github.com/espressif/arduino-esp32)
+
+3.  Erase firmware
+
+    a.  If unusual behavior
+
+    b.  Install esptool.py
+
+        i.  pip install esptool
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  esptool.py --chip esp32 --port /dev/cu.usbserial-0001 erase_flash
+
+        i.  Change chip and port
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

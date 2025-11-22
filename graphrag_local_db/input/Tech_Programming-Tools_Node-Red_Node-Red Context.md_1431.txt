@@ -1,0 +1,33 @@
+# Node-Red Context.md
+
+---
+aliases: 
+tags:
+  - node-red
+---
+# Node-Red Context
+Date: 2024-09-23
+
+### Backlink
+[[Node-Red Organisation]]
+
+### Reference
+-  
+### Notes
+##### 3.1 Node Context:
+
+	•	Stores data locally within a specific node.
+	•	Only that node can access or modify the data stored in the node context.
+	•	Useful for temporarily storing data between executions of that specific node.
+
+##### 3.2 Flow Context:
+
+	•	Stores data that is accessible by all nodes within the same flow.
+	•	Scope: Limited to the flow, meaning all nodes within the same flow (on the same tab) can access and share this data.
+	•	Useful when multiple nodes within a flow need to access shared data without passing it through messages.
+
+##### 3.3 Global Context:
+
+	•	Stores data that is available to all nodes across all flows in the Node-Red instance.
+	•	Scope: Global context persists across all flows and can be accessed by any node within the Node-Red instance.
+	•	Useful for sharing data between flows, such as global settings, environment variables, or status flags that need to be accessible throughout the entire project.

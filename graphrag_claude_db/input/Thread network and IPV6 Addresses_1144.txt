@@ -1,0 +1,26 @@
+---
+aliases: []
+tags: []
+---
+# Thread network and IPV6 Addresses
+Date: 2023-06-07
+
+### Backlink
+[[Tech/Electronics/Hardware/Nordic/Thread MoC]]
+
+### Reference
+-  
+### Notes
+-  ot ipaddr gives me 4 addresses on my dk:
+- These addresses are IPv6 addresses in different scopes and with different purposes. 
+
+1. `fd39:3ca3:dac7:1:3eef:ae84:2f61:7ed2`: This is a Unique Local Address (ULA) which is similar to private IP addresses in IPv4. These are used for local networking, and they are not routable on the global internet.
+    
+2. `fdd3:4f5a:1b64:8b08:0:ff:fe00:d800`: This is a Mesh Local EID (End-Device ID). These addresses are used for device identification within a Thread mesh network. It has a 64-bit prefix that is common to all Thread devices in a particular network (which is `fdd3:4f5a:1b64:8b08` in this case), and a 64-bit interface identifier (which is `0:ff:fe00:d800` in this case).
+    
+3. `fdd3:4f5a:1b64:8b08:96be:1686:74b1:d0a2`: This looks like a Global Unicast Address (GUA). These addresses are globally routable and are derived from the prefix assigned by the border router (again `fdd3:4f5a:1b64:8b08` in this case) and a 64-bit interface identifier (`96be:1686:74b1:d0a2` in this case).
+    
+4. `fe80:0:0:0:74ec:5159:584:e03c`: This is a Link-Local Address (LLA). These addresses are only valid and unique on a single network link. Devices use these addresses to communicate with neighboring devices on the same link. In the IPv6 address `fe80::/10`, prefix is reserved for link-local unicast addressing.
+    
+
+So in summary, your device has a link-local address for communicating with devices on the same network link, a mesh local EID for identification within the Thread network, a unique local address for local network communication, and a global unicast address for communicating with devices across the internet.

@@ -1,0 +1,754 @@
+---
+aliases: 
+tags:
+  - AI
+  - sequential-thinking
+  - examples
+created: 2025-10-17 11:05
+ContentType: Examples
+Backlink: "[[Sequential Thinking Tool|Sequential Thinking Tool]]"
+---
+### Main Idea
+Real-world examples demonstrating Sequential Thinking in action across different problem types.
+
+### References
+- [[Sequential Thinking Tool]]
+- [[Core Concepts]]
+- [[Usage Patterns]]
+
+### Notes
+
+## Example 1: Algorithm Design
+
+**Problem**: Design an efficient algorithm for finding duplicates in a large dataset.
+
+**Context**:
+- Dataset: 10 million records
+- Need to find duplicate customer emails
+- Memory constraint: 2GB RAM
+- Performance requirement: Under 10 seconds
+
+**Sequential Thinking Process**:
+
+```
+Thought 1 [1/6]: Understanding the problem
+- Dataset size: 10 million records
+- Need to find duplicate customer emails
+- Memory constraints: 2GB RAM
+- Performance requirement: Under 10 seconds
+
+Thought 2 [2/6]: Initial approach consideration
+Consider using a hash map for O(n) lookup time.
+Space complexity would be O(n) for the hash map.
+
+Thought 3 [3/7]: Wait, memory constraint issue (REVISION)
+10M records × ~100 bytes per email = ~1GB for data
+Plus hash map overhead = ~1.5GB
+This might be too close to our 2GB limit. Adjusting plan.
+
+Thought 4 [4/7]: Alternative approach - sorting
+Sort the dataset first (O(n log n))
+Then find duplicates with single pass (O(n))
+Space complexity: O(1) if using in-place sort
+But sorting 10M records may exceed time constraint.
+
+Thought 5 [5/7]: Hybrid approach (NEW DIRECTION)
+Use Bloom filter for initial filtering (space-efficient)
+Then hash map only for potential duplicates
+Significantly reduces memory footprint
+
+Thought 6 [6/7]: Hypothesis verification
+- Bloom filter: ~12MB for 10M items at 1% false positive rate
+- Hash map for ~100K potential duplicates: ~10MB
+- Total memory: ~22MB << 2GB ✓
+- Time complexity: O(n) for bloom + O(k) for hash where k << n ✓
+- Expected time: ~2 seconds ✓
+
+Thought 7 [7/7]: Final solution confirmed
+Use Bloom filter + hash map hybrid approach.
+Meets all constraints with comfortable margins.
+```
+
+**Result**: Memory-efficient solution using only 22MB RAM (far below 2GB limit) with O(n) time complexity.
+
+---
+
+## Example 2: Debugging Complex Issue
+
+**Problem**: Production API is returning 500 errors intermittently.
+
+**Context**:
+- Error rate: 2% of requests
+- Pattern: No obvious time-based pattern
+- Logs show "Connection timeout" errors
+- Multiple microservices involved
+
+**Sequential Thinking Process**:
+
+```
+Thought 1 [1/5]: Gathering initial information
+- Error rate: 2% of requests
+- Pattern: No obvious time-based pattern
+- Logs show "Connection timeout" errors
+- Multiple microservices involved
+Need systematic approach to identify root cause.
+
+Thought 2 [2/6]: Hypothesis A - Database connection pool
+The connection pool might be exhausted under load.
+Let me check this theory.
+
+Thought 3 [3/7]: Database metrics show normal connection usage
+Connection pool is at 60% capacity during errors.
+This isn't the bottleneck. (REVISION needed)
+
+Thought 4 [4/8]: Hypothesis B - Downstream service timeout
+One of the microservices might be timing out.
+Need to check service mesh metrics to identify which service.
+
+Thought 5 [5/8]: Service mesh shows Service C has p99 latency of 8s
+Service C's timeout is set to 5s.
+This explains the intermittent 500s!
+But need to understand WHY Service C is slow.
+
+Thought 6 [6/8]: Root cause analysis
+Service C is occasionally slow (8s response time)
+Calling service timeout is 5s
+Result: Timeout → 500 error
+But this is a symptom, not root cause yet.
+
+Thought 7 [7/8]: But why is Service C slow? (DEEPER ANALYSIS)
+Checking Service C logs... found memory pressure indicators.
+Service C is garbage collecting frequently.
+Memory leak suspected in Service C code.
+
+Thought 8 [8/8]: Complete diagnosis
+Root cause: Memory leak in Service C
+Symptom: Frequent GC causing 8s response times
+Result: Timeout in calling service → 500 errors
+Solution: 
+1. Fix memory leak in Service C (permanent fix)
+2. Adjust timeout to 10s as temporary measure
+3. Add alerting on Service C memory usage
+```
+
+**Result**: Complete diagnosis with root cause identified (memory leak) and both short-term (timeout adjustment) and long-term (fix leak) solutions.
+
+---
+
+## Example 3: Strategic Planning with Branching
+
+**Problem**: Should we migrate our monolith to microservices?
+
+**Context**:
+- Monolithic Rails app, 5 years old
+- Team of 8 developers
+- 50K lines of code
+- Growing performance issues
+
+**Sequential Thinking Process**:
+
+```
+Thought 1 [1/6]: Understanding current state
+- Monolithic Rails app, 5 years old
+- Team of 8 developers
+- 50K lines of code
+- Growing performance issues
+Need to evaluate if microservices is the right path.
+
+Thought 2 [2/8]: Key decision factors identified
+Need to explore two paths:
+A) Microservices migration
+B) Optimize existing monolith
+Will branch to compare both thoroughly.
+
+Thought 3 [3/10] [Branch A]: Microservices path
+Pros:
+- Better scalability
+- Team autonomy
+- Technology flexibility
+Cons:
+- Complexity increase
+- 6-12 month migration
+- Requires DevOps expertise
+
+Thought 4 [4/10] [Branch A]: Team capacity analysis
+Current team: 8 developers, 1 DevOps
+Microservices need: 2-3 DevOps, distributed tracing, service mesh
+This is a significant gap that could derail the project.
+
+Thought 5 [5/10] [Branch B from thought 2]: Monolith optimization path
+Options:
+- Add caching layer (Redis)
+- Optimize database queries
+- Horizontal scaling with load balancer
+- Modularize code internally
+All achievable with current team skills.
+
+Thought 6 [6/10] [Branch B]: Cost-benefit analysis
+Optimization approach:
+- Timeline: 2-3 months
+- Uses existing skills
+- Immediate performance gains
+- Maintains simplicity
+- Lower risk
+
+Thought 7 [7/10]: Comparison of branches
+Branch A (Microservices): High reward, high risk, high cost, 6-12mo
+Branch B (Optimization): Moderate reward, low risk, low cost, 2-3mo
+Given team size and constraints, Branch B seems more realistic.
+
+Thought 8 [8/10]: Additional consideration - growth trajectory
+Expected team growth: 12 developers in 2 years
+Expected traffic: 3x current in 2 years
+This changes the equation - microservices will eventually be needed.
+
+Thought 9 [9/10]: Hybrid approach emerges (SYNTHESIS)
+Phase 1 (Now): Optimize monolith, buy time
+Phase 2 (6 months): Extract 2-3 key services
+Phase 3 (18 months): Gradual migration with team growth
+This balances immediate needs with long-term strategy.
+
+Thought 10 [10/10]: Final recommendation
+Start with monolith optimization (Branch B approach)
+Plan for gradual service extraction (stepping stone to Branch A)
+Align migration with team growth trajectory
+Best of both worlds: immediate relief + strategic positioning
+Estimated timeline: 2-3mo optimization, then 18mo gradual migration
+```
+
+**Result**: Hybrid strategy that provides immediate performance improvements while setting up for eventual microservices migration aligned with team growth.
+
+---
+
+## Example 4: Real Tool Usage
+
+**User Request**: "I need to optimize my database queries. Use sequential thinking please."
+
+**Tool Usage Flow**:
+
+```json
+// Thought 1
+{
+  "thought_number": 1,
+  "total_thoughts": 5,
+  "next_thought_needed": true,
+  "thought": "First, I need to understand what queries are slow. Looking at the schema and query patterns mentioned: Posts table with Comments association, typical Rails app with N+1 query problems reported."
+}
+
+// Thought 2
+{
+  "thought_number": 2,
+  "total_thoughts": 5,
+  "next_thought_needed": true,
+  "thought": "The user mentioned N+1 query problems. This typically happens with ORM lazy loading. Let me analyze the specific queries: Loading posts, then loading comments one-by-one for each post. Classic N+1 pattern."
+}
+
+// Thought 3
+{
+  "thought_number": 3,
+  "total_thoughts": 6,
+  "next_thought_needed": true,
+  "thought": "Found the issue: Posts query loads comments one-by-one. Need to add eager loading. But wait, I'm also noticing missing indexes on foreign keys. This is actually two separate issues."
+}
+
+// Thought 4
+{
+  "thought_number": 4,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Two separate issues identified: 1) N+1 queries from lazy loading, 2) Missing indexes on foreign keys (user_id, post_id, created_at). Need to prioritize these fixes."
+}
+
+// Thought 5
+{
+  "thought_number": 5,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Priority 1 should be indexes (quick win, immediate impact). Priority 2 is fixing N+1 queries (requires code changes). Let me design the complete solution."
+}
+
+// Thought 6
+{
+  "thought_number": 6,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Solution designed: Add composite index on (user_id, created_at), index on post_id. Change query to use .includes(:comments) for eager loading. Now verifying: Will these indexes cover all slow queries? Checking query execution plans..."
+}
+
+// Thought 7
+{
+  "thought_number": 7,
+  "total_thoughts": 7,
+  "next_thought_needed": false,
+  "thought": "Verified! Final solution: 1) Add 3 indexes: user_id, post_id, created_at. 2) Change query to use eager loading with .includes(:comments). Expected improvement: 95% reduction in query time (from 2000ms to <100ms). Implementation order: indexes first (zero downtime), then code changes."
+}
+```
+
+**What User Sees**: 
+Clear progression from problem identification → analysis → solution design → verification → final answer, with complete transparency into the reasoning.
+
+---
+
+## Example 5: Mathematical Problem
+
+**Problem**: "Find the optimal investment allocation across 5 assets with constraints."
+
+**Sequential Thinking Process**:
+
+```
+Thought 1 [1/6]: Problem setup
+5 assets with different risk/return profiles
+Constraints: 
+- Total investment: $100,000
+- Min allocation per asset: $10,000
+- Max allocation per asset: $40,000
+- Target return: 8% annually
+- Risk tolerance: Moderate
+
+Thought 2 [2/6]: Initial approach - equal allocation
+Simple approach: $20,000 per asset
+But this ignores risk/return optimization.
+
+Thought 3 [3/7]: REVISION - Need portfolio optimization
+Equal allocation is suboptimal.
+Should use modern portfolio theory (MPT).
+Need to consider covariance matrix.
+
+Thought 4 [4/8]: Simplification for tractability
+Full MPT requires complex optimization.
+Simplified approach: Weight by Sharpe ratio
+Sharpe ratio = (Return - Risk-free rate) / Volatility
+
+Thought 5 [5/8]: Calculating weights
+Asset A: Sharpe 0.8 → Weight 25%
+Asset B: Sharpe 1.2 → Weight 38%
+Asset C: Sharpe 0.6 → Weight 19%
+Asset D: Sharpe 0.9 → Weight 28%
+Asset E: Sharpe 0.5 → Weight 15%
+
+Thought 6 [6/9]: Checking constraints
+Asset B at 38% = $38,000 ✓ (under $40k)
+Asset E at 15% = $15,000 ✓ (over $10k)
+All constraints satisfied.
+
+Thought 7 [7/9]: Calculating expected portfolio metrics
+Expected return: 8.2% annually ✓
+Portfolio volatility: 12% (moderate risk) ✓
+Sharpe ratio: 0.95 (good)
+
+Thought 8 [8/9]: Sensitivity analysis
+If market changes by 10%, portfolio adjusts within risk tolerance.
+Diversification is adequate across 5 assets.
+
+Thought 9 [9/9]: Final allocation
+Asset A: $25,000
+Asset B: $38,000  
+Asset C: $19,000
+Asset D: $28,000
+Asset E: $15,000
+Total: $100,000 ✓
+Expected return: 8.2%, Risk: Moderate ✓
+```
+
+**Result**: Optimized portfolio allocation meeting all constraints with mathematical verification.
+
+---
+
+## Key Patterns Demonstrated
+
+### Pattern Recognition
+- **Example 1**: Iterative refinement (hash map → revision → Bloom filter)
+- **Example 2**: Hypothesis-driven investigation (testing each hypothesis)
+- **Example 3**: Comparative analysis with branching (monolith vs microservices)
+- **Example 4**: Practical implementation (real tool usage)
+- **Example 5**: Constraint satisfaction (portfolio optimization)
+
+### Common Techniques
+- **Revision**: Examples 1, 2, 3, 5 all show revision
+- **Branching**: Example 3 explicitly branches
+- **Verification**: All examples verify solutions
+- **Dynamic adjustment**: Examples 2, 3 adjust total_thoughts
+
+### Related Notes
+- [[Sequential Thinking Tool]]
+- [[Usage Patterns]]
+- [[Core Concepts]]
+---
+aliases:
+  - Sequential Thinking Examples
+  - ST Examples
+tags:
+  - AI
+  - sequential-thinking
+  - examples
+created: 2025-10-17
+ContentType: Examples & Tutorials
+Backlink: "[[Sequential Thinking MoC]]"
+---
+
+### Main Idea
+
+Real-world examples of Sequential Thinking in action, organized by use case type.
+
+### References
+
+- [[Sequential Thinking MoC]]
+- [[Core Concepts]]
+- [[Usage Patterns]]
+- [[Parameters Reference]]
+
+### Notes
+
+## Algorithm Design Examples
+
+### Example 1: Efficient Duplicate Finding
+
+**Problem**: Design an efficient algorithm for finding duplicates in a large dataset.
+
+```
+Thought 1 [1/6]: Understanding the problem
+- Dataset size: 10 million records
+- Need to find duplicate customer emails
+- Memory constraints: 2GB RAM
+- Performance requirement: Under 10 seconds
+
+Thought 2 [2/6]: Initial approach consideration
+Consider using a hash map for O(n) lookup time.
+Space complexity would be O(n) for the hash map.
+
+Thought 3 [3/7]: Wait, memory constraint issue (REVISION)
+10M records × ~100 bytes per email = ~1GB for data
+Plus hash map overhead = ~1.5GB
+This might be too close to our 2GB limit.
+
+Thought 4 [4/7]: Alternative approach - sorting
+Sort the dataset first (O(n log n))
+Then find duplicates with single pass (O(n))
+Space complexity: O(1) if using in-place sort
+
+Thought 5 [5/7]: Hybrid approach (NEW DIRECTION)
+Use Bloom filter for initial filtering (space-efficient)
+Then hash map only for potential duplicates
+Significantly reduces memory footprint
+
+Thought 6 [6/7]: Hypothesis verification
+- Bloom filter: ~12MB for 10M items at 1% false positive rate
+- Hash map for ~100K potential duplicates: ~10MB
+- Total memory: ~22MB << 2GB ✓
+- Time complexity: O(n) for bloom + O(k) for hash where k << n ✓
+
+Thought 7 [7/7]: Final solution confirmed
+Use Bloom filter + hash map hybrid approach.
+Meets all constraints with comfortable margins.
+```
+
+---
+
+## Debugging Examples
+
+### Example 2: Production API Errors
+
+**Problem**: Production API is returning 500 errors intermittently.
+
+```
+Thought 1 [1/5]: Gathering initial information
+- Error rate: 2% of requests
+- Pattern: No obvious time-based pattern
+- Logs show "Connection timeout" errors
+- Multiple microservices involved
+
+Thought 2 [2/6]: Hypothesis A - Database connection pool
+The connection pool might be exhausted under load.
+Let me check this theory.
+
+Thought 3 [3/7]: Database metrics show normal connection usage
+Connection pool is at 60% capacity during errors.
+This isn't the bottleneck. (REVISION needed)
+
+Thought 4 [4/8]: Hypothesis B - Downstream service timeout
+One of the microservices might be timing out.
+Need to check service mesh metrics.
+
+Thought 5 [5/8]: Service mesh shows Service C has p99 latency of 8s
+Service C's timeout is set to 5s.
+This explains the intermittent 500s!
+
+Thought 6 [6/8]: Root cause analysis
+Service C is occasionally slow (8s response time)
+Calling service timeout is 5s
+Result: Timeout → 500 error
+
+Thought 7 [7/8]: But why is Service C slow? (DEEPER ANALYSIS)
+Checking Service C logs... found memory pressure.
+Service C is garbage collecting frequently.
+Memory leak suspected.
+
+Thought 8 [8/8]: Complete diagnosis
+Root cause: Memory leak in Service C
+Symptom: Frequent GC causing 8s response times
+Result: Timeout in calling service → 500 errors
+Solution: Fix memory leak in Service C and adjust timeout to 10s as temporary measure
+```
+
+---
+
+## Strategic Planning Examples
+
+### Example 3: Microservices Migration Decision
+
+**Problem**: Should we migrate our monolith to microservices?
+
+```
+Thought 1 [1/6]: Understanding current state
+- Monolithic Rails app, 5 years old
+- Team of 8 developers
+- 50K lines of code
+- Growing performance issues
+
+Thought 2 [2/8]: Key decision factors identified
+Need to explore two paths:
+A) Microservices migration
+B) Optimize existing monolith
+
+Thought 3 [3/10] [Branch A]: Microservices path
+Pros:
+- Better scalability
+- Team autonomy
+- Technology flexibility
+Cons:
+- Complexity increase
+- 6-12 month migration
+- Requires DevOps expertise
+
+Thought 4 [4/10] [Branch A]: Team capacity analysis
+Current team: 8 developers, 1 DevOps
+Microservices need: 2 DevOps, distributed tracing, service mesh
+This is a significant gap.
+
+Thought 5 [5/10] [Branch B from thought 2]: Monolith optimization path
+Options:
+- Add caching layer
+- Optimize database queries
+- Horizontal scaling with load balancer
+- Modularize code internally
+
+Thought 6 [6/10] [Branch B]: Cost-benefit analysis
+Optimization approach:
+- 2-3 month timeline
+- Uses existing skills
+- Immediate performance gains
+- Maintains simplicity
+
+Thought 7 [7/10]: Comparison of branches
+Branch A (Microservices): High reward, high risk, high cost
+Branch B (Optimization): Moderate reward, low risk, low cost
+
+Thought 8 [8/10]: Additional consideration - growth trajectory
+Expected team growth: 12 developers in 2 years
+Expected traffic: 3x current in 2 years
+This changes the equation...
+
+Thought 9 [9/10]: Hybrid approach emerges (SYNTHESIS)
+Phase 1 (Now): Optimize monolith, buy time
+Phase 2 (6 months): Extract 2-3 key services
+Phase 3 (18 months): Gradual migration with team growth
+
+Thought 10 [10/10]: Final recommendation
+Start with monolith optimization (Branch B approach)
+Plan for gradual service extraction (stepping stone to Branch A)
+Align with team growth trajectory
+Best of both worlds: immediate relief + strategic positioning
+```
+
+---
+
+## Database Optimization Example
+
+### Example 4: Query Performance Tuning
+
+**User Request**: "I need to optimize my database queries. Sequential thinking please."
+
+```
+Thought 1 [1/5]: Understanding what queries are slow
+Looking at the schema and query patterns mentioned...
+The user has a Rails app with Posts and Comments models.
+
+Thought 2 [2/5]: Analyzing query patterns
+The user mentioned N+1 query problems. This typically happens with ORM lazy loading.
+Let me analyze the specific queries...
+
+Thought 3 [3/6]: Found the issue (COMPLEXITY INCREASE)
+Posts query loads comments one-by-one. Need to add eager loading.
+But wait, there's also missing indexes on foreign keys...
+
+Thought 4 [4/7]: Two separate issues identified
+1) N+1 queries in the ORM
+2) Missing indexes on foreign keys
+Need to prioritize...
+
+Thought 5 [5/7]: Priority analysis
+Priority 1 should be indexes (quick win, immediate impact).
+Priority 2 is fixing N+1 queries (requires code changes).
+Let me design the solution...
+
+Thought 6 [6/7]: Solution verification
+Will these indexes cover all slow queries? 
+Checking query execution plans...
+Yes! Indexes on user_id, post_id, and created_at will cover 95% of queries.
+
+Thought 7 [7/7]: Final solution (VERIFIED)
+Step 1: Add 3 indexes (user_id, post_id, created_at)
+Step 2: Change Posts query to use eager loading with .includes(:comments)
+Expected improvement: 95% reduction in query time
+Implementation time: 1 hour
+Risk: Low (indexes don't break existing queries)
+```
+
+---
+
+## System Design Example
+
+### Example 5: Caching Strategy
+
+**Problem**: Design a caching strategy for a high-traffic API.
+
+```
+Thought 1 [1/7]: Understanding requirements
+- API serves product catalog data
+- 10,000 requests/second at peak
+- Data updates once per hour
+- Response time must be < 100ms
+
+Thought 2 [2/7]: Cache placement options
+Could cache at multiple layers:
+1. CDN/Edge cache
+2. Application cache (Redis)
+3. Database query cache
+Need to evaluate each...
+
+Thought 3 [3/8]: Edge caching analysis (BRANCH A)
+Pros: Lowest latency, reduces backend load
+Cons: Data staleness, cache invalidation complexity
+For product catalog with hourly updates, this could work.
+
+Thought 4 [4/9]: Application cache analysis (BRANCH B)
+Pros: More control, easier invalidation
+Cons: Single point of failure, network hop
+Redis can handle 10K req/s easily.
+
+Thought 5 [5/9]: Hybrid approach consideration
+What if we use both?
+- Edge cache for product lists (stale OK for 5 min)
+- Redis for product details (fresh data critical)
+This combines benefits of both...
+
+Thought 6 [6/9]: Cache invalidation strategy
+Hourly data updates require:
+- Time-based expiry (TTL)
+- Manual invalidation on emergency updates
+- Versioned cache keys for safe updates
+
+Thought 7 [7/9]: Verification against requirements
+- 10K req/s: Edge cache handles this easily ✓
+- < 100ms: CDN adds ~20ms, Redis ~5ms ✓
+- Hourly updates: TTL set to 1 hour ✓
+- Stale data risk: Max 5 min at edge, real-time in Redis ✓
+
+Thought 8 [8/9]: Failure scenarios
+What if Redis goes down?
+- Edge cache continues serving (stale but available)
+- Implement circuit breaker to database
+- This provides graceful degradation ✓
+
+Thought 9 [9/9]: Final architecture (COMPLETE)
+Layer 1: CDN/Edge cache, TTL 5 minutes, serves product lists
+Layer 2: Redis cache, TTL 1 hour, serves product details
+Layer 3: Database as source of truth
+Invalidation: Time-based + manual override
+Fallback: Edge → Redis → Database
+Expected performance: 95% of requests served from edge
+```
+
+---
+
+## Real Tool Usage Example
+
+### Example 6: Actual Tool Call Sequence
+
+**User**: "Help me understand why my React app is slow"
+
+**Tool Usage**:
+
+```json
+// Thought 1
+{
+  "thought_number": 1,
+  "total_thoughts": 5,
+  "next_thought_needed": true,
+  "thought": "Let me understand what's happening. React apps can be slow for many reasons: unnecessary re-renders, large bundle sizes, or inefficient data fetching. Need more context..."
+}
+
+// Thought 2  
+{
+  "thought_number": 2,
+  "total_thoughts": 6,
+  "next_thought_needed": true,
+  "thought": "Based on the symptoms described, the most likely culprit is unnecessary re-renders. Let me analyze the component structure and state management pattern..."
+}
+
+// Thought 3
+{
+  "thought_number": 3,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "is_revision": true,
+  "revises_thought": 2,
+  "thought": "Actually, before assuming re-renders, I should check the bundle size. A 5MB bundle would explain the slow initial load better than re-render issues..."
+}
+
+// Thought 4
+{
+  "thought_number": 4,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Two separate issues found: 1) Large bundle (no code splitting), 2) Missing React.memo on expensive components. Need to prioritize fixes..."
+}
+
+// Thought 5
+{
+  "thought_number": 5,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Priority 1: Implement code splitting (immediate 60% load time improvement). Priority 2: Add React.memo to list components (fixes scrolling performance)."
+}
+
+// Thought 6
+{
+  "thought_number": 6,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Let me verify this solution addresses all symptoms: Slow initial load → code splitting ✓, Laggy scrolling → React.memo ✓, Both are non-breaking changes ✓"
+}
+
+// Thought 7
+{
+  "thought_number": 7,
+  "total_thoughts": 7,
+  "next_thought_needed": false,
+  "thought": "Final solution: 1) Split large vendors into separate chunks using dynamic imports. 2) Wrap list item components in React.memo. Expected improvements: 60% faster initial load, smooth 60fps scrolling."
+}
+```
+
+---
+
+### Related Notes
+
+- [[Usage Patterns]] - Learn the patterns behind these examples
+- [[Advanced Techniques]] - More sophisticated examples
+- [[Core Concepts]] - Understand why these examples work
+
+### Questions / Ideas for Further Exploration
+
+- What other use case categories would be valuable?
+- How can we build a library of reusable example patterns?
+- What makes some examples more effective than others?

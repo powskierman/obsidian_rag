@@ -1,0 +1,19 @@
+# LPGSensor.md
+
+---
+aliases: []
+---
+
+2022-06-27
+# LPGSensor
+
+### Backlink
+[[Projects MOC]]
+
+### Reference
+- LPG Sensor wiring: ![[Projects-LPGSensor-Wiring-image1.png|200]]MQxx Connection Diagram: ![[Projects-LPGSensor-Wiring-image2.png|200]]
+- 
+### Notes
+-  LPGSensor is a solar-powered custom board with battery backup that uses a MQ-6 sensor to detect LPG.  It uses an ESP32 WROOM 
+- The project can be found at: /Volumes/Docs/Electronics/Projects/NH/LPGDetector and on Github
+- The Kicad PCB files can be found at: /Volumes/Docs/Electronics/Projects/Kicad/LPGDetector

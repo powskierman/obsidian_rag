@@ -1,0 +1,25 @@
+---
+aliases:
+tags:
+created: 2021-12-30 13:47
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Clipped from: <https://i0.wp.com/www.esp32learning.com/wp-content/uploads/2017/12/esp32minikit.jpg?resize=696%2C278>
+
+![](media/esp32minikit.jpg-(WEBP-Image,-69-image1.jpg){width="9.802083333333334in" height="3.9166666666666665in"}
+
+I ,KK,,
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

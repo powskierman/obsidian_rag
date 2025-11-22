@@ -1,0 +1,55 @@
+---
+aliases: 
+tags:
+  - handbrake
+  - dvd
+  - rip
+---
+# Ripping DVDs with Handbrake
+Date: 2025-02-12
+
+### Backlink
+[[Movie Organization MOC]]
+
+### Reference
+-  
+### Notes
+-  To rip your Great Courses videos using HandBrake, follow these detailed step-by-step instructions with optimal settings:
+**Preparation**
+	1.	Install HandBrake on your computer if you haven’t already.
+	2.	Insert the Great Courses DVD into your computer’s DVD drive.
+**Step-by-Step Instructions**
+Step 1: Open HandBrake and Select Source
+	1.	Launch HandBrake.
+	2.	Click “Open Source” in the top-left corner.
+	3.	Select your DVD drive from the list of available sources.
+	4.	HandBrake will scan the DVD. This may take a few minutes.
+Step 2: Choose Title and Chapters
+	1.	In the “Title” dropdown, select the main feature. Usually, this is the longest title.
+	2.	If you want to rip specific lectures, you can select individual chapters.
+Step 3: Select Output Settings
+	1.	In the “Presets” sidebar, choose “Fast 480p30” for standard definition DVDs.
+	2.	Set the output format to MP4 in the “Format” dropdown menu.
+Step 4: Adjust Video Settings
+	1.	In the “Video” tab:
+	•	Encoder: H.264 (x264)
+	•	Framerate: Same as source
+	•	Constant Quality: RF 20 (adjust between 18-22 for SD content)
+	•	Encoder Preset: Slow (for better quality)
+Step 5: Adjust Audio Settings
+	3.	In the “Audio” tab:
+	•	Codec: AAC (avcodec)
+	•	Bitrate: 160
+	•	Mixdown: Stereo
+Step 6: Configure Subtitles (if needed)
+	5.	In the “Subtitles” tab, add any subtitle tracks you want to include.
+Step 7: Set Destination
+	1.	Click “Browse” next to “Save As” to choose where to save your ripped video.
+	2.	Name your file appropriately (e.g., “GreatCourses_Lecture1”).
+Step 8: Start Encoding
+	1.	Click the “Start Encode” button at the top of the window.
+	2.	HandBrake will begin ripping and encoding your video. This process may take some time depending on your computer’s speed and the length of the video.
+Additional Tips
+	•	For batch processing multiple lectures, use the “Add to Queue” button instead of “Start Encode” for each title, then start the queue when you’ve added all desired lectures.
+	•	If you encounter any issues with copy-protected DVDs, you may need to install libdvdcss.
+	•	Always ensure you have the right to make personal copies of your DVDs before ripping them.

@@ -1,0 +1,23 @@
+# IRFS7530-full-bridge.md
+
+---
+aliases:
+tags:
+created: 2022-01-07 15:57
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<https://www.infineon.com/dgdl/Infineon-IRFS7530-7P-DataSheet-v01_01-EN.pdf?fileId=5546d462533600a40153563a9d1e21d8>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

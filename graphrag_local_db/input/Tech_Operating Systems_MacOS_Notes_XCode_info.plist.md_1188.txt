@@ -1,0 +1,42 @@
+# info.plist.md
+
+---
+aliases: 
+tags:
+  - SIGABRT
+  - xcode
+---
+# info.plist
+Date: 2022-12-28
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  error:  [Info.plist contained no UIScene configuration dictionary (looking for configuration named (no name))](https://stackoverflow.com/questions/74805019/info-plist-contained-no-uiscene-configuration-dictionary-looking-for-configurat)
+	- Add the `UISceneConfigurations` key (inside the `UIApplicationSceneManifest` dictionary) and its value as an empty dictionary, to info (not build settings) like this:
+
+```xml
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <true/>
+        <key>UISceneConfigurations</key>
+        <dict/>
+    </dict>
+```
+- Or, using UX:
+	- Click on Project, Targets, Info tab
+	- Click on down arrow next to Application Scene Manifest inside of Custom IOS Target Properties
+	- Click +
+	- Choose Scene Configuration
+	- 
+- error: Thread 2: signal SIGABRT **This app has crashed because it attempted to access privacy-sensitive data without a usage description.  The app's Info.plist must contain an NSHomeKitUsageDescription key with a string value explaining to the user how the app uses this data.**
+	- A Privacy HomeKit Description string needs to be added in build settings
+		- Click on Project, Targets, Info tab
+		- Click on + sign next to 1st entry
+		- Choose Privacy - Homekit Usage Description
+		- Click on Build Settings tab and search for Homekit
+		- Add appropriate description in text field

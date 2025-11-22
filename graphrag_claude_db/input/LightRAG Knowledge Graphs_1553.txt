@@ -1,0 +1,82 @@
+---
+date: 2025-10-20
+tags: AI, RAG, LightRAG, knowledge-graph, testing
+status: experimental
+---
+
+# LightRAG Knowledge Graphs
+
+## Backlink
+[[Obsidian RAG System MoC]] | [[AI Projects]]
+
+## Reference
+- Test: `test_lightrag.py`
+- Compare: `compare_rag_systems.py`
+- Repo: https://github.com/HKUDS/LightRAG
+
+## Main Idea
+Knowledge graph-based RAG enhancement for relationship queries, timelines, and multi-hop reasoning.
+
+---
+
+## What LightRAG Adds
+
+### Current RAG
+- Vector similarity search
+- Good for: "Find docs about X"
+
+### LightRAG
+- Knowledge graph traversal
+- Good for: "How does X relate to Y?"
+- Better for: Timelines, relationships, causal chains
+
+---
+
+## Use Cases
+
+### Timeline Reconstruction
+```
+Query: "Trace treatment from diagnosis to now"
+Output: Complete timeline graph with relationships
+```
+
+### Multi-Hop Reasoning
+```
+Query: "Why do I need IVIG therapy?"
+Output: Yescarta → B-cell aplasia → low IgG → IVIG
+```
+
+### Entity-Centric
+```
+Query: "Everything about Yescarta"
+Output: Complete entity graph with all connections
+```
+
+---
+
+## Test Setup
+
+```bash
+pip install lightrag-hku nano-vectordb networkx
+ollama pull nomic-embed-text
+python test_lightrag.py
+```
+
+---
+
+## Decision
+
+**Add if:** Relationship queries frequent  
+**Skip if:** Simple lookups sufficient  
+**Test:** 2-3 hours to evaluate
+
+---
+
+## Related
+- [[Obsidian RAG System MoC]]
+- [[RAG Memory System]]
+
+---
+
+## Tags
+#AI #RAG #LightRAG #knowledge-graph #experimental

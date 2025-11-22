@@ -1,0 +1,106 @@
+# NH Network Map.md
+
+---
+aliases: 
+tags: 
+created: 2025-09-13 14:31
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+
+#### DHCP Addresses
+
+| MAC/DUID            | IPA           | Hostname                 |
+| ------------------- | ------------- | ------------------------ |
+| b0:95:75:91:18:7e   | 192.168.0.3   | PiscineAP                |
+| b8:27:eb:4d:46:35   | 192.168.0.13  | OctoPi                   |
+| b8:27:eb:d9:0f:21   | 192.168.0.15  | piscine OpenSprinkler    |
+| b8:27:eb:d9:fd:3a   | 192.168.0.16  | Etang OpenSprinkler      |
+| dc:56:e7:58:9b:c0   | 192.168.0.130 | Home-Theater             |
+| 20:23:51:0b:01:d8   | 192.168.0.137 | Kasa smart plug KP125M   |
+| 9a:a7:c1:3c:01:75   | 192.168.0.143 | 9a-a7-c1-3c-01-75        |
+| d8:61:62: cf:af:f5  | 192.168.0.144 | connect                  |
+| 86f6:3d: 78:8b:ba   | 192.168.0.157 | iPhone                   |
+| 94:3c:c6:05:17:60   | 192.168.0.162 | TVRoom                   |
+| 80:7d:3a:f4:63:e8   | 192.168.0.163 | Cuisine                  |
+| 94:3c:c6:05:17:64   | 192.168.0.167 | GazeboWx Blynk           |
+| 00:0b:82:eb:23:f4   | 192.168.0.174 | VOIP HT801               |
+| 20:23:51:0b:17:b3   | 192.168.0.176 | TP-Link                  |
+| 30:ae:a4:6b:33:94   | 192.168.0.177 | garagenh                 |
+| 3e: 2f:46:5a:7f:e1  | 192.168.0.178 | Watch                    |
+| 44:3d:54:18:7b:63   | 192.168.0.179 | Amazon                   |
+| d8:fb:d6:cb:54:44   | 192.168.0.180 | amazon-49799708d         |
+| f8:d0:27:3b:5d:6f   | 192.168.0.193 | EpsonNH                  |
+| 28:73:f6:36:36:96   | 192.168.0.194 | Blink-Mini               |
+| Oc:43:f9:c3:48:fe   | 192.168.0.196 | blink-sync-module        |
+| aa:bb:3e:7c:3d:14   | 192.168.0.198 | iPhone                   |
+| 20:23:51:0b:04:b2   | 192.168.0.202 | TP-Link smart plug       |
+| 2a: de: 39:19:5f:1f | 192.168.0.203 | iPad                     |
+| 3c:52:a1:15:50:d0   | 192.168.0.204 | TP-Link WiFi extender    |
+| 10:09:f9:67:2a:02   | 192.168.0.206 | 10-09-f9-67-2a-02        |
+| 00:04:20:f0:d4:c2   | 192.168.0.207 | HarmonyHub               |
+| a4:3c:d7:3c:5c:c1   | 192.168.0.210 | kobo                     |
+| 3c: 84:27:1c: 3d:2c | 192.168.0.211 | espressif                |
+| 20:23:51:0b:06:0f   | 192.168.0.213 | TP-Link smart plug       |
+| 20:23:51:0b: 1b:8a  | 192.168.0.214 | KS205 Smart light switch |
+| 40:a2:db:53:24:5a   | 192.168.0.215 | 40-a2-db-53-24-5a        |
+| bo:73:9c:92:55:6f   | 192.168.0.218 | Amazon                   |
+| 9c: c8:9:8d:e4:ad   | 192.168.0.220 | Amazon                   |
+| C8:63:14:70:4e:12   | 192.168.0.222 | Kodi                     |
+| fc:a6:67:14:72:e1   | 192.168.0.225 | udhcp 1.28.3             |
+| 20:23:51:0b:14:33   | 192.168.0.228 | KS205 Smart light switch |
+| 4c:17:44:69:59:d1   | 192.168.0.229 | Amazon Technologies Inc. |
+| 28:73:f6:e8:4c:5f   | 192.168.0.230 | 28-73-f6-e8-4c-5f        |
+| C6:f8:f6:25:66:04   | 192.168.0.239 | Mac                      |
+| 20:23:51:0a:fc:07   | 192.168.0.245 | TP-Link                  |
+| dc:a6:32:a3:46:12   | 192.168.0.247 | PiServer                 |
+| 08:7c:39:12:de:1c   | 192.168.0.250 | Amazon                   |
+| dc:56:e7:58:9b:be   | 192.168.0.251 | Home-Theater             |
+| 62:3b:97:1b:b0:1e   | 192.168.0.252 | Lorraine Ipad            |
+| 90:23:5b:7c:b2:c2   | 192.168.0.253 | udhcp 1.34.1             |
+|                     |               |                          |
+
+#### Reservations
+
+| MAC/DUID            | IP            | Hostname         |
+| ------------------- | ------------- | ---------------- |
+| B0:95:75:91:18:7E   | 192.168.0.3   | PiscineAP        |
+| dc:a6:32:a3:46:11   | 192.168.0.10  | PiServer         |
+| b8:27:eb:d7:50:ae   | 192.168.0.11  | PiTunes          |
+| b8:27:eb:4d: 46:35  | 192.168.0.13  | OctoPi           |
+| b8:27:eb:5e:a9:4b   | 192.168.0.128 | PiPiano          |
+| dc:56:e7:58:9b:c0   | 192.168.0.130 | ATVTVRoom        |
+| fo:27:2d:9a:f7:f0   | 192.168.0.131 | FTVTVRoom        |
+| c8: 3a: 6b:13:0c:71 | 192.168.0.132 | RokuTVRoom       |
+| d0:03:4b:34:f3:52   | 192.168.0.133 | ATVChambre       |
+| 48:3f: da:48:54:1a  | 192.168.0.160 | MeteoNH          |
+| 68:c6:Зa:a4:ce:7d   | 192.168.0.161 | Thermostat       |
+| 94:3c: c6:05:17:60  | 192.168.0.162 | TVRoom           |
+| 80:7d:3a:f4:63:e8   | 192.168.0.163 | Cuisine          |
+| 30:ae:a4:92:d0:84   | 192.168.0.164 | Salon            |
+| 30:ae:a4:92:c6:d8   | 192.168.0.165 | Amis             |
+| 94:3c: c6:05:17:84  | 192.168.0.166 | Chambre          |
+| 94:3c: c6:05:17:64  | 192.168.0.167 | GazeboWx         |
+| ac:a2:13:b6:28:8c   | 192.168.0.192 | Pantum-Bureau    |
+| f8:d0:27:3b:5d:6f   | 192.168.0.193 | EpsonNH          |
+| 00:04:20:f0:d4:c2   | 192.168.0.207 | HarmonyHub       |
+| 7c:61:66:7f:82:d6   | 192.168.0.223 | amazon-0fa8775f2 |
+| b8:27:eb:d9:0f:21   | 192.168.0.15  | piscine          |
+| 84:d6:d0:39:2c:6c   | 192.168.0.238 | amazon-a29a2382c |
+| b8:27:eb:d9:fd:3a   | 192.168.0.16  | Etang            |
+| d8:3a:dd:71:4f:02   | 192.168.0.12  | HASS             |
+| d8:3a:dd:71:4f:03   | 192.168.0.14  | NHAssistant      |
+| 02:11:32:31:87:01   | 172.21.0.145  | vpnplus-l2tp     |
+| 70:B8:F6:DD:B4:28.  | 192.168.0.168 | proxy-pool.      |
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights

@@ -1,0 +1,59 @@
+---
+bookId: "44553"
+title: "Essential Photoshop: How to use 9 essential tools and techniques to transform your photography"
+author: Robin Whalley and Martin Hellewell
+asin: B00EBRW2K4
+lastAnnotatedDate: 2016-11-29
+highlightsCount: 15
+reference: https://www.amazon.com/dp/B00EBRW2K4
+kindle_link: kindle://book?action=open&asin=B00EBRW2K4
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81wplYhBLHL._SY160.jpg)
+## Highlights
+Being able to target your adjustments so they affect only specific areas is probably the greatest skill you can develop and will set your work apart. — location: [1631](kindle://book?action=open&asin=B00EBRW2K4&location=1631) ^ref-55927
+
+---
+There is, however, an easy way to view the mask – by holding down the Alt key and clicking on the layer mask in the Layers window with your mouse. This makes the mask visible. — location: [1641](kindle://book?action=open&asin=B00EBRW2K4&location=1641) ^ref-33203
+
+---
+When we use grey it will partly mask the area covered. The darker the grey the more it blocks the adjustment and the lighter the grey the more it allows the adjustment to show through the mask. — location: [1647](kindle://book?action=open&asin=B00EBRW2K4&location=1647) ^ref-62372
+
+---
+Try using a brush opacity of between 8% and 20%. This allows you to build up your mask with multiple brush strokes. — location: [1657](kindle://book?action=open&asin=B00EBRW2K4&location=1657) ^ref-61519
+
+---
+When painting on a layer mask it's a good idea to use a soft-edged brush as this will help blend the effect much more naturally into the finished image. — location: [1659](kindle://book?action=open&asin=B00EBRW2K4&location=1659) ^ref-3526
+
+---
+Add a new Hue/Saturation mask and increase the saturation for the "Master" colour by +20. — location: [1668](kindle://book?action=open&asin=B00EBRW2K4&location=1668) ^ref-38820
+
+---
+By separating the elements of the image using masks we were able to adjust and fine tune each. — location: [1702](kindle://book?action=open&asin=B00EBRW2K4&location=1702) ^ref-46120
+
+---
+Making fewer adjustments is almost always a good thing. You end up with a higher quality finished image, you make it more believable and you make your adjustments quicker. — location: [1703](kindle://book?action=open&asin=B00EBRW2K4&location=1703) ^ref-57414
+
+---
+We used two different approaches to masking. One started with a white mask and applied black paint to hide the effect. The other started with a black mask and applied white paint to reveal the effect. You can use either approach but it's best to start with the one that means you have less to paint. — location: [1706](kindle://book?action=open&asin=B00EBRW2K4&location=1706) ^ref-34164
+
+---
+how it's possible to paint such as complex mask, let alone paint it in a couple of minutes. — location: [1712](kindle://book?action=open&asin=B00EBRW2K4&location=1712) ^ref-45777
+
+---
+a duplicate of all the layers (created using Shift + Ctrl + Alt + E). — location: [1795](kindle://book?action=open&asin=B00EBRW2K4&location=1795) ^ref-15945
+
+---
+As with most things in Photoshop, it's always best to plan your adjustment before making it — location: [1802](kindle://book?action=open&asin=B00EBRW2K4&location=1802) ^ref-33249
+
+---
+Method 2 - Blending Mode — location: [1848](kindle://book?action=open&asin=B00EBRW2K4&location=1848) ^ref-61520
+
+---
+Set the zoom level for your image to 50%. You can do this by zooming in or out with the magnifying glass tool in the tools palette or by typing 50% into the zoom level indicator found at the bottom left of the Photoshop interface. — location: [2175](kindle://book?action=open&asin=B00EBRW2K4&location=2175) ^ref-39919
+
+---
+http://www.amazon.co.uk/Robin-Whalley/e/B00B1VIN5G/ref=ntt_dp_epwbk_0 — location: [2363](kindle://book?action=open&asin=B00EBRW2K4&location=2363) ^ref-40254
+
+---

@@ -1,0 +1,321 @@
+---
+aliases:
+tags:
+created: 2023-03-06 18:18
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+[](https://pyartez.github.io/swiftui/using-protocols-observableobject-published-property-wrappers-swiftui.html)
+
+
+
+9 Feb, 2021
+
+## Background
+
+As I’m sure any iOS developer now knows, the future of iOS app development is [SwiftUI](https://developer.apple.com/xcode/swiftui/). Apple’s new UI development language is now on it’s 2nd major release. While my own personal feeling is that the framework is not quite ready for prime time (much like when Swift first arrived. It’s missing some fairly key features) and we are perhaps a version or 2 away from it realistically being an option for being used to build a complete app. There is no denying that it is the future and when it works well, it makes building UI a lot easier.
+
+As SwiftUI is the future, I’ve been investigating how teams might migrate their existing architectures across to the new technology. There a number of challenges presented by migrating to SwiftUI we will discuss below. As the title suggests we will be exploring how to use a presenter to control a SwiftUI view. It doesn’t matter which architecture you are using as such, whether it’s VIPER, MVVVM, VIP, MVP etc. As long as the logic and state of the view has been abstracted away from the view itself so it can be properly unit tested.
+
+## Example
+
+### List Item View
+
+Let’s start by creating an example in SwiftUI. We will create a simple list view to display some news for example. Let’s create a simple list view first of all:
+
+```
+// 1
+struct ListItemViewModel: Identifiable {
+    let id: Int
+    let title: String
+    let subTitle: String?
+    let image: String
+}
+
+// 2
+struct ListItemView: View {
+    let viewModel: ListItemViewModel
+    
+    var body: some View {
+        HStack() {
+            Image(viewModel.image)
+            VStack(alignment: .leading) {
+                Text(viewModel.title)
+                    .font(.headline)
+                viewModel.subTitle.map({
+                    Text($0)
+                        .font(.subheadline)
+                })
+            }
+        }
+    }
+}
+
+// 3
+struct ListItemView_Previews: PreviewProvider {
+    static var previews: some View {
+        ListItemView(
+            viewModel: ListItemViewModel(
+                id: 1,
+                title: "Test Title",
+                subTitle: "Test Subtitle",
+                image: "first"
+            )
+        )
+    }
+}
+```
+
+This is quite a straight forward view, but let’s step through it.
+
+1.  First of all we define our model for the view. We have an id so that we can conform to [Identifiable](https://developer.apple.com/documentation/swift/identifiable). This allows SwiftUI to uniquely identify each model in the view and helps with performing things like animation and reordering. We also have a title, optional subTitle and an image string. Hopefully nothing here is too scary.
+2.  Now we define the view inself. Views in SwiftUI are simple structs that conform to the View protocol, rather than subclasses of UIView like they used to be in UIKit. Its a simple Hstack with an image view then 2 labels stacked on top of each other. See the screen grab below.
+3.  Finally we have the preview code to inject an example model to use in the preview.
+
+![SwiftUI ListItemView](safari-reader://pyartez.github.io/assets/images/swiftui-listview.png "SwiftUI ListItemView")
+
+### List View
+
+Now that we have the items in our list, lets create a simple list view that displays those items.
+
+```
+// 1
+struct ContentView: View {
+    let listItems: [ListItemViewModel]
+ 
+    var body: some View {
+        List(listItems) { item in
+            ListItemView(viewModel: item)
+        }
+    }
+}
+
+// 2
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        let items = [ListItemViewModel(id: 1, title: "test", subTitle: "test sub", image: "first"),
+                    ListItemViewModel(id: 2, title: "test2", subTitle: "test sub1", image: "first"),
+                    ListItemViewModel(id: 3, title: "test3", subTitle: "test sub2", image: "first"),
+                    ListItemViewModel(id: 4, title: "test4", subTitle: "test sub3", image: "first"),
+                    ListItemViewModel(id: 5, title: "test5", subTitle: "test sub4", image: "first")]
+        
+        ContentView(listItems: items)
+    }
+}
+```
+
+Ok so what do we have here:
+
+1.  A simple ContentView who has an array of list item view models and a body. The body lists out the content of our list using the ListItemView we created earlier. Simple
+2.  Here we have some test data to show that our list is working. If we preview this view we will see something like this:
+3. ![](https://pyartez.github.io/assets/images/swiftui-fulllistview.png)
+
+That’s wonderful, however it is not particularly dynamic. This is where a presenter or view model would come in. If we look at the description of [MVP](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93presenter) or [MVVM](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) we will see they have a similar role:
+
+> The presenter acts upon the model and the view. It retrieves data from repositories (the model), and formats it for display in the view.
+
+There are further abstractions layers (such as interactors and use cases). However we are less concerned with them in this discussion and more on the relationship between the view and the presenter who is holding the state and logic of the view.
+
+### Abstracting the state
+
+So at the moment we have a pretty stateless SwiftUI view that simply displays a hardcoded list. Now let’s attempt to abstract the list items away into another object that is injected into the view. This object would be responsible for fetching our items and loading them for the view.
+
+This is where an [ObservableObject](https://developer.apple.com/documentation/combine/observableobject) comes in.
+
+> When your type conforms to ObservableObject, you are creating a new source of truth and teaching SwiftUI how to react to changes. In other words, you are defining the data that a view needs to render its UI and perform its logic. SwiftUI uses this dependency to automatically keep your view consistent and show the correct representation of your data. We like to think of ObservableObject as your data dependency surface. This is the part of your model that exposes data to your view, but it’s not necessarily the full model.
+
+So lets update our example to move our list of items into a separate class that conforms to this protocol.
+
+```
+final class ListPresenter: ObservableObject {
+    @Published var listItems: [ListItemViewModel] = []
+}
+
+
+struct ContentView: View {
+    @ObservedObject private var presenter: ListPresenter
+    
+    init(presenter: ListPresenter) {
+        self.presenter = presenter
+    }
+ 
+    var body: some View {
+        List(presenter.listItems) { item in
+            ListItemView(viewModel: item)
+        }
+    }
+}
+```
+
+The [@Published](https://developer.apple.com/documentation/combine/published) property wrapper here works with the ObservableObject to notify SwiftUI whenever the value changes in order to trigger an update.
+
+We also see the [@ObservedObject](https://developer.apple.com/documentation/swiftui/observedobject) property wrapper. This causes this view to subscribe to the ObservableObject that’s assigned to it, and invalidates the view any time the object updates.
+
+This is great and allows us to inject an object from outside of the view who can manage the fetching and supplying to the view, whenever the listItems var updates, the view will automatically update!
+
+### De-coupling dependencies
+
+Now there is one problem here, can you see it? This view has a dependency between the view itself and the presenter class. Now if you are following the SOLID principles for example, and like to separate dependencies between your classes and layers we will need to remove the dependency between the view and presenter.
+
+To do this lets change the ListPresenter class to be a protocol instead:
+
+```
+final class ListPresenterImp: ListPresenter {
+    @Published var listItems: [ListItemViewModel] = []
+}
+
+protocol ListPresenter: ObservableObject {
+    @Published var listItems: [ListItemViewModel] { get }
+}
+
+struct ContentView: View {
+    @ObservedObject private var presenter: ListPresenter
+    
+    init(presenter: ListPresenter) {
+        self.presenter = presenter
+    }
+ 
+    var body: some View {
+        List(presenter.listItems) { item in
+            ListItemView(viewModel: item)
+        }
+    }
+}
+```
+
+This looks like it should be a straight forward change… Wrong! You will now start seeing errors galore. The primary cause coming from the decleration of our new protocol:
+
+> Property ‘listItems’ declared inside a protocol cannot have a wrapper
+
+The problem here being exactly as the error states. We cannot use property wrappers inside protocols! That is going to cause a bit of a problem as we now can’t make use of the nice integration with SwiftUI via @Published properties, or so it seems…
+
+Let’s take a step back for a moment, what exactly does the @Published property wrapper actually do? The @Published property wrapper essentially provides a publisher that the SwiftUI system can subscribe to in order to listen to updates to the value. This is in fact an implementation detail. One of the key points of protocol oriented programming is to abstract the implementation of functions are variables away from the dependency so that it is unaware of the inner workings. By trying to apply a property wrapper to the protocol we are trying to enforce how that variable should implemented under the hood. When infact should the implementing class of our protocol wish to, they could create their own custom implementation of the wrapper.
+
+### Fixing the errors
+
+Ok so let’s start by removing the @Published property wrapper from our protocol:
+
+```
+final class ListPresenterImp: ListPresenter {
+    @Published var listItems: [ListItemViewModel] = []
+}
+
+protocol ListPresenter: ObservableObject {
+    var listItems: [ListItemViewModel] { get }
+}
+
+struct ContentView: View {
+    @ObservedObject private var presenter: ListPresenter
+    
+    init(presenter: ListPresenter) {
+        self.presenter = presenter
+    }
+ 
+    var body: some View {
+        List(presenter.listItems) { item in
+            ListItemView(viewModel: item)
+        }
+    }
+}
+```
+
+Great! However there are now a bunch of different errors occuring… The key one that we need to pay attention to is this one:
+
+> Protocol ‘ListPresenter’ can only be used as a generic constraint because it has Self or associated type requirements
+
+Right, so we have solved the riddle of @Published but this has now surfaced another problem. In order for our ListPresenter protocol to be compatible with the ObervedObject property wrapper in the view, it must extend ObservableObject. Now the problem here is that the ObservableObject uses an associatedtype. Which means if we wish to use it or hold a reference to it we must do type erasure (for more info read my [previous post on type erasure](safari-reader://pyartez.github.io/type-erasure/what-is-type-erasure)) or use a generic constraint.
+
+The simplest solution is for us to use a generic constraint on the view. View the code below:
+
+```
+final class ListPresenterImp: ListPresenter {
+    @Published var listItems: [ListItemViewModel] = []
+}
+
+protocol ListPresenter: ObservableObject {
+    var listItems: [ListItemViewModel] { get }
+}
+
+struct ContentView<T>: View where T: ListPresenter {
+    @ObservedObject private var presenter: T
+    
+    init(presenter: T) {
+        self.presenter = presenter
+    }
+ 
+    var body: some View {
+        List(presenter.listItems) { item in
+            ListItemView(viewModel: item)
+        }
+    }
+}
+```
+
+So what has changed here. You will now notice that we have added a generic type T to our view. We have also added a generic constraint when implementing the View protocol which signals that the init and body implementations here are only when type T is a ListPresenter. Now in this instance that works fine as we only intend to use this view with our ListPresenter class. This removes the errors and the code now compiles. Let’s update the code and run a little test to make sure we are still getting all the reactive goodness of SwiftUI.
+
+```
+final class ListPresenterImp: ListPresenter {
+    @Published var listItems: [ListItemViewModel] = []
+    
+    init() {
+        Timer.scheduledTimer(withTimeInterval: 5.0, repeats: false) { (timer) in
+            let items = [ListItemViewModel(id: 1, title: "test", subTitle: "test sub", image: "first"),
+                        ListItemViewModel(id: 2, title: "test2", subTitle: "test sub1", image: "first")]
+            
+            self.listItems = items
+        }
+    }
+}
+
+protocol ListPresenter: ObservableObject {
+    var listItems: [ListItemViewModel] { get }
+}
+
+struct ContentView<T>: View where T: ListPresenter {
+    @ObservedObject private var presenter: T
+    
+    init(presenter: T) {
+        self.presenter = presenter
+    }
+ 
+    var body: some View {
+        List(presenter.listItems) { item in
+            ListItemView(viewModel: item)
+        }
+    }
+}
+```
+
+We have updated our list presenter implementation class to update our list items after 5 seconds. Nice and easy. If we initialise our view with a presenter with 5 items as below, then after 5 seconds our list should reduce to the 2 items as set in the timer.
+
+```
+let items = [ListItemViewModel(id: 1, title: "test", subTitle: "test sub", image: "first"),
+                    ListItemViewModel(id: 2, title: "test2", subTitle: "test sub1", image: "first"),
+                    ListItemViewModel(id: 3, title: "test3", subTitle: "test sub2", image: "first"),
+                    ListItemViewModel(id: 4, title: "test4", subTitle: "test sub3", image: "first"),
+                    ListItemViewModel(id: 5, title: "test5", subTitle: "test sub4", image: "first")]
+        
+let presenter = ListPresenterImp()
+presenter.listItems = items
+let contentView = ContentView(presenter: presenter)
+```
+
+Now let’s run this as part of an app and see what happens:
+![](https://miro.medium.com/v2/resize:fit:1400/1*yf5LQhhjtO0i01Q5tKP1xg.gif)
+
+So as you can see, after 5 seconds the list of items is reduced to 2 items, proving that our implementation works and we are still able to hook into the nice secret sauce that Combine and SwiftUI expose to us to allow us to update our views. I’ve seen some rather crazy implementations and workarounds on Stack Overflow. Hopefully this implementation is a little nicer!
+
+Download the [sample project](https://github.com/pyartez/swiftui-presenter) to run it for yourself (Xcode 12.4)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

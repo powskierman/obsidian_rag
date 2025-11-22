@@ -1,0 +1,15 @@
+---
+aliases: []
+tags: []
+---
+# Note Taking MoC
+Date: 2023-12-27
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- [[Note-taking apps for iPad]]
+- 

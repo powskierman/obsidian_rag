@@ -1,0 +1,187 @@
+---
+aliases:
+  - Setting up LightRAG
+tags:
+  - AI
+  - RAG
+  - implementation
+  - tutorial
+created: 2025-10-21 15:34
+ContentType: guide
+Backlink: "[[GraphRAG & LightRAG MoC]]"
+---
+### Main Idea
+
+Step-by-step guide to implementing LightRAG alongside existing Obsidian RAG system using a phased, gradual approach.
+
+### Implementation Phases
+
+**Phase 1: Test (Week 1)**
+```bash
+# Install LightRAG
+pip install lightrag-hku
+
+# Test on subset of notes
+# Medical folder only (~200 notes)
+# Evaluate graph connections quality
+```
+
+**Phase 2: Parallel (Week 2-3)**
+```python
+# Run both systems side-by-side
+# Compare results for same queries
+# Identify optimal use cases for each system
+```
+
+**Phase 3: Integrate (Week 4)**
+```python
+# Smart routing based on query type
+# Keep both systems active
+# LightRAG for relationships
+# Current RAG for simple lookups
+```
+
+### Basic Setup
+
+**Installation:**
+```bash
+pip install lightrag-hku
+```
+
+**Initialize LightRAG:**
+```python
+from lightrag import LightRAG
+from lightrag.llm import ollama_model_complete, ollama_embedding
+
+# Initialize LightRAG
+rag = LightRAG(
+    working_dir="./lightrag_db",
+    llm_model_func=ollama_model_complete,
+    embedding_func=ollama_embedding,
+    llm_model_name="qwen2.5:7b"  # or qwen2.5-coder:32b
+)
+
+# Build knowledge graph from vault
+for note in vault_notes:
+    rag.insert(note.content)
+
+# Query with graph awareness
+result = rag.query(
+    "How does my treatment relate to outcomes?",
+    mode="hybrid"  # Combines graph + vector search
+)
+```
+
+### References
+
+- [[LightRAG Overview]]
+- [[LightRAG Query Modes]]
+- GitHub: https://github.com/HKUDS/LightRAG
+- Current RAG location: `/Users/michel/ai/RAG/obsidian_rag/`
+
+### Notes
+
+**Directory Structure:**
+```
+/Users/michel/ai/RAG/
+├── obsidian_rag/          # Existing system
+│   ├── chroma_db/         # Vector database
+│   ├── venv/              # Python 3.12 environment
+│   └── *.py               # Current RAG scripts
+└── lightrag_db/           # NEW: Knowledge graph database
+    ├── entities/
+    ├── relationships/
+    └── graph_index/
+```
+
+**Integration Script:**
+```python
+# test_lightrag.py
+from lightrag import LightRAG
+from lightrag.llm import ollama_model_complete, ollama_embedding
+import os
+from pathlib import Path
+
+# Vault path
+VAULT_PATH = "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel/"
+
+# Initialize LightRAG
+rag = LightRAG(
+    working_dir="./lightrag_db",
+    llm_model_func=ollama_model_complete,
+    embedding_func=ollama_embedding,
+    llm_model_name="qwen2.5:7b"
+)
+
+# Index medical notes subset
+medical_path = Path(VAULT_PATH) / "Tech" / "AI" / "RAG"
+for md_file in medical_path.glob("*.md"):
+    with open(md_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        rag.insert(content)
+        print(f"Indexed: {md_file.name}")
+
+# Test queries
+test_queries = [
+    "How does Yescarta relate to my current monitoring plan?",
+    "What factors led to choosing CAR-T over transplant?",
+    "Visualize my treatment timeline"
+]
+
+for query in test_queries:
+    print(f"\nQuery: {query}")
+    result = rag.query(query, mode="hybrid")
+    print(f"Result: {result[:200]}...")
+```
+
+**Resource Requirements:**
+- Storage: +100MB for graph database
+- RAM: +2GB during operations (36GB available ✅)
+- Initial indexing: ~30 minutes for 1,584 files
+- Query time: +5 seconds for graph traversal
+
+**Configuration Options:**
+```python
+rag = LightRAG(
+    working_dir="./lightrag_db",
+    llm_model_func=ollama_model_complete,
+    embedding_func=ollama_embedding,
+    llm_model_name="qwen2.5:7b",
+    # Optional parameters:
+    chunk_size=1200,           # Adjust for your notes
+    chunk_overlap=200,         # Entity context preservation
+    max_token_size=4096,       # LLM context window
+    enable_llm_cache=True,     # Speed up repeated queries
+)
+```
+
+### Related Notes
+
+- [[Knowledge Graph RAG Architecture]]
+- [[LightRAG Query Modes]]
+- [[LightRAG Benefits]]
+- [[Obsidian RAG System MoC]]
+
+### Questions / Ideas for Further Exploration
+
+- What's optimal chunk size for medical notes?
+- Should we index entire vault or medical subset first?
+- How to handle Obsidian wiki-links in graph?
+- What LLM model works best (qwen2.5:7b vs 32b)?
+- How to update graph when notes change?
+
+### To-Do
+
+- [ ] Create `/Users/michel/ai/RAG/lightrag_db/` directory
+- [ ] Install lightrag-hku in existing venv
+- [ ] Write test_lightrag.py script
+- [ ] Index medical notes subset (200 files)
+- [ ] Test all four query modes
+- [ ] Compare with current RAG results
+- [ ] Measure indexing and query performance
+- [ ] Document entity extraction quality
+- [ ] Plan incremental update strategy
+
+### Smart Connections Insights
+
+Start small with medical notes subset to validate graph quality before full vault indexing. The 30-minute test can determine if relationship discovery justifies the complexity.

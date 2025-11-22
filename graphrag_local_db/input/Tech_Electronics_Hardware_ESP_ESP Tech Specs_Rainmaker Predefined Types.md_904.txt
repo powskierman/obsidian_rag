@@ -1,0 +1,54 @@
+# Rainmaker Predefined Types.md
+
+---
+aliases: 
+tags:
+  - Rainmaker
+---
+# Rainmaker Predefined Types
+Date: 2023-09-17
+
+### Backlink
+[[Rainmaker MoC]]
+
+### Reference
+-  [Standard Types · ESP RAINMAKER](https://rainmaker.espressif.com/docs/standard-types.html)
+### Notes
+-  | **Name** | **Type** | **Params** | **GVA** | **Alexa** | **Image** |
+| --- | --- | --- | --- | --- | --- |
+| Switch | esp.device.switch | **Name**, **Power\*** | SWITCH | SWITCH | ![](https://rainmaker.espressif.com/img/switch.png) |
+| Lightbulb | esp.device.lightbulb | **Name**, **Power\***, Brightness, Color Temperature, Hue, Saturation, Intensity, Light Mode | LIGHT | LIGHT | ![](https://rainmaker.espressif.com/img/lightbulb.png) |
+| Light | esp.device.light | **Name**, **Power\***, Brightness, Color Temperature, Hue, Saturation, Intensity, Light Mode | LIGHT | LIGHT | X |
+| Fan | esp.device.fan | **Name**, **Power\***, **Speed**, Direction | FAN | FAN | ![](https://rainmaker.espressif.com/img/fan.png) |
+| Temperature Sensor | esp.device.temperature-sensor | **Name**, **Temperature\*** | X | TEMPERATURE  
+\_SENSOR | ![](https://rainmaker.espressif.com/img/temperature-sensor.png) |
+| Outlet | esp.device.outlet | **Name**, **Power\*** | OUTLET | SMARTPLUG | ![](https://rainmaker.espressif.com/img/outlet.png) |
+| Plug | esp.device.plug | **Name**, **Power\*** | OUTLET | SMARTPLUG | X |
+| Socket | esp.device.socket | **Name**, **Power\*** | OUTLET | SMARTPLUG | X |
+| Lock | esp.device.lock | **Name**,  
+**Lock State\*** | LOCK | SMARTLOCK | ![](https://rainmaker.espressif.com/img/lock.png) |
+| Internal Blinds | esp.device.blinds-internal | **Name**,  
+**Blinds Position\*** | BLINDS | INTERIOR\_BLIND | X |
+| External Blinds | esp.device.blinds-external | **Name**,  
+**Blinds Position\*** | BLINDS | EXTERIOR\_BLIND | X |
+| Garage Door | esp.device.garage-door | **Name**,  
+**Garage Position\***, Lock State | GARAGE | GARAGE\_DOOR | X |
+| Speaker | esp.device.speaker | **Name**, **Power\***, **Media State**, **Media Control**, **Volume**, Mute | SPEAKER | SPEAKER | X |
+| Air Conditioner | esp.device.air-conditioner | **Name**, **Power\***, **Setpoint Temperature**, **Fan Speed**, **AC Mode** | AC\_UNIT | AIR\_CONDITIONER | X |
+| Thermostat | esp.device.thermostat | **Name**, **Setpoint Temperature\***, **AC Mode**, Power | THERMOSTAT | THERMOSTAT | ![](https://rainmaker.espressif.com/img/lock.png) |
+| TV | esp.device.tv | **Name**, **Power\***, **Media State**, **Media Control** **App Selector**, **Input Selector**, **Volume**, Mute | TV | TV | X |
+| Washer | esp.device.washer | **Name**, Mode | WASHER | WASHER | X |
+| Contact Sensor | esp.device.contact-sensor | **Name**,  
+**Contact Detection State\*** | X | CONTACT\_SENSOR | X |
+| Motion Sensor | esp.device.motion-sensor | **Name**,  
+**Motion Detection State\*** | X | MOTION\_SENSOR | X |
+| Door Bell | esp.device.doorbell | **Name**,  
+**Pressed State\*** | X | DOORBELL | X |
+| Security Panel | esp.device.security-panel | **Name**, **Arm State\***,  
+Fire Alarm State,  
+Water Alarm State,  
+CO Alarm State,  
+Burglary Alarm State | X | SECURITY\_PANEL | X |
+| Other | esp.device.other |  | X | OTHER | ![](https://rainmaker.espressif.com/img/other.png) |
+
+## [](https://rainmaker.espressif.com/docs/standard-types.html#services)

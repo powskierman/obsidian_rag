@@ -1,0 +1,25 @@
+---
+aliases: 
+tags:
+  - thread
+---
+# Mesh-Local address
+Date: 2024-08-20
+
+### Backlink
+[[Tech/Networking/Thread MoC|Thread MoC]]
+
+### Reference
+-  
+### Notes
+-  This address is significant in Thread networks and has some important characteristics:
+Prefix: fdfe:fb46:ee79:4084 (64 bits)
+This is the Mesh Local Prefix (MLP) for your Thread network.
+It's unique to your Thread network and remains stable.
+Interface Identifier (IID): a6bf:3d37:384a:c814 (64 bits)
+This part identifies the specific node within your Thread network.
+Key points about this mesh-local address:
+Stability: In Thread networks, this address is typically stable and doesn't change frequently. It's often referred to as the Mesh-Local EID (ML-EID).
+Uniqueness: This address is unique within your Thread network and can be used to identify the node consistently.
+Scope: It's routable within your Thread network but not outside of it.
+Privacy: The IID part doesn't appear to be directly derived from an EUI-64, which provides some privacy benefits.

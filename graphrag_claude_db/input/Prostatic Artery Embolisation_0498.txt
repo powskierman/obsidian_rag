@@ -1,0 +1,48 @@
+---
+aliases: 
+tags:
+  - prostate
+  - medical
+created: 2025-03-03 16:52
+---
+### Main Idea
+- Obtain prostatic hyperplesia relief without surgery
+### References
+- 
+### Notes
+- Prostatic Artery Embolization (PAE) is a minimally invasive procedure designed to treat benign prostatic hyperplasia (BPH), a condition where the prostate enlarges and causes lower urinary tract symptoms (LUTS). PAE is performed by interventional radiologists and has emerged as an alternative to traditional surgical treatments like transurethral resection of the prostate (TURP).
+##### How PAE Works
+	•	The procedure involves blocking blood flow to specific areas of the prostate using tiny particles injected through a catheter. This reduces blood supply, causing parts of the prostate to shrink and alleviating pressure on the urethra.
+	•	It is performed through a small puncture in the groin or wrist, with a catheter guided into the arteries supplying the prostate.
+	•	The process typically takes 1–4 hours, depending on the complexity of the arterial anatomy.
+##### Benefits
+	1.	Minimally Invasive: No incisions are required, and recovery time is shorter than traditional surgeries.
+	2.	Preserves Sexual Function: PAE has a low risk of complications like erectile dysfunction or retrograde ejaculation, which are more common with surgical options.
+	3.	Effective Symptom Relief: Studies show significant improvements in urinary symptoms, quality of life, and prostate volume reduction within 6–12 months post-procedure.
+	4.	Suitable for High-Risk Patients: It is an option for patients who cannot undergo surgery due to age, comorbidities, or anticoagulation therapy.
+##### Limitations
+	•	Efficacy Compared to TURP: While PAE improves symptoms significantly, its functional outcomes (e.g., maximum urinary flow rate) may be slightly less effective than TURP due to its non-resective nature.
+	•	Complexity of Procedure: PAE requires highly skilled interventional radiologists due to the intricate arterial anatomy and risk of non-target embolization.
+	•	Durability: Long-term data indicate that up to 20% of patients may experience recurrence of symptoms within five years due to gland regrowth.
+##### Ideal Candidates
+PAE is most appropriate for:
+	•	Men with moderate-to-severe LUTS caused by BPH.
+	•	Patients who wish to avoid surgery or medications.
+	•	Those with large prostates or who are not candidates for invasive procedures due to health conditions.
+##### Risks and Side Effects
+	•	Mild side effects include pelvic pain, blood in urine or semen, and urinary urgency, which usually resolve within days to weeks.
+	•	Rare complications include accidental embolization of non-target organs such as the bladder or rectum, which can cause localized tissue damage.
+##### Effectiveness
+- Clinical trials have shown:
+	•	A reduction in International Prostate Symptom Score (IPSS) by 9–21 points within months.
+	•	Prostate volume reduction by 20–40% over six months.
+	•	Long-term symptom relief lasting at least 3–4 years, though some patients may require repeat treatments.
+- PAE provides a safe and effective alternative for men seeking relief from BPH symptoms without undergoing surgery. However, consultation with both a urologist and interventional radiologist is essential to determine if this option is suitable based on individual anatomy and health conditions.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

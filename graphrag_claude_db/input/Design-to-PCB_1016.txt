@@ -1,0 +1,32 @@
+---
+aliases: 
+tags:
+  - eleksmaker
+  - laser
+created: 2021-12-27 17:59
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- 1.  Export Kicad to gerber
+
+2.  Import to FlatCam, generate milling gcode
+
+3.  Replace all "Z down"-movements with "laser on" and all "Z up"-movements with "laser off"
+
+4.  Use laserweb to preview and send to the machine
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 
+
+
+
+

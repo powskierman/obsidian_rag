@@ -1,0 +1,20 @@
+# esp-idf courses.md
+
+---
+aliases: 
+tags:
+  - esp32
+  - esp-idf
+  - tutorial
+---
+# esp-idf courses
+Date: 2023-09-16
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  [https://learnesp32.com](https://learnesp32.com/)
+	- Comprehensive, well structured course that cost $75

@@ -1,0 +1,462 @@
+---
+id: 16112738
+updated: 2022-06-18
+title: Power, Sex, Suicide
+author: Nick Lane
+highlights: 108
+last_highlight: 2011-01-29
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112738
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/510VOh-NAqL._SL500_.jpg)
+
+# About
+Title: [[Power, Sex, Suicide]]
+Authors: [[Nick Lane]]
+Category: #books
+Number of Highlights: ==108==
+Readwise URL: https://readwise.io/bookreview/16112738
+Date: [[2022-06-18]]
+Last Highlighted: *2011-01-29*
+
+---
+
+# Highlights
+
+The genome is the full library of genes possessed by an organism, and may run to billions of letters. A gene is essentially the code for a single protein, which usually takes thousands of letters. Each protein is a string of subunits called amino acids, and the precise order of these dictates the functional properties of the protein. The sequence of letters in a gene specifies the sequence of amino acids in a protein. ([203](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=203)) %% Color: yellow %% ^334466395
+
+---
+
+Proteins are the crowning glory of life. Their forms, and their functions, are almost endless, and the rich variety of life is almost entirely attributable to the rich variety of proteins. Proteins make possible all the physical attainments of life, from metabolism to movement, from flight to sight, from immunity to signalling. ([206](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=206)) %% Color: yellow %% ^334466396
+
+---
+
+the most important group are the enzymes, which are biological catalysts that speed up the rate of biochemical reactions by many orders of magnitude, with an astonishing degree of selectivity for their raw materials.Some enzymes can even distinguish between different forms of the same atom (isotopes). Other important groups of proteins include hormones and their receptors, immune proteins like antibodies, DNA-binding proteins like histones, and structural proteins, such as the fibres of the cytoskeleton. ([208](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=208)) %% Color: yellow %% ^334466397
+
+---
+
+there are said to be to million billion mitochondria in an adult human, which together constitute about io per cent of our body weight. ([228](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=228)) %% Color: yellow %% ^334466398
+
+---
+
+the mitochondrial genes only encode a handful of proteins (13 to be exact), along with all the genetic machinery needed to make them. The great majority of mitochondrial proteins (some Boo) are encoded by the genes in the nucleus, of which there are 30 000 to 40 000 in total. ([289](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=289)) %% Color: yellow %% ^334466399
+
+---
+
+bacteria have been collaborating and competing among themselves for nearly four billion years, and yet only came up with the eukaryotic cell once. The acquisition of mitochondria was the pivotal moment in the history of life. ([308](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=308)) %% Color: yellow %% ^334466400
+
+---
+
+flight evolved independently no less than four times, in the insects, the pterosaurs (such as pterodactyls), the birds, and the bats. ([378](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=378)) %% Color: yellow %% ^334466401
+
+---
+
+eyes have evolved independently as many as forty times, each time following a limited set of design specifications: the familiar 'camera eye' of mammals and (independently) the squid; and the compound eyes of insects and extinct groups such as trilobites. ([380](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=380)) %% Color: yellow %% ^334466402
+
+---
+
+all of this engineering flamboyance evolved in the last boo million years, barely a sixth of the time in which life has existed. Before that, stretching back for perhaps more than 3000 million years, there was little to see but bacteria and it few primitive eukaryotic organisms like algae. ([389](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=389)) %% Color: yellow %% ^334466403
+
+---
+
+At its most basic level a multicellular colony is simply a group of cells that divided but failed to separate properly. The difference between a colony and a true multicellular organism is the degree of specialization (differentiation) among genetically identical cells. ([396](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=396)) %% Color: yellow %% ^334466404
+
+---
+
+The event that made all the difference here was the evolution of the eukaryotic cell, the first complex cells that harbour a nucleus. ([405](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=405)) %% Color: yellow %% ^334466405
+
+---
+
+Most specialists agree the eukaryotic cell evolved only once. ([407](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=407)) %% Color: yellow %% ^334466406
+
+---
+
+the acquisition of mitochondria was far more important than simply plugging an efficient power-supply into an already complicated cell, with a nucleus brimming with genes-it was the single event that made the evolution of complex eukaryotic cells possible at all. ([411](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=411)) %% Color: yellow %% ^334466407
+
+---
+
+Diseases like syphilis have become much less virulent over the centuries, and there are hints that a similar attenuation is already underway with AIDS. ([671](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=671)) %% Color: yellow %% ^334466408
+
+---
+
+A bacterium loses its cell wall but survives because it has an internal cytoskeleton, which it had made use of before to keep in shape. It now resembles a modern archaeon. With a few modifications to its cytoskeleton, the wall-less archaeon learns to eat food by phagocytosis. As it grows larger it wraps its genes in a membrane and develops a nucleus. It has now turned into an archezoon, perhaps resembling cells like Giardia. One such hungry archezoon happens to engulf a smaller aerobic bacterium but fails to digest it, let's say because the bacterium is a parasite like the modern Rickettsia,and has learned to evade the defences of its host. The two get along together in a benign parasitic relationship, but as atmospheric oxygen levels rise, the relationship begins to pay dividends to both the host and parasite: the parasite still gets its free lunch, but the host is now getting a better deal-it's protected from toxic oxygen from within by its catalytic converter. Then, finally, in an act of breathtaking ingratitude, the host plugs a 'tap' into the membrane of its guest and drains off its energy. The modern eukaryotic cell is born, and never looks back. ([682](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=682)) %% Color: yellow %% ^334466409
+
+---
+
+At present, evidence suggests that the two protagonists of the eukaryotic merger were a methanogen and a metabolically versatile a-proteobacterium, like Rhodobacter. The hydrogen hypothesis reconciles the apparently discordant ecological requirements of these protagonists by arguing that the deal revolved around the methanogen's metabolic addiction to hydrogen, and the bacterium'sability to provide it. ([834](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=834)) %% Color: yellow %% ^334466410
+
+---
+
+the origin of the eukaryotic cell, was simply gene transfer. Through a series of small and realistic steps, the hydrogen hypothesis explains how a chemical dependency between two cells evolved to become a single chimeric cell containing organelles that function as mitochondria. This cell is able to import organic molecules, like sugars, across its external membrane and to ferment them in its cytoplasm, in the same fashion as yeast. It is able to pass the fermentation products onwards to the mitochondria, which can then oxidize them using oxygen, or for that matter other molecules such as nitrate. This chimeric cell does not yet have a nucleus. It may or may not have lost its cell wall. It does have a cytoskeleton, but has probably not adapted it for changing shape like an amoeba; it merely provides rigid structural support. In short, we have derived a `prototype' eukaryote without a nucleus. ([889](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=889)) %% Color: yellow %% ^334466411
+
+---
+
+nucleus. ([894](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=894)) %% Color: yellow %% ^334466412
+
+---
+
+ATP is composed of adenosine bound to three phosphate groups linked end to end in a chain, a somewhat precarious arrangement. Splitting off the terminal phosphate group from ATP releases a large amount of energy that can be used to power work-indeed, is required to power much biological work. ([1119](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1119)) %% Color: yellow %% ^334466413
+
+---
+
+Muscle fibres split ATP to liberate the energy that they need to contract and relax again, leaving adenosine diphosphate (ADP) and phosphate (P):ATP ([1121](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1121)) %% Color: yellow %% ^334466414
+
+---
+
+Because the cell has a limited supply of ATP, fresh supplies must be regenerated continually from ADP and phosphate-and to do so, of course, requires an input of energy, as can he seen if the equation above is followed backwards. This is the function of fermentation: to provide the energy that is needed to regenerate ATP. Fermenting one molecule of glucose regenerates two molecules of ATP. ([1123](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1123)) %% Color: yellow %% ^334466415
+
+---
+
+Severo Ochoa showed that as many as 38 molecules of ATP could be generated by respiration from a single molecule of glucose, a finding for which he too received the Nobel Prize, in 1959. This means that oxygen respiration can produce ig times more ATP per molecule of glucose than does fermentation. The total production is astonishing. In an average person, ATP is produced at a rate of 9 x 1020 molecules per second, which equates to a turnover rate (the rate at which it is produced and consumed) of about 65 kgevery day. ([1129](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1129)) %% Color: yellow %% ^334466416
+
+---
+
+as many as 38 molecules of ATP could be generated by respiration from a single molecule of glucose, a finding for which he too received the Nobel Prize, in 1959. This means that oxygen respiration can produce ig times more ATP per molecule of glucose than does fermentation. ([1129](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1129)) %% Color: yellow %% ^334466417
+
+---
+
+ATP to be 'the universal energy currency' of life. ([1133](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1133)) %% Color: yellow %% ^334466418
+
+---
+
+In the 1940s, ATP was known to be the product of both fermentation and respiration, and by the 1950s, photosynthesis was added to the list-it, too, generates ATP, in this case by trapping the energy of sunlight. So the three great energy highways of life, respiration, fermentation, and photosynthesis, all generate ATP, another profound example of the fundamental unity of life. ([1135](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1135)) %% Color: yellow %% ^334466419
+
+---
+
+Many astrobiologists, keen to link life with space, argue that the primordial soup could have been cooked up in outer space. The earth then received generous helpings in the huge asteroid bombardment that pockmarked the moon and earth for half a billion years from 4.5to 4 billion years ago. ([1358](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1358)) %% Color: yellow %% ^334466420
+
+---
+
+LUCA, the Last Universal Common Ancestor of all known life on Earth. ([1382](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1382)) %% Color: yellow %% ^334466421
+
+---
+
+The early earth, as envisaged by Russell, is a giant electrochemical cell, which depends on the power of the sun to oxidize the oceans. UV rays split water and oxidize iron. Hydrogen, released from water, is so light that it is not retained by gravity, and evaporates off into space. The ocean becomes gradually oxidized, relative to the more reduced conditions in the mantle. According to the basic rules of chemistry, the mixing zone inevitably forms natural cells, replete with their own chemiosmotic and redox gradients. ([1457](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1457)) %% Color: yellow %% ^334466422
+
+---
+
+The critical point of the hydrogen hypothesis is that there never was a primitive eukaryote, one that supposedly possessed a nucleus and had a predatory lifestyle, but did not have any mitochondria. Rather, the first eukaryote was born of the union between two prokaryotes, a fundamentally non-Darwinian process-there was no halfway house. ([1545](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1545)) %% Color: yellow %% ^334466423
+
+---
+
+Internalization of energy production therefore enables both the loss of the cell wall and a much greater cell volume. ([1757](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1757)) %% Color: yellow %% ^334466424
+
+---
+
+why bacteria have remained small and unsophisticated, at least in terms of their morphology. The reasons relate mostly to the selection pressures that face bacteria. These are different from eukaryotic cells because bacteria, for the most part, do not eat each other. Their success in a population therefore depends largely on the speed of their replication. This in turn depends on two critical factors: first, copying the bacterial genome is the slowest step of replication, so the larger the genome, the slower is replication; and second, cell division costs energy, so the least energetically efficient bacteria replicate the slowest. ([1793](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1793)) %% Color: yellow %% ^334466425
+
+---
+
+eukaryotes escape this problem because they generate their energy internally, which makes them relatively independent of their surface area, and enables them to become many thousands of times larger without losing energetic efficiency. ([1802](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1802)) %% Color: yellow %% ^334466426
+
+---
+
+Let's think back again to how respiration works. Electrons and protons are stripped from food, and react with oxygen to provide the energy that we need to live. The energy is released a bit at a time, by breaking the reaction into a series of small steps. These steps take place in the respiratory chain, down which electrons flow, as if down a tiny wire. At several points the energy released is used to pump protons across a membrane, trapping them on the other side, like water behind the dam of a reservoir. The flow of protons back from this reservoir, through special channels in the dam (the drive shafts of the ATPase motor) powers the formation of ATP, the energy 'currency' of the cell. ([1934](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=1934)) %% Color: yellow %% ^334466427
+
+---
+
+Mice live for 2 or 3 years, and elephants for about 60, yet both have a similar number of heartbeats in their lifetime, and over their lives their component cells consume around about the same quantity of oxygen and food (the elephant in 6o years, the mouse in 3). The cells seem able to burn a fixed amount of energy, but the elephant burns its quota more slowly than the mouse ([2178](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2178)) %% Color: yellow %% ^334466428
+
+---
+
+The size of animals influences their population density, the range of distances they travel in a day, the number of offspring, the time to reproductive maturity, the speed of population turnover, and the rate of evolution, such as the origin of new species. All of these traits can be predicted, with startling accuracy, from nothing more than the metabolic rate of individual animals. ([2182](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2182)) %% Color: yellow %% ^334466429
+
+---
+
+the 0.75 exponent turned out to apply to more than just the mammals: birds, reptiles, fish, insects, trees, even single-celled organisms, have all been placed on the same curve: metabolic rate is claimed to vary with the 3/4 power of mass (or mass314) across an extraordinary 21 orders of magnitude. Many other traits also vary with an exponent based on multiples of one quarter (such as 1/4 or 3/4), giving rise to the general term 'quarter-power scaling'. For example, the pulse rate, the diameter of the aorta (even the diameter of tree trunks), and lifespan, all conform roughly to 'quarter-power scaling'. ([2209](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2209)) %% Color: yellow %% ^334466430
+
+---
+
+Both types of fractal share a property known as scale invariance, which is to say they 'look' similar whatever the magnification. For example, the contours of a rock often resemble those of a cliff or even a mountain, ([2230](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2230)) %% Color: yellow %% ^334466431
+
+---
+
+the cardiovascular system of an elephant is nearly a million times bigger than that of a mouse; ([2239](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2239)) %% Color: yellow %% ^334466432
+
+---
+
+Muscle strength is the same: it depends on the cross-sectional area, and so rises with the square of the dimensions, whereas the weight of the animal rises with the cube. This means that even if every muscle cell were to operate with the same power, the strength of the muscle as a whole could at best increase with mass to the power of 2/3 (mass° 67). This is why ants lift twigs hundreds of times their own weight, and grasshoppers leap high into the air, whereas we can barely lift our own weight, or leap much higher than our own height. We are weak in relation to our mass, even though the muscle cells themselves are not weaker. ([2364](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2364)) %% Color: yellow %% ^334466433
+
+---
+
+Unlike organs such as the liver (wherein the activity falls sevenfold from rat to man, as we've seen) the power and metabolic rate of the skeletal muscle is similar in all mammals regardless of their size. ([2382](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2382)) %% Color: yellow %% ^334466434
+
+---
+
+If we start regular exercise, new capillaries start growing into the muscles to provide them with the extra oxygen they need. Likewise, when we acclimatize to high altitude in the mountains, the low atmospheric pressure of oxygen induces the growth of new capillaries. The brain may develop 50 per cent more capillaries over a few months, and lose them again on return to sea level. ([2390](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2390)) %% Color: yellow %% ^334466435
+
+---
+
+in the wild, a mammal uses about thirty times more energy to stay alive than an equivalent reptile. In practical terms, this means that a mammal must eat in one day the amount of food that would sustain a reptile for a whole month. ([2488](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2488)) %% Color: yellow %% ^334466436
+
+---
+
+an individual is an organism composed of genetically identical cells, which are specialized to perform diverse tasks for the good of the organism as a whole. ([2618](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2618)) %% Color: yellow %% ^334466437
+
+---
+
+apoptosis is enforced by mitochondria, ([2623](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2623)) %% Color: yellow %% ^334466438
+
+---
+
+The Selfish Gene either inspired or raised the hackles of an entire generation, at least partly because it was so well written that everyone could feel the icy blast of its conclusion-living organisms are the throwawaysurvival machines of their genes, temporary puppets controlled by virtually immortal puppet-master genes. ([2647](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2647)) %% Color: yellow %% ^334466439
+
+---
+
+Cancer is a chilling ghost of conflict within an individual. A single cell opts out of the body's centralized control and proliferates like a bacterium. ([2749](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2749)) %% Color: yellow %% ^334466440
+
+---
+
+the mutations must be in two sets of genes known as oncogenes and tumour-suppressor genes. Both sets code for proteins that control the normal 'cell cycle'-the way in which cells proliferate or die in response to signals from elsewhere in the body. ([2753](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2753)) %% Color: yellow %% ^334466441
+
+---
+
+in the first eukaryotes, the relationship between the mitochondria and their host cells was parasitical. The proto-mitochondria presumably got into an archaeon and monitored its health for a period, before triggering the death of this host, devouring its packaged remains, and moving on to the next. ([2967](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2967)) %% Color: yellow %% ^334466442
+
+---
+
+Swift and smooth, almost unnoticed, some io billion cells die by apoptosis every day in the human body, to be replaced by fresh, undamaged cells. The death apparatus consists of a number of proteins that are released from the mitochondria into the cell, which then activate the latent death enzymes, the caspases. These enzymes dismember the cell from within, and package its contents for reuse later by other cells. ([2986](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2986)) %% Color: yellow %% ^334466443
+
+---
+
+once upon a time, the bacterial ancestors of the mitochondria were parasites, and used proteins like the porins to attack and dismember their host cell from within, feeding on its remains before moving on to another cell. ([2992](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2992)) %% Color: yellow %% ^334466444
+
+---
+
+the eukaryotic cell itself was forged in the crucible of war between an intracellular parasite, which was later tamed and went on to become the mitochondria, and the host cells, which learnt to survive the infection. ([2996](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=2996)) %% Color: yellow %% ^334466445
+
+---
+
+The first critical difference between mitochondrial and nuclear DNA is the mutation rate. On average, the mutation rate of mitochondrial DNA is nearly twenty times faster than nuclear DNA, although the actual rate varies according to the genes sampled. This fast mutation rate equates to a fast rate of evolution (but we should beware of always equating the two, as we'll see later). The fast rate of evolution stems from the proximity of mitochondrial DNA to the free radicals generated in cellular respiration. The effect is to magnify the differences between races. ([3404](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3404)) %% Color: yellow %% ^334466446
+
+---
+
+human mitochondrial DNA is inherited only from our mothers, by asexual reproduction. ([3409](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3409)) %% Color: yellow %% ^334466447
+
+---
+
+In other words, mitochondrial DNA works like a matriarchal surname, linking a string of individuals together down the corridor of the centuries. Unlike nuclear genes, which are shuffled and redealt every generation, mitochondrial genes allow us to track the fate of individuals and their descendents. ([3412](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3412)) %% Color: yellow %% ^334466448
+
+---
+
+The third aspect of mitochondrial DNA that the Berkeley team drew on is its steady rate of evolution: the mutation rate, though fast, remains approximately constant over thousands or millions of years. This is ascribed to neutral evolution, the assumption that there is little selective pressure on mitochondrial genes, which serve a restricted and menial purpose ([3414](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3414)) %% Color: yellow %% ^334466449
+
+---
+
+So how fast does the mitochondrial clock tick? On the basis of relatively recent, approximately known colonization dates (a minimum of 30 000 years ago for New Guinea, 40 000 years ago for Australia, and 12 000 years ago for the Americas), Wilson and colleagues were able to calculate a divergence rate of about 2 per cent to 4 per cent every million years. ([3418](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3418)) %% Color: yellow %% ^334466450
+
+---
+
+Wilson's group concluded that Mitochondrial Eve lived fairly recently in Africa, and the rest of the world was populated by repeated waves of migration from that continent, lending support to the 'Out of Africa' hypothesis. ([3424](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3424)) %% Color: yellow %% ^334466451
+
+---
+
+the last common ancestor of Neanderthals and humans probably lived about 500 to boo thousand years ago. ([3438](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3438)) %% Color: yellow %% ^334466452
+
+---
+
+Most mitochondria have five to ten copies of their chromosome, which act as an insurance policy against free-radical damage; it is unlikely that the same gene will be damaged on all copies so normal proteins can still be produced. ([3455](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3455)) %% Color: yellow %% ^334466453
+
+---
+
+the 1912 census showed that half the children descended from just one-ninth of the men and one-seventh of the women. The essential point, stressed by Australian fertility expert Jim Cummins, is that reproductive success is extremely unevenly distributed in populations. Most lines fall extinct; and just the same applies to mitochondrial DNA. ([3528](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3528)) %% Color: yellow %% ^334466454
+
+---
+
+The mitochondria, they said, have two main roles: to produce energy, and to produce heat. The balance between energy generation and heat production can vary, and the actual setting might be critical to our health. Here's why.Much of our internal heat is generated by dissipating the proton gradient across the mitochondria] membranes (see page 183). Since the proton gradientcan either power ATP production or heat production, we are faced with alternatives: any protons dissipated to produce heat cannot be used to make ATP. ([3556](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3556)) %% Color: yellow %% ^334466455
+
+---
+
+Mitochondrial genes can be inherited from both parents, albeit rarely; they recombine, if very rarely; they mutate at variablerates according to circumstances, questioning the accuracy of imputed dates; and they are unquestionably subject to natural selection. ([3587](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3587)) %% Color: yellow %% ^334466456
+
+---
+
+the deepest biological difference between the two sexes relates to the inheritance of mitochondria. The female sex specializes to provide the mitochondria (too 000 of them in humans) in the large, immobile egg cells, while the male sex specializes to eliminate mitochondria from tiny, motile sperm cells. ([3590](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3590)) %% Color: yellow %% ^334466457
+
+---
+
+dissimilar populations of mitochondria can compete with each other for succession, and the only way to prevent such conflict is to ensure that all the mitochondria inherited in the egg are genetically identical. ([3596](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3596)) %% Color: yellow %% ^334466458
+
+---
+
+mitochondrial recombination does indeed occur, probably very rarely in human mitochondria, but more commonly in other species, such as yeast and mussels. It is not the taboo we had once thought. Moreover, the condition for recombination, heteroplasmy (a mixture of dissimilar mitochondria), is far more common than is assumed by the selfish conflict model. Some degree of heteroplasmy is found in io to 20 per cent of humans, ([3605](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3605)) %% Color: yellow %% ^334466459
+
+---
+
+The mutation rate of mitochondria] DNA in families suggests one mutation every Boo to 1200 years, whereas the long-term divergence of races suggests a mutation rate of one every 6ooo to 12 000 years. The disparity can be explained if many of the variants are eliminated by natural selection. Counter to the usual mantra, there is now good evidence that natural selection does indeed act on mitochondrial genes, in ways that are subtle and pervasive. ([3608](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3608)) %% Color: yellow %% ^334466460
+
+---
+
+Mitochondria contain proteins that are encoded by two different genomes. Genes in the nucleus encode the vast majority, some 8oo proteins, whereas the handful of mitochondrial genes encodes the rest, a mere 13 proteins, all of which are critical subunits of the large protein complexes of the respiratory chains. The mitochondrial-encoded proteins are essential for respiration. It's this necessary interaction between two genomes, the mitochondrial and nuclear, that explains the need for two sexes. ([3611](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3611)) %% Color: yellow %% ^334466461
+
+---
+
+the mitochondria retained a handful of genes for a positive reason: a rapid-reaction unit of genes in the mitochondria is necessary to maintain efficient respiration. ([3616](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3616)) %% Color: yellow %% ^334466462
+
+---
+
+The fine control of mitochondrial function influences not just energy availability, but other matters of life and death, such as apoptosis, fertility, sex, endothermy, disease, and ageing. ([3618](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3618)) %% Color: yellow %% ^334466463
+
+---
+
+The fertilized egg cell (the zygote) contains about iooooo mitochondria, 99.99 per cent of which come from the mother. ([3660](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3660)) %% Color: yellow %% ^334466464
+
+---
+
+energetic insufficiency certainly causes many failures of chromosomes to separate properly during cell division, giving rise to anomalies in the number of chromosomes such as trisomy ([3664](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3664)) %% Color: yellow %% ^334466465
+
+---
+
+more than half the immature oocytes of a normal woman contain alterations in… ([3671](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3671)) %% Color: yellow %% ^334466466
+
+---
+
+Having established a direct match between a single clone of mitochondria and the nuclear genes, it is necessary to test how well they work together. To do so, the cells and their mitochondria must divide, and this relies on both mitochondria) and nuclear genes. The behaviour of the mitochondria is striking when… ([3677](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3677)) %% Color: yellow %% ^334466467
+
+---
+
+The replication of oocytes in the embryo over the first half of pregnancy takes their number from around ioo after 3 weeks, to 7 million after 5 months (a rise of about 2's). The number of mitochondria climbs to some io ooo per cell, or a total of about 35 billion in all the germ cells combined (a rise of 229), a massiveamplification of the mitochondrial genome. Then follows some kind of selection. How this selection works is quite unknown, but by the time of birth the number of oocytes has fallen from 7 million to about 2 million, an extraordinary wastage of 5 million oocytes, or nearly three quarters of the total. The rate of loss abates after birth, but by the onset of menstruation there are only about 300 000 oocytes left; and by the age of 40, when there is a steep decline in oocyte fertility, just 25000. After that, decline is exponential into menopause. Of the… ([3680](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3680)) %% Color: yellow %% ^334466468
+
+---
+
+the incidence of mitochondrial mutations in newborn babies is a tiny fraction of that in early embryos, implying that a purge of… ([3691](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3691)) %% Color: yellow %% ^334466469
+
+---
+
+The species that have the smallest litters also have the tightest mitochondria] bottleneck (the smallest number of mitochondria per immature oocyte), and the greatest cull of oocytes during development.Although we don't know how such selection acts, it is plain that failing oocytes die by apoptosis, and the mechanism certainly involves the mitochondria. It is possible to preserve an oocyte… ([3694](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3694)) %% Color: yellow %% ^334466470
+
+---
+
+if it is shown that oocytes are the testing ground for mitochondrial performance against the nuclear genes then this would be good evidence that two sexes exist to ensure a perfect… ([3700](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3700)) %% Color: yellow %% ^334466471
+
+---
+
+In ageing cells, mitochondrial genes accumulate new mutations and the dual genomic control begins to break down. Respiratory function declines, free-radical leakage rises, and the mitochondria begin to promote apoptosis. These microscopic changes are writ large as we age. Our energy diminishes, we become… ([3703](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3703)) %% Color: yellow %% ^334466472
+
+---
+
+in mammals and birds, body mass corresponds to metabolic rate: in general, the larger a species the slower its metabolic rate. ([3730](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3730)) %% Color: yellow %% ^334466473
+
+---
+
+On average, if a bird and a mammal are paired so their resting metabolic rate is similar-we might say their pace of life is similar-then the bird lives three or four times longer than the mammal. ([3736](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3736)) %% Color: yellow %% ^334466474
+
+---
+
+We, too, live longer than we should' if our lifespan is plotted against our metabolic rate-like many birds, and indeed bats, we live three or four times longer than other mammals with similar resting metabolic rates. ([3738](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3738)) %% Color: yellow %% ^334466475
+
+---
+
+There is a hint that the 'oldest old' among humans-those who live well past a hundred-are also less prone to degenerative diseases, and tend to die from muscle wastage rather than any specific illness. ([3757](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3757)) %% Color: yellow %% ^334466476
+
+---
+
+The telomeres, for example-the 'caps' on the end of chromosomes that wear away over our lives at a steady rate-display such divergent patterns across species that they can't possibly be the primary cause of ageing. ([3765](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3765)) %% Color: yellow %% ^334466477
+
+---
+
+the metabolic rate of a species depends on its body mass to the power of 2/3: the larger the mass, the slower the metabolic rate in individual cells. ([3790](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3790)) %% Color: yellow %% ^334466478
+
+---
+
+birds live long lives because they leak fewer free radicals from their respiratory chains in the first place. As a result, they don't need to have so many antioxidants, despite consuming large amounts of oxygen. ([3827](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3827)) %% Color: yellow %% ^334466479
+
+---
+
+thirteen of the core respiratory proteins are encoded by mitochondrial DNA, which is anchored to the membrane right next to the respiratory chains. Any escaping free radicals are virtually bound to react with this DNA: it's only a matter of time before mutations occur. ([3860](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3860)) %% Color: yellow %% ^334466480
+
+---
+
+individual mutations in the control region canaccumulate at over 50 per cent of the total mitochondrial DNA in the tissues of older people, but are largely absent in young people. ([3977](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3977)) %% Color: yellow %% ^334466481
+
+---
+
+Several studies have shown that most mitochondria in ageing tissues have basically normal DNA, except perhaps in the control region, and moreover, are capable of virtually normal respiration. ([3987](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=3987)) %% Color: yellow %% ^334466482
+
+---
+
+If conditions become oxidizing within a particular mitochondrion, then the mitochondrial genes are actively transcribed to form more respiratory complexes. If this resolves the situation, then all is well and good. However, if this fails to resolve the situation, then conditions in the cell as a whole become more oxidizing, and this activates transcription factors like NRF-i. Their activation shifts the spectrum of nuclear genes in operation, which in turn stimulates the genesis of more mitochondria and protects the cell against stress. The new arrangement stabilizes the cell again, albeit in a new status quo that can influence vulnerability to inflammatory conditions. But there is little oxidation of the fabric of cells and tissues, and because only the least damaged mitochondria tend to proliferate there is little overt sign of mitochondrial mutations and damage. ([4099](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4099)) %% Color: yellow %% ^334466483
+
+---
+
+The ultimate fate of the cell depends on its ability to cope with its normal energetic demands, which vary with the metabolic requirements of the tissue. As in mitochondrial diseases, if the cell is normally highly active, then any significant mitochondrial deficiency will lead to a swift execution by apoptosis. What exactly constitutes the signal for apoptosis is uncertain, and again depends on the tissue, but two mitochondrial factors are probably involved-the proportion of damaged mitochondria, and the ATP levels in the cell as a whole. Of course, these two are interlinked. Clonal expansion of dysfunctional mitochondria inevitably leads to a more general failure to match ATP production to demand. In most cells, once the ATP levels fall below a particular threshold, the cell inexorably commits itself to apoptosis. ([4111](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4111)) %% Color: yellow %% ^334466484
+
+---
+
+as cells draw closer to their limits, with advancing age, various random factors are more likely to push them over the abyss to apoptosis. ([4120](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4120)) %% Color: yellow %% ^334466485
+
+---
+
+most diseases of old age are an appallingly complex amalgam of genetic and environmental factors-and most of them have little to do with free radicals and mitochondria, at least not directly. ([4128](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4128)) %% Color: yellow %% ^334466486
+
+---
+
+The paradigm underlying most medical research today is gene-centric. The approach is first to pinpoint the gene, then to find out what it does and how it works, then dream up some pharmacological way of correcting the problem, and finally to apply the pharmacological solution. I think this paradigm is fallacious, as it is based on a view of ageing that now seems incorrect-the idea that ageing is little more than a dustbin of late-acting genetic mutations, which have broadly independent effects and so must be targeted individually. ([4133](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4133)) %% Color: yellow %% ^334466487
+
+---
+
+What they found was a very tight correlation between disease progression and the underlying rate of production of free radicals from mitochondria. In other words, in the species that produced free radicals quickly, the disease set in early and was quick to progress, despite no direct link with free-radical production. ([4153](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4153)) %% Color: yellow %% ^334466488
+
+---
+
+Some critically important conclusions emerge from this thinking. First, it seems that mitochondria] mutations genuinely do contribute to the progression of ageing and disease, even if they can't always be seen-they are eliminated, along with their host cells, by apoptosis. Second, other genes associated with particular diseases add to the overall levels of cellular stress, making it more likely that the cell will die by apoptosis. ([4178](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4178)) %% Color: yellow %% ^334466489
+
+---
+
+This means that it is pointless trying to target individual genes or mutations in clinical research-and ([4182](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4182)) %% Color: yellow %% ^334466490
+
+---
+
+Third, research strategies that aim to block apoptosis are also likely to fail, for apoptosis is merely a useful way of disposing of broken cells without leaving behind a bloody signature. ([4183](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4183)) %% Color: yellow %% ^334466491
+
+---
+
+Finally, hugely importantly, the degenerative diseases of old age, all of them, could be slowed down by orders of magnitude, perhaps even eliminated altogether, just by slowing down the rate of free-radical leakage from mitochondria. ([4185](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4185)) %% Color: yellow %% ^334466492
+
+---
+
+the signalling role of free radicals maintains near optimal respiratory function in long-lived cells for many decades. Damaged mitochondria are removed, and undamaged mitochondria replicate to take their place. In the end, though, at least in long-lived cells, the supply of undamaged mitochondria runs out, and then a new level of signalling must take over. ([4196](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4196)) %% Color: yellow %% ^334466493
+
+---
+
+If too many mitochondria become deficient in respiration simultaneously, then the general load of free radicals in the cell rises, and this signals the general respiratory failure to the nucleus. Such oxidizing conditions shift the kaleidoscope of active nuclear genes to compensate-a shift known as the retrograde response, for the mitochondria control the activity of genes in the nucleus. The cell enters a stress-resistant state and may survive like this for many years. It is limited in its powers of energy generation, but can get by so long as it is notplaced under too much strain. However, any stressful episodes are likely to undermine such cells, and lead to some degree of organ failure. This in turn probably contributes to the chronic inflammation that underpins many diseases of old age. ([4198](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4198)) %% Color: yellow %% ^334466494
+
+---
+
+Metabolically active organs, like the brain, heart, and skeletal muscle, are most likely to lose cells by apoptosis. The exact timing of cell death depends on the general stress levels. These are calibrated by the mitochondria, as we saw in Part 5; and one important factor involved in this calibration is the accumulated exposure to free radicals. As a result, long-lived animals suffer from age-related diseases late in life, while short-lived animals capitulate more quickly. ([4207](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4207)) %% Color: yellow %% ^334466495
+
+---
+
+if all genetic and environmental contributions to the diseases of old age are calibrated by the mitochondria, we ought to be able to cure, or postpone, all the diseases of old age at once. Conversely, attempting to tackle them piecemeal, as we do today, is doomed to failure. All we need to do is to lower free-radical leakage over a lifetime. ([4211](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4211)) %% Color: yellow %% ^334466496
+
+---
+
+nearly two-thirds of Japanese centenarians shared the same variation within a mitochondrial gene-a single letter change in the code for a subunit of complex I-compared with about 45 per cent of the population as a whole. In other words, if you have the letter-change, you are 50 per cent more likely to live to a hundred. The benefits don't stop there. You are also half as likely to end up in hospital for any reason at all in the second half of your life: you're less likely to suffer from any age-related disease. ([4229](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4229)) %% Color: yellow %% ^334466497
+
+---
+
+two-thirds of Japanese centenarians shared the same variation within a mitochondrial gene-a single letter change in the code for a subunit of complex I-compared with about 45 per cent of the population as a whole. ([4229](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4229)) %% Color: yellow %% ^334466498
+
+---
+
+by enabling a constant flow of electrons down the respiratory chain, uncoupling restricts the leakage of free radicals. ([4246](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4246)) %% Color: yellow %% ^334466499
+
+---
+
+That's not to say that uncoupling couldn't help us though. Not only could it, in principle, lower free-radical leakage, and so prolong our lives, but it would also enable us to burn more calories and lose weight. We could cure obesity and all the diseases of old age in one go! ([4252](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4252)) %% Color: yellow %% ^334466500
+
+---
+
+Curiously, aspirin is also a mild respiratory uncoupler; I do wonder how many of its more mysterious benefits may relate to this property. ([4256](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4256)) %% Color: yellow %% ^334466501
+
+---
+
+Birds rely on a large number of mitochondria, and within the individual mitochondria, they have a large number of respiratory chains. ([4281](https://readwise.io/to_kindle?action=open&asin=B001CHNWCI&location=4281)) %% Color: yellow %% ^334466502
+
+---

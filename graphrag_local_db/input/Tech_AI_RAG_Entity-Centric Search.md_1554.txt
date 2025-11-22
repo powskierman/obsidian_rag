@@ -1,0 +1,235 @@
+# Entity-Centric Search.md
+
+---
+aliases:
+  - Entity Search
+  - Entity-Focused RAG
+tags:
+  - AI
+  - RAG
+  - entities
+  - knowledge-graph
+created: 2025-10-21 15:39
+ContentType: concept
+Backlink: "[[GraphRAG & LightRAG MoC]]"
+---
+### Main Idea
+
+Entity-centric search retrieves complete knowledge graphs around specific entities (people, treatments, concepts), showing all relationships, attributes, and connections rather than just text chunks mentioning the entity.
+
+### Traditional vs Entity-Centric Search
+
+**Traditional RAG Approach:**
+```
+Query: "Everything about Yescarta"
+
+Returns: List of chunks
+- Chunk 1: "Yescarta is a CAR-T therapy..."
+- Chunk 2: "I received Yescarta in April..."
+- Chunk 3: "Side effects of Yescarta include..."
+
+User must: Mentally synthesize scattered information
+```
+
+**Entity-Centric Search (LightRAG):**
+```
+Query: "Everything about Yescarta"
+
+Returns: Complete entity graph
+Yescarta (CAR-T therapy)
+├─ Type: Axicabtagene ciloleucel
+├─ Mechanism: CD19-targeted CAR-T
+├─ Administered: April 2025
+├─ Preceded by: R-CHOP chemotherapy
+├─ Requires: Lymphodepletion chemotherapy
+├─ Side effects:
+│  ├─ Cytokine release syndrome (CRS) - Grade 2
+│  ├─ Neurotoxicity - Grade 1
+│  └─ B-cell aplasia - Persistent
+├─ Monitoring:
+│  ├─ PET scans (3mo, 6mo)
+│  ├─ IgG levels (monthly)
+│  └─ CD19+ monitoring
+├─ Related concepts:
+│  ├─ CD19 antigen
+│  ├─ B-cells
+│  └─ Immunotherapy
+├─ Outcomes:
+│  ├─ 3mo: Complete metabolic response
+│  ├─ 6mo: Continued remission
+│  └─ SUV max: Normalized (<2.5)
+└─ Follow-up care:
+   ├─ IVIG therapy (monthly)
+   ├─ Infection precautions
+   └─ Long-term monitoring plan
+
+Complete entity knowledge in structured form!
+```
+
+### Use Cases
+
+**1. Medical Entities**
+
+**Query:** "Everything about B-cell aplasia"
+
+**Entity Graph:**
+```
+B-cell aplasia
+├─ Definition: Loss of B-cell population
+├─ Caused by: Yescarta (CD19 targeting)
+├─ Expected: Yes (intended effect)
+├─ Duration: Persistent (months to years)
+├─ Impact:
+│  ├─ Low IgG levels (<400 mg/dL)
+│  ├─ Increased infection risk
+│  └─ Reduced antibody production
+├─ Management:
+│  ├─ IVIG therapy
+│  ├─ Prophylactic antibiotics
+│  └─ Infection monitoring
+├─ Monitoring markers:
+│  ├─ IgG levels (target >500)
+│  ├─ CD19+ B-cell count
+│  └─ Infection frequency
+└─ Related conditions:
+   ├─ Hypogammaglobulinemia
+   └─ Secondary immunodeficiency
+```
+
+**2. Treatment Entities**
+
+**Query:** "Everything about R-CHOP"
+
+**Entity Graph:**
+```
+R-CHOP (chemotherapy regimen)
+├─ Components:
+│  ├─ Rituximab (R)
+│  ├─ Cyclophosphamide (C)
+│  ├─ Doxorubicin (H)
+│  ├─ Vincristine (O)
+│  └─ Prednisone (P)
+├─ Administration: 6 cycles, 21-day intervals
+├─ Duration: December 2024 - March 2025
+├─ Indication: DLBCL (double-hit)
+├─ Side effects experienced:
+│  ├─ Nausea (managed)
+│  ├─ Fatigue (moderate)
+│  ├─ Neuropathy (mild, resolved)
+│  └─ Low blood counts (expected)
+├─ Response: Partial (residual disease)
+├─ Led to: CAR-T consideration
+└─ Outcome: Not curative, bridged to Yescarta
+```
+
+**3. Concept Entities**
+
+**Query:** "What have I learned about immunotherapy?"
+
+**Concept Graph:**
+```
+Immunotherapy
+├─ Definition: Treatment using immune system
+├─ Types:
+│  ├─ CAR-T therapy (experienced)
+│  │  ├─ Yescarta
+│  │  ├─ Kymriah
+│  │  └─ Breyanzi
+│  ├─ Checkpoint inhibitors (researched)
+│  └─ Monoclonal antibodies (R in R-CHOP)
+├─ Personal experience:
+│  ├─ Yescarta CAR-T (April 2025)
+│  ├─ Complete response achieved
+│  └─ Managing B-cell aplasia
+├─ Mechanisms learned:
+│  ├─ T-cell engineering
+│  ├─ CD19 targeting
+│  ├─ Cytokine cascades
+│  └─ Immune memory
+├─ Research explored:
+│  ├─ Response rates (70% durable)
+│  ├─ Side effect management
+│  ├─ Long-term outcomes
+│  └─ New CAR-T targets
+└─ Questions remaining:
+   ├─ Duration of B-cell aplasia?
+   ├─ Long-term efficacy data?
+   └─ Future monitoring needs?
+```
+
+### References
+
+- [[LightRAG Overview]]
+- [[LightRAG Query Modes]]
+- [[LightRAG Benefits]]
+- [[Medical Timeline with GraphRAG]]
+
+### Notes
+
+**Entity Types in Medical Knowledge:**
+
+1. **Treatments**: R-CHOP, Yescarta, IVIG
+2. **Conditions**: DLBCL, B-cell aplasia, CRS
+3. **Biomarkers**: IgG, SUV max, CD19+
+4. **Procedures**: PET scan, lymphodepletion
+5. **Concepts**: Immunotherapy, CAR-T, remission
+6. **Medications**: Tocilizumab, prophylactic antibiotics
+7. **Side effects**: Neurotoxicity, CRS, fatigue
+
+**Entity Extraction Quality:**
+
+Good extraction captures:
+- Entity name and aliases
+- Type and classification
+- Attributes (dates, values, status)
+- Relationships (causes, treats, monitors)
+- Context (when, where, why)
+
+**LightRAG Local Mode:**
+
+Entity-centric search uses `mode="local"`:
+```python
+result = rag.query(
+    "Everything about Yescarta",
+    mode="local"  # Entity-focused retrieval
+)
+```
+
+This retrieves the entity and its immediate relationship neighborhood.
+
+**Visualization:**
+
+Entity graphs can be visualized as:
+- Network diagrams (nodes + edges)
+- Mind maps (hierarchical)
+- Timeline views (temporal entities)
+- Relationship matrices
+
+### Related Notes
+
+- [[LightRAG Query Modes]]
+- [[Multi-Hop Reasoning with LightRAG]]
+- [[Medical Timeline with GraphRAG]]
+- [[Knowledge Graph RAG Architecture]]
+
+### Questions / Ideas for Further Exploration
+
+- How many relationships define "complete" entity knowledge?
+- Should entity boundaries be configurable?
+- Can we rank relationships by importance?
+- How to handle entity disambiguation?
+- Optimal depth for entity neighborhood?
+
+### To-Do
+
+- [ ] List key entities in medical notes
+- [ ] Test entity-centric queries
+- [ ] Evaluate completeness of entity graphs
+- [ ] Document entity extraction accuracy
+- [ ] Build entity visualization dashboard
+- [ ] Create entity taxonomy
+- [ ] Test disambiguation edge cases
+
+### Smart Connections Insights
+
+Entity-centric search transforms "find text about X" into "tell me everything connected to X" - essential for comprehensive understanding of complex medical treatments where knowledge is scattered across dozens of notes but interconnected through relationships.

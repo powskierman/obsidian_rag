@@ -1,0 +1,23 @@
+---
+aliases: []
+tags: [
+ mutex
+ z_impl_k_mutex_unlock
+ USB
+ zephyr
+]
+---
+# USB Device Stack
+Date: 2023-08-21
+
+### Backlink
+[[Zephyr MoC]]
+
+### Reference
+-  
+### Notes
+-  Some key things that the USB device stack depends on:
+	- Work queue support - Many of the USB APIs use kernel work queues for deferred work. The errors show calls to k_work_submit_to_queue() and other work queue functions being unresolved. These would need to be implemented/enabled.
+	- Kernel synchronization primitives - The USB stack uses mutexes, semaphores, etc. for locking and synchronization within the driver. The errors show missing implementations for k_mutex_lock(), k_sem_give(), etc. These kernel APIs would need to be enabled.
+	- Kernel memory pools - The USB stack uses memory pools for allocating USB request and driver internal objects. These would need to be available.
+	- Entropy/random number generator - The USB stack requires an entropy source for generating random numbers used internally. This is likely why the build pulls in the RNG driver even if USB is enabled.

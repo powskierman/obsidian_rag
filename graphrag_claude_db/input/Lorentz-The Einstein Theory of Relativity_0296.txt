@@ -1,0 +1,17 @@
+---
+bookId: "36585"
+title: The Einstein Theory of Relativity
+author: H.A. Lorentz
+asin: B000JML3IW
+lastAnnotatedDate: 2016-02-13
+highlightsCount: 1
+reference: https://www.amazon.com/dp/B000JML3IW
+kindle_link: kindle://book?action=open&asin=B000JML3IW
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/91YpUl4TnUL._SY160.jpg)
+## Highlights
+"Till now it was believed that time and space existed by themselves, even if there was nothing else--no sun, no earth, no stars--while now we know that time and space are not the vessel for the universe, but could not exist at all if there were no contents, namely, no sun, earth and other celestial bodies. — location: [33](kindle://book?action=open&asin=B000JML3IW&location=33) ^ref-34418
+
+---

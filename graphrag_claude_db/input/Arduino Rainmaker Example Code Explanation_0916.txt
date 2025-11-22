@@ -1,0 +1,139 @@
+---
+aliases: []
+tags:
+  - arduino
+  - Rainmaker
+---
+# Arduino Rainmaker Example Code Explanation
+Date: 2023-09-06
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- First, include all necessary Libraries for the successful execution of the code. Libraries include **RMaker.h**, **Wifi.h**, **WifiProv.h** only.
+
+```
+#include "RMaker.h"
+#include "WiFi.h"
+#include "WiFiProv.h"
+```
+
+Since the ESP32 communicates with Bluetooth, we define Bluetooth credentials using the pointers **service_name** and **pop**, which will be used during provisioning.
+
+```
+const char *service_name = "RainMaker_BLE";
+const char *pop = "12345678";
+```
+
+Then we define the GPIO pins used for the LED and switch. We also create a Boolean variable called **switch_state** to store the switch status.
+
+```
+//GPIO for virtual device
+static int gpio_0 = 0;
+static int gpio_switch = 15;
+/* Variable for reading pin status*/
+bool switch_state = true;
+//The framework provides some standard device types like switch, lightbulb, fan, temperaturesensor.
+static Switch my_switch;
+```
+
+The **sysProvEvent()** function obtains Wi-Fi credentials and connects ESP32 to the router for system provisioning events.
+
+```
+void sysProvEvent(arduino_event_t *sys_event) {
+    switch (sys_event->event_id) {
+        case ARDUINO_EVENT_PROV_START:
+#if CONFIG_IDF_TARGET_ESP32S2
+        Serial.printf("\nProvisioning Started with name \"%s\" and PoP \"%s\" on SoftAP\n", service_name, pop);
+        printQR(service_name, pop, "softap");
+#else
+        Serial.printf("\nProvisioning Started with name \"%s\" and PoP \"%s\" on BLE\n", service_name, pop);
+        printQR(service_name, pop, "ble");
+#endif
+        break;
+        default:;
+    }
+}
+```
+
+The **write\_callback()** function checks the device that sent data and adjusts its parameters. It is specifically designed for the device LED and determines whether the LED should turn on or off based on the state of the LED pin. If the device is '**LED**' and the parameter is '**Power**', the function turns the LED on if the power is HIGH and off if the power is LOW.
+
+```
+void write_callback(Device *device, Param *param, const param_val_t val, void *priv_data, write_ctx_t *ctx) {
+    const char *device_name = device->getDeviceName();
+    const char *param_name = param->getParamName();
+    if(strcmp(param_name, "Power") == 0) {
+        Serial.printf("Received value = %s for %s - %s\n", val.val.b? "true" : "false", device_name, param_name);
+        switch_state = val.val.b;
+        (switch_state == false) ? digitalWrite(gpio_switch, LOW) : digitalWrite(gpio_switch, HIGH);
+        param->updateAndReport(val);
+    }
+}
+```
+
+In the **setup()** function, we open serial communication at 115200 baud and configure the reset and LED pins using the pinMode() function with the GPIO pin as the first parameter and the mode as the second parameter. The reset pin is set as an input pin, while the LED pin is set as an output pin. The LED pin is initially set to a LOW state.
+
+```
+void setup() {
+    Serial.begin(115200);
+    pinMode(gpio_0, INPUT);
+    pinMode(gpio_switch, OUTPUT);
+    digitalWrite(gpio_switch, DEFAULT_POWER_MODE);
+```
+
+Then we will declare a node with the name “**ESP RainMaker Node**”. Later we declared the switch device. We also declared the call-back function for the switch device and enabled the time zone service. Later we started the RainMaker band using **Rmaker.start** function and called the sysProEvent function after that for provisioning.
+
+```
+Node my_node;
+    my_node = RMaker.initNode("ESP RainMaker Node");
+    //Initialize switch device
+    my_switch = Switch("Switch", &gpio_switch);
+    //Standard switch device
+    my_switch.addCb(write_callback);
+    //Add switch device to the node
+    my_node.addDevice(my_switch);
+    //This is optional
+    RMaker.enableOTA(OTA_USING_PARAMS);
+    //If you want to enable scheduling, set time zone for your region using setTimeZone().
+    //The list of available values are provided here https://rainmaker.ESPressif.com/docs/time-service.html
+    // RMaker.setTimeZone("Asia/Shanghai");
+    // Alternatively, enable the Timezone service and let the phone apps set the appropriate timezone
+    RMaker.enableTZService();
+    RMaker.enableSchedule();
+    RMaker.start();
+    WiFi.onEvent(sysProvEvent);
+#if CONFIG_IDF_TARGET_ESP32S2
+    WiFiProv.beginProvision(WIFI_PROV_SCHEME_SOFTAP, WIFI_PROV_SCHEME_HANDLER_NONE, WIFI_PROV_SECURITY_1, pop, service_name);
+#else
+    WiFiProv.beginProvision(WIFI_PROV_SCHEME_BLE, WIFI_PROV_SCHEME_HANDLER_FREE_BTDM, WIFI_PROV_SECURITY_1, pop, service_name);
+#endif
+}
+```
+
+The loop monitors GPIO 0 and updates the switch\_state parameter accordingly. Additionally, it prints the status change to the serial monitor for debugging purposes.
+
+```
+void loop() {
+    if(digitalRead(gpio_0) == LOW) { //Push button pressed
+        // Key debounce handling
+        delay(100);
+        int startTime = millis();
+        while(digitalRead(gpio_0) == LOW) delay(50);
+        int endTime = millis();
+        if ((endTime - startTime) > 100) {
+          // Toggle device state
+          switch_state = !switch_state;
+          Serial.printf("Toggle State to %s.\n", switch_state ? "true" : "false");
+          my_switch.updateAndReportParam(ESP_RMAKER_DEF_POWER_NAME, switch_state);
+          (switch_state == false) ? digitalWrite(gpio_switch, LOW) : digitalWrite(gpio_switch, HIGH);
+      }
+    }
+    delay(100);
+}
+
+```
+
+### **Working of the project ESP RainMaker**

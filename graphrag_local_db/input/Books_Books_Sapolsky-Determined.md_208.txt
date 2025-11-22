@@ -1,0 +1,67 @@
+# Sapolsky-Determined.md
+
+---
+bookId: "61290"
+title: "Determined: A Science of Life without Free Will"
+author: Robert M. Sapolsky
+asin: B0BSKQ5ZDM
+lastAnnotatedDate: 2024-06-10
+highlightsCount: 17
+reference: https://www.amazon.com/dp/B0BSKQ5ZDM
+kindle_link: kindle://book?action=open&asin=B0BSKQ5ZDM
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71m2ED6zGlL._SY160.jpg)
+## Highlights
+while it sure may seem at times that we are free do as we intend, we are never free to intend what we intend. — location: [356](kindle://book?action=open&asin=B0BSKQ5ZDM&location=356) ^ref-59830
+
+---
+The Libetian literature is built around people spontaneously deciding to do something. In the view of Manuel Vargas, free will revolves around being future oriented, enduring an immediate cost for a long-term goal, — location: [486](kindle://book?action=open&asin=B0BSKQ5ZDM&location=486) ^ref-14760
+
+---
+“Freedom arises from the creative and indeterministic generation of alternative possibilities, which present themselves to the will for evaluation and selection.” — location: [622](kindle://book?action=open&asin=B0BSKQ5ZDM&location=622) ^ref-4114
+
+---
+Where did that intent come from in the first place? — location: [701](kindle://book?action=open&asin=B0BSKQ5ZDM&location=701) ^ref-47261
+
+---
+Where I am definitely trying to sound pejorative and worse is when this ahistorical view of judging people’s behavior is moralistic. Why would you ignore what came before the present in analyzing someone’s behavior? Because you don’t care why someone else turned out to be different from you. — location: [720](kindle://book?action=open&asin=B0BSKQ5ZDM&location=720) ^ref-32741
+
+---
+“we cannot undo the effects of luck with more luck”; instead our world virtually guarantees that bad and good luck are each amplified further. — location: [744](kindle://book?action=open&asin=B0BSKQ5ZDM&location=744) ^ref-57517
+
+---
+the insula mediates olfactory and gustatory disgust and protects from food poisoning, an evolutionarily useful thing. — location: [810](kindle://book?action=open&asin=B0BSKQ5ZDM&location=810) ^ref-40406
+
+---
+versatile human insula also responds to stimuli we deem morally disgusting. — location: [811](kindle://book?action=open&asin=B0BSKQ5ZDM&location=811) ^ref-28093
+
+---
+once activated this way, the insula then activates the amygdala, a brain region central to fear and aggression.[4] — location: [818](kindle://book?action=open&asin=B0BSKQ5ZDM&location=818) ^ref-64159
+
+---
+In three different studies, subjects in brain scanners alternated between rating the beauty of something (e.g., faces) or the goodness of some behavior. Both types of assessments activated the same region (the orbitofrontal cortex, or OFC); the more beautiful or good, the more OFC activation (and the less insula activation). — location: [829](kindle://book?action=open&asin=B0BSKQ5ZDM&location=829) ^ref-3373
+
+---
+the brain hasn’t had enough time yet to evolve separate circuits for evaluating morality and aesthetics.[6] — location: [837](kindle://book?action=open&asin=B0BSKQ5ZDM&location=837) ^ref-12214
+
+---
+lying orally (via voice mail) increased the desire for mouthwash, while lying by hand (via email) made hand sanitizers more desirable. — location: [842](kindle://book?action=open&asin=B0BSKQ5ZDM&location=842) ^ref-65219
+
+---
+the longer it had been since judges had eaten, the less likely they were to grant a prisoner parole. — location: [863](kindle://book?action=open&asin=B0BSKQ5ZDM&location=863) ^ref-35132
+
+---
+oxytocin and vasopressin strengthen the bond in females and males, respectively. — location: [909](kindle://book?action=open&asin=B0BSKQ5ZDM&location=909) ^ref-4963
+
+---
+Monogamous species are genetically prone toward higher concentrations of vasopressin receptors in the dopaminergic “reward” part of the brain (the nucleus accumbens). — location: [910](kindle://book?action=open&asin=B0BSKQ5ZDM&location=910) ^ref-32304
+
+---
+glucocorticoids have predictable effects on behavior during stress. Your judgments become more impulsive. If you’re reactively aggressive, you become more so, if anxious, more so, if depressive, ditto. You become less empathic, more egoistic, more selfish in moral decision-making.[20] — location: [948](kindle://book?action=open&asin=B0BSKQ5ZDM&location=948) ^ref-22315
+
+---
+Developing post-traumatic stress disorder after trauma transforms the amygdala. Synapse number increases along with the extent of the circuitry by which the amygdala influences the rest of the brain. The overall size of the amygdala increases, and it becomes more excitable, with a lower threshold for triggering fear, anxiety, and aggression. — location: [980](kindle://book?action=open&asin=B0BSKQ5ZDM&location=980) ^ref-53205
+
+---

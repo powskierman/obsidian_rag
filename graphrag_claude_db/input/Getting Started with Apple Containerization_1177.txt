@@ -1,0 +1,181 @@
+---
+aliases: 
+tags:
+  - container
+created: 2025-07-09 12:34
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Apple Containerization is a native, VM-based container solution for macOS, designed for security, privacy, and performance—especially on Apple Silicon. Here’s a step-by-step guide to help you get started, from installation to running your first container.
+
+## Prerequisites
+
+- Apple Silicon Mac (M1, M2, M3, or newer)
+    
+- macOS 15 “Sequoia” or later (macOS 26 “Tahoe” recommended for full features)
+    
+- Basic familiarity with the Terminal
+## 1. Installation
+
+1. **Download the Installer**
+    
+    - Visit the official Apple Container GitHub release page and download the latest signed `.pkg` installer.
+        
+2. **Install**
+    
+    - Double-click the `.pkg` file and follow the prompts. Enter your admin password if required.
+        
+3. **Start the Service**
+    
+    - Open Terminal and run:
+        
+        text
+        
+        `container system start`
+        
+    - The first time you run this, it may prompt you to download and install a default Linux kernel. Type `y` and press Enter.
+        
+4. **Verify Installation**
+    
+    - Check running containers (should be empty at first):
+        
+        text
+        
+        `container ls -a`
+        
+    - You should see an empty list with headers like `ID IMAGE OS ARCH STATE ADDR`.
+        
+## 2. Running Your First Container
+
+## Example: Run a Simple Web Server
+
+- **Pull a Base Image**
+    
+    text
+    
+    `container image pull alpine:latest`
+    
+- **Run the Container Interactively**
+    
+    text
+    
+    `container run -t -i alpine:latest sh`
+    
+    - `-t -i` gives you an interactive shell inside the container.
+        
+- **Run a Container in the Background**
+    
+    text
+    
+    `container run --name my-web-server --detach --rm web-test`
+    
+    - `--name` assigns a name.
+        
+    - `--detach` runs in the background.
+        
+    - `--rm` removes the container after stopping.
+        
+- **List Running Containers**
+    
+    text
+    
+    `container ls`
+    
+    - Shows your container’s name, state, and assigned IP address.
+        
+- **Access the Container**
+    
+    - If running a web server, open a browser to the IP address under the `ADDR` column, e.g.:
+        
+        text
+        
+        `http://192.168.64.3`
+        
+        (Replace with the actual IP.)
+        
+- **Interact with the Container**
+    
+    - Run a command:
+        
+        text
+        
+        `container exec my-web-server ls /`
+        
+    - Open an interactive shell:
+        
+        text
+        
+        `container exec -it my-web-server sh`
+        
+        Use `exit` to return to your Mac’s terminal.
+        
+
+## 3. Mounting a Directory
+
+To share a folder from your Mac with the container:
+
+text
+
+`container run --volume ${HOME}/my-project:/app my-image`
+
+This mounts your local `my-project` directory to `/app` inside the container.
+
+## 4. Stopping and Cleaning Up
+
+- **Stop a running container:**
+    
+    text
+    
+    `container stop my-web-server`
+    
+- **Stop the container system service:**
+    
+    text
+    
+    `container system stop`
+    
+    This frees up system resources when you’re done.
+    
+
+## 5. Advanced Usage
+
+- **Build a multi-architecture image:**
+    
+    text
+    
+    `container build --arch arm64 --arch amd64 --tag my-multi-arch-image .`
+    
+- **Tag and push an image to a registry:**
+    
+    text
+    
+    `container images tag web-test docker.io/youruser/web-test:latest container images push docker.io/youruser/web-test:latest`
+    
+- **Log in to a registry:**
+    
+    text
+    
+    `container registry login docker.io`
+    
+    You’ll be prompted for credentials.
+    
+
+## Troubleshooting Tips
+
+- **Service won’t start:** Ensure you’re on a supported macOS version and Apple Silicon hardware.
+    
+- **Port conflicts:** Make sure the port your container wants isn’t already in use.
+    
+- **Network access:** Check local firewall settings if you can’t reach the container’s IP.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

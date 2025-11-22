@@ -1,0 +1,26 @@
+---
+aliases: []
+---
+# Amazon Alexa
+Date: 2022-11-30
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- 
+
+Client 
+### Notes
+-  Client ID:
+	- amzn1.application-oa2-client.18377556fbcb4b9082f5f87310e35a7f
+- Secret:
+	- 950587a739b5f19356dba9d665d0507aba9e8535298f007a3054555dcbe4946e 
+- customer ID:   
+	- ATE0RXOVAQB4T
+- vendor ID:   
+	- M1J1WIHIMJ5MCT
+- AWS account ID: 
+	- 128854164886

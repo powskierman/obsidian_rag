@@ -1,0 +1,37 @@
+---
+aliases: 
+tags:
+  - Home-Assistant
+  - esphome
+---
+# ESPHome Install
+Date: 2023-09-24
+
+### Backlink
+[[../media/Home-Assistant MoC]]
+
+### Reference
+-  
+### Notes
+- Caveats:
+	- esphome works better of https:
+	- [[../media/Home Assistant over https]]
+	- Requires rpi w/ 4GB RAM if used with vscode addon
+- Format esp32 flash:
+	- . /opt/esp/esp-idf/export.sh
+	- `idf.py erase-flash -p /dev/cu.usbserial-0001`
+- Plug in new device to usb port
+- Go to esphome (left ribbon)
+		- Click new device
+- Edit yaml configuration file with Studio Code Server (Left ribbon)
+- Go back to esphome
+	- First use: 
+		- On Chrome or Edge:
+			- go to https://web.esphome.io
+		- Click Edit for device
+		- Click install
+			- Much more reliable to connect ESP32 directly to RPI USB port
+		- Click manual download
+			- Click modern format
+	- Subsequently:
+		- Install wirelessly

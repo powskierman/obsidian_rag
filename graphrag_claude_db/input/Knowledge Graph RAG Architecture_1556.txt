@@ -1,0 +1,117 @@
+---
+aliases: [GraphRAG Architecture]
+tags:
+  - AI
+  - RAG
+  - architecture
+  - knowledge-graph
+created: 2025-10-21 15:32
+ContentType: technical
+Backlink: [[GraphRAG & LightRAG MoC]]
+---
+### Main Idea
+
+Enhanced RAG architecture combining knowledge graphs with traditional vector search for superior multi-hop reasoning and relationship understanding.
+
+### Architecture Diagram
+
+```
+User Query
+    ↓
+┌───────────────────────────────────┐
+│   LightRAG Layer (NEW)            │
+│   1. Extract entities/concepts    │
+│   2. Query knowledge graph        │
+│   3. Get connected subgraph       │
+└───────────────────────────────────┘
+    ↓
+┌───────────────────────────────────┐
+│   Traditional RAG Layer           │
+│   1. Vector search (ChromaDB)     │
+│   2. Re-ranking                   │
+│   3. Memory integration (Mem0)    │
+└───────────────────────────────────┘
+    ↓
+┌───────────────────────────────────┐
+│   LLM Synthesis                   │
+│   Graph context + Chunks → Answer │
+└───────────────────────────────────┘
+```
+
+### Hybrid Approach Benefits
+
+✅ **Graph traversal** for relationships and connections  
+✅ **Vector search** for semantic similarity  
+✅ **Memory integration** for personal context  
+✅ **LLM synthesis** for natural language generation
+
+### References
+
+- [[LightRAG Overview]]
+- [[Obsidian RAG System MoC]]
+- Current RAG: ChromaDB + SentenceTransformers + Flask + Streamlit
+
+### Notes
+
+**Component Integration:**
+
+1. **LightRAG Layer**: Builds and queries knowledge graph
+   - Extracts entities from markdown content
+   - Creates relationship edges between entities
+   - Clusters concepts into themes
+   - Returns connected subgraphs for queries
+
+2. **Traditional RAG Layer**: Existing Obsidian RAG system
+   - SentenceTransformers (all-MiniLM-L6-v2) for embeddings
+   - ChromaDB for vector storage
+   - Flask API on port 8000
+   - Processes 1,584+ markdown files
+
+3. **Smart Query Router**:
+```python
+def smart_query(question):
+    """Route to best system based on query type"""
+    
+    if is_relationship_query(question):
+        # "How does X relate to Y?"
+        return lightrag.query(question, mode="hybrid")
+    
+    elif is_timeline_query(question):
+        # "What happened between X and Y?"
+        return lightrag.query(question, mode="local")
+    
+    elif is_simple_lookup(question):
+        # "What is X?"
+        return current_rag.query(question)
+    
+    else:
+        # Complex: use both!
+        graph_context = lightrag.query(question)
+        vector_context = current_rag.query(question)
+        return synthesize(graph_context, vector_context)
+```
+
+### Related Notes
+
+- [[LightRAG Implementation Guide]]
+- [[LightRAG Query Modes]]
+- [[LightRAG vs Traditional RAG Comparison]]
+
+### Questions / Ideas for Further Exploration
+
+- How to handle incremental graph updates when notes change?
+- What's the optimal balance between graph and vector search?
+- Can we cache graph traversal results?
+- How to handle conflicting information in the graph?
+
+### To-Do
+
+- [ ] Design smart router decision logic
+- [ ] Implement hybrid query system
+- [ ] Test query routing performance
+- [ ] Monitor resource usage during dual-system queries
+- [ ] Document query patterns for each system
+
+### Smart Connections Insights
+
+The hybrid architecture leverages strengths of both approaches: graphs excel at relationships while vectors excel at semantic similarity. Query routing is key to optimal performance.

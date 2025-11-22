@@ -1,0 +1,25 @@
+# Arduino IDE.md
+
+---
+aliases: |-
+  ---
+  aliases: 
+  tags:
+    - arduino
+    - ide
+  created: 2022-06-25
+  ContentType: Tool
+  Backlink: [[Arduino MoC]]
+  ---
+---
+
+2022-06-25
+# Arduino IDE
+
+### Backlink
+[[Arduino MOC]]
+
+### Reference
+- [[Arduino IDE Problem-solving]]
+### Notes
+-

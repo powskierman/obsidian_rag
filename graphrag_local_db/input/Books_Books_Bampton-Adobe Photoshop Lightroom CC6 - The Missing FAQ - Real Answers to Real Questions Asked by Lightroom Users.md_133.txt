@@ -1,0 +1,38 @@
+# Bampton-Adobe Photoshop Lightroom CC6 - The Missing FAQ - Real Answers to Real Questions Asked by Lightroom Users.md
+
+---
+bookId: "23029"
+title: "Adobe Photoshop Lightroom CC/6 - The Missing FAQ - Real Answers to Real Questions Asked by Lightroom Users"
+author: Victoria Bampton
+asin: B00ZYDUHLK
+lastAnnotatedDate: 2016-12-12
+highlightsCount: 7
+reference: https://www.amazon.com/dp/B00ZYDUHLK
+kindle_link: kindle://book?action=open&asin=B00ZYDUHLK
+tags:
+  - book-notes
+  - photography
+---
+![](https://m.media-amazon.com/images/I/A1h-snyxF6L._SY160.jpg)
+## Highlights
+Many photographers limit themselves to using 1-3 stars when initially ranking their photos, and leave 4 and 5 stars for the best photos — location: [2490](kindle://book?action=open&asin=B00ZYDUHLK&location=2490) ^ref-2942
+
+---
+Color Labels have no specific meaning, so you can decide how to use them. Many use them to mark photos that need further work in other editors, for example, photos that need retouching in Photoshop, sets of photos for merging into HDR, photos to be built into a panorama, etc. — location: [2493](kindle://book?action=open&asin=B00ZYDUHLK&location=2493) ^ref-39023
+
+---
+On the keyboard, the 0-5 keys apply star ratings, with 1-5 obviously setting 1-5 stars, and 0 clearing your rating. The 6-9 keys apply or remove red, yellow, green and blue color labels. — location: [2502](kindle://book?action=open&asin=B00ZYDUHLK&location=2502) ^ref-3782
+
+---
+Refine Photos If you use Flags, you can select Library menu > Refine Photos to downgrade all of the flags at once. This command downgrades the unflagged photos to rejects and flagged photos to unflagged. It's little-used tool, but it works surprisingly well in a multi-pass workflow. Flag all of the photos you like, then select Refine Photos, so that the photo you didn't flag initially are marked as rejects. Go through the newly unflagged photos again, marking the ones you still like with a flag, and repeat. In the end, only the best photos remain. — location: [2564](kindle://book?action=open&asin=B00ZYDUHLK&location=2564) ^ref-10256
+
+---
+Collection sets allow you to build a hierarchy of collections, just like you would with folders. — location: [2740](kindle://book?action=open&asin=B00ZYDUHLK&location=2740) ^ref-29673
+
+---
+Collections can only usually contain photos and videos, whereas collection sets can contain collections or other collection sets but not the photos or videos themselves. — location: [2752](kindle://book?action=open&asin=B00ZYDUHLK&location=2752) ^ref-52012
+
+---
+scaling preference. — location: [16838](kindle://book?action=open&asin=B00ZYDUHLK&location=16838) ^ref-9045
+
+---

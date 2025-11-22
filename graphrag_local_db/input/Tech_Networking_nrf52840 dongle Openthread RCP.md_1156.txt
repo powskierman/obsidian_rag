@@ -1,0 +1,40 @@
+# nrf52840 dongle Openthread RCP.md
+
+---
+aliases: 
+tags:
+  - dongle
+  - nrf52840
+  - RCP
+  - thread
+  - openthread
+---
+# nrf52840 dongle Openthread RCP
+Date: 2024-04-12
+
+### Backlink
+[[RPI Thread Border Router]]
+
+### Reference
+-  [Configuring OpenThread Radio Co-processor on nRF52840 Dongle — Matter documentation](https://developer.nordicsemi.com/nRF_Connect_SDK/doc/2.1.3/matter/openthread_rcp_nrf_dongle.html)
+- 
+### Notes
+-  Download RCP:
+	- `https://golioth.github.io/golioth-openthread-demo-docs/assets/files/ot-rcp-4739803640df77c4ccaac1cf20ca4851.hex`
+- Or build your own:
+	- The sample can be found at:
+	  `/opt/nordic/ncs/v2.6.1/nrf/samples/openthread/coprocessor`
+	- Using vscode, open the preceding folder
+	- Go to nrf connect extension
+	- Delete the build
+	- Create new build
+	- Copy `/opt/nordic/ncs/v2.6.1/nrf/samples/openthread/coprocessor/build/zephyr/zephyr.hex` to nrf connect programmer
+- Goto to Home Assistant Openthread Border router addon
+	- Go to configuration
+		- Select RPC port
+	- Go to network
+		- Toggle show network ports
+		- enter 8080 and 8081
+		- Start the addon
+- Using Postman, get the relevant network details:
+	- Do a get on `192.168.0.12:8081/node/dataset/active`

@@ -1,0 +1,284 @@
+---
+aliases:
+tags:
+created: 2022-11-03 23:09
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Introduction
+
+    a.  <https://docs.docker.com/get-started/>
+
+```{=html}
+<!-- -->
+```
+1.  Install Docker
+
+    a.  <https://linuxhint.com/install_docker_on_raspbian_os/>
+
+    b.  <https://www.zuidwijk.com/blog/installing-docker-and-docker-compose-on-a-raspberry-pi-4/>
+
+```{=html}
+<!-- -->
+```
+1.  Docker-compose
+
+    a.  <https://docs.docker.com/compose/gettingstarted/>
+
+    b.  Script file to instantiate containers
+
+    c.  Edit docker-compose.yml file to specific requirements
+
+    d.  Ex:
+
+volumes:
+
+- /home/pi/blynkserver/server.properties:/config/server.properties
+
+- /home/pi/blynkserver/blynkdata:/data
+
+5.  Start stack
+
+    a.  docker-compose up -d
+
+```{=html}
+<!-- -->
+```
+1.  Stop stack
+
+    a.  docker-compose stop
+
+```{=html}
+<!-- -->
+```
+1.  Stop and delete containers
+
+    a.  docker-compose down
+
+```{=html}
+<!-- -->
+```
+4.  Pull an image
+
+    a.  <https://docs.docker.com/engine/reference/commandline/pull/>
+
+```{=html}
+<!-- -->
+```
+1.  Instantiate container
+
+    a.  Docker run hello-world
+
+    b.  docker run -it ubuntu /bin/bash
+
+    c.  docker container run --name blynk -p9443:9443 -p 8080:8080 iotstack_blynk_server
+
+    d.  With persistent data folder and server.properties
+
+        i.  docker container run --name blynk -p9443:9443 -p 8080:8080 -v ~/blynkserver/server.properties:/config/server.properties -v ~/blynkserver/blynkdata:/data iotstack_blynk_server
+
+```{=html}
+<!-- -->
+```
+1.  Start container
+
+    a.  Docker start blynk
+
+```{=html}
+<!-- -->
+```
+1.  Stop container
+
+    a.  docker container stop blynk
+
+```{=html}
+<!-- -->
+```
+1.  Ssh into container
+
+    a.  docker exec -it <container name> /bin/sh
+
+```{=html}
+<!-- -->
+```
+1.  Check Running Containers
+
+    a.  Docker ps
+
+```{=html}
+<!-- -->
+```
+1.  Info on running containers
+
+    a.  Docker stats
+
+        i.  List active containers
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Docker stats -a
+
+        i.  List active and inactive containers
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  List volumes in containers
+
+        i.  <https://stackoverflow.com/questions/30133664/how-do-you-list-volumes-in-docker-containers>
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Container ip address
+
+        i.  <https://www.freecodecamp.org/news/how-to-get-a-docker-container-ip-address-explained-with-examples/>
+
+```{=html}
+<!-- -->
+```
+1.  View mounts inside container
+
+    a.  docker inspect -f '{{ .Mounts }}' <container id>
+
+```{=html}
+<!-- -->
+```
+1.  Communicate outside container
+
+    a.  <https://docs.docker.com/storage/volumes/>
+
+    b.  To persist data, mount a directory into the container
+
+        i.  docker run -v ~/blynkserver/blynkdata:/data iotstack_blynk_server:latest
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  To include my server.properties
+
+        i.  docker run -v ~/blynkserver/server.properties:/config/server.properties iotstack_blynk_server:latest
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  To persist server.properties and blynkdata
+
+        i.  docker run -v ~/blynkserver/server.properties:/config/server.properties -v ~/blynkserver/blynkdata:/data iotstack_blynk_server:latest
+
+```{=html}
+<!-- -->
+```
+1.  Delete container
+
+    a.  Docker rm <container id>
+
+```{=html}
+<!-- -->
+```
+1.  Prune unused Docker objects
+
+    a.  <https://docs.docker.com/config/pruning/#:~:text=Prune%20containers&text=A%20stopped%20container%27s%20writable%20layers,the%20docker%20container%20prune%20command.&text=y%2FN%5D%20y-,By%20default%2C%20you%20are%20prompted%20to%20continue.,f%20or%20%2D%2Dforce%20flag>.
+
+    b.  docker image prune
+
+        i.  Cleanup unused images
+
+        ii. Cleans dangling images
+
+            1.  not tagged
+
+            2.  not referenced by any container
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  docker image prune -a
+
+        i.  Removes all images unused by containers
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Prune containers
+
+        i.  When you stop a container, it is not automatically removed unless you started it with the--rmflag.
+
+        ii. docker container prune
+
+            1.  Deletes all stopped containers
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Docker system prune
+
+        i.  <https://docs.docker.com/engine/reference/commandline/system_prune/>
+
+        ii. sudo docker system prune -a -f
+
+```{=html}
+<!-- -->
+```
+1.  Update container
+
+    a.  <https://docs.docker.com/engine/reference/commandline/update/>
+
+    b.  Ex: docker update --restart always blynk
+
+```{=html}
+<!-- -->
+```
+1.  Start containers Automatically
+
+    a.  <https://docs.docker.com/config/containers/start-containers-automatically/>
+
+```{=html}
+<!-- -->
+```
+1.  Cups running in container
+
+    a.  Make sure folder from OriPiServer:/etc/cups is copied to PiServer:/home/pi/cups/
+
+    b.  docker run --name cups -d --restart always -p 631:631 -v /home/pi/cups:/etc/cups -e ADMIN_PASSWORD=xlap8911 ydkn/cups:latest
+
+    c.  <https://gitlab.com/ydkn/docker-cups>
+
+```{=html}
+<!-- -->
+```
+1.  Blynk with Docker container
+
+    a.  Use IOTstack for Blynk but good information
+
+        i.  <https://hub.docker.com/r/mpherg/blynk-server/>
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Good summary of Blynk server installation with TLS
+
+        i.  <https://github.com/maksimstojkovic/blynk-server-setup>
+
+```{=html}
+<!-- -->
+
+1.  sudo systemctl status docker
+
+2.  [Docker inspect](https://stackoverflow.com/questions/43108227/is-it-possible-to-show-the-restart-policy-of-a-running-docker-container/43108590)
+3. [How to access the hassio file system via docker from the command line(https://community.home-assistant.io/t/how-does-one-access-the-hassio-file-system-via-docker-from-the-command-line/61749)
+4.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

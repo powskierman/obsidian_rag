@@ -1,0 +1,266 @@
+# Open Source RAG Stack MoC.md
+
+---
+aliases: ["Open Source RAG", "Self-Hosted RAG", "Open Source Knowledge Base"]
+tags: [AI, RAG, open-source, self-hosted, MoC]
+created: 2025-10-18
+ContentType: Map of Content
+---
+
+# Open Source RAG Stack - Complete Guide
+
+> Build enterprise-grade RAG systems with zero vendor lock-in and minimal costs
+
+## Overview
+
+This guide provides complete implementation details for building RAG (Retrieval-Augmented Generation) knowledge bases using entirely open source components. Save $1,800-10,800/year compared to commercial solutions while maintaining full control of your data and infrastructure.
+
+---
+
+## 📚 Knowledge Base Components
+
+### Core Infrastructure
+- [[Local Obsidian RAG/Vector Databases for RAG]] - Chroma, Weaviate, Qdrant, pgvector, Milvus
+- [[Local Obsidian RAG/Open Source LLM Solutions]] - Ollama, LiteLLM, LocalAI, vLLM
+- [[Local Obsidian RAG/Frontend Frameworks for RAG]] - Gradio, Streamlit, Chainlit, React
+
+### Complete Solutions
+- [[Local Obsidian RAG/Complete Open Source RAG Stacks]] - 5 pre-configured stacks for different use cases
+- [[Local Obsidian RAG/Open Source RAG Quick Start]] - Build your first system in 30 minutes
+- [[Local Obsidian RAG/RAG Cost Analysis]] - Commercial vs Open Source breakdown
+
+---
+
+## 🎯 Quick Navigation
+
+### By Use Case
+
+**Just Getting Started?**
+→ Start with [[Local Obsidian RAG/Open Source RAG Quick Start]]
+→ Use Stack 1 (Gradio + Ollama + Chroma)
+
+**Need Production-Ready?**
+→ See [[Local Obsidian RAG/Complete Open Source RAG Stacks]] - Stack 2 or 5
+→ Review [[Local Obsidian RAG/RAG Cost Analysis]] for infrastructure planning
+
+**Privacy/Compliance Required?**
+→ [[Local Obsidian RAG/Complete Open Source RAG Stacks]] - Stack 3 (Privacy-First)
+→ All data stays on-premises
+
+**On a Budget?**
+→ [[Local Obsidian RAG/Complete Open Source RAG Stacks]] - Stack 4 (Cost-Optimized)
+→ $5-10/month VPS hosting
+
+---
+
+## 💰 Cost Savings Summary
+
+| Scale | Commercial | Open Source | Annual Savings |
+|-------|-----------|-------------|----------------|
+| **Small Business** | $2,040/yr | $240/yr | **$1,800** (88%) |
+| **Enterprise** | $13,200/yr | $2,400/yr | **$10,800** (82%) |
+
+Full breakdown: [[Local Obsidian RAG/RAG Cost Analysis]]
+
+---
+
+## 🔧 Component Comparison
+
+### Vector Databases
+| Solution | Best For | Complexity | Cost |
+|----------|----------|------------|------|
+| **Chroma** | Simplicity, Python | ⭐⭐ | FREE |
+| **pgvector** | Postgres users | ⭐⭐ | FREE |
+| **Weaviate** | Production scale | ⭐⭐⭐ | FREE |
+| **Qdrant** | High performance | ⭐⭐⭐ | FREE |
+
+→ Full comparison: [[Local Obsidian RAG/Vector Databases for RAG]]
+
+### LLM Solutions
+| Solution | Best For | Privacy | Cost |
+|----------|----------|---------|------|
+| **Ollama** | Local deployment | ⭐⭐⭐⭐⭐ | FREE |
+| **LiteLLM** | Multi-model proxy | ⭐⭐⭐ | FREE |
+| **LocalAI** | OpenAI compatible | ⭐⭐⭐⭐⭐ | FREE |
+| **vLLM** | High throughput | ⭐⭐⭐⭐ | FREE |
+
+→ Full comparison: [[Local Obsidian RAG/Open Source LLM Solutions]]
+
+### Frontend Options
+| Solution | Best For | Setup Time | Customization |
+|----------|----------|------------|---------------|
+| **Gradio** | Rapid prototyping | 10 min | ⭐⭐⭐ |
+| **Streamlit** | Data apps | 15 min | ⭐⭐⭐⭐ |
+| **Chainlit** | LLM-focused | 20 min | ⭐⭐⭐⭐ |
+| **React** | Full control | 2-3 days | ⭐⭐⭐⭐⭐ |
+
+→ Full comparison: [[Local Obsidian RAG/Frontend Frameworks for RAG]]
+
+---
+
+## 🚀 Recommended Stacks
+
+### Stack 1: Simplest (30-min setup)
+```
+Gradio → n8n → Ollama → Chroma
+```
+**Perfect for:** Learning, prototyping, small projects
+**Hosting:** Single machine or VPS
+
+### Stack 2: Production-Ready
+```
+React → PostgreSQL → n8n → LiteLLM → Weaviate
+```
+**Perfect for:** Scalable business applications
+**Hosting:** Docker Swarm or Kubernetes
+
+### Stack 3: Privacy-First
+```
+Streamlit → n8n → Ollama → pgvector
+```
+**Perfect for:** Healthcare, legal, finance (GDPR/HIPAA)
+**Hosting:** On-premises or private cloud
+
+### Stack 4: Cost-Optimized
+```
+Chainlit → n8n → Ollama → Chroma
+```
+**Perfect for:** Startups, individual developers
+**Hosting:** $5-10/mo VPS
+
+### Stack 5: Enterprise Grade
+```
+React → PostgreSQL → n8n → vLLM → Qdrant
+```
+**Perfect for:** High-volume, mission-critical applications
+**Hosting:** Kubernetes cluster
+
+→ Detailed implementation: [[Local Obsidian RAG/Complete Open Source RAG Stacks]]
+
+---
+
+## 📖 Implementation Guides
+
+### Quick Start (30 minutes)
+1. [[Local Obsidian RAG/Open Source RAG Quick Start]] - Get running fast
+2. Test with sample data
+3. Deploy Stack 1
+
+### Production Deployment
+1. Choose your stack from [[Local Obsidian RAG/Complete Open Source RAG Stacks]]
+2. Review [[Local Obsidian RAG/Vector Databases for RAG]] for database selection
+3. Select LLM from [[Local Obsidian RAG/Open Source LLM Solutions]]
+4. Pick frontend from [[Local Obsidian RAG/Frontend Frameworks for RAG]]
+5. Follow stack-specific implementation guide
+
+---
+
+## 🔗 Related Notes
+
+### RAG Foundations
+- [[Building AI RAG Agents - No Code Guide v2]] - Original commercial implementation
+- [[AI Tools MoC]]
+- [[n8n]]
+
+### Infrastructure
+- [[MCP MoC]]
+- [[Ollama MoC]]
+
+### Deployment
+- Docker basics
+- Kubernetes fundamentals
+- VPS hosting options
+
+---
+
+## 📊 Key Benefits
+
+### Financial
+- 82-88% cost reduction
+- No per-query pricing
+- Predictable infrastructure costs
+- No vendor lock-in fees
+
+### Technical
+- Complete control over data
+- Custom model fine-tuning
+- No API rate limits
+- Offline operation capability
+
+### Privacy & Compliance
+- Data never leaves your infrastructure
+- GDPR/HIPAA/SOC2 compliant by design
+- Full audit trail
+- No third-party data processing
+
+### Scalability
+- Horizontal scaling
+- Multi-region deployment
+- Load balancing
+- Custom caching strategies
+
+---
+
+## 🎓 Learning Path
+
+**Beginner** (Week 1)
+1. Read [[Local Obsidian RAG/Open Source RAG Quick Start]]
+2. Deploy Stack 1 locally
+3. Experiment with Ollama models
+
+**Intermediate** (Week 2-3)
+1. Study [[Local Obsidian RAG/Vector Databases for RAG]]
+2. Compare pgvector vs Chroma
+3. Build custom frontend with Gradio
+
+**Advanced** (Week 4+)
+1. Review [[Local Obsidian RAG/Complete Open Source RAG Stacks]] - Stack 5
+2. Implement production monitoring
+3. Optimize performance and costs
+
+---
+
+## 🔧 Troubleshooting & Support
+
+### Common Issues
+- Vector database connection errors → [[Local Obsidian RAG/Vector Databases for RAG]]
+- LLM performance optimization → [[Local Obsidian RAG/Open Source LLM Solutions]]
+- Frontend deployment → [[Local Obsidian RAG/Frontend Frameworks for RAG]]
+
+### Community Resources
+- Chroma Discord
+- Ollama GitHub Discussions
+- n8n Community Forum
+- r/LocalLLaMA subreddit
+
+---
+
+## 🎯 Next Steps
+
+1. **Choose Your Path:**
+   - 🚀 Quick learner? → [[Local Obsidian RAG/Open Source RAG Quick Start]]
+   - 🏢 Production deployment? → [[Local Obsidian RAG/Complete Open Source RAG Stacks]]
+   - 💰 Cost analysis first? → [[Local Obsidian RAG/RAG Cost Analysis]]
+
+2. **Compare Components:**
+   - [[Local Obsidian RAG/Vector Databases for RAG]]
+   - [[Local Obsidian RAG/Open Source LLM Solutions]]
+   - [[Local Obsidian RAG/Frontend Frameworks for RAG]]
+
+3. **Get Building:**
+   - Pick a stack
+   - Follow implementation guide
+   - Join community for support
+
+---
+
+## 📝 Maintenance Notes
+
+**Last Updated:** 2025-10-18
+**Tested Configurations:** All 5 stacks verified working
+**Next Review:** Monthly for tool updates
+
+---
+
+## Tags for Search
+#rag #open-source #self-hosted #vector-database #ollama #chroma #gradio #streamlit #chainlit #weaviate #qdrant #pgvector #litellm #vllm #localai #cost-analysis #privacy #gdpr #hipaa #kubernetes #docker #n8n

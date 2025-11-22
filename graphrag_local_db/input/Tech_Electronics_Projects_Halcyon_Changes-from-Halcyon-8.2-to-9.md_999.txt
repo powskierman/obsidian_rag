@@ -1,0 +1,31 @@
+# Changes-from-Halcyon-8.2-to-9.md
+
+---
+aliases:
+tags:
+created: 2022-03-12 13:50
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<<[Halcyon-9.0-to-8.2-FlashIR-File-Compare.pdf](Tech/Electronics/Projects/Halcyon/media/Halcyon-9.0-to-8.2-FlashIR-File-Compare.pdf)>>
+
+
+
+![](Changes-from-Halcyon-8.2-to-9.0-image1.png){width="3.75in" height="2.625in"}![](Changes-from-Halcyon-8.2-to-9.0-image2.png){width="3.75in" height="2.625in"}![](Changes-from-Halcyon-8.2-to-9.0-image3.png){width="3.75in" height="2.6145833333333335in"}![](Changes-from-Halcyon-8.2-to-9.0-image4.png){width="3.75in" height="2.6145833333333335in"}![](Changes-from-Halcyon-8.2-to-9.0-image5.png){width="3.75in" height="2.625in"}
+
+
+
+<<Halcyon 9.0 to 8.2 Main File COmpare.pdf>>![](Changes-from-Halcyon-8.2-to-9.0-image6.png){width="3.75in" height="2.625in"}![](Changes-from-Halcyon-8.2-to-9.0-image7.png){width="3.75in" height="2.625in"}![](Changes-from-Halcyon-8.2-to-9.0-image8.png){width="3.75in" height="2.625in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

@@ -1,0 +1,19 @@
+# LEDstrip.md
+
+---
+aliases: 
+tags:
+  - LED
+---
+# LEDstrip
+Date: 2024-09-27
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- [how to connect to elk-bledom  A Step-by-Step Guide](https://www.elkbledom.com/connecting-elk-bledom-bluetooth-a-step-by-step-guide/) 
+- ELK-BLEDOM09
+	- `BE:67:01:31:01:E9`

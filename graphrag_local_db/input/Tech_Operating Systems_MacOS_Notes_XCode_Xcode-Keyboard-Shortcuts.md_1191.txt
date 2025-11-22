@@ -1,0 +1,17 @@
+# Xcode-Keyboard-Shortcuts.md
+
+---
+aliases: []
+tags: []
+---
+# Xcode-Keyboard-Shortcuts
+Date: 2023-02-11
+
+### Backlink
+[[../../../../Programming-Tools/Xcode/Xcode MOC]]
+
+### Reference
+-  ![Machine generated alternative text: Xcode Keyboard Shortcuts AStopwatch 2 targets. •OS SDK 8.a Stopwatch swift % (1-7) Switch Navigators supporting Files Toggle Navigators Filter in Navigator Control 'N General Documentation Console iPhone 6 Stopwatch: Ready 1 Today at 1269 pu 88 < Stopwatch S. ViewControner.swift ViewControIIer Copyright (C) 2015 Apple Inc. AIL Rights Reserved. import UIKit c Lass UIViewControIIer { var stopwatch: Stopwatch? g180utIet weak var elapsedTieLabeL. • UlLabeU override func viewOidLoad() { stopwatch Stopwatch (j rning() { override func dia Super. e @IBAction func st Mapped (sender: UIButton) NST 2me scheou i I. Show Standard Editor repeats: true) stopwatch ! . start() @1BAction func stopButtonTapped(sender: Ulautton) stopwatch stop() func updateEtapsedTimeLabeI(timer: MST imer) { if stopwatch!.running { elapsed TimeLabeI. text --- stogwatch!. elapsedTimeAsSt ring ( ) else { timer. inva 57 77 Stopwatch. swift NO Seletion Copyright (C) 2015 Apple Inc. All Rights Reserved. import Foundation class Stopwatch { var startTi---: NSDate? var running: BOOL { return startTine nil var elapsedTiæ: NSTiæIntervaI { retun else retun, Show Assistant Editor func stop() func elapsedTimeAsString() String { var minutes = floor(eIapsedTi'æ / 60 'inutes (minutes var tenth d", Int(minutes), Show Version Editor Toggle Debug Area Shift O StV&a ch.swift - Swift swift Switch --- Inspectors Stoowatch Tests Toggle Utilities Filter in Library •rough a Return Option 09€o oxc A Space Tab A3€E Command 9€ Documentation for selected text Quick Help Code Editing Show completions Next completion Accept completion Next placeholder Previous placeholder Comment selection Fold method/class Unfold method/class Edit all in scope Build & Run Build Analyze Run Profile Test Clean Clear console File Navigation Go forward Go back Open quickly Show related items Debugging Next issue Previous issue Fix next issue Fix previous issue Add breakpoint Activate breakpoints 03€B 03€1< Code Navigation End of line Beginning of line Top of file Bottom of file Next word Previous word Next subword Previous subword Center selection Goto line Find Find Find Find in file in project next previous 03€F 03€G Libraries File template Code snippet Object Media This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License, by Yong Bakos. ](Xcode-Keyboard-Shortcuts-image1.png)
+- 
+### Notes
+-  Libraries:  ⌘⇧L

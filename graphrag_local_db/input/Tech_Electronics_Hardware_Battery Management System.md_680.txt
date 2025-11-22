@@ -1,0 +1,19 @@
+# Battery Management System.md
+
+---
+aliases: [BMS]
+---
+
+2022-03-11
+# Battery Management System
+
+### Backlink
+[[]]
+
+### Reference
+- [DIYBMSV4](https://github.com/stuartpittaway/diyBMSv4)
+- [BMS Teardown and Schematic](https://circuitdigest.com/electronic-circuits/lithium-ion-battery-management-and-protection-module-bms-teardown-schematics-parts-list-and-working)
+- [ATtiny841](https://www.microchip.com/en-us/product/ATtiny841)
+- 
+### Notes
+-

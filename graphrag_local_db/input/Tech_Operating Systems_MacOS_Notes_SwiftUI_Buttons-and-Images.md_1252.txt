@@ -1,0 +1,89 @@
+# Buttons-and-Images.md
+
+---
+aliases: []
+---
+
+2022-06-25
+# Buttons-and-Images
+
+### Backlink
+[[../../../../Programming-Tools/SwiftUI/SwiftUI MoC]]
+
+### Reference
+
+### Notes
+- 1.  Simple Button
+
+    a.  Button("Tap me!") {
+
+print("Button was tapped")
+
+}
+
+2.  More complex button with image
+
+    a.  Button(action: {
+
+print("Button was tapped")
+
+}) {
+
+Text("Tap me!")
+
+}
+
+3.  3 ways to create Image
+
+    a.  Image("pencil")
+
+        i.  will load an image called "Pencil"
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Image(decorative: "pencil")
+
+        i.  will load the same image, but won't read it out for users who have enabled the screen reader.
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Image(systemName: "pencil")
+
+        i.  will load the pencil icon that is built into iOS.
+
+        ii. This uses Apple's SF Symbols icon collection
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Example
+
+Button(action: {
+
+print("Edit button was tapped")
+
+}) {
+
+HStack(spacing: 10) {
+
+Image(systemName: "pencil")
+
+Text("Edit")
+
+}
+
+}
+
+4.  render the original image pixels rather than trying to recolor them as a button
+
+    a.  .renderingMode(.original)
+
+```{=html}
+<!-- -->
+```
+1.  Fancy 3D button with Shadow
+
+    a.  ![Button( " Show Alert") { self . showA1ert true . padding (10) . background( ZStack { RoundedRectang1e(cornerRadius: 10, style: . continuous) . shadow(color: . white, radius: self. showA1ert ? 7: 10, x: self. showA1ert ? ---5: -15, y: self. showA1ert ? ---5: ---15) . shadow(color: . black, radius: self. showA1ert ? 7: 10, x: self. showA1ert ? 5: 15, y: self. showA1ert ? 5: 15) . blendMode( . overlay) RoundedRectang1e(cornerRadius: 10, style: . continuous) . ? e. 95: 1) . foregroundC010r( . primary) . animation( . spring()) accentC010r( . blue) ](Buttons-and-Images-image1.png) 
+-

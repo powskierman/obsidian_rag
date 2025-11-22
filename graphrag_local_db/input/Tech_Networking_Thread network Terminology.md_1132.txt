@@ -1,0 +1,25 @@
+# Thread network Terminology.md
+
+---
+aliases: []
+tags: []
+---
+# Thread network Terminology
+Date: 2023-06-07
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  ExtAddress:
+	- the `extAddress` is the Extended Address, which is a unique 64-bit identifier for a device on the network. This identifier is typically derived from the device's IEEE 802.15.4-compliant radio, which requires a unique 64-bit Extended Address.
+	- My DK's extAddress: 76EC51590584E03C
+	- My Dongle's extAddress: 86E43A61A8FBF225
+- RLOC: 
+	- each node has a unique 16-bit identifier associated with it.  the RLOC16 (Router Locator) is used to identify devices within a Thread network.
+- Partition ID:
+	- The Partition ID for a given network is chosen by the Leader of the network. It's a randomly generated 32-bit value and all routers in a Thread network share the same Partition ID. This ID will change if the Leader of the network changes or if the network merges with another network.  In a Thread network, the Partition ID is a unique identifier that represents the Thread partition the device belongs to.
+	- A Thread network can potentially split into multiple partitions due to poor connectivity, interference, or other issues. When this happens, each partition continues operating as a separate Thread network with its own Partition ID.
+	- If all of your devices have the same Partition ID, they are all part of the same Thread network. If you see different Partition IDs, it means that your network has split into different partitions and you may have connectivity issues.

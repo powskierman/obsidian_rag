@@ -1,0 +1,25 @@
+---
+aliases: 
+tags:
+  - xcode
+  - troubleshooting
+---
+# Xcode Troubleshooting
+Date: 2022-10-01
+
+### Tags: 
+
+### Backlink
+[[../Xcode/Xcode MOC]]
+
+### Reference
+- 
+### Notes
+ - [[Xcode Rename-Project]]
+ - Errors immediately disappear after build:
+	 - In Project > Build Setting, remove any filter
+		 - ![[Pasted image 20231105110806.png|300]]
+ - Strange errors?  Delete derived data:
+	 - `rm -rf ~/Library/Developer/Xcode/DerivedData/*`
+ - [[Add target to active scheme]]
+ - [[Preparing iPhone]]

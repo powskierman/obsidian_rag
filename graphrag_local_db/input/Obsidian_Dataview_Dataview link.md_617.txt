@@ -1,0 +1,29 @@
+# Dataview link.md
+
+---
+aliases:
+tags:
+created: 2022-07-05 14:13
+ContentType: Note
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+```dataview
+table without id
+    link(file.link, title) as "title",
+    last_highlight_at
+where contains(file.inlinks, file.link)
+sort date desc
+```
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

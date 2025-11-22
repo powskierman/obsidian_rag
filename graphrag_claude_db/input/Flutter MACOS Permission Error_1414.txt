@@ -1,0 +1,22 @@
+---
+aliases: []
+---
+# Flutter MACOS Permission Error
+Date: 2022-08-16
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- 
+### Notes
+- From [Stackoverflow](https://stackoverflow.com/questions/65458903/socketexception-connection-failed-os-error-operation-not-permitted-errno-1):
+	- macOS needs you to request a specific entitlement in order to access the network. To do that open macos/Runner/DebugProfile.entitlements and add the following key-value pair.
+	
+	<key>com.apple.security.network.client</key>
+	<true/>
+	Then do the same thing in macos/Runner/Release.entitlements.
+	
+	You can read more about this in the Desktop support for Flutter documentation. 

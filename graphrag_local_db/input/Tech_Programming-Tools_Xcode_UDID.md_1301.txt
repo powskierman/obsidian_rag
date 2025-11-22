@@ -1,0 +1,17 @@
+# UDID.md
+
+---
+aliases: []
+tags: []
+---
+# UDID
+Date: 2024-04-05
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Michel' iPhone UDID:
+	- `00008110-001444EE1E0A801E`

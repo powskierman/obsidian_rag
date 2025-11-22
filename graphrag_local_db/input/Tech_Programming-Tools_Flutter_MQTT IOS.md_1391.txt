@@ -1,0 +1,22 @@
+# MQTT IOS.md
+
+---
+aliases: []
+---
+# MQTT IOS
+Date: 2022-10-01
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [emqx/CocoaMQTT: MQTT 5.0 client library for iOS and macOS ](https://github.com/emqx/CocoaMQTT)
+- [CocoaMQTT 2.0.7](https://cocoapods.org/pods/CocoaMQTT)
+- [anoop4real/SwiftUI_MQTT: An MQTT app using SwiftUI](https://github.com/anoop4real/SwiftUI_MQTT)
+- [Communicate between iOS and Raspberry Pi using MQTT](https://forums.raspberrypi.com/viewtopic.php?t=196010&sid=29e6a9e8318398e212cdbbb8b93b5299)
+- [MQTT In iOS. The Why and the How - Excellent, simple article](https://medium.com/thefloatingpoint/mqtt-in-ios-d8574b55e006)
+- ### Notes
+- [SwiftUI: Create an MQTT app - YouTube](https://www.youtube.com/watch?v=xHHOL3EgqNY)
+-

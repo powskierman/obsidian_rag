@@ -1,0 +1,205 @@
+---
+aliases: 
+tags:
+  - Kicad
+  - PCB
+created: 2025-02-21 22:06
+---
+### Main Idea
+- A 4 layer PCB design project from Peter Dalmaris to illustrate the design process and the functionality of Kicad 9.
+### References
+- [Udemy Kicad 9 Course](https://www.udemy.com/course/advanced-pcb-design-with-kicad/?couponCode=KEEPLEARNING)
+- [[Kicad 9.1 - Understanding PCB Design|Kicad 9.1 - Understanding PCB Design]]
+- [[Kicad 9.2 - Starting a New Project in KiCad]]
+- [[Kicad 9.3- Structuring the Schematic Design]]
+- [[Kicad 9.4 - Expanding the Schematic to Include the ESP32 and Peripherals]]
+- [[Kicad 9.5]]
+- 
+### Notes
+
+In this project, I will walk you through the step-by-step process of designing a medium-complexity, four-layer IoT development board using the release candidate version of KiCad 9. This board features the ESP32-C3 SoC, sensors, flash memory, an SD card reader, and power management circuits, making it a versatile platform for IoT applications.
+
+Throughout the design process, I explore the new features of KiCad 9 RC1 and RC2, from schematic creation to layout and preparation for manufacturing, highlighting how these tools streamline PCB development. Whether you’re an experienced PCB designer or new to the field, this blog will give you practical insights into designing high-quality, manufacturable PCBs.
+
+Unlike in previous updates of KiCad, I wanted to do something different for KiCad 9. Instead of just listing all the new bells and whistles, I decided to put it to the test and design a PCB that would give me the opportunity to really experience the productivity and design enhancements that this new version brings.
+
+I also wanted to make this test as realistic as possible. This means that I would embark on a design that is not trivial. This design would be more complex than anything I have done before. I would also manufacture the final design and test the assembled board. If the testing revealed any issues, I would fix them until I had a working PCB.
+
+Here is the final PCB project, on [Github](https://github.com/futureshocked/KLP-5e-ESP32-sensor-board).
+
+Table of contents
+
+## Full design video
+
+How to Design a Custom PCB with KiCad 9: A Complete Guide
+
+**Chapters:**
+
+00:00:00 – Introduction   
+00:01:21 – Overview of the PCB Design   
+00:06:12 – Design Guidelines and Component Selection   
+00:12:06 – Multi-Page Schematic Design   
+00:37:34 – Setting Up the Schematic Editor   
+01:09:06 – ESP32 and Related Hardware   
+01:14:05 – Sensors and User Interface Design   
+02:19:15 – Assigning Footprints to Symbols   
+02:41:28 – Importing Schematic Data into the Layout Editor   
+03:05:29 – Component Placement and Board Outline   
+03:14:44 – Signal Conditioning and Placement Refinement   
+03:45:56 – Routing and Copper Zones   
+04:16:13 – Differential Pairs and High-Speed Signals   
+04:26:57 – Power Traces and Final Routing   
+05:06:10 – Design Rule Check (DRC) and Fixing Errors   
+05:21:56 – Silkscreen Design and Annotations   
+05:43:36 – Preparing Files for Manufacturing   
+05:48:44 – Ordering and Assembly with NextPCB
+
+## Testing video
+
+I have tested the prototype of this PCB with surprising results. Here’s the video.
+
+ESP32 Custom Board Prototype: First Impressions, Testing, and Next Steps
+
+## Welcome to KiCad 9
+
+KiCad 9 ([see post-V8 discussion](https://forum.kicad.info/t/post-v8-new-features-and-development-news/48614)) introduces new features and improvements that significantly enhance its usability, functionality, and performance compared to KiCad 8. These updates cater to schematic and PCB editors and the 3D viewer.
+
+One of the standout additions in KiCad 9 is the Zone Manager Tool, which allows users to preview and adjust copper zone priorities and settings more effectively. This feature simplifies the management of complex copper geometries, particularly in multilayer designs. Another notable improvement is the Net Inspector Tool, now relocated to a docked panel with enhanced filtering, grouping options, and column customization. These changes make it easier to navigate and manage large-scale netlists. Additionally, schematic sheet-level DNP (Do Not Place) functionality enables designers to define DNP components directly at the sheet level, streamlining hierarchical designs.
+
+![](https://imagedelivery.net/EzErua5FfjxwIvZXiki_dA/cc47928f-ec14-4ec8-7ff2-fe317e792800/1920)
+
+This is the design process I used in this project.
+
+For PCB design, KiCad 9 offers advanced features such as via tenting control, which allows per-via tenting customization on both sides of the board. The new Dogbone corner relief tool further enhances mechanical design by accommodating sharper angles in cutouts. Another improvement is the layer pair management system, simplifying navigation through complex multilayer designs using customizable presets and hotkeys.
+
+The 3D Viewer in KiCad 9 also sees significant upgrades. Rendering performance has been optimized, making ray tracing faster and more practical for photorealistic visualizations. The export capabilities have been expanded with options to fuse copper geometries, export inner-layer copper, and exclude specific board elements during model export. Additionally, perspective projection has been introduced alongside orthogonal views for more realistic visualization.
+
+KiCad 9 also improves interoperability with other tools by supporting importing Altium schematics in ASCII format. Furthermore, the ability to embed elements like worksheets, datasheets, 3D models, and custom fonts directly into project files reduces dependency on external references, streamlining project management.
+
+![](https://imagedelivery.net/EzErua5FfjxwIvZXiki_dA/30b71e8a-9b66-4b33-4679-97550b81df00/1920)
+
+KiCad 9.0 introduces several secondary improvements and features that enhance its usability, flexibility, and functionality. These updates complement the significant enhancements and provide additional tools for designers to streamline their workflows. Here are some of the noteworthy secondary features:
+
+1. **Text Justification Hotkeys:** Users can now assign hotkeys to text justification actions, allowing for quick alignment of text elements in schematics and PCB layouts. This improves both the aesthetic and functional aspects of designs and saves time during the editing process.
+2. **Selection Filter for Schematic and Symbol Editors**: A new selection filter has been added to the schematic and symbol editors, enabling more precise control over selected elements. This is particularly useful for working with densely populated schematics, as it reduces errors when selecting components or connections.
+3. **Schematic Rule Areas**: Designers can now define them by drawing shapes in the schematic editor and attaching net class directives. This feature ensures that specific schematic areas adhere to unique electrical rules, making it ideal for mixed-signal or power-sensitive designs.
+4. **Table Support in Editors**: Tables have been introduced in the Schematic Editor, Footprint Editor, and PCB Editor. This allows users to organize data such as component lists or connections in a structured format directly within the editors, improving data management.
+5. **Embedded Design Elements**: KiCad 9 embeds design elements like worksheets, datasheets, 3D models, and custom fonts into project files. This reduces dependency on external references and simplifies project management by keeping all necessary resources within the design file.
+6. **Enhanced ERC/DRC Exclusions with Comments**: The ability to add comments to ERC (Electrical Rule Check) and DRC (Design Rule Check) exclusions has been introduced. This feature is particularly useful in collaborative environments, as it documents the reasons behind specific rule overrides for better team understanding.
+7. **Improved Differential Pair Skew Rules**: Advanced skew rules for differential pairs have been added to ensure better signal integrity in high-speed designs. The new rules allow skew measurements relative to the most extended trace within a pair, providing more precise control over trace length matching.
+8. **Regulator Tolerance Calculator**: A built-in calculator helps users select appropriate components by ensuring that designs meet specified performance criteria without relying on external tools.
+
+I haven’t tested all of these features in this project. Some of them are so well integrated that I didn’t even realise they were new. I just used them as part of my natural workflow. A good example is the Zone Manager tool, which I struggled to remember if it was available in KiCad 8. Now, this is a sign that software is mature: new features feel like they’ve always been there.
+
+## Tech specs of this project
+
+This custom IoT development board showcases the power of KiCad 9 RC1 and creates a versatile platform for real-world IoT projects. At its heart is the ESP32-C3 microcontroller, which offers Wi-Fi and BLE connectivity along with impressive processing power. It’s compact, efficient, and ready for your next IoT application.
+
+The board offers power options. You can run it through a USB-C connector, which also handles data transfer, or power it with a LiPo battery for portable setups. A dedicated battery management circuit onboard ensures safe charging and discharging. To top it off, built-in 3.3V and 5V regulators keep everything running smoothly.
+
+![](https://imagedelivery.net/EzErua5FfjxwIvZXiki_dA/48892469-b835-4cbe-a127-db4aafc2e800/1920)
+
+One of the schematic design sheets.
+
+The board is flexible when it comes to storage. It features a microSD card slot for local data logging and onboard SPI flash memory, which is perfect for storing configuration files, sensor data, or firmware updates. There’ll be plenty of room for everything you need.
+
+Speaking of sensors, the board is designed to effortlessly capture environmental data. It has a BME280 sensor to measure temperature, humidity, and pressure. An ambient light sensor tracks light intensity, while a microphone paired with a pre-amplifier makes it easy to capture sound. These features make it ideal for smart monitoring projects.
+
+The board supports I2C and SPI protocols for connectivity, making it compatible with a wide range of devices and peripherals. It also has a USB-to-UART bridge for programming and debugging, making development straightforward.
+
+![](https://imagedelivery.net/EzErua5FfjxwIvZXiki_dA/49104641-e2bb-4525-bf80-92ac9dc41400/1920)
+
+The front of the freshly manufactured board.
+
+The user interface is designed with practicality in mind. It includes boot and reset buttons, a GPIO header for external connections, and status LEDs to indicate power, charging, and operation. Everything is arranged for ease of use.
+
+The PCB itself is a standout feature. It’s a four-layer design with dedicated planes for power and ground, which keeps signals clean and stable. The layout is compact but thoughtfully arranged to minimize interference and simplify assembly. There are also test points for debugging, which come in handy during development.
+
+### **Summary of Features**
+
+- **Microcontroller**: ESP32-C3 with Wi-Fi and BLE connectivity.
+- **Power**: USB-C input, LiPo battery connector, onboard 3.3V and 5V regulation.
+- **Storage**: MicroSD card slot and SPI flash memory.
+- **Sensors**: BME280 environment sensor, ambient light sensor, microphone with pre-amplifier.
+- **Interfaces**: I2C, SPI, USB-to-UART bridge for communication.
+- **User Interaction**: Boot and reset buttons, GPIO header, and status LEDs.
+- **Design**: 4-layer PCB with optimized layout, test points for debugging.
+
+## Potential applications
+
+This IoT development board is a versatile platform designed to support various projects, particularly those focused on environmental monitoring, data logging, and wireless connectivity. Its ESP32-C3 microcontroller, built-in sensors, and flexible storage options make it well-suited for applications where gathering and analyzing data in real time is essential.
+
+![](https://imagedelivery.net/EzErua5FfjxwIvZXiki_dA/39eeb225-81b5-4c97-4c60-775046ae9800/1920)
+
+The back of the freshly manufactured board.
+
+For instance, you could use the board to build a weather station that tracks temperature, humidity, atmospheric pressure, and ambient light levels. The onboard microSD card slot allows for local historical data storage, while the Wi-Fi lets you upload live readings to the cloud for remote monitoring. The microphone and pre-amplifier open possibilities for projects like sound level monitoring in urban environments or acoustic analysis in natural habitats.
+
+This board also excels in portable and battery-powered applications. With its LiPo battery support and power management circuitry, you could create smart devices such as wearable fitness trackers, remote IoT sensors for agricultural fields, or mobile data loggers for field research. Its GPIO breakout and I2C/SPI interfaces mean you can quickly expand functionality by adding displays, additional sensors, or actuators, allowing you to tailor the board to your specific project needs.
+
+One more application that I will explore is Artificial Intelligence. For example, Espressif has released an [OpenAI component](https://docs.espressif.com/projects/esp-iot-solution/en/latest/ai/openai.html), a version of the OpenAI-ESP32 Arduino library. This component and library allow your ESP32-powered project to access OpenAI’s LLMs, with all this entails for its potential applications.
+
+One idea is to build voice-controlled devices. With the onboard microphone and OpenAI’s natural language processing capabilities, you could create a smart home assistant that responds to your commands with context-aware answers. Imagine being able to ask your device to dim the lights, report the current weather, or even explain why a sensor is reading an unusual value—all in natural conversation.
+
+This setup could also take environmental monitoring to the next level. The sensors on the board can gather data like temperature, humidity, or light intensity, while the OpenAI integration turns that raw data into meaningful insights. For instance, it could analyze trends and recommend plant watering schedules or even generate conversational summaries of sensor data for a quick update on environmental conditions.
+
+## **My impressions of KiCad 9 during this project**
+
+Working with KiCad 9 RC1 and RC2 for this project was exciting and insightful. Being an early release candidate, I was curious to see how the new features and updates would improve the design workflow, and overall, I was impressed. However, like any pre-release software, it wasn’t without its challenges, which gave me a chance to think about how KiCad might evolve further.
+
+The first thing I noticed was how much smoother and faster certain aspects of the workflow were compared to previous versions. Features like the improved routing tools, copper zone management, and the new layer management UI made designing a 4-layer PCB much more intuitive. The interface feels modern and well-organized, which is especially important for complex designs like this IoT board. As you can see in the video, I had to go back and forth between the schematic and layout editors multiple times to fix things, modify or add components, and each time I encounter zero problems.
+
+That said, I did run into a few bumps along the way. Some plugins I’ve relied on previously didn’t function properly with the RC versions. For example, the NextPCB DFM plugin, which would have been very helpful for quickly verifying the manufacturability of my design, wasn’t compatible with RC1 or RC2. It’s understandable since plugins often need time to catch up with major software updates. I’m optimistic that by the time KiCad 9.0 is officially released, both the core software and its plugin ecosystem will be much more stable.
+
+I particularly appreciated the improvements in error checking and net management. The design rules checker (DRC) caught a few issues I might have missed otherwise, and the ability to easily modify net classes and assign custom clearances added a lot of flexibility to the design process. These features made troubleshooting and refining the board layout easier as I progressed.
+
+I think KiCad can still improve its usability in managing more significant projects with many custom libraries. While the library management system has come a long way, I wished for a more streamlined way to handle missing footprints and symbols, particularly when transferring between projects or working with downloaded components. This would save time and reduce errors, especially in collaborative environments. A sharable database of footprints, symbols, and 3D models would be a fantastic productivity boost for teams.
+
+Another feature I’d like to see in the future is greater integration with team-oriented tools like Cadlab and Github. I did use Cadlab in this project along with KiCad, although I did not document it in the video. I know there are plugins for Git that promise to make teamwork easier, but I don’t think they are ready for primetime yet.
+
+Despite these minor hurdles, I’m confident that KiCad 9.0 and future versions will be even better. The rapid development and responsiveness of the KiCad team and community make me optimistic about its future. This project gave me a good sense of how far the software has come, and I’m excited to see how it continues to evolve. For anyone considering upgrading to KiCad 9 when it officially releases, I’d say it’s shaping up to be a fantastic update with much to offer.
+
+## **What I hope you’ll take away from this KiCad 9 project**
+
+This video is more than just a step-by-step guide to designing a 4-layer IoT development board—it’s a deep dive into how KiCad 9 can be used to tackle real-world projects. My goal is to show you not only the technical aspects of PCB design but also the thought process, problem-solving, and decision-making that goes into creating a professional-quality board.
+
+Throughout the video, I’ve tried to share my workflow as much as possible, from schematic creation and part selection to layout and manufacturing preparation. I hope you’ve picked up valuable tips for working with KiCad, whether managing libraries, refining your copper zones, or troubleshooting design issues with tools like the design rules checker. If you’re starting, I hope this project gives you the confidence to try something similar, knowing that mistakes and iterative improvements are part of the process.
+
+I also hope this video highlights how KiCad continues evolving as a powerful tool for PCB design. By showcasing its new features and discussing areas for improvement, I want to encourage you to explore what’s possible with KiCad and perhaps share your feedback and experiences with the community. As KiCad grows, we all benefit from its progress.
+
+Most importantly, I hope you come away inspired to tackle your projects. Whether you’re working on your first board or refining advanced designs, the lessons from this video should help you push your skills further. My goal is to empower you to not only use KiCad effectively but to enjoy the process of turning your ideas into reality. Happy designing!
+
+### **Share your thoughts and feedback.**
+
+I’d love to hear from you! If you have any questions about the design process, thoughts on the features of KiCad 9, or tips and tricks you’ve discovered while using it, please share them in the comments section. Whether you’re working on a similar project, exploring the new features in KiCad 9, or just starting with PCB design, your insights and experiences are valuable. Let me know your thoughts on this project, how KiCad 9 works, and what features you’d love to see in future updates. Your feedback and ideas can spark great conversations and help us grow as a community of designers.
+
+### Main resources mentioned: 
+
+- [NextPCB PCB Manufacturing and Assembly Services](https://www.nextpcb.com/)
+- [KiCad Official Website](https://www.kicad.org/)
+- [ESP32 Datasheet and Documentation](https://www.espressif.com/en/products/socs/esp32/resources)
+- [Texas Instruments High-Speed Layout Guidelines](https://www.ti.com/lit/an/szza009/szza009.pdf)
+- [NextPCB HQ DFM Tool](https://www.nextpcb.com/dfm)
+
+### Other useful resources: 
+
+- [SnapMagic](https://www.snapeda.com/): Used extensively for sourcing components, footprints, symbols, and 3D models for the project. 
+- [Kemet](https://www.kemet.com/): A resource for component sourcing. 
+- [DigiKey](https://www.digikey.com/): A popular distributor for electronic components. 
+- [Bel Fuse](https://www.belfuse.com/): Used for sourcing components like fuses. 
+- [USB.org](https://www.usb.org/): Helpful for understanding the USB module specifications. 
+- [OnSemi](https://www.onsemi.com/) (ON Semiconductor): Used for researching integrated circuits. 
+- [SparkFun](https://www.sparkfun.com/): A resource for maker-focused components and modules. 
+- [Texas Instruments](https://www.ti.com/): Helpful for high-speed layout guidelines and PCB design resources. 
+- [Silicon Labs](https://www.ti.com/): Used for specific integrated circuits. https://www.silabs.com 
+- [Espressif Resources](https://www.espressif.com/): For PCB layout guidelines specific to the ESP32 module placement. 
+- [NextPCB](https://www.nextpcb.com/): The PCB manufacturer and sponsor of this project. 
+- [HQ DFM Tool by NextPCB](https://www.nextpcb.com/dfm): Used for design-for-manufacturing checks.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

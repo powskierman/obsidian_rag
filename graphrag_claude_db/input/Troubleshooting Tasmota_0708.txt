@@ -1,0 +1,101 @@
+---
+aliases: 
+tags:
+  - tasmota
+  - troubleshooting
+---
+# Troubleshooting Tasmota
+Date: 2024-07-14
+
+### Backlink
+[[tas]]
+
+### Reference
+-  [Tasmota Commands](https://tasmota.github.io/docs/Commands/#setoptions)
+- [Tasmota Matter](https://tasmota.github.io/docs/Matter/#full-example)
+- 
+### Notes
+-  Ensure Firmware is Up-to-date:
+Make sure your Tasmota firmware is up-to-date. Download the latest version from the Tasmota GitHub releases page.
+
+Erase Flash Memory:
+Use esptool.py to completely erase the flash memory of your ESP32. This ensures that there are no residual configurations or firmware issues.
+
+sh
+Copy code
+esptool.py --port /dev/ttyUSB0 erase_flash
+Flash Tasmota Firmware:
+After erasing, flash the latest Tasmota firmware onto your device.
+
+sh
+Copy code
+esptool.py --port /dev/ttyUSB0 --baud 460800 write_flash -fm dout 0x00000 tasmota32.bin
+Initial Configuration:
+Connect to the Tasmota device and perform the initial configuration via the web interface to set up Wi-Fi and basic settings.
+
+Apply Template via Console:
+Once the device is connected to your network, access the console and apply your template.
+
+sh
+Copy code
+template {"NAME":"Garage Matter","GPIO":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,258,256,257,1,259,1,1,1,164,165,1],"FLAG":0,"BASE":1}
+Activate Template and Restart:
+Activate the template by setting the module to 0 and restart the device.
+
+sh
+Copy code
+Module 0
+Restart 1
+Verify GPIO Configuration:
+After the device restarts, check the GPIO configuration.
+
+sh
+Copy code
+gpio
+Set SwitchMode and Verify:
+If necessary, set the switch mode for the relevant GPIOs.
+
+sh
+Copy code
+SwitchMode5 1
+Verify the switch mode setting.
+
+sh
+Copy code
+SwitchMode5
+Detailed Steps with Commands
+Erase Flash:
+
+sh
+Copy code
+esptool.py --port /dev/ttyUSB0 erase_flash
+Flash Firmware:
+
+sh
+Copy code
+esptool.py --port /dev/ttyUSB0 --baud 460800 write_flash -fm dout 0x00000 tasmota32.bin
+Initial Setup via Web Interface:
+Connect to the Tasmota device’s Wi-Fi and configure the network settings.
+
+Apply Template via Console:
+
+sh
+Copy code
+template {"NAME":"Garage Matter","GPIO":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,258,256,257,1,259,1,1,1,164,165,1],"FLAG":0,"BASE":1}
+Module 0
+Restart 1
+Verify GPIO Configuration:
+
+sh
+Copy code
+gpio
+Set and Verify SwitchMode:
+
+sh
+Copy code
+SwitchMode5 1
+SwitchMode5
+Additional Tips
+Use a Different Browser: Sometimes, browser caching issues can cause discrepancies in the displayed configuration. Clear your browser cache or use a different browser to access the Tasmota web interface.
+Check for Hardware Issues: Ensure that there are no hardware issues with the ESP32 module or the GPIO pins being used.
+Consistency in Commands: Make sure all commands are entered correctly and consistently in both the console and the GUI.

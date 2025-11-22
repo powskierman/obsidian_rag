@@ -1,0 +1,142 @@
+# Pilone-UML 2.0 Pocket Reference.md
+
+---
+bookId: "48866"
+title: "UML 2.0 Pocket Reference: UML Syntax and Usage (Pocket Reference (O'Reilly))"
+author: Dan Pilone
+asin: B00G9G1L5M
+lastAnnotatedDate: 2023-01-14
+highlightsCount: 42
+reference: https://www.amazon.com/dp/B00G9G1L5M
+kindle_link: kindle://book?action=open&asin=B00G9G1L5M
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81ebwW1bWTL._SY160.jpg)
+## Highlights
+several of the core UML concepts have been formalized and documented so they can be modeled, extended, and even executed by development and design applications. This approach to software development is called Model Driven Architecture (MDA), — location: [62](kindle://book?action=open&asin=B00G9G1L5M&location=62) ^ref-20240
+
+---
+Static modeling captures the fixed, code-level relationships contained within a system. — location: [93](kindle://book?action=open&asin=B00G9G1L5M&location=93) ^ref-47100
+
+---
+Class A class describes a name, attributes, operations, and responsibilities that are shared by multiple objects. Classes are blueprints for runtime objects. — location: [102](kindle://book?action=open&asin=B00G9G1L5M&location=102) ^ref-56503
+
+---
+Component A component is a physical piece of a system that realizes one or more interfaces. It is similar to a subsystem, but it is typically smaller and contained within a more encompassing subsystem. — location: [104](kindle://book?action=open&asin=B00G9G1L5M&location=104) ^ref-7599
+
+---
+A datatype is a fundamental type that is usually built into an implementation language. For example, C++ supports int, double, char, and so forth. — location: [107](kindle://book?action=open&asin=B00G9G1L5M&location=107) ^ref-15602
+
+---
+Interface An interface provides operation signatures but no implementations. It is typically used to define a service that one or more classes implement or realize — location: [109](kindle://book?action=open&asin=B00G9G1L5M&location=109) ^ref-2193
+
+---
+node is a physical installation of the system at runtime. — location: [112](kindle://book?action=open&asin=B00G9G1L5M&location=112) ^ref-10825
+
+---
+Signal A signal represents an asynchronous call between two instances of a class. — location: [115](kindle://book?action=open&asin=B00G9G1L5M&location=115) ^ref-33635
+
+---
+Subsystem A subsystem is similar to a component in that it provides a realization of one or more interfaces. A subsystem is almost always made up of multiple classes, and it often contains multiple components. — location: [116](kindle://book?action=open&asin=B00G9G1L5M&location=116) ^ref-40209
+
+---
+case A use case is a collection of requirements for a system, — location: [119](kindle://book?action=open&asin=B00G9G1L5M&location=119) ^ref-21559
+
+---
+Stereotypes provide a way of extending UML by defining simple terms and using them to clarify UML elements and their participation in a system. Stereotypes are usually one word, such as interface, exception, import, or library. — location: [123](kindle://book?action=open&asin=B00G9G1L5M&location=123) ^ref-39829
+
+---
+Stereotypes are displayed between « and » near or within the stereotyped element. — location: [130](kindle://book?action=open&asin=B00G9G1L5M&location=130) ^ref-21648
+
+---
+UML allows you to define an icon to represent a stereotype — location: [134](kindle://book?action=open&asin=B00G9G1L5M&location=134) ^ref-38600
+
+---
+Notes can be placed anywhere on a diagram and can be connected to one or more UML elements using the note anchor line, which is the dashed line — location: [236](kindle://book?action=open&asin=B00G9G1L5M&location=236) ^ref-22148
+
+---
+Classes represent concepts within a system, — location: [307](kindle://book?action=open&asin=B00G9G1L5M&location=307) ^ref-24986
+
+---
+Each class is made up of multiple compartments. — location: [309](kindle://book?action=open&asin=B00G9G1L5M&location=309) ^ref-8060
+
+---
+three compartments: one showing the class’s name, one showing its attributes, and one showing its operations — location: [313](kindle://book?action=open&asin=B00G9G1L5M&location=313) ^ref-30808
+
+---
+It is a common practice to hide (or elide) operations and attributes that are not relevant to a given diagram. — location: [319](kindle://book?action=open&asin=B00G9G1L5M&location=319) ^ref-19168
+
+---
+Attributes represent common features of a class. — location: [344](kindle://book?action=open&asin=B00G9G1L5M&location=344) ^ref-28755
+
+---
+You show inlined attributes of a class in the second compartment, — location: [347](kindle://book?action=open&asin=B00G9G1L5M&location=347) ^ref-59478
+
+---
+visibility Shown as +, #, -, or ~ for public, protected, private, or package, — location: [354](kindle://book?action=open&asin=B00G9G1L5M&location=354) ^ref-8779
+
+---
+/ Indicates this attribute is derived. — location: [357](kindle://book?action=open&asin=B00G9G1L5M&location=357) ^ref-35850
+
+---
+Properties are tags that you can attach to attributes to provide more information. — location: [369](kindle://book?action=open&asin=B00G9G1L5M&location=369) ^ref-14869
+
+---
+Attributes can be specific to an instance or object of a class, in which case, they are considered to be of instance scope. Attributes can also be shared between classes (static in C++ or Java), in which case, they are considered to be of classifier scope. Attributes with classifier scope are underlined in the class, — location: [374](kindle://book?action=open&asin=B00G9G1L5M&location=374) ^ref-7795
+
+---
+By default, attributes with multiplicity greater than 1 are unique! — location: [389](kindle://book?action=open&asin=B00G9G1L5M&location=389) ^ref-38919
+
+---
+To specify that your attribute’s elements should be unique, use the property unique in curly braces ({}) — location: [390](kindle://book?action=open&asin=B00G9G1L5M&location=390) ^ref-51359
+
+---
+Dependency is the weakest relationship; it indicates only a loose coupling between two classes. It is typically read as “uses a,” as in “ClassA uses a ClassB.” A dependency relationship is represented by a dashed line with an arrow pointing to the target class. Usually, a dependency represents a relationship in which the class on the left side of the arrow briefly uses the class on the right — location: [434](kindle://book?action=open&asin=B00G9G1L5M&location=434) ^ref-50001
+
+---
+An association indicates a stronger relationship between two classes than a dependency does. It is typically read as “has a,” as in “ClassA has a ClassB.” An association is represented by a solid line between two classes. — location: [442](kindle://book?action=open&asin=B00G9G1L5M&location=442) ^ref-47752
+
+---
+You can explicitly forbid navigation in a particular direction by placing a small x (two crossed lines, not necessarily the letter x) near the end of the non-navigable class. — location: [447](kindle://book?action=open&asin=B00G9G1L5M&location=447) ^ref-40400
+
+---
+Multiplicity of each class in an association can be specified at the respective end of an association line. If none is specified, a multiplicity of 1 is assumed. — location: [466](kindle://book?action=open&asin=B00G9G1L5M&location=466) ^ref-40836
+
+---
+Aggregation is a special type of association used to represent a stronger relationship between two classes than regular associations. It is usually read as “owns a,” as in “ClassA owns a ClassB.” — location: [483](kindle://book?action=open&asin=B00G9G1L5M&location=483) ^ref-34270
+
+---
+aggregations can be bidirectional, though they are typically navigable only from the containing class to the contained class. — location: [486](kindle://book?action=open&asin=B00G9G1L5M&location=486) ^ref-3296
+
+---
+aggregations can be refined further with constraints, tagged values, and multiplicity indicators. — location: [492](kindle://book?action=open&asin=B00G9G1L5M&location=492) ^ref-4567
+
+---
+Composition is the strongest relationship between two classes. It is usually read as “is made up of,” as in “Class A is made up of ClassB” — location: [496](kindle://book?action=open&asin=B00G9G1L5M&location=496) ^ref-7382
+
+---
+Generalization is used to show inheritance; subclass B has an “is a” relationship with superclass A, or superclass A is a generalization of subclass B. — location: [510](kindle://book?action=open&asin=B00G9G1L5M&location=510) ^ref-5913
+
+---
+Generalization is represented by a solid line with a closed arrow pointing to the superclass. — location: [513](kindle://book?action=open&asin=B00G9G1L5M&location=513) ^ref-60667
+
+---
+Realization indicates that a class implements, or realizes, an interface at the other end (see the upcoming section, Interfaces). Similar to inheritance, realization indicates that the class realizing an interface is an implementation of the referenced interface. — location: [519](kindle://book?action=open&asin=B00G9G1L5M&location=519) ^ref-57230
+
+---
+Realization is represented by a dashed line with a closed arrow pointing to the interface. — location: [525](kindle://book?action=open&asin=B00G9G1L5M&location=525) ^ref-58746
+
+---
+An association qualifier is represented as a smaller rectangle at the larger end of a relationship. The name of the qualifier is written in the rectangle. — location: [542](kindle://book?action=open&asin=B00G9G1L5M&location=542) ^ref-52923
+
+---
+An operation is a signature that defines the operation name, its arguments, and its return type, whereas a method is an implementation of an operation. — location: [581](kindle://book?action=open&asin=B00G9G1L5M&location=581) ^ref-25788
+
+---
+Operations are polymorphic by default, meaning that subclasses (classes further down the inheritance hierarchy) can provide their own implementation of an operation rather than inherit their parent’s method. — location: [585](kindle://book?action=open&asin=B00G9G1L5M&location=585) ^ref-24051
+
+---
+Unlike attributes, operations can be abstract, meaning the class provides no implementation. — location: [590](kindle://book?action=open&asin=B00G9G1L5M&location=590) ^ref-5581
+
+---

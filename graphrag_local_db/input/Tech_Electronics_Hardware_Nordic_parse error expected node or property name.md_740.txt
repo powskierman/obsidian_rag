@@ -1,0 +1,59 @@
+# parse error expected node or property name.md
+
+---
+aliases: []
+tags: [
+ parse_error
+]
+---
+# parse error expected node or property name
+Date: 2023-08-04
+
+### Backlink
+[[]]
+
+### Reference
+-  [[undefined reference to `__device_dts_ord_112']]
+- [[undefined reference to __device_dts_ord]]
+- 
+### Notes
+-  This is due to bad devicetree formatting. Each node should be separated by curly braces.  This is wrong:
+```
+/{
+    chosen {
+        zephyr,console = &usb_cdc_acm_uart;
+        zephyr,shell-uart = &usb_cdc_acm_uart;
+
+    };
+
+
+    zephyr_udc0: &usbd {
+        compatible = "nordic,nrf-usbd";
+        status = "okay";
+
+        usb_cdc_acm_uart: cdc-acm-uart {
+            compatible = "zephyr,cdc-acm-uart";
+            status = "okay";
+        };
+    };
+};
+```
+It should be:
+```
+/{
+    chosen {
+        zephyr,console = &usb_cdc_acm_uart;
+        zephyr,shell-uart = &usb_cdc_acm_uart;
+
+    };
+};
+zephyr_udc0: &usbd {
+    compatible = "nordic,nrf-usbd";
+    status = "okay";
+
+    usb_cdc_acm_uart: cdc-acm-uart {
+        compatible = "zephyr,cdc-acm-uart";
+        status = "okay";
+    };
+};
+```

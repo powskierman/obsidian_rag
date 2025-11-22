@@ -1,0 +1,19 @@
+# Rigol.md
+
+---
+aliases: []
+tags: []
+---
+# Rigol
+Date: 2022-12-18
+
+### Backlink
+[[Oscilloscopes MOC]]
+
+### Reference
+-  
+### Notes
+-  
+# Rigol
+- [[DS-1054Z]]
+- [[Rigol-MSO5074]]

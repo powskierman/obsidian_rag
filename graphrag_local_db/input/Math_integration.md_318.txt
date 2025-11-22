@@ -1,0 +1,17 @@
+# integration.md
+
+---
+aliases: []
+---
+
+2022-02-23
+# integration
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+- finding areas of regions in the plane is called integration
+-

@@ -1,0 +1,51 @@
+# Stacks.md
+
+---
+aliases: []
+---
+
+2022-06-25
+# Stacks
+
+### Backlink
+[[../../../../Programming-Tools/SwiftUI/SwiftUI MoC]]
+
+### Reference
+
+### Notes
+- 1.  Some View returns only one view
+
+    a.  For multiple views, use stacks
+
+        i.  3 types
+
+            1.  Hstack { }
+
+            2.  Vstack { }
+
+            3.  Zstack {}
+
+        ```{=html}
+        <!-- -->
+        ```
+        i.  can contain maximum of 10 views
+
+        ii. If we need more, use a Group
+
+        iii. Vstacks aligns things vertically
+
+        iv. Can be controlled with alignment
+            property
+
+        v.  HStacks Align things horizontally
+
+        vi. Zstacks align things from back to front, top to bottom
+            
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Spacer
+
+        i.  Are used to push content in particular direction 
+-

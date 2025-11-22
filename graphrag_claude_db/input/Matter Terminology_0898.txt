@@ -1,0 +1,29 @@
+---
+aliases: [Matter object model]
+tags: []
+---
+# Matter Terminology
+Date: 2023-03-28
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  
+| Matter Object | Description |
+| --- | --- |
+| Node | Represents a single device or group of devices that can be addressed and managed as a single unit. |
+| Endpoint | Represents a single service instance within a Node that provides a specific functionality. |
+| Cluster | Represents a group of related commands, attributes, and events that define the behavior of an Endpoint. |
+| Attribute | Represents a specific value or state of an Endpoint or Cluster. |
+| Command | Represents an action that can be taken on an Endpoint or Cluster. |
+| Event | Represents a change in the state of an Endpoint or Cluster. |
+| Group | Represents a collection of Nodes that can be addressed and managed as a single unit. |
+| Zone | Represents a collection of Nodes that are grouped together based on their physical location or function. |
+| Network | Represents a collection of Nodes, Groups, and Routers that are interconnected and can communicate with each other. |
+| Router | Represents a device that provides connectivity between Nodes and other Routers within a network. |
+| Border Router | Represents a device that connects a Matter network to an external network, such as the internet. |
+| Commissioner | Represents a device or application that is responsible for commissioning new Nodes and Routers into a Matter network. |
+| Registrar | Represents a device or application that is responsible for assigning unique addresses and security keys to Nodes and Routers within a Matter network. |

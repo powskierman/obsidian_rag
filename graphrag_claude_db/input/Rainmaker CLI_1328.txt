@@ -1,0 +1,235 @@
+---
+aliases: 
+tags:
+  - Rainmaker
+  - CLI
+  - troubleshooting
+---
+# Rainmaker CLI
+Date: 2023-09-21
+
+### Backlink
+[[Rainmaker MoC]]
+
+### Reference
+-  [CLI Usage · ESP RAINMAKER](https://rainmaker.espressif.com/docs/cli-usage.html)
+- 
+### Notes
+- Signin:
+	- `python rainmaker.py login --email mlapoint99@hotmail.com`
+	- `password: 40Highland`
+	- URL: 
+```nodejs TI:"Signin URL" "FOLD"
+https://rainmaker-signin-ui.s3.amazonaws.com/index.html?port=62559&host_url=https://api.rainmaker.espressif.com/v1/login2&github_url=https://3pauth.rainmaker.espressif.com/oauth2/authorize?&redirect_uri=https://rainmaker-login-ui.s3.amazonaws.com/welcome.html&response_type=CODE&client_id=1h7ujqjs8140n17v0ahb4n51m2&scope=aws.cognito.signin.user.admin%20email%20openid%20phone%20profile&state=port:62559
+```
+- Get nodes:
+	- `python rainmaker.py getnodes`
+	- `LJpaR4j8KTav9sywPneYKm`
+- Get node configuration:
+	- `python rainmaker.py getnodeconfig LJpaR4j8KTav9sywPneYKm`
+```js TI:"node config" "FOLD"
+{
+    "attributes": [
+        {
+            "name": "cmd-resp",
+            "value": "1"
+        }
+    ],
+    "config_version": "2020-03-20",
+    "devices": [
+        {
+            "name": "Left Door",
+            "params": [
+                {
+                    "data_type": "string",
+                    "name": "Name",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.name"
+                },
+                {
+                    "data_type": "bool",
+                    "name": "Power",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.power",
+                    "ui_type": "esp.ui.toggle"
+                }
+            ],
+            "primary": "Power",
+            "type": "esp.device.switch"
+        },
+        {
+            "name": "Right Door",
+            "params": [
+                {
+                    "data_type": "string",
+                    "name": "Name",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.name"
+                },
+                {
+                    "data_type": "bool",
+                    "name": "Power",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.power",
+                    "ui_type": "esp.ui.toggle"
+                }
+            ],
+            "primary": "Power",
+            "type": "esp.device.switch"
+        }
+    ],
+    "info": {
+        "fw_version": "1.0",
+        "model": "switch",
+        "name": "NH Garage Door",
+        "platform": "esp32",
+        "project_name": "switch",
+        "type": "Switch"
+    },
+    "node_id": "LJpaR4j8KTav9sywPneYKm",
+    "services": [
+        {
+            "name": "Time",
+            "params": [
+                {
+                    "data_type": "string",
+                    "name": "TZ",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.tz"
+                },
+                {
+                    "data_type": "string",
+                    "name": "TZ-POSIX",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.tz_posix"
+                }
+            ],
+            "type": "esp.service.time"
+        },
+        {
+            "name": "Schedule",
+            "params": [
+                {
+                    "bounds": {
+                        "max": 10
+                    },
+                    "data_type": "array",
+                    "name": "Schedules",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.schedules"
+                }
+            ],
+            "type": "esp.service.schedule"
+        },
+        {
+            "attributes": [
+                {
+                    "name": "deactivation_support",
+                    "value": "no"
+                }
+            ],
+            "name": "Scenes",
+            "params": [
+                {
+                    "bounds": {
+                        "max": 10
+                    },
+                    "data_type": "array",
+                    "name": "Scenes",
+                    "properties": [
+                        "read",
+                        "write"
+                    ],
+                    "type": "esp.param.scenes"
+                }
+            ],
+            "type": "esp.service.scenes"
+        },
+        {
+            "name": "Local Control",
+            "params": [
+                {
+                    "data_type": "string",
+                    "name": "POP",
+                    "properties": [
+                        "read"
+                    ],
+                    "type": "esp.param.local_control_pop"
+                },
+                {
+                    "data_type": "int",
+                    "name": "Type",
+                    "properties": [
+                        "read"
+                    ],
+                    "type": "esp.param.local_control_type"
+                }
+            ],
+            "type": "esp.service.local_control"
+        }
+    ]
+}
+```
+- Get Params:
+	- `./rainmaker.py getparams LJpaR4j8KTav9sywPneYKm`
+```js TI:"Node Parameters" "FOLD"
+{
+    "Left Door": {
+        "Name": "Left Door",
+        "Power": false
+    },
+    "Local Control": {
+        "POP": "9c7e18b2",
+        "Type": 1
+    },
+    "OTA": {
+        "Info": "",
+        "Status": "",
+        "URL": ""
+    },
+    "Right Door": {
+        "Name": "Right Door",
+        "Power": false
+    },
+    "Scenes": {
+        "Scenes": []
+    },
+    "Schedule": {
+        "Schedules": []
+    },
+    "Time": {
+        "TZ": "America/Toronto",
+        "TZ-POSIX": "EST5EDT,M3.2.0,M11.1.0"
+    }
+}
+
+```
+- Set Params:
+```js TI:"Set left_door On" "FOLD"
+./rainmaker.py setparams LJpaR4j8KTav9sywPneYKm --data '{"Left Door": {"Name": "Left Door", "Power": true }}'
+Node state updated successfully.
+```
+- Troubleshooting
+	- ERROR: Descriptors cannot not be created directly.
+		- `export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python`

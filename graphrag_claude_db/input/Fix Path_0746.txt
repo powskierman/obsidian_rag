@@ -1,0 +1,16 @@
+---
+aliases: []
+tags: []
+---
+# Fix Path
+Date: 2023-08-15
+
+### Backlink
+[[]]
+
+### Reference
+-  [macos - How to remove entry from $PATH on mac](https://stackoverflow.com/questions/15872666/how-to-remove-entry-from-path-on-mac)
+### Notes
+-  echo $PATH and copy it's value
+- export PATH=""
+- export PATH="/path/you/want/to/keep"

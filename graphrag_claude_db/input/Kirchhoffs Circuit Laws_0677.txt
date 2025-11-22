@@ -1,0 +1,22 @@
+---
+aliases:
+tags:
+created: 2021-12-30 14:17
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+The first of of Kirchhoffs laws deals with the current flowing around a closed circuit, **Kirchhoffs Current Law, (KCL)** while the other law deals with the voltage sources present in a closed circuit, **Kirchhoffs Voltage Law, (KVL)**.
+ 1. [Kirchhoffs Circuit Law](https://www.electronics-tutorials.ws/dccircuits/dcp_4.html)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

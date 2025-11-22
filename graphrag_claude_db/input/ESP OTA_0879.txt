@@ -1,0 +1,29 @@
+---
+aliases:
+tags:
+created: 2021-12-30 17:05
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+OTA (Over the Air) update is the process of uploading firmware to an ESP module using a Wi-Fi connection rather than a serial port.
+
+1. [Detailed Documentation: ](https://arduino-esp8266.readthedocs.io/en/latest/ota_updates/readme.html)
+2. Espressif's reference: [Espressif OTA](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/ota.html)
+3. Tutorial: [LastMinuteEngineer](https://lastminuteengineers.com/esp8266-ota-updates-arduino-ide/)
+4. Random Nerds Tutorial: [ESP8266 OTA]( https://randomnerdtutorials.com/esp8266-ota-updates-with-arduino-ide-over-the-air/)
+5. Andreas Spiess video tutorial:
+6. 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1pwqS_NUG7Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

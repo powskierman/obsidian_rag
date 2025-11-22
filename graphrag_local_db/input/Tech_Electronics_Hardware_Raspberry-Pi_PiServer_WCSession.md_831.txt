@@ -1,0 +1,20 @@
+# WCSession.md
+
+---
+aliases: 
+tags:
+  - watch
+  - WatchConnectivity
+---
+# WCSession
+Date: 2023-11-11
+
+### Backlink
+[[]]
+
+### Reference
+-  [Sending Data Between watchOS and iOS App Using Watch Connectivity](https://betterprogramming.pub/sending-data-between-watchos-and-ios-apps-cf924e21b3c2)
+- 
+### Notes
+-  WCSession:
+	  The object that initiates communication between a WatchKit extension and its companion iOS app

@@ -1,0 +1,17 @@
+---
+aliases: []
+tags: [find]
+---
+# Find
+Date: 2023-04-29
+
+### Backlink
+[[MacOS MOC]]
+
+### Reference
+-  
+### Notes
+-  Find an occurrence within all files:
+	- find . -type f -exec grep -l "cluster-enums.h" {} +
+- Find largest file:
+	- find . -type f -exec du -h {} + | sort -rh | head -n 1

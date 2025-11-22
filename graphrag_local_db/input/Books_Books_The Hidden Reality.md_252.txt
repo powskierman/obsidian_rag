@@ -1,0 +1,244 @@
+# The Hidden Reality.md
+
+---
+id: 16112707
+updated: 2022-06-18
+title: The Hidden Reality
+author: Brian Greene
+highlights: 53
+last_highlight: 2015-01-14
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112707
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/517pp06a0TL._SL500_.jpg)
+
+# About
+Title: [[The Hidden Reality]]
+Authors: [[Brian Greene]]
+Category: #books
+Number of Highlights: ==53==
+Readwise URL: https://readwise.io/bookreview/16112707
+Date: [[2022-06-18]]
+Last Highlighted: *2015-01-14*
+
+---
+
+# Highlights
+
+range of possibility is manifest in the laws governing the parallel universes. In some, the laws are the same as in ours; in others, they appear different but have a shared heritage; in others still, the laws are of a form and structure unlike anything we’ve ever encountered. ([116](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=116)) %% Color: yellow %% ^334465554
+
+---
+
+what’s gratifying about being human, what’s exciting about being part of the scientific enterprise, is our ability to use analytical thought to bridge vast distances, journeying to outer and inner space ([205](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=205)) %% Color: yellow %% ^334465555
+
+---
+
+Before Einstein, gravity was a mysterious force that one body somehow exerted across space on another. After Einstein, gravity was recognized as a distortion of the environment caused by one object and guiding the motion of others. Right now, according to these ideas, you are anchored to the floor because your body is trying to slide down an indentation in space (really, spacetime) caused by the earth. ([283](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=283)) %% Color: yellow %% ^334465556
+
+---
+
+Einstein spent years developing this idea into a rigorous mathematical framework, and the resulting Einstein Field Equations, the heart of his general theory of relativity, tell us precisely how space and time will curve as a result of the presence of a given quantity of matter ([287](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=287)) %% Color: yellow %% ^334465557
+
+---
+
+In the 1970s experiments using hydrogen maser clocks (masers are similar to lasers, but they operate in the microwave part of the spectrum) confirmed general relativity’s prediction of the earth’s warping of spacetime in its vicinity to about 1 part in 15,000. ([301](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=301)) %% Color: yellow %% ^334465558
+
+---
+
+The cosmological principle asserts that if the universe is examined on the largest of scales, it will appear uniform. ([317](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=317)) %% Color: yellow %% ^334465559
+
+---
+
+The cosmological principle cuts the Gordian knot by reducing the mathematical complexity of studying matter and energy spread throughout the cosmos to a single equation (you can see it in the notes). ([344](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=344)) %% Color: yellow %% ^334465560
+
+---
+
+If the mathematics of general relativity were arranged like a tax form, it would have three lines. One line would describe the geometry of spacetime—its warps and curves—the embodiment of gravity. Another would describe the distribution of matter across space, the source of gravity—the cause of the warps and curves. During a decade of ardent research, Einstein had worked out the mathematical description of these two features and had thus filled in these two lines with great care. But a complete accounting of general relativity requires a third line, one that is on an absolutely equal mathematical footing with the other two but whose physical meaning is more subtle. When general relativity elevated space and time into dynamic participants in the unfolding of the cosmos, they shifted from merely providing language to delineate where and when things take place to being physical entities with their own intrinsic properties. The third line on the general relativity tax form quantifies a particular intrinsic feature of spacetime relevant for gravity: the amount of energy stitched into the very fabric of space itself. ([373](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=373)) %% Color: yellow %% ^334465561
+
+---
+
+The uniformity of the cosmos articulated by the cosmological principle substantially winnows the possible shapes for the universe. Some of the possible shapes have infinite spatial extent, while others do not. ([458](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=458)) %% Color: yellow %% ^334465562
+
+---
+
+The equations of general relativity provide a mathematical strategy. They show that the curvature of space reduces to a single observational quantity: the density of matter (more precisely, the density of matter and energy) in space. If there is a lot of matter, gravity will cause space to curve back on itself, yielding the spherical shape. If there is little matter, space is free to flare outward in the Pringles shape. And if there is just the right amount of matter, space will have zero curvature. ([471](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=471)) %% Color: yellow %% ^334465563
+
+---
+
+The equations of general relativity also provide a precise numerical demarcation among the three possibilities. The mathematics shows that “just the right amount of matter,” the so-called critical density, weighs in today at about 2 × 10–29 grams per cubic centimeter, which is about six hydrogen atoms per cubic meter or, in more familiar terms, the equivalent of a single raindrop in every earth-sized volume. ([475](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=475)) %% Color: yellow %% ^334465564
+
+---
+
+Current data thus favor an ever-expanding universe shaped like the three-dimensional version of the infinite tabletop or of the finite video-game screen. ([504](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=504)) %% Color: yellow %% ^334465565
+
+---
+
+when pressed, physicists and cosmologists tend to favor the proposition that the universe is infinite. ([527](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=527)) %% Color: yellow %% ^334465566
+
+---
+
+The uncertainty principle establishes that regardless of what equipment you use or what techniques you employ, if you increase the resolution of your measurement of one property, there is an unavoidable cost: you necessarily reduce how accurately you can measure a complementary property. As a prime example, the uncertainty principle shows that the more accurately you measure an object’s position, the less accurately you can measure its speed, and vice versa. ([619](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=619)) %% Color: yellow %% ^334465567
+
+---
+
+perfect resolution, according to Heisenberg, requires a probe with infinite energy. That’s unattainable. ([634](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=634)) %% Color: yellow %% ^334465568
+
+---
+
+In an infinitely big universe, the repetition is yet more extreme. There are infinitely many patches in an infinite expanse of space; so, with only finitely many different particle arrangements, the arrangements of particles within patches must be duplicated an infinite number of times. ([669](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=669)) %% Color: yellow %% ^334465569
+
+---
+
+for the gravity generated by familiar objects like the earth and sun, it is actually the curvature of time—not space—that exerts the dominant impact. ([733](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=733)) %% Color: yellow %% ^334465570
+
+---
+
+General relativity then establishes that objects move toward regions where time elapses more slowly; in a sense, all objects “want” to age as slowly as possible. From an Einsteinian perspective, that explains why an object falls when you let go of it. ([737](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=737)) %% Color: yellow %% ^334465571
+
+---
+
+The speed limit set by light refers solely to the motion of objects through space. But galaxies recede from one another not because they are traveling through space—galaxies don’t have jet engines—but rather because space itself is swelling and the galaxies are being dragged along by the overall flow.2 And the thing is, relativity places no limit on how fast space can swell, so there is no limit on how fast galaxies that are being pushed apart by the swell recede from one another. The rate of recession between any two galaxies can exceed any speed, including the speed of light. ([876](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=876)) %% Color: yellow %% ^334465572
+
+---
+
+In Newton’s theory, gravity arises solely from an object’s mass. The bigger the mass, the bigger the object’s gravitational pull. In Einstein’s theory, gravity arises from an object’s mass (and energy) but also from its pressure. ([914](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=914)) %% Color: yellow %% ^334465573
+
+---
+
+In general relativity, positive pressure, like positive mass, contributes positively to gravity, resulting in increased weight. ([922](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=922)) %% Color: yellow %% ^334465574
+
+---
+
+And much as general relativity shows that positive pressure gives rise to attractive gravity, it shows that negative pressure gives rise to the opposite: repulsive gravity. ([925](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=925)) %% Color: yellow %% ^334465575
+
+---
+
+A cosmological constant not only endows the spatial fabric with a uniform energy determined by the constant’s value (the number on the third line of the apocryphal relativity tax form), but it also fills space with a uniform negative pressure ([930](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=930)) %% Color: yellow %% ^334465576
+
+---
+
+the inflationary theory envisions a gargantuan surge of repulsive gravity that’s astoundingly short and thunderingly intense. ([939](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=939)) %% Color: yellow %% ^334465577
+
+---
+
+As a flame generates heat, so a magnet generates a magnetic field. Lying beyond the physical boundary of the solid magnet, the magnet’s field is a “mist” or “essence” that fills space and does the magnet’s bidding. ([961](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=961)) %% Color: yellow %% ^334465578
+
+---
+
+Maxwell discovered equations, which now bear his name, that govern how the strength of electric and magnetic fields varies from point to point in space and moment to moment in time. These very same equations govern the sea of rippling electric and magnetic fields, so-called electromagnetic waves, within which we’re all immersed. ([971](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=971)) %% Color: yellow %% ^334465579
+
+---
+
+in addition to electric and magnetic fields, there exists a whole panoply of others with names like strong and weak nuclear fields and electron, quark, and neutrino fields. One field that to date remains wholly hypothetical, the inflaton field, provides a theoretical basis for inflationary cosmology. ([978](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=978)) %% Color: yellow %% ^334465580
+
+---
+
+uniform field configurations fill space not only with uniform energy but also with uniform negative pressure. And with that, he found a physical mechanism to generate repulsive gravity. ([986](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=986)) %% Color: yellow %% ^334465581
+
+---
+
+Since a uniform field contributes the same energy at every location, the larger the volume the field fills, the greater the total energy the bottle contains. Which means that, unlike with champagne, the act of removing the cork adds energy to the bottle. ([995](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=995)) %% Color: yellow %% ^334465582
+
+---
+
+The same reasoning that explains why a uniform field has negative pressure applies as well to a cosmological constant. (If the bottle contains empty space endowed with a cosmological constant, then when you slowly remove the cork the extra space you make available within the bottle contributes extra energy. The only source for this extra energy is your muscles, which therefore must have strained against an inward, negative pressure supplied by the cosmological constant.) And, as with a uniform field, a cosmological constant’s uniform negative pressure also yields repulsive gravity. ([1008](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1008)) %% Color: yellow %% ^334465583
+
+---
+
+like a cooling vat of steam condensing into water droplets, the inflaton’s energy condenses into a uniform bath of particles that fill space. This two-step process—brief but rapid expansion, followed by energy conversion to particles—results in a huge, uniform spatial expanse that’s filled with the raw material of familiar structures like stars and galaxies. ([1042](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1042)) %% Color: yellow %% ^334465584
+
+---
+
+the mathematical calculations show that the inflaton’s energy would roll down the slope in a tiny fraction of a second, on the order of 10–35 seconds. And yet, during that brief span, space would expand by a colossal factor, perhaps 1030 if not more. These numbers are so extreme that they defy analogy. They imply that a region of space the size of a pea would be stretched larger than the observable universe in a time interval so short that the blink of an eye would overestimate it by a factor larger than a million billion billion billion. ([1046](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1046)) %% Color: yellow %% ^334465585
+
+---
+
+the region of space that spawned the observable universe was so small that it would easily have come to a uniform temperature before it was stretched into our grand cosmic expanse by the rapid burst. ([1051](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1051)) %% Color: yellow %% ^334465586
+
+---
+
+In many versions of the inflationary theory, the burst of spatial expansion is not a onetime event. Instead, the process by which our region of the universe formed—rapid stretching of space, followed by a transition to a more ordinary, slower expansion, together with the production of particles—may happen over and over again at various far-flung locations throughout the cosmos. ([1064](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1064)) %% Color: yellow %% ^334465587
+
+---
+
+Our realm, what we have always thought of as the universe, would then be but one of these numerous regions, floating within a vastly larger spatial expanse. ([1068](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1068)) %% Color: yellow %% ^334465588
+
+---
+
+Think of the universe as a gigantic block of Swiss cheese, with the cheesy parts being regions where the inflaton field’s value is high and the holes being regions where it’s low. That is, the holes are regions, like ours, that have transitioned out of the superfast expansion and, in the process, converted the inflaton field’s energy into a bath of particles, which over time may coalesce into galaxies, stars, and planets. ([1110](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1110)) %% Color: yellow %% ^334465589
+
+---
+
+Garden-variety inflationary models yield a gargantuan number of bubble universes carved into an eternally expanding spatial expanse. ([1127](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1127)) %% Color: yellow %% ^334465590
+
+---
+
+minute energy differences caused by quantum jitters are stretched into temperature variations that become imprinted in the cosmic microwave background radiation. ([1153](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1153)) %% Color: yellow %% ^334465591
+
+---
+
+Just as the theory predicted, they measure about a thousandth of a degree (see Figure 3.4). More impressive still, the tiny temperature differences fit a pattern on the sky that is explained spot-on by the theoretical calculations. ([1158](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1158)) %% Color: yellow %% ^334465592
+
+---
+
+The very existence of galaxies, stars, planets, and life itself derives from microscopic quantum uncertainty amplified by inflationary expansion. ([1174](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1174)) %% Color: yellow %% ^334465593
+
+---
+
+Inflation’s theoretical underpinnings may be rather tentative: the inflaton, after all, is a hypothetical field whose existence has yet to be demonstrated; its potential energy curve is posited by researchers, not revealed by observation; the inflaton must somehow start at the top of its energy curve across a region of space; and so on. Despite all that, and even if some details of the theory are not quite right, the agreement between theory and observation has convinced many that the inflationary scheme taps into a deep truth about cosmic evolution. ([1183](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1183)) %% Color: yellow %% ^334465594
+
+---
+
+we can still imagine a voyage to one or more of the other bubble universes. On such a journey, what would you find? Well, because each bubble universe results from the same process—the inflaton is knocked from its perch, yielding a region that drops out of the inflationary expansion—they are all governed by the same physical theory and so are all subject to the same set of physical laws. ([1198](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1198)) %% Color: yellow %% ^334465595
+
+---
+
+As fundamental particles burrow through a Higgs field, they acquire and maintain the mass that experiments have revealed them to possess ([1218](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1218)) %% Color: yellow %% ^334465596
+
+---
+
+in many versions of inflationary cosmology, a Higgs field would naturally have different values in different bubble universes. ([1227](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1227)) %% Color: yellow %% ^334465597
+
+---
+
+The fundamental forces—the electromagnetic force, the nuclear forces, and (we believe) gravity—are also communicated by particles. Change the particle properties and you drastically change the properties of the forces. ([1239](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1239)) %% Color: yellow %% ^334465598
+
+---
+
+The quilted variety emerges if the extent of space is infinite; the inflationary variety emerges from eternal inflationary expansion. ([1262](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1262)) %% Color: yellow %% ^334465599
+
+---
+
+the inflaton field carried our universe’s storehouse of energy—energy that would shortly be converted into familiar particles—so we need to envisage setting our clocks by the density of the inflaton field’s energy. ([1295](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1295)) %% Color: yellow %% ^334465600
+
+---
+
+The best available cosmological theory for explaining the best available cosmological data leads us to think of ourselves as occupying one of a vast inflationary system of parallel universes, each of which harbors its own vast collection of quilted parallel universes. ([1349](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1349)) %% Color: yellow %% ^334465601
+
+---
+
+for composite particles, like protons and neutrons (each made from 3 quarks), much of the mass arises from interactions between the constituents (the energy carried by gluons of the strong nuclear force, which bind the quarks inside protons and neutrons, contributes most of the mass of these composite particles). ([1365](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=1365)) %% Color: yellow %% ^334465602
+
+---
+
+Einstein’s equations of general relativity in this context reduce to . The variable a(t) is the scale factor of the universe—a number whose value, as the name indicates, sets the distance scale between objects (if the value of a(t) at two different times differs, say, by a factor of 2, then the distance between any two particular galaxies would differ between those times by a factor of 2 as well), G is Newton’s constant, is the density of matter/energy, and k is a parameter whose value can be 1, 0, or -1 according to whether the shape of space is spherical, Euclidean (“flat”), or hyperbolic. The form of this equation is usually credited to Alexander Friedmann and, as such, is called the Friedmann equation. ([6121](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=6121)) %% Color: yellow %% ^334465603
+
+---
+
+To initiate the inflationary expansion, the inflaton field’s value needs to be high up on this potential energy curve too, but the enormously hot conditions expected in the early universe would naturally cause this to happen. ([6280](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=6280)) %% Color: yellow %% ^334465604
+
+---
+
+A little more precisely, it is not the strength of the gravitational field, per se, that determines the slowing of time, but rather the strength of the gravitational potential. ([6316](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=6316)) %% Color: yellow %% ^334465605
+
+---
+
+A bubble universe forms in a given region when the inflaton field’s value drops; as it does, the energy the inflaton contained is converted into particles. The precise arrangement of these particles at any moment is determined by the precise value of the inflaton during the conversion process. ([6324](https://readwise.io/to_kindle?action=open&asin=B004C43ETO&location=6324)) %% Color: yellow %% ^334465606
+
+---

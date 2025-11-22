@@ -1,0 +1,26 @@
+---
+aliases:
+tags:
+  - cursor
+created: 2025-10-03 11:41
+ContentType:
+Backlink: "[[Cursor MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Cursor offers several modes you can switch between:
+	- Agent Mode - Allows Cursor to autonomously learn your codebase and make codebase-wide changes on your behalf
+	- Ask Mode - Get explanations and answers about your codebase, and plan out features with the AI Cursor – Overview
+	- Manual Mode - Make focused edits using only the context you provide Cursor
+	- Custom Modes - You can create your own modes for specific workflows
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

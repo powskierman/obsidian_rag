@@ -1,0 +1,98 @@
+---
+bookId: "26309"
+title: "Infinite Powers: How Calculus Reveals the Secrets of the Universe"
+author: Steven H.  Strogatz
+asin: B07FKF9DVJ
+lastAnnotatedDate: 2020-07-29
+highlightsCount: 28
+reference: https://www.amazon.com/dp/B07FKF9DVJ
+kindle_link: kindle://book?action=open&asin=B07FKF9DVJ
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81+p0GcwDTL._SY160.jpg)
+## Highlights
+I said that the digits of pi are out there, but where are they exactly? They don’t exist in the material world. They exist in some Platonic realm, along with abstract concepts like truth and justice. — location: [768](kindle://book?action=open&asin=B07FKF9DVJ&location=768) ^ref-19534
+
+---
+Calculus, for its part, uses the infinite to study the finite, the unlimited to study the limited, and the straight to study the curved. — location: [778](kindle://book?action=open&asin=B07FKF9DVJ&location=778) ^ref-33245
+
+---
+true parabola, to Archimedes, would have meant a curve obtained by slicing through a cone with a plane. — location: [783](kindle://book?action=open&asin=B07FKF9DVJ&location=783) ^ref-13165
+
+---
+the ancient Greek astronomer Aristarchus to propose a sun-centered universe almost two millennia before Copernicus — location: [1122](kindle://book?action=open&asin=B07FKF9DVJ&location=1122) ^ref-26602
+
+---
+Why did differential calculus—the easier side of the subject—develop so much later than integral calculus? It’s because differential calculus grew out of algebra, — location: [1522](kindle://book?action=open&asin=B07FKF9DVJ&location=1522) ^ref-40094
+
+---
+distinction between analysis and synthesis. In analysis, one solves a problem by starting at the end, as if the answer had already been obtained, and then works back wishfully toward the beginning, hoping to find a path to the given assumptions. — location: [1717](kindle://book?action=open&asin=B07FKF9DVJ&location=1717) ^ref-16904
+
+---
+Synthesis goes in the other direction. It starts with the givens, and then, by stabbing in the dark, trying things, you are somehow supposed to move forward to a solution, step by logical step, and eventually arrive at the desired result. — location: [1720](kindle://book?action=open&asin=B07FKF9DVJ&location=1720) ^ref-62306
+
+---
+Fermat paved the way for calculus in its modern form. His principle of least time revealed that optimization is woven deeply into the fabric of nature. — location: [1975](kindle://book?action=open&asin=B07FKF9DVJ&location=1975) ^ref-34034
+
+---
+The log of a product is the sum of the logs. — location: [2137](kindle://book?action=open&asin=B07FKF9DVJ&location=2137) ^ref-884
+
+---
+if we are interested in the logs of other numbers, we need only work out the logs of numbers from 1 to 10. — location: [2144](kindle://book?action=open&asin=B07FKF9DVJ&location=2144) ^ref-34654
+
+---
+logarithms replace multiplication problems with addition problems, which are much easier. This is why logarithms were invented. — location: [2149](kindle://book?action=open&asin=B07FKF9DVJ&location=2149) ^ref-29747
+
+---
+exponential functions are for modeling growth that feeds on itself, and power functions are for modeling less violent forms of growth. — location: [2157](kindle://book?action=open&asin=B07FKF9DVJ&location=2157) ^ref-50791
+
+---
+our perception of pitch is approximately logarithmic. When a musical pitch goes up by successive octaves, from one do to the next, that increase corresponds to successive doublings of the frequency of the associated sound waves. Yet although the waves oscillate twice as fast for every octave increase, we hear the doublings—which are multiplicative changes in frequency—as equal upward steps in pitch, meaning equal additive steps. It’s freaky. Our minds fool us into believing that 1 is as far from 2 as 2 is from 4, and as 4 is from 8, and so on. We somehow sense frequency logarithmically. — location: [2163](kindle://book?action=open&asin=B07FKF9DVJ&location=2163) ^ref-39656
+
+---
+The rate of growth of ex is ex itself. — location: [2172](kindle://book?action=open&asin=B07FKF9DVJ&location=2172) ^ref-22154
+
+---
+To estimate how long it will take to double your money at a given annual rate of return, divide 72 by the rate of return. — location: [2215](kindle://book?action=open&asin=B07FKF9DVJ&location=2215) ^ref-22619
+
+---
+the natural logarithm now pervades all fields where exponential growth and decay arise. — location: [2220](kindle://book?action=open&asin=B07FKF9DVJ&location=2220) ^ref-8149
+
+---
+the thing that makes e special is that the rate of change of ex is ex — location: [2222](kindle://book?action=open&asin=B07FKF9DVJ&location=2222) ^ref-46459
+
+---
+In the technical jargon of calculus, a rate always means a quotient of two changes: a change in y divided by a change in x, written in symbols as Δy/x. — location: [2357](kindle://book?action=open&asin=B07FKF9DVJ&location=2357) ^ref-23779
+
+---
+function is a disembodied rule that eats xs and spits out ys and does so uniquely, one y for each x. — location: [2377](kindle://book?action=open&asin=B07FKF9DVJ&location=2377) ^ref-54284
+
+---
+The derivative of x2 is 2x — location: [2425](kindle://book?action=open&asin=B07FKF9DVJ&location=2425) ^ref-27426
+
+---
+when a variable follows a perfect sine-wave pattern, its rate of change is also a perfect sine wave timed a quarter of a cycle ahead. This self-regeneration property is unique to sine waves. No other kinds of waves have — location: [2487](kindle://book?action=open&asin=B07FKF9DVJ&location=2487) ^ref-36581
+
+---
+Because of the geometry of a circle, there’s always a quarter-cycle offset between any sine wave and the wave derived from it as its derivative, its rate of change. — location: [2502](kindle://book?action=open&asin=B07FKF9DVJ&location=2502) ^ref-41794
+
+---
+The art of abstraction lies in knowing what is essential and what is minutia, what is signal and what is noise, what is trend and what is wiggle. — location: [2609](kindle://book?action=open&asin=B07FKF9DVJ&location=2609) ^ref-8322
+
+---
+“Art,” said Picasso, “is a lie that makes us realize truth.” — location: [2611](kindle://book?action=open&asin=B07FKF9DVJ&location=2611) ^ref-44025
+
+---
+what’s the slope of a curve when it’s viewed as a graph in the xy plane? As we learned from our work with the parabola in chapter 6, the slope is the derivative of y, defined as the limit of Δy/Δx as Δx approaches zero. But what is it in terms of differentials? It’s simply dy/dx. It’s as if the curve is made up of little straight pieces:     If we think of dy as an infinitesimal rise and dx as an infinitesimal run, the slope is simply the rise over the run, just as it always is, and hence is dy/dx. — location: [3245](kindle://book?action=open&asin=B07FKF9DVJ&location=3245) ^ref-4799
+
+---
+the fundamental theorem concerns the area accumulation function A(x), which gives the area under the curve y = f(x) over the interval from 0 to x. The theorem says that as we slide x to the right, the area under the curve accumulates at a rate given by f(x) itself. Thus f(x) is the derivative of A(x). — location: [3285](kindle://book?action=open&asin=B07FKF9DVJ&location=3285) ^ref-12755
+
+---
+acceleration is a derivative (the rate of change of the body’s velocity) or, in Leibnizian terms, the ratio of two differentials: a = dv⁄dt. — location: [3609](kindle://book?action=open&asin=B07FKF9DVJ&location=3609) ^ref-65143
+
+---
+determinism does not imply predictability. — location: [4374](kindle://book?action=open&asin=B07FKF9DVJ&location=4374) ^ref-53087
+
+---

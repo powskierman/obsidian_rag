@@ -1,0 +1,24 @@
+---
+aliases: 
+tags:
+  - Rainmaker
+  - esp-idf
+---
+# esp-idf Rainmaker code explanation
+Date: 2023-09-13
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  The typical code for any ESP RainMaker based application is as follows:
+
+-   Initialise the Wi-Fi (`app_wifi_init()`), which also initialises the MAC address which will act as the unique node identifier (node\_id) for ESP32-S2 self claiming.
+-   Initialise the ESP RainMaker node (`esp_rmaker_node_init()`) by passing it a configuration (`esp_rmaker_config_t`), node name and type.
+-   Create a device (`esp_rmaker_device_create()`). The RainMaker node in itself has no specific value, unless it has a device under it. In our example, we create a device named "Switch", for which we also provide a write callback, which will be invoked if a write request is received for any parameter under the Switch device.
+-   Add parameters and other metadata. A switch device, at the minimum, will have atleast the standard power parameter. Marking some parameter as primary gives it prominence in the phone apps.
+-   Add the device to the node.
+-   Start the RainMaker Agent (`esp_rmaker_start()`). This will start the RainMaker core task which will wait for Wi-Fi, do the claiming, if required, connect to the RainMaker cloud over MQTT, report the node configuration, report the values of parameters, and then wait for commands.
+-   Start the Wi-Fi (`app_wifi_start()`). If the ESP32 is already provisioned, it will join the configured Wi-Fi network. Else, it will start the Wi-Fi provisioning. Note that rainmaker should be initialised and started before this call.

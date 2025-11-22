@@ -1,0 +1,17 @@
+---
+bookId: "8864"
+title: Rage
+author: Bob Woodward
+asin: B0881XTWZW
+lastAnnotatedDate: 2020-09-29
+highlightsCount: 1
+reference: https://www.amazon.com/dp/B0881XTWZW
+kindle_link: kindle://book?action=open&asin=B0881XTWZW
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71MHQ94JBDS._SY160.jpg)
+## Highlights
+“You don’t always control your circumstances, but you can control your response.” — location: [239](kindle://book?action=open&asin=B0881XTWZW&location=239) ^ref-41685
+
+---

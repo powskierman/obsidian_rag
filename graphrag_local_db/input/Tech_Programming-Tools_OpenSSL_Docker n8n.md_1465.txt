@@ -1,0 +1,35 @@
+# Docker n8n.md
+
+---
+aliases: 
+tags: 
+created: 2025-10-18 09:48
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Instantiate Docker n8n:
+```
+docker run -d \
+ --name n8n \
+ -p 5678:5678 \
+ -e GENERIC_TIMEZONE="<YOUR_TIMEZONE>" \
+ -e TZ="<YOUR_TIMEZONE>" \
+ -e N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true \
+ -e N8N_RUNNERS_ENABLED=true \
+ -v n8n_data:/home/node/.n8n \
+ docker.n8n.io/n8nio/n8n
+ ```
+ 
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

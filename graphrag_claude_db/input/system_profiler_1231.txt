@@ -1,0 +1,39 @@
+---
+aliases: 
+tags: 
+created: 2025-06-23 14:12
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- ### Quick Reference Table
+
+| Command                               | Description                                    |
+| ------------------------------------- | ---------------------------------------------- |
+| `system_profiler`                     | Full system report                             |
+| `system_profiler -detailLevel mini`   | Short report, no personal info                 |
+| `system_profiler -detailLevel basic`  | Basic hardware and network info                |
+| `system_profiler -detailLevel full`   | All available info                             |
+| `system_profiler -xml`                | Output in XML format                           |
+| `system_profiler -json`               | Output in JSON format                          |
+| `system_profiler -listDataTypes`      | List all available data types                  |
+| `system_profiler SPHardwareDataType`  | Hardware overview (model, CPU, memory, serial) |
+| `system_profiler SPPowerDataType`     | Power and battery information                  |
+| `system_profiler SPSoftwareDataType`  | Software info (OS version, apps)               |
+| `system_profiler SPNetworkDataType`   | Network configuration                          |
+| `system_profiler SPSerialATADataType` | SATA drive/controller info                     |
+| `system_profiler SPUSBDataType`       | USB device info                                |
+| `system_profiler SPPowerDataType`     | Battery/power info (laptops)                   |
+| `system_profiler SPMemoryDataType`    | Memory module info                             |
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

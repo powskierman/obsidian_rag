@@ -1,0 +1,25 @@
+# zap-cli error.md
+
+---
+aliases: []
+tags: []
+---
+# zap-cli error
+Date: 2023-06-06
+
+### Backlink
+[[]]
+
+### Reference
+-  [Cannot run ZAP tool Error](https://devzone.nordicsemi.com/f/nordic-q-a/99742/cannot-run-zap-tool)
+- 
+### Notes
+-  If a #zap-cli #error occurs while compiling with #west, extract the #zip file manually:
+``` extract the zip manually instead of using the Python script for some reason:
+
+Create the directory: /opt/nordic/ncs/v2.4.0/modules/lib/matter/location_path in the terminal and delete the existing files and folders before running this command._
+
+_"wget [github.com/.../zap-mac.zip](https://github.com/project-chip/zap/releases/download/v2022.12.20-nightly/zap-mac.zip) && unzip -d zap-mac zap-mac.zip && ../../../../nrf/samples/matter/sensor/src/template."_
+
+After the zip is downloaded and extracted, make sure that both /opt/nordic/ncs/v2.3.0/modules/lib/matter/location_path/zap-mac/**zap.app/Contents/MacOS/**and /opt/nordic/ncs/v2.3.0/modules/lib/matter/location_path/zap-mac/ are added to PATH.
+```

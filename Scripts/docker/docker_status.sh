@@ -32,20 +32,14 @@ else
     echo "❌ Embedding Service (port 8000) - Not responding"
 fi
 
-# Claude Graph service
-if curl -s http://localhost:8002/health > /dev/null 2>&1; then
-    GRAPH_STATS=$(curl -s http://localhost:8002/health)
-    GRAPH_LOADED=$(echo $GRAPH_STATS | grep -o '"graph_loaded":[a-z]*' | cut -d':' -f2)
-    NODES=$(echo $GRAPH_STATS | grep -o '"nodes":[0-9]*' | cut -d':' -f2)
-    EDGES=$(echo $GRAPH_STATS | grep -o '"edges":[0-9]*' | cut -d':' -f2)
-    if [ "$GRAPH_LOADED" = "true" ]; then
-        echo "✅ Claude Graph Service (port 8002)"
-        echo "   Graph: ${NODES:-0} entities, ${EDGES:-0} relationships"
-    else
-        echo "⏳ Claude Graph Service (port 8002) - Graph not loaded"
-    fi
+# LightRAG service
+if curl -s http://localhost:8001/health > /dev/null 2>&1; then
+    GRAPH_STATS=$(curl -s http://localhost:8001/stats)
+    DB_EXISTS=$(echo $GRAPH_STATS | grep -o '"database_exists":[a-z]*' | cut -d':' -f2)
+    echo "✅ LightRAG Service (port 8001)"
+    echo "   Database: ${DB_EXISTS:-unknown}"
 else
-    echo "❌ Claude Graph Service (port 8002) - Not responding"
+    echo "❌ LightRAG Service (port 8001) - Not responding"
 fi
 
 # Streamlit UI

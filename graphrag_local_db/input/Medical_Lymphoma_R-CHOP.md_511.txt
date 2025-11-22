@@ -1,0 +1,29 @@
+# R-CHOP.md
+
+---
+aliases: 
+tags:
+  - r-chop
+  - lymphoma
+---
+# R-CHOP
+Date: 2024-12-10
+
+### Backlink
+[[Lymphoma Treatment]]
+
+### Reference
+-  
+### Notes
+- R-CHOP is the standard initial (front-line) treatment for most patients newly diagnosed with DLBCL. It’s usually given in cycles (every 21 days) for about 6 cycles. This regimen has a proven track record of achieving remission and, in many cases, cure.
+- **Side Effects & Considerations:**
+- Common side effects include lowered blood cell counts, increased infection risk, fatigue, hair loss, neuropathy (especially from vincristine), and gastrointestinal issues. Most are manageable with supportive care, and long-term outcomes can be very good, especially for patients who achieve complete remission. 
+- R-CHOP stands for a combination chemotherapy regimen plus a monoclonal antibody:
+	•	Rituximab: A monoclonal antibody against CD20, a protein found on most B-cells, which helps the immune system target lymphoma cells.
+	•	Cyclophosphamide: A chemotherapy agent that interferes with DNA replication in rapidly dividing cells.
+	•	Hydroxydaunorubicin (Doxorubicin): An anthracycline chemotherapy drug that damages DNA and disrupts cancer cell division.
+	•	Oncovin (Vincristine): A plant alkaloid that prevents cancer cells from completing cell division.
+	•	Prednisone: A corticosteroid that helps reduce inflammation and can induce lymphoma cell death.
+
+How It Works:
+These drugs work synergistically to kill rapidly dividing lymphoma cells. Rituximab, in particular, revolutionized DLBCL treatment by helping the immune system recognize and destroy malignant B-cells more effectively.

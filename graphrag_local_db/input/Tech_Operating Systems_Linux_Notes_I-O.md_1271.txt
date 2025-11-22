@@ -1,0 +1,56 @@
+# I-O.md
+
+---
+aliases:
+tags:
+created: 2021-12-31 10:11
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  ![Data streams of the process STDIN Process STDOUT STDERR ](I-O-image1.jpeg){width="2.5416666666666665in" height="1.7916666666666667in"}
+
+
+
+1.  Redirection
+
+    a.  Stdout to file
+
+        i.  >
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Stderr to file
+
+        i.  2>
+
+    ```{=html}
+    <!-- -->
+    ```
+    a.  Append to file
+
+        i.  >>
+
+        ii. 2>>
+
+```{=html}
+<!-- -->
+```
+1.  ![Shell and other processes STDIN Process STDOUT Bash/sh/zsh shell STDOUT STDERR STDERR aooaamnoo ](I-O-image2.jpeg){width="2.4375in" height="2.78125in"}
+
+
+
+3.  ![Numeric IDs of the process data streams O - STDIN 1 - STDOUT 2 - STDERR ](I-O-image3.jpeg){width="2.1666666666666665in" height="1.5729166666666667in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

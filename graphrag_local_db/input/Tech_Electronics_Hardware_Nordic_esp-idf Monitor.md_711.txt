@@ -1,0 +1,19 @@
+# esp-idf Monitor.md
+
+---
+aliases: 
+tags:
+  - esp-idf
+  - monitor
+---
+# esp-idf Monitor
+Date: 2023-09-16
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- Terminate monitor
+	- <Kbd>Ctrl<Kbd>+[

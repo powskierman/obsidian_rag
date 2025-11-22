@@ -1,0 +1,37 @@
+# Six Easy Pieces.md
+
+---
+id: 16131171
+updated: 2022-06-19
+title: Six Easy Pieces
+author: Richard P. Feynman
+highlights: 1
+last_highlight: 2012-10-29
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16131171
+Updated: 2022-06-19
+%%
+
+![]( https://readwise-assets.s3.amazonaws.com/static/images/default-book-icon-1.a08c56e2fedd.png)
+
+# About
+Title: [[Six Easy Pieces]]
+Authors: [[Richard P. Feynman]]
+Category: #books
+Number of Highlights: ==1==
+Readwise URL: https://readwise.io/bookreview/16131171
+Date: [[2022-06-19]]
+Last Highlighted: *2012-10-29*
+
+---
+
+# Highlights
+
+2–4  Nuclei and particles
+What are the nuclei made of, and how are they held together? It is found that the nuclei are held together by enormous forces. When these are released, the energy released is tremendous compared with chemical energy, in the same ratio as the atomic bomb explosion is to a TNT explosion, because, of course, the atomic bomb has to do with changes inside the nucleus, while the explosion of TNT has to do with the changes of the electrons on the outside of the atoms. The question is, what are the forces which hold the protons and neutrons together in the nucleus? Just as the electrical interaction can be connected to a particle, a photon, Yukawa suggested that the forces between neutrons and protons also have a field of some kind, and that when this field jiggles it behaves like a particle. Thus there could be some other particles in the world besides protons and neutrons, and he was able to deduce the properties of these particles from the already known characteristics of nuclear forces. For example, he predicted they should have a mass of two or three hundred times that of an electron; and lo and behold, in cosmic rays there was ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) %% Color: yellow %% ^334747085
+
+---

@@ -1,0 +1,20 @@
+---
+bookId: "12156"
+title: "The Fifth Risk: Undoing Democracy"
+author: Michael Lewis
+asin: B07FFCMSCX
+lastAnnotatedDate: 2019-01-17
+highlightsCount: 2
+reference: https://www.amazon.com/dp/B07FFCMSCX
+kindle_link: kindle://book?action=open&asin=B07FFCMSCX
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81Xvo-KiIkL._SY160.jpg)
+## Highlights
+In 1950, the average cow yielded 5,300 pounds of milk. In 2016, the average cow yielded 23,000 pounds of milk. A Wisconsin Holstein recently yielded nearly 75,000 pounds of milk in a year, which amounts to roughly 24 gallons a day. — location: [1030](kindle://book?action=open&asin=B07FFCMSCX&location=1030) ^ref-40980
+
+---
+By — location: [1881](kindle://book?action=open&asin=B07FFCMSCX&location=1881) ^ref-16091
+
+---

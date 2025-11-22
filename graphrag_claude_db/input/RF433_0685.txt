@@ -1,0 +1,17 @@
+---
+aliases: 
+tags:
+  - rf433
+---
+# RF433
+Date: 2024-10-10
+
+### Backlink
+[[]]
+
+### Reference
+-  [RC Switch Library](https://github.com/sui77/rc-switch/archive/master.zip)
+### Notes
+-  [Decode and Send 433 MHz RF Signals with Arduino  Random Nerd Tutorials](https://randomnerdtutorials.com/decode-and-send-433-mhz-rf-signals-with-arduino/)
+- [Remote Receiver — ESPHome](https://esphome.io/components/remote_receiver.html)
+	- [Video Tutorial](https://youtu.be/UUmzUyc_GHY?si=TdBO1C10yHJI7zeI)

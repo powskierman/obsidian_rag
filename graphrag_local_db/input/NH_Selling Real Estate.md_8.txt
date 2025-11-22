@@ -1,0 +1,49 @@
+# Selling Real Estate.md
+
+---
+aliases: 
+tags:
+  - real-estate
+  - capital-gains
+  - taxes
+---
+# Selling Real Estate
+Date: 2024-05-23
+
+### Backlink
+[[../Important Documents/Taxes/Capital Gains]]
+
+### Reference
+-  
+### Notes
+-  TAX MATTERS
+
+## How the personal-residence exemption can help minimize taxes on capital gains
+
+The federal government has taken a lot of flak for its proposed changes to the capital-gains inclusion rate. While some investors will see the taxman claim a bigger chunk of their investment gains, ordinary property owners may find themselves whacked by a bigger tax bill, too.
+
+Given that real estate is the greatest store of value for many Canadians, I’ve had no shortage of readers ask how the principal-residence exemption works. Today, I want to explain it more fully.
+
+### The qualification
+
+If you’re hoping to call a place your principal residence, there are three tests the property must meet. First, it will have to be “capital property,” so that any profit is considered a capital gain, not business income. If you’re in the business of buying and flipping properties, your profits are likely to be considered business income. And, if you sell a residential property that you’ve owned for less than 365 consecutive days, our tax law will now deem your profit to be business income – not a capital gain. This property-flipping rule came into effect on Jan. 1, 2023.
+
+Second, the property must be: a housing unit (including a house, apartment or unit in a duplex, condominium, cottage, chalet, cabin, mobile home, trailer, or houseboat), a leasehold interest in a housing unit, or a share of the capital stock of a co-operative housing corporation. The property can be located anywhere in the world, but can’t be primarily (more than half the time) a rental property. Note that any land in excess of half a hectare (1.24 acres) may not qualify for the PRE unless you can show that the land was necessary for the use and enjoyment of the home as your residence.
+
+Third, the property must be “ordinarily inhabited” by you, your current spouse or common-law partner, or a child. While there’s no definition of “ordinarily inhabited” in our tax law, the courts have said that 24 hours is not enough, and the taxman has said that “a short period of time” should be enough. So, living in a property for one or two weeks each year should allow you to claim the PRE on the property if you’re not primarily holding the place to earn rent.
+
+### The calculation
+
+Each family unit (which includes you, your spouse or common-law partner, and any children under the age of 18) is allowed to designate one property as their principal residence for each calendar year. This means that, if you own more than one property at the same time, you could pay tax on one or partly on both of the properties eventually.
+
+When you sell a property you have to report this on Schedule 3 of your tax return for the year of the sale, and you’ll need to file Form T2091 if you’re claiming the PRE to shelter any capital gain on the disposition.
+
+Let’s walk through an example. Suppose you purchased your home in 2010 for $400,000, and that it’s worth $1,400,000 today (a gain of $1,000,000). Suppose also that you bought a vacation property – perhaps a cottage – in 2015 for $500,000, and that it’s worth $1,200,000 today (a gain of $700,000). Let’s assume that you’ve decided to sell the cottage this year.
+
+Can you sell the cottage tax-free? Sure. You could designate the cottage as your principal residence for the years 2015 to 2024 inclusive, or 10 years out of the 10 years you’ve owned it. So, 100 per cent (10 years out of 10) of the capital gain would be sheltered using your PRE.
+
+If you were to sell your city home in 2024 too, you could designate it as your principal residence for the years 2010 (when you bought it) through 2014 – a total of five years. As for the years 2015 through 2024, they’ve already been used to designate the cottage as your principal residence, so these years are not available for the city home. In this example, just five out of 15 years, or one third, of the capital gain on the home would be sheltered from tax.
+
+One last point: Our tax law will allow you to add one more year to the years you designate a property. So, you’d only need to designate the cottage for nine of the 10 years you’ve owned it to fully shelter the capital gain. This “one-plus” rule allows you to own two properties that can overlap by one year and still shelter both fully from tax.
+
+Tim Cestnick, FCPA, FCA, CPA(IL), CFP, TEP, is an author, and co-founder and CEO of Our Family Office Inc. He can be reached at [tim@ourfamilyoffice.ca](mailto:tim@ourfamilyoffice.ca "mailto:tim@ourfamilyoffice.ca").

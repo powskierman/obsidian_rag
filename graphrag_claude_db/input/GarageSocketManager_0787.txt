@@ -1,0 +1,23 @@
+---
+aliases: 
+tags:
+  - garage
+  - GarageHass
+---
+# GarageSocketManager
+Date: 2023-12-07
+
+### Backlink
+[[NHGarage]]
+
+### Reference
+-  [[Sensor request-response cycle]]
+- 
+### Notes
+-  GarageSocketManager is a class that manages a WebSocket connection and updates certain properties based on the received WebSocket events. Here's a breakdown of what the code does:
+- Class Definition: The GarageSocketManager class is defined, which conforms to the ObservableObject and EventMessageHandler protocols.
+- Singleton Instance: A singleton instance of GarageSocketManager is created using static let shared = GarageSocketManager(websocket: HassWebSocket.shared). This instance can be accessed from anywhere in your code.
+- Published Properties: Several properties are declared with the @Published property wrapper. This means that any changes to these properties will publish events that can be listened to by other parts of your code.
+- WebSocket: An instance of HassWebSocket is stored in the websocket property. This is used to interact with the WebSocket.
+- Initialization: In the initializer, the websocket property is set, the GarageSocketManager is added as an event message handler to the WebSocket, and WebSocket events are set up (though the implementation of setupWebSocketEvents() is not shown in the provided code).
+- Event Handling: The didReceive(event:client:) method is implemented to handle incoming WebSocket events. When a .connected event is received, the connectionState of the WebSocket is set to .connected.

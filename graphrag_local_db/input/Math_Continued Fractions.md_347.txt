@@ -1,0 +1,33 @@
+# Continued Fractions.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-02-01 14:28
+ContentType: Reference
+Backlink: "[[Algebra MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- A continued fraction is an expression obtained by taking a number and adding a reciprocal, where the denominator itself is another expression involving a number added to a reciprocal, and allowing this process to repeat.
+If the entire expression is just a reciprocal, but the denominator can be expressed symbolically in terms of the entire expression, then the expression can be fed into itself indefinitely, to obtain an infinite continued fraction. 
+For example, the expression
+X=$1\over (1+X)$
+leads to the infinite continued fraction
+  $X = 1+\cfrac{1}{1+\cfrac{1}{1+\cfrac{1}{1+\dots}}}$
+ By truncating such an expression at some place, one obtains a finite continued fraction, which then evaluates to an ordinary fraction.
+
+see:
+[[Notes-Algebraic-expressions.pdf]]
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

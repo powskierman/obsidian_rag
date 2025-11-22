@@ -1,0 +1,52 @@
+# Kymriah.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+---
+# Kymriah
+Date: 2025-01-15
+
+### Backlink
+[[Diagnosis and Options]]
+
+### Reference
+-  
+### Notes
+-  Kymriah (tisagenlecleucel) is a groundbreaking cancer treatment that uses the patient’s own immune cells to target and destroy cancerous cells. It is a type of CAR-T (chimeric antigen receptor T-cell) therapy, which represents a significant advancement in immunotherapy.
+#### Indications
+Kymriah is approved for the treatment of specific blood cancers:
+	•	B-cell acute lymphoblastic leukemia (ALL): For patients up to 25 years old with relapsed or refractory ALL, meaning the disease has returned after treatment or did not respond to prior therapies.
+	•	Diffuse large B-cell lymphoma (DLBCL): For adult patients with relapsed or refractory DLBCL after at least two lines of systemic therapy.
+	•	Follicular lymphoma (FL): For adult patients with relapsed or refractory FL after two or more lines of systemic therapy. This indication is under accelerated approval, contingent on further clinical studies confirming its benefit.
+#### Mechanism of Action
+Kymriah works by reprogramming the patient’s T cells, a type of immune cell, to attack cancer cells:
+	1.	T-cell Collection: The patient’s T cells are extracted through a process called leukapheresis.
+	2.	Genetic Modification: These T cells are genetically engineered to express a CAR that targets CD19, a protein found on the surface of most cancerous B cells.
+	3.	Infusion: The modified T cells are infused back into the patient, where they recognize and destroy CD19-expressing cancer cells.
+#### Treatment Process
+The process takes several weeks:
+	•	After leukapheresis, the T cells are sent to a lab for modification, which typically takes 3-4 weeks.
+	•	Before infusion, patients may receive chemotherapy to prepare their body for the CAR-T cells.
+	•	Kymriah is administered as a single intravenous infusion.
+#### Efficacy
+Clinical trials have demonstrated significant success:
+	•	In pediatric and young adult ALL patients, about 66% achieved complete remission within three months of treatment.
+	•	In DLBCL patients, approximately 24% achieved complete remission, with durable responses observed in many cases.
+#### Side Effects and Risks
+While effective, Kymriah can cause severe side effects:
+	•	Cytokine Release Syndrome (CRS): A potentially life-threatening condition characterized by fever, low blood pressure, difficulty breathing, and organ dysfunction. CRS requires immediate medical management.
+	•	Neurological Toxicities: Symptoms may include confusion, seizures, and memory issues.
+	•	Other risks include serious infections, prolonged low blood cell counts (cytopenias), and secondary malignancies.
+Patients are closely monitored after infusion to manage these risks effectively.
+#### Advantages
+Kymriah offers several benefits over traditional treatments like chemotherapy or stem cell transplantation:
+	•	It uses the patient’s own immune system, eliminating the need for a donor.
+	•	It is highly targeted, reducing damage to healthy cells.
+	•	It is typically administered as a single infusion.
+#### Limitations
+Kymriah is not suitable for all patients. For example:
+	•	It is not indicated for primary central nervous system lymphoma.
+	•	Its use in follicular lymphoma requires further validation through ongoing studies.
+In summary, Kymriah represents a transformative approach in treating certain blood cancers, offering hope to patients with limited options. However, it requires careful patient selection and management due to its complex process and potential side effects.

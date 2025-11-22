@@ -1,0 +1,27 @@
+---
+aliases: []
+tags: []
+---
+# Copying shared cache symbols from iPhone takes forever
+Date: 2024-01-14
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  1. Turn off your Wi-Fi on the computer.
+    
+2. Plug in your iPhone the traditional way - using a cable.\
+    
+    ![xcode-problem](https://theaveragelearner.com/_astro/xcodeConnect1.e3ab7bb7_27PupM.webp)
+    
+3. You can click “Manage Run Destinations” to initiate the connection.\
+    
+    ![xcode-problem-2](https://theaveragelearner.com/_astro/xcodeConnect2.1c6c1e14_ZmDg6D.webp)
+    
+4. Click on the side devices, and just wait for it to start doing its work.
+    
+
+To me, this method took me less than a few minutes from start to finish the whole copying process.

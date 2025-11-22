@@ -1,0 +1,132 @@
+---
+aliases: []
+---
+
+2022-02-25
+# Discontinuity
+
+### Backlink
+[[limit]]
+
+### Reference
+- [source](: https://www.mathwarehouse.com/calculus/continuity/what-are-types-of-discontinuities.php)
+- [[Notes-Limits-and-Continuity.pdf]]
+### Notes
+- ---
+created: 2022-01-16T10:36:29 (UTC -10:00)
+tags: [math]
+
+author: 
+---
+
+# Discontinuities
+### [[Continuity]]
+- A function is continuous if it can be drawn by not lifting the pen from paper
+### Obstructions to [[Continuity]]
+- division by zero
+- pieces not joining up when function is defined piecewise
+	- $y=f(x)={x\over |x|}$
+	- 
+---
+### Quick Overview
+
+-   Discontinuities can be classified as _jump_, _infinite_, _removable_, _endpoint_, or _mixed_.
+-   Removable discontinuities are characterized by the fact that the [limit](https://www.mathwarehouse.com/calculus/limits/) exists.
+-   Removable discontinuities can be "fixed" by re-defining the function.
+-   The other types of discontinuities are characterized by the fact that the [limit](https://www.mathwarehouse.com/calculus/limits/) does not exist. Specifically,
+    -   Jump Discontinuities: both [one-sided limits](https://www.mathwarehouse.com/calculus/limits/limits-one-sided.php) exist, but have different values.
+    -   Infinite Discontinuities: both [one-sided limits](https://www.mathwarehouse.com/calculus/limits/limits-one-sided.php) are infinite.
+    -   Endpoint Discontinuities: only one of the [one-sided limits](https://www.mathwarehouse.com/calculus/limits/limits-one-sided.php) exists.
+    -   Mixed: at least one of the [one-sided limits](https://www.mathwarehouse.com/calculus/limits/limits-one-sided.php) does not exist.
+
+### Jump Discontinuities
+
+The graph of f(x) below shows a [function](https://www.mathwarehouse.com/algebra/relation/math-function.php) that is discontinuous at x\=a.
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/jump-discontinuity.png)
+
+In this graph, you can easily see that limx→a−f(x)\=L and limx→a+f(x)\=M.
+
+The [function](https://www.mathwarehouse.com/algebra/relation/math-function.php) is approaching different values depending on the direction x is coming from. When this happens, we say the [function](https://www.mathwarehouse.com/algebra/relation/math-function.php) has a _jump discontinuity_ at x\=a.
+
+### Infinite Discontinuities
+
+The graph below shows a [function](https://www.mathwarehouse.com/algebra/relation/math-function.php) that is discontinuous at x\=a.
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/infinite-discontinuity-1.png)
+
+The arrows on the function indicate it will grow infinitely large as x approaches a. Since the function doesn't approach a particular finite value, the [limit](https://www.mathwarehouse.com/calculus/limits/) does not exist. This is an _infinite discontinuity_.
+
+The following two graphs are also examples of infinite discontinuities at x\=a. Notice that in all three cases, both of the [one-sided limits](https://www.mathwarehouse.com/calculus/limits/limits-one-sided.php) are infinite.
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/infinite-discontinuity-2.png)
+
+### Removable Discontinuities
+
+In the graphs below, there is a hole in the function at x\=a. These holes are called _removable discontinuities_
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/removable-discontinuities.png)
+
+Notice that for both graphs, even though there are holes at x\=a, the limit value at x\=a exists.
+
+### Removable Discontinuities can be Fixed
+
+Removable discontinuities can be fixed by redefining the function, as shown in the following example.
+
+##### Example
+
+The function below has a removable discontinuity at x\=2. Redefine the function so that it _becomes continuous_ at x\=2.
+
+f(x)\=x2−2xx2−4
+
+Solution
+
+The graph of the function is shown below for reference.
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/fixable-discontinuity.png)
+
+In order to fix the discontinuity, we need to know the y\-value of the hole in the graph. To determine this, we find the value of limx→2f(x).
+
+Examining the form of the limit we see
+
+limx→2x2−2xx2−4\=(2)2−2(2)(2)2−4\=00
+
+The division by zero in the 00 form tells us there is definitely a discontinuity at this point.
+
+Next, using the techniques covered in previous lessons (see [Indeterminate Limits---Factorable](https://www.mathwarehouse.com/calculus/limits/limits-indeterminate-factorable.php)) we can easily determine
+
+limx→2f(x)\=12
+
+The limit value is also the y\-value of the hole in the graph. Now we can redefine the original function in a piecewise form:
+
+f(x)\={x2−2xx2−4,for all x≠212,for x\=2
+
+The first piece preserves the overall behavior of the function, while the second piece plugs the hole.
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/fixed-discontinuity.png)
+
+### Endpoint Discontinuities
+
+When a function is defined on an interval with a closed endpoint, the limit cannot exist at that endpoint. This is because the limit has to examine the function values as x approaches from both sides.
+
+For example, consider finding limx→0x (see the graph below).
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/endpoint-discontinuity.png)
+
+Note that x\=0 is the left-endpoint of the functions domain: \[0,∞), and the function is technically not continuous there because the limit doesn't exist (because x can't approach from both sides).
+
+We should note that the function _is_ right-hand continuous at x\=0 which is why we don't see any jumps, or holes at the endpoint.
+
+### Mixed Discontinuities
+
+Consider the graph shown below.
+
+![](https://www.mathwarehouse.com/calculus/continuity/images/mixed-discontinuity.png)
+
+The function is obviously discontinuous at x\=3. From the left, the function has an infinite discontinuity, but from the right, the discontinuity is removable. Since there is more than one reason why the discontinuity exists, we say this is a _mixed_ discontinuity
+
+  
+
+![Download this web page as a pdf with answer key ](https://www.mathwarehouse.com/sitefiles/v.1.2/images/_download-page-as-pdf.png "www.mathwarehouse.com/downloads/calculus/continuity/what-are-types-of-discontinuities.pdf")
+ 
+-  

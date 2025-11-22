@@ -1,0 +1,18 @@
+# VSCode MoC.md
+
+---
+aliases: []
+tags: []
+---
+# VSCode MoC
+Date: 2023-09-16
+
+### Backlink
+[[]]
+
+### Reference
+-  [[VSCode Troubleshooting]]
+- [[VSCode Keyboard Shortcuts]]
+- 
+### Notes
+-

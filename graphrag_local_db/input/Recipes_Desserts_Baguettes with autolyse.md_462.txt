@@ -1,0 +1,51 @@
+# Baguettes with autolyse.md
+
+---
+aliases: []
+tags:
+  - recipe
+---
+# Baguettes with autolyse
+Date: 2024-10-09
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- Modified Procedure with Autolyse
+Ingredients
+Poolish (prepared the night before):
+	•	Flour: 160 grams
+	•	Water: 160 grams
+	•	Instant yeast: A small pinch
+Final Dough:
+	•	All of the poolish
+	•	Flour: 320 grams
+	•	Water: 160 grams
+	•	Salt: 9 grams
+	•	Instant yeast: 1 to 2 grams
+Day 1: Prepare the Poolish
+	1.	Mix Ingredients: Combine flour, water, and a pinch of yeast. Mix until smooth.
+	2.	Fermentation: Cover and let sit at room temperature for 12-16 hours.
+Day 2: Autolyse and Make the Dough
+	1.	Autolyse:
+	•	Combine Flour and Water: Mix the remaining flour (320 grams) and water (160 grams) from the final dough ingredients in a large bowl until no dry bits remain. Do not add salt or yeast yet.
+	•	Rest: Cover and let the mixture rest for about 30 minutes to 1 hour. This resting period allows gluten development without kneading, improving dough extensibility.
+	2.	Mix Final Dough:
+	•	Add Poolish, Salt, and Yeast: After the autolyse period, add the poolish, salt, and yeast to the autolysed mixture.
+	•	[[Knead Dough]]: Knead until the dough is smooth and elastic.
+	3.	First Fermentation:
+	•	[[Let the dough ferment for about two hours]], performing a stretch-and-fold at the one-hour mark to strengthen the dough structure.
+Shaping and Baking
+	1.	Divide and Pre-shape:
+	•	Divide into three equal pieces, shape into rounds, and let rest for 20 minutes.
+	2.	Shape Baguettes:
+	•	Roll each piece into a baguette shape.
+	3.	Final Proofing:
+	•	Allow baguettes to proof for about 60 to 90 minutes.
+	4.	Bake:
+	•	Preheat oven to 460°F (240°C).
+	•	Score baguettes and bake with steam for about 25 minutes until golden brown.
+By incorporating an autolyse step, you enhance gluten development naturally without extensive kneading, which can result in a more open crumb structure and improved dough handling characteristics.

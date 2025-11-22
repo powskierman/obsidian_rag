@@ -1,0 +1,19 @@
+# Sonenshein-Stretch.md
+
+---
+bookId: "50488"
+title: "Stretch: Unlock the Power of Less -and Achieve More Than You Ever Imagined"
+author: Scott Sonenshein
+asin: B01FQQ6EMU
+lastAnnotatedDate: 2020-01-31
+highlightsCount: 1
+reference: https://www.amazon.com/dp/B01FQQ6EMU
+kindle_link: kindle://book?action=open&asin=B01FQQ6EMU
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71lp0IEZl5L._SY160.jpg)
+## Highlights
+convince you of the benefits of stretching, I will introduce studies and stories that explain how to find success and satisfaction that’s hard to get from chasing. People who routinely stretch, those I call stretchers, ask what more they can do with what they have, instead of asking what’s missing. — location: [393](kindle://book?action=open&asin=B01FQQ6EMU&location=393) ^ref-6845
+
+---

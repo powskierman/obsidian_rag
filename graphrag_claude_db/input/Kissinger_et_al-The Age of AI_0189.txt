@@ -1,0 +1,35 @@
+---
+bookId: "12912"
+title: "The Age of AI: And Our Human Future"
+author: Henry A Kissinger, Eric Schmidt, and Daniel Huttenlocher
+asin: B095XH2N6Q
+lastAnnotatedDate: 2023-02-06
+highlightsCount: 7
+reference: https://www.amazon.com/dp/B095XH2N6Q
+kindle_link: kindle://book?action=open&asin=B095XH2N6Q
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71zaLrygEQL._SY160.jpg)
+## Highlights
+When information is contextualized, it becomes knowledge. When knowledge compels convictions, it becomes wisdom. — location: [588](kindle://book?action=open&asin=B095XH2N6Q&location=588) ^ref-5762
+
+---
+The digital world has little patience for wisdom; its values are shaped by approbation, not introspection. It inherently challenges the Enlightenment proposition that reason is the most important element of consciousness. — location: [592](kindle://book?action=open&asin=B095XH2N6Q&location=592) ^ref-36838
+
+---
+Today’s deep networks typically contain around ten layers. — location: [703](kindle://book?action=open&asin=B095XH2N6Q&location=703) ^ref-27382
+
+---
+As of this writing, three forms of machine learning are noteworthy: supervised learning, unsupervised learning, and reinforcement learning. — location: [714](kindle://book?action=open&asin=B095XH2N6Q&location=714) ^ref-29828
+
+---
+another technique, generative neural networks, can create. — location: [794](kindle://book?action=open&asin=B095XH2N6Q&location=794) ^ref-19686
+
+---
+Currently, GPT-3, which can produce human-like text (see chapter 1), is one of the most noteworthy generative AIs. — location: [810](kindle://book?action=open&asin=B095XH2N6Q&location=810) ^ref-21467
+
+---
+with government restrictions or incentives, creating a strategic arena that is particularly dynamic and difficult to predict. Further, a new form of cultural and political anxiety is being added to this already complex equation. In Beijing, Washington, and some European capitals, concern has been expressed (and articulated obliquely elsewhere) about the implications — location: [1317](kindle://book?action=open&asin=B095XH2N6Q&location=1317) ^ref-41885
+
+---

@@ -1,0 +1,26 @@
+# Dataview List of Lists.md
+
+---
+aliases:
+tags:
+created: 2022-07-06 07:21
+ContentType: Note
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+```dataview
+list author
+from "Books"
+```
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

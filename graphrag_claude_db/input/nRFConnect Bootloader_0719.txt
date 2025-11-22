@@ -1,0 +1,17 @@
+---
+aliases: []
+tags: [
+ nRFConnect
+ Bootloader
+]
+---
+# nRFConnect Bootloader
+Date: 2023-06-17
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  

@@ -1,0 +1,44 @@
+---
+aliases: 
+tags:
+  - C
+  - logging
+---
+# Logging Level
+Date: 2023-09-19
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  In C, the LOG macro is typically used to represent a logging level for outputting debug or diagnostic messages.
+- Some common values used for LOG are:
+	- LOG_ERROR - Log error messages
+	- LOG_WARN - Log warning messages
+	- LOG_INFO - Log informational messages
+	- LOG_DEBUG - Log debug messages
+	- LOG_TRACE - Log trace/verbose messages
+These are defined as integer constants for comparison, for example:
+```c
+#define LOG_ERROR 1
+#define LOG_WARN 2 
+#define LOG_INFO 3
+#define LOG_DEBUG 4
+#define LOG_TRACE 5
+The logging level can then be checked before printing a log message:
+c
+Copy code
+if(LOG >= LOG_INFO) {
+  printf("Info level message"); 
+}
+This will only print if LOG is set to LOG_INFO or higher.
+Some other common LOG values are:
+LOG_FATAL - Unrecoverable errors
+LOG_DATA - Log data dumps
+LOG_ALL - Print all log messages
+```
+- [[esp-idf Logging]]
+- So in summary, LOG represents a logging level, with higher values representing more verbose/detailed logging. The values are preprocessor defines that can be compared to control logging output.
+

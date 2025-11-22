@@ -1,0 +1,39 @@
+---
+id: 16131174
+updated: 2022-06-19
+title: Develop Great Images in Lightroom
+author: Photofocus, Nicole S. Young, Levi Sim, Rob Sylvan, Richard Harrington & Gerard Murphy
+highlights: 1
+last_highlight: 2015-02-28
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16131174
+Updated: 2022-06-19
+%%
+
+![]( https://is5-ssl.mzstatic.com/image/thumb/Publication4/v4/cb/57/09/cb5709a0-7822-e157-b3a0-23c4de4f2b91/Develop_Book.jpg/1400x0w.jpg)
+
+# About
+Title: [[Develop Great Images in Lightroom]]
+Authors: [[Photofocus]], [[Nicole S. Young]], [[Levi Sim]], [[Rob Sylvan]], [[Richard Harrington & Gerard Murphy]]
+Category: #books
+Number of Highlights: ==1==
+Readwise URL: https://readwise.io/bookreview/16131174
+Date: [[2022-06-19]]
+Last Highlighted: *2015-02-28*
+
+---
+
+# Highlights
+
+Collections
+One of my favorite features inside of Lightroom is the ability to add images to collections. Collections are great because they are similar to folders, but you are able to store the same image within several different collections without having to move the file itself. This way you can make changes to the file and it will display those changes to that file across all collections where it is located. There are a few different aspects to collections, so I have them listed here in this section.
+  Quick Collection: By default, the Quick Collection is the first collection you will likely have exposure to. This collection, located under the Catalog panel, is the initial “target collection” inside of Lightroom, meaning that when you use the keyboard shortcut B it will add any highlighted photo to that collection.
+The Quick Collection is a good choice to use when you need to quickly group photos, but don’t necessarily need to have a permanent collection created in the Collections panel. One example of this would be if you need to export a handful of images for a blog post, and they are all in different folders. By adding them to the Quick Collection you are able to easily group them together and export them together.
+Tip: 
+To set your own target collection, right-click over top of it and select “Set as Target Collection”. The plus sign next to the collection name indicates that the collection is the current target collection and you can use the keyboard shortcut B to add your images. ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) %% Color: yellow %% ^334747206
+
+---

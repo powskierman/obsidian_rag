@@ -1,0 +1,108 @@
+---
+aliases: 
+tags:
+  - Halcyon
+  - PlatformIO
+  - CLI
+  - esphome
+  - OTA
+  - fota
+---
+# Update ESPHome from CLI
+Date: 2024-06-22
+
+### Backlink
+[[Halcyon]]
+
+### Reference
+- 
+
+### Notes
+- To upload ESPHome to your ESP32 using PlatformIO OTA, follow these steps:
+
+#### Prerequisites
+1. **ESPHome Setup**:
+   - Ensure you have ESPHome installed. You can do this by running: 
+     ```zsh
+     pip install esphome
+     ```
+
+2. **PlatformIO Setup**:
+   - Ensure PlatformIO is installed and properly set up in your development environment.
+
+#### Steps
+
+1.**Configure ESPHome for OTA**:
+   - Create an ESPHome configuration file (e.g., `/Volumes/Docs/Electronics/Projects/NH/Halcyon/HalcyonHASS/roomName.yaml`
+   - Copy another room and modify name and IP address
+1.  **Create yaml file in Home Assistant**
+   - In HASSOS terminal:
+	   - `cd config/esphome`
+	   - `nano roomName.yaml`
+	   - Paste content of yaml file at:
+		   - `/Volumes/Docs/Electronics/Projects/NH/Halcyon/HalcyonHASS/roomName.yaml`
+2. **Compile ESPHome Firmware**:
+   - Within the `/Volumes/Docs/Electronics/Projects/NH/Halcyon/HalcyonHASS` folder, 
+   - Compile the firmware using ESPHome:
+     ```zsh
+     esphome compile roomName.yaml
+     ```
+   - This will generate a firmware binary file in the present directory(e.g., `/Volumes/Docs/Electronics/Projects/NH/Halcyon/HalcyonHASS/.esphome/build/halcyoncuisine/.piolibdeps/halcyoncuisine/firmware.bin`
+
+3. **Upload Precompiled ESPHome Firmware Using PlatformIO OTA**
+
+   1. **Initialize a PlatformIO Project**:
+      ```bash
+      cd /Volumes/Docs/Electronics/Projects/NH/Halcyon/HalcyonHASS
+      platformio project init --board esp32dev
+      ```
+
+   2. **Edit `platformio.ini`**:
+      ```ini
+      [env:esp32dev]
+      platform = espressif32
+      board = esp32dev
+      framework = arduino
+      upload_protocol = espota
+      upload_port = 192.168.0.201
+      upload_flags =
+          --port=3232
+          --auth=b1b01df3b1785ca1a805c13069198a7b  ; if you have set an OTA password
+          --timeout=120
+      extra_scripts = ota_upload.py
+      ```
+
+3. **Create `ota_upload.py` Script**:
+      ```python
+      import os
+      Import("env")
+
+      def ota_upload(source, target, env):
+          print("Uploading firmware via OTA...")
+          os.system(f"pio run -t nobuild -t upload --upload-port 192.168.0.201")
+
+      env.AddCustomTarget("ota_upload", None, ota_upload, title="OTA Upload", description="Upload precompiled firmware via OTA")
+      ```
+
+4. **Copy Precompiled Firmware**:
+		- From:  `/Volumes/Docs/Electronics/Projects/NH/Halcyon/HalcyonHASS/.esphome/build/halcyoncuisine/.pioenvs/halcyoncuisine/firmware.bin`
+		- To:
+		- `/Volumes/Docs/Electronics/Projects/NH/Halcyon/HalcyonHASS/.pio/build/esp32dev`
+
+5. **Run OTA Upload**:
+      ```bash
+      platformio run --target ota_upload
+      ```
+6.**In ESPHome addon, 
+		- click on `edit` on roomName
+		- save
+		- install
+7.**Configure**
+		- In integrations, find the device and click `Configure`
+
+By following these steps, you can use PlatformIO to upload a precompiled ESPHome firmware to your ESP32 device via OTA, bypassing the need to rebuild the firmware in PlatformIO. Replace `192.168.0.201` with the IP address or mDNS name of your ESP32 device.
+
+### Troubleshooting
+
+- If we get: NameError: name 'esptool' is not defined, we need to update `post_build.py`
+	- The updated file can be found at: `/Users/michel/.esphome/build/halcyoncuisine/post_build.py`

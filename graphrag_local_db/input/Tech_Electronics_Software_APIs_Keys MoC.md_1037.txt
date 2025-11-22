@@ -1,0 +1,25 @@
+# Keys MoC.md
+
+---
+aliases:
+tags:
+  - key
+created: 2025-10-16 08:19
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Newsapi.org
+	- `c31306a849bd453ebd3577d06be38934`
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

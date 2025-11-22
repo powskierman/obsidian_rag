@@ -1,0 +1,77 @@
+# Openthread ot commands.md
+
+---
+aliases: []
+tags: [
+ ot
+ openthread
+ cli
+ 
+]
+---
+# #Openthread #ot commands
+Date: 2023-06-11
+
+### Backlink
+[[]]
+
+### Reference
+-  [OpenThread CLI Command Reference](https://openthread.io/reference/cli/commands)
+- 
+### Notes
+- Create specific network parameters:
+	- ot factoryreset
+	- ot dataset networkname home-assistant
+	- ot dataset panid 0xa3aa
+	- ot dataset active commit
+- View thread network parameters:
+	- ot dataset active
+```
+Active Timestamp: 1
+Channel: 15
+Channel Mask: 0x07fff800
+Ext PAN ID: 28df6e248ee7da88
+Mesh Local Prefix: fd7f:c78e:e559:a2a3::/64
+Network Key: 1da3eb13a8ad1523920d4e78881387be
+Network Name: OpenThread-79ed
+PAN ID: 0x79ed
+PSKc: d1cc34b675b669e4f88a8b9c1c89a699
+Security Policy: 672 onrc
+Done
+
+```
+- Create new, random network:
+	- ot dataset init new
+
+- #### Most Used OpenThread CLI Commands
+
+1. `state`  
+    Displays the current state of the Thread device (disabled, detached, child, router, leader).
+2. `ifconfig up` / `ifconfig down`  
+    Brings the Thread interface up or down.
+3. `thread start` / `thread stop`  
+    Starts or stops Thread protocol operation.
+4. `scan`  
+    Performs an energy scan on all channels.
+5. `ping <ip-address>`  
+    Sends an ICMPv6 Echo Request to a specific IPv6 address.
+6. `dataset active`  
+    Displays the active operational dataset.
+7. `ipaddr`  
+    Shows the list of IPv6 addresses assigned to the Thread interface.
+8. `neighbor table`  
+    Displays the neighbor table.
+9. `router table`  
+    Shows the router table (if the device is a router or leader).
+10. `netdata show`  
+    Displays the Thread Network Data.
+11. `prefix add <prefix> [padcrosnD] [high|med|low]`  
+    Adds a valid prefix to the Network Data.
+12. `coap start` / `coap stop`  
+    Starts or stops the CoAP service.
+13. `commissioner start` / `commissioner stop`  
+    Starts or stops the Commissioner role.
+14. `joiner start <pskd> <provisioning-url>`  
+    Starts the Joiner role with the given PSKd and provisioning URL.
+15. `diag start` / `diag stop`  
+    Starts or stops the network diagnostic module

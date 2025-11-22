@@ -1,0 +1,42 @@
+# Add-portable-app-to-Start-Menu.md
+
+---
+aliases:
+tags:
+created: 2022-01-01 16:59
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  **Download the portable app**you want to use.**Move it to a folder you know it won't be deleted from**. (e:Portable Apps) It does not have to be placed on the C drive or[**Windows drive.**](https://www.addictivetips.com/windows-tips/identify-windows-drive-on-windows-10/)
+
+2.  **Run the app at least once.**Some apps will create a few additional directories in order to work even if they're portable.
+
+3.  **Look for the EXE of the portable app.****Right-click it,**and s**elect 'Create Shortcut'**from the context menu.
+
+```{=html}
+<!-- -->
+```
+4.  Open**File Explorer.**
+
+5.  Enter the following**in the location bar.**
+
+%appdata%MicrosoftWindowsStart MenuPrograms
+
+
+
+
+
+*From <<https://www.addictivetips.com/windows-tips/pin-portable-apps-start-menu/>>*
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

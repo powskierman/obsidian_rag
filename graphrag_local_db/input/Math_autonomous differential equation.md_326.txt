@@ -1,0 +1,17 @@
+# autonomous differential equation.md
+
+---
+aliases: []
+---
+
+2022-03-20
+# autonomous differential equation
+
+### Backlink
+[[]]
+
+[differential equation](https://mathinsight.org/autonomous_differential_equation_introduction)
+### Notes
+-  An autonomous differential equation is an equation of the form ${dy \over dt}=f(y)$
+	-  if the right side does not depend on x, the equation is autonomous. 
+	- The slopes in the direction field will only depend on y

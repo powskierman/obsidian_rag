@@ -1,0 +1,17 @@
+# Xcode Framework.md
+
+---
+aliases: []
+tags: []
+---
+# Xcode Framework
+Date: 2023-11-10
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  [[Xcode - Testing a Framework]]
+- [[XCFramework]]

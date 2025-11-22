@@ -1,0 +1,68 @@
+---
+aliases:
+tags:
+  - Baguette
+  - recipe
+---
+# Baguettes Recipe
+Date: 2024-10-09
+
+### Backlink
+[[Baguette MoC]]
+
+### Reference
+-  
+### Notes
+-  To make baguettes at home using a poolish, follow this detailed step-by-step procedure. This process involves preparing a poolish the night before, mixing the final dough, shaping the baguettes, and baking them to perfection.
+
+## Ingredients
+
+### Poolish
+- **Flour:** 160 grams (about 1.25 cups)
+- **Water:** 160 grams (about ½ cup + 3 tablespoons)
+- **Instant yeast:** A small pinch (about 1/32 teaspoon)
+
+### Final Dough
+- **All of the poolish**
+- **Flour:** 320 grams (about 2.5 cups)
+- **Malt extract:**  1.25 grams (0.5 teaspoon)
+- **Gluten:** 5 grams 
+- **Water:** 160 grams (about ½ cup + 3 tablespoons)
+- **Salt:** 9 grams (about 1.25 teaspoons)
+- **Instant yeast:** 1 to 2 grams (about ½ + 1/8 teaspoon)
+
+## Procedure
+
+- https://www.perplexity.ai/search/give-me-a-step-by-step-procedu-vVzQUml3SUWdzLURZ..iPg#0
+### Day 1: Prepare the Poolish
+1. **Mix Ingredients:** In a bowl, dissolve the yeast in water, then add the flour. Mix until combined.
+2. **Fermentation:** Cover the bowl and let it sit at room temperature for 12-16 hours until bubbles form on top and it begins to wrinkle[1][5].
+
+### Day 2: Make the Dough
+1. **Combine Ingredients:** Add water to the poolish to loosen it, then mix with flour, salt, and yeast in a large bowl until all ingredients are combined into a shaggy dough.
+2. **Kneading:** Knead the dough until it passes the windowpane test, indicating proper gluten development[1][5].
+3. **First Fermentation:** Cover the dough and let it ferment for two hours, performing a stretch-and-fold at the one-hour mark[1].
+
+### Shaping
+1. **Divide and Pre-shape:** Divide the dough into three equal pieces and shape them into rounds. Let them rest for about 20 minutes[1].
+2. **Shape Baguettes:** Roll each piece into a baguette shape approximately 12 inches long. Place them on a floured couche or tea towel[2][6].
+
+### Proofing
+1. **Final Proofing:** Cover the shaped baguettes and let them proof for about 60 to 90 minutes until they have visibly expanded[2][5].
+
+### Baking
+1. **Preheat Oven:** Preheat your oven to 460°F (240°C) with a baking stone inside if available.
+2. **Score Baguettes:** Just before baking, score each baguette with a sharp blade or lame.
+3. **Bake with Steam:** Place baguettes in the oven and add steam by pouring water into a preheated tray at the bottom of the oven. Bake for about 25 minutes until golden brown[1][6].
+
+4. **Cooling:** Remove from oven and allow to cool on a wire rack before slicing.
+
+This method will yield delicious homemade baguettes with a crispy crust and chewy interior, thanks to the poolish preferment technique that enhances flavor and texture[5][6].
+
+Citations:
+[1] https://www.thefreshloaf.com/handbook/poolish-baguettes
+[2] https://www.busbysbakery.com/recipe/authentic-french-baguette-poolish/
+[3] https://www.weekendbakery.com/posts/recipe-for-80-hydration-baguette/
+[4] https://dawghousebakery.com/2021/10/20/recipe-traditional-poolish-baguettes/
+[5] https://milkandpop.com/homemade-french-baguette/
+[6] https://www.chainbaker.com/poolish-baguettes/

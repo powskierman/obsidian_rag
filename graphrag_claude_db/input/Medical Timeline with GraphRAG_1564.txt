@@ -1,0 +1,197 @@
+---
+aliases:
+  - Medical Knowledge Graph
+tags:
+  - AI
+  - RAG
+  - medical
+  - use-case
+  - timeline
+created: 2025-10-21 15:37
+ContentType: use-case
+Backlink: "[[GraphRAG & LightRAG MoC]]"
+---
+### Main Idea
+
+GraphRAG-Local-Ollama transforms medical knowledge management by automatically reconstructing treatment timelines, discovering causal relationships, and connecting clinical data across time - eliminating manual timeline reconstruction. **Now successfully deployed and actively indexing 1,607 vault files.**
+
+### Treatment Timeline Example
+
+**Query:** "How did my treatment progress from diagnosis to current status?"
+
+**Traditional RAG Response:**
+- Returns disconnected chunks:
+  - "Diagnosed with DLBCL"
+  - "Started R-CHOP chemotherapy"
+  - "Received Yescarta CAR-T"
+  - "3-month PET scan results"
+  
+User must manually construct timeline.
+
+**GraphRAG-Local Response:**
+```
+Complete Treatment Graph:
+
+2024-12: Diagnosis → DLBCL (high-grade, double-hit)
+   ↓
+2024-12 to 2025-03: R-CHOP (6 cycles)
+   ├─ Response: Partial
+   ├─ Side effects: Nausea, fatigue
+   └─ Outcome: Residual disease detected
+   ↓
+2025-04: Decision → CAR-T therapy
+   ├─ Factors: Refractory disease, double-hit, eligible
+   ├─ Option chosen: Yescarta (axicabtagene ciloleucel)
+   └─ Rationale: 70% durable response rate
+   ↓
+2025-04: Lymphodepletion → Preparation
+   ↓
+2025-04: Yescarta infusion
+   ├─ Side effects: CRS grade 2, neurotoxicity grade 1
+   ├─ Management: Tocilizumab, supportive care
+   └─ Recovery: 2 weeks inpatient
+   ↓
+2025-07: 3-month PET scan
+   ├─ Result: Complete metabolic response
+   ├─ SUV max: Normalized
+   └─ Status: No active disease
+   ↓
+2025-10: 6-month monitoring
+   ├─ PET scan: Continued remission
+   ├─ IgG levels: Low (B-cell aplasia)
+   ├─ Intervention: IVIG therapy monthly
+   └─ Status: Excellent response maintained
+```
+
+### Side Effect Correlation
+
+**Query:** "What side effects correlated with low IgG levels and what helped?"
+
+**GraphRAG-Local Causal Chain:**
+```
+Yescarta CAR-T therapy
+   ↓ causes
+B-cell aplasia (expected, persistent)
+   ↓ results in
+Low IgG levels (<400 mg/dL)
+   ↓ increases risk
+Infections (respiratory, opportunistic)
+   ↓ treated with
+IVIG therapy (monthly infusions)
+   ↓ maintains
+Protective antibody levels (>500 mg/dL target)
+   ↓ outcome
+Reduced infection frequency
+```
+
+### References
+
+- [[LightRAG Benefits]]
+- [[LightRAG Overview]]
+- [[Multi-Hop Reasoning with LightRAG]]
+
+### Notes
+
+**Decision Support Example:**
+
+**Query:** "What factors influenced my decision to do Yescarta over stem cell transplant?"
+
+**Decision Graph:**
+```
+R-CHOP incomplete response
+   → led to → consideration of alternatives
+      → evaluated → [Stem cell transplant, CAR-T therapy]
+         → stem cell transplant
+            ├─ Pros: Established approach
+            ├─ Cons: Age factor, risk, conditioning
+            └─ Status: Deferred
+         → CAR-T (Yescarta)
+            ├─ Pros: Single infusion, 70% durable response
+            ├─ Pros: Good for double-hit lymphoma
+            ├─ Pros: Eligibility criteria met
+            └─ Chosen ✓
+               ← because → High-grade DLBCL
+               ← because → Double-hit status
+               ← because → Refractory to R-CHOP
+               ← because → Strong evidence base
+```
+
+**Biomarker Tracking:**
+
+**Query:** "Track my SUV max values over time"
+
+**Timeline Graph:**
+```
+Pre-treatment:     SUV max 18.5 (highly active)
+   ↓
+Post R-CHOP:       SUV max 8.2 (partial response)
+   ↓
+Post Yescarta 3mo: SUV max 2.1 (complete response)
+   ↓
+6-month follow-up: SUV max 1.8 (continued remission)
+
+Trend: ↓ Excellent response trajectory
+Status: Below threshold (<2.5) indicating no active disease
+```
+
+**Doctor Visit Preparation:**
+
+GraphRAG-Local can generate comprehensive visit summaries:
+```
+"Generate summary for oncologist visit"
+
+Output:
+- Current Status: 6 months post-Yescarta, complete remission
+- Timeline: Diagnosis → R-CHOP → Yescarta → Remission
+- Key Metrics: SUV max 1.8, IgG 320 mg/dL
+- Interventions: Monthly IVIG
+- Side Effects: B-cell aplasia (expected, managed)
+- Questions: Long-term IVIG duration? CD19+ monitoring?
+- Concerns: None currently
+- Quality of Life: Excellent
+```
+
+### Related Notes
+
+- [[Entity-Centric Search]]
+- [[Multi-Hop Reasoning with LightRAG]]
+- [[LightRAG Query Modes]]
+- [[LightRAG Benefits]]
+
+### Questions / Ideas for Further Exploration
+
+- Can graph predict treatment outcomes?
+- How to visualize temporal relationships?
+- Integration with actual medical records?
+- Export timeline for medical team?
+- Track medication interactions?
+
+### To-Do
+
+- [ ] Index all medical notes chronologically
+- [ ] Test timeline reconstruction queries
+- [ ] Create doctor visit summary template
+- [ ] Build biomarker tracking graph
+- [ ] Document side effect correlations
+- [ ] Create decision tree visualization
+- [ ] Test "what if" scenario queries
+
+### Smart Connections Insights
+
+GraphRAG-Local's killer feature for medical use: automatic timeline reconstruction eliminates manual work while discovering patterns and connections invisible in disconnected notes. Transforms fragmented medical knowledge into comprehensive treatment narratives.
+
+### Current Implementation Status
+
+- ✅ **GraphRAG-Local-Ollama**: Successfully deployed and running
+- ✅ **Service**: Available at http://localhost:8003
+- ✅ **Models**: qwen2.5-coder:14b + nomic-embed-text optimized for medical content
+- ✅ **Indexing**: Processing 1,607 vault files (in progress)
+- 🔄 **Next**: Test timeline queries once indexing completes
+- 📊 **Monitor**: `curl http://localhost:8003/stats` for progress
+
+### GraphRAG-Local Advantages Over LightRAG
+
+- **Ollama Integration**: Purpose-built for local LLM deployment
+- **Stability**: No event loop conflicts like LightRAG
+- **Medical Optimization**: Entity extraction configured for medical terms
+- **Production Ready**: Active development and community support

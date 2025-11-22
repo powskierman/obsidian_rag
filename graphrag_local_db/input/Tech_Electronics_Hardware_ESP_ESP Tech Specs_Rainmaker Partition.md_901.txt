@@ -1,0 +1,26 @@
+# Rainmaker Partition.md
+
+---
+aliases: []
+tags:
+  - Rainmaker
+  - partitions
+---
+# Rainmaker Partition
+Date: 2023-09-04
+
+### Backlink
+[[]]
+
+### Reference
+-  [arduino-esp32toolspartitionsrainmaker.csv](https://github.com/espressif/arduino-esp32/blob/master/tools/partitions/rainmaker.csv)
+- 
+### Notes
+ | \# Name | Type | SubType | Offset | Size   | Flags |     |
+ | ------- | ---- | ------- | ------ | ------ | ----- | --- |
+ | nvs     | data | nvs     | 0x9000 | 0x5000 |       |     |
+ | otadata | data | ota | 0xe000 | 0x2000 |  |     |
+ | ota\_0 | app | ota\_0 | 0x10000 | 0x1E0000 |  |
+ | ota\_1 | app | ota\_1 | 0x1F0000 | 0x1E0000 |  |
+ | fctry | data | nvs | 0x3D0000 | 0x6000 |  |
+ | coredump | data | coredump | 0x3F0000 | 0x10000 |  |

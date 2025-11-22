@@ -1,0 +1,22 @@
+# Flutter Streams.md
+
+---
+aliases: []
+---
+# Flutter Streams
+Date: 2022-08-16
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [Creating streams in Dart](https://dart.dev/articles/libraries/creating-streams)
+- [Flutter Dart Stream Basic Example - Fetch Crypto Currency API Data](https://protocoderspoint.com/flutter-dart-stream-basic-example-fetch-crypto-currency-api-data/) 
+- [(3157) Simple Beginners Guide to Streams | Flutter and Dart Stream Basics - YouTube](https://www.youtube.com/watch?v=53jIxLiCv2E)
+-[Flutter Stream Basics for Beginners](https://medium.com/flutter-community/flutter-stream-basics-for-beginners-eda23e44e32f)
+- 
+### Notes
+-  [dart - call method in one stateful widget from another stateful widget - Flutter](https://stackoverflow.com/questions/51029655/call-method-in-one-stateful-widget-from-another-stateful-widget-flutter)
+- [Flutter: call a method from another class / setState a page from outside that class with StreamController](https://haoc8.blogspot.com/2020/10/flutter-call-method-from-another-class-setState-from-outside.html)

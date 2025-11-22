@@ -1,0 +1,35 @@
+---
+bookId: "6713"
+title: "The Joy Of X: A Guided Tour of Math, from One to Infinity"
+author: Steven H. Strogatz
+asin: B006R8PL7G
+lastAnnotatedDate: 2020-08-11
+highlightsCount: 7
+reference: https://www.amazon.com/dp/B006R8PL7G
+kindle_link: kindle://book?action=open&asin=B006R8PL7G
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81CxliKkb+L._SY160.jpg)
+## Highlights
+When we divide an hour into 60 minutes, or a minute into 60 seconds, or a full circle into 360 degrees, we’re channeling the sages of ancient Babylon. — location: [430](kindle://book?action=open&asin=B006R8PL7G&location=430) ^ref-41520
+
+---
+complex numbers. Here “complex” doesn’t mean “complicated”; it means that two types of numbers, real and imaginary, have bonded together to form a complex, a hybrid number like 2 + 3i. — location: [574](kindle://book?action=open&asin=B006R8PL7G&location=574) ^ref-28259
+
+---
+roots of any polynomial are always complex numbers. — location: [579](kindle://book?action=open&asin=B006R8PL7G&location=579) ^ref-37238
+
+---
+multiplying by i produces a rotation counterclockwise by a quarter turn. — location: [583](kindle://book?action=open&asin=B006R8PL7G&location=583) ^ref-63630
+
+---
+If we multiply a positive number by i², the corresponding arrow rotates 180 degrees, flipping from east to west, because the two 90-degree rotations (one for each factor of i) combine to make a 180-degree rotation.     But multiplying by –1 produces the very same 180-degree flip. That’s the sense in which i² = –1. — location: [590](kindle://book?action=open&asin=B006R8PL7G&location=590) ^ref-10670
+
+---
+This underscores the earlier impression that geodesics, like great circles, are the natural generalization of straight lines. — location: [2156](kindle://book?action=open&asin=B006R8PL7G&location=2156) ^ref-59182
+
+---
+Einstein showed that light beams follow geodesics as they sail through the universe. — location: [2158](kindle://book?action=open&asin=B006R8PL7G&location=2158) ^ref-24250
+
+---

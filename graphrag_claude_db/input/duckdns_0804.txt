@@ -1,0 +1,15 @@
+---
+aliases: []
+tags: []
+---
+# duckdns
+Date: 2023-09-24
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- [Instructions](https://help.konnected.io/support/solutions/articles/32000023964-set-up-hass-io-with-secure-remote-access-using-duckdns-and-nginx-proxy)
+- Alternatively, [use dehydrated](https://www.splitbrain.org/blog/2017-08/10-homeassistant_duckdns_letsencrypt)

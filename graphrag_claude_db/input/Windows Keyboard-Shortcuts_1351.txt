@@ -1,0 +1,43 @@
+---
+aliases:
+tags:
+created: 2022-06-24 20:55
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Modifier key: Right Ctrl
+
+Neither this key nor any key pressed in combination with it will be sent to the remote computer.
+
+Right Ctrl +
+
+Activates...
+
+Q: Disconnect
+
+F: Toggle full-screen
+
+Backspace and Delete: Press "Ctrl+Alt+Del"
+
+P: Press "Print Screen"
+
+M: Toggle relative mouse mode
+
+U: Upload file
+
+D: Download file
+
+O: Show options
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

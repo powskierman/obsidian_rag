@@ -1,0 +1,25 @@
+# ESP32 Projects.md
+
+---
+aliases:
+tags:
+created: 2022-06-28 07:42
+ContentType: Reference
+Backlink: "[[Projects MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- 
+- 
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

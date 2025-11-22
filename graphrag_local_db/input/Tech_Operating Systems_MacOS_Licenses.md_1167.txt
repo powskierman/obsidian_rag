@@ -1,0 +1,23 @@
+# Licenses.md
+
+---
+aliases: 
+tags:
+  - license
+---
+# Licenses
+Date: 2024-01-11
+
+### Backlink
+[[MacOS MOC]]
+
+### Reference
+-  
+### Notes
+- [[4K Downloader License]]
+- [[Bartender 4]]
+- [[Pathfinder-License]]
+- [[Roboform License]]
+- [[Typora]]
+- [[Vivid License]]
+- [[DriveDX]]

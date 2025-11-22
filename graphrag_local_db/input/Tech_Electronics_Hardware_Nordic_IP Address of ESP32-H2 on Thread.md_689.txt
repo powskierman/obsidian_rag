@@ -1,0 +1,27 @@
+# IP Address of ESP32-H2 on Thread.md
+
+---
+aliases: 
+tags:
+  - thread
+  - esp32-h2
+  - ipaddr
+---
+# IP Address of ESP32-H2 on Thread
+Date: 2024-08-17
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  The output from the ipaddr command in the OpenThread CLI shows four different IPv6 addresses for a Thread device. Each address serves a specific purpose within the Thread network. Here's a breakdown of each address:
+fdfe:fb46:ee79:4084:0:ff:fe00:9c00
+Mesh-Local EID (ML-EID): This address identifies a unique interface within a Thread network partition. It is used for communication within the Thread network and is independent of the network topology.
+fda9:5c61:f8d9:1:710d:15d8:4c02:7909
+Mesh-Local EID (ML-EID): Similar to the first address, this is another ML-EID used for communication within the same Thread network partition.
+fdfe:fb46:ee79:4084:930c:898b:28b5:1143
+Routing Locator (RLOC): This address identifies a device's location within the network topology. It is composed of the mesh-local prefix and an Interface Identifier (IID) that includes the RLOC16, which encodes a Router ID and a Child ID.
+fe80:0:0:0:cc7d:f3cb:b146:209a
+Link-Local Address (LLA): This address is used for communication within a single radio transmission range. It is typically used for neighbor discovery and other local communication purposes.

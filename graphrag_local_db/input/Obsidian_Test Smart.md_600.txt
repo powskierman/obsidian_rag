@@ -1,0 +1,32 @@
+# Test Smart.md
+
+---
+aliases: []
+tags: []
+created: 2025-02-13 11:50
+---
+
+# Test Smart
+
+## Main Idea
+[Concise statement of the main concept]
+
+## Notes
+---
+aliases: []
+tags: []
+created: <% tp.date.now("YYYY-MM-DD HH:mm") %>
+---
+
+# <% tp.file.title %>
+
+## Main Idea
+[Concise statement of the main concept]
+
+## Notes
+<% tp.system.clipboard() %>
+
+## Key Concepts
+
+
+## Key Concepts

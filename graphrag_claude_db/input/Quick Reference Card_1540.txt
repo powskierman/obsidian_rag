@@ -1,0 +1,307 @@
+---
+aliases:
+  - Sequential Thinking Cheat Sheet
+  - ST Quick Reference
+tags:
+  - AI
+  - sequential-thinking
+  - reference
+  - cheatsheet
+created: 2025-10-17
+ContentType: Quick Reference
+Backlink: "[[Sequential Thinking MoC]]"
+---
+
+### Main Idea
+
+One-page quick reference for Sequential Thinking - all the essentials at a glance.
+
+### References
+
+- [[Sequential Thinking MoC]]
+- [[Parameters Reference]]
+- [[Usage Patterns]]
+
+### Notes
+
+## 🚀 Quick Start
+
+```
+Simply ask:
+"Use sequential thinking to debug this issue"
+"Please think through this step by step"
+"Can you use sequential thinking for this design problem?"
+```
+
+---
+
+## 📊 When to Use
+
+| ✅ USE FOR | ❌ DON'T USE FOR |
+|-----------|-----------------|
+| Complex multi-step problems | Simple questions |
+| Unclear problem scope | Casual conversation |
+| Planning with uncertainty | Quick lookups |
+| Need to revise approach | Speed is critical |
+| Debugging complex issues | Trivial calculations |
+
+---
+
+## 🔧 Required Parameters
+
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `thought` | string | Current thinking step | "Analyzing the problem..." |
+| `thought_number` | integer | Current position (1, 2, 3...) | `3` |
+| `total_thoughts` | integer | Estimated total (adjustable!) | `7` |
+| `next_thought_needed` | boolean | Continue or finish? | `true` / `false` |
+
+---
+
+## ⚙️ Optional Parameters
+
+| Parameter | Type | When to Use |
+|-----------|------|-------------|
+| `is_revision` | boolean | Correcting earlier thought |
+| `revises_thought` | integer | Which thought to revise |
+| `branch_from_thought` | integer | Exploring alternative path |
+| `branch_id` | string | Naming the branch |
+| `needs_more_thoughts` | boolean | Need to extend sequence |
+
+---
+
+## 📋 Common Patterns
+
+### Linear Flow
+```
+T1 → T2 → T3 → T4 → T5 ✓
+```
+
+### With Revision
+```
+T1 → T2 → T3
+         ↓ (revise T2)
+     T4 → T5 ✓
+```
+
+### With Branching
+```
+     → Branch A → T3
+T1 → T2
+     → Branch B → T4
+              ↓
+             T5 ✓ (choose B)
+```
+
+### Dynamic Adjustment
+```
+T1 [est: 5] → T2 [adj: 7] → T3 [adj: 6] → ... → T6 ✓
+```
+
+---
+
+## 🎯 Decision Tree: Should I Use Sequential Thinking?
+
+```
+Is the problem simple/direct? → YES → Use regular conversation
+                              ↓ NO
+Can I answer in 1-2 steps? → YES → Use regular conversation
+                           ↓ NO
+Is speed more important? → YES → Use regular conversation
+                        ↓ NO
+Is the solution path unclear? → YES → ✅ USE SEQUENTIAL THINKING
+Multiple approaches to compare? → YES → ✅ USE SEQUENTIAL THINKING
+Need to revise as I go? → YES → ✅ USE SEQUENTIAL THINKING
+Complex verification needed? → YES → ✅ USE SEQUENTIAL THINKING
+```
+
+---
+
+## 🔄 Typical Flow Template
+
+```
+Thought 1: Understand the problem
+- What are we solving?
+- What are the constraints?
+- Initial complexity estimate
+
+Thought 2-4: Explore and analyze
+- Consider approaches
+- Identify issues
+- Revise if needed
+
+Thought N-1: Generate solution
+- Propose complete solution
+- Address all requirements
+
+Thought N: Verify and conclude
+- Verify against constraints
+- Confirm completeness
+- Set next_thought_needed = false
+```
+
+---
+
+## ✅ Quality Checklist
+
+Before setting `next_thought_needed = false`:
+
+- [ ] Problem fully understood
+- [ ] All constraints identified
+- [ ] Solution addresses root cause
+- [ ] Solution verified
+- [ ] Edge cases considered
+- [ ] Alternatives evaluated
+- [ ] No outstanding doubts
+
+---
+
+## 🚨 Common Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Finishing too early | Add verification step |
+| Not revising when needed | Use `is_revision = true` |
+| Too many branches | Limit to 2-3, synthesize |
+| Unclear revisions | State what changed and why |
+| Scope creep | Stay focused on original problem |
+
+---
+
+## 💡 Pro Tips
+
+1. **Start with 5-7 thoughts** - Adjust as needed
+2. **Batch related analyses** - Combine when clear
+3. **Verify before finishing** - Always double-check
+4. **Use clear branch names** - "async_approach" not "option2"
+5. **Skip obvious steps** - Don't narrate everything
+6. **Express uncertainty** - "I'm not certain..." is OK
+7. **Filter irrelevant info** - Explicitly note what you're ignoring
+
+---
+
+## 📐 Best Practices
+
+### Starting
+- Estimate conservatively (5-7 thoughts)
+- State all constraints upfront
+- Plan your approach
+
+### During
+- Adjust `total_thoughts` dynamically
+- Revise when assumptions prove wrong
+- Branch for alternatives
+- Add checkpoints every 5 thoughts (if long)
+
+### Finishing
+- Verify solution against requirements
+- Check edge cases
+- Only finish when truly satisfied
+
+---
+
+## 🔗 Complementary Tools
+
+```
+Web Search → Gather info
+     ↓
+Sequential Thinking → Reason about it
+     ↓
+Analysis Tool (REPL) → Test with code
+     ↓
+Regular Conversation → Communicate results
+```
+
+---
+
+## 📊 Parameter Examples
+
+### Basic Thought
+```json
+{
+  "thought_number": 3,
+  "total_thoughts": 7,
+  "next_thought_needed": true,
+  "thought": "Analyzing the database performance..."
+}
+```
+
+### Revision
+```json
+{
+  "thought_number": 5,
+  "total_thoughts": 7,
+  "is_revision": true,
+  "revises_thought": 3,
+  "next_thought_needed": true,
+  "thought": "Actually, my analysis in T3 was wrong because..."
+}
+```
+
+### Branching
+```json
+{
+  "thought_number": 4,
+  "total_thoughts": 8,
+  "branch_from_thought": 2,
+  "branch_id": "async_approach",
+  "next_thought_needed": true,
+  "thought": "Exploring asynchronous alternative..."
+}
+```
+
+### Final Thought
+```json
+{
+  "thought_number": 7,
+  "total_thoughts": 7,
+  "next_thought_needed": false,
+  "thought": "Solution verified: implement caching layer with 1hr TTL..."
+}
+```
+
+---
+
+## 🆘 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Tool not found | Check docker-gateway is running |
+| Thoughts disconnected | Reference previous thoughts explicitly |
+| Too many thoughts | Check for scope creep, batch analyses |
+| Unsure when to stop | Use quality checklist above |
+| Branches too complex | Limit to 2-3 branches max |
+
+---
+
+## 📏 Typical Durations
+
+| Complexity | Thoughts | Time |
+|-----------|----------|------|
+| Simple | 3-5 | 15-30 sec |
+| Medium | 5-10 | 30-60 sec |
+| Complex | 10-15 | 60-90 sec |
+| Very Complex | 15-20 | 90-120 sec |
+
+---
+
+## 🎓 Learning Path
+
+1. Read [[Core Concepts]]
+2. Review [[Usage Patterns]]
+3. Study [[Examples]]
+4. Try on your own problems
+5. Explore [[Advanced Techniques]]
+
+---
+
+### Related Notes
+
+- [[Sequential Thinking MoC]] - Full navigation
+- [[Parameters Reference]] - Complete technical docs
+- [[Examples]] - Real-world usage
+- [[Limitations and Troubleshooting]] - What to avoid
+
+### Quick Access
+
+Print this page or bookmark for quick reference while working!

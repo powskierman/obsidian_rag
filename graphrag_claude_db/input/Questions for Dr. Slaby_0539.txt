@@ -1,0 +1,51 @@
+---
+aliases:
+tags:
+  - lymphoma
+  - slaby
+  - questions
+created: 2025-01-14 09:47
+ContentType:
+Backlink: "[[Lymphoma MoC]]"
+---
+### Main Idea
+- 
+### References
+- [[Agenda Meeting with Dr. Slaby]]
+### Notes
+
+#### Understanding my Relapse:
+1. “Why did I relapse at 6 months?” (CAR-T exhaustion? Antigen loss? Disease characteristics?)
+2. “Is this considered early or late relapse post-CAR-T?”
+3. “Does single-site involvement change the approach?”
+
+#### First Priority - Treatment Plan:
+1.	“What treatment do you recommend and why?”
+	- What’s the most effective treatment with acceptable quality of life at my age?”
+	- “How do we balance efficacy with toxicity?”
+		1. [[media/Bispecific Antibodies Success Rate#^5c4595|Reducing Toxicity]]
+2.	“What are my other realistic options?” (bispecifics, clinical trials, chemo)
+	2. [[4th PET Scan - Treatment Options|Treatment Options]]
+	3. Are there MYC-targeted therapies in trials?
+1. [[Bispecific Antibody]] therapy eligibility and timing.
+2. “What’s the timeline - when should we start?”
+3. “Given my stable LDH, what is optimal timing?”
+4. molecular profiling (CD19, CD20, CD21, [[CD22 CAR-T|CD22]] status) that could guide next-line therapy choices.
+#### Bispecific Antibodies Questions:
+1. “If bispecific antibody - which one and for how long?”
+	1. [[media/Bispecific Antibodies Success Rate#^5f6df0|Glofitamab Efficacy]]
+	2. The STARGLO phase III trial demonstrated a clear benefit for [[Glofitamab + GemOx]] in transplant-ineligible patients with relapsed/refractory DLBCL and HGBCL, with a complete response rate of 58.5% versus 25.3% for R-GemOx, and a 41% reduction in risk of death (hazard ratio 0.59, p=0.011). Median overall survival was extended to 25.5 months compared to 12.9 months with standard therapy, and progression-free survival was significantly longer.  
+	3. Glofitamab in combination with GemOx is available in Alberta for eligible adult patients with relapsed or refractory diffuse large B-cell lymphoma (DLBCL) who are not candidates for autologous stem cell transplant. Health Canada granted market authorization for this regimen in August 2025 
+2. “Are there age-related considerations for bispecific antibodies?”
+3. “Are there relevant clinical trials in Alberta or Canada?”
+4. Bloodwork- IGG
+5. IVIG therapy?
+6. [[Relapse Detection]]
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

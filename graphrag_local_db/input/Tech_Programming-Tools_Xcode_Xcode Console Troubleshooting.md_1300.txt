@@ -1,0 +1,20 @@
+# Xcode Console Troubleshooting.md
+
+---
+aliases: 
+tags:
+  - xcode
+  - troubleshooting
+  - console
+---
+# Xcode Console Troubleshooting
+Date: 2024-02-17
+
+### Backlink
+[[Xcode Console MoC]]
+
+### Reference
+-  
+### Notes
+-  The console may be hidden. Press Show the console button (1.) present in right corner (blue coloured when console is open).
+![[console.png]]

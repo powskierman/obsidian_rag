@@ -1,0 +1,24 @@
+---
+aliases:
+tags:
+  - tech
+created: 2022-06-26 10:15
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<<[vs-code_cheat-sheet_mac.pdf](vs-code_cheat-sheet_mac.pdf)>>
+
+![VISUAL STUDIO CODE Cheat Sheet presented by Tower --- the best Git client for Mac and Windows GENERAL Snow *lette "_dit shortcuts SMART CODE FEAWRES Trigw hints Go to definition sym bm at Fm 1st. 2nd or 3rd editor 0m editor editM FILE NAVIGATION QL,u TOWER S Bindoa•, 30•day trial milable at ---git•to ræ SELECTING NAVIGATING COOE line Add Add at line Undo opmtion Skip "rd Goto Go to rocus EDITOR MANAGEMENT edit" in editor vou Fin' loots ANO rERMlNAL edition EDITING CODE Copy up/dm Delete Win kith T%gle N • win VIEW Toggle sift Show,'tocus Show debus Open ups with terminal ](VS-Code-Cheat-Sheet-image1.png){width="6.197916666666667in" height="8.760416666666666in"}![VISUAL STUDIO CODE Cheat Sheet presented by Tower --- the best Cit client for Mac and Windows EDITOR SPLITS You can split editors to achieve just about any layout you Kant. The View Editor Layout menu holds some presets like three columns or a two---by-two grid. There are commands for splitting the current editor in any direction. and dragging-and-dropping the tab Of an open file also lets you create a split in any direction. In addition, here are some ways to manage the editor layout: x 2. etc. Wid bring up additional editors. or focus that editorifitsalreadyopened. x -clicking a file in the Explorer in the side bar Will open the file in a second editor. in the Quick Open list opens the file in a new editor. TERMINAL The panel at the bottom of the VS Code interface houses an integrated terminal * J toggles the panel, while • focuses and then toggles the terminal. - O • opens a new terminal. You can shift between open terminals using the dropdown in the upper-right corner of the panel. The terminal can be split. and binding a keyboard shortcut to the command Mew: Toggle Maximized Panel" allows you to temporarily maximize it. There are also commands available to "Run Selected Text in Active Terminal" and "Run Active File in Active Terminal' KEYBOARD SHORTCUT PREFERENCES Open the keyboard shortcut preferenceswith the shortcut X X S Here, you can search for a command like •add cursor below", but you can also search for a key binding. For example. searching for •ctrl shift cmd right" shcm•s the command bound to that shortcut. The preferences show the keyboard shortcuts "th the current keyboard layout. If you Switch your keyboard layout. the shortcuts displayed update accordingly. You can fitter the shortcuts to display only bindings added by the user Or default bindings by typing or in the search bar. TOWER The Git client fM Windw 30•day ffial m nable at macOS edition ](VS-Code-Cheat-Sheet-image2.png){width="6.197916666666667in" height="8.760416666666666in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,42 @@
+# Solar-power.md
+
+---
+aliases:
+tags:
+  - 383
+created: 2022-01-01 13:42
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  [Tutorial](https://randomnerdtutorials.com/power-esp32-esp8266-solar-panels-battery-level-monitoring/)
+
+![POWER REGULATORS LiPo POWER REGULATION u2 XC6203P332PR.G C19 .3V Iu vcc GND GND Cll o.xu vcc GND u3 HX400a t'0UT GND CC C12 ](Solar-power-image1.png){width="5.0in" height="4.854166666666667in"}
+
+
+
+
+
+
+
+Andreas Spiess video #383 on solar power:
+
+![383 Cheap and simple Solar Power for our small Projects (ESP32, ESP8266 , Arduino) | 0k B+ R5 工 S 山 990 dl DWO IA C2 O,lv R6 5 1 8 4 3 C3 1 2 3 R3 O,lp 2k Fs8205A ifthe battery voltage is still ok. 口 even ](Solar-power-image2.jpeg){width="5.0in" height="2.4583333333333335in"}
+
+![](Solar-power-image3.png){width="0.11458333333333333in" height="0.11458333333333333in"}
+
+
+
+1.  [Easy article on solar power](https://randomnerdtutorials.com/power-esp32-esp8266-solar-panels-battery-level-monitoring/)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

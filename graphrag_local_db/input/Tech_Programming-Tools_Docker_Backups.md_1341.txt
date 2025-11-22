@@ -1,0 +1,52 @@
+# Backups.md
+
+---
+aliases:
+tags:
+created: 2022-07-07 15:27
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Test rsync over ssh
+
+    1.  rsync -a IOTstack/ admin@192.168.0.20:/share/Docs/Backups/
+
+```{=html}
+<!-- -->
+```
+1.  ssh-keygen generates keys.
+
+    1.  ssh-keygen
+
+    2.  When it asks you to enter the passphrase press enter key, do not enter password
+
+```{=html}
+<!-- -->
+```
+1.  ssh-copy-id copies public key to remote host
+
+    1.  ssh-copy-id -i ~/.ssh/id_rsa.pub 192.168.200.10.
+
+```{=html}
+<!-- -->
+```
+1.  <https://www.thegeekstuff.com/2011/07/rsync-over-ssh-without-password/>
+
+2.  rsync -a IOTstack/ admin@192.168.0.20:/share/Docs/Backups/
+
+3.  Final crontab script
+
+    1.  0 1 * * * rsync -av -e ssh /home/pi/IOTstack/ mlapoint99@192.168.0.20:/share/Docs/Backups/ --no-perms >/dev/null 2>&1
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

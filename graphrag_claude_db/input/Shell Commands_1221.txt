@@ -1,0 +1,19 @@
+---
+aliases: 
+tags:
+  - linux
+  - macos
+  - shell
+---
+# Shell Commands
+Date: 2023-09-16
+
+### Backlink
+[[Linux MOC]]
+[[MacOS MOC]]
+
+### Reference
+-  
+### Notes
+- Display the the environment variables: 
+	- `printenv`

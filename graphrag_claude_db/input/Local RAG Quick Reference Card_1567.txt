@@ -1,0 +1,64 @@
+---
+aliases:
+tags:
+  - RAG
+  - obsidian
+  - ollama
+created: 2025-10-20 12:33
+ContentType:
+Backlink: "[[rag"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- ## 🎯 **Quick Reference Card**
+
+### **Daily Commands**
+
+bash
+
+```bash
+./start_obsidian_rag.sh      # Start
+./check_status.sh             # Check
+./stop_obsidian_rag.sh        # Stop
+```
+
+### **Logs**
+
+bash
+
+```bash
+tail -f embedding_service.log  # Search engine
+tail -f streamlit.log          # Web UI
+tail -f scanner.log            # File watcher
+```
+
+### **Maintenance**
+
+bash
+
+```bash
+./backup.sh                    # Backup everything
+./test.sh                      # Run system tests
+./clean.sh                     # Clean logs/cache
+```
+
+### **Memory Management**
+
+bash
+
+~~~bash
+python rag_with_memory.py init          # Initialize
+python rag_with_memory.py interactive   # Interactive Q&A
+```
+
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

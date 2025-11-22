@@ -1,0 +1,46 @@
+# Xcode -Change build configuration.md
+
+---
+aliases: 
+tags:
+  - xcode
+  - build
+  - release
+  - debug
+---
+# Xcode -Change build configuration
+Date: 2023-11-10
+
+### Backlink
+[[Xcode MOC]]
+
+### Reference
+-  
+### Notes
+-  To configure your Xcode project to build for release, follow these steps:
+- Open Your Xcode Project:
+	- Launch Xcode and open your project file (.xcodeproj or .xcworkspace).
+- Select the Appropriate Scheme:
+		- From menu bar: Product / Scheme / Edit Scheme..
+			- Left pane select Run
+			- Build Configuration:  Debug or release
+		- In the top bar next to the play and stop buttons, you’ll find the scheme dropdown. Click on it and make sure you have selected the correct scheme for the app or framework you want to build.
+	- or, Edit the Scheme for Release:
+	- Click on the scheme dropdown again and select "Edit Scheme..." or use the menu bar: Product > Scheme > Edit Scheme.
+	- In the scheme editor, select the "Run" action on the left panel.
+		- Change the "Build Configuration" to "Release" for the Run action.
+		- Repeat this process for other actions like "Test", "Profile", "Analyze", and "Archive" if you want all of them to use the "Release" configuration.
+		- Click "Close" to save the scheme settings.
+- Build for Release:
+		- With the scheme configuration set to "Release", you can now build your project. Press Command + B or select Product > Build from the menu bar.
+- Archive for Distribution:
+	- To create a release build for distribution (such as submitting to the App Store or for Ad Hoc distribution), you’ll want to archive your project.
+		- Select Product > Archive. This will build your project using the Release configuration and place it in the Archives organizer.
+		- Validate and Export the Archive (if needed):
+		- Once the archive is complete, you can validate or export your app for distribution through the Organizer window in Xcode.
+			- Select the archive, then click "Validate App" or "Distribute App" and follow the prompts.
+- Check Build Settings:
+	- Optionally, you can review the build settings for your target to ensure that they are configured correctly for a Release build.
+		- Select your project in the Project Navigator, choose your target, and look at the "Build Settings" tab.
+		- Ensure settings like "Optimization Level" are set appropriately for Release (usually you'll want faster, smaller, or faster and smaller optimizations).
+- Remember, the "Release" configuration typically includes optimizations that make debugging more difficult, so it’s best used when you’re ready to distribute the app, not while you’re actively developing and debugging it. Always thoroughly test the release build before distribution.

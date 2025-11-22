@@ -1,0 +1,188 @@
+# Sequential Thinking MoC.md
+
+---
+aliases: 
+tags:
+  - MoC
+  - AI
+  - sequential-thinking
+created: 2025-10-17 10:45
+Backlink: "[[Sequential Thinking Tool|Sequential Thinking Tool]]"
+---
+## Links
+
+### Core Documentation
+- [[Sequential Thinking Tool|Sequential Thinking Tool]] - Main hub and quick start
+- [[Core Concepts]] - Theory and mental model
+- [[Parameters Reference]] - Technical parameter documentation
+- [[Usage Patterns]] - Practical application patterns
+
+### Learning Resources
+- [[Examples]] - Real-world usage examples
+- [[Quick Reference Card]] - One-page cheat sheet
+- [[Requesting Guide]] - How to ask for sequential thinking
+
+### Advanced
+- [[Advanced Techniques]] - Power user techniques
+- [[Limitations and Troubleshooting]] - Constraints and problem-solving
+
+## Related MoCs
+- [[AI Tools MoC|AI Tools MoC]]
+
+## External Resources
+- [Model Context Protocol Documentation](https://modelcontextprotocol.io)
+- [Chain of Thought Research](https://arxiv.org/abs/2201.11903)
+
+## Notes
+
+The Sequential Thinking tool enables **dynamic, reflective problem-solving** through structured chain-of-thought reasoning. Unlike regular conversation, it makes Claude's thinking process transparent and allows for non-linear reasoning with revision and branching capabilities.
+
+### Navigation Guide
+
+**Start Here:**
+1. [[Sequential Thinking Tool|Sequential Thinking Tool]] - Overview and quick start
+2. [[Core Concepts]] - Understand how it works
+3. [[Examples]] - See it in action
+
+**For Reference:**
+- [[Parameters Reference]] - When you need parameter details
+- [[Quick Reference Card]] - Quick lookup while working
+- [[Usage Patterns]] - Pattern matching for your use case
+
+**For Deep Work:**
+- [[Advanced Techniques]] - Complex scenarios
+- [[Limitations and Troubleshooting]] - When things go wrong
+
+### Key Concepts at a Glance
+
+- **Adaptive Planning**: Adjust thought count as complexity emerges
+- **Revision Capability**: Question and revise earlier thinking
+- **Branching**: Explore alternative approaches in parallel
+- **Hypothesis Testing**: Generate and verify solutions explicitly
+- **Transparency**: Every reasoning step is visible
+
+### When to Use
+
+✅ Complex multi-step problems
+✅ Problems with unclear scope  
+✅ Planning and design requiring iteration
+✅ Analysis requiring course correction
+✅ Filtering complex information
+
+❌ Simple questions
+❌ Casual conversation
+❌ Quick factual lookups
+---
+aliases:
+  - Sequential Thinking Hub
+  - ST MoC
+tags:
+  - MoC
+  - AI
+  - tools
+  - sequential-thinking
+created: 2025-10-17
+Backlink: "[[AI Tools MoC]]"
+---
+
+## 🎯 Overview
+
+The **Sequential Thinking Tool** is an advanced MCP tool that enables dynamic, reflective problem-solving through a structured chain-of-thought process. It allows Claude to explicitly work through complex problems step-by-step, with the ability to revise, branch, and adapt its thinking as understanding deepens.
+
+**Key Insight**: This tool makes Claude's thinking process transparent and allows for non-linear reasoning - it can question earlier decisions, explore alternative approaches, and adjust its plan as it goes.
+
+---
+
+## 📚 Navigation
+
+### Core Documentation
+
+- **[[Core Concepts]]** - Understanding the theory and mental model
+- **[[Parameters Reference]]** - Technical reference for all parameters
+- **[[Usage Patterns]]** - Practical patterns and best practices
+
+### Learning & Reference
+
+- **[[Examples]]** - Real-world examples by use case
+- **[[Advanced Techniques]]** - Power user strategies
+- **[[Quick Reference Card]]** - One-page cheat sheet
+
+### Support
+
+- **[[Limitations and Troubleshooting]]** - Known constraints and solutions
+- **[[Requesting Guide]]** - How to ask for sequential thinking
+
+---
+
+## 🚀 Quick Start
+
+### When to Use
+
+✅ **Use for:**
+- Complex multi-step problems
+- Planning and design with uncertainty
+- Analysis requiring course correction
+- Problems where scope is unclear
+- Debugging complex issues
+
+❌ **Don't use for:**
+- Simple questions with direct answers
+- Casual conversation
+- Quick factual lookups
+- When speed > thoroughness
+
+### How to Request
+
+Simply ask:
+```
+"Can you use sequential thinking to debug why my API is slow?"
+"Please use sequential thinking to design an algorithm for this problem."
+"I need you to think through this complex decision step by step."
+```
+
+---
+
+## 📊 Quick Reference
+
+| Aspect | Sequential Thinking | Regular Response |
+|--------|---------------------|------------------|
+| **Visibility** | Every step visible | Thinking is hidden |
+| **Revision** | Can revise any thought | Hard to backtrack |
+| **Planning** | Adaptive, adjusts as needed | Fixed approach |
+| **Branching** | Can explore alternatives | Linear only |
+| **Complexity** | Excels at complex problems | Best for simple questions |
+
+---
+
+## 🔗 Related Tools
+
+- Analysis Tool (REPL) - For code execution
+- Web Search - For gathering information
+- Regular Conversation - For simple queries
+
+**Complementary Usage**: Often best used together - search for info, sequential thinking to reason, REPL to test, conversation to communicate.
+
+---
+
+## 🔧 Technical Details
+
+- **Tool Name**: `sequentialthinking`
+- **Source**: docker-gateway MCP server
+- **Availability**: Apple Container CLI or Docker Desktop
+
+---
+
+## Links
+
+- [[Sequential Thinking Tool]] (original comprehensive guide)
+- [[AI Tools MoC]]
+- [[Tech/AI/AI Tools MoC|AI Tools MoC]]
+
+## External Resources
+
+- [Model Context Protocol](https://modelcontextprotocol.io)
+- [Chain of Thought Research](https://en.wikipedia.org/wiki/Chain-of-thought_prompting)
+
+## Notes
+
+This MoC serves as the central hub for all Sequential Thinking documentation. Each linked note focuses on a specific aspect, making it easier to find exactly what you need.

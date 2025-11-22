@@ -1,0 +1,37 @@
+---
+aliases:
+tags:
+created: 2025-08-23 09:47
+Backlink:
+---
+### Main Idea
+- 
+### References
+- [[../../T12 Compression Fracture|T12 Compression Fracture]]
+- 
+### Notes
+- The twelfth thoracic vertebra (or the T12 vertebra) is the largest and most inferior of the thoracic vertebrae. T12 bears the most weight of any thoracic vertebra, making it the strongest thoracic vertebra, but also the most susceptible to stress-related injuries. In many ways, the T12 is a hybrid vertebra with the anatomical features of both a thoracic and lumbar vertebra.
+
+The T12 vertebra is located in the spinal column of the thoracic (or trunk) region inferior to the T11 vertebra and superior to the first lumbar (L1) vertebra. Its structure is similar to the other thoracic vertebrae, with a large column of bone known as the centrum (or vertebral body) forming its anterior structure and a thin ring of bone known as the vertebral arch forming its posterior structure. The vertebral body is larger and wider in T12 than in the other thoracic vertebrae and more closely resembles the vertebral bodies of the lumbar vertebrae. It is flat on top and bottom, convex anteriorly, and slightly concave posteriorly. Most of the osseous tissue of T12 is contained within the centrum, which serves to support the body's weight. A pair of intervertebral disks made of tough fibrocartilage connects the vertebral body of T12 to those of its neighboring vertebrae. Each rubbery intervertebral disk provides a slightly flexible connection between the vertebral bodies and acts as a shock absorber to prevent collisions between the vertebrae.
+
+The vertebral arch of T12 is thicker and stronger than its counterparts in the other thoracic vertebrae and in many ways resembles the vertebral arches of the lumbar vertebrae. A pair of strong pedicles extends posteriorly from the vertebral body to begin the arch. Each pedicle contains a smooth, oval-shaped articular facet that forms a joint with the 12th pair of ribs.
+
+Posterior to the pedicles are the transverse processes that extend laterally from the vertebral arch. Unlike the transverse processes of the superior thoracic vertebrae, those of T12 are short; they do not form joints with the ribs; and they end in three tiny processes --- the superior, lateral and inferior tubercles. Many muscles that control the flexion and extension of the back and the flexion of the thighs at the hip are connected to the transverse processes.
+
+The thin laminae continue the vertebral arch posteriorly from the transverse processes until they unite at the body's midline to form the spinous process. The spinous process extends posteriorly toward the surface of the back and can be felt through the skin. It is a thin rectangle of bone that provides muscle attachment points for the muscles that stabilize, flex, extend, and rotate the spine. The spinous process is considerably shorter, straighter, and thicker in T12 than it is in the superior thoracic vertebrae, closely resembling the spinous process of the lumbar vertebrae below.
+
+Inside the vertebral arch is a hollow vertebral foramen that contains the spinal cord and spinal nerves. The strong bony tissue of the vertebral arch protects the delicate nervous tissue as it passes through the vertebral canal.
+
+Extending vertically from the vertebral arch are two pairs of articular processes that form joints with the neighboring vertebra and help to stabilize the spine.
+
+The superior articular processes extend superiorly to meet the inferior articular processes of the T11 vertebra. Each superior articular process resembles those of the thoracic vertebrae, ending in a smooth, convex oval that corresponds with the concave oval of the inferior articular process of T11. The joints formed between T11 and T12 are classified as planar joints, and allow the bones to glide along a plane relative to one another.
+At the bottom of T12, a pair of inferior articular processes descends to meet the superior articular processes of the L1 vertebra. The inferior articular processes resemble those of the lumbar vertebrae, ending in smooth cylinders of bone that are surrounded by cup-like ends of the superior articular processes of L1. The joints formed between T12 and L1 are reinforced planar joints, providing slightly less movement and more stability than the T11-T12 joints.
+Both the superior and inferior articular processes permit the slight flexion, extension and rotation of the spine, while preventing eccentric and potentially damaging movement of the vertebrae relative to each other.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

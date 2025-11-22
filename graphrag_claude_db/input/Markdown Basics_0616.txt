@@ -1,0 +1,76 @@
+---
+aliases:
+tags:
+  - custom
+  - Syntax
+created: 2022-12-26 11:40
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+2. Element	Markdown #Syntax
+	  1. Heading	# H1
+		 	## H2
+		 	### H3
+      2. Bold	**bold text**
+      3. Italic	*italicized text*
+      4. Blockquote	> blockquote
+      5. ==This is highlighted==
+      5. Ordered List
+	      1. First item
+	      2. Second item
+	      3. Third item
+	  1. Unordered List
+		  - First item
+		  - Second item
+		  - Third item
+3. Code	`code`
+4. Horizontal Rule	---
+5. Link	[title](https://www.example.com)
+6. Image	![alt text](image.jpg)
+[Extended Markdown](<[Extended Syntax  Markdown Guide](https://www.markdownguide.org/extended-syntax/)>) 
+#Syntax
+1. Table
+	1. Needs leading and trailing empty lines
+	2. Headers separated by pipes
+	3. Second line needs at least 2 hyphens separated by pipes for each colums
+
+| Syntax | Description |
+| -- | -- |
+| Header | Title |
+| Paragraph | Text |
+
+2. Fenced Code Block	```
+ 	{
+ 	"firstName": "John",
+ 	"lastName": "Smith",
+ 	"age": 25
+ 	}
+ 	```
+3. Footnote	Here's a sentence with a footnote. [^1]
+ 	 
+ 	[^1]: This is the footnote.
+	
+4. Heading ID	
+	1. ### My Great Heading {#custom-id}
+5. Definition List	
+
+term
+: definition
+6. Strikethrough	~~The world is flat.~~
+7. Task List
+	- [ ] Write the press release
+ 	- [ ] Update the website
+ 	- [ ] Contact the media”
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

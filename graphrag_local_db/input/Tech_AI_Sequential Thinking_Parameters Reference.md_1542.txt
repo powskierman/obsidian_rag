@@ -1,0 +1,912 @@
+# Parameters Reference.md
+
+---
+aliases:
+  - Sequential Thinking Parameters
+tags:
+  - AI
+  - sequential-thinking
+  - reference
+  - technical
+created: 2025-10-17 10:55
+ContentType: Technical Reference
+Backlink: "[[Sequential Thinking Tool|Sequential Thinking Tool]]"
+---
+### Main Idea
+Complete technical reference for all Sequential Thinking tool parameters. This is your go-to document when you need to know exactly what each parameter does and how to use it.
+
+### References
+- [[Sequential Thinking Tool|Sequential Thinking Tool]]
+- [[Core Concepts]]
+- [[Usage Patterns]]
+
+### Notes
+
+## Required Parameters
+
+Every Sequential Thinking call must include these four parameters:
+
+### `thought` (string)
+
+**Purpose**: The current thinking step - what you're reasoning about right now.
+
+**Can Include**:
+- Regular analytical steps
+- Revisions of previous thoughts
+- Questions about previous decisions
+- Realizations about needing more analysis
+- Changes in approach
+- Hypothesis generation
+- Hypothesis verification
+- Meta-cognitive observations
+
+**Examples**:
+```
+"Breaking down the problem: We need to optimize database queries 
+that are timing out. Three possible causes: missing indexes, 
+inefficient joins, or N+1 queries."
+
+"Wait - my assumption in thought 3 was incorrect. The bottleneck 
+isn't the query itself but the connection pooling configuration."
+
+"I'm noticing a pattern here that suggests this problem is actually 
+simpler than I first thought. Let me reconsider..."
+
+"Hypothesis: The issue is caused by memory leaks in Service C. 
+Let me test this against the observed symptoms."
+```
+
+**Best Practices**:
+- Be specific and concrete
+- State your reasoning clearly
+- Note when changing direction
+- Admit uncertainty when present
+- Reference previous thoughts when relevant
+
+---
+
+### `thought_number` (integer, minimum: 1)
+
+**Purpose**: Tracks your current position in the reasoning sequence.
+
+**Behavior**:
+- Starts at 1
+- Increments with each thought
+- Can exceed initial `total_thoughts` estimate
+- Provides context for where you are in the process
+
+**Examples**:
+```json
+{"thought_number": 1}   // First thought
+{"thought_number": 5}   // Fifth thought
+{"thought_number": 12}  // Twelfth thought (even if initially estimated 8)
+```
+
+**Important Notes**:
+- Must increment sequentially (1, 2, 3, not 1, 3, 5)
+- Used to reference thoughts in revisions
+- Helps track progress through the problem
+
+---
+
+### `total_thoughts` (integer, minimum: 1)
+
+**Purpose**: Current estimate of total thoughts needed to complete reasoning.
+
+**Key Feature**: **This is DYNAMIC** - adjust it as you learn more about the problem.
+
+**Initial Estimation Guidelines**:
+- Simple problems: 3-5 thoughts
+- Moderate complexity: 5-8 thoughts
+- Complex problems: 8-15 thoughts
+- Very complex: 15+ thoughts
+
+**Adjustment Examples**:
+```
+Start:    total_thoughts = 5   (initial estimate)
+Thought 2: total_thoughts = 8   (realized more complex)
+Thought 5: total_thoughts = 7   (found simpler path)
+Thought 6: total_thoughts = 9   (need more verification)
+Final:    Completed in 9 thoughts ✓
+```
+
+**Common Patterns**:
+```json
+// Increasing complexity
+{"thought_number": 3, "total_thoughts": 7}  // was 5
+{"thought": "This is more complex than expected..."}
+
+// Decreasing complexity
+{"thought_number": 5, "total_thoughts": 6}  // was 8
+{"thought": "Found a shortcut that simplifies this..."}
+
+// Extension at the end
+{"thought_number": 8, "total_thoughts": 10} // was 8
+{"thought": "Need more verification before finalizing..."}
+```
+
+**Best Practices**:
+- Don't be afraid to adjust frequently
+- Increase when discovering complexity
+- Decrease when finding simpler paths
+- Extend when more verification needed
+- Be honest about what you don't know yet
+
+---
+
+### `next_thought_needed` (boolean)
+
+**Purpose**: Indicates whether reasoning should continue.
+
+**Values**:
+- `true`: Continue reasoning, more thoughts needed
+- `false`: Reasoning complete, ready for final answer
+
+**Critical Rule**: Only set to `false` when **truly satisfied** with the solution.
+
+**Good Stopping Criteria**:
+✅ All constraints verified
+✅ Hypothesis tested and confirmed
+✅ Edge cases considered
+✅ Solution is complete and correct
+✅ No outstanding questions or doubts
+✅ Alternative approaches evaluated
+
+**Bad Stopping Criteria**:
+❌ "This seems about right" (not verified)
+❌ "I'm 80% confident" (not certain enough)
+❌ "Probably works" (needs testing)
+❌ "Haven't considered X yet" (incomplete)
+
+**Examples**:
+```json
+// Continue reasoning
+{
+  "thought_number": 5,
+  "total_thoughts": 8,
+  "next_thought_needed": true,
+  "thought": "Now let me verify this hypothesis..."
+}
+
+// Finished reasoning
+{
+  "thought_number": 8,
+  "total_thoughts": 8,
+  "next_thought_needed": false,
+  "thought": "Solution verified against all constraints. Final answer: ..."
+}
+```
+
+---
+
+## Optional Parameters
+
+These parameters enable advanced reasoning patterns:
+
+### `is_revision` (boolean)
+
+**Purpose**: Signals that this thought revises or reconsiders previous thinking.
+
+**When to Use**:
+- Discovered error in earlier reasoning
+- Initial assumption was wrong
+- New information contradicts earlier thoughts
+- Need to correct the reasoning path
+
+**Example**:
+```json
+{
+  "thought_number": 5,
+  "is_revision": true,
+  "revises_thought": 3,
+  "thought": "Actually, my assumption in thought 3 was wrong. 
+             The bottleneck isn't the database but the cache layer."
+}
+```
+
+**Benefits**:
+- Makes corrections explicit
+- Shows self-awareness
+- Improves final answer quality
+- Demonstrates critical thinking
+
+---
+
+### `revises_thought` (integer)
+
+**Purpose**: Specifies which thought number is being reconsidered.
+
+**Requirements**:
+- Only used when `is_revision = true`
+- Must reference a previous thought number
+- Must be less than current `thought_number`
+
+**Example Revision Flow**:
+```json
+// Thought 3: Original
+{
+  "thought_number": 3,
+  "thought": "The issue is caused by database queries"
+}
+
+// Thought 6: Revision
+{
+  "thought_number": 6,
+  "is_revision": true,
+  "revises_thought": 3,
+  "thought": "After checking metrics, thought 3 was incorrect. 
+             The issue is actually the cache layer, not database."
+}
+```
+
+**Multiple Revisions**:
+You can revise the same thought multiple times:
+```json
+// First revision
+{"thought_number": 5, "is_revision": true, "revises_thought": 2}
+
+// Second revision of the same thought
+{"thought_number": 8, "is_revision": true, "revises_thought": 2}
+```
+
+---
+
+### `branch_from_thought` (integer)
+
+**Purpose**: Creates an alternative reasoning path from a previous thought.
+
+**When to Use**:
+- Exploring multiple solution approaches
+- Comparing scenarios (optimistic vs. pessimistic)
+- Evaluating trade-offs
+- Considering different strategies
+
+**Example Branching**:
+```json
+// Thought 2: Branching point
+{
+  "thought_number": 2,
+  "thought": "Two possible approaches identified: sync and async"
+}
+
+// Thought 3: Branch A
+{
+  "thought_number": 3,
+  "branch_from_thought": 2,
+  "branch_id": "sync_approach",
+  "thought": "Exploring synchronous approach: simpler but slower"
+}
+
+// Thought 4: Branch B (from same point)
+{
+  "thought_number": 4,
+  "branch_from_thought": 2,
+  "branch_id": "async_approach",
+  "thought": "Exploring asynchronous approach: complex but faster"
+}
+
+// Thought 5: Compare branches
+{
+  "thought_number": 5,
+  "thought": "Comparing both approaches: async wins for our use case"
+}
+```
+
+**Branching Patterns**:
+```
+        Thought 1: Problem
+              ↓
+        Thought 2: Branch point
+              ↓
+        ┌─────┴─────┐
+        ↓           ↓
+    Branch A    Branch B
+    Thought 3   Thought 4
+        ↓           ↓
+        └─────┬─────┘
+              ↓
+        Thought 5: Comparison
+```
+
+---
+
+### `branch_id` (string)
+
+**Purpose**: Names the current exploration branch for tracking.
+
+**Naming Conventions**:
+- Descriptive: `"async_approach"`, `"optimistic_scenario"`
+- Short: `"plan_a"`, `"option_1"`
+- Meaningful: `"microservices"`, `"monolith"`
+
+**Examples**:
+```json
+{"branch_id": "approach_A"}
+{"branch_id": "worst_case"}
+{"branch_id": "high_performance"}
+{"branch_id": "low_cost"}
+{"branch_id": "hybrid_solution"}
+```
+
+**Use Cases**:
+```json
+// Technical decision
+{
+  "branch_from_thought": 2,
+  "branch_id": "sql_database",
+  "thought": "Exploring SQL database option..."
+}
+
+{
+  "branch_from_thought": 2,
+  "branch_id": "nosql_database",
+  "thought": "Exploring NoSQL database option..."
+}
+
+// Scenario planning
+{
+  "branch_from_thought": 3,
+  "branch_id": "bull_market",
+  "thought": "In a bull market scenario..."
+}
+
+{
+  "branch_from_thought": 3,
+  "branch_id": "bear_market",
+  "thought": "In a bear market scenario..."
+}
+```
+
+---
+
+### `needs_more_thoughts` (boolean)
+
+**Purpose**: Signals that more thoughts are needed despite approaching estimated end.
+
+**When to Use**:
+- Approaching `total_thoughts` but not finished
+- Discovered unexpected complexity
+- Need more verification
+- Want to extend reasoning
+
+**Example**:
+```json
+{
+  "thought_number": 8,
+  "total_thoughts": 8,
+  "needs_more_thoughts": true,
+  "next_thought_needed": true,
+  "thought": "Approaching my initial estimate but realizing I need 
+             more analysis before concluding. Extending to verify 
+             edge cases."
+}
+
+// Next thought
+{
+  "thought_number": 9,
+  "total_thoughts": 11,  // Adjusted upward
+  "next_thought_needed": true,
+  "thought": "Now checking edge case A..."
+}
+```
+
+**Difference from Adjusting total_thoughts**:
+- `needs_more_thoughts`: Signals intent to extend
+- Adjusting `total_thoughts`: Actually extends
+
+Both are typically used together.
+
+---
+
+## Technical Details
+
+### Tool Parameters Schema
+
+```typescript
+interface SequentialThinkingParams {
+  // Required parameters
+  thought: string;              // Current thinking step
+  thought_number: number;       // Position in sequence (min: 1)
+  total_thoughts: number;       // Estimated total (min: 1)
+  next_thought_needed: boolean; // Continue or finish?
+  
+  // Optional parameters for advanced reasoning
+  is_revision?: boolean;        // Revising earlier thought?
+  revises_thought?: number;     // Which thought number?
+  branch_from_thought?: number; // Branching point
+  branch_id?: string;           // Branch identifier
+  needs_more_thoughts?: boolean;// Need to extend?
+}
+```
+
+### Validation Rules
+
+**Required**:
+- All four required parameters must be present
+- `thought_number` must be ≥ 1
+- `total_thoughts` must be ≥ 1
+- `thought_number` should be ≤ `total_thoughts` (but can exceed)
+
+**Optional**:
+- If `is_revision = true`, then `revises_thought` should be provided
+- `revises_thought` must be < `thought_number`
+- `branch_from_thought` must be < `thought_number`
+- `branch_id` should be provided if `branch_from_thought` is used
+
+---
+
+## Integration with MCP
+
+### Docker Gateway Setup
+
+Available through docker-gateway MCP server:
+
+```json
+{
+  "mcpServers": {
+    "docker-gateway": {
+      "command": "container",
+      "args": ["mcp", "gateway", "run"]
+    }
+  }
+}
+```
+
+### Tool Invocation
+
+Tool name: `sequentialthinking`
+
+Example invocation:
+```xml
+<function_calls>
+<invoke name="sequentialthinking">
+<parameter name="thought">Initial analysis of the problem...</parameter>
+<parameter name="thought_number">1</parameter>
+<parameter name="total_thoughts">5</parameter>
+<parameter name="next_thought_needed">true</parameter>
+</invoke>
+</function_calls>
+```
+
+---
+
+## Parameter Decision Tree
+
+### Should I set `is_revision = true`?
+```
+Is this thought reconsidering/correcting previous thinking?
+├─ Yes → is_revision = true, set revises_thought
+└─ No  → Don't use is_revision
+```
+
+### Should I use branching?
+```
+Am I exploring multiple approaches simultaneously?
+├─ Yes → Set branch_from_thought and branch_id
+└─ No  → Don't use branching parameters
+```
+
+### Should I adjust `total_thoughts`?
+```
+Is the problem complexity different than initially estimated?
+├─ More complex    → Increase total_thoughts
+├─ Less complex    → Decrease total_thoughts
+└─ About the same  → Keep current value
+```
+
+### Should I set `next_thought_needed = false`?
+```
+Have I:
+├─ Verified the solution against all constraints?
+├─ Tested the hypothesis?
+├─ Considered edge cases?
+├─ Explored alternatives?
+└─ Reached a satisfactory answer?
+    ├─ All YES → next_thought_needed = false
+    └─ Any NO  → next_thought_needed = true
+```
+
+---
+
+## Common Parameter Patterns
+
+### Pattern 1: Simple Linear Reasoning
+```json
+{"thought_number": 1, "total_thoughts": 5, "next_thought_needed": true}
+{"thought_number": 2, "total_thoughts": 5, "next_thought_needed": true}
+{"thought_number": 3, "total_thoughts": 5, "next_thought_needed": true}
+{"thought_number": 4, "total_thoughts": 5, "next_thought_needed": true}
+{"thought_number": 5, "total_thoughts": 5, "next_thought_needed": false}
+```
+
+### Pattern 2: Discovering Complexity
+```json
+{"thought_number": 1, "total_thoughts": 5, "next_thought_needed": true}
+{"thought_number": 2, "total_thoughts": 5, "next_thought_needed": true}
+{"thought_number": 3, "total_thoughts": 8, "next_thought_needed": true}
+// Adjusted from 5 to 8 after discovering complexity
+```
+
+### Pattern 3: Revision
+```json
+{"thought_number": 3, "total_thoughts": 6, "next_thought_needed": true}
+{"thought_number": 4, "total_thoughts": 6, "next_thought_needed": true}
+{"thought_number": 5, "total_thoughts": 7, 
+ "is_revision": true, "revises_thought": 3, "next_thought_needed": true}
+// Revised thought 3, extended total to 7
+```
+
+### Pattern 4: Branching
+```json
+{"thought_number": 2, "total_thoughts": 8, "next_thought_needed": true}
+{"thought_number": 3, "total_thoughts": 8, 
+ "branch_from_thought": 2, "branch_id": "approach_a", 
+ "next_thought_needed": true}
+{"thought_number": 4, "total_thoughts": 8,
+ "branch_from_thought": 2, "branch_id": "approach_b",
+ "next_thought_needed": true}
+{"thought_number": 5, "total_thoughts": 8, "next_thought_needed": true}
+// Compared branches, continuing with winner
+```
+
+---
+
+### Related Notes
+- [[Sequential Thinking Tool|Sequential Thinking Tool]]
+- [[Core Concepts]]
+- [[Usage Patterns]]
+- [[Quick Reference Card]]
+
+### Questions / Ideas for Further Exploration
+- What are the optimal ranges for total_thoughts by problem type?
+- Should there be a maximum depth for branching?
+- How do revision patterns correlate with solution quality?
+
+### To-Do
+- [ ] Create interactive parameter selector tool
+- [ ] Add validation error examples
+- [ ] Document parameter combination anti-patterns
+
+### Smart Connections Insights
+- 
+---
+aliases:
+  - Sequential Thinking Parameters
+  - ST Parameters
+tags:
+  - AI
+  - sequential-thinking
+  - reference
+  - technical
+created: 2025-10-17
+ContentType: Technical Reference
+Backlink: "[[Sequential Thinking MoC]]"
+---
+
+### Main Idea
+
+Complete technical reference for all Sequential Thinking tool parameters, including types, requirements, and usage examples.
+
+### References
+
+- [[Sequential Thinking MoC]]
+- [[Core Concepts]]
+- [[Usage Patterns]]
+
+### Notes
+
+## Required Parameters
+
+### `thought` (string)
+
+The current thinking step content.
+
+**Can include:**
+- Regular analytical steps
+- Revisions of previous thoughts  
+- Questions about previous decisions
+- Realizations about needing more analysis
+- Changes in approach
+- Hypothesis generation
+- Hypothesis verification
+
+**Example:**
+```json
+{
+  "thought": "Breaking down the problem: We need to optimize database queries that are timing out. Three possible causes: missing indexes, inefficient joins, or N+1 queries."
+}
+```
+
+---
+
+### `thought_number` (integer, min: 1)
+
+The current position in the sequence.
+
+**Characteristics:**
+- Starts at 1
+- Increments sequentially
+- Can exceed initial `total_thoughts` if more thinking is needed
+- Tracks position in reasoning chain
+
+**Example:**
+```json
+{
+  "thought_number": 5
+}
+```
+
+---
+
+### `total_thoughts` (integer, min: 1)
+
+Current estimate of total thoughts needed.
+
+**Key Features:**
+- **Dynamic**: Can be adjusted up or down as you progress
+- **Flexible**: Not a hard limit
+- **Adaptive**: Reflects current understanding of problem complexity
+
+**Example Progression:**
+```
+Initial:     total_thoughts = 5
+After T3:    total_thoughts = 8  (more complex than expected)
+After T6:    total_thoughts = 7  (found simpler solution)
+```
+
+---
+
+### `next_thought_needed` (boolean)
+
+Whether another thought step is required.
+
+**Values:**
+- `true`: Continue thinking
+- `false`: Reasoning complete, ready for final answer
+
+**Critical**: Only set to `false` when truly satisfied with the solution.
+
+---
+
+## Optional Parameters (Advanced)
+
+### `is_revision` (boolean)
+
+Indicates this thought revises previous thinking.
+
+**When to use:**
+- Reconsidering earlier logic
+- Signaling a change in direction
+- Showing self-correction
+
+**Default**: `false`
+
+---
+
+### `revises_thought` (integer)
+
+Which thought number is being reconsidered.
+
+**Requirements:**
+- Only used when `is_revision = true`
+- Must reference a valid previous thought number
+- Enables backtracking
+
+**Example:**
+```json
+{
+  "thought_number": 5,
+  "is_revision": true,
+  "revises_thought": 3,
+  "thought": "Actually, my assumption in thought 3 was wrong. The bottleneck isn't the query itself, but the connection pooling configuration."
+}
+```
+
+---
+
+### `branch_from_thought` (integer)
+
+Starting point for exploring an alternative path.
+
+**Purpose:**
+- Creates a fork in reasoning
+- Allows parallel exploration
+- Enables comparison of different approaches
+
+**Example:**
+```json
+{
+  "thought_number": 4,
+  "branch_from_thought": 2,
+  "branch_id": "async_approach"
+}
+```
+
+---
+
+### `branch_id` (string)
+
+Identifier for the current branch.
+
+**Characteristics:**
+- Names the exploration path
+- Examples: "approach_A", "scenario_optimistic", "async_approach"
+- Helps track multiple alternatives
+- Enables structured exploration
+
+---
+
+### `needs_more_thoughts` (boolean)
+
+Signals that more thoughts are needed despite approaching estimated end.
+
+**When to use:**
+- Complexity greater than expected
+- Prevents premature conclusion
+- Allows extension of reasoning
+
+**Default**: `false`
+
+---
+
+## Technical Details
+
+### Tool Parameters Schema
+
+```typescript
+interface SequentialThinking {
+  // Required
+  thought: string;                    // Current thinking step
+  thought_number: number;             // Current position (1, 2, 3...)
+  total_thoughts: number;             // Estimated total needed
+  next_thought_needed: boolean;       // Continue or finish?
+  
+  // Optional - for advanced reasoning
+  is_revision?: boolean;              // Is this revising earlier thought?
+  revises_thought?: number;           // Which thought to revise?
+  branch_from_thought?: number;       // Branching point
+  branch_id?: string;                 // Branch identifier
+  needs_more_thoughts?: boolean;      // Need to extend reasoning?
+}
+```
+
+---
+
+## Parameter Decision Tree
+
+### Starting a Sequence
+
+```
+1. Set thought_number = 1
+2. Estimate total_thoughts (usually 5-7)
+3. Write your first thought
+4. Set next_thought_needed = true
+```
+
+### Continuing
+
+```
+1. Increment thought_number
+2. Adjust total_thoughts if needed
+3. Write next thought
+4. Set next_thought_needed = true (unless done)
+```
+
+### Revising
+
+```
+1. Set is_revision = true
+2. Set revises_thought = <number>
+3. Write revised thinking
+4. Adjust total_thoughts if needed
+```
+
+### Branching
+
+```
+1. Set branch_from_thought = <number>
+2. Set branch_id = "<name>"
+3. Write alternative approach
+4. Continue branch or merge back
+```
+
+### Finishing
+
+```
+1. Verify solution is complete
+2. Check all constraints satisfied
+3. Set next_thought_needed = false
+4. Provide final answer
+```
+
+---
+
+## Integration with MCP
+
+### Tool Name
+`sequentialthinking`
+
+### Source
+docker-gateway MCP server
+
+### Configuration
+```json
+{
+  "docker-gateway": {
+    "command": "container",
+    "args": ["mcp", "gateway", "run"]
+  }
+}
+```
+
+### Availability
+- Apple Container CLI
+- Docker Desktop
+
+---
+
+## Parameter Validation Rules
+
+### Required Field Validation
+
+- `thought`: Must be non-empty string
+- `thought_number`: Must be ≥ 1
+- `total_thoughts`: Must be ≥ 1
+- `next_thought_needed`: Must be boolean
+
+### Optional Field Validation
+
+- `revises_thought`: Must be < current `thought_number`
+- `branch_from_thought`: Must be < current `thought_number`
+- `branch_id`: Should be descriptive string
+- `is_revision`: Should be `true` when `revises_thought` is set
+
+### Logical Validation
+
+- `total_thoughts` should be ≥ `thought_number` (usually)
+- Final thought should have `next_thought_needed = false`
+- `revises_thought` should only be set when `is_revision = true`
+
+---
+
+## Common Parameter Patterns
+
+### Linear Progression
+```json
+T1: {thought_number: 1, total_thoughts: 5, next_thought_needed: true}
+T2: {thought_number: 2, total_thoughts: 5, next_thought_needed: true}
+T3: {thought_number: 3, total_thoughts: 5, next_thought_needed: true}
+T4: {thought_number: 4, total_thoughts: 5, next_thought_needed: true}
+T5: {thought_number: 5, total_thoughts: 5, next_thought_needed: false}
+```
+
+### With Revision
+```json
+T1: {thought_number: 1, total_thoughts: 5}
+T2: {thought_number: 2, total_thoughts: 5}
+T3: {thought_number: 3, total_thoughts: 6, is_revision: true, revises_thought: 2}
+T4: {thought_number: 4, total_thoughts: 6}
+```
+
+### With Branching
+```json
+T1: {thought_number: 1, total_thoughts: 7}
+T2: {thought_number: 2, total_thoughts: 7}
+T3: {thought_number: 3, total_thoughts: 7, branch_from_thought: 2, branch_id: "approach_A"}
+T4: {thought_number: 4, total_thoughts: 7, branch_from_thought: 2, branch_id: "approach_B"}
+T5: {thought_number: 5, total_thoughts: 7} // merged back
+```
+
+---
+
+### Related Notes
+
+- [[Usage Patterns]] - How to use these parameters effectively
+- [[Examples]] - See parameters in action
+- [[Quick Reference Card]] - Quick lookup guide
+
+### Questions / Ideas for Further Exploration
+
+- Are there additional parameters that would be useful?
+- How do parameter choices affect reasoning quality?
+- What validation rules would improve usability?

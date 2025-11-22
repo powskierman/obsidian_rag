@@ -1,0 +1,15 @@
+---
+aliases: []
+---
+
+2022-06-23
+# Blynk Tutorials
+
+### Backlink
+[[Blynk MOC]]
+
+### Reference
+
+### Notes
+1. <https://diyprojects.io/blynk-how-to-install-a-private-local-server-on-raspberry-pi-3-unlimited-energy-test-wemos-dht22/#.W8oF9xopCf1>
+2. <https://github.com/maksimstojkovic/blynk-server-setup>

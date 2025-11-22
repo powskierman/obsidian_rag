@@ -1,0 +1,19 @@
+---
+aliases: []
+tags: []
+---
+# PlantUML MoC
+Date: 2023-01-13
+
+### Backlink
+[[]]
+
+### Reference
+- [UML Basics](https://docs.kde.org/trunk5/en/umbrello/umbrello/uml-basics.html)] 
+- [[SwiftPlantUML]]
+- [RealWorldPlantUML - example usage](http://real-world-plantuml.com/)
+- [Class Diagram syntax and features](https://plantuml.com/class-diagram)
+- [The Hitchhiker’s Guide to PlantUML](https://crashedmind.github.io/PlantUMLHitchhikersGuide/index.html)
+- 
+### Notes
+-  

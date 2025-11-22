@@ -1,0 +1,23 @@
+---
+aliases: []
+---
+
+2022-03-01
+# inverse function rule
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+-  Expresses the [derivative](https://en.wikipedia.org/wiki/Derivative "Derivative") of the [inverse](https://en.wikipedia.org/wiki/Inverse_function "Inverse function") of a [bijective](https://en.wikipedia.org/wiki/Bijective "Bijective") and [differentiable function](https://en.wikipedia.org/wiki/Differentiable_function "Differentiable function") $f$ in terms of $f'$.
+	- The inverse of $f(a)$ is $[f^{-1}]'(a)$ = $1 \over {f'(f^{-1}(a))}$
+- The derivative of $f^{−1}$ is the reciprocal of the derivative of $f$, with argument and value reversed.
+- To find the inverse function, swap $x$ and $y$, and solve the resulting equation for $x$.
+	- If the initial function is not one-to-one, then there will be more than one inverse.
+	- wap the variables: 𝑦=𝑒𝑥y=ex becomes 𝑥=𝑒𝑦x=ey.
+
+Now, solve the equation 𝑥=𝑒𝑦x=ey for 𝑦y.
+
+𝑦=ln(𝑥)y=ln⁡(x)

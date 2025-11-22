@@ -1,0 +1,200 @@
+---
+bookId: "35829"
+title: "The Neanderthals Rediscovered: How Modern Science Is Rewriting Their Story (The Rediscovered Series)"
+author: Dimitra Papagianni and Michael A. Morse
+asin: B00ET8B6PM
+lastAnnotatedDate: 2015-10-24
+highlightsCount: 62
+reference: https://www.amazon.com/dp/B00ET8B6PM
+kindle_link: kindle://book?action=open&asin=B00ET8B6PM
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81+gA0ug9wL._SY160.jpg)
+## Highlights
+Europe has been inhabited by human species since around 1 million years ago, it was only by 500,000 years ago that incipient Neanderthal traits first appeared. — location: [243](kindle://book?action=open&asin=B00ET8B6PM&location=243) ^ref-49960
+
+---
+Neanderthals took on a distinctive form by 250,000 years ago. — location: [247](kindle://book?action=open&asin=B00ET8B6PM&location=247) ^ref-37434
+
+---
+A sustained warm period that began some 130,000 years before the present enabled Neanderthals and modern humans to expand simultaneously from their separate homelands, — location: [252](kindle://book?action=open&asin=B00ET8B6PM&location=252) ^ref-36504
+
+---
+Clutching very similar stone tools, Homo neanderthalensis and Homo sapiens were the prime contenders to dominate the Earth, coming out of Europe and Africa, respectively. — location: [258](kindle://book?action=open&asin=B00ET8B6PM&location=258) ^ref-53944
+
+---
+Everything changed for the Neanderthals by around 40,000 years ago, when Homo sapiens penetrated deep into their European homeland. — location: [271](kindle://book?action=open&asin=B00ET8B6PM&location=271) ^ref-37335
+
+---
+Our world is about to be shaken by another major change in climate. If we suffer a significant jump in warming, as we almost certainly will over the next few generations, or if we experience a new glaciation, which will surely come unless global warming somehow delays its arrival, our survival as a species may hang in the balance. — location: [282](kindle://book?action=open&asin=B00ET8B6PM&location=282) ^ref-51573
+
+---
+by 1 million years ago parts of Europe were occupied by a human species. — location: [313](kindle://book?action=open&asin=B00ET8B6PM&location=313) ^ref-32018
+
+---
+The first human exodus from Africa occurred around 1.9 million years ago, and descendants of these early hominins seem to have inhabited the warmer parts of Asia to as late as 100,000 years ago. — location: [344](kindle://book?action=open&asin=B00ET8B6PM&location=344) ^ref-35335
+
+---
+erectus was among the most successful of our ancestor species. — location: [349](kindle://book?action=open&asin=B00ET8B6PM&location=349) ^ref-48759
+
+---
+The main features that separate Homo erectus from its predecessors are in its legs and pelvis, the most important part of the body for long-distance walking, and its brain size, which grew to about 75 per cent of ours. — location: [349](kindle://book?action=open&asin=B00ET8B6PM&location=349) ^ref-25188
+
+---
+the beginning of the current Ice Age about 2.5 million years ago. — location: [351](kindle://book?action=open&asin=B00ET8B6PM&location=351) ^ref-37901
+
+---
+As the Ice Age progressed, the cold periods became increasingly extreme and long-lasting, and by about 650,000 years ago Europe suffered its first major glaciation. — location: [354](kindle://book?action=open&asin=B00ET8B6PM&location=354) ^ref-5399
+
+---
+The earliest hominin site outside Africa is Dmanisi in Georgia, which is dated to between 1.7 and 1.8 million years ago. — location: [386](kindle://book?action=open&asin=B00ET8B6PM&location=386) ^ref-41355
+
+---
+Judging by its longevity, the handaxe is the greatest-ever human invention. From its first appearance, humans continued to use this tool until around 40,000 years ago. — location: [423](kindle://book?action=open&asin=B00ET8B6PM&location=423) ^ref-24531
+
+---
+Over the past million years, glaciers have expanded and retreated in Europe perhaps ten separate times. — location: [438](kindle://book?action=open&asin=B00ET8B6PM&location=438) ^ref-30831
+
+---
+If, as at present, winter in the northern hemisphere begins when the Earth is closest to the Sun, winters are relatively mild and summers are temperate. — location: [462](kindle://book?action=open&asin=B00ET8B6PM&location=462) ^ref-64777
+
+---
+A decrease in levels of heavy oxygen (18O) in cores taken from the ocean floor indicates an interglacial, or warm period. — location: [477](kindle://book?action=open&asin=B00ET8B6PM&location=477) ^ref-43113
+
+---
+The Earth’s orbit is now in the part of the cycle where its shape approaches a perfect circle, and we can expect the current warm conditions – which are already unusually long and stable – to continue. For example, the ‘wobble’ cycle is now 6,000 years into a cooling phase and the tilt of the Earth’s axis is moving towards a minimum value, which has a cooling effect, but these cycles have been overshadowed by the warmth brought on by the shape of the orbit. Some computer models predict that the next glacial period is at least 5,000 years away. — location: [482](kindle://book?action=open&asin=B00ET8B6PM&location=482) ^ref-43900
+
+---
+The Holocene is already the longest stable warm spell since Homo erectus walked out of Africa. The effects of human-induced warming on such a complex system are not fully understood, but some climate scientists suggest that rather than being just 5,000 years away from the next cooling phase – which after all is just about the amount of time since the Bronze Age began or since the early phases of Stonehenge in Britain – we may have broken the cycle of glaciations for at least the next 45,000 years. — location: [486](kindle://book?action=open&asin=B00ET8B6PM&location=486) ^ref-5706
+
+---
+Starting just over 650,000 years ago, Europe underwent almost 40,000 years of icy conditions in the coldest and most sustained glacial period since humans first arrived. — location: [646](kindle://book?action=open&asin=B00ET8B6PM&location=646) ^ref-32185
+
+---
+Homo heidelbergensis represents a second major wave of migration out of Africa, following the initial Homo erectus exodus. — location: [674](kindle://book?action=open&asin=B00ET8B6PM&location=674) ^ref-22767
+
+---
+By the time of the final wave – of our own Homo sapiens ancestors – the European heidelbergensis population had evolved into Neanderthals. — location: [675](kindle://book?action=open&asin=B00ET8B6PM&location=675) ^ref-39056
+
+---
+It is worth pausing here to consider why the European heidelbergensis population was so large and muscular, with the bodies of boxers. One theory is that they had become specialized ambush hunters, using wooden spears in close combat against sizeable prey. This strategy contrasts with that of our own African ancestors, who had the ability to run down prey over long distances. — location: [824](kindle://book?action=open&asin=B00ET8B6PM&location=824) ^ref-20139
+
+---
+fully formed Neanderthals appeared some 250,000 years ago, — location: [849](kindle://book?action=open&asin=B00ET8B6PM&location=849) ^ref-44902
+
+---
+This behaviour, which separated the Neanderthals from their heidelbergensis ancestors and distinguished them from almost all other human species, can be summarized in two words: forward planning. — location: [929](kindle://book?action=open&asin=B00ET8B6PM&location=929) ^ref-8058
+
+---
+The two main descendants of Homo heidelbergensis – the Neanderthals of Europe and the archaic Homo sapiens (which some call Homo rhodesiensis) of Africa – were both progressing in parallel, and neither could yet claim any advantage over the other. — location: [943](kindle://book?action=open&asin=B00ET8B6PM&location=943) ^ref-32531
+
+---
+about 120,000 years old – the last time that the climate in Palaeolithic Europe was as warm as in modern times. — location: [977](kindle://book?action=open&asin=B00ET8B6PM&location=977) ^ref-11915
+
+---
+The signature Neanderthal characteristic was prominent ridges above each eye. This contrasted with the single brow ridge of Homo erectus and the near absence of brow ridges in Homo sapiens. — location: [983](kindle://book?action=open&asin=B00ET8B6PM&location=983) ^ref-26453
+
+---
+there seems to be a hiatus in the human occupation of Britain from about 200,000 years ago to 60,000 years ago. They associate this with the formation of the English Channel as a barrier, leading to the gradual extinction of the local early Neanderthal population in Britain. — location: [1006](kindle://book?action=open&asin=B00ET8B6PM&location=1006) ^ref-24911
+
+---
+For reasons possibly related to brain hemisphere functions and dating back to the earliest members of the Homo line, our species has evolved to be increasingly right-handed, — location: [1042](kindle://book?action=open&asin=B00ET8B6PM&location=1042) ^ref-24906
+
+---
+For the first 1.5 million years after the invention of the handaxe, there was little improvement in stone technology. — location: [1059](kindle://book?action=open&asin=B00ET8B6PM&location=1059) ^ref-64544
+
+---
+Handaxes, despite their size, were the equivalent of disposable razors in the early prehistoric world. — location: [1065](kindle://book?action=open&asin=B00ET8B6PM&location=1065) ^ref-64084
+
+---
+From around 427,000 years ago down to 301,000 years ago Europe was mainly warm, — location: [1068](kindle://book?action=open&asin=B00ET8B6PM&location=1068) ^ref-14649
+
+---
+the emergence of Middle Palaeolithic tools was the first major step towards modern technology — location: [1082](kindle://book?action=open&asin=B00ET8B6PM&location=1082) ^ref-353
+
+---
+The Levallois technique of toolmaking has since come to denote the first of the so-called ‘prepared core’ technologies that marked the Lower–Middle Palaeolithic transition in Europe and the emergence of the Neanderthals. — location: [1092](kindle://book?action=open&asin=B00ET8B6PM&location=1092) ^ref-47679
+
+---
+In handaxe manufacture, the core at the end of the knapping process is the intended tool. In the Levallois technique, the core is essentially a tool whose purpose is the manufacture of other tools – Levallois flakes. — location: [1125](kindle://book?action=open&asin=B00ET8B6PM&location=1125) ^ref-23583
+
+---
+humans are defined by the ability to make tools that are designed to produce other tools. — location: [1128](kindle://book?action=open&asin=B00ET8B6PM&location=1128) ^ref-64977
+
+---
+Modern humans, he argues, have brains that can maintain social relationships with 150 others, the so-called ‘Dunbar number’ — location: [1260](kindle://book?action=open&asin=B00ET8B6PM&location=1260) ^ref-24102
+
+---
+Dunbar places this moment at about 500,000 years ago, which gives credit to Homo heidelbergensis for the development of complex speech. — location: [1265](kindle://book?action=open&asin=B00ET8B6PM&location=1265) ^ref-5825
+
+---
+Neanderthals probably had social networks slightly smaller than ours, perhaps of 120 individuals, most likely structured along the lines of modern hunter-gatherers, who are based in clusters of about thirty people (four to six families) and have good relations with neighbouring clusters. — location: [1273](kindle://book?action=open&asin=B00ET8B6PM&location=1273) ^ref-54637
+
+---
+Having become adept at forward planning, using the Levallois technique to make stone tools and organizing themselves enough to run herds of large animals over cliffs, the Neanderthals were well positioned to take further leaps forward. Yet most of the period from 250,000 to 130,000 years ago had a climate of sustained cold conditions. Survival became the priority for them in the northern latitudes of Europe. — location: [1279](kindle://book?action=open&asin=B00ET8B6PM&location=1279) ^ref-36327
+
+---
+Humans first used hard hammers (hammerstones) for knapping. They started to use soft hammers (antler, wood or bone) perhaps 700,000 years ago for finer control. — location: [1308](kindle://book?action=open&asin=B00ET8B6PM&location=1308) ^ref-22868
+
+---
+Modern humans were beginning to develop an advantage, not in hunting tools or muscle power, and not in overall brain size, but in ornamentation in the form of paint and jewelry. Our ancestors were exploring forms of symbolic expression, while there is little evidence that the Neanderthals had taken this step. Was this the key to our success? — location: [1396](kindle://book?action=open&asin=B00ET8B6PM&location=1396) ^ref-25310
+
+---
+Remains of more than forty-five individuals from 130,000 to 60,000 years ago have been excavated from at least six caves or rock shelters in northern Israel. — location: [1405](kindle://book?action=open&asin=B00ET8B6PM&location=1405) ^ref-24174
+
+---
+this early foray by early modern humans into Asia seems to have ended in failure. — location: [1549](kindle://book?action=open&asin=B00ET8B6PM&location=1549) ^ref-33221
+
+---
+One of the most significant effects of the Eemian interglacial in Africa was the greening of the Sahara desert. Enormous lakes and a network of rivers connected the north African coast with the rest of the continent. — location: [1553](kindle://book?action=open&asin=B00ET8B6PM&location=1553) ^ref-39060
+
+---
+The humid and warm Eemian, which coincided with the beginning of this leap forward in behaviour and expansion into Asia, was 10,000 years long and ended 120,000 years ago. — location: [1561](kindle://book?action=open&asin=B00ET8B6PM&location=1561) ^ref-54926
+
+---
+Wolpoff developed the multiregionalist theory of human evolution, which argued that since the days of Homo erectus humans around the globe exchanged genes within a single breeding population, despite the differences in appearance that others attributed to a proliferation of different species. — location: [1656](kindle://book?action=open&asin=B00ET8B6PM&location=1656) ^ref-44396
+
+---
+For modern humans, Shanidar is an important site in the development of civilization, while for Neanderthals it appears to have been an isolated outpost. — location: [1703](kindle://book?action=open&asin=B00ET8B6PM&location=1703) ^ref-64936
+
+---
+the rest of the global population is descended from a founder group that could have been as small as just a few hundred individuals. — location: [2039](kindle://book?action=open&asin=B00ET8B6PM&location=2039) ^ref-64629
+
+---
+a main African exodus event occurred around 80,000 to 55,000 years ago, either across the Bab-el-Mandeb (‘Gate of Grief’), roughly from modern Djibouti in the Horn of Africa to Yemen in the Arabian Peninsula, or alternatively around the rim of the Red Sea. — location: [2042](kindle://book?action=open&asin=B00ET8B6PM&location=2042) ^ref-5238
+
+---
+the Aurignacian culture may have arrived late on the Balkan coast. By then the local Neanderthal population had been long gone, and the region had been empty of human habitation. — location: [2075](kindle://book?action=open&asin=B00ET8B6PM&location=2075) ^ref-12821
+
+---
+The Caucasus region is now considered to have been devoid of Neanderthals by the time modern humans arrived there. — location: [2079](kindle://book?action=open&asin=B00ET8B6PM&location=2079) ^ref-47952
+
+---
+it is widely accepted that Neanderthals and modern humans shared Europe from the modern human arrival around 45,000 years ago until the Neanderthals’ extinction around 30,000 years ago. — location: [2091](kindle://book?action=open&asin=B00ET8B6PM&location=2091) ^ref-21885
+
+---
+There is, in fact, some overlap between the Mousterian and Aurignacian (and presumably Neanderthal and modern human) occupation in northern Spain and in France. — location: [2102](kindle://book?action=open&asin=B00ET8B6PM&location=2102) ^ref-22285
+
+---
+the population densities so low, perhaps as little as one person per 100 square kilometres (40 sq. miles), — location: [2107](kindle://book?action=open&asin=B00ET8B6PM&location=2107) ^ref-15280
+
+---
+we can eliminate the first modern human pioneers as the cause of the Neanderthals’ extinction. In many areas, such as the Caucasus Mountains, south-eastern Europe and Italy, Homo sapiens entered territory that had been vacated by the Neanderthals. In shared territory such as France we have a picture of two separate populations. One, the modern humans, produced extraordinary works of art: cave paintings, figurines and flutes. The other, the Neanderthals, had a similar suite of behaviours to those the modern humans exhibited some 100,000 years earlier – burial of the dead and the use of red ochre, possibly as a dye. — location: [2146](kindle://book?action=open&asin=B00ET8B6PM&location=2146) ^ref-54489
+
+---
+Neanderthal bones contain an enormous library of information. Their shape and thickness can tell us about Neanderthal bodies and also hint at evolutionary connections with other hominin species. The ratio of the unstable carbon isotope 14C to the stable isotope 12C can tell us how long ago the individual died. And the ratio of stable carbon and nitrogen isotopes can tell us what the individual ate. — location: [2153](kindle://book?action=open&asin=B00ET8B6PM&location=2153) ^ref-18873
+
+---
+we do not have evidence for mixed societies or long-term interaction between the populations, but we do have evidence for at least some productive one-night stands, enough for the results to have affected the entire out-of-Africa population. — location: [2193](kindle://book?action=open&asin=B00ET8B6PM&location=2193) ^ref-8041
+
+---
+Many large mammals, such as reindeer, horse, steppe rhinoceros and mammoth, as well as smaller species, such as the wolverine, wolf and fox, all survived Stage 3 and were present during the Last Glacial Maximum. — location: [2229](kindle://book?action=open&asin=B00ET8B6PM&location=2229) ^ref-35514
+
+---
+What is the Gravettian culture? It is defined archaeologically by the appearance of certain tool types, a novel form of flint blade and bone points. But what really distinguished it from the Mousterian and Aurignacian cultures was that its population was much denser, with more sites in an area, that it reached a wider range of environments, notably the chilly plains of northern Europe, and that it had long-term settlements and food-storage capacity. — location: [2248](kindle://book?action=open&asin=B00ET8B6PM&location=2248) ^ref-23132
+
+---
+as the Gravettian culture expanded, it left them with little room to recover their numbers. — location: [2261](kindle://book?action=open&asin=B00ET8B6PM&location=2261) ^ref-56577
+
+---

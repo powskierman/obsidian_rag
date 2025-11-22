@@ -1,0 +1,30 @@
+---
+aliases:
+tags:
+  - purchase
+  - math
+created: 2022-02-28 11:49
+ContentType: Reference
+Backlink: "[[derivative MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- A recursion of s to the nth degree
+- : $f^n(x)$ 
+	- $f^0(x)$ = $f(x)$
+	-  $\delta^nf \over \delta x^n$ is synonimous () 
+-  Often used in motion studies
+	- $v(t)$ = velocity
+	- $x'(t)$ = instantaneous velocity
+	- $x''(t)$ = acceleration
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

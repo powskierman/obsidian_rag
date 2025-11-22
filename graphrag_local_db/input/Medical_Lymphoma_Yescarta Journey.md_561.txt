@@ -1,0 +1,43 @@
+# Yescarta Journey.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+  - yescarta
+created: 2025-03-25 16:05
+Backlink:
+---
+### Main Idea
+- What to expect with Yescarta
+### References
+- 
+### Notes
+- Since you have been prescribed Yescarta CAR T-cell therapy and have already undergone leukapheresis, the next phase involves several crucial steps. Here's what the future likely holds, based on the sources:
+*   **T-cell Engineering:** Your collected T cells are now being sent to a specialized laboratory where they will be genetically engineered to express a chimeric antigen receptor (CAR) that targets the CD19 protein found on lymphoma cells. This manufacturing process typically takes around **2-3 weeks (approximately 17 days)**.
+*   **Pre-infusion Phase (Lymphodepleting Chemotherapy):** Before the engineered CAR T cells can be infused back into your body, you will likely receive lymphodepleting chemotherapy. This usually involves **3 days** of chemotherapy, typically with fludarabine and cyclophosphamide. The purpose of this chemotherapy is to create "space" in your body for the CAR T cells to expand and to help them be more effective. Side effects of this phase may include nausea, fatigue, and a temporary reduction in blood cell counts.
+*   **CAR T-cell Infusion:** Once your engineered CAR T cells are ready and you have completed the lymphodepleting chemotherapy, the **CAR T-cell infusion will take place**. This is a **one-time infusion** administered intravenously, typically taking less than 30 minutes. You will be closely monitored during the infusion. While the infusion itself is generally well-tolerated, you might experience fever, chills, or low blood pressure shortly after.
+*   **Post-infusion Monitoring (Weeks 1-4):** This is a **critical period requiring hospitalization for approximately 14 days for close monitoring**. You will also need a caregiver available 24/7 and must stay within 2 hours of the treatment facility for at least 4 weeks after the infusion. The main concerns during this phase are potential side effects:
+    *   **Cytokine Release Syndrome (CRS):** This inflammatory response typically occurs between **days 1 and 5** after infusion. Symptoms can include fever, low blood pressure, and the need for oxygen support. CRS is usually treated with medications like tocilizumab and/or steroids if needed. The incidence of any CRS is high (90-93%), with severe CRS (Grade 3 or higher) occurring in 9-13% of patients.
+    *   **Immune Effector Cell-Associated Neurotoxicity Syndrome (ICANS):** Neurological toxicity typically develops between **days 5 and 14** after infusion. Symptoms can range from confusion and difficulty speaking to seizures. ICANS is managed with steroids and supportive care. The incidence of any neurologic symptoms is 60-65%, with severe neurotoxicity (Grade 3 or higher) in 28-31% of patients.
+    *   Other potential issues include neurotoxicity and hemophagocytic lymphohistiocytosis (HLH), occurring in about 15% of patients. Tumor lysis syndrome, resulting from the rapid destruction of cancer cells, can also occur, potentially harming the kidneys.
+*   **Longer-term Recovery (Months 1-6 and Beyond):** After the initial critical monitoring period, you will continue to be followed closely. This phase involves:
+    *   **Ongoing monitoring of blood counts**.
+    *   Potential for **prolonged cytopenias (low blood counts)**. Grade 3-4 neutropenia occurs in 80-85% of patients, thrombocytopenia in 40-45%, and anemia in 45-50%. Prolonged cytopenias (lasting more than 90 days) can occur in 17-24% of patients.
+    *   Increased risk of **infections** due to B-cell aplasia (the elimination of both cancerous and healthy B cells) and hypogammaglobulinemia (low antibody levels). You may be susceptible to encapsulated bacteria.
+    *   **Quarterly follow-up scans** to assess the response to therapy.
+    *   Potential for **B-cell recovery**, which typically begins 6-12 months after treatment, although complete recovery may take 1-2 years or longer. Some patients may have persistent B-cell aplasia for years.
+    *   Monitoring for **long-term side effects**, including potential secondary malignancies.
+*   **Efficacy and Prognosis:** Yescarta has shown significant promise in treating high-grade and double-/triple-hit lymphomas. Clinical trials have demonstrated overall response rates ranging from 50% to 80%, with complete response rates of 30% to 50% in relapsed/refractory diffuse large B-cell lymphoma and high-grade B-cell lymphomas. While patients with double-hit lymphomas may have slightly lower response rates compared to non-double-hit DLBCL, Yescarta remains one of the most effective options for this high-risk group. Approximately 30-40% of patients who achieve a complete response experience long-term remission (beyond 2 years).
+
+*   **Potential Challenges:** It's important to be aware that CAR T-cell therapy is not always successful, and relapse can occur, especially given the aggressive nature of double-hit lymphoma. Factors like high tumor burden, elevated LDH, or refractory disease prior to CAR T-cell therapy can be associated with poorer outcomes. If Yescarta is not effective or if relapse occurs, other alternative therapies such as bispecific antibodies, BCL2 inhibitors, or participation in clinical trials would be considered.
+
+Your medical team, including Dr. Slaby and Dr. Mona Naiim Shafey at the Alberta Blood and Marrow Transplant Program, will be closely involved in each of these stages, monitoring your progress and managing any potential complications. It's crucial to maintain open communication with them and adhere to all monitoring and follow-up recommendations.
+### Related Notes
+- [[Scans After Yescarta Treatment]]
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

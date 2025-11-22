@@ -1,0 +1,17 @@
+# Venetoclax.md
+
+---
+aliases: 
+tags:
+  - lymphoma
+---
+# Venetoclax
+Date: 2025-01-14
+
+### Backlink
+[[Lymphoma Treatment]]
+
+### Reference
+-  
+### Notes
+-  Venetoclax is not currently approved as a first-line treatment with [[R-CHOP]] for high-grade B-cell lymphoma (HGBCL) in Alberta.  Evidence from the CAVALLI trial suggests that venetoclax combined with [[R-CHOP]] in the first-line setting improves outcomes, particularly in [[BCL2]]-positive subgroups, with a complete response rate of 69% and trends toward better progression-free survival compared to [[R-CHOP]] alone. ^9ff4b4

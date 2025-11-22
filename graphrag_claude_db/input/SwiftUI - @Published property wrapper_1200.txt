@@ -1,0 +1,16 @@
+---
+aliases: []
+tags: []
+---
+# SwiftUI @Published property wrapper
+Date: 2023-02-28
+
+### Backlink
+[[]]
+
+### Reference
+-  [What is the @Published property wrapper?](https://www.hackingwithswift.com/quick-start/swiftui/what-is-the-published-property-wrapper)
+- 
+### Notes
+-  @Published allows us to create observable objects that automatically announce when changes occur. SwiftUI will automatically monitor for such changes, and re-invoke the `body` property of any views that rely on the data.
+- Whenever an object with a property marked `@Published` is changed, all views using that object will be reloaded to reflect those changes.

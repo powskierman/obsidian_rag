@@ -1,0 +1,50 @@
+---
+id: 16112678
+updated: 2022-06-18
+title: David Buschs Canon EOS 7D Guide to Digital Photography, 1st Ed
+author: Busch
+highlights: 5
+last_highlight: 2015-06-22
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112678
+Updated: 2022-06-18
+%%
+
+![]( https://m.media-amazon.com/images/I/51OQUlzpwYL._SY500.jpg)
+
+# About
+Title: [[David Buschs Canon EOS 7D Guide to Digital Photography, 1st Ed]]
+Authors: [[Busch]]
+Category: #books
+Number of Highlights: ==5==
+Readwise URL: https://readwise.io/bookreview/16112678
+Date: [[2022-06-18]]
+Last Highlighted: *2015-06-22*
+
+---
+
+# Highlights
+
+Partial. This is a faux spot mode, using roughly 9.4 percent of the image area to calculate exposure, which, as you can see in Figure 4.8, is a rather large spot, represented by a yellow disk. The status LCD icon is shown in the upper-left corner. Use this mode if the background is much brighter or darker than the subject. ([1490](https://readwise.io/to_kindle?action=open&asin=B00B7R8232&location=1490)) %% Color: yellow %% ^334464443
+
+---
+
+Spot. This mode confines the reading to a limited area in the center of the viewfinder, as shown in Figure 4.10, making up only 2.3 percent of the image. This mode is useful when you want to base exposure on a small area in the frame, such as a spotlight performer on stage, surrounded by a black background. ([1493](https://readwise.io/to_kindle?action=open&asin=B00B7R8232&location=1493)) %% Color: yellow %% ^334464444
+
+---
+
+Center-weighting works best for portraits, architectural photos, and other pictures in which the most important subject is located in the middle of the frame. ([1499](https://readwise.io/to_kindle?action=open&asin=B00B7R8232&location=1499)) %% Color: yellow %% ^334464445
+
+---
+
+In Auto mode, the 7D selects an appropriate ISO sensitivity setting, color (white) balance, Picture Style, color space, noise reduction features, and use of the Auto Lighting Optimizer. ([1528](https://readwise.io/to_kindle?action=open&asin=B00B7R8232&location=1528)) %% Color: yellow %% ^334464446
+
+---
+
+The camera will lock in ISO sensitivity, white balance, color space, noise reduction, and settings for the Auto Lighting Optimizer. But you can specify some other parameters, including selecting from three alternate Picture Styles in addition to Standard. When you set the Mode Dial to the CA position, ([1535](https://readwise.io/to_kindle?action=open&asin=B00B7R8232&location=1535)) %% Color: yellow %% ^334464447
+
+---

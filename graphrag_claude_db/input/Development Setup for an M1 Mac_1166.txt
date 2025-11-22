@@ -1,0 +1,44 @@
+---
+aliases: []
+tags: []
+---
+# Development Setup for an M1 Mac
+Date: 2022-12-13
+
+### Backlink
+[[]]
+
+### Reference
+-  [Development Setup for an M1 Mac ](https://www.roguelynn.com/words/m1-dev-setup/#zshrc-files)
+### Notes
+-  Covered in referenced tutorial:
+		- To switch architectures, use:
+			- arch --x86_64 zsh
+		- Once in the proper architecture, install homebrew for both types
+		```
+		arm64: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+		
+		i386: arch --x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+		```
+		- Install pyenv
+			- brew install pyenv
+		- Install virtualenv
+			- brew install pyenv-virtualenv
+- Not covered:
+	- Iterm2 gets confused between copies to alleviate:
+		- Setup 2 profiles. one for arm64, one for x86
+		- [Multiple zsh configs in iTerm](https://www.donielsmith.com/blog/2020-04-12-multiple-zsh-config-in-iterm/)
+	- In general/basics, send following startup command:
+		- env /usr/bin/arch -arm64 /bin/zsh --login
+		- env /usr/bin/arch -x86_64 /bin/zsh --login
+- Install python
+	- type -a python
+	- which python
+	- python --version
+	- [Install Python on macOS 11 M1 (Apple Silicon) using pyenv](https://laict.medium.com/install-python-on-macos-11-m1-apple-silicon-using-pyenv-12e0729427a9) 
+- Install esp-idf in x86 arch
+	- [Get Started — ESP-IDF Programming Guide v4.4.3 documentation](https://docs.espressif.com/projects/esp-idf/en/v4.4.3/esp32/get-started/index.html#get-started-get-esp-idf)
+	- install in osp (old espressif) to distinguish from arm64 esp-idf
+- in osp, install matter
+	- [Espressif's SDK for Matter main documentation](https://docs.espressif.com/projects/esp-matter/en/main/esp32/developing.html#development-setup)
+	->)

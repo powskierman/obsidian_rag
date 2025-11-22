@@ -1,0 +1,61 @@
+---
+aliases: 
+tags:
+  - lm358
+---
+# Low Pass Active Filter
+Date: 2024-07-24
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Based on your application, you need a low-pass filter to convert the 2Hz pulsing LED signal into a steady voltage that can be read by a digital pin on your ESP32. Here's what I recommend:
+
+1. Use an active low-pass filter with an op-amp. This will provide a stable output voltage above 2.5V when the alarm is armed.
+
+2. Choose a second-order Butterworth filter topology for a maximally flat response and good balance between smoothing and response time.
+
+3. Set the cutoff frequency to about 0.5Hz, which is low enough to smooth the 2Hz signal but still responsive to changes in the alarm state.
+
+Here's a circuit design:
+
+```
+     R1       R2
+Vin ---/\/\/\---/\/\/\---+--- Vout
+               |         |
+               |         |
+            ---+----     |
+            |      |     |
+           C1     C2    ---
+            |      |    | |
+           GND    GND   | | Op Amp (LM358)
+                        | |
+                        ---
+                         |
+                        GND
+```
+
+Component values:
+- R1 = R2 = 330kΩ
+- C1 = C2 = 1µF
+- Op Amp: LM358 (can operate on single supply voltage)
+
+This configuration will:
+1. Smooth the 2Hz pulse into a steady voltage
+2. Provide an output above 2.5V when the LED is flashing
+3. Be readable by a digital pin on your ESP32
+
+Power the LM358 with your ESP32's 3.3V supply. The output will be a steady voltage that you can connect directly to an available digital pin on your ESP32.
+
+To interpret the signal, read the digital pin in your ESP32 code. A HIGH reading indicates the alarm is armed (LED flashing), while a LOW reading indicates it's disarmed (LED off).
+
+Sources
+[1] Analog to Digital Converter - ESP32 - Espressif Systems https://docs.espressif.com/projects/esp-idf/en/v4.2/esp32/api-reference/peripherals/adc.html
+[2] Filtre numerique RII, RIF….digital filter...FFT...atmega328, ESP32 https://forum.arduino.cc/t/filtre-numerique-rii-rif-digital-filter-fft-atmega328-esp32/640606?page=2
+[3] Low-Pass Filter a PWM Signal into an Analog Voltage https://www.allaboutcircuits.com/technical-articles/low-pass-filter-a-pwm-signal-into-an-analog-voltage/
+[4] Controlling Lights With Your Eyes : 9 Steps (with Pictures) https://www.instructables.com/Controlling-Lights-With-Your-Eyes/
+[5] Subwoofer active low pass filter - ElectroIMC https://www.electroimc.com/en/doc/projects/audio/1_subwoofer_active_low_pass_filter
+P

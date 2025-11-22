@@ -1,0 +1,17 @@
+# Excalidraw MoC.md
+
+---
+aliases: []
+---
+> ### Tags: 
+
+2022-07-02
+# Excalidraw MOC
+
+### Backlink
+[[Obsidian MOC]]
+
+### Reference
+- [[Obsidian/Excalidraw/Tutorials]] 
+### Notes
+-

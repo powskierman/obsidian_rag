@@ -1,0 +1,20 @@
+---
+aliases: 
+tags:
+  - watch
+---
+# Apple Watch MoC
+Date: 2023-11-07
+
+### Backlink
+[[Apple MOC]]
+
+### Reference
+-  [[New Apple Watch App]]
+### Notes
+- [[Watch Troubleshooting]]
+- [[Xcode won't connect to Apple Watch]]
+- [[../../Electronics/Software/Home-Assistant/media/Home-Assistant Apple Watch]]
+- [[Apple Watch Unlock Mac not Working]]
+- [[WatchConnectivity]]
+- [[Digital Crown Rotation]]

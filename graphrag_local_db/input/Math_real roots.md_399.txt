@@ -1,0 +1,25 @@
+# real roots.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-01-29 12:10
+ContentType: Reference
+Backlink: "[[Quadratic Formula]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- a root is a "solution" of the equation. It is called a real root if it is also a real number. 
+-
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

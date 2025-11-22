@@ -1,0 +1,30 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-11 14:30
+ContentType: Reference
+Backlink: "[[Algebra MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- [Cuemath, Rationalization](https://www.cuemath.com/numbers/rationalize-the-denominator/)
+- 
+
+- To rationalize is to move the root from the bottom of a fraction (denominator) to the top of the fraction (numerator). This way, the denominator becomes rational.
+- **Step 1:** Multiply both the  and  by a suitable  that will remove the radicals in the denominator.
+-  **Step 2:** We need to make sure that all the surds in the given fraction are in their simplified form.
+-  **Step 3:** If needed, we can simplify the fraction further.
+- Ex: If $a ∈ Z$, $b ∈ N$ and $a ± b \ne 0$ then
+	- $1 \over(a ∓ √b)$ = ($1 \over(a ∓ √b)$)($(a ∓ √b) \over(a ∓ √b)$)=$(a ∓ √b) \over (a^2 - b)$.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

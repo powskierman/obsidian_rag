@@ -1,0 +1,554 @@
+---
+id: 16112702
+updated: 2022-06-18
+title: The Grand Design
+author: Stephen Hawking, Leonard Mlodinow
+highlights: 131
+last_highlight: 2015-04-20
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112702
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51P7-SvOA1L._SL500_.jpg)
+
+# About
+Title: [[The Grand Design]]
+Authors: [[Stephen Hawking]], [[Leonard Mlodinow]]
+Category: #books
+Number of Highlights: ==131==
+Readwise URL: https://readwise.io/bookreview/16112702
+Date: [[2022-06-18]]
+Last Highlighted: *2015-04-20*
+
+---
+
+# Highlights
+
+model-dependent realism. It is based on the idea that our brains interpret the input from our sensory organs by making a model of the world. When such a model is successful at explaining events, we tend to attribute to it, and to the elements and concepts that constitute it, the quality of reality or absolute truth. ([65](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=65)) %% Color: yellow %% ^334465250
+
+---
+
+According to M-theory, ours is not the only universe. Instead, M-theory predicts that a great many universes were created out of nothing. Their creation does not require the intervention of some supernatural being or god. Rather, these multiple universes arise naturally from physical law. ([86](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=86)) %% Color: yellow %% ^334465251
+
+---
+
+Thales first developed the idea that the world can be understood, that the complex happenings around us could be reduced to simpler principles and explained without resorting to mythical or theological explanations. ([140](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=140)) %% Color: yellow %% ^334465252
+
+---
+
+Ionian science was an endeavor marked by a strong interest in uncovering fundamental laws to explain natural phenomena, a tremendous milestone in the history of human ideas. ([144](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=144)) %% Color: yellow %% ^334465253
+
+---
+
+the only physical laws known correctly to the ancients were three laws detailed by Archimedes (ca. 287 BC–ca. 212 BC), by far the most eminent physicist of antiquity. In today’s terminology, the law of the lever explains that small forces can lift large weights because the lever amplifies a force according to the ratio of the distances from the lever’s fulcrum. The law of buoyancy states that any object immersed in a fluid will experience an upward force equal to the weight of the displaced fluid. And the law of reflection asserts that the angle between a beam of light and a mirror is equal to the angle between the mirror and the reflected beam. ([158](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=158)) %% Color: yellow %% ^334465254
+
+---
+
+Anaximander (ca. 610 BC–ca. 546 BC), a friend and possibly a student of Thales, argued that since human infants are helpless at birth, if the first human had somehow appeared on earth as an infant, it would not have survived. In what may have been humanity’s first inkling of evolution, people, Anaximander reasoned, must therefore have evolved from other animals ([166](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=166)) %% Color: yellow %% ^334465255
+
+---
+
+Around the same time Democritus (ca 460 BC–ca. 370 BC), from an Ionian colony in northern Greece, pondered what happened when you break or cut an object into pieces. He argued that you ought not to be able to continue the process indefinitely. Instead he postulated that everything, including all living beings, is made of fundamental particles that cannot be cut or broken into parts. He named these ultimate particles atoms, from the Greek adjective meaning “uncuttable.” ([175](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=175)) %% Color: yellow %% ^334465256
+
+---
+
+The revolutionary idea that we are but ordinary inhabitants of the universe, not special beings distinguished by existing at its center, was first championed by Aristarchus (ca. 310 BC–ca. 230 BC), one of the last of the Ionian scientists. ([181](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=181)) %% Color: yellow %% ^334465257
+
+---
+
+he became the first person to argue that the earth is not the center of our planetary system, but rather that it and the other planets orbit the much larger sun. ([185](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=185)) %% Color: yellow %% ^334465258
+
+---
+
+Aristarchus suspected that this was the case and believed that the stars we see in the night sky are actually nothing more than distant suns. ([187](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=187)) %% Color: yellow %% ^334465259
+
+---
+
+The Ionian idea that the universe is not human-centered was a milestone in our understanding of the cosmos, but it was an idea that would be dropped and not picked up again, or commonly accepted, until Galileo, almost twenty centuries later. ([196](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=196)) %% Color: yellow %% ^334465260
+
+---
+
+In the thirteenth century the early Christian philosopher Thomas Aquinas (ca. 1225–1274) adopted this view and used it to argue for the existence of God, writing, “It is clear that [inanimate bodies] reach their end not by chance but by intention…. There is therefore, an intelligent personal being by whom everything in nature is ordered to its end.” Even as late as the sixteenth century, the great German astronomer Johannes Kepler (1571–1630) believed that planets had sense perception and consciously followed laws of movement that were grasped by their “mind.” ([211](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=211)) %% Color: yellow %% ^334465261
+
+---
+
+The notion that the laws of nature had to be intentionally obeyed reflects the ancients’ focus on why nature behaves as it does, rather than on how it behaves. ([215](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=215)) %% Color: yellow %% ^334465262
+
+---
+
+The base ten number notation we find so convenient for arithmetic dates back only to around AD 700, when the Hindus took the first great strides toward making that subject a powerful tool. ([218](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=218)) %% Color: yellow %% ^334465263
+
+---
+
+The abbreviations for plus and minus didn’t come until the fifteenth century. And neither the equal sign nor clocks that could measure times to the second existed before the sixteenth century. ([220](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=220)) %% Color: yellow %% ^334465264
+
+---
+
+Aristotle built his physics upon principles that appealed to him intellectually. He suppressed facts he found unappealing and focused his efforts on the reasons things happen, with relatively little energy invested in detailing exactly what was happening. ([223](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=223)) %% Color: yellow %% ^334465265
+
+---
+
+Though Aristotle’s theories often had little predictive value, his approach to science dominated Western thought for nearly two thousand years. ([230](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=230)) %% Color: yellow %% ^334465266
+
+---
+
+The Greeks’ Christian successors rejected the idea that the universe is governed by indifferent natural law. They also rejected the idea that humans do not hold a privileged place within that universe. ([231](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=231)) %% Color: yellow %% ^334465267
+
+---
+
+Galileo did uncover a great many laws, and advocated the important principles that observation is the basis of science and that the purpose of science is to research the quantitative relationships that exist between physical phenomena. ([241](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=241)) %% Color: yellow %% ^334465268
+
+---
+
+the person who first explicitly and rigorously formulated the concept of laws of nature as we understand them was René Descartes (1596–1650). ([242](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=242)) %% Color: yellow %% ^334465269
+
+---
+
+According to Descartes, God could at will alter the truth or falsity of ethical propositions or mathematical theorems, but not nature. ([254](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=254)) %% Color: yellow %% ^334465270
+
+---
+
+Newton was the person who won widespread acceptance of the modern concept of a scientific law with his three laws of motion and his law of gravity, ([261](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=261)) %% Color: yellow %% ^334465271
+
+---
+
+a law of nature is a rule that is based upon an observed regularity and provides predictions that go beyond the immediate situations upon which it is based. ([267](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=267)) %% Color: yellow %% ^334465272
+
+---
+
+once a sphere of uranium-235 grew to a diameter greater than about six inches, it would demolish itself in a nuclear explosion. ([279](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=279)) %% Color: yellow %% ^334465273
+
+---
+
+In modern science laws of nature are usually phrased in mathematics. ([282](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=282)) %% Color: yellow %% ^334465274
+
+---
+
+If nature is governed by laws, three questions arise: What is the origin of the laws? Are there any exceptions to the laws, i.e., miracles? Is there only one set of possible laws? ([287](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=287)) %% Color: yellow %% ^334465275
+
+---
+
+In opposition to Descartes’s view, almost all Christian thinkers maintained that God must be able to suspend the laws to accomplish miracles. ([298](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=298)) %% Color: yellow %% ^334465276
+
+---
+
+scientific determinism: Given the state of the universe at one time, a complete set of laws fully determines both the future and the past. ([305](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=305)) %% Color: yellow %% ^334465277
+
+---
+
+Though we feel that we can choose what we do, our understanding of the molecular basis of biology shows that biological processes are governed by the laws of physics and chemistry and therefore are as determined as the orbits of the planets. ([324](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=324)) %% Color: yellow %% ^334465278
+
+---
+
+it is our physical brain, following the known laws of science, that determines our actions, and not some agency that exists outside those laws. ([326](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=326)) %% Color: yellow %% ^334465279
+
+---
+
+In physics, an effective theory is a framework created to model certain observed phenomena without describing in detail all of the underlying processes. ([335](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=335)) %% Color: yellow %% ^334465280
+
+---
+
+they are the mathematical reflection of an external reality that exists independent of the observer who sees it. ([357](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=357)) %% Color: yellow %% ^334465281
+
+---
+
+held as official doctrine for fourteen hundred years. It was not until 1543 that an alternative model was put forward by Copernicus ([384](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=384)) %% Color: yellow %% ^334465282
+
+---
+
+the real advantage of the Copernican system is simply that the equations of motion are much simpler in the frame of reference in which the sun is at rest. ([398](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=398)) %% Color: yellow %% ^334465283
+
+---
+
+There is no picture- or theory-independent concept of reality. Instead we will adopt a view that we will call model-dependent realism: the idea that a physical theory or world picture is a model (generally of a mathematical nature) and a set of rules that connect the elements of the model to observations. This provides a framework with which to interpret modern science. ([410](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=410)) %% Color: yellow %% ^334465284
+
+---
+
+Strict realists often argue that the proof that scientific theories represent reality lies in their success. But different theories can successfully describe the same phenomenon through disparate conceptual frameworks. ([428](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=428)) %% Color: yellow %% ^334465285
+
+---
+
+David Hume (1711–1776), who wrote that although we have no rational grounds for believing in an objective reality, we also have no choice but to act as if it is true. ([438](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=438)) %% Color: yellow %% ^334465286
+
+---
+
+According to model-dependent realism, it is pointless to ask whether a model is real, only whether it agrees with observation. ([442](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=442)) %% Color: yellow %% ^334465287
+
+---
+
+Model-dependent realism applies not only to scientific models but also to the conscious and subconscious mental models we all create in order to interpret and understand the everyday world. ([447](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=447)) %% Color: yellow %% ^334465288
+
+---
+
+Our perception—and hence the observations upon which our theories are based—is not direct, but rather is shaped by a kind of lens, the interpretive structure of our human brains. ([450](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=450)) %% Color: yellow %% ^334465289
+
+---
+
+according to model-dependent realism, quarks exist in a model that agrees with our observations of how subnuclear particles behave. ([489](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=489)) %% Color: yellow %% ^334465290
+
+---
+
+A model is a good model if it: Is elegant Contains few arbitrary or adjustable elements Agrees with and explains all existing observations Makes detailed predictions about future observations that can disprove or falsify the model if they are not borne out. ([504](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=504)) %% Color: yellow %% ^334465291
+
+---
+
+scientists view a model that is contorted to match a specific set of observations as unsatisfying, more of a catalog of data than a theory likely to embody any useful principle. ([520](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=520)) %% Color: yellow %% ^334465292
+
+---
+
+many people view the “standard model,” which describes the interactions of the elementary particles of nature, as inelegant. ([522](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=522)) %% Color: yellow %% ^334465293
+
+---
+
+In the first two thousand or so years of scientific thought, ordinary experience and intuition were the basis for theoretical explanation. As we improved our technology and expanded the range of phenomena that we could observe, we began to find nature behaving in ways that were less and less in line with our everyday experience ([615](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=615)) %% Color: yellow %% ^334465294
+
+---
+
+Given the state of a system at some time, the laws of nature determine the probabilities of various futures and pasts rather than determining the future and past with certainty. ([689](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=689)) %% Color: yellow %% ^334465295
+
+---
+
+Feynman realized one does not have to interpret that to mean that particles take no path as they travel between source and screen. It could mean instead that particles take every possible path connecting those points. ([727](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=727)) %% Color: yellow %% ^334465296
+
+---
+
+In Feynman’s model a quantum particle samples every path connecting A and B, collecting a number called a phase for each path. That phase represents the position in the cycle of a wave, that is, whether the wave is at a crest or trough or some precise position in between. ([744](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=744)) %% Color: yellow %% ^334465297
+
+---
+
+Feynman’s mathematical prescription for calculating that phase showed that when you add together the waves from all the paths you get the “probability amplitude” that the particle, starting at A, will reach B. The square of that probability amplitude then gives the correct probability that the particle will reach B. ([746](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=746)) %% Color: yellow %% ^334465298
+
+---
+
+According to Feynman’s theory, the phases associated with each path depend upon Planck’s constant. ([758](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=758)) %% Color: yellow %% ^334465299
+
+---
+
+It turns out that for large objects, paths very similar to the path predicted by Newton’s will have similar phases and add up to give by far the largest contribution to the sum, and so the only destination that has a probability effectively greater than zero is the destination predicted by Newtonian theory, and that destination has a probability that is very nearly one. ([762](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=762)) %% Color: yellow %% ^334465300
+
+---
+
+Between the initial state of the system and our later measurement of its properties, those properties evolve in some way, which physicists call the system’s history. ([769](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=769)) %% Color: yellow %% ^334465301
+
+---
+
+of observing the particle to land at any given point depends upon all the paths that could have gotten it there, Feynman showed that, for a general system, the probability of any observation is constructed from all the possible histories that could have led to that observation. ([771](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=771)) %% Color: yellow %% ^334465302
+
+---
+
+Quantum physics tells us that no matter how thorough our observation of the present, the (unobserved) past, like the future, is indefinite and exists only as a spectrum of possibilities. The universe, according to quantum physics, has no single past, or history. ([804](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=804)) %% Color: yellow %% ^334465303
+
+---
+
+HE UNIVERSE IS COMPREHENSIBLE because it is governed by scientific laws; that is to say, its behavior can be modeled. ([831](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=831)) %% Color: yellow %% ^334465304
+
+---
+
+The first force to be described in mathematical language was gravity. Newton’s law of gravity, published in 1687, said that every object in the universe attracts every other object with a force proportional to its mass. ([832](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=832)) %% Color: yellow %% ^334465305
+
+---
+
+The next aspects of the universe for which a law or model was discovered were the electric and magnetic forces. These behave like gravity, with the important difference that two electric charges or two magnets of the same kind repel each other, while unlike charges or unlike magnets attract. Electric and magnetic forces are far stronger than gravity, but we don’t usually notice them in everyday life because a macroscopic body contains almost equal numbers of positive and negative electrical charges. ([842](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=842)) %% Color: yellow %% ^334465306
+
+---
+
+One of the most important discoveries was that electrical and magnetic forces are related: A moving electrical charge causes a force on magnets, and a moving magnet causes a force on electrical charges. ([848](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=848)) %% Color: yellow %% ^334465307
+
+---
+
+One of Faraday’s greatest intellectual innovations was the idea of force fields. ([862](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=862)) %% Color: yellow %% ^334465308
+
+---
+
+Today we believe that all forces are transmitted by fields, so it is an important concept in modern physics—as ([869](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=869)) %% Color: yellow %% ^334465309
+
+---
+
+James Clerk Maxwell developed Faraday’s thinking into a mathematical framework that explained the intimate and mysterious relation among electricity, magnetism, and light. The result was a set of equations describing both electric and magnetic forces as manifestations of the same physical entity, the electromagnetic field. ([875](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=875)) %% Color: yellow %% ^334465310
+
+---
+
+he showed that electromagnetic fields could propagate through space as a wave. ([877](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=877)) %% Color: yellow %% ^334465311
+
+---
+
+gravity, in Einstein’s theory, is not a force like other forces; rather, it is a consequence of the fact that mass distorts space-time, creating curvature. In Einstein’s theory, objects move on geodesics, which are the nearest things to straight lines in a curved space. Lines are geodesics on the flat plane, and great circles are geodesics on the surface of the earth. In the absence of matter, the geodesics in four-dimensional space-time correspond to lines in three-dimensional space. But when matter is present, distorting space-time, the paths of bodies in the corresponding three-dimensional space curve in a manner that in Newtonian theory was explained by the attraction of gravity. When space-time is not flat, objects’ paths appear to be bent, giving the impression that a force is acting on them. ([998](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=998)) %% Color: yellow %% ^334465312
+
+---
+
+so general relativity has transformed physics into geometry. ([1010](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1010)) %% Color: yellow %% ^334465313
+
+---
+
+Maxwell’s theory of electromagnetism and Einstein’s theory of gravity—general relativity—are both, like Newton’s own physics, classical theories. That is, they are models in which the universe has a single history. ([1012](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1012)) %% Color: yellow %% ^334465314
+
+---
+
+we wish to understand the behavior of atoms and molecules, we need a quantum version of Maxwell’s theory of electromagnetism; and if we want to understand the early universe, when all the matter and energy in the universe were squeezed into a small volume, we must have a quantum version of the theory of general relativity. ([1016](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1016)) %% Color: yellow %% ^334465315
+
+---
+
+We also need such theories because if we are seeking a fundamental understanding of nature, it would not be consistent if some of the laws were quantum while others were classical. We therefore have to find quantum versions of all the laws of nature. Such theories are called quantum field theories. ([1018](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1018)) %% Color: yellow %% ^334465316
+
+---
+
+The known forces of nature can be divided into four classes: 1. Gravity. This is the weakest of the four, but it is a long-range force and acts on everything in the universe as an attraction. This means that for large bodies the gravitational forces all add up and can dominate over all other forces. 2. Electromagnetism. This is also long-range and is much stronger than gravity, but it acts only on particles with an electric charge, being repulsive between charges of the same sign and attractive between charges of the opposite sign. This means the electric forces between large bodies cancel each other out, but on the scales of atoms and molecules they dominate. Electromagnetic forces are responsible for all of chemistry and biology. 3. Weak nuclear force. This causes radioactivity and plays a vital role in the formation of the elements in stars and the early universe. We don’t, however, come into contact with this force in our everyday lives. 4. Strong nuclear force. This force holds together the protons and neutrons inside the nucleus of an atom. It also holds together the protons and neutrons themselves, which is necessary because they are made of still tinier particles, the quarks we mentioned in Chapter 3. The strong force is the energy source for the sun and nuclear power, but, as with the weak force, we don’t have direct contact with it. ([1020](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1020)) %% Color: yellow %% ^334465317
+
+---
+
+The first force for which a quantum version was created was electromagnetism. The quantum theory of the electromagnetic field, called quantum electrodynamics, or QED for short, was developed in the 1940s by Richard Feynman and others, and has become a model for all quantum field theories. ([1032](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1032)) %% Color: yellow %% ^334465318
+
+---
+
+in quantum field theories the force fields are pictured as being made of various elementary particles called bosons, which are force-carrying particles that fly back and forth between matter particles, transmitting the forces. ([1035](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1035)) %% Color: yellow %% ^334465319
+
+---
+
+The matter particles are called fermions. Electrons and quarks are examples of fermions. The photon, or particle of light, is an example of a boson. ([1036](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1036)) %% Color: yellow %% ^334465320
+
+---
+
+In QED the sum over all possible histories can be represented as a sum over Feynman diagrams ([1049](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1049)) %% Color: yellow %% ^334465321
+
+---
+
+To deal with these infinities, a procedure called renormalization was developed. ([1068](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1068)) %% Color: yellow %% ^334465322
+
+---
+
+The process of renormalization involves subtracting quantities that are defined to be infinite and negative in such a way that, with careful mathematical accounting, the sum of the negative infinite values and the positive infinite values that arise in the theory almost cancel out, leaving a small remainder, ([1069](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1069)) %% Color: yellow %% ^334465323
+
+---
+
+once we have fixed the mass and charge of the electron in this manner, we can employ QED to make many other very precise predictions, which all agree extremely closely with observation, so renormalization is one of the essential ingredients of QED. ([1075](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1075)) %% Color: yellow %% ^334465324
+
+---
+
+the division of natural forces into four classes is probably artificial and a consequence of our lack of understanding. ([1080](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1080)) %% Color: yellow %% ^334465325
+
+---
+
+People have therefore sought a theory of everything that will unify the four classes into a single law that is compatible with quantum theory. This would be the holy grail of physics. ([1081](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1081)) %% Color: yellow %% ^334465326
+
+---
+
+electromagnetism was unified with the weak force, and found that the unification cured the plague of infinities. The unified force is called the electroweak force. Its theory could be renormalized, and it predicted three new particles called W+, W–, and Z0. ([1086](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1086)) %% Color: yellow %% ^334465327
+
+---
+
+The strong force can be renormalized on its own in a theory called QCD, or quantum chromodynamics. According to QCD, the proton, the neutron, and many other elementary particles of matter are made of quarks, which have a remarkable property that physicists have come to call color (hence the term “chromodynamics,” although quark colors are just helpful labels—there is no connection with visible color). Quarks come in three so-called colors, red, green, and blue. In addition, each quark has an anti-particle partner, and the colors of those particles are called anti-red, anti-green, and anti-blue. The idea is that only combinations with no net color can exist as free particles. ([1090](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1090)) %% Color: yellow %% ^334465328
+
+---
+
+A color and its anti-color cancel, so a quark and an anti-quark form a colorless pair, an unstable particle called a meson. Also, when all the three colors (or anti-colors) are mixed, the result has no net color. Three quarks, one of each color, form stable particles called baryons, of which protons and neutrons are examples ([1095](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1095)) %% Color: yellow %% ^334465329
+
+---
+
+Asymptotic freedom means that the strong forces between quarks are small when the quarks are close together but increase if they are farther apart, rather as though they were joined by rubber bands. Asymptotic freedom explains why we don’t see isolated quarks in nature and have been unable to produce them in the laboratory. ([1100](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1100)) %% Color: yellow %% ^334465330
+
+---
+
+most physicists adopted an ad hoc theory called the standard model, which comprises the unified theory of the electroweak forces and QCD as a theory of the strong forces. But in the standard model, the electroweak and strong forces act separately and are not truly unified. The standard model is very successful and agrees with all current observational evidence, but it is ultimately unsatisfactory because, apart from not unifying the electroweak and strong forces, it does not include gravity. ([1118](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1118)) %% Color: yellow %% ^334465331
+
+---
+
+Since the uncertainty principle does not allow the values of both the field and the rate of change to be exact, space is never empty. It can have a state of minimum energy, called the vacuum, but that state is subject to what are called quantum jitters, or vacuum fluctuations—particles and fields quivering in and out of existence. One can think of the vacuum fluctuations as pairs of particles that appear together at some time, move apart, then come together and annihilate each other. ([1129](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1129)) %% Color: yellow %% ^334465332
+
+---
+
+In physics a system is said to have a symmetry if its properties are unaffected by a certain transformation such as rotating it in space or taking its mirror image. ([1147](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1147)) %% Color: yellow %% ^334465333
+
+---
+
+Supersymmetry is a more subtle kind of symmetry that cannot be associated with a transformation of ordinary space. One of the important implications of supersymmetry is that force particles and matter particles, and hence force and matter, are really just two facets of the same thing. ([1149](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1149)) %% Color: yellow %% ^334465334
+
+---
+
+Practically speaking, that means that each matter particle, such as a quark, ought to have a partner particle that is a force particle, and each force particle, such as the photon, ought to have a partner particle that is a matter particle. ([1151](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1151)) %% Color: yellow %% ^334465335
+
+---
+
+M-theory has eleven space-time dimensions, ([1190](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1190)) %% Color: yellow %% ^334465336
+
+---
+
+M-theory can contain not just vibrating strings but also point particles, two-dimensional membranes, three-dimensional blobs, and other objects that are more difficult to picture and occupy even more dimensions of space, up to nine. These objects are called p-branes (where p runs from zero to nine). ([1191](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1191)) %% Color: yellow %% ^334465337
+
+---
+
+The laws of M-theory therefore allow for different universes with different apparent laws, depending on how the internal space is curled. ([1200](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1200)) %% Color: yellow %% ^334465338
+
+---
+
+M-theory has solutions that allow for many different internal spaces, perhaps as many as 10500, which means it allows for 10500 different universes, each with its own laws. ([1201](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1201)) %% Color: yellow %% ^334465339
+
+---
+
+general relativity predicts there to be a point in time at which the temperature, density, and curvature of the universe are all infinite, a situation mathematicians call a singularity. ([1293](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1293)) %% Color: yellow %% ^334465340
+
+---
+
+during this cosmological inflation, the universe expanded by a factor of 1,000,000,000,000,000,000,000,000,000,000 in .00000000000000000000000000000000001 second. It was as if a coin 1 centimeter in diameter suddenly blew up to ten million times the width of the Milky Way. That may seem to violate relativity, which dictates that nothing can move faster than light, but that speed limit does not apply to the expansion of space itself. ([1300](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1300)) %% Color: yellow %% ^334465341
+
+---
+
+we are now confident that inflation really did happen. ([1310](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1310)) %% Color: yellow %% ^334465342
+
+---
+
+Inflation explains the bang in the big bang, at least in the sense that the expansion it represents was far more extreme than the expansion predicted by the traditional big bang theory of general relativity during the time interval in which inflation occurred. ([1317](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1317)) %% Color: yellow %% ^334465343
+
+---
+
+if you go far enough back in time, the universe was as small as the Planck size, a billion-trillion-trillionth of a centimeter, which is the scale at which quantum theory does have to be taken into account. ([1327](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1327)) %% Color: yellow %% ^334465344
+
+---
+
+the origin of the universe was a quantum event. ([1329](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1329)) %% Color: yellow %% ^334465345
+
+---
+
+In the early universe—when the universe was small enough to be governed by both general relativity and quantum theory—there were effectively four dimensions of space and none of time. ([1357](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1357)) %% Color: yellow %% ^334465346
+
+---
+
+That is beyond our experience, but not beyond our imagination, or our mathematics. ([1360](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1360)) %% Color: yellow %% ^334465347
+
+---
+
+when one combines the general theory of relativity with quantum theory, the question of what happened before the beginning of the universe is rendered meaningless. This idea that histories should be closed surfaces without boundary is called the no-boundary condition. ([1367](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1367)) %% Color: yellow %% ^334465348
+
+---
+
+If the origin of the universe was a quantum event, it should be accurately described by the Feynman sum over histories. ([1374](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1374)) %% Color: yellow %% ^334465349
+
+---
+
+particles of matter fired at a screen with two slits in it could exhibit interference patterns just as water waves do. Feynman showed that this arises because a particle does not have a unique history. ([1376](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1376)) %% Color: yellow %% ^334465350
+
+---
+
+Applied to the motion of a particle, Feynman’s method tells us that to calculate the probability of any particular endpoint we need to consider all the possible histories that the particle might follow from its starting point to that endpoint. ([1380](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1380)) %% Color: yellow %% ^334465351
+
+---
+
+In this view, the universe appeared spontaneously, starting off in every possible way. Most of these correspond to other universes. While some of those universes are similar to ours, most are very different. ([1384](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1384)) %% Color: yellow %% ^334465352
+
+---
+
+Some people make a great mystery of this idea, sometimes called the multiverse concept, but these are just different expressions of the Feynman sum over histories. ([1387](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1387)) %% Color: yellow %% ^334465353
+
+---
+
+In the sum over histories, there is only one completely uniform and regular history, and it will have the greatest probability, but many other histories that are very slightly irregular will have probabilities that are almost as high. That is why inflation predicts that the early universe is likely to be slightly nonuniform, corresponding to the small variations in the temperature that were observed in the CMBR. ([1396](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1396)) %% Color: yellow %% ^334465354
+
+---
+
+The irregularities in the early universe are important because if some regions had a slightly higher density than others, the gravitational attraction of the extra density would slow the expansion of that region compared with its surroundings. ([1400](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1400)) %% Color: yellow %% ^334465355
+
+---
+
+We are the product of quantum fluctuations in the very early universe. ([1404](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1404)) %% Color: yellow %% ^334465356
+
+---
+
+top-down cosmology dictates that the apparent laws of nature are different for different histories. ([1427](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1427)) %% Color: yellow %% ^334465357
+
+---
+
+as long as the probability amplitude for three large space dimensions is not exactly zero, it doesn’t matter how small it is compared with the probability amplitude for other numbers of dimensions. ([1439](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1439)) %% Color: yellow %% ^334465358
+
+---
+
+in M-theory the precise shape of the remaining curled-up dimensions, the internal space, determines both the values of physical quantities such as the charge on the electron and the nature of the interactions between elementary particles, that is, the forces of nature. ([1444](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1444)) %% Color: yellow %% ^334465359
+
+---
+
+The no-boundary condition implies that the probability amplitude is highest for histories in which the universe starts out completely smooth. ([1458](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1458)) %% Color: yellow %% ^334465360
+
+---
+
+our universe itself is also one of many, and that its apparent laws are not uniquely determined. ([1466](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1466)) %% Color: yellow %% ^334465361
+
+---
+
+any solar system with multiple suns would probably never allow life to develop. ([1488](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1488)) %% Color: yellow %% ^334465362
+
+---
+
+uniform heating over long periods of time, a situation that seems necessary for life, would be unlikely. ([1490](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1490)) %% Color: yellow %% ^334465363
+
+---
+
+the earth’s orbit has an eccentricity of only about 2 percent, which means it is nearly circular. ([1498](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1498)) %% Color: yellow %% ^334465364
+
+---
+
+Seasonal weather patterns on earth are determined mainly by the tilt of the earth’s axis of rotation relative to the plane of its orbit around the sun. ([1501](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1501)) %% Color: yellow %% ^334465365
+
+---
+
+The largest stars have a mass about a hundred times that of our sun, while the smallest are about a hundred times less massive. ([1511](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1511)) %% Color: yellow %% ^334465366
+
+---
+
+scientists define the habitable zone as the narrow region around the star in which temperatures are such that liquid water can exist. ([1514](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1514)) %% Color: yellow %% ^334465367
+
+---
+
+the fact of our being restricts the characteristics of the kind of environment in which we find ourselves. That principle is called the weak anthropic principle. ([1529](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1529)) %% Color: yellow %% ^334465368
+
+---
+
+Environmental coincidences are easy to understand because ours is only one cosmic habitat among many that exist in the universe, and we obviously must exist in a habitat that supports life. ([1551](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1551)) %% Color: yellow %% ^334465369
+
+---
+
+The strong anthropic principle suggests that the fact that we exist imposes constraints not just on our environment but on the possible form and content of the laws of nature themselves. ([1554](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1554)) %% Color: yellow %% ^334465370
+
+---
+
+the early universe, which was almost completely uniform but thankfully contained density variations of about 1 part in 100,000. ([1561](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1561)) %% Color: yellow %% ^334465371
+
+---
+
+helium and lithium, atoms whose nuclei contain two and three protons, were also primordially synthesized, in much smaller amounts, when the universe was about 200 seconds old. ([1572](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1572)) %% Color: yellow %% ^334465372
+
+---
+
+This process of carbon creation is called the triple alpha process because “alpha particle” is another name for the nucleus of the isotope of helium involved, and because the process requires that three of them (eventually) fuse together. ([1595](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1595)) %% Color: yellow %% ^334465373
+
+---
+
+a change of as little as 0.5 percent in the strength of the strong nuclear force, or 4 percent in the electric force, would destroy either nearly all carbon or all oxygen in every star, and hence the possibility of life as we know it. ([1607](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1607)) %% Color: yellow %% ^334465374
+
+---
+
+if the other nuclear force, the weak force, were much weaker, in the early universe all the hydrogen in the cosmos would have turned to helium, and hence there would be no normal stars; if it were much stronger, exploding supernovas would not eject their outer envelopes, and hence would fail to seed interstellar space with the heavy elements planets require to foster life. If protons were 0.2 percent heavier, they would decay into neutrons, destabilizing atoms. If the sum of the masses of the types of quark that make up a proton were changed by as little as 10 percent, there would be far fewer of the stable atomic nuclei of which we are made; in fact, the summed quark masses seem roughly optimized for the existence of the largest number of stable nuclei. ([1613](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1613)) %% Color: yellow %% ^334465375
+
+---
+
+according to the laws of gravity, it is only in three dimensions that stable elliptical orbits are possible. ([1620](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1620)) %% Color: yellow %% ^334465376
+
+---
+
+The laws of nature form a system that is extremely fine-tuned, and very little in physical law can be altered without destroying the possibility of the development of life as we know it. ([1630](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1630)) %% Color: yellow %% ^334465377
+
+---
+
+That multiverse idea is not a notion invented to account for the miracle of fine-tuning. It is a consequence of the no-boundary condition as well as many other theories of modern cosmology. ([1677](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1677)) %% Color: yellow %% ^334465378
+
+---
+
+it means that our cosmic habitat—now the entire observable universe—is only one of many, just as our solar system is one of many. ([1680](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1680)) %% Color: yellow %% ^334465379
+
+---
+
+On the scale of the entire universe, the positive energy of the matter can be balanced by the negative gravitational energy, and so there is no restriction on the creation of whole universes. ([1818](https://readwise.io/to_kindle?action=open&asin=B003TXSF5C&location=1818)) %% Color: yellow %% ^334465380
+
+---

@@ -1,0 +1,18 @@
+---
+aliases: []
+tags: [
+ coolterm
+ monitor
+]
+---
+# Coolterm Serial Monitor
+Date: 2023-07-29
+
+### Backlink
+[[]]
+
+### Reference
+-  [CoolTerm Help and Reference](file:///Applications/CoolTerm.app/Contents/Resources/Help/index.html)
+- 
+### Notes
+-  

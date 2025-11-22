@@ -1,0 +1,82 @@
+---
+date: 2025-10-20
+tags: AI, RAG, quickstart, setup
+status: active
+---
+
+# Obsidian RAG Quick Start
+
+## Backlink
+[[Obsidian RAG System MoC]] | [[AI Projects]]
+
+## Reference
+- Complete guide: [[Building a Local Obsidian RAG System]]
+- Project: `/Users/michel/ai/RAG/obsidian_rag`
+- Code: See Claude artifacts
+
+## Main Idea
+Fast-track guide to get the Obsidian RAG system running in 20 minutes.
+
+---
+
+## Quick Setup (20 minutes)
+
+### 1. Install Dependencies (3 min)
+```bash
+cd /Users/michel/ai/RAG/obsidian_rag
+source venv/bin/activate
+pip install mem0ai watchdog sentence-transformers torch
+```
+
+### 2. Download Model (10 min)
+```bash
+ollama pull qwen2.5-coder:32b
+```
+
+### 3. Copy Files from Artifacts (5 min)
+- embedding_service.py
+- obsidian_rag_ui.py
+- rag_with_memory.py
+- watching_scanner.py
+- simple_scanner.py
+- obsidian_rag_mcp.py
+- extract_scripts.sh
+
+### 4. Create Scripts (1 min)
+```bash
+chmod +x extract_scripts.sh
+./extract_scripts.sh
+```
+
+### 5. Initialize Memory (1 min)
+```bash
+python rag_with_memory.py init
+```
+
+### 6. Start System
+```bash
+./start_obsidian_rag.sh
+```
+
+### 7. Test
+Open: http://localhost:8501
+Try: "What do I know about lymphoma treatment?"
+
+---
+
+## Daily Usage
+
+**Start:** `./start_obsidian_rag.sh`  
+**Stop:** `./stop_obsidian_rag.sh`  
+**Status:** `./check_status.sh`
+
+---
+
+## Related
+- [[Obsidian RAG System MoC]]
+- [[RAG Memory System]]
+
+---
+
+## Tags
+#AI #RAG #quickstart #setup

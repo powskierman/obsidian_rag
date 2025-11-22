@@ -1,0 +1,927 @@
+---
+aliases: ["RAG UI", "Chat Interfaces", "Frontend for AI"]
+tags: [AI, RAG, frontend, gradio, streamlit, chainlit, react, UI]
+created: 2025-10-18
+ContentType: Technical Reference
+Backlink: "[[Open Source RAG Stack MoC]]"
+---
+
+# Frontend Frameworks for RAG
+
+> Build beautiful chat interfaces without complex frontend development
+
+## Overview
+
+Open source frontend frameworks let you create professional chat interfaces in minutes instead of days. Perfect for RAG systems where you need clean, user-friendly UI without hiring frontend developers.
+
+**Key Benefit:** Professional UI in 10-30 minutes with minimal code
+
+---
+
+## Quick Comparison
+
+| Framework | Language | Setup Time | Complexity | Best For |
+|-----------|----------|------------|------------|----------|
+| **Gradio** | Python | 10 min | ⭐ Very Easy | Rapid prototyping |
+| **Streamlit** | Python | 15 min | ⭐ Very Easy | Data apps |
+| **Chainlit** | Python | 20 min | ⭐⭐ Easy | LLM-focused apps |
+| **React** | JavaScript | 2-3 days | ⭐⭐⭐⭐ Complex | Full customization |
+| **Open WebUI** | Docker | 5 min | ⭐ Very Easy | ChatGPT clone |
+
+---
+
+## 1. Gradio (RECOMMENDED FOR BEGINNERS)
+
+### Overview
+- **License:** Apache 2.0
+- **Language:** Python
+- **Best For:** Rapid prototyping, ML demos
+- **Website:** https://gradio.app/
+
+### Why Choose Gradio?
+✅ Create UI in ~10 lines of code
+✅ Built-in chat interface
+✅ Automatic API generation
+✅ Share publicly or privately
+✅ Built-in authentication
+✅ File uploads supported
+
+### Installation
+
+```bash
+pip install gradio
+```
+
+### Basic Chat Interface
+
+```python
+import gradio as gr
+import requests
+
+def query_rag(message, history):
+    """Send message to n8n webhook and get response"""
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        json={"userMessage": message}
+    )
+    return response.json()["text"]
+
+# Create chat interface
+demo = gr.ChatInterface(
+    fn=query_rag,
+    title="RAG Knowledge Base",
+    description="Ask questions about our documentation",
+    theme="soft",
+    examples=[
+        "What is RAG?",
+        "How do I get started?",
+        "What are the costs?"
+    ]
+)
+
+# Launch
+demo.launch(
+    server_name="0.0.0.0",  # Allow external access
+    server_port=7860,
+    share=True  # Create public link
+)
+```
+
+### Advanced Features
+
+```python
+import gradio as gr
+import requests
+
+def query_with_context(message, history, system_prompt, temperature):
+    """Advanced query with customization"""
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        json={
+            "userMessage": message,
+            "systemPrompt": system_prompt,
+            "temperature": temperature
+        }
+    )
+    return response.json()["text"]
+
+# Chat interface with additional inputs
+demo = gr.ChatInterface(
+    fn=query_with_context,
+    title="Advanced RAG System",
+    additional_inputs=[
+        gr.Textbox(
+            value="You are a helpful assistant.",
+            label="System Prompt",
+            lines=3
+        ),
+        gr.Slider(
+            minimum=0.0,
+            maximum=2.0,
+            value=0.7,
+            label="Temperature"
+        )
+    ],
+    theme="soft"
+)
+
+demo.launch(share=True)
+```
+
+### File Upload Support
+
+```python
+import gradio as gr
+import requests
+
+def query_with_file(message, file, history):
+    """Query with file upload"""
+    files = {'file': open(file.name, 'rb')} if file else None
+    data = {'userMessage': message}
+    
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        data=data,
+        files=files
+    )
+    return response.json()["text"]
+
+demo = gr.ChatInterface(
+    fn=query_with_file,
+    title="RAG with Document Upload",
+    additional_inputs=[
+        gr.File(label="Upload Document (optional)")
+    ]
+)
+
+demo.launch(share=True)
+```
+
+### Custom Themes
+
+```python
+import gradio as gr
+
+# Use built-in themes
+demo = gr.ChatInterface(
+    fn=query_rag,
+    theme="monochrome"  # Options: soft, default, monochrome, glass, etc.
+)
+
+# Or create custom theme
+from gradio.themes import Base
+
+class CustomTheme(Base):
+    pass
+
+custom_theme = CustomTheme(
+    primary_hue="blue",
+    secondary_hue="gray",
+    neutral_hue="slate",
+)
+
+demo = gr.ChatInterface(
+    fn=query_rag,
+    theme=custom_theme
+)
+```
+
+### Authentication
+
+```python
+import gradio as gr
+
+demo = gr.ChatInterface(
+    fn=query_rag,
+    title="Secure RAG System"
+)
+
+demo.launch(
+    auth=("admin", "password123"),  # Basic auth
+    # Or use auth function
+    # auth=lambda user, pwd: user == "admin" and pwd == "secret"
+)
+```
+
+### Hosting Options
+
+**1. Local:**
+```bash
+python app.py
+# Access at http://localhost:7860
+```
+
+**2. HuggingFace Spaces (FREE):**
+```python
+demo.launch(share=False)
+# Deploy to spaces.huggingface.co
+```
+
+**3. Railway/Render:**
+```bash
+# Procfile
+web: python app.py
+```
+
+**4. Docker:**
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY app.py .
+EXPOSE 7860
+CMD ["python", "app.py"]
+```
+
+### When to Use Gradio
+- ✅ Need UI in 10 minutes
+- ✅ Python is primary language
+- ✅ Rapid prototyping
+- ✅ Demo/MVP creation
+- ✅ Internal tools
+
+---
+
+## 2. Streamlit
+
+### Overview
+- **License:** Apache 2.0
+- **Language:** Python
+- **Best For:** Data apps and dashboards
+- **Website:** https://streamlit.io/
+
+### Why Choose Streamlit?
+✅ Reactive updates
+✅ Rich widget library
+✅ Session state management
+✅ Custom components
+✅ Great documentation
+
+### Installation
+
+```bash
+pip install streamlit
+```
+
+### Basic Chat Interface
+
+```python
+import streamlit as st
+import requests
+
+st.title("RAG Knowledge Base")
+st.caption("Powered by n8n + Ollama")
+
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Display chat history
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Chat input
+if prompt := st.chat_input("Ask a question"):
+    # Display user message
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    # Query n8n webhook
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        json={"userMessage": prompt}
+    )
+    
+    # Display assistant response
+    assistant_response = response.json()["text"]
+    with st.chat_message("assistant"):
+        st.markdown(assistant_response)
+    st.session_state.messages.append({"role": "assistant", "content": assistant_response})
+```
+
+### Run Streamlit
+
+```bash
+streamlit run app.py
+# Access at http://localhost:8501
+```
+
+### Advanced Features
+
+```python
+import streamlit as st
+import requests
+
+# Sidebar configuration
+with st.sidebar:
+    st.title("⚙️ Settings")
+    model = st.selectbox("Model", ["llama3.2", "mistral", "mixtral"])
+    temperature = st.slider("Temperature", 0.0, 2.0, 0.7)
+    max_tokens = st.number_input("Max Tokens", 100, 4000, 1000)
+    
+    if st.button("Clear Chat"):
+        st.session_state.messages = []
+        st.rerun()
+
+# Main chat
+st.title("Advanced RAG System")
+
+# Display metrics
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric("Total Messages", len(st.session_state.messages))
+with col2:
+    st.metric("Model", model)
+with col3:
+    st.metric("Temperature", temperature)
+
+# Chat interface
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+if prompt := st.chat_input("Ask a question"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    with st.chat_message("user"):
+        st.markdown(prompt)
+    
+    # Query with settings
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        json={
+            "userMessage": prompt,
+            "model": model,
+            "temperature": temperature,
+            "max_tokens": max_tokens
+        }
+    )
+    
+    assistant_response = response.json()["text"]
+    with st.chat_message("assistant"):
+        st.markdown(assistant_response)
+    
+    st.session_state.messages.append({"role": "assistant", "content": assistant_response})
+```
+
+### File Upload
+
+```python
+import streamlit as st
+
+st.title("RAG with Document Upload")
+
+uploaded_file = st.file_uploader("Upload a document", type=["pdf", "txt", "docx"])
+
+if uploaded_file:
+    # Process file
+    st.success(f"Uploaded: {uploaded_file.name}")
+    
+    # Send to n8n
+    files = {'file': uploaded_file}
+    response = requests.post("YOUR_N8N_WEBHOOK_URL", files=files)
+```
+
+### When to Use Streamlit
+- ✅ Need dashboards or analytics
+- ✅ Python-based team
+- ✅ Rich widgets needed
+- ✅ Data visualization
+- ✅ Internal tools
+
+---
+
+## 3. Chainlit
+
+### Overview
+- **License:** Apache 2.0
+- **Language:** Python
+- **Best For:** LLM-focused applications
+- **Website:** https://chainlit.io/
+
+### Why Choose Chainlit?
+✅ Built for LLM apps
+✅ Streaming responses
+✅ Step-by-step visualization
+✅ File attachments
+✅ User authentication
+✅ Chat history persistence
+
+### Installation
+
+```bash
+pip install chainlit
+```
+
+### Basic Chat
+
+```python
+import chainlit as cl
+import requests
+
+@cl.on_message
+async def main(message: cl.Message):
+    """Handle incoming messages"""
+    
+    # Query n8n
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        json={"userMessage": message.content}
+    )
+    
+    # Send response
+    await cl.Message(
+        content=response.json()["text"]
+    ).send()
+```
+
+### Run Chainlit
+
+```bash
+chainlit run app.py -w
+# Access at http://localhost:8000
+```
+
+### Streaming Responses
+
+```python
+import chainlit as cl
+import requests
+
+@cl.on_message
+async def main(message: cl.Message):
+    # Create message object
+    msg = cl.Message(content="")
+    
+    # Stream response
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        json={"userMessage": message.content},
+        stream=True
+    )
+    
+    for chunk in response.iter_content(chunk_size=1):
+        if chunk:
+            await msg.stream_token(chunk.decode())
+    
+    await msg.send()
+```
+
+### Step Visualization
+
+```python
+import chainlit as cl
+import requests
+
+@cl.on_message
+async def main(message: cl.Message):
+    # Step 1: Retrieve context
+    async with cl.Step(name="Retrieving Context") as step:
+        context_response = requests.post(
+            "YOUR_VECTOR_DB_URL",
+            json={"query": message.content}
+        )
+        context = context_response.json()["results"]
+        step.output = f"Found {len(context)} relevant documents"
+    
+    # Step 2: Generate response
+    async with cl.Step(name="Generating Response") as step:
+        response = requests.post(
+            "YOUR_LLM_URL",
+            json={
+                "message": message.content,
+                "context": context
+            }
+        )
+        answer = response.json()["text"]
+        step.output = answer
+    
+    # Send final response
+    await cl.Message(content=answer).send()
+```
+
+### File Attachments
+
+```python
+import chainlit as cl
+
+@cl.on_message
+async def main(message: cl.Message):
+    # Handle file attachments
+    if message.elements:
+        for element in message.elements:
+            await cl.Message(
+                content=f"Processing file: {element.name}"
+            ).send()
+            
+            # Send file to n8n
+            with open(element.path, 'rb') as f:
+                files = {'file': f}
+                response = requests.post(
+                    "YOUR_N8N_WEBHOOK_URL",
+                    files=files
+                )
+```
+
+### Authentication
+
+```python
+import chainlit as cl
+
+@cl.password_auth_callback
+def auth_callback(username: str, password: str):
+    # Verify credentials
+    if username == "admin" and password == "secret":
+        return cl.User(identifier=username)
+    return None
+
+@cl.on_chat_start
+async def start():
+    await cl.Message(content="Welcome! You're authenticated.").send()
+```
+
+### When to Use Chainlit
+- ✅ LLM-focused applications
+- ✅ Need streaming
+- ✅ Want step visualization
+- ✅ File handling required
+- ✅ Chat persistence needed
+
+---
+
+## 4. Custom React + PostgreSQL
+
+### Overview
+- **License:** Your choice
+- **Best For:** Complete customization
+- **Complexity:** High
+- **Time:** 2-3 days setup
+
+### Why Choose Custom React?
+✅ Full control over UX/UI
+✅ Advanced features
+✅ White-label ready
+✅ Scalable architecture
+✅ User management
+
+### Tech Stack
+
+```
+Frontend: React + TypeScript + Tailwind CSS
+Backend: FastAPI or Express.js
+Database: PostgreSQL (with pgvector)
+Auth: JWT or Auth0
+Deployment: Docker + Nginx
+```
+
+### Architecture
+
+```
+┌─────────────────┐
+│   React UI      │
+│  (Tailwind CSS) │
+└────────┬────────┘
+         │
+         ↓ HTTP/WebSocket
+┌─────────────────┐
+│   FastAPI       │
+│  (Python)       │
+└────────┬────────┘
+         │
+         ↓ SQL
+┌─────────────────┐
+│  PostgreSQL     │
+│  (pgvector)     │
+└────────┬────────┘
+         │
+         ↓ Webhook
+┌─────────────────┐
+│   n8n RAG       │
+└─────────────────┘
+```
+
+### Database Schema
+
+```sql
+-- Users
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Chat sessions
+CREATE TABLE chat_sessions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    title VARCHAR(255),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Messages
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    session_id INTEGER REFERENCES chat_sessions(id),
+    role VARCHAR(20) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Documents (with pgvector)
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE documents (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    embedding vector(1536),
+    metadata JSONB,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX ON documents USING ivfflat (embedding vector_cosine_ops);
+```
+
+### FastAPI Backend
+
+```python
+from fastapi import FastAPI, Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel
+import asyncpg
+import requests
+
+app = FastAPI()
+security = HTTPBearer()
+
+# Database connection
+async def get_db():
+    return await asyncpg.connect("postgresql://user:pass@localhost/ragdb")
+
+# Models
+class ChatMessage(BaseModel):
+    message: str
+    session_id: int
+
+class ChatResponse(BaseModel):
+    response: str
+    session_id: int
+
+# Chat endpoint
+@app.post("/chat", response_model=ChatResponse)
+async def chat(
+    msg: ChatMessage,
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    # Verify JWT token
+    user_id = verify_token(credentials.credentials)
+    
+    # Save user message
+    db = await get_db()
+    await db.execute("""
+        INSERT INTO messages (session_id, role, content)
+        VALUES ($1, $2, $3)
+    """, msg.session_id, "user", msg.message)
+    
+    # Query n8n RAG system
+    response = requests.post(
+        "YOUR_N8N_WEBHOOK_URL",
+        json={"userMessage": msg.message}
+    )
+    assistant_message = response.json()["text"]
+    
+    # Save assistant message
+    await db.execute("""
+        INSERT INTO messages (session_id, role, content)
+        VALUES ($1, $2, $3)
+    """, msg.session_id, "assistant", assistant_message)
+    
+    await db.close()
+    
+    return ChatResponse(
+        response=assistant_message,
+        session_id=msg.session_id
+    )
+```
+
+### React Frontend
+
+```typescript
+import { useState } from 'react';
+import axios from 'axios';
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export default function Chat() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const userMessage: Message = { role: 'user', content: input };
+    setMessages([...messages, userMessage]);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const response = await axios.post('/api/chat', {
+        message: input,
+        session_id: 1  // Get from context
+      }, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: response.data.response
+      };
+      setMessages([...messages, userMessage, assistantMessage]);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Chat messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-xl px-4 py-2 rounded-lg ${
+                msg.role === 'user'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-800 shadow'
+              }`}
+            >
+              {msg.content}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Input */}
+      <div className="border-t bg-white p-4">
+        <div className="flex space-x-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+            className="flex-1 border rounded-lg px-4 py-2"
+            placeholder="Ask a question..."
+            disabled={loading}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={loading}
+            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### When to Use Custom React
+- ✅ Need full customization
+- ✅ White-label product
+- ✅ Advanced features
+- ✅ Have development resources
+- ✅ Long-term product
+
+---
+
+## 5. Open WebUI
+
+### Overview
+- **License:** MIT
+- **Best For:** ChatGPT-like experience
+- **Website:** https://github.com/open-webui/open-webui
+
+### Why Choose Open WebUI?
+✅ Beautiful ChatGPT-style UI
+✅ Built for Ollama
+✅ RAG built-in
+✅ Multi-user support
+✅ Model switching
+✅ 5-minute setup
+
+### Docker Setup
+
+```bash
+docker run -d -p 3000:8080 \
+  -v open-webui:/app/backend/data \
+  --name open-webui \
+  ghcr.io/open-webui/open-webui:main
+```
+
+### With Ollama
+
+```bash
+docker run -d -p 3000:8080 \
+  --add-host=host.docker.internal:host-gateway \
+  -v open-webui:/app/backend/data \
+  --name open-webui \
+  --restart always \
+  ghcr.io/open-webui/open-webui:main
+```
+
+### Features
+- Multiple chat sessions
+- Document upload (RAG)
+- Model selection
+- User authentication
+- Admin panel
+- API access
+
+### When to Use Open WebUI
+- ✅ Want ChatGPT UI
+- ✅ Using Ollama
+- ✅ Need 5-minute setup
+- ✅ Multi-user environment
+- ✅ Internal tool
+
+---
+
+## Comparison Matrix
+
+### Feature Comparison
+
+| Feature | Gradio | Streamlit | Chainlit | React | Open WebUI |
+|---------|--------|-----------|----------|-------|------------|
+| **Setup Time** | 10 min | 15 min | 20 min | 2-3 days | 5 min |
+| **Code Required** | ⭐ Very Low | ⭐ Very Low | ⭐⭐ Low | ⭐⭐⭐⭐⭐ High | None |
+| **Customization** | ⭐⭐ Limited | ⭐⭐⭐ Moderate | ⭐⭐⭐ Moderate | ⭐⭐⭐⭐⭐ Full | ⭐⭐ Limited |
+| **Auth Built-in** | ✅ | ❌ | ✅ | Custom | ✅ |
+| **File Upload** | ✅ | ✅ | ✅ | Custom | ✅ |
+| **Streaming** | ❌ | ❌ | ✅ | Custom | ✅ |
+| **Chat History** | ❌ | Manual | ✅ | Custom | ✅ |
+
+---
+
+## Decision Guide
+
+### Choose Gradio If:
+- ✅ Need UI in 10 minutes
+- ✅ Python developer
+- ✅ MVP/prototype
+- ✅ Internal tool
+
+### Choose Streamlit If:
+- ✅ Need dashboards
+- ✅ Data visualization
+- ✅ Python developer
+- ✅ Rich widgets needed
+
+### Choose Chainlit If:
+- ✅ LLM-focused app
+- ✅ Need streaming
+- ✅ Step visualization
+- ✅ File handling
+
+### Choose React If:
+- ✅ Need full control
+- ✅ Have dev resources
+- ✅ White-label product
+- ✅ Advanced features
+
+### Choose Open WebUI If:
+- ✅ Want ChatGPT UI
+- ✅ Using Ollama
+- ✅ Need instant setup
+- ✅ Multi-user
+
+---
+
+## Related Notes
+- [[Open Source RAG Stack MoC]]
+- [[Complete Open Source RAG Stacks]]
+- [[Open Source RAG Quick Start]]
+
+---
+
+## Resources
+- Gradio: https://gradio.app/
+- Streamlit: https://streamlit.io/
+- Chainlit: https://chainlit.io/
+- Open WebUI: https://github.com/open-webui/open-webui

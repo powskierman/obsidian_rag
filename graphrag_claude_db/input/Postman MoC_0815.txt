@@ -1,0 +1,17 @@
+---
+aliases:
+tags:
+  - MoC
+  - postman
+created: 2025-10-13 14:03
+Backlink:
+---
+## Links
+- 
+## Related MoCs
+- [[]]
+- ## External Resources
+- 
+## Notes
+Postman API Key:
+	`PMAK-68ed3e1c64b3f000015456a7-4f5947114b6d2415881a8cd5e6a4087650`

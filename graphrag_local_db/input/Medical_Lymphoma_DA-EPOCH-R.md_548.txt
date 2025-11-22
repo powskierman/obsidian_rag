@@ -1,0 +1,42 @@
+# DA-EPOCH-R.md
+
+---
+aliases: []
+tags: [lymphoma]
+---
+# DA-EPOCH-R
+Date: 2024-12-17
+
+### Backlink
+[[Lymphoma MoC]]
+
+### Reference
+-  
+### Notes
+-  ==DA-EPOCH-R== has shown improved outcomes compared to standard [[R-CHOP]] in certain aggressive lymphomas, particularly those with [[MYC]] rearrangements or double-hit/triple-hit features.
+	•	==In a prospective study of [[MYC]]-rearranged lymphomas, DA-EPOCH-R achieved a 48-month event-free survival (EFS) rate of 71% and overall survival (OS) rate of 76.7%==.
+	•	Another retrospective study reported a 2-year progression-free survival (PFS) of 74% and OS of 84% for double-expressor lymphomas treated with DA-EPOCH-R.
+	•	For primary mediastinal B-cell lymphoma, DA-EPOCH-R achieved excellent outcomes with a 5-year OS of 97% and EFS of 93%, allowing omission of radiation therapy in most cases.
+	2.	Comparison with [[R-CHOP]]:
+	•	A phase III trial comparing DA-EPOCH-R to [[R-CHOP]] in diffuse large B-cell lymphoma (DLBCL) found no significant differences in PFS or OS between the two regimens for unselected patients. However, DA-EPOCH-R may provide better disease control in high-risk subtypes like double-hit lymphomas.
+	3.	Limitations:
+	•	While effective, DA-EPOCH-R has not consistently demonstrated superiority over [[R-CHOP]] for all aggressive lymphomas, and its use is often guided by specific genetic markers or high-risk features.
+Side Effects
+DA-EPOCH-R is associated with significant toxicity due to its intensity and continuous infusion approach.
+	3.	Common Side Effects:
+	•	Fatigue, nausea, vomiting
+	•	Low blood counts (neutropenia, anemia, thrombocytopenia), increasing infection risk
+	•	Neuropathy from vincristine
+	•	Mucositis (mouth sores), constipation
+	•	Steroid-related effects like mood changes, insomnia, and fluid retention.
+	2.	Severe Toxicities:
+	•	Grade 4 neutropenia occurred in over 50% of treatment cycles in one study; febrile neutropenia was seen in 19% of cycles.
+	•	Grade 3–4 complications such as sepsis, hemorrhage, and thrombocytopenia are common.
+	•	Rare but serious risks include cardiotoxicity from doxorubicin and line-associated complications like infections or thrombosis due to central venous catheters.
+	3.	Mortality Risk:
+	•	Treatment-related death occurred in about 7% of patients in some studies due to severe infections or organ failure.
+Clinical Implications
+	•	DA-EPOCH-R is typically reserved for aggressive lymphomas with poor prognosis features (e.g., [[MYC]] rearrangements or double-hit status).
+	•	Its intensive nature requires close monitoring during inpatient administration or outpatient care with frequent follow-ups.
+	•	Patients must be informed about the potential for severe side effects and the need for supportive care measures like growth factors (e.g., filgrastim) to manage neutropenia.
+In summary, DA-EPOCH-R is an effective but intensive regimen for high-risk lymphomas. Its use must balance potential survival benefits against significant toxicity risks, making patient selection and supportive care critical.

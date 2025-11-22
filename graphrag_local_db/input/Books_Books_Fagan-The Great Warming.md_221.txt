@@ -1,0 +1,28 @@
+# Fagan-The Great Warming.md
+
+---
+bookId: "64408"
+title: "The Great Warming: Climate Change and the Rise and Fall of Civilizations"
+author: Brian Fagan
+asin: B0047DVI5M
+lastAnnotatedDate: 2021-03-28
+highlightsCount: 4
+reference: https://www.amazon.com/dp/B0047DVI5M
+kindle_link: kindle://book?action=open&asin=B0047DVI5M
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81mpfCl06LL._SY160.jpg)
+## Highlights
+Horses and wheeled plows came into widespread use at about the same time as the three-field crop rotation system, which first appeared on monastic lands in northeastern France during the ninth century and spread gradually throughout Europe. — location: [589](kindle://book?action=open&asin=B0047DVI5M&location=589) ^ref-51458
+
+---
+Legumes, such as peas and beans, fixed nitrogen in the soil and maintained its fertility, so one could keep more animals. — location: [596](kindle://book?action=open&asin=B0047DVI5M&location=596) ^ref-7665
+
+---
+the faith that emerged from the ordeal of the conquests was narrower, more restricted, and closed to new ideas. The great traditions of Islamic learning in medicine, mathematics, history, geography, and astronomy that had flourished from 800 to 1200 now withered in the face of religious orthodoxy. — location: [912](kindle://book?action=open&asin=B0047DVI5M&location=912) ^ref-41089
+
+---
+Roderick McIntosh calls the middle Niger basin a “symbolic reservoir,” a place where a shared body of social values that originated in deep time survived over thousands of years to define history and society. — location: [1363](kindle://book?action=open&asin=B0047DVI5M&location=1363) ^ref-40831
+
+---

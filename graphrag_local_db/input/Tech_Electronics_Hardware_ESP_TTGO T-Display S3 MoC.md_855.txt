@@ -1,0 +1,49 @@
+# TTGO T-Display S3 MoC.md
+
+---
+aliases: []
+---
+# TTGO T-Display S3 MoC
+Date: 2022-11-25
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- [Github board repository for TTGO T-Display S3](https://github.com/Xinyuan-LilyGO/T-Display-S3)
+- [esp32 LVGL display driver](https://github.com/lvgl/lv_port_esp32) 
+- [Excellent basic tutorial](https://youtu.be/WFVjsxFMbSM)
+- [[text plotting alignment (reference datum point)]]
+- [[Default color definitions]]
+- [# RGB565 Color Picker](http://www.barth-dev.de/online/rgb565-color-picker/#)
+- [Drawing functions ](https://github.com/Ambercroft/TFT_eSPI/wiki/Drawing-functions)
+- [BodmerTFT_eSPI  library](https://github.com/Bodmer/TFT_eSPI)
+- [BodmerTFT_eWidget A TFT support GUI library providing button, graph, meter, and slider class functions.](https://github.com/Bodmer/TFT_eWidget)
+- [Rinky-Dink Image Converter](http://www.rinkydinkelectronics.com/t_imageconverter565.php)
+- [video - Custom Images](https://youtu.be/u1BvcRRiGq4)
+- [TTGO T Display Internet WatchClock  5 Steps - Instructables](https://www.instructables.com/TTGO-T-Display-Internet-WatchClock/)
+- [video -lvgl and esp-idf](https://youtu.be/88MwR-4Dy0Q)
+- [Getting TTGO ESP32-based T-DISPLAY to work](https://www.projectitis.com/getting-ttgo-esp32-based-t-display-to-work/)
+- [Fix bricked TTGO T-Display](https://youtu.be/zledBB6UPqE)
+- 
+### Notes
+- [![](https://github.com/Xinyuan-LilyGO/T-Display-S3/raw/main/image/T-DISPLAY-S3.jpg)](https://github.com/Xinyuan-LilyGO/T-Display-S3/blob/main/image/T-DISPLAY-S3.jpg)
+- Screen is 320 x 170 pixels 
+- Clear screen with :
+	- ```lcd.fillScreen(TFT_BLACK);```
+- Common functions
+	- Include library:
+		- ```#include "TFT_eSPI.h"```
+	- Create instance:
+		- ```TFT_eSPI lcd = TFT_eSPI();```
+	- Initialize instance:
+		- ```lcd.init();```
+	- Fill screen with color:
+		- ```lcd.fillScreen(TFT_RED);```
+	- Set text color:
+		- ```lcd.setTextColor(TFT_<color>);```
+	- Write text with specific font
+		- ```lcd.drawString("text",<x>,<y>,<)```
+- A Sprite is an invisible graphics screen that is kept in the processors RAM. Graphics can be drawn into the Sprite just as they can be drawn directly to the screen. Once the Sprite is completed it can be plotted onto the screen in any position.

@@ -1,0 +1,93 @@
+---
+date: 2025-10-20
+tags: AI, RAG, memory, Mem0
+status: active
+---
+
+# RAG Memory System (Mem0)
+
+## Backlink
+[[Obsidian RAG System MoC]] | [[AI Projects]]
+
+## Reference
+- Implementation: `rag_with_memory.py`
+- Database: `./mem0_db/`
+- Docs: https://docs.mem0.ai/
+
+## Main Idea
+Cross-session memory system that remembers conversations, user context, and personal timeline using Mem0.
+
+---
+
+## What It Does
+
+**Transforms RAG from stateless to stateful:**
+- Remembers past conversations
+- Tracks personal timeline (medical journey)
+- Maintains user preferences
+- Enables natural follow-up questions
+
+---
+
+## Pre-seeded Facts
+
+System knows:
+- High-grade B-cell DLBCL (double-hit)
+- R-CHOP → Yescarta timeline
+- 3-month scan (July 2025)
+- 6-month scan (October 2025)
+- Technical interests (3D printing, Raspberry Pi)
+- Privacy preferences (local-only)
+
+---
+
+## Usage
+
+### Initialize
+```bash
+python rag_with_memory.py init
+```
+
+### Query with Memory
+```python
+from rag_with_memory import MemoryRAG
+rag = MemoryRAG()
+result = rag.query("What should I expect at my scan?")
+```
+
+### View Memories
+```python
+memories = rag.get_all_memories()
+```
+
+### Interactive Mode
+```bash
+python rag_with_memory.py interactive
+```
+
+---
+
+## Example
+
+**First conversation:**
+```
+You: "Tell me about my treatment"
+RAG: [Full context about DLBCL, R-CHOP, Yescarta]
+```
+
+**Later:**
+```
+You: "What about side effects?"
+RAG: [Knows you mean Yescarta, no re-explanation]
+```
+
+---
+
+## Related
+- [[Obsidian RAG System MoC]]
+- [[Obsidian RAG Quick Start]]
+
+---
+
+## Tags
+#AI #RAG #memory #Mem0

@@ -1,0 +1,195 @@
+---
+aliases:
+tags:
+created: 2023-01-25 12:47
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Ever since I tried ChatGPT and GPT-3, **everything else feels painfully dumb** and useless: Siri, Alexa, Google Home and all other “smart” assistants.
+
+Here’s the shocking thing: you can build your own in less than an hour!
+
+![](https://miro.medium.com/max/1400/1*OVhfYqPzT-biY3G6tU17xA.jpeg)
+
+I have a fully built HomeKit smart home with dozens of lights, thermostats, underfloor heating, ventilation unit, cameras and a lot more, so I thought it **would be great if I could replace Siri with GPT-3**.
+
+> I asked GPT-3 to pretend to be the smart brain of my house, carefully explained what it can access around the house and how to respond to my requests.
+> 
+> I explained all this in plain English with no programme code involved.
+
+Before we go into the details, here’s the demo. Bear in mind that the responses are always personalised and is not limited to what’s in the demo. You can literally ask anything you want and any way you want it!
+
+
+
+GPT-3, and especially ChatGPT are language models trained on conversational data which means they are extremely good at understanding and responding to human instructions.
+
+If you tried any of these chat bots, you know how easily you can ask questions and get responses in a wide range of formats. The complication is that when it comes to controlling a smart home you have very specific components to address and interact with. How can you solve this problem?
+
+> You can simply ask GPT-3 to interpret and categorise your request, then **respond in a structured data format**.
+
+Here’s the exact prompt I used to achieve all this:
+
+![](https://miro.medium.com/max/1400/1*Th35nz_cyJ2mQDS6HszKZw.png)
+
+The prompt I used to train my Home Assistant
+
+As you can see, I explained everything in plain English. I described the types of requests, the exact structure of the response, and asked it to behave like a sentient AI, giving advice even for personal questions. I also provided a few details about time, location, and the devices and rooms in the house. From this, we will receive a perfectly structured response.
+
+And that’s all there is to programming it!
+
+## Different request types
+
+Let’s now look at the four request categories and how we will handle them by looking at a few examples from the video.
+
+## :: Command action
+
+When GPT-3 detects that **you intend to control any part of the smart home**, it will respond with an action category of “command”.
+
+Our example request was:
+
+> Just noticed that I’m recording this video in the dark in the office.  
+> Can you do something about that?
+
+And we got this response back:
+
+```
+{  "action": "command",  "location": "office",  "target": "light",  "value": "on",  "comment": "Turning the light on for you.",  "scheduleTimeStamp": ""}
+```
+
+Honestly, when I first saw this response I couldn’t believe my eyes and how exceptionally well it worked!
+
+The request was not a simple “Switch the lights on the office.” It was phrased in a very twisted and elaborate way. Something that would immediately throw off Siri, Alexa or Google Home.
+
+**Also note that the comment sent back is always different and is always personalised to your request!**
+
+With this information, we now know exactly what we need to do and we will handle that later in the Siri Shortcut.
+
+You also probably noticed how we have an empty `scheduleTimeStamp` . This means the action needs to happen immediately, but it is possible to get a response back with this pre-filled with a future date and time if the command needs to happen later:
+
+> I sent my son to bed to read for another 20 minutes. Can you switch of the lights in his room when it’s time to sleep?
+
+In this case GPT-3 understood that it is probably the bedroom that needs switching off and it added the correct timestamp, which is 20 minutes after the time we passed into the request:
+
+```
+{  "action": "command",  "location": "bedroom",  "target": "light",  "value": "off",  "comment": "Switching the lights off in your son's bedroom.",  "scheduleTimeStamp": "Mon Jan 16 2023 12:16:31 GMT+0000"}
+```
+
+Another interesting example was how it was able to make a decision instead of me on what temperature I should set the bedroom to:
+
+> I’m going to trust you with this one! Set the bedroom to a temperature you think would help me sleep better.
+
+And it set the bedroom to a comfortable 19 celsius based on its knowledge!
+
+## :: Query action
+
+When GPT-3 detects that **you intend to read the state of a device in the smart home**, it will respond with an action category of “query”.
+
+Example request:
+
+> I just finished cooking a nice big meal in the kitchen, can you check what’s the temperature there?
+
+The response we get back is:
+
+```
+{  "action" : "query",  "location" : "kitchen",  "target" : "thermostat",  "property" : "temperature"}
+```
+
+Perfect! The action type changed to a query so we can go ahead and fetch the temperature of the kitchen thermostate. Again, we will do this later in the Siri Shortcut.
+
+## :: Answer action
+
+When GPT-3 detects that **your request has nothing to do with the smart home and it’s just a general question**, it will respond with an action category of “answer”.
+
+Example request:
+
+> We are going to head out for a short walk into the town center.  
+> Can you recommend a few things to see?
+
+Because I told GPT-3 in the request that the location of the smart home is St Albans, United Kingdom, it knows exactly how to respond!
+
+```
+{  "action": "answer",  "answer": "St Albans has a great selection of historical sites and attractions. The St Albans Cathedral is an impressive sight with its Norman architecture. The Verulamium Park is also a great place to visit with its Roman ruins and lovely gardens. For a more modern experience, you can visit the Museum of St Albans or the Alban Arena for a show."}
+```
+
+Nice and simple! Again, we will just pass this back to the Shortcut to read out loud.
+
+## :: Clarify action
+
+Finally, if GPT-3 was unable to detect any of the three actions, it will ask you to repeat or rephrase your question.
+
+## Handling the data in Siri Shortcuts
+
+Open the Shortcuts application on iOS, macOS or iPadOS and add in the details of your request:
+
+![](https://miro.medium.com/max/1400/1*dpUHNkLYltW1SFH9wh5ZWQ.png)
+
+One trick to remember is that to run your shortcut, you can simply say the name of your shortcut to Siri. So “Okay Smart Home” seemed like a good idea.
+
+Next, using the “Ask for <Text>…” action, we get the response from the user. This will be spoken out loud if you start the shortcut with Siri, or a type input field if you run by clicking the shortcut tile.
+
+We are now ready to send our request to OpenAI. For this, you will need to register an account and get your API token. It’s unders “View API keys” menu item after loggin in.
+
+Using the API will cost around $0.014 per request, so you could perform over 70 requests for $1. Bear in mind that this is considered expensive because our request is very long, so with shorter ones you will pay proportionally less. Maybe something to remember as you experiment.
+
+![](https://miro.medium.com/max/1400/1*aquSoiSwLRXnMJB4PA7qcQ.png)
+
+Once you have your API token ready, fill our the details of the request:  
+_— model: text-davinci-003  
+— prompt: <Text> Request: <Provided Input> Response:  
+— max\_tokens: 1000_
+
+In the headers section, add:  
+_— Content-Type: application/json  
+— Authorization: Bearer <addYourAPIToken>_
+
+Once we have the response data from the API, we need to dig it out as it’s nested in the JSON response. Once we have it, we assign it to a JSON variable, then we also extract the action category value:
+
+![](https://miro.medium.com/max/1400/1*V0uR8WOQYuI3vw9Gi5bSyw.png)
+
+With this, we are now ready to check the value of the action category in an if statement:
+
+![](https://miro.medium.com/max/1400/1*9f-TuEyEwUBtJOm-Ka6GaA.png)
+
+Once we know the action was a “command”, we can add further if statements to check the location, target and value fields and trigger the action: switching the office light on in our first example:
+
+![](https://miro.medium.com/max/1400/1*cSmvZjosyty3FRbqRioDBg.png)
+
+Outside the condition and after the “End If” blocks, we also show/announce the comment GPT-3 sent along with the request:
+
+![](https://miro.medium.com/max/1400/1*d2ZXdWkwtYeU5u8KK3dkJg.png)
+
+The query commands also work similarly with the built-in HomeKit actions:
+
+![](https://miro.medium.com/max/1400/1*wG-0SI8_RtP6mjobtYpXzw.png)
+
+Finally, the answer and clarify actions simply show/announce the returned value without any processing:
+
+![](https://miro.medium.com/max/1400/1*c3S1elckTmZKa-xV_SzPcQ.png)
+
+And that is all
+
+Now I know this sounds like a lot of if else statements, and to perfectly honest, I haven’t actually done my whole house. However, I know that is possible to abstract your logic into further smaller shortcuts with input parameters and they can return with a value (similar to functions in coding). I’m going to look into that and see if I can simplify things. Let me now if you have any ideas around that!
+
+Link to my Shortcut for you to try and adapt:  
+[https://www.icloud.com/shortcuts/e5d4033cf8024b5796e270c8fed9e478](https://www.icloud.com/shortcuts/e5d4033cf8024b5796e270c8fed9e478)
+
+## Conclusion
+
+How cool is this?? Being able to create your own smart assistants by simply defining it in plain English is simply mind blowing.
+
+But this is just one example. Imagine all the different prompts you could send to GPT-3 and then all the different actions you could perform in Siri Shortcuts.
+
+I’m almost certain you already have a few ideas around this so please let me know as I’m really interested!
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

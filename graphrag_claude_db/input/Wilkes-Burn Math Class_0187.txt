@@ -1,0 +1,20 @@
+---
+bookId: "45459"
+title: "Burn Math Class: And Reinvent Mathematics for Yourself"
+author: Jason Wilkes
+asin: B017QL8UHU
+lastAnnotatedDate: 2016-04-25
+highlightsCount: 2
+reference: https://www.amazon.com/dp/B017QL8UHU
+kindle_link: kindle://book?action=open&asin=B017QL8UHU
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81PX8Yz7YfL._SY160.jpg)
+## Highlights
+Creation is simply translation, from qualitative to quantitative. — location: [982](kindle://book?action=open&asin=B017QL8UHU&location=982) ^ref-50736
+
+---
+The purpose of math courses is not to create students who know things about math. The purpose of math courses is to create students who know how to think. — location: [1121](kindle://book?action=open&asin=B017QL8UHU&location=1121) ^ref-42527
+
+---

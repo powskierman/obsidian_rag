@@ -1,0 +1,23 @@
+# Rigol-MSO-5072-Backup.md
+
+---
+aliases:
+tags:
+created: 2021-12-29 13:48
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- <% tp.system.clipboard() %>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

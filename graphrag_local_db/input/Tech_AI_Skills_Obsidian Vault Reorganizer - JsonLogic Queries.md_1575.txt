@@ -1,0 +1,353 @@
+# Obsidian Vault Reorganizer - JsonLogic Queries.md
+
+---
+title: Obsidian Vault Reorganizer - JsonLogic Queries
+aliases: [JsonLogic Queries, Complex Search Examples]
+tags: [obsidian, jsonlogic, search, queries, reference]
+created: 2025-10-25
+related: [Obsidian Vault Reorganizer - Overview, Obsidian Vault Reorganizer - MCP Tools Reference]
+---
+
+### Main Idea
+- JsonLogic query examples for `obsidian_complex_search()`
+- Complete reference with practical examples for vault reorganization
+- Covers all common search patterns and operators
+
+### Available Variables
+
+When writing JsonLogic queries, you can access:
+- `path` - File path relative to vault root
+- `content` - Full file content including frontmatter
+- `frontmatter.*` - Access any frontmatter field (e.g., `frontmatter.tags`)
+
+### Basic Operators
+
+#### Equality
+```json
+{"==": [{"var": "frontmatter.status"}, "draft"]}
+```
+Find notes where status equals "draft"
+
+#### Inequality
+```json
+{"!=": [{"var": "frontmatter.status"}, "completed"]}
+```
+Find notes where status is NOT "completed"
+
+#### Greater Than / Less Than
+```json
+{">": [{"var": "frontmatter.priority"}, 5]}
+{"<": [{"var": "frontmatter.priority"}, 10]}
+```
+
+#### In (Contains)
+```json
+{"in": ["project", {"var": "frontmatter.tags"}]}
+```
+Find notes that have "project" in their tags
+
+---
+
+### Logical Operators
+
+#### AND
+```json
+{
+  "and": [
+    {"==": [{"var": "frontmatter.status"}, "active"]},
+    {"in": ["urgent", {"var": "frontmatter.tags"}]}
+  ]
+}
+```
+Find active notes tagged as urgent
+
+#### OR
+```json
+{
+  "or": [
+    {"==": [{"var": "frontmatter.category"}, "project"]},
+    {"==": [{"var": "frontmatter.category"}, "task"]}
+  ]
+}
+```
+Find notes in "project" OR "task" category
+
+#### NOT
+```json
+{"not": {"in": ["archived", {"var": "frontmatter.tags"}]}}
+```
+Find notes that are NOT archived
+
+---
+
+### Pattern Matching
+
+#### GLOB (Wildcard)
+```json
+{"glob": ["*.md", {"var": "path"}]}
+{"glob": ["Projects/*", {"var": "path"}]}
+{"glob": ["*TODO*", {"var": "content"}]}
+```
+- `*` matches any characters
+- Use for path matching and simple patterns
+
+#### REGEXP (Regular Expression)
+```json
+{"regexp": ["^---\\n", {"var": "content"}]}
+{"regexp": ["#[a-z]+", {"var": "content"}]}
+```
+- More powerful than glob
+- Use for complex patterns
+
+---
+
+### Practical Queries for Vault Reorganization
+
+#### Find Notes Without Frontmatter
+```json
+{
+  "and": [
+    {"glob": ["*.md", {"var": "path"}]},
+    {"not": {"regexp": ["^---\\n", {"var": "content"}]}}
+  ]
+}
+```
+**Use:** Phase 3 - Identify notes needing frontmatter
+
+---
+
+#### Find Empty or Near-Empty Notes
+```json
+{
+  "and": [
+    {"glob": ["*.md", {"var": "path"}]},
+    {"<": [{"length": {"var": "content"}}, 50]}
+  ]
+}
+```
+**Use:** Phase 2 - Find notes to potentially delete
+
+---
+
+#### Find Notes with Specific Tag
+```json
+{
+  "and": [
+    {"glob": ["*.md", {"var": "path"}]},
+    {"in": ["project", {"var": "frontmatter.tags"}]}
+  ]
+}
+```
+**Use:** Phase 5 - Organize by tags
+
+---
+
+#### Find Notes in Specific Folder
+```json
+{"glob": ["Projects/*", {"var": "path"}]}
+```
+**Use:** Folder-specific operations
+
+---
+
+#### Find Notes NOT in Any Subfolder (Root Level)
+```json
+{
+  "and": [
+    {"glob": ["*.md", {"var": "path"}]},
+    {"not": {"regexp": ["/", {"var": "path"}]}}
+  ]
+}
+```
+**Use:** Find notes that need to be organized into folders
+
+---
+
+#### Find Draft Notes
+```json
+{"==": [{"var": "frontmatter.status"}, "draft"]}
+```
+**Use:** Filter by status field
+
+---
+
+#### Find Notes with Empty or Missing Backlinks
+```json
+{
+  "or": [
+    {"!": {"var": "frontmatter.backlinks"}},
+    {"==": [{"var": "frontmatter.backlinks"}, []]}
+  ]
+}
+```
+**Use:** Phase 4 - Find notes needing backlinks
+
+---
+
+#### Find Notes by Multiple Categories
+```json
+{
+  "or": [
+    {"in": ["technical", {"var": "frontmatter.categories"}]},
+    {"in": ["programming", {"var": "frontmatter.categories"}]},
+    {"in": ["code", {"var": "frontmatter.categories"}]}
+  ]
+}
+```
+**Use:** Find notes matching any of several categories
+
+---
+
+#### Find Old Notes (By Date)
+```json
+{"<": [{"var": "frontmatter.modified"}, "2024-01-01"]}
+```
+**Use:** Find stale notes for review
+
+---
+
+#### Exclude Templates and System Files
+```json
+{
+  "and": [
+    {"glob": ["*.md", {"var": "path"}]},
+    {"not": {"glob": ["Templates/*", {"var": "path"}]}},
+    {"not": {"glob": ["_*", {"var": "path"}]}},
+    {"not": {"glob": [".obsidian/*", {"var": "path"}]}}
+  ]
+}
+```
+**Use:** Filter out system files from operations
+
+---
+
+### Complex Combination Queries
+
+#### Find Uncategorized Project Notes
+```json
+{
+  "and": [
+    {"in": ["project", {"var": "frontmatter.tags"}]},
+    {
+      "or": [
+        {"!": {"var": "frontmatter.categories"}},
+        {"==": [{"var": "frontmatter.categories"}, []]}
+      ]
+    }
+  ]
+}
+```
+**Use:** Phase 5 - Find projects needing categorization
+
+---
+
+#### Find Active Notes Needing Review
+```json
+{
+  "and": [
+    {"==": [{"var": "frontmatter.status"}, "active"]},
+    {"<": [{"var": "frontmatter.modified"}, "2024-10-01"]},
+    {"not": {"in": ["reviewed", {"var": "frontmatter.tags"}]}}
+  ]
+}
+```
+**Use:** Maintenance - find stale active notes
+
+---
+
+#### Find Notes That Should Be Archived
+```json
+{
+  "and": [
+    {"==": [{"var": "frontmatter.status"}, "completed"]},
+    {"<": [{"var": "frontmatter.modified"}, "2024-06-01"]},
+    {"not": {"glob": ["Archive/*", {"var": "path"}]}}
+  ]
+}
+```
+**Use:** Phase 5 - Identify notes for archiving
+
+---
+
+### References
+- [[Obsidian Vault Reorganizer - Overview]]
+- [[Obsidian Vault Reorganizer - MCP Tools Reference]]
+
+### Notes
+
+**Usage Pattern:**
+```python
+# In your reorganization script
+query = {
+    "and": [
+        {"glob": ["*.md", {"var": "path"}]},
+        {"not": {"regexp": ["^---\\n", {"var": "content"}]}}
+    ]
+}
+
+results = obsidian_complex_search(query=query)
+```
+
+**Tips:**
+1. **Test incrementally** - Start simple, add complexity
+2. **Use glob for paths** - More readable than regexp
+3. **Combine with graph_query** - Filter by metadata, then analyze relationships
+4. **Cache results** - Store to avoid redundant searches
+5. **Handle null values** - Always check if fields exist with `!` operator
+
+**Common Patterns:**
+
+**"All notes except X":**
+```json
+{
+  "and": [
+    {"glob": ["*.md", {"var": "path"}]},
+    {"not": {"your_exception_condition"}}
+  ]
+}
+```
+
+**"Notes matching any criteria":**
+```json
+{
+  "or": [
+    {"condition_1"},
+    {"condition_2"},
+    {"condition_3"}
+  ]
+}
+```
+
+**"Notes in folder with tag":**
+```json
+{
+  "and": [
+    {"glob": ["Folder/*", {"var": "path"}]},
+    {"in": ["tag", {"var": "frontmatter.tags"}]}
+  ]
+}
+```
+
+### Related Notes
+- [[Obsidian Vault Reorganizer - Complete Workflow]]
+- [[Obsidian Vault Reorganizer - MCP Tools Reference]]
+- [[MCP MoC]]
+
+### Questions / Ideas for Further Exploration
+- How to query by date ranges effectively?
+- Performance implications of complex queries on large vaults?
+- Combining multiple complex searches vs one large query?
+- Custom frontmatter fields - how to query effectively?
+
+### To-Do
+- [ ] Test basic queries on your vault
+- [ ] Create custom queries for your specific needs
+- [ ] Document your most-used query patterns
+- [ ] Build a library of queries for common tasks
+- [ ] Experiment with performance on large result sets
+
+### Smart Connections Insights
+- JsonLogic queries can complement Smart Connections filtering
+- Use complex_search for structured metadata queries
+- Use Smart Connections for semantic content queries
+- Combine both for powerful vault navigation

@@ -1,0 +1,20 @@
+# J-Link to ESP32.md
+
+---
+aliases: 
+tags:
+  - esp32
+  - Debugging
+  - j-link
+---
+# J-Link to ESP32
+Date: 2023-09-19
+
+### Backlink
+[[Debugging MoC]]
+
+### Reference
+-  [J-Link to ESP32](https://www.visualmicro.com/pics/Debug-Help-ESP32-Jlink-Connections.png)
+- 
+### Notes
+-  ![[9531A843-9B78-4AD8-A440-FC65E65BD59B.png]]

@@ -1,0 +1,15 @@
+---
+aliases: []
+---
+
+2022-03-12
+# Parts Models
+
+### Backlink
+[[]]
+
+### Reference
+
+### Notes
+- [SnapEDA](https://www.snapeda.com)
+-  

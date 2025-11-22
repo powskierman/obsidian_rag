@@ -1,0 +1,45 @@
+---
+bookId: "24399"
+title: "Digital Restoration from Start to Finish: How to repair old and damaged photographs"
+author: Ctein
+asin: B00BMTIE60
+lastAnnotatedDate: 2015-06-22
+highlightsCount: 10
+reference: https://www.amazon.com/dp/B00BMTIE60
+kindle_link: kindle://book?action=open&asin=B00BMTIE60
+tags:
+  - book-notes
+  - photography
+---
+![](https://m.media-amazon.com/images/I/51YMACJHCYL._SY160.jpg)
+## Highlights
+Even when I’m working with a “B&W” original, I still scan in full-color mode. — location: [1914](kindle://book?action=open&asin=B00BMTIE60&location=1914) ^ref-28267
+
+---
+When I’m ready to convert the scan of a monochrome photograph to grayscale, I almost never use the Desaturate adjustment or grayscale mode conversion. Instead, I use the Channel Mixer with the monochrome option selected. — location: [1942](kindle://book?action=open&asin=B00BMTIE60&location=1942) ^ref-12418
+
+---
+In Photoshop, click Image/Adjustments/Channel Mixer.… That opens up a control panel that displays the conversion options (Figure 4-16). Click the Monochrome option at the bottom of the panel. Although the file stays in RGB mode, it turns gray. — location: [1956](kindle://book?action=open&asin=B00BMTIE60&location=1956) ^ref-15413
+
+---
+Adjust the channel sliders to emphasize the color(s) you want to most retain and deemphasize the one(s) you want to get rid of. — location: [1960](kindle://book?action=open&asin=B00BMTIE60&location=1960) ^ref-46107
+
+---
+if you want to increase or decrease brightness, raise or lower the curve. If you want to increase or decrease contrast, make the slope of the curve greater (steeper) or lower (more horizontal). — location: [2412](kindle://book?action=open&asin=B00BMTIE60&location=2412) ^ref-20813
+
+---
+When you use the Curves tool, the cursor automatically becomes an eyedropper; clicking the eyedropper anywhere on the photograph overlays an open-circle indicator on the curve at the tonal value of that point in the photograph — location: [2444](kindle://book?action=open&asin=B00BMTIE60&location=2444) ^ref-30141
+
+---
+Numerical readouts below the graph report the exact value at that point (Input) and what it will change to when the curve is applied (Output). — location: [2446](kindle://book?action=open&asin=B00BMTIE60&location=2446) ^ref-13262
+
+---
+Photoshop’s Info window, shown in Figure 5-11, will also tell you the numerical values for the photograph under your cursor; — location: [2449](kindle://book?action=open&asin=B00BMTIE60&location=2449) ^ref-19289
+
+---
+If you shift-click on a point in the photograph with the eyedropper, it adds a readout point to the photograph; — location: [2452](kindle://book?action=open&asin=B00BMTIE60&location=2452) ^ref-11196
+
+---
+You can set adjustment points on the curve by Command-clicking (Control-clicking under Windows) on the tone in the photograph that you want to modify. Once you set a point, you can drag it up or down and to the left or right to alter the tones. — location: [2454](kindle://book?action=open&asin=B00BMTIE60&location=2454) ^ref-48307
+
+---

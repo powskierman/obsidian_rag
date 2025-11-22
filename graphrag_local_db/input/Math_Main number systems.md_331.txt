@@ -1,0 +1,34 @@
+# Main number systems.md
+
+---
+aliases:
+tags:
+  - math
+created: 2022-01-22 13:11
+ContentType: Reference
+Backlink: Math MOC
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- ![\mathbb {N} ](https://wikimedia.org/api/rest_v1/media/math/render/svg/fdf9a96b565ea202d0f4322e9195613fb26a9bed)[Natural](https://en.wikipedia.org/wiki/Natural_number "Natural number")	
+		- 0, 1, 2, 3, 4, 5, ... or 1, 2, 3, 4, 5, ...	
+		- ![\mathbb {N} _{0}](https://wikimedia.org/api/rest_v1/media/math/render/svg/77ab7e98123f0def29a1cd3df96a0b7a58f4202c) or ![\mathbb {N} _{1}](https://wikimedia.org/api/rest_v1/media/math/render/svg/0cca915d54ae835781191ae19599e11c7ff3d066) are sometimes used.	
+- ![\mathbb {Z} ](https://wikimedia.org/api/rest_v1/media/math/render/svg/449494a083e0a1fda2b61c62b2f09b6bee4633dc)[Integer](https://en.wikipedia.org/wiki/Integer "Integer")
+	- ..., −5, −4, −3, −2, −1, 0, 1, 2, 3, 4, 5, ...
+- ![\mathbb {Q} ](https://wikimedia.org/api/rest_v1/media/math/render/svg/c5909f0b54e4718fa24d5fd34d54189d24a66e9a)[Rational](https://en.wikipedia.org/wiki/Rational_number "Rational number")
+	- _a_/_b_ where _a_ and _b_ are integers and _b_ is not 0
+- ![\mathbb {R} ](https://wikimedia.org/api/rest_v1/media/math/render/svg/786849c765da7a84dbc3cce43e96aad58a5868dc)[Real](https://en.wikipedia.org/wiki/Real_number "Real number")
+	- The limit of a convergent sequence of rational [[Numbers]]
+- ![\mathbb {C} ](https://wikimedia.org/api/rest_v1/media/math/render/svg/f9add4085095b9b6d28d045fd9c92c2c09f549a7)[Complex](https://en.wikipedia.org/wiki/Complex_number "Complex number")
+	- *a* + _bi_ where _a_ and _b_ are real [[Numbers]] and _i_ is a formal square root of −1
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

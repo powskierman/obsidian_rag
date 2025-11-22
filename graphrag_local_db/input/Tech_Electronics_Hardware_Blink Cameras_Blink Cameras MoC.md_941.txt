@@ -1,0 +1,22 @@
+# Blink Cameras MoC.md
+
+---
+aliases: 
+tags:
+  - blink
+---
+# Blink Cameras MOC
+Date: 2022-07-18
+
+### Tags: 
+
+### Backlink
+[[Electronics MOC]]
+
+### Reference
+- 
+- 
+### Notes
+-  [Monitoring Amazon Blink Cameras with AWS IoT Core, Lambda and Grafana Dashboard](https://mustafa-kachwala.medium.com/monitoring-amazon-blink-cameras-with-aws-iot-core-lambda-and-grafana-dashboard-86eecb634966)
+- [Blink cameras and HomeAssistant](https://www.home-assistant.io/integrations/blink/)
+- [[NH Blink Cameras]]

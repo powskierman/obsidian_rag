@@ -1,0 +1,21 @@
+---
+aliases: []
+tags: [
+ mcuboot/cheatsheet
+ prj.conf
+]
+---
+# Build mcuboot app
+Date: 2023-07-24
+
+### Backlink
+[[MCUBoot MoC]]
+
+### Reference
+-  [[undefined reference to `__device_dts_ord_112']]
+-  [[undefined reference to __device_dts_ord]]
+- [[Mutex error]]
+- 
+### Notes
+-  In prj.conf add: CONFIG_BOOTLOADER_MCUBOOT=y
+- 

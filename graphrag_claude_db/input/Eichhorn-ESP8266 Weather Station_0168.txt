@@ -1,0 +1,26 @@
+---
+bookId: "16625"
+title: "ESP8266 Weather Station: Getting Started Guide"
+author: Daniel Eichhorn
+asin: B01LFX8Z5W
+lastAnnotatedDate: 2017-10-30
+highlightsCount: 4
+reference: https://www.amazon.com/dp/B01LFX8Z5W
+kindle_link: kindle://book?action=open&asin=B01LFX8Z5W
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/7136BefeCqL._SY160.jpg)
+## Highlights
+The ESP has one Analog To Digital Converter (ADC) which can be used to measure voltage in the range 0 - 1V. — location: [325](kindle://book?action=open&asin=B01LFX8Z5W&location=325) ^ref-39723
+
+---
+You can also use the ADC to measure the input voltage without any additional wiring. You have to instruct the processor that you want to measure the supply voltage rather than the value on A0 with a special command outside the setup() and loop() method. Here is an example:  1 ADC_MODE(ADC_VCC);  2  3 void setup() {  4    Serial.begin(115200);  5 }  6  7 void loop() {  8    Serial.println(ESP.getVcc());  9    delay(500); 10 } — location: [329](kindle://book?action=open&asin=B01LFX8Z5W&location=329) ^ref-42652
+
+---
+If you are programming a NodeMCU module you can use the printed D# names. If you use a generic ESP8266 module then you have to use the corresponding GPIO numbers. — location: [534](kindle://book?action=open&asin=B01LFX8Z5W&location=534) ^ref-8801
+
+---
+NodeMCU Index ESP8266 Internal NodeMCU Index ESP8266 Internal D0 GPIO16 D7 GPIO13 D1 GPIO5 D8 GPIO5 D2 GPIO4 D9 GPIO3 D3 GPIO0 D10 GPIO1 D4 GPIO2 D11 GPIO9 D5 GPIO14 D12 GPIO10 D6 GPIO12 — location: [536](kindle://book?action=open&asin=B01LFX8Z5W&location=536) ^ref-34834
+
+---

@@ -1,0 +1,45 @@
+# Swift Framework.md
+
+---
+aliases: 
+tags:
+  - swiftui
+  - framework
+---
+# Swift Framework
+Date: 2023-09-30
+
+### Backlink
+[[Swift MOC]]
+
+### Reference
+-  
+### Notes
+-  Creating a shared framework in Xcode allows you to encapsulate your library and reuse it across multiple apps or projects. Here's how you can create a shared framework from your HomeAssistantWebSocket library:
+
+1. Create a New Framework Project:
+	1. Open Xcode.
+	2. Select "Create a new Xcode project."
+	3. Choose "Framework" under macOS. If you're targeting iOS/tvOS/watchOS, choose the respective framework option under those platforms.
+	4. Name the framework (e.g., HomeAssistantFramework) and save it.
+2. Copy Library to Framework Project:
+3. In the framework project, right-click on the group (folder) in the Navigator pane.
+	1. Choose "New File".
+	2. Select "Swift File" and click "Next".
+	3. Name the file "HomeAssistantWebSocket.swift" and click "Create".
+	4. Copy and paste the HomeAssistantWebSocket code into this file.
+4. Resolve Dependencies:
+	1. If your library has dependencies (like Starscream), you'll need to add them to your framework project. Depending on the dependency management tool you're using (Swift Package Manager, CocoaPods, Carthage), the process might slightly differ.
+5. Public vs. Internal:
+	1. By default, all entities in a Swift framework are internal, meaning they can only be accessed within the framework itself.
+	2. To expose entities to the apps or projects that use the framework, you need to mark them as public. For example, your HomeAssistantWebSocket class and any protocols, methods, or properties you want to be accessible outside should be marked with the public access modifier.
+6. Build the Framework:
+	1. Click the "Build" button (or press Command + B) in Xcode to build the framework. This will create a .framework file that you can distribute and link to other projects.
+7. Using the Framework in an App:
+	1. Drag the generated .framework file to another Xcode project's "Frameworks, Libraries, and Embedded Content" section (under the "General" tab of the target).
+	2. Make sure the framework is properly embedded. For iOS, tvOS, and watchOS projects, choose "Embed & Sign" from the dropdown.
+	3. Import the framework in any Swift file where you want to use its functionality with import HomeAssistantFramework.
+8. Distribution:
+	1. If you want to distribute your framework to other developers or teams, you can archive the framework to generate a .framework file and share it.
+	2. If you want to create a more distributable package, consider using Swift Package Manager to define your framework as a package, or CocoaPods to distribute it as a pod.
+- Remember that maintaining a framework requires some extra overhead. Each time you make changes to the framework, you need to rebuild and redistribute it to all the projects that use it. If the framework is used in many projects, be cautious about introducing breaking changes.

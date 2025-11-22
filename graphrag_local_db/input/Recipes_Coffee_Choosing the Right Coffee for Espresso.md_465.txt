@@ -1,0 +1,135 @@
+# Choosing the Right Coffee for Espresso.md
+
+---
+reference: "https://library.sweetmarias.com/espresso-choosing-the-right-coffee-for-espresso/"
+created: 2025-08-26
+tags:
+"Content Type:": "Book"
+author:
+  - "[[Admini]]"
+published: 2018-03-26
+description: "A guide to choosing the right coffee for espresso."
+cover: "https://library.sweetmarias.com/wp-content/uploads/2018/03/ChoosingEspresso.jpg"
+summary: "> **Espresso blends involve careful selection and combination of coffees to achieve balance, body, sweetness, crema, and desired flavor notes in espresso extractions.** Blending for espresso usually aims for *balance*, avoiding overwhelming qualities that can work in drip or filter coffee but would overshadow in espresso. Most espresso blends use a base of **Brazil dry-processed arabicas** for body and crema, complemented with Central Americans for sharper acidity or sweetness, Indonesians for body/earthiness, and sometimes a small portion (10-15%) of **robusta** to add body and increase crema, though robusta can impart strong flavors if overused. Dry-processed Ethiopians, Yemens, and Aged/Monsooned coffees can contribute fruitiness, pungency, or \"funk,\" but should be used thoughtfully. Many successful blends are built around 40-50% base (often Brazil), 20-30% body/sweetness/acidity contributor, and 20-30% accent beans for aromatics or unique flavor (e.g., Guatemala, Ethiopia, Sumatra). Blending can be done before roasting (if roasting all beans to same level) or after roasting (to roast each bean optimally). Single-origin espresso is also popular, though it may highlight intense or imbalanced qualities. Decaf base components (Brazil WP Decaf, Donkey Blend) can be used for low-caffeine espresso mixes. Ultimately, blending for espresso is a creative process, balancing body, sweetness, crema, and specific flavor goals, often through trial, tasting, and adjustment.[1]"
+---
+Highlights:
+Blends are intended to do something that a single coffee selection can’t do. So before blending you likely exhausted options available to you from your stock of single-origin coffees, right?  
+
+---
+Full Page Content:
+#### Blending for espresso takes intention. But the first question to ask is, “Why should espresso be a blend at all?”
+
+==Blends are intended to do something that a single coffee selection can’t do. So before blending you likely exhausted options available to you from your stock of single-origin coffees, right?==
+
+The fact that large commercial companies blend for might be something you want to duplicate. But consider that they might do it for other reasons, namely cost control, or uniformity throughout the year. Are those your reasons for espresso blending as well? I rather hope not. But let’s say you can’t do it with a single bean. Okay, let’s move on!
+
+#### Blending for espresso is different
+
+In general, the goal of espresso blending differs from the goal of filter coffee blends (and some may argue that there are blends specific for brewing or for serving with cream/milk).
+
+Drip coffees may be blended for complexity or for , but an espresso blend usually must be blended for balance or particular varietal qualities that would be favorable in a drip coffee might overwhelm the espresso extract.
+
+Many commercial espresso blends are based on one or several high-quality arabicas, some washed, some dry-processed. They often involve some African coffees for or enzymatic flowery /fruitiness, or a Central American for a cleaner acidity.
+
+Dry processed coffees can be responsible for the attractive on the cup, among other mechanical factors in the process. Wet-processed Central Americans add positive aromatic qualities. Robustas, or *canephora*, are used in cheaper blends, and some decent ones, to increase and produce crema. They also add a particular bite to the cup.
+
+The notion that true “continental” espresso blends have ? Nonsense! In fact the coffee samples from small Italian roasters I’ve had (in green form) appear to be very mild, sweet blends with about 40% Brazil Dry-process, 40% Colombian and 20%+ Centrals, like Guatemalan. For bite, syrupy or winey fruit, and earthiness you can use a . It’s fun to play with but I personally don’t like it too much beyond experimentation and I personally don’t enjoy having more in my coffee than is necessary.
+
+A Colombian-based espresso blend offers a sharper, sweeter flavor but won’t result in as much crema production.
+
+You can blend by the seat of your pants (not recommended) or make your process of establishing the coffees and the percentages logical. Start by developing the base, the backdrop in terms of flavor and a coffee that provides the kind of body, roast flavor and crema you like. I suggest Brazils, although any sweet coffee with mild acidity and texture in the are viable options.
+
+Practice roasting this base coffee to different degrees of roast, and pulling straight shots of espresso. Get familiar with this cup and imagine what you would like to improve in it.
+
+Do you want it to be sharper and **sweeter**, with more  **aromatics**: perhaps you will want to add Central American coffees. Watch out with percentages above 25%, particularly if you like a lighter espresso roast. You will be losing some crema and body.
+
+Do you want more **body** and : use a clean Indonesian like a or a premium . You will be losing some and at too light a roast level some of the or qualities can become sharper. You can go up to 50% with one of these and some are nice even at 100%, but if you are blending it with another coffee that has more delicate features (such as wet processed Ethiopian) that you were hoping to highlight, I would not use too much of one of these coffees for risk of overwhelming them.
+
+Do you want an **earthy aggressive bite**  and more  **pungency**: try a dry-processed Ethiopian. Some are brighter and more aromatic with fruitiness and wineyness. Some have great pungency in the darker roasts and are fruitier in the lighter roasts. These produce great crema. I often enjoy straight shots of these coffees, but keep it to 25% or so in most blends.
+
+Do you want **spicy** **pungency**: try a Yemeni coffee. These add wineyness too, and great crema. I keep this to 50% or less (normally 25% or so) in blends. Some of the nicer ones have an aromatic sandalwood note that when balanced with the winey acidity produce really rich and exotic single-origin espresso.
+
+Do you want **extreme bite**: try an , a Monsooned coffee (Indian or better yet the Sulawesi Rantepao) or Robusta. Aged coffees and Monsooned add certain funky tastes that you may love, or perhaps hate. You just have to give them a try to find out but that is part of the fun. Robusta — I would not go there unless you have too. I personally do not like the added caffeine they bring. They increase crema, but you also need to keep them below 20% in the blend, I personally never go above 15% with them.
+
+![Espresso-arabica versus robusta graphic](https://library.sweetmarias.com/wp-content/uploads/2018/03/espresso.arabVSrobusta.jpg.webp)
+
+Espresso-arabica versus robusta graphic
+
+#### Arabica vs. Robusta?
+
+coffees (that means every coffee we sell except those at the very end of our list under the Premium Robusta heading) produce a fine crema, with good aromatics, and a lighter brown-yellow color. Robusta coffees (from the species *coffea canefora*) make a greater volume of crema, but it has larger “bubbles” and dissipates faster. Robusta has about 2x the caffeine of arabica, 2.2 to 2.4% compared to 1.1 to 1.3% in arabica. It can have a very rubbery-medicinal flavor when there is too much in the espresso blend. At a low percentage, 10% to 15%, it delivers a nice bite and it’s negative features can be minimized.
+
+Perhaps you’ll find that the coffee you chose for a base or even one of the accents are appealing to you as an espresso on their own. Espresso is becoming more prevalent as people are experimenting with what an espresso can or should be. Thinking about espresso simply as a brewing method rather than a beverage in and of itself with predetermined parameters or “rules” to what it is made up of and what it should taste like can open up the door to a lot of non-traditional and sometimes exciting flavors in a shot. But there are definitely coffees that have too much of one quality or another that in an espresso extraction are not as enjoyable to me because that quality can become exaggerated.
+
+There’s a lot of ways to achieve great espresso. It’s fun to experiment and I don’t know if there is some terminal point where you achieve the perfect trans-subjective espresso.
+
+![](https://library.sweetmarias.com/wp-content/uploads/2018/03/espressocup.med_.jpg.webp)
+
+Espresso in an Espresso Cup! Old School Photo!
+
+---
+
+#### Blending Before Roasting or Blending After Roasting? The big debate…
+
+There are many advantages to blending after roasting, and I will concede that point right away. You can roast each bean to the exact “degree of roast” to function perfectly in your blend. The Sumatra can be a little darker to bring out pungency. The can be a to add sweetness and acidity. The Brazil can be Full City + so as not to get tasting.
+
+The problem with this is logistics. You will now need to to a roast for each, and unless your blend has equal parts of the blend ingredients, you are going to end up with some odd leftovers. If that’s acceptable, and roasting each ingredient to a different level and then blending (a “melange” to be fancy about it), then for sure blend after roasting.
+
+If you are going to roast the ingredients to the same roast level, and for ease, I prefer blending pre-roast when possible. For me that’s most of the time.
+
+There’s an argument for pre-roast blending that also implies that coffee roasted together equalizes moisture content and is different in some way as roasting first and blending post-roast. I find the logic pretty weak and ambiguous, not to mention hard to prove.
+
+#### Some Espresso Blends that I Like
+
+I would recommend you try our **Sweet Maria’s Espresso Monkey Blend**  to see what you think. It will definitely give you a basis for comparison. We also create new espresso blends on a regular basis in our Espresso Workshop series. The Malabar Gold blend is a very exotic pre-blended espresso, and if that’s what you like you might want to look into Aged coffees and Robustas for your own blends, and obviously you would want to be using Indian Monsooned Malabar. The  **Moka Kadir**  is a  *very* fruity-winey East African and blend. So these three span the gamut of blends and can give you a good idea what direction to take with your own blend. Many people also buy my Espresso Money blend and modify it by, for example, adding 15% robusta or adding 25% Aged coffee.
+
+Here’s a great starter blend for a sweeter, cleaner espresso. The absence of North African or Yemeni coffee takes out a little bite from the cup and possibly some lurking flavor. this is, as noted above, a sweet blend used at a street-level roasterie/caffe in Rome. They use a Antigua for the Central:
+
+- 50% Brazil Dry-process
+- 25% Colombian Wet-process
+- 25% Guatemala or other aromatic Central American
+
+or you could replace the Colombia with a premium Sumatra for more body and less brightness.
+
+- 50% Brazil \\ Dry-process
+- 25% Guatemala or other bright Central American
+- 25% Sumatra -Premium coffee
+
+Some sharp sweetness (Central American) hides behind the Brazil flavors and the wonderful Yemeni aromatics. adds body and depth. Yemeni coffees are fun for espresso blends, where they can be used like spice to give zest the aromatically or enzymatically flat blends. Roast to 40 to 35. Good crema production from this blend due to the many dry-processed coffees
+
+- 40% Brazil Dry-process
+- 20% or other bright Central American
+- 20% Yemen
+- 20% Sumatra coffee
+
+Ah, too sweet, too boring. You want something more aggressive, chocolatey? Drop the Centrals:
+
+- 50% Brazil Dry-process
+- 25% Ethiopian Sidamo or Yemen
+- 25% Sumatra Aceh
+
+You can certainly keep going along this route by adding other coffees (monsooned, aged, robusta) to discover what they add and what they subtract from the blend.
+
+For an potent Indian Monsooned-type blend you could do something like this:
+
+- 60% Indian Monsooned Malabar -this high percentage will cup very
+- 20% High Quality Robusta: Wet-processed Indonesian or Indian
+- 20% Wet-processed Arabica, for and balance: perhaps Indian, , or Sulawesi.
+
+For an potent Aged coffee blend you could do something like this:
+
+- 40% Aged Sumatra
+- 30% Sumatra, or Sulawesi
+- 30% Guatemala or other bright Central American for aroma and balance
+
+(Aged Java is very potent and should probably not exceed 1/3 of the blend or so…)
+
+---
+
+![Gaggia espresso in black](https://library.sweetmarias.com/wp-content/uploads/2018/03/gaggiaespresso.black_.jpg.webp)
+
+Gaggia espresso in black. When home espresso machines looked cool.
+
+#### Decaf Espresso? Low-caffeine espresso?
+
+That is why we stock the Brazil WP Decaf as a base. Use it as 50% of your blend to cut the caffeine in half, then add your main “character” coffees as usual. If you wanted an all-decaf blend you could try our own **Sweet Maria’s Decaf Espresso “Donkey” Blend** ready to roast. We also are sending coffees that we select beforehand to be decaffeinated by water process and have been able to not only then source amazing components for an espresso blend in WP Decaf Ethiopias, Colombias, Centrals, and even Indonesian coffees, but also construct blends with complexity, depth of character, loads of sweetness and syrupy notes, and little to none of the flavor or scent of decaf coffee.

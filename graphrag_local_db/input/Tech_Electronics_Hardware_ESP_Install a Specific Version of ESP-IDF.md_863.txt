@@ -1,0 +1,57 @@
+# Install a Specific Version of ESP-IDF.md
+
+---
+aliases: []
+tags: []
+---
+# Install a Specific Version of ESP-IDF
+Date: 2024-08-19
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+
+#### Steps to use a previous version of ESP-IDF:
+
+1. Determine which version of ESP-IDF you want to use. You can check the available releases on the ESP-IDF GitHub repository: [https://github.com/espressif/esp-idf/releases](https://github.com/espressif/esp-idf/releases)
+2. Clone the specific version of ESP-IDF you want to use. For example, to use v4.3.3:
+
+bash
+
+`git clone -b v4.3.3 --recursive https://github.com/espressif/esp-idf.git esp-idf-v4.3.3`
+
+3. Change to the new ESP-IDF directory:
+
+bash
+
+`cd esp-idf-v4.3.3`
+
+4. Run the installation script:
+
+bash
+
+`./install.sh`
+
+5. Set up the environment variables for this version:
+
+bash
+
+`. ./export.sh`
+
+6. Now you can use this specific version of ESP-IDF for your project.
+
+To switch between different versions of ESP-IDF:
+
+1. You can keep multiple versions installed in separate directories.
+2. When you want to use a specific version, navigate to its directory and run the export script:
+
+bash
+
+`cd path/to/esp-idf-version . ./export.sh`
+
+3. This will set up the environment variables for that specific version.
+
+Remember that different versions of ESP-IDF may have different features, APIs, or requirements. Make sure your project is compatible with the version you're using[](https://www.reddit.com/r/esp32/comments/17qqcc3/request_helpdowngrading_esp_idf/)[](https://stackoverflow.com/questions/75819503/running-multiple-versions-of-esp-idf-concurrently).If you're using VSCode with the ESP-IDF extension, you can configure it to use a specific ESP-IDF version in your workspace settings[](https://stackoverflow.com/questions/75819503/running-multiple-versions-of-esp-idf-concurrently).

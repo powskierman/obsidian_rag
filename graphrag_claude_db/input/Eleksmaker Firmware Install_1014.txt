@@ -1,0 +1,82 @@
+---
+aliases: 
+tags:
+  - laser
+  - eleksmaker
+created: 2025-04-01 12:26
+Backlink: "[[Eleksmaker A4 Pro Laser Cutter MoC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- ![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/eleksmaker-firmware-t2laser.jpg "Eleksmaker Board (a universal laser engraver) and Firmware")
+
+Here I am going to show you how to load firmware on the nanochip, board.  
+Here are two different brand chips but both do the same job.
+
+**Green** is none branded  **Black** is [Eleksmaker](https://endurancelasers.com/tag/eleksmaker-firmware/)
+
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/69319496_953878168288204_3535431956386807808_n-e1566499772533.jpg)
+
+Both of them will do the same job and take the same firmware.  
+When working with both of the chips the setup is the same to load on firmware on them. Eleksmaker one you can not get hold of without buying the whole new board with it. Which you do not need to do as the none Branded will work just fine with your Eleksmaker board.
+
+**1**. Eleksmaker board with Nano Chip **£24**  
+**2**. None Branded Nano Chip **£3**
+
+Here are two pictures of them fitted to the board.
+
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/68993907_490447515087505_3115586838639673344_n-300x169.jpg)  
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/69095770_726703931094085_2472665367260954624_n-e1566500283660-300x165.jpg)
+
+When buying the None Branded Nano Chip Order the cable with it. as the Eleksmaker cable dose did not fit this Nano.
+
+To load firmware on the Nanochip you can use Xloader. If you use this you will need to have the firmware file to hand. You can use a software called T2Laser which has this file loaded in it.
+
+### T2Laser software
+
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/t2laser.png)
+
+When you have installed the next set of pictures is going to show you have to load 1.1e firmware on to your Nanochip.
+
+### Click on Control
+
+### ![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/68714647_451293782394643_8981370601323102208_n.jpg)
+
+### Firmware 1.1E  Click.
+
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/firmware.png)
+
+### You will need to click yes
+
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/fireware-yes.png)
+
+A black box will pop up and then go and your board will now have 1.1e on. If this fails I will show you in the next set of pictures how it will look and this will mean you need a new Nano.
+
+### Failed Screen
+
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/firmware-fail-229x200.png)
+
+### Failed Report
+
+![Eleksmaker Board (a universal laser engraver) and Firmware](https://endurancelasers.com/wp-content/uploads/2019/08/Dean-Nano-chip-231x200.png)
+
+There is no getting around this when this error pop’s up. the only thing that can be done to get you back up and running is buy a new Nano Chip which can be found on Banggoods, eBay and other sites.
+
+Here is a video I did about them.
+
+<iframe loading="lazy" title="Eleksmaker board and firmware" width="640" height="360" src="https://www.youtube.com/embed/DyEoyROcBrA?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+### Eleksmaker A3 Pro Frame (modified) with a 10 watt Endurance Laser.
+
+<iframe loading="lazy" title="Another Time Lapse of a Channel Logo on Laser engraver" width="640" height="360" src="https://www.youtube.com/embed/3QDIZuNb2cI?feature=oembed" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

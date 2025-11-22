@@ -1,0 +1,111 @@
+---
+aliases:
+  - Sequential Thinking
+  - Sequential Thinking Hub
+tags:
+  - AI
+  - tools
+  - mcp
+  - sequential-thinking
+created: 2025-10-17
+ContentType: Hub Note
+Backlink: "[[AI Tools MoC]]"
+---
+
+### Main Idea
+
+The Sequential Thinking tool enables dynamic, reflective problem-solving through a structured chain-of-thought process. This hub provides quick access to all Sequential Thinking documentation.
+
+
+---
+
+## 🚀 Quick Start
+
+**New to Sequential Thinking?** Start here:
+
+1. **[[Core Concepts]]** - Understand what makes it different
+2. **[[Quick Reference Card]]** - Essential info at a glance  
+3. **[[Examples]]** - See it in action
+4. **[[Requesting Guide]]** - How to ask for it
+
+**Just need a reminder?**
+→ Jump to **[[Quick Reference Card]]**
+
+---
+
+## 📖 Complete Documentation
+
+### Foundation
+
+- **[[Sequential Thinking MoC]]** - Central navigation hub
+- **[[Core Concepts]]** - Theory and mental models
+- **[[Parameters Reference]]** - Technical parameter documentation
+
+### Practical Guides
+
+- **[[Usage Patterns]]** - Common flows and best practices
+- **[[Examples]]** - Real-world use cases by type
+- **[[Requesting Guide]]** - How to ask Claude effectively
+
+### Advanced
+
+- **[[Advanced Techniques]]** - Power user strategies
+- **[[Limitations and Troubleshooting]]** - Constraints and solutions
+- **[[Quick Reference Card]]** - One-page cheat sheet
+
+---
+
+## 🎯 Quick Decision: Should I Use This?
+
+```
+Simple question? → NO, use regular conversation
+Know the answer path? → NO, use regular conversation
+Time critical? → NO, use regular conversation
+Complex/uncertain? → YES, use Sequential Thinking
+Need to compare options? → YES, use Sequential Thinking
+Debugging complex issue? → YES, use Sequential Thinking
+```
+
+---
+
+## 💡 Most Useful Pages
+
+**If you need...**
+
+- **Quick answers while working** → [[Quick Reference Card]]
+- **To understand how it works** → [[Core Concepts]]
+- **Examples to learn from** → [[Examples]]
+- **Advanced strategies** → [[Advanced Techniques]]
+- **Help with issues** → [[Limitations and Troubleshooting]]
+- **To request it effectively** → [[Requesting Guide]]
+- **Technical details** → [[Parameters Reference]]
+- **Common patterns** → [[Usage Patterns]]
+
+---
+
+## 🔗 Related
+
+- [[AI Tools MoC]] - Other AI tools available
+- Analysis Tool (REPL) - For code execution
+- Web Search - For information gathering
+
+---
+
+### References
+
+All sub-notes linked above provide detailed documentation on specific aspects of Sequential Thinking.
+
+### Notes
+
+**Original comprehensive guide has been split into focused sub-notes for:**
+- ✅ Easier navigation
+- ✅ Better maintenance  
+- ✅ Targeted learning
+- ✅ Quick reference
+
+Start with the [[Sequential Thinking MoC]] for full navigation, or jump directly to any topic above.
+
+### Related Notes
+
+- [[AI Tools MoC]]
+- [[Tech/AI/AI Tools MoC|AI Tools MoC]]

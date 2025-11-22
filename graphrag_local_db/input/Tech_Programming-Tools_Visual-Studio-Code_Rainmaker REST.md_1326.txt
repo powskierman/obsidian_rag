@@ -1,0 +1,79 @@
+# Rainmaker REST.md
+
+---
+aliases: 
+tags:
+  - Rainmaker
+  - REST
+---
+# Rainmaker REST
+Date: 2023-09-22
+
+### Backlink
+[[Rainmaker MoC]]
+
+### Reference
+-  [Rainmaker REST API](https://swaggerapis.rainmaker.espressif.com)
+- [Rainmaker Dashboard Login](https://dashboard.rainmaker.espressif.com/login)
+- 
+### Notes
+-  The following REST commands can be used to turn the switch on and off:
+
+To turn the switch on:
+
+```js TI:"Operate Switch" "FOLD"
+POST /api/v1/devices/<device_id>/params/<power_param_id>/value
+{
+  "value": true
+}
+To turn the switch off:
+
+POST /api/v1/devices/<device_id>/params/<power_param_id>/value
+{
+  "value": false
+}
+```
+- Where:
+	- <device_id> is the ID of the device that you want to control.
+	- <power_param_id> is the ID of the power parameter for the device.
+- To find the device ID and the power parameter ID, you can use the ESP RainMaker API. For example, the following Python code will print the device ID and power parameter ID for a device named "Switch":
+
+```Python TI:"Device ID and Power" "FOLD"
+import esp_rmaker
+
+def main():
+    # Get the device ID and power parameter ID for the switch.
+    device_id, power_param_id = esp_rmaker.get_device_and_param_id("Switch")
+
+    # Print the device ID and power parameter ID.
+    print("Device ID:", device_id)
+    print("Power parameter ID:", power_param_id)
+
+if __name__ == "__main__":
+    main()
+```
+- Once you have the device ID and power parameter ID, you can use the REST commands above to turn the switch on and off.
+- The following curl command will turn the switch on:
+
+```js TI:"Rainmaker curl" "FOLD"
+curl -X POST \
+  -H "Authorization: Bearer <auth_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "value": true
+  }' \  "https://<rainmaker_server>/api/v1/devices/<device_id>/params/<power_param_id>/value"
+```
+- Where:
+	- <auth_token> is your ESP RainMaker authentication token.
+	- <rainmaker_server> is the address of your ESP RainMaker server.
+- You can find your ESP RainMaker authentication token in the ESP RainMaker console.
+```js TI:"ID Token" "FOLD"
+  "idtoken": "eyJraWQiOiIrQVwvTW5yc0JXOHhkXC95WFZwRzBWYngzTzBXVEJKTjFBem1qakk5aWZOYUk9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhOTAwYTk3OS02ODU3LTQ3MGQtYWY4MS1kNzUyYjJmMGY4ZjAiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiY3VzdG9tOm1haW50YWluZXIiOiJmYWxzZSIsImN1c3RvbTphZG1pbiI6InRydWUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9MOXU0UzBOMWkiLCJjdXN0b206dXNlcl9pZCI6ImE5MDBhOTc5LTY4NTctNDcwZC1hZjgxLWQ3NTJiMmYwZjhmMCIsImNvZ25pdG86dXNlcm5hbWUiOiJhOTAwYTk3OS02ODU3LTQ3MGQtYWY4MS1kNzUyYjJmMGY4ZjAiLCJvcmlnaW5fanRpIjoiNWViNjNmMWMtYmQ4Zi00YWZkLTkzZjQtMTIxNmYwYjE5Zjg0IiwiYXVkIjoiMWg3dWpxanM4MTQwbjE3djBhaGI0bjUxbTIiLCJldmVudF9pZCI6ImZlNGEyYzU3LTk2Y2ItNDUwMy05NDdmLTQwMzA5NzNiYjcxNyIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNjk1NDg3ODA3LCJleHAiOjE2OTU0OTE0MDcsImlhdCI6MTY5NTQ4NzgwNywianRpIjoiMmY4NjlmYmQtNDRkMy00MWZlLTg5NDItMzIwNjE5NzIxYjNjIiwiZW1haWwiOiJtbGFwb2ludDk5QGhvdG1haWwuY29tIn0.WEfEK8pW2GiBsEXiXqBuptjOAusT5eJqxgRpcmlfrkO0LgFHq5Fh8HAkKwmSDIY7CJdAI-zCZexw63j5Mac9aMbV_6PdsjmFB3esXKurzpkMXYH21eaesikiaiMEqVSHdrr8en_KrT_MBQDXfLhpm0VZ1gkF8bq-kx941GHcMRlKqTXffKYmcOqT0mW7VqAnIKJ5H1ZJJDRPcru-4eD19xPUXevlT_lzrRHE5SRkWrKg6I4Ma9HKFO6wZ0RXkqy5fX_Rq6V4oP0ZZl6M8HVtM0mBAM8iJ0va7QgBU6dUL-LDqrgkWPP_aeRQyqIJbEA2FujXWz0vDB3X7CaHPZNhAA",
+```
+```js TI:"Access Token" "FOLD"
+  "accesstoken": "eyJraWQiOiJxK0Y2Nkk1eE1nOWo2d2pQOWU1c05IeDF2VENVMDVqYjRJTm9cL0Izb1l0VT0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJhOTAwYTk3OS02ODU3LTQ3MGQtYWY4MS1kNzUyYjJmMGY4ZjAiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9MOXU0UzBOMWkiLCJjbGllbnRfaWQiOiIxaDd1anFqczgxNDBuMTd2MGFoYjRuNTFtMiIsIm9yaWdpbl9qdGkiOiI1ZWI2M2YxYy1iZDhmLTRhZmQtOTNmNC0xMjE2ZjBiMTlmODQiLCJldmVudF9pZCI6ImZlNGEyYzU3LTk2Y2ItNDUwMy05NDdmLTQwMzA5NzNiYjcxNyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE2OTU0ODc4MDcsImV4cCI6MTY5NTQ5MTQwNywiaWF0IjoxNjk1NDg3ODA3LCJqdGkiOiJlZjE4YmMzMS1jYTRlLTRmMzgtOTUxNy1kNTUzN2U4Y2E0MDAiLCJ1c2VybmFtZSI6ImE5MDBhOTc5LTY4NTctNDcwZC1hZjgxLWQ3NTJiMmYwZjhmMCJ9.rw94c1bEkmLBBimJmjvHtrPcge47-6WQzn-YLRk8u-vzysV42UZlGzqVzs_AdgZYwvQAUsAD-aX-unqkwzaPkvTI0lbn4HM5FWOzKgKt71LwJ1xjmepdpqsjzCheQIom-WoJl5eaAK1EaV4XrCWheTtROAbDLQwyTm4mZx1l6uOERdnDo3uzZOp0jwJmKliErkhwRwWf5C3G0Dn-neTVlwMitLLH85tVfke5IUufmkheHCtNkKVmB28r3zszLGP5f7F0Au8-NDk2akAHw38a2w7_W-tLAH8_coFWhwFgifaEKYDD4qjnEDlyEOtQNXRlNM1_9O5YN2XbBDdz0j6B7w",
+```
+```js TI:"Refresh Token" "FOLD"
+"refreshtoken": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.QMmi6wj_ZE4-vnCgBiTUYoLhMLNYPM36lL_cJiu3Xw0TerEDfQcLXDXqWyCZ-DFeAJucNutP6AU5TiWp_YKklLAYmLrux9XSRcJxm-Gt6Mqd0v_JAquYQhIK_FCLxrn6oa1QRKv09WHMMEOKhMoUM8tRBqxxgHjvAEH5ameHrmHcIkmg8Ylh3xQkkYI6G3yIJixok6pNQeOz5wXgzTFnJwj89ZzDVtxae3opO1hERkDQmm0anS0XiSAnGldov2dY-F46Uj0DzPAiooeF8r7bhZ1j4YHAULSAwvGrY91s-rMRLyhvTEIjxVWdzSNuN3Q_i_Np7eWYDo2C8IUuvqLzYA.BecMeL7hARpEmqTa.VPotTNb0HNfvGSSFR5yA9UPlJZ14yDQM0mbtZI2pJ80xc8ppY32iXRBqWsaTmeRg_Mp5gZBN8Xl5dyhCRsj6hEUeqQYph9jEyoZHkv2g6Nr-XH1cn08hKIJr71bd4U9RTn6ZyJTS7pnwbMUdk21Ydfu3jhjtJSdwm-DGCb5t1mwnS2_B81Vlwi_AwnIFLFDCZlGxEOg169oOHKGFI8SHb4zUFsYN-myPSM23YvZOxrNPgNbZiKBDfk-iXR-m6iWO1TZs7N-qivJKKHaTMwOC532dzLye1oWDRvGb1-xfM7s0lQcFRsgtR7OVMMHPDxOllrWmA5IAyCODan6w-SGH4DkRodXKPvrX-dkzHCuVgJbCenrlJ0kc3qOWAnjhRCUX-t5R85n_ftw4eHZ3nswPvMAMhv2I7bR2f1J6Vr53N_T3B7cPcejhnEE1Nusbwjm6lfI_W12fbR0xFAS_03yG_ibQXjlrBni3rHxjQ8TbvAoII0SusozBlOSuffa_MTzsi1dPolDt6DouCi8-gJRICkBtzmrTaOtA5laAVMY1md3Xnp9Xfvi-MlMnO8Kjis-JNHGSS5I6uyz__u3qQFIQc9xQ21fCzXIBurjiw8HJ-Ky-_uZeQ5deBalysoPweGwUEHh_3WUaLgFIrzVUECzJ0kyRz5nBu-ZfDZAepbJr-APjwyxiuAFFaHBmJa5xFo1X2NNft-C1B9TjDRcpuaB4veBh-aOndp2zwedUc_YU5pMNUpKojY5EIBqPbd4HKwLgFDuDBkC5d-9hYgaovRcdOrQJyImBnQ3edPoxR_urL7FmBt6AgOXsdtWN1Z8weZ9fAHrG5AasXTx7VsqTk-GvPQDsdofJk9MQ-UUSeWscutiUGcoFVvzBOI_4RtQocHOM-rIZaGKHaV3nsqoP06qSDWCrQ9ErnHGmCRD_-f-ft8VSpgJ1RQta3IEEr8DAnthEg8zKucxoTs4tPAtg4FzahfHgx7xUPeB8QgW55wONxl1LCUWMgOfJI279EGLdFVM7OI4P0APZ59GIGc8703B2EMOm7emu4D6PT37hLi56AOcKR6BaYbw4n0YySx1Fm7f3AtCZrWDjsd42fBq9N8H8Jjxbiw-OugH6ku8VZJlcTQw5CLRtnI26aMYKTQzNfAaM4AEhgOczp3_x40W0kH3Q4yRg8sQz-3BvVObyYV0u0G6sNiNRJ8J-nrBzjnCcsmEk-GjLi1MuHe6lZrYlT37f70I5x30j6evO7BOeQOuXM5JJn11bYYQ9RPiPxWg7bq1UMyoMXRd1LXzylvGf696hdrV9LIfhe3jQYaUHb6Nn5RDIpX4YQ8tnkmq0Y7MVDA.7JlOHOI-3BD8WJRDHsjm6w"
+}
+```

@@ -1,0 +1,48 @@
+# Flutter MoC.md
+
+---
+aliases: []
+---
+# Flutter MoC
+Date: 2022-07-29
+
+### Tags: 
+
+### Backlink
+[[Programming Tools MOC]]
+
+### Reference
+- [macOS install | Flutter](https://docs.flutter.dev/get-started/install/macos)
+- [Download Android Studio & App Tools](https://developer.android.com/studio)
+-  [[Writing a Flutter App]]
+-  [Flutter programming automation snippets](Snippets.docx)
+- [[Flutter Widgets]]
+- [Flutter inspector video](https://www.youtube.com/watch?v=CcLfGJZS8ns)
+- [Flutter Layout Cheat Sheet](https://medium.com/flutter-community/flutter-layout-cheat-sheet-5363348d037e)
+- [Flutter Animations Cheat Sheet](https://medium.com/flutter-community/flutter-animations-cheat-sheet-7f8cebfb850c)
+- [Using packages | Flutter](https://docs.flutter.dev/development/packages-and-plugins/using-packages#adding-a-package-dependency-to-an-app)
+- [[Flutter Streams]]
+- [Flutter Colors](http://hnl.name/color-schemer-online/)
+- [[ValueNotifier]]
+- [[Flutter Troubleshooting]]
+- [App Icon Generator](https://appicon.co/)
+- [anoop4real/Flutter_MQTT: Example of good programming practices](https://github.com/anoop4real/Flutter_MQTT)
+-
+### Notes
+- [[Writing a Flutter App]]
+- [Flutter's build modes ](https://docs.flutter.dev/testing/build-modes) 
+- [Scaffold class](https://api.flutter.dev/flutter/material/Scaffold-class.html)
+- [[Dart MoC ]] is the programming language used in Flutter
+- [[Flutter on VSCode]]
+- Create new flutter project with CLI
+	- flutter create --org com.yourdomain your_app_name
+- [How to reach a variable of a class from another class in Flutter](https://stackoverflow.com/questions/61116601/how-to-reach-a-variable-of-a-class-from-another-class-in-flutter)
+- [How To Use Gradients in Flutter with BoxDecoration and GradientAppBar](https://www.digitalocean.com/community/tutorials/flutter-flutter-gradient)
+- [Container class - widgets library](https://api.flutter.dev/flutter/widgets/Container-class.html)
+- [Accessing variable from another class](https://stackoverflow.com/questions/61116601/how-to-reach-a-variable-of-a-class-from-another-class-in-flutter)
+- [Private App Distribution for Custom iOS Apps](https://blog.instabug.com/private-app-distribution-for-custom-ios-apps/)
+- [[Flutter - Use methods from another class]]
+- [Using packages](https://docs.flutter.dev/development/packages-and-plugins/using-packages)
+- [Change Elevated Button Color in Flutter](https://www.flutterbeads.com/elevated-button-color-in-flutter/#Steps-to-Change-the-Elevated-Button-Color-in-Flutter)
+- [Breaking layouts into Rows and Columns in Flutter](https://medium.com/flutter-community/breaking-layouts-in-rows-and-columns-in-flutter-8ea1ce4c1316)
+-

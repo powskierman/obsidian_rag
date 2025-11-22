@@ -1,0 +1,28 @@
+---
+aliases: []
+tags: []
+---
+# Zigbee Example for nrf52840 Dongle
+Date: 2023-06-16
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  In order to support the nrf52840 Dongle in nrf Connect, you need to create a static partition manager file for the dongle so that a partition for the Bootloader and MBR can be created. 
+- You will also need to create a .overlay file for the dongle. There is support for the dongle in the light bulb sample here: [light_bulb_dongle](https://github.com/martelmy/NCS_examples/tree/main/zigbee/light_bulb_dongle). 
+- The modified files are pm_static_nrf52840dongle_nrf52840.yml and boards/nrf52840dongle_nrf52840.overlay. Since you are using the light switch sample you will also have to do some changes to the sample regarding buttons, as the dongle only has one button which can be used by the application.
+
+
+Build step: west build -t nrf52840dongle\_nrf52840, which creates the merged.hex
+
+flash steps:
+
+1\. west flash
+
+2\. nrfutil pkg generate --hw-version 52 --sd-req=0x00 --application build/zephyr/merged.hex --application-version 1 example.zip
+
+    nrfutil dfu usb-serial -pkg example.zip -p /dev/ttyACM0
+

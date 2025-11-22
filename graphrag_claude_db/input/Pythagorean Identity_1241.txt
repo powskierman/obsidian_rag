@@ -1,0 +1,26 @@
+---
+aliases:
+tags:
+created: 2022-02-10 13:48
+ContentType: Reference
+Backlink: "[[Trigonometry MOC]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- Pythagorian Identity: $\sin^2(\theta)+\cos^2(\theta)=1$
+	- $\sin(\theta)=y$
+	- $\cos(\theta)=x$
+	- Definition of : $x^2+y^2=1$
+	- Can be used for rewriting trigonometric expressions in equivalent, more useful, forms.
+	-  Allows us to convert between the sine and cosine values of an angle, without knowing the angle itself.
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

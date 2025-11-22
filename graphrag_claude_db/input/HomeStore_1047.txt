@@ -1,0 +1,15 @@
+---
+aliases: []
+tags: [swiftui, HomeKit]
+---
+# HomeStore
+Date: 2023-03-07
+
+### Backlink
+[[Homekit MoC]]
+
+### Reference
+-  [[Minimal HomeStore class]]
+### Notes
+- HomeStore is a [[Homekit MoC|Homekit]] class that has 3 dependencies:  [[NSObject]], [[ObservableObject]] and [[HMHomeManagerDelegate]]
+- You first need to instanciate the [[HMHomeManager]] class

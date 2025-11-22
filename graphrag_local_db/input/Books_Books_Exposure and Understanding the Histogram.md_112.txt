@@ -1,0 +1,80 @@
+# Exposure and Understanding the Histogram.md
+
+---
+id: 16112706
+updated: 2022-06-18
+title: Exposure and Understanding the Histogram
+author: Andrew S. Gibson
+highlights: 12
+last_highlight: 2015-02-05
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112706
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51D9wUYPWUL._SL500_.jpg)
+
+# About
+Title: [[Exposure and Understanding the Histogram]]
+Authors: [[Andrew S. Gibson]]
+Category: #books
+Number of Highlights: ==12==
+Readwise URL: https://readwise.io/bookreview/16112706
+Date: [[2022-06-18]]
+Last Highlighted: *2015-02-05*
+
+---
+
+# Highlights
+
+The first, and most important, thing to check is highlight clipping. ([202](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=202)) %% Color: yellow %% ^334465539
+
+---
+
+Digital cameras are sensitive to overexposure; it’s easier to overexpose parts of the digital image than a film image. Furthermore, the results tend to look a lot more unnatural on digital than film. ([215](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=215)) %% Color: yellow %% ^334465540
+
+---
+
+JPEGs are similar to slide film—you need to get the exposure spot-on at the point of image capture. ([252](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=252)) %% Color: yellow %% ^334465541
+
+---
+
+Raw files, though, have more in common with color negative film than slide film. Color negative film responds well to overexposure and horribly to underexposure. ([254](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=254)) %% Color: yellow %% ^334465542
+
+---
+
+If you underexpose an image, you will need to correct it in postprocessing by increasing the brightness. This increases the noise levels in the photo, and there’s not much that you can do about it. ([268](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=268)) %% Color: yellow %% ^334465543
+
+---
+
+Digital sensors are more sensitive to overexposure than film. You can think of the pixels in the sensor as small wells that fill up with light during the exposure. Once a pixel fills up, it is no longer capable of recording detail—and what you get is a clipped highlight. ([286](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=286)) %% Color: yellow %% ^334465544
+
+---
+
+It’s best to have to darken the image in postprocessing than to have to lighten it, which will increase the noise. ([330](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=330)) %% Color: yellow %% ^334465545
+
+---
+
+If you are using the Raw format, you can increase the exposure so that the histogram moves closer to the right-hand side of the graph. This is called exposing to the right (often abbreviated to ETTR). The quality of the image improves as the graph moves closer to the right-hand side of the histogram. The result, after postprocessing, is a better-quality image with less noise. This technique is particularly effective at high ISO settings. ([346](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=346)) %% Color: yellow %% ^334465546
+
+---
+
+When less light reaches the sensor during the exposure, noise levels increase. That’s why noise levels are higher when you take photos at higher ISO settings. Less light is hitting the sensor at these settings than when you use a low ISO, and the signal-to-noise ratio is lower. ([353](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=353)) %% Color: yellow %% ^334465547
+
+---
+
+if you switch to a lens with a longer focal length, you can hone in on part of the scene and exclude any areas of excessive brightness. ([381](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=381)) %% Color: yellow %% ^334465548
+
+---
+
+You can minimize noise at high ISO settings by using the Raw format and utilizing the expose-to-the-right technique where possible. ([417](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=417)) %% Color: yellow %% ^334465549
+
+---
+
+Image quality improves as you move toward the middle of the aperture range. Generally speaking, you’ll get the best optical quality from your lens at f8 or f11 (or f5.6 on a prime lens with a wide maximum aperture). ([434](https://readwise.io/to_kindle?action=open&asin=B005DKQQAU&location=434)) %% Color: yellow %% ^334465550
+
+---

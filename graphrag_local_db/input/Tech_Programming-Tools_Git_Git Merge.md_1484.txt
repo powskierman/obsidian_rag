@@ -1,0 +1,84 @@
+# Git Merge.md
+
+---
+aliases: 
+tags:
+  - git
+  - merge
+---
+# Git Merge
+Date: 2024-01-27
+
+### Backlink
+[[Tech/Programming-Tools/Git/Git MOC|Git MOC]]
+
+### Reference
+-  
+### Notes
+Running a simulated merge can be a useful way to predict and prevent merge conflicts before actually merging branches in Git. This process involves checking out a new temporary branch, merging the target branch into this temporary branch, and then examining the results without affecting the main branches. Below are the steps to do this using the command line interface (CLI) and SourceTree:
+
+### Simulated Merge using CLI
+
+1.  **Ensure Your Repository is Up-to-Date:**
+    
+```
+git fetch
+```
+    
+2.  **Create and Check Out a New Temporary Branch:**
+    
+    -   This branch is a copy of the branch into which you plan to merge changes (e.g., `main` or `develop`).
+    
+```
+git checkout -b temp-merge-branch origin/main
+```
+    
+3.  **Merge the Feature Branch into the Temporary Branch:**
+    
+    -   Replace `feature-branch` with the name of the branch you want to merge.
+    
+```
+ git merge feature-branch
+```
+    
+4.  **Check for Merge Conflicts:**
+    
+    -   If there are merge conflicts, resolve them as you would normally. This gives you an idea of what to expect during the actual merge.
+5.  **Test the Merged Code:**
+    
+    -   Run your tests or perform any necessary checks to ensure that the merge doesn't break anything.
+6.  **Delete the Temporary Branch After Testing:**
+    
+    -   Once you're done testing, you can delete the temporary branch.
+
+```
+    git checkout main // or switch to your original branch
+    git branch -d temp-merge-branch
+```
+    
+
+### Simulated Merge using SourceTree
+
+1.  **Fetch the Latest Changes:**
+    
+    -   Open SourceTree and select your repository.
+    -   Click on the "Fetch" button to ensure you have the latest changes.
+2.  **Create a New Branch:**
+    
+    -   Right-click on the branch you intend to merge into (e.g., `main`) and select "Branch from here."
+    -   Name the new branch (e.g., `temp-merge-branch`) and create it.
+3.  **Merge the Feature Branch:**
+    
+    -   Right-click on the feature branch you want to merge and select "Merge..."
+    -   In the merge dialog, ensure you're merging into your newly created temporary branch.
+4.  **Review Changes and Conflicts:**
+    
+    -   SourceTree will show any conflicts or changes resulting from the merge. Review them as needed.
+5.  **Test and Resolve Conflicts:**
+    
+    -   Test the application and resolve any conflicts that may have arisen.
+6.  **Delete the Temporary Branch:**
+    
+    -   Once you've finished testing, you can delete the temporary branch by right-clicking on it and selecting "Delete."
+
+Remember, the purpose of this simulated merge is to anticipate problems and prepare for conflict resolution in advance. It's a preventative measure that does not replace the need for careful review and testing during the actual merge process.

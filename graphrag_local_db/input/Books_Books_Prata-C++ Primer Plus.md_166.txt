@@ -1,0 +1,115 @@
+# Prata-C++ Primer Plus.md
+
+---
+bookId: "22079"
+title: C++ Primer Plus (Developer's Library)
+author: Stephen Prata
+asin: B005OR9MWQ
+lastAnnotatedDate: 2021-04-17
+highlightsCount: 33
+reference: https://www.amazon.com/dp/B005OR9MWQ
+kindle_link: kindle://book?action=open&asin=B005OR9MWQ
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/71b8Qn2QueL._SY160.jpg)
+## Highlights
+structured programming limits branching (choosing which instruction to do next) to a small set of well-behaved constructions. C incorporates these constructions (the for loop, the while loop, the do while loop, and the if else statement) into its vocabulary. — location: [599](kindle://book?action=open&asin=B005OR9MWQ&location=599) ^ref-48058
+
+---
+Top-down design was another of the new principles. With C, the idea is to break a large program into smaller, more manageable tasks. — location: [602](kindle://book?action=open&asin=B005OR9MWQ&location=602) ^ref-22469
+
+---
+C’s design facilitates this approach, encouraging you to develop program units called functions to represent individual task modules. — location: [606](kindle://book?action=open&asin=B005OR9MWQ&location=606) ^ref-19778
+
+---
+Unlike procedural programming, which emphasizes algorithms, OOP emphasizes the data. — location: [611](kindle://book?action=open&asin=B005OR9MWQ&location=611) ^ref-10250
+
+---
+The idea is to design data forms that correspond to the essential features of a problem. In C++, a class is a specification describing such a new data form, and an object is a particular data structure constructed according to that plan. — location: [612](kindle://book?action=open&asin=B005OR9MWQ&location=612) ^ref-37843
+
+---
+The OOP approach to program design is to first design classes that accurately represent those things with which the program deals. — location: [623](kindle://book?action=open&asin=B005OR9MWQ&location=623) ^ref-53974
+
+---
+The process of going from a lower level of organization, such as classes, to a higher level, such as program design, is called bottom-up programming. — location: [626](kindle://book?action=open&asin=B005OR9MWQ&location=626) ^ref-61257
+
+---
+Polymorphism lets you create multiple definitions for operators and functions, with the programming context determining which definition is used. Inheritance lets you derive new classes from old ones. — location: [629](kindle://book?action=open&asin=B005OR9MWQ&location=629) ^ref-10028
+
+---
+OOP is a tool for managing large projects, whereas generic programming provides tools for performing common tasks, such as sorting data or merging lists. — location: [640](kindle://book?action=open&asin=B005OR9MWQ&location=640) ^ref-13889
+
+---
+Generic programming involves extending the language so that you can write a function for a generic (that is, an unspecified) type once and use it for a variety of actual types. — location: [643](kindle://book?action=open&asin=B005OR9MWQ&location=643) ^ref-55140
+
+---
+The name C++ comes from the C increment operator ++, which adds one to the value of a variable. Therefore, the name C++ correctly suggests an augmented version of C. — location: [665](kindle://book?action=open&asin=B005OR9MWQ&location=665) ^ref-44863
+
+---
+A C++ library contains object code for a collection of computer routines, called functions, — location: [738](kindle://book?action=open&asin=B005OR9MWQ&location=738) ^ref-52840
+
+---
+Linking combines your object code with object code for the functions you use and with some standard startup code to produce a runtime version of your program. — location: [740](kindle://book?action=open&asin=B005OR9MWQ&location=740) ^ref-55581
+
+---
+Occasionally, compilers get confused after incompletely building a program and respond by giving meaningless error messages that cannot be fixed. In such cases, you can clear things up by selecting Build All to restart the process from scratch. — location: [881](kindle://book?action=open&asin=B005OR9MWQ&location=881) ^ref-59609
+
+---
+C++, like C, uses a semicolon as a terminator rather than as a separator. The difference is that a semicolon acting as a terminator is part of the statement rather than a marker between statements. The practical upshot is that in C++ you should never omit the semicolon. — location: [1023](kindle://book?action=open&asin=B005OR9MWQ&location=1023) ^ref-54713
+
+---
+the following function header states that the main() function returns an integer value to the function that calls it and that main() takes no information from the function that calls it: int main() — location: [1048](kindle://book?action=open&asin=B005OR9MWQ&location=1048) ^ref-57095
+
+---
+a void return type means the function doesn’t return a value. — location: [1063](kindle://book?action=open&asin=B005OR9MWQ&location=1063) ^ref-41308
+
+---
+When you run a C++ program, execution always begins at the beginning of the main() function. — location: [1079](kindle://book?action=open&asin=B005OR9MWQ&location=1079) ^ref-57830
+
+---
+The #include directive causes the contents of the iostream file to be sent along with the contents of your file to the compiler. — location: [1138](kindle://book?action=open&asin=B005OR9MWQ&location=1138) ^ref-12052
+
+---
+the h extension is reserved for the old C header files (which C++ programs can still use), whereas C++ header files have no extension. — location: [1152](kindle://book?action=open&asin=B005OR9MWQ&location=1152) ^ref-17794
+
+---
+The namespace facility lets a vendor package its wares in a unit called a namespace so that you can use the name of a namespace to indicate which vendor’s product you want. — location: [1178](kindle://book?action=open&asin=B005OR9MWQ&location=1178) ^ref-14432
+
+---
+the classes, functions, and variables that are a standard component of C++ compilers are now placed in a namespace called std. — location: [1187](kindle://book?action=open&asin=B005OR9MWQ&location=1187) ^ref-45947
+
+---
+operator overloading, by which the same operator symbol can have different meanings. — location: [1248](kindle://book?action=open&asin=B005OR9MWQ&location=1248) ^ref-43925
+
+---
+C++ extends the operator overloading concept by letting you redefine operator meanings for the user-defined types called classes. — location: [1254](kindle://book?action=open&asin=B005OR9MWQ&location=1254) ^ref-65119
+
+---
+Special notations like endl that have particular meanings to cout are dubbed manipulators. — location: [1261](kindle://book?action=open&asin=B005OR9MWQ&location=1261) ^ref-48145
+
+---
+The \n combination is considered to be a single character called the newline character. — location: [1286](kindle://book?action=open&asin=B005OR9MWQ&location=1286) ^ref-46343
+
+---
+One difference is that endl guarantees the output will be flushed (in, this case, immediately displayed onscreen) before the program moves on. — location: [1299](kindle://book?action=open&asin=B005OR9MWQ&location=1299) ^ref-59969
+
+---
+in C++ you normally can use a space where you would use a carriage return and vice versa. This means you can spread a single statement over several lines or place several statements on one line. — location: [1307](kindle://book?action=open&asin=B005OR9MWQ&location=1307) ^ref-32181
+
+---
+The indivisible elements in a line of code are called tokens (see Figure 2.3). Generally, you must separate one token from the next with a space, tab, or carriage return, which collectively are termed white space. — location: [1323](kindle://book?action=open&asin=B005OR9MWQ&location=1323) ^ref-43400
+
+---
+One statement per line • An opening brace and a closing brace for a function, each of which is on its own line • Statements in a function indented from the braces • No whitespace around the parentheses associated with a function name — location: [1337](kindle://book?action=open&asin=B005OR9MWQ&location=1337) ^ref-43503
+
+---
+A C++ program is a collection of functions, and each function is a collection of statements. — location: [1343](kindle://book?action=open&asin=B005OR9MWQ&location=1343) ^ref-14644
+
+---
+A blank line separates the declaration from the rest of the program. — location: [1357](kindle://book?action=open&asin=B005OR9MWQ&location=1357) ^ref-41736
+
+---
+the usual C++ style is to declare a variable just before it is first used. That way, you don’t have to rummage back through a program to see what the type is. — location: [1402](kindle://book?action=open&asin=B005OR9MWQ&location=1402) ^ref-52506
+
+---

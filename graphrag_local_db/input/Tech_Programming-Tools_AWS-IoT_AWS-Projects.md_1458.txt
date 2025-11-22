@@ -1,0 +1,20 @@
+# AWS-Projects.md
+
+---
+aliases: []
+---
+# AWS-Projects
+Date: 2022-07-18
+
+### Tags: 
+
+### Backlink
+[[]]
+
+### Reference
+- 
+### Notes
+-  [Publishing DHT22 data to aws iot](https://medium.com/@akila.indula6/publishing-humidity-and-temperature-sensor-data-to-aws-iot-using-esp8266-6f8b128b1413)
+-  [Link to Platformio project](/Users/michel/Documents/PlatformIO/Projects/ESP32AwsArduinoJson/src/pubSubTest.ino)
+- [DHT22 sensor Mongoose](https://github.com/mongoose-os-apps/example-dht-js/blob/master/fs/init.js)
+4. [[Connect an iOS app to AWS IoT.pdf]]

@@ -1,0 +1,17 @@
+---
+bookId: "55093"
+title: "Bread Illustrated: A Step-By-Step Guide to Achieving Bakery-Quality Results At Home"
+author: America's Test Kitchen
+asin: B01D7CEGPM
+lastAnnotatedDate: 2024-10-29
+highlightsCount: 1
+reference: https://www.amazon.com/dp/B01D7CEGPM
+kindle_link: kindle://book?action=open&asin=B01D7CEGPM
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/A1H5ySsZDgL._SY160.jpg)
+## Highlights
+The indicator for when many doughs are properly fermented is when it has doubled in size—the point at which most of the available sugars have been consumed. — location: [725](kindle://book?action=open&asin=B01D7CEGPM&location=725) ^ref-36442
+
+---

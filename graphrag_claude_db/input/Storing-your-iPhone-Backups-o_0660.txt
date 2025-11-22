@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2022-01-01 17:39
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+![](media/Storing-your-iPhone-Backups-on-a-image1.png){width="8.5625in" height="11.0625in"}
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

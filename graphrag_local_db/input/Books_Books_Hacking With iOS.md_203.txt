@@ -1,0 +1,383 @@
+# Hacking With iOS.md
+
+---
+id: 16131176
+updated: 2022-06-19
+title: Hacking With iOS
+author: Paul Hudson
+highlights: 87
+last_highlight: 2019-12-13
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16131176
+Updated: 2022-06-19
+%%
+
+![]( https://readwise-assets.s3.amazonaws.com/static/images/default-book-icon-5.25188386e520.png)
+
+# About
+Title: [[Hacking With iOS]]
+Authors: [[Paul Hudson]]
+Category: #books
+Number of Highlights: ==87==
+Readwise URL: https://readwise.io/bookreview/16131176
+Date: [[2022-06-19]]
+Last Highlighted: *2019-12-13*
+
+---
+
+# Highlights
+
+A view controller is best thought of as being one screen of information ([0](https://readwise.io/to_kindle?action=open&asin=null&location=0)) %% Color: yellow %% ^334747213
+
+---
+
+This super call means “tell Apple’s UIViewController to run its own code before I run mine ([1](https://readwise.io/to_kindle?action=open&asin=null&location=1)) %% Color: yellow %% ^334747214
+
+---
+
+a bundle is a directory containing our compiled program and all our assets. ([2](https://readwise.io/to_kindle?action=open&asin=null&location=2)) %% Color: yellow %% ^334747215
+
+---
+
+class ViewController: UIViewController line means “I want to create a new screen of data called ViewController, based on UIViewController.” When you see a data type that starts with “UI”, it means it comes from UIKit. ([3](https://readwise.io/to_kindle?action=open&asin=null&location=3)) %% Color: yellow %% ^334747216
+
+---
+
+the override keyword is needed because it means “we want to change Apple’s default behavior from UIViewController. ([4](https://readwise.io/to_kindle?action=open&asin=null&location=4)) %% Color: yellow %% ^334747217
+
+---
+
+FileManager.default. This is a data type that lets us work with the filesystem ([5](https://readwise.io/to_kindle?action=open&asin=null&location=5)) %% Color: yellow %% ^334747218
+
+---
+
+To create a property, you need to declare it outside of methods ([6](https://readwise.io/to_kindle?action=open&asin=null&location=6)) %% Color: yellow %% ^334747219
+
+---
+
+The override keyword means the method has been defined already, and we want to override the existing behavior with this new behavior ([7](https://readwise.io/to_kindle?action=open&asin=null&location=7)) %% Color: yellow %% ^334747220
+
+---
+
+a method is a function that appears inside a class ([8](https://readwise.io/to_kindle?action=open&asin=null&location=8)) %% Color: yellow %% ^334747221
+
+---
+
+The _ means it doesn’t need to have a name sent externally, because it’s the same as the method name ([9](https://readwise.io/to_kindle?action=open&asin=null&location=9)) %% Color: yellow %% ^334747222
+
+---
+
+textLabel? – to mean “do this only if there is an actual text label there, or do nothing otherwise ([10](https://readwise.io/to_kindle?action=open&asin=null&location=10)) %% Color: yellow %% ^334747223
+
+---
+
+variables and constants should start with a lowercase letter, then use a capital letter at the start of any subsequent words. ([11](https://readwise.io/to_kindle?action=open&asin=null&location=11)) %% Color: yellow %% ^334747224
+
+---
+
+It is vital to your learning that you try the challenges above yourself, and not just for a handful of minutes before you give up ([12](https://readwise.io/to_kindle?action=open&asin=null&location=12)) %% Color: yellow %% ^334747225
+
+---
+
+UITableViewController. It’s based on UIViewController – Apple’s most basic type of screen – but adds the ability to show rows of data that can be scrolled and selected ([13](https://readwise.io/to_kindle?action=open&asin=null&location=13)) %% Color: yellow %% ^334747226
+
+---
+
+A table view cell is responsible for displaying one row of data in a table ([14](https://readwise.io/to_kindle?action=open&asin=null&location=14)) %% Color: yellow %% ^334747227
+
+---
+
+Swift has built-in methods for shuffling arrays: shuffle() for in-place shuffling, and shuffled() to return a new, shuffled array. ([15](https://readwise.io/to_kindle?action=open&asin=null&location=15)) %% Color: yellow %% ^334747228
+
+---
+
+notice the gray circle with a ring around it on the left, signifying this has a connection in Interface Builder. ([16](https://readwise.io/to_kindle?action=open&asin=null&location=16)) %% Color: yellow %% ^334747229
+
+---
+
+@IBOutlet is a way of connecting code to storyboard layouts, and @IBAction is a way of making storyboard layouts trigger code. ([17](https://readwise.io/to_kindle?action=open&asin=null&location=17)) %% Color: yellow %% ^334747230
+
+---
+
+closures is a special kind of code block that can be used like a variable – Swift literally takes a copy of the block of code so that it can be called later. Swift also copies anything referenced inside the code ([18](https://readwise.io/to_kindle?action=open&asin=null&location=18)) %% Color: yellow %% ^334747231
+
+---
+
+UIAlertController() gives us two kinds of style: .alert, which pops up a message box over the center of the screen, and .actionSheet, which slides options up from the bottom. They are similar, but Apple recommends you use .alert when telling users about a situation change, and .actionSheet when asking them to choose from a set of options. ([19](https://readwise.io/to_kindle?action=open&asin=null&location=19)) %% Color: yellow %% ^334747232
+
+---
+
+UIAlertAction data type to add a button to the alert that says "Continue", and gives it the style “default". There are three possible styles: .default, .cancel, and .destructive. ([20](https://readwise.io/to_kindle?action=open&asin=null&location=20)) %% Color: yellow %% ^334747233
+
+---
+
+Warning: We must use askQuestion and not askQuestion(). If you use the former, it means "here's the name of the method to run," but if you use the latter it means "run the askQuestion() method now, and it will tell you the name of the method to run." ([21](https://readwise.io/to_kindle?action=open&asin=null&location=21)) %% Color: yellow %% ^334747234
+
+---
+
+A closure can be thought of as a variable that holds code. So, where an integer holds 0 or 500, a closure holds lines of Swift code. Closures also capture the environment where they are created, which means they take a copy of the values that are used inside them. ([22](https://readwise.io/to_kindle?action=open&asin=null&location=22)) %% Color: yellow %% ^334747235
+
+---
+
+UIView is an iOS data type in UIKit that represents the most basic kind of user interface container. ([23](https://readwise.io/to_kindle?action=open&asin=null&location=23)) %% Color: yellow %% ^334747236
+
+---
+
+The rule is this: if the last parameter to a method takes a closure, you can eliminate that parameter and instead provide it as a block of code inside braces. ([24](https://readwise.io/to_kindle?action=open&asin=null&location=24)) %% Color: yellow %% ^334747237
+
+---
+
+UIActivityViewController: you tell it what kind of data you want to share, and it figures out how best to share it. ([25](https://readwise.io/to_kindle?action=open&asin=null&location=25)) %% Color: yellow %% ^334747238
+
+---
+
+a UINavigationController has a bar across the top, called a UINavigationBar, and as developers we can add buttons to this navigation bar that call our methods. ([26](https://readwise.io/to_kindle?action=open&asin=null&location=26)) %% Color: yellow %% ^334747239
+
+---
+
+The .action system item displays an arrow coming out of a box, signaling the user can do something when it's tapped. ([27](https://readwise.io/to_kindle?action=open&asin=null&location=27)) %% Color: yellow %% ^334747240
+
+---
+
+The target and action parameters go hand in hand, because combined they tell the UIBarButtonItem what method should be called. ([28](https://readwise.io/to_kindle?action=open&asin=null&location=28)) %% Color: yellow %% ^334747241
+
+---
+
+the current view controller – self ([29](https://readwise.io/to_kindle?action=open&asin=null&location=29)) %% Color: yellow %% ^334747242
+
+---
+
+it's generally preferred to use the system items where possible because users already know what they do. ([30](https://readwise.io/to_kindle?action=open&asin=null&location=30)) %% Color: yellow %% ^334747243
+
+---
+
+When you call a method using #selector you’ll always need to use @objc too. ([31](https://readwise.io/to_kindle?action=open&asin=null&location=31)) %% Color: yellow %% ^334747244
+
+---
+
+UIActivityViewController, which is the iOS method of sharing content with other apps and services. ([32](https://readwise.io/to_kindle?action=open&asin=null&location=32)) %% Color: yellow %% ^334747245
+
+---
+
+On iPhone, activity view controllers automatically take up the full screen, but on iPad they appear as a popover that allows the user to see what they were working on below. ([33](https://readwise.io/to_kindle?action=open&asin=null&location=33)) %% Color: yellow %% ^334747246
+
+---
+
+when you use @IBAction to make storyboards call your code, that automatically implies @objc ([34](https://readwise.io/to_kindle?action=open&asin=null&location=34)) %% Color: yellow %% ^334747247
+
+---
+
+create a new instance of the UIBarButtonItem data type, setting it up with three parameters: a system item, a target, and an action ([35](https://readwise.io/to_kindle?action=open&asin=null&location=35)) %% Color: yellow %% ^334747248
+
+---
+
+we need to tell Xcode that this storyboard table view controller is the same one we have in code inside ViewController.swift. ([36](https://readwise.io/to_kindle?action=open&asin=null&location=36)) %% Color: yellow %% ^334747249
+
+---
+
+we need to tell Xcode that this new table view controller is what should be shown when the app first runs ([37](https://readwise.io/to_kindle?action=open&asin=null&location=37)) %% Color: yellow %% ^334747250
+
+---
+
+To place our table view controller into a navigation controller, all you need to do is go to the Editor menu and choose Embed In > Navigation Controller. ([38](https://readwise.io/to_kindle?action=open&asin=null&location=38)) %% Color: yellow %% ^334747251
+
+---
+
+To make the table show our rows, we need to override two behaviors: how many rows should be shown, and what each row should contain. ([39](https://readwise.io/to_kindle?action=open&asin=null&location=39)) %% Color: yellow %% ^334747252
+
+---
+
+Delegation is what's called a programming pattern – a way of writing code – and it's used extensively in iOS ([40](https://readwise.io/to_kindle?action=open&asin=null&location=40)) %% Color: yellow %% ^334747253
+
+---
+
+A delegate is one thing acting in place of another, effectively answering questions and responding to events on its behalf. ([41](https://readwise.io/to_kindle?action=open&asin=null&location=41)) %% Color: yellow %% ^334747254
+
+---
+
+In the case of navigationDelegate, all these methods are optional, meaning that we don't need to implement any methods.
+Any methods you do implement will now be given control over the WKWebView's behavior. Any you don't implement will use the default behavior of WKWebView. ([42](https://readwise.io/to_kindle?action=open&asin=null&location=42)) %% Color: yellow %% ^334747255
+
+---
+
+when we say class A: B we’re defining a new class called A that builds on the functionality provided by class B. However, when we say class A: B, C we’re saying it inherits from UIViewController (the first item in the list), and promises it implements the WKNavigationDelegate protocol.
+
+The order here really is important: the parent class (superclass) comes first, then all protocols implemented come next, all separated by commas. We're saying that we conform to only one protocol here (WKNavigationDelegate) but you can specify as many as you need to. ([43](https://readwise.io/to_kindle?action=open&asin=null&location=43)) %% Color: yellow %% ^334747256
+
+---
+
+Even though we’re used to URLs being strings of text, Swift stores URLs in a specific URL data type that adds a lot of extra functionality. ([44](https://readwise.io/to_kindle?action=open&asin=null&location=44)) %% Color: yellow %% ^334747257
+
+---
+
+Warning: you need to ensure you use https:// for your websites, because iOS does not like apps sending or receiving data insecurely. ([45](https://readwise.io/to_kindle?action=open&asin=null&location=45)) %% Color: yellow %% ^334747258
+
+---
+
+WKWebViews don't load websites from strings like www.hackingwithswift.com, or even from a URL made out of those strings. You need to turn the string into a URL, then put the URL into an URLRequest, and WKWebView will load that. ([46](https://readwise.io/to_kindle?action=open&asin=null&location=46)) %% Color: yellow %% ^334747259
+
+---
+
+Your URL must be complete, and valid, in order for this process to work. That means including the https:// part. ([47](https://readwise.io/to_kindle?action=open&asin=null&location=47)) %% Color: yellow %% ^334747260
+
+---
+
+setting the alert controller’s popoverPresentationController?.barButtonItem property is used only on iPad, and tells iOS where it should make the action sheet be anchored. ([48](https://readwise.io/to_kindle?action=open&asin=null&location=48)) %% Color: yellow %% ^334747261
+
+---
+
+We're adding a dedicated Cancel button using style .cancel. It doesn’t provide a handler parameter, which means iOS will just dismiss the alert controller if it’s tapped ([49](https://readwise.io/to_kindle?action=open&asin=null&location=49)) %% Color: yellow %% ^334747262
+
+---
+
+UIToolbar holds and shows a collection of UIBarButtonItem objects that the user can tap on. ([50](https://readwise.io/to_kindle?action=open&asin=null&location=50)) %% Color: yellow %% ^334747263
+
+---
+
+UIProgressView is a colored bar that shows how far a task is through its work, sometimes called a "progress bar." ([51](https://readwise.io/to_kindle?action=open&asin=null&location=51)) %% Color: yellow %% ^334747264
+
+---
+
+all view controllers automatically come with a toolbarItems array that automatically gets read in when the view controller is active inside a UINavigationController. ([52](https://readwise.io/to_kindle?action=open&asin=null&location=52)) %% Color: yellow %% ^334747265
+
+---
+
+You can't just add random UIView subclasses to a UIToolbar, or to the rightBarButtonItem property. Instead, you need to wrap them in a special UIBarButtonItem, and use that instead. ([53](https://readwise.io/to_kindle?action=open&asin=null&location=53)) %% Color: yellow %% ^334747266
+
+---
+
+Swift has a special keyword, #keyPath, which works like the #selector keyword you saw previously ([54](https://readwise.io/to_kindle?action=open&asin=null&location=54)) %% Color: yellow %% ^334747267
+
+---
+
+Warning: in more complex applications, all calls to addObserver() should be matched with a call to removeObserver() when you're finished observing ([55](https://readwise.io/to_kindle?action=open&asin=null&location=55)) %% Color: yellow %% ^334747268
+
+---
+
+Once you have registered as an observer using KVO, you must implement a method called observeValue(). ([56](https://readwise.io/to_kindle?action=open&asin=null&location=56)) %% Color: yellow %% ^334747269
+
+---
+
+we're setting the web view's navigationDelegate property to self, which means "when any web page navigation happens, please tell me – the current view controller.” ([57](https://readwise.io/to_kindle?action=open&asin=null&location=57)) %% Color: yellow %% ^334747270
+
+---
+
+key-value observing (KVO), and it effectively lets you say, "please tell me when the property X of object Y gets changed ([58](https://readwise.io/to_kindle?action=open&asin=null&location=58)) %% Color: yellow %% ^334747271
+
+---
+
+path(forResource:) and creating a String from the contents of a file both return String?, which means we need to check and unwrap the optional using if let syntax. ([59](https://readwise.io/to_kindle?action=open&asin=null&location=59)) %% Color: yellow %% ^334747272
+
+---
+
+try? means "call this code, and if it throws an error just send me back nil instead." ([60](https://readwise.io/to_kindle?action=open&asin=null&location=60)) %% Color: yellow %% ^334747273
+
+---
+
+The reason we use isEmpty is because some collection types, such as string, have to calculate their size by counting over all the elements they contain, so reading count == 0 can be significantly slower than using isEmpty. ([61](https://readwise.io/to_kindle?action=open&asin=null&location=61)) %% Color: yellow %% ^334747274
+
+---
+
+In our code we use this: [weak self, weak ac]. That declares self (the current view controller) and ac (our UIAlertController) to be captured as weak references inside the closure. It means the closure can use them, but won't create a strong reference cycle because we've made it clear the closure doesn't own either of them. ([62](https://readwise.io/to_kindle?action=open&asin=null&location=62)) %% Color: yellow %% ^334747275
+
+---
+
+We've already declared that self is weakly owned by the closure, but Swift wants us to be absolutely sure we know what we're doing: every call to a method or property of the current view controller must prefixed with "self?.”, as in self?.submit(). ([63](https://readwise.io/to_kindle?action=open&asin=null&location=63)) %% Color: yellow %% ^334747276
+
+---
+
+Implicit capture of self in closures is that place when using self is required and meaningful ([64](https://readwise.io/to_kindle?action=open&asin=null&location=64)) %% Color: yellow %% ^334747277
+
+---
+
+Everything after in is the actual code of the closure. ([65](https://readwise.io/to_kindle?action=open&asin=null&location=65)) %% Color: yellow %% ^334747278
+
+---
+
+NSRange. This is used to store a string range, which is a value that holds a start position and a length. ([66](https://readwise.io/to_kindle?action=open&asin=null&location=66)) %% Color: yellow %% ^334747279
+
+---
+
+Here the return statement is used in a new way: as part of an operation involving ==. This is a very common way to code, and what happens is that == returns true or false depending on whether misspelledRange.location is equal to NSNotFound. That true or false is then given to return as the return value for the method. ([67](https://readwise.io/to_kindle?action=open&asin=null&location=67)) %% Color: yellow %% ^334747280
+
+---
+
+Swift’s strings natively store international characters as individual characters, e.g. the letter ([68](https://readwise.io/to_kindle?action=open&asin=null&location=68)) %% Color: yellow %% ^334747281
+
+---
+
+“é” is stored as precisely that. However, UIKit was written in Objective-C before Swift’s strings came along, and it uses a different character system called UTF-16 – short for 16-bit Unicode Transformation Format – where the accent and the letter are stored separately. ([69](https://readwise.io/to_kindle?action=open&asin=null&location=69)) %% Color: yellow %% ^334747282
+
+---
+
+if you use count with UIKit methods, you run the risk of miscounting the string length ([70](https://readwise.io/to_kindle?action=open&asin=null&location=70)) %% Color: yellow %% ^334747283
+
+---
+
+when you’re working with UIKit, SpriteKit, or any other Apple framework, use utf16.count for the character count. If it’s just your own code - i.e. looping over characters and processing each one individually – then use count instead. ([71](https://readwise.io/to_kindle?action=open&asin=null&location=71)) %% Color: yellow %% ^334747284
+
+---
+
+Auto Layout Visual Format Language (VFL), which is kind of like a way of drawing the layout you want with a series of keyboard symbols. ([72](https://readwise.io/to_kindle?action=open&asin=null&location=72)) %% Color: yellow %% ^334747285
+
+---
+
+VFL can generate multiple constraints at a time. ([73](https://readwise.io/to_kindle?action=open&asin=null&location=73)) %% Color: yellow %% ^334747286
+
+---
+
+NSLayoutConstraint.constraints(withVisualFormat:) is the Auto Layout method that converts VFL into an array of constraints ([74](https://readwise.io/to_kindle?action=open&asin=null&location=74)) %% Color: yellow %% ^334747287
+
+---
+
+the - symbol, which means "space". It's 10 points by default, but you can customize it. ([75](https://readwise.io/to_kindle?action=open&asin=null&location=75)) %% Color: yellow %% ^334747288
+
+---
+
+our vertical VFL doesn't have a pipe at the end, so we're not forcing the last label to stretch all the way to the edge of our view. ([76](https://readwise.io/to_kindle?action=open&asin=null&location=76)) %% Color: yellow %% ^334747289
+
+---
+
+when specifying the size of a space, you need to use the - before and after the size: a simple space, -, becomes -(>=10)-. ([77](https://readwise.io/to_kindle?action=open&asin=null&location=77)) %% Color: yellow %% ^334747290
+
+---
+
+you can give VFL a set of sizes with names, then use those sizes in the VFL rather than hard-coding numbers ([78](https://readwise.io/to_kindle?action=open&asin=null&location=78)) %% Color: yellow %% ^334747291
+
+---
+
+constraints are evaluated from highest priority down to lowest, but all are taken into account ([79](https://readwise.io/to_kindle?action=open&asin=null&location=79)) %% Color: yellow %% ^334747292
+
+---
+
+Constraint priority is a value between 1 and 1000, where 1000 means "this is absolutely required" and anything less is optional. By default, all constraints you have are priority 1000, so Auto Layout will fail to find a solution in our current layout. But if we make the height optional – even as high as priority 999 – it means Auto Layout can find a solution to our layout: shrink the labels to make them fit. ([80](https://readwise.io/to_kindle?action=open&asin=null&location=80)) %% Color: yellow %% ^334747293
+
+---
+
+In practice, this means using leadingAnchor and trailingAnchor if you want your user interface to flip around for right to left languages, and leftAnchor and rightAnchor for things that should look the same no matter what environment. ([81](https://readwise.io/to_kindle?action=open&asin=null&location=81)) %% Color: yellow %% ^334747294
+
+---
+
+The navigation controller adds a gray bar at the top called a navigation bar, and the tab bar controller adds a gray bar at the bottom called a tab bar ([82](https://readwise.io/to_kindle?action=open&asin=null&location=82)) %% Color: yellow %% ^334747295
+
+---
+
+JSON – short for JavaScript Object Notation – is a way of describing data. It's not the easiest to read yourself, but it's compact and easy to parse for computers, which makes it popular online where bandwidth is at a premium ([83](https://readwise.io/to_kindle?action=open&asin=null&location=83)) %% Color: yellow %% ^334747296
+
+---
+
+Swift has built-in support for working with JSON using a protocol called Codable ([84](https://readwise.io/to_kindle?action=open&asin=null&location=84)) %% Color: yellow %% ^334747297
+
+---
+
+Swift’s simple types like String and Int automatically conform to Codable, and arrays and dictionaries also conform to Codable if they contain Codable objects. That is, [String] conforms to Codable just fine, because String itself conforms to Codable ([85](https://readwise.io/to_kindle?action=open&asin=null&location=85)) %% Color: yellow %% ^334747298
+
+---
+
+one of the advantages of structs in Swift is that it gives us a memberwise initializer – a special function that can create new Petition instances by passing in values for title, body, and signatureCount. ([86](https://readwise.io/to_kindle?action=open&asin=null&location=86)) %% Color: yellow %% ^334747299
+
+---

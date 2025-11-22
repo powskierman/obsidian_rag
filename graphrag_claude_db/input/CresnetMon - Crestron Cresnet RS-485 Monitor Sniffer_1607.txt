@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2022-06-24 15:11
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<https://github.com/StephenGenusa/CresnetMon>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

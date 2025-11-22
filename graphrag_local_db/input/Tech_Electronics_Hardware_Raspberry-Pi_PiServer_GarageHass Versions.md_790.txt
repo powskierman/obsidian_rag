@@ -1,0 +1,35 @@
+# GarageHass Versions.md
+
+---
+aliases: 
+tags:
+  - garage
+  - GarageHass
+---
+# GarageHass Versions
+Date: 2024-01-28
+
+### Backlink
+[[NHGarage]]
+
+### Reference
+-  
+### Notes
+-  There are 3 versions of GarageHass
+	- WebSocket and WatchConnectivity
+		- Secrets is set for Canmore
+		- Commit merge-commit
+		- 7fe0b076313f07170e30363239d9fcf3386a9b3e
+	- RESTful API and WatchConnectivity
+		- commit rest-watch
+		- 1079c4f0f39a8b62373a2635cb844e85095025b4
+	- Standalone phone and watch versions
+		- commit no_watch
+		- 7c3344f851c110834f501bb681813d56399335ef
+		- Standalone Watch version
+			- commit main
+			- 163c01efb2a1217313cc28031237d1c5097dcf99
+	- They all use HassFramework
+		- commit rest
+		- 482060f65a542d6c62335561944afad1c7e225d3
+-

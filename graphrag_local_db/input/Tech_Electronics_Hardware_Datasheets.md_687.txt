@@ -1,0 +1,37 @@
+# Datasheets.md
+
+---
+aliases: []
+---
+
+2022-06-26
+# Datasheets
+
+### Backlink
+[[]]
+
+### Reference
+- [SMD numbering reference](https://www.s-manuals.com/smd)
+-  [HT7333](https://datasheet.lcsc.com/szlcsc/Holtek-Semicon-HT7333-A_C21583.pdf)
+	-  [HT7333 Description and pinout](https://components101.com/regulators/ht7333-linear-voltage-regulator-datasheet-pinout)
+-  [ESP32 Pinout](https://www.mischianti.org/wp-content/uploads/2021/02/ESP32-wroom-32-pinout-mischianti-high-resolution.png)
+-  [XC6203P332PR](https://www.mouser.ca/datasheet/2/760/TOSL_S_A0009829733_1-2574991.pdf)
+-  [DW01A](http://hmsemi.com/downfile/DW01A.PDF)
+-  [NTF5P03T3G](https://www.mouser.ca/datasheet/2/308/1/NTF5P03T3_D-2318677.pdf)
+- [TP4056](https://dlnmh9ip6v2uc.cloudfront.net/datasheets/Prototyping/TP4056.pdf)
+- [FS8205A](https://www.ic-fortune.com/upload/Download/FS8205A-DS-12_EN.pdf)
+- [MQ-6](https://www.sparkfun.com/datasheets/Sensors/Biometric/MQ-6.pdf)
+- [[IRFS7530-full-bridge]]
+- [[LM338]]
+- [[MMBT2222LT1-D]]
+- [[TinyPICO]]
+- [[Vishay-TSAL6200]]
+- [hx2300](hx2300.pdf)
+- [[TinyPICO]]
+- [[ChipQwik Profile]]
+-  [MMBT2222LT1-D](onenote:..Datasheets.one#MMBT2222LT1-D&section-id={E165ED6D-8E09-9E4E-80F1-7DEE0E6EF8BA}&page-id={D5502B6D-D8AC-DD4C-A45C-8D56E0C6CFCC}&end&base-path=https://d.docs.live.net/1dfb008572b727cd/Documents/Electronics)
+- [[Dymore-Reed-Relay]]
+- 
+
+### Notes
+-

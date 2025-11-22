@@ -1,0 +1,21 @@
+---
+aliases:
+tags:
+created: 2021-12-27 17:59
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+1.  Rpi [AFP server](https://pimylifeup.com/raspberry-pi-afp/)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,49 @@
+# Oakley-A Mind For Numbers.md
+
+---
+bookId: "6963"
+title: "A Mind For Numbers: How to Excel at Math and Science (Even If You Flunked Algebra)"
+author: Barbara Oakley
+asin: B00G3L19ZU
+lastAnnotatedDate: 2020-02-01
+highlightsCount: 11
+reference: https://www.amazon.com/dp/B00G3L19ZU
+kindle_link: kindle://book?action=open&asin=B00G3L19ZU
+tags:
+  - book-notes
+---
+![](https://m.media-amazon.com/images/I/81xk6jafTJL._SY160.jpg)
+## Highlights
+If you are trying to understand or figure out something new, your best bet is to turn off your precision-focused thinking and turn on your “big picture” diffuse mode, — location: [387](kindle://book?action=open&asin=B00G3L19ZU&location=387) ^ref-24813
+
+---
+The harder you push your brain to come up with something creative, the less creative your ideas will be. So far, I have not found a single situation where this does not apply. — location: [395](kindle://book?action=open&asin=B00G3L19ZU&location=395) ^ref-5847
+
+---
+as long as we are consciously focusing on a problem, we are blocking the diffuse mode. — location: [424](kindle://book?action=open&asin=B00G3L19ZU&location=424) ^ref-27446
+
+---
+shifting from focused to diffuse mode happens naturally if you distract yourself and then allow a little time to pass. You can go for a walk, take a nap, or go to the gym. — location: [513](kindle://book?action=open&asin=B00G3L19ZU&location=513) ^ref-9640
+
+---
+The key is to do something else until your brain is consciously free of any thought of the problem. — location: [516](kindle://book?action=open&asin=B00G3L19ZU&location=516) ^ref-56972
+
+---
+Enlisting the diffuse mode helps you learn at a deep and creative level. — location: [543](kindle://book?action=open&asin=B00G3L19ZU&location=543) ^ref-5982
+
+---
+blinking is a vital activity that provides another means of reevaluating a situation. — location: [614](kindle://book?action=open&asin=B00G3L19ZU&location=614) ^ref-30757
+
+---
+Figuring out a difficult problem or learning a new concept almost always requires one or more periods when you aren’t consciously working on the problem. — location: [627](kindle://book?action=open&asin=B00G3L19ZU&location=627) ^ref-44092
+
+---
+when you are first learning new concepts, is not to let things go untouched for longer than a day. — location: [643](kindle://book?action=open&asin=B00G3L19ZU&location=643) ^ref-41668
+
+---
+Rising frustration is usually a good time-out signal for you, signaling that you need to shift to diffuse mode. — location: [655](kindle://book?action=open&asin=B00G3L19ZU&location=655) ^ref-29232
+
+---
+Research has shown that when your brain first puts an item of information in long-term memory, you need to revisit it a few times to increase the chances you’ll later be able to find it when you need it.21 — location: [701](kindle://book?action=open&asin=B00G3L19ZU&location=701) ^ref-33540
+
+---

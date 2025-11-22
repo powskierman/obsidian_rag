@@ -1,0 +1,66 @@
+---
+aliases: 
+tags:
+  - 3d-printing
+  - firmware
+  - creality
+created: 
+ContentType:
+Backlink: "[[Creality MOC]]"
+---
+
+# Firmware
+
+### Main Idea
+- Firmware configuration and setup for Creality 3D printers with SKR Mini E3 board
+
+### References
+1.  [SKR Mini E3 Board Marlin Setup](https://www.makenprint.uk/3d-printing/3d-printing-guides/skr-mini-e3-v2-marlin-2-setup-part-1/)
+
+    a.  [Bigtreetech Manual](https://github.com/bigtreetech/BIGTREETECH-SKR-mini-E3/blob/master/hardware/BTT%20SKR%20MINI%20E3%20V2.0/Hardware/BTT%20SKR%20MINI%20E3%20V2.0%20Instruction%20Manual.pdf)
+
+    b.  [Marlin Guide for SKR Mini](https://www.reddit.com/r/ender3/comments/e894j7/marlin_20x_guide_for_ender_3_using_skr_mini_e3_v12/)
+
+[Micro-Swiss Direct Drive installation](https://store.micro-swiss.com/pages/installation-instructions)
+
+3.  BLTouch
+
+    a.  [Installation](https://3dwork.io/en/configure-bltouch-in-marlin/#Configuring_the_offset)
+
+    b.  [Probing Boundaries](https://3dprinting.stackexchange.com/questions/7395/how-to-set-the-boundaries-for-bltouch-probing)
+
+    c.  [Center Prints on Build Platform](https://3dprinting.stackexchange.com/questions/6375/how-to-center-my-prints-on-the-build-platform-re-calibrate-homing-offset)
+
+### Notes
+1.  Compilation
+
+    a.  [Compiling Marlin on VSCode](https://www.webcarpenter.com/blog/162-3D-Print---How-to-calibrate-Z-offset-with-a-BLTouch-bed-leveling-probe-sensor)
+
+        i.  Download new Marlin
+
+        ii. Compare configuration.h and configuration_adv.h to previous install and machine specific version with Beyond Compare
+
+        iii. Previous version can be found on [jumboapplicationsMy DriversCreality](file://jumbo/applications/My%20Drivers/Creality)
+
+   
+    b.  [Marlin Download](https://marlinfw.org/meta/download/)
+
+    c.  [Ender-3 Original Firmware](https://github.com/Creality3DPrinting/Ender-3)
+
+    d.  [Creality Forum Downloads](https://forums.creality3dofficial.com/download/ender-series/ender-3/)
+
+1.  Offsets
+
+    a.  [Home Offsets](https://cdn.shopify.com/s/files/1/1210/0176/files/Leveling_probe_installed_with_generic_or_Creality_Marlin_Firmware.pdf)
+
+    b.  Calibrating Nozzle position
+
+Home your machine. Use a caliper or ruler to measure the distance between the nozzle and the edges of the print bed in both the X and Y direction. If the nozzle was*off*the bed in both directions, input these measurements as*negative*X_MIN_POSandY_MIN_POSvalues. If it was*over*the bed in either of those directions, you'll need to input them as*positive*positions.
+
+That should result in your nozzle to be exactly on the edge of the bed after a
+
+G28 X Y
+G1 X0 Y0
+
+1.  [Calibrating Z Offset](https://www.webcarpenter.com/blog/162-3D-Print---How-to-calibrate-Z-offset-with-a-BLTouch-bed-leveling-probe-sensor)
+2. [PID Autotuning](https://print3d.world/easy-ender-3-hot-end-pid-auto-tuning/)

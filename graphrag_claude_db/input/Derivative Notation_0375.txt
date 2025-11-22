@@ -1,0 +1,25 @@
+---
+aliases:
+tags:
+  - math
+created: 2022-02-28 11:48
+ContentType: Reference
+Backlink: "[[average rate of change]]"
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+- These all mean the same thing: The 
+	- $f'(x)$ = $df \over dx$ = $dy \over dx$ = d $f \over x$ = d$y \over x$
+	- The first is Newton, the others Leibniz
+- $\delta f \over \delta x$ = $\delta y \over \delta x$ is the .
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

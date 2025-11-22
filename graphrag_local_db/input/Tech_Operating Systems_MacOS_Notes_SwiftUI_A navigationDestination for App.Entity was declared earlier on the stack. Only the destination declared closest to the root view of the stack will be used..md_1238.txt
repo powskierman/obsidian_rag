@@ -1,0 +1,17 @@
+# A navigationDestination for App.Entity was declared earlier on the stack. Only the destination declared closest to the root view of the stack will be used..md
+
+---
+aliases:
+  - A navigationDestination for <App.Entity> was declared earlier on the stack. Only the destination declared closest to the root view of the stack will be used.
+tags: []
+---
+# A navigationDestination for <App.Entity> was declared earlier on the stack. Only the destination declared closest to the root view of the stack will be used.
+Date: 2023-02-07
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+- For value-based navigation destinations, don't put the destination modifier right after the NavigationLink. Put it after the List view or whatever your containing view is.

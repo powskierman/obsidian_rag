@@ -1,0 +1,92 @@
+# Essential Photoshop.md
+
+---
+id: 16112635
+updated: 2022-06-18
+title: Essential Photoshop
+author: Robin Whalley
+highlights: 15
+last_highlight: 2016-11-29
+tags: book-notes
+"Date added:": 
+---
+
+%%
+ID: 16112635
+Updated: 2022-06-18
+%%
+
+![]( https://images-na.ssl-images-amazon.com/images/I/51GTZaHL7tL._SL500_.jpg)
+
+# About
+Title: [[Essential Photoshop]]
+Authors: [[Robin Whalley]]
+Category: #books
+Number of Highlights: ==15==
+Readwise URL: https://readwise.io/bookreview/16112635
+Date: [[2022-06-18]]
+Last Highlighted: *2016-11-29*
+
+---
+
+# Highlights
+
+Being able to target your adjustments so they affect only specific areas is probably the greatest skill you can develop and will set your work apart. ([1631](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1631)) %% Color: yellow %% ^334463089
+
+---
+
+There is, however, an easy way to view the mask – by holding down the Alt key and clicking on the layer mask in the Layers window with your mouse. This makes the mask visible. ([1641](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1641)) %% Color: yellow %% ^334463090
+
+---
+
+When we use grey it will partly mask the area covered. The darker the grey the more it blocks the adjustment and the lighter the grey the more it allows the adjustment to show through the mask. ([1647](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1647)) %% Color: yellow %% ^334463091
+
+---
+
+Try using a brush opacity of between 8% and 20%. This allows you to build up your mask with multiple brush strokes. ([1657](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1657)) %% Color: yellow %% ^334463092
+
+---
+
+When painting on a layer mask it's a good idea to use a soft-edged brush as this will help blend the effect much more naturally into the finished image. ([1659](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1659)) %% Color: yellow %% ^334463093
+
+---
+
+Add a new Hue/Saturation mask and increase the saturation for the "Master" colour by +20. ([1668](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1668)) %% Color: yellow %% ^334463094
+
+---
+
+By separating the elements of the image using masks we were able to adjust and fine tune each. ([1702](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1702)) %% Color: yellow %% ^334463095
+
+---
+
+Making fewer adjustments is almost always a good thing. You end up with a higher quality finished image, you make it more believable and you make your adjustments quicker. ([1703](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1703)) %% Color: yellow %% ^334463096
+
+---
+
+We used two different approaches to masking. One started with a white mask and applied black paint to hide the effect. The other started with a black mask and applied white paint to reveal the effect. You can use either approach but it's best to start with the one that means you have less to paint. ([1706](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1706)) %% Color: yellow %% ^334463097
+
+---
+
+how it's possible to paint such as complex mask, let alone paint it in a couple of minutes. ([1712](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1712)) %% Color: yellow %% ^334463098
+
+---
+
+a duplicate of all the layers (created using Shift + Ctrl + Alt + E). ([1795](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1795)) %% Color: yellow %% ^334463099
+
+---
+
+As with most things in Photoshop, it's always best to plan your adjustment before making it ([1802](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1802)) %% Color: yellow %% ^334463100
+
+---
+
+Method 2 - Blending Mode ([1848](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=1848)) %% Color: yellow %% ^334463101
+
+---
+
+Set the zoom level for your image to 50%. You can do this by zooming in or out with the magnifying glass tool in the tools palette or by typing 50% into the zoom level indicator found at the bottom left of the Photoshop interface. ([2175](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=2175)) %% Color: yellow %% ^334463102
+
+---
+
+http://www.amazon.co.uk/Robin-Whalley/e/B00B1VIN5G/ref=ntt_dp_epwbk_0 ([2363](https://readwise.io/to_kindle?action=open&asin=B00EBRW2K4&location=2363)) %% Color: yellow %% ^334463103
+
+---

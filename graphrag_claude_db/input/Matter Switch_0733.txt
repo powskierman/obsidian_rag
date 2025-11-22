@@ -1,0 +1,32 @@
+---
+aliases: []
+tags: [
+ Matter
+ Switch
+ nrf52840dk
+]
+---
+# Matter Switch
+Date: 2023-07-14
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  Matter Switch for the nrf52840 dk builds but only fits in memory if prj_no_dfu.conf is used.
+- The differences between prj.conf and prj_no_dfu.conf:
+	- prj.conf has this additional statement:
+```
+CONFIG_UART_INTERRUPT_DRIVEN=y
+```
+
+- prj_no_dfu.conf has these additional statements:
+```
+# Disable Matter OTA DFU
+CONFIG_CHIP_OTA_REQUESTOR=n
+
+# Disable QSPI NOR
+CONFIG_CHIP_QSPI_NOR=n
+```

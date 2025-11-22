@@ -1,0 +1,24 @@
+# ESP32-MQTT.md
+
+---
+aliases:
+tags:
+created: 2021-12-30 14:14
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+use the MQTT communication protocol with the ESP32 to publish messages and subscribe to topics.
+1.  [Tutorial](https://randomnerdtutorials.com/esp32-mqtt-publish-subscribe-arduino-ide/)
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

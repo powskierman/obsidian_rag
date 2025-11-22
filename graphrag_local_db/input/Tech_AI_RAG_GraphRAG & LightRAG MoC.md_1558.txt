@@ -1,0 +1,73 @@
+# GraphRAG & LightRAG MoC.md
+
+---
+aliases:
+  - LightRAG MoC
+  - Knowledge Graph RAG
+tags:
+  - MoC
+  - AI
+  - RAG
+  - knowledge-graph
+created: 2025-10-21 15:30
+Backlink: "[[AI Tools MoC]]"
+---
+## Overview
+
+Map of Content for GraphRAG and LightRAG implementation - a knowledge graph-based enhancement to traditional RAG systems.
+
+## Core Concepts
+
+- [[LightRAG Overview]] - What is LightRAG and how it differs from traditional RAG
+- [[Knowledge Graph RAG Architecture]] - Technical architecture and dual-level retrieval system
+- [[LightRAG Benefits]] - Advantages for medical timeline tracking and multi-hop reasoning
+
+## Implementation
+
+- [[LightRAG Implementation Guide]] - Setup, configuration, and integration
+- [[LightRAG Query Modes]] - Naive, local, global, and hybrid query strategies
+- [[LightRAG vs Traditional RAG Comparison]] - Performance and use case analysis
+  [GraphRAG Implementation Guide](https://www.chitika.com/graphrag-local-install-setup-using-vllm-and-ollama/)
+- [Pitfalls Pevention Guide](https://chishengliu.com/posts/graphrag-local-ollama/?utm_source=perplexity)
+- 
+
+## Use Cases
+
+- [[Medical Timeline with GraphRAG]] - Treatment progression tracking and decision support
+- [[Multi-Hop Reasoning with LightRAG]] - Complex causal chain discovery
+- [[Entity-Centric Search]] - Comprehensive entity relationship mapping
+- [[Which research type to use]]
+
+## Related MoCs
+
+- [[Obsidian RAG System MoC]]
+- [[RAG Memory System]]
+
+## External Resources
+
+- LightRAG-HKU: https://github.com/HKUDS/LightRAG
+- Installation: `pip install lightrag-hku`
+
+## Status
+
+- Current: **Production Ready** - GraphRAG-Local-Ollama successfully implemented
+- Tech stack: GraphRAG-Local-Ollama + qwen2.5-coder:14b + nomic-embed-text
+- Vault size: 1,607 markdown files actively indexing
+- Service: Running on port 8003 with Docker Compose profile `graphrag-local`
+- LightRAG: Deprecated due to persistent event loop issues
+
+## Implementation Details
+
+- **GraphRAG-Local Service**: Specialized Ollama integration at http://localhost:8003
+- **Container**: obsidian-graphrag-local with Flask API wrapper
+- **Models**: qwen2.5-coder:14b (LLM) + nomic-embed-text (embeddings)
+- **Indexing**: Active processing of 1,607 vault files
+- **API Endpoints**: /health, /stats, /query, /index-vault, /build-index
+
+## Next Steps
+
+1. ✅ Complete vault indexing (in progress)
+2. Test medical timeline queries with GraphRAG-Local
+3. Compare GraphRAG vs vector search results
+4. Document query optimization patterns
+5. Create GraphRAG query templates for medical use

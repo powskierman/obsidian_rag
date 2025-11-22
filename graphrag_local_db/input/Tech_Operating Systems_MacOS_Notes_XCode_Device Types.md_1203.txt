@@ -1,0 +1,18 @@
+# Device Types.md
+
+---
+aliases: []
+---
+# Device Types
+Date: 2022-10-07
+
+### Tags: 
+
+### Backlink
+[[../../../../Programming-Tools/SwiftUI/SwiftUI MoC]]
+
+### Reference
+- 
+### Notes
+-  You can get a list of supported preview device names by using the xcrun command in the Terminal app:
+	- xcrun simctl list devicetypes

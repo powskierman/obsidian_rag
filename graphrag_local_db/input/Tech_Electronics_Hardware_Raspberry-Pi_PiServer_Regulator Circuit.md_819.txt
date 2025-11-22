@@ -1,0 +1,63 @@
+# Regulator Circuit.md
+
+---
+aliases:
+tags:
+created: 2024-07-22 12:11
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <rect x="50" y="50" width="500" height="300" fill="none" stroke="black" />
+  <text x="60" y="40" font-size="14">Simplified Alarm Signal Conditioning Circuit</text>
+  
+  <!-- LM358 -->
+  <polygon points="300,200 350,175 350,225" fill="none" stroke="black" />
+  <text x="320" y="205" font-size="10">LM358</text>
+  
+  <!-- Input -->
+  <text x="60" y="195" font-size="10">3.3V Alarm Signal In</text>
+  <line x1="50" y1="200" x2="300" y2="200" stroke="black" />
+  
+  <!-- Op-amp connections -->
+  <line x1="270" y1="210" x2="300" y2="210" stroke="black" />
+  <line x1="270" y1="210" x2="270" y2="250" stroke="black" />
+  <rect x="260" y="250" width="20" height="40" fill="none" stroke="black" />
+  <text x="265" y="275" font-size="10">R1</text>
+  
+  <!-- Output -->
+  <text x="520" y="195" font-size="10">Output to ESP32</text>
+  <line x1="350" y1="200" x2="550" y2="200" stroke="black" />
+  
+  <!-- Power supply -->
+  <text x="60" y="95" font-size="10">3.3V from ESP32</text>
+  <line x1="50" y1="100" x2="325" y2="100" stroke="black" />
+  <line x1="325" y1="100" x2="325" y2="175" stroke="black" />
+  
+  <!-- Ground -->
+  <text x="60" y="345" font-size="10">GND</text>
+  <line x1="50" y1="350" x2="550" y2="350" stroke="black" />
+  <line x1="270" y1="290" x2="270" y2="350" stroke="black" />
+  <line x1="325" y1="225" x2="325" y2="350" stroke="black" />
+  
+  <!-- RC Filter -->
+  <text x="180" y="165" font-size="10">R2</text>
+  <rect x="170" y="170" width="20" height="40" fill="none" stroke="black" />
+  <line x1="180" y1="210" x2="180" y2="250" stroke="black" />
+  <text x="185" y="270" font-size="10">C1</text>
+  <line x1="170" y1="250" x2="190" y2="250" stroke="black" />
+  <line x1="170" y1="270" x2="190" y2="270" stroke="black" />
+</svg>
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

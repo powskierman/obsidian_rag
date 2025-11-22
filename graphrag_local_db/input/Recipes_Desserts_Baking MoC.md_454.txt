@@ -1,0 +1,20 @@
+# Baking MoC.md
+
+---
+aliases:
+tags:
+  - baking
+  - Baguette
+  - recipe
+---
+# Baking MoC
+Date: 2024-10-13
+
+### Backlink
+[[]]
+
+### Reference
+-  
+### Notes
+-  [[Baguette MoC]]
+- [[CHAUSSONS aux POMMES de boulanger]]

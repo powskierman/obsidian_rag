@@ -1,0 +1,225 @@
+---
+bookId: "37249"
+title: "How to Take Smart Notes: One Simple Technique to Boost Writing, Learning and Thinking – for Students, Academics and Nonfiction Book Writers"
+author: Sönke Ahrens
+asin: B06WVYW33Y
+lastAnnotatedDate: 2022-03-27
+bookImageUrl: https://m.media-amazon.com/images/I/81A0MWyFUeL._SY160.jpg
+highlightsCount: 70
+reference: https://www.amazon.com/dp/B06WVYW33Y
+kindle_link: kindle://book?action=open&asin=B06WVYW33Y
+tags:
+  - book-notes
+  - note-taking
+---
+## Highlights
+only do what is easy. I only write when I immediately know how to do it. If I falter for a moment, I put the matter aside and do something else." — location: [365](kindle://book?action=open&asin=B06WVYW33Y&location=365) ^ref-59175
+
+---
+Luhmann had two slip-boxes: a bibliographical one, which contained the references and brief notes on the content of the literature, and the main one in which he collected and generated his ideas, mainly in response to what he read. — location: [416](kindle://book?action=open&asin=B06WVYW33Y&location=416) ^ref-20730
+
+---
+Whenever he read something, he would write the bibliographic information on one side of a card and make brief notes about the content on the other side (Schmidt 2013, 170). These notes would end up in the bibliographic slip-box. In a second step, shortly after, he would look at his brief notes and think about their relevance for his own thinking and writing. He then would turn to the main slip-box and write his ideas, comments and thoughts on new pieces of paper, using only one for each idea and restricting himself to one side of the paper, to make it easier to read them later without having to take them out of the box. He kept them usually brief enough to make one idea fit on a single sheet, but would sometimes add another note to extend a thought. — location: [419](kindle://book?action=open&asin=B06WVYW33Y&location=419) ^ref-3639
+
+---
+Assemble notes and bring them into order, turn these notes into a draft, review it and you are done. — location: [485](kindle://book?action=open&asin=B06WVYW33Y&location=485) ^ref-38460
+
+---
+Writing is, without dispute, the best facilitator for thinking, reading, learning, understanding and generating ideas we have. — location: [494](kindle://book?action=open&asin=B06WVYW33Y&location=494) ^ref-16331
+
+---
+If you want to learn something for the long run, you have to write it down. If you want to really understand something, you have to translate it into your own words. — location: [496](kindle://book?action=open&asin=B06WVYW33Y&location=496) ^ref-8349
+
+---
+If we write, it is more likely that we understand what we read, remember what we learn and that our thoughts make sense. — location: [503](kindle://book?action=open&asin=B06WVYW33Y&location=503) ^ref-60555
+
+---
+1. Make fleeting notes. — location: [510](kindle://book?action=open&asin=B06WVYW33Y&location=510) ^ref-58378
+
+---
+Make literature notes. Whenever you read something, make notes about the content. Write down what you don't want to forget or think you might use in your own thinking or writing. Keep it very short, be extremely selective, and use your own words. — location: [516](kindle://book?action=open&asin=B06WVYW33Y&location=516) ^ref-38562
+
+---
+don't copy them to skip the step of really understanding what they mean. — location: [518](kindle://book?action=open&asin=B06WVYW33Y&location=518) ^ref-58717
+
+---
+3. Make permanent notes. Now turn to your slip-box. Go through the notes you made in step one or two (ideally once a day and before you forget what you meant) and think about how they relate to what is relevant for your own research, — location: [520](kindle://book?action=open&asin=B06WVYW33Y&location=520) ^ref-45365
+
+---
+Write exactly one note for each idea and write as if you were writing for someone else: Use full sentences, disclose your sources, make references and try to be as precise, clear and brief as possible. — location: [525](kindle://book?action=open&asin=B06WVYW33Y&location=525) ^ref-21307
+
+---
+Throw away the fleeting notes from step one and put the literature notes from step two into your reference system. — location: [526](kindle://book?action=open&asin=B06WVYW33Y&location=526) ^ref-18918
+
+---
+Now add your new permanent notes to the slip-box by: a)    Filing each one behind one or more related notes — location: [529](kindle://book?action=open&asin=B06WVYW33Y&location=529) ^ref-52671
+
+---
+Making sure you will be able to find this note later by either linking to it from your index or by making a link to it on a note that you use as an entry point to a discussion or topic and is itself linked to the index. — location: [536](kindle://book?action=open&asin=B06WVYW33Y&location=536) ^ref-49872
+
+---
+Develop your topics, questions and research projects bottom up from within the system. See what is there, what is missing and what questions arise. Read more to challenge and strengthen your arguments and change and develop your arguments according to the new information you are learning about. — location: [539](kindle://book?action=open&asin=B06WVYW33Y&location=539) ^ref-4158
+
+---
+After a while, you will have developed ideas far enough to decide on a topic to write about. — location: [548](kindle://book?action=open&asin=B06WVYW33Y&location=548) ^ref-59172
+
+---
+Look through the connections and collect all the relevant notes on this topic — location: [550](kindle://book?action=open&asin=B06WVYW33Y&location=550) ^ref-65032
+
+---
+Turn your notes into a rough draft. — location: [555](kindle://book?action=open&asin=B06WVYW33Y&location=555) ^ref-28685
+
+---
+Edit and proofread your manuscript. — location: [558](kindle://book?action=open&asin=B06WVYW33Y&location=558) ^ref-52587
+
+---
+because the accidental encounters make up the majority of what we learn. — location: [578](kindle://book?action=open&asin=B06WVYW33Y&location=578) ^ref-1209
+
+---
+More is unnecessary, less is impossible. — location: [628](kindle://book?action=open&asin=B06WVYW33Y&location=628) ^ref-11026
+
+---
+Zotero, which allows you to make new entries via browser plugins or just by entering the ISBN or digital object identifier (DOI) number. — location: [637](kindle://book?action=open&asin=B06WVYW33Y&location=637) ^ref-12342
+
+---
+You will find the links to all recommended programs on takesmartnotes.com. — location: [643](kindle://book?action=open&asin=B06WVYW33Y&location=643) ^ref-13802
+
+---
+In the old system, the question is: Under which topic do I store this note? In the new system, the question is: In which context will I want to stumble upon it again? — location: [787](kindle://book?action=open&asin=B06WVYW33Y&location=787) ^ref-39458
+
+---
+The slip-box is designed to present you with ideas you have already forgotten, allowing your brain to focus on thinking instead of remembering. — location: [797](kindle://book?action=open&asin=B06WVYW33Y&location=797) ^ref-34137
+
+---
+three types of notes: 1.  Fleeting notes, which are only reminders of information, can be written in any kind of way and will end up in the trash within a day or two. 2.  Permanent notes, which will never be thrown away and contain the necessary information in themselves in a permanently understandable way. They are always stored in the same way in the same place, either in the reference system or, written as if for print, in the slip-box. — location: [803](kindle://book?action=open&asin=B06WVYW33Y&location=803) ^ref-62344
+
+---
+Project notes, which are only relevant to one particular project. They are kept within a project-specific folder and can be discarded or archived after the project is finished. — location: [810](kindle://book?action=open&asin=B06WVYW33Y&location=810) ^ref-24047
+
+---
+Fleeting notes are only useful if you review them within a day or so and turn them into proper notes you can use later. — location: [844](kindle://book?action=open&asin=B06WVYW33Y&location=844) ^ref-63672
+
+---
+Permanent notes, on the other hand, are written in a way that can still be understood even when you have forgotten the context they are taken from. — location: [848](kindle://book?action=open&asin=B06WVYW33Y&location=848) ^ref-65000
+
+---
+the threshold to write an idea down has to be as low as possible, but it is equally crucial to elaborate on them within a day or two. — location: [851](kindle://book?action=open&asin=B06WVYW33Y&location=851) ^ref-51662
+
+---
+The only permanently stored notes are the literature notes in the reference system and the main notes in the slip-box. The former can be very brief as the context is clearly the text they refer to. The latter need be written with more care and details as they need to be self-explanatory. — location: [854](kindle://book?action=open&asin=B06WVYW33Y&location=854) ^ref-8068
+
+---
+The notes are no longer reminders of thoughts or ideas, but contain the actual thought or idea in written form. — location: [866](kindle://book?action=open&asin=B06WVYW33Y&location=866) ^ref-33508
+
+---
+The ability to express understanding in one's own words is a fundamental competency for everyone who writes — location: [1036](kindle://book?action=open&asin=B06WVYW33Y&location=1036) ^ref-42601
+
+---
+Expressing our own thoughts in writing makes us realise if we really thought them through. — location: [1042](kindle://book?action=open&asin=B06WVYW33Y&location=1042) ^ref-29207
+
+---
+Zeigarnik effect: Open tasks tend to occupy our short-term memory – until they are done. — location: [1297](kindle://book?action=open&asin=B06WVYW33Y&location=1297) ^ref-23601
+
+---
+The brain doesn't distinguish between an actual finished task and one that is postponed by taking a note. — location: [1300](kindle://book?action=open&asin=B06WVYW33Y&location=1300) ^ref-3486
+
+---
+The secret to have a "mind like water" is to get all the little stuff out of our short-term memory. — location: [1302](kindle://book?action=open&asin=B06WVYW33Y&location=1302) ^ref-11313
+
+---
+The first step is to break down the amorphous task of "writing" into smaller pieces of different tasks that can be finished in one go. The second step is to make sure we always write down the outcome of our thinking, including possible connections to further inquiries. — location: [1308](kindle://book?action=open&asin=B06WVYW33Y&location=1308) ^ref-15317
+
+---
+Possible subsequent tasks are open questions or connections to other notes, — location: [1312](kindle://book?action=open&asin=B06WVYW33Y&location=1312) ^ref-26597
+
+---
+While we have a walk or a shower or clean the house, the brain cannot help but play around with the last unsolved problem it came across. — location: [1321](kindle://book?action=open&asin=B06WVYW33Y&location=1321) ^ref-51626
+
+---
+Next to the attention that can only be directed at one thing at a time and the short-term memory that can only hold up to seven things at once, the third limited resource is motivation or willpower. — location: [1328](kindle://book?action=open&asin=B06WVYW33Y&location=1328) ^ref-38295
+
+---
+"We use the term ego depletion to refer to a temporary reduction in the self's capacity or willingness to engage in volitional action — location: [1334](kindle://book?action=open&asin=B06WVYW33Y&location=1334) ^ref-18156
+
+---
+reliable and standardised working environment is less taxing on our attention, — location: [1351](kindle://book?action=open&asin=B06WVYW33Y&location=1351) ^ref-13519
+
+---
+To get a good paper written, you only have to rewrite a good draft; to get a good draft written, you only have to turn a series of notes into a continuous text. And as a series of notes is just the rearrangement of notes you already have in your slip-box, all you really have to do is have a pen in your hand when you read. — location: [1379](kindle://book?action=open&asin=B06WVYW33Y&location=1379) ^ref-4924
+
+---
+When we extract ideas from the specific context of a text, we deal with ideas that serve a specific purpose in a particular context, support a specific argument, are part of a theory that isn't ours or written in a language we wouldn't use. — location: [1395](kindle://book?action=open&asin=B06WVYW33Y&location=1395) ^ref-1567
+
+---
+more often than not, reading is not accompanied by taking notes, which is, in terms of writing, almost as valuable as not having read at all. — location: [1425](kindle://book?action=open&asin=B06WVYW33Y&location=1425) ^ref-40382
+
+---
+Literature notes are short and meant to help with writing slip-box notes. — location: [1433](kindle://book?action=open&asin=B06WVYW33Y&location=1433) ^ref-27750
+
+---
+The linear process promoted by most study guides, which insanely starts with the decision on the hypothesis or the topic to write about, is a sure-fire way to let confirmation bias run rampant. First, you basically fix your present understanding, as the outcome instead of using it as the starting point, priming yourself for one-sided perception. Then you artificially create a conflict of interest between getting things done (finding support for your preconceived argument) and generating insight, — location: [1484](kindle://book?action=open&asin=B06WVYW33Y&location=1484) ^ref-44738
+
+---
+One of the most important habitual changes when starting to work with the slip-box is moving the attention from the individual project with our preconceived ideas towards the open connections within the slip-box. — location: [1506](kindle://book?action=open&asin=B06WVYW33Y&location=1506) ^ref-10187
+
+---
+we have to be selective, but not in terms of pros and cons, but in terms of relevant or irrelevant. — location: [1509](kindle://book?action=open&asin=B06WVYW33Y&location=1509) ^ref-39860
+
+---
+The ability to distinguish relevant from less relevant information is another skill that can only be learned by doing. It is the practice of looking for the gist and distinguishing it from mere supporting details. — location: [1523](kindle://book?action=open&asin=B06WVYW33Y&location=1523) ^ref-41853
+
+---
+Extracting the gist of a text or an idea and giving an account in writing is for academics what daily practice on the piano is for pianists: — location: [1526](kindle://book?action=open&asin=B06WVYW33Y&location=1526) ^ref-1787
+
+---
+[immaturity] is the inability to use one's own understanding without another's guidance. — location: [1540](kindle://book?action=open&asin=B06WVYW33Y&location=1540) ^ref-48382
+
+---
+nonage is self-imposed if its cause lies not in lack of understanding but in indecision and lack of courage to use one's own mind without another's guidance. — location: [1540](kindle://book?action=open&asin=B06WVYW33Y&location=1540) ^ref-30737
+
+---
+while writing down an idea feels like a detour, extra time spent, not writing it down is the real waste of time, as it renders most of what we read as ineffectual. — location: [1592](kindle://book?action=open&asin=B06WVYW33Y&location=1592) ^ref-13757
+
+---
+This is why choosing an external system that forces us to deliberate practice and confronts us as much as possible with our lack of understanding or not-yet-learned information is such a smart move. — location: [1607](kindle://book?action=open&asin=B06WVYW33Y&location=1607) ^ref-50880
+
+---
+Learning requires effort, because we have to think to understand and we need to actively retrieve old knowledge to convince our brains to connect it with new ideas as cues. — location: [1618](kindle://book?action=open&asin=B06WVYW33Y&location=1618) ^ref-37774
+
+---
+Writing, taking notes and thinking about how ideas connect is exactly the kind of elaboration that is needed to learn. — location: [1661](kindle://book?action=open&asin=B06WVYW33Y&location=1661) ^ref-7809
+
+---
+There is a clear division of labour between the brain and the slip-box: The slip-box takes care of details and references and is a long-term memory resource that keeps information objectively unaltered. That allows the brain to focus on the gist, the deeper understanding — location: [1663](kindle://book?action=open&asin=B06WVYW33Y&location=1663) ^ref-8426
+
+---
+Experienced academic readers usually read a text with questions in mind and try to relate it to other possible approaches, while inexperienced readers tend to adopt the question of a text and the frames of the argument and take it as a given. — location: [1673](kindle://book?action=open&asin=B06WVYW33Y&location=1673) ^ref-1288
+
+---
+scientific thinking is plainly impossible if we can't manage to think beyond a given context and we only focus on the information as it is given to us — location: [1681](kindle://book?action=open&asin=B06WVYW33Y&location=1681) ^ref-14333
+
+---
+The brain, as Kahneman writes, is "a machine for jumping to conclusions" — location: [1748](kindle://book?action=open&asin=B06WVYW33Y&location=1748) ^ref-52410
+
+---
+The first step of elaboration is to think enough about a piece of information so we are able to write about it. The second step is to think about what it means for other contexts as well. — location: [1913](kindle://book?action=open&asin=B06WVYW33Y&location=1913) ^ref-64025
+
+---
+Learned right, which means understanding, which means connecting in a meaningful way to previous knowledge, information almost cannot be forgotten anymore and will be reliably retrieved if triggered by the right cues. — location: [1928](kindle://book?action=open&asin=B06WVYW33Y&location=1928) ^ref-47664
+
+---
+That the slip-box is not sorted by topics is the precondition for actively building connections between notes. — location: [1941](kindle://book?action=open&asin=B06WVYW33Y&location=1941) ^ref-14969
+
+---
+too much order can impede learning — location: [1945](kindle://book?action=open&asin=B06WVYW33Y&location=1945) ^ref-43709
+
+---
+the references between the notes are much more important than the references from the index to a single note. — location: [2004](kindle://book?action=open&asin=B06WVYW33Y&location=2004) ^ref-47194
+
+---
+Most notes will be found through other notes. — location: [2010](kindle://book?action=open&asin=B06WVYW33Y&location=2010) ^ref-3569
+
+---
+Keywords should always be assigned with an eye towards the topics you are working on or interested in, never by looking at the note in isolation. — location: [2046](kindle://book?action=open&asin=B06WVYW33Y&location=2046) ^ref-14278
+
+---

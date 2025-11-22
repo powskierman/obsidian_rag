@@ -1,0 +1,28 @@
+# SwiftUI - .environmentObject vs @EnvironmentObject.md
+
+---
+aliases: 
+tags:
+  - swiftui
+  - iOS
+  - development
+  - environment-object
+created: 2023-03-04
+ContentType:
+Backlink: "[[AI Tools MoC]]"
+---
+# SwiftUI - .environmentObject vs @EnvironmentObject
+Date: 2023-03-04
+
+### Backlink
+[[AI Tools MoC]]
+
+### Reference
+-  
+### Notes
+-  .environmentObject is a method on a view that allows you to pass an instance of an observed object down the view hierarchy as an environment object.
+	- This means that any child views that access the same observed object will be able to read and write to the same instance of the object.
+- 
+
+### Related Notes
+- [[SwiftUI - @EnvironmentObject]]

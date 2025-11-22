@@ -1,0 +1,49 @@
+---
+aliases: 
+tags:
+  - lymphoma
+  - treatment
+created: 2025-03-29 21:05
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+### Disease Status Assessment
+- I have a persistent retroperitoneal nodal mass (conglomerate in the abdomen) with intense hypermetabolism (SUV max 27.4)
+- This single site is rated Deauville 5, indicating it remains significantly more metabolically active than my liver (which has SUV 3.5)
+- There are signs of partial response to R-CHOP as indicated by:
+    - Slight size reduction in part of the mass (7.5 cm vs 9.0 cm previously)
+    - Areas showing necrosis/cystic changes
+    - No new hypermetabolic lesions
+- Complete metabolic response in the right humeral lesion (SUV decreased from 11.0 to 1.7)
+### Clinical Context
+- My double-hit DLBCL did not achieve complete response after 4 cycles of R-CHOP
+- This is consistent with the known resistance of double-hit lymphomas to standard chemoimmunotherapy
+- The decision to switch to Yescarta is appropriate given the persistent disease
+### Remission Potential with Yescarta
+- For patients like me with double-hit DLBCL and partial response to prior therapy:
+    - Complete response rates with Yescarta: approximately 40-50%
+    - Durable remission potential (2+ years): approximately 30-35%
+###  <mark style="background: #FFF3A3A6;">Positive Prognostic Factors in Your Case
+- <mark style="background: #FFF3A3A6;">Single site of persistent disease (rather than multiple sites)</mark>
+- <mark style="background: #FFF3A3A6;">No evidence of disease progression</mark>
+- <mark style="background: #FFF3A3A6;">Some response to R-CHOP was observed</mark>
+- <mark style="background: #FFF3A3A6;">No new lesions detected</mark>
+- <mark style="background: #FFF3A3A6;">Complete response in one site (humeral lesion)</mark>
+- <mark style="background: #FFF3A3A6;">No mention of extranodal disease beyond the initial bone involvement</mark>
+
+Given these findings, I have a reasonable chance of responding to Yescarta therapy. The persistent retroperitoneal mass with Deauville 5 uptake clearly indicates the need for a different treatment approach, but the limited disease burden and partial response to prior therapy are encouraging factors for potential success with CAR T-cell therapy.
+
+### Summary:
+- Double-hit lymphoma (DHL) is a high-risk subtype of large B-cell lymphoma characterized by concurrent rearrangements of the MYC and BCL2 genes. The aggressive nature of DHL stems from these <mark style="background: #FFF3A3A6;">genetic abnormalities, which drive proliferation (MYC) and inhibit apoptosis (BCL2)</mark>. Treatment strategies for DHL are evolving, with a focus on intensive chemotherapy regimens and novel therapies for relapsed/refractory cases.  
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+- 

@@ -1,0 +1,56 @@
+---
+aliases: 
+tags:
+  - lymphoma
+  - asct
+---
+Date: 2025-02-14
+
+### Backlink
+[[autologous stem cell transplant]]
+
+### Reference
+-  [[media/autologous-sct.pdf|autologous-sct]]
+- [[../Media/ASCT - Benefits-Risks-Side Effects|ASCT - Benefits-Risks-Side Effects]]
+- 
+### Notes
+-  After completing [[R-CHOP]] (rituximab plus cyclophosphamide, doxorubicin, vincristine, and prednisone) therapy for double-hit germinal center diffuse large B-cell lymphoma (GCB-DLBCL), ==Dr. Slaby has recommended autologous stem cell transplant (#ASCT) as consolidation therapy.== #ASCT is often considered in patients with high-risk or relapsed/refractory DLBCL to improve outcomes and reduce the risk of relapse. 
+- Here's detailed guidance on the #ASCT process, potential side effects, prognosis, and follow-up care:
+**Preparation for #ASCT :**
+- Stem cell mobilization : Before undergoing #ASCT, you will need to undergo stem cell mobilization to collect enough healthy stem cells for transplantation. This usually involves:
+- Administration of granulocyte colony-stimulating factor (G-CSF) or a combination of G-CSF and plerixafor to stimulate the release of stem cells from the bone marrow into the peripheral blood.
+- Leukapheresis, a process that filters and collects stem cells from your blood using a machine called a cell separator. This procedure is typically well-tolerated but may cause minor side effects such as nausea, headache, or bruising at the venipuncture site.
+ - Conditioning regimen : Prior to #ASCT, you will receive high-dose chemotherapy to eliminate cancer cells and make room for the transplanted stem cells. The most common conditioning regimens for DLBCL include:
+	- BEACOPP (carmustine, etoposide, cytarabine, melphalan, cyclophosphamide, vincristine, doxorubicin, prednisone)
+	- LEAM (lomustine, etoposide, cytarabine, melphalan)
+	- CBV (cyclophosphamide, busulfan, melphalan) with or without total body irradiation (TBI)
+ - Supportive care : During the conditioning regimen and #ASCT, you will receive supportive care to manage side effects such as nausea, vomiting, mucositis, and infections. This may include medications for symptom management, blood transfusions, and antibiotics.
+ **#ASCT procedure :**
+- The collected stem cells are infused intravenously under careful monitoring.
+- After infusion, the transplanted stem cells will travel to your bone marrow, where they will begin producing new red blood cells, white blood cells, and platelets.
+ - Potential side effects and complications of #ASCT :
+	- Nausea, vomiting, mucositis, and diarrhea : These are common side effects during the conditioning regimen but usually improve after transplantation.
+	- Infections : Due to the temporary reduction in immune cell counts following high-dose chemotherapy, you will be at increased risk for infections. Common infectious complications include:
+		- Bacterial infections (e.g., pneumonia, bloodstream infections)
+		- Viral infections (e.g., cytomegalovirus [CMV], human herpesvirus 6 [HHV-6], BK virus)
+		- Fungal infections (e.g., invasive aspergillosis, candidiasis)
+		 - Hematologic toxicities : Transient low blood counts are expected after transplantation, but may require red blood cell or platelet transfusions.
+		- Graft failure or slow engraftment : In rare cases, transplanted stem cells may fail to engraft properly, leading to delayed recovery of blood counts. This can be life-threatening if it occurs.
+ **Prognosis :**
+- The primary goal of #ASCT in DLBCL is to improve progression-free survival (PFS) and overall survival (OS).
+- For patients with chemosensitive disease who undergo #ASCT consolidation, the 5-year PFS ranges from approximately 30% to 60%, depending on various factors such as patient characteristics, tumor biology, and response to pre-transplant therapy.
+- Patients with chemorefractory or relapsed disease have a worse prognosis following #ASCT, with reported 5-year OS ranging from about 15% to 40%. However, even in these situations, #ASCT may still provide meaningful clinical benefit by prolonging survival and improving quality of life compared to other treatments.
+- <mark style="background: #ABF7F7A6;">Several studies have identified factors associated with inferior outcomes after #ASCT for DLBCL, including:</mark>
+	- Poor response to pre-transplant therapy
+	- <mark style="background: #ABF7F7A6;">Advanced age (>60 years)</mark>
+	- High International Prognostic Index (IPI) score (≥3)
+	- <mark style="background: #ABF7F7A6;">Extraneousodal involvement (e.g., bone marrow</mark>, CNS)
+	- <mark style="background: #ABF7F7A6;">Co-expression of [[MYC]] and [[BCL2]] in ≥50% of tumor cells</mark>
+	- [[ASCT Poor Outcome Studies]]
+ **Follow-up care :**
+- After #ASCT, close follow-up with your healthcare team is crucial to monitor for any complications, manage side effects, and assess response to treatment.
+- Regular blood tests will be required to track your blood counts as they recover from the transplant.
+- Immunizations should be avoided during the period of severe immune deficiency after transplantation but can typically resume around 6-12 months post-#ASCT once immune cell counts have recovered.
+- Routine surveillance imaging, such as CT scans or PET/CT scans, will be performed to monitor for signs of disease relapse or progression.
+- Long-term follow-up is essential to assess for late effects of #ASCT, including secondary malignancies and organ toxicities (e.g., cardiopulmonary, endocrine, and musculoskeletal complications).
+ In summary, undergoing #ASCT after R-CHOP therapy in my case aims to improve PFS and OS by eliminating residual cancer cells following induction chemotherapy. The #ASCT procedure carries potential risks and side effects, but with appropriate supportive care and monitoring, many patients successfully complete transplantation and achieve improved outcomes compared to other treatment options. Close follow-up with your healthcare team is essential for managing post-transplant complications and assessing response to therapy.

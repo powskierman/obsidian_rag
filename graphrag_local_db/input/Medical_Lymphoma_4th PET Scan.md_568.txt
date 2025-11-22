@@ -1,0 +1,137 @@
+# 4th PET Scan.md
+
+---
+aliases: 
+tags: 
+created: 2025-10-28 16:11
+ContentType:
+Backlink:
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+-    ==== ORIGINAL REPORT ====
+   
+ MICHEL LAPOINTE
+ PT BODY
+ 
+ PET CT OF THE BODY FROM BASE OF BRAIN TO UPPER THIGHS USING F-18 FLUORODEOXYGLUCOSE (299 MBq) WITH LOW DOSE CT FOR LOCALIZATION AND ATTENUATION CORRECTION :
+ 
+ PROVIDED CLINICAL HISTORY: DLBCL, 6 month post CAR-T, previous scan Douville 4 persistent activity, F/U study
+ 
+ COMPARISON STUDIES: FDG PET 16/7/2025, CT chest, abdomen and pelvis May 16, 2025, FDG PET/CT July 16, 2025
+ 
+ FINDINGS: 
+ 
+ 
+ REFERENCE 3-D maximum SUV:
+ 
+           Mediastinal blood pool: 2.4
+           Liver background: 2.7
+ 
+ NECK:
+ 
+ No hypermetabolic lesion identified within the base of the brain or neck.
+ 
+ CHEST:
+ 
+ Devices / Lines:
+ Dual lead pacemaker electrode tips right atrium right ventricle redemonstrated.
+ 
+ Lungs:  
+ Scattered areas of minor atelectasis. No new or enlarging pulmonary nodule or mass. Previously described small scattered pulmonary nodules are not well seen on today's exam.
+ 
+ Pleura:  
+ No pleural effusion. No pneumothorax.
+ 
+ Lymph nodes:  
+ No FDG avid  new or enlarging mediastinal, hilar or axillary lymphadenopathy.
+ 
+ Vasculature: 
+ unremarkable on this unehanced study.
+ 
+ Heart:
+ Normal size.  No pericardial effusion.
+ 
+ Other Mediastinal Structures:
+ 
+ Unremarkable visualized esophagus.
+ 
+ Chest Wall:
+ No abnormal metabolic activity.
+ 
+ 
+ ABDOMEN AND PELVIS:
+ 
+ Liver: 
+ No abnormal FDG uptake. 
+ 
+ Bile Ducts and Gallbladder:
+ 
+ Cholelithiasis without CT findings of acute inflammation.
+ 
+ Bile ducts are unremarkable.
+ 
+ Spleen: 
+ Normal.
+ 
+ Pancreas: 
+ No abnormal metabolic activity
+ 
+ Adrenal Glands: 
+ No abnormal metabolic activity
+ 
+ Kidneys, Ureters and Bladder: 
+ No abnormal metabolic activity. Stable multiple exophytic hypodensities within both kidneys likely cysts. No hydronephrosis.
+ Unremarkable urinary bladder.
+ 
+ Bowel: 
+ Metabolic activity within the stomach and bowel are within physiologic limits.  No suspicious focal metabolic activity identified. 
+ 
+  CT appearance of the stomach and bowel are unremarkable.  No distention.  No masses, mural thickening or inflammatory change.
+ 
+ Peritoneum:
+ No pneumoperitoneum. No free fluid. No peritoneal nodule. 
+ 
+ Lymph Nodes: 
+ Previously described residual retroperitoneal mass with residual FDG uptake seen on the prior PET Deauville 4.
+ 
+ On today's PET/CT study, the residual retroperitoneal partly calcified conglomerate lymph node mass is slightly smaller than the prior PET from July 16, 2025. The residual mass measures 3.5 cm x 6.0 cm (previously 4.3 cm x 7.3 cm). There has been however interval development of 3 small foci of moderate to high-grade metabolic activity. The new three small foci 3-D maximum SUV measures from 4.24-10.5. Deauville 5. Previously 3-D maximum SUV 4.00.
+ 
+ No FDG avid lymph node identified elsewhere.
+ 
+ Pelvic Organs:
+ No abnormal metabolic activity. Enlarged prostate.
+ 
+ Vascular Structures: 
+ Unremarkable on this unenhanced study.No abnormal FDG activity. 
+ 
+ Abdominal Wall:
+ No abnormal metabolic activity.
+ 
+ OSSEOUS STRUCTURES: 
+ Previous imaging had demonstrated a right humeral bone lesion which resolved on the most recent  PET. No corresponding hypermetabolic lesion identified on this exam.
+ 
+ No hypermetabolic or focal destructive bone lesion identified.
+ 
+ Bone marrow activity is within normal limits.
+ 
+ IMPRESSION:
+ 
+ Adverse interval change with residual retroperitoneal mass now demonstrating three new foci of moderate to high-grade FDG uptake . Deauville 5. This is worrisome for recurrent disease.
+ 
+ No FDG avid lymph node identified elsewhere.
+ 
+ Bone marrow and spleen are within normal limits.
+ 
+ Edited by TDH on 10/28/2025 10:21 AM
+### Related Notes
+- [[Pseudoprogression following CAR-T]]
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

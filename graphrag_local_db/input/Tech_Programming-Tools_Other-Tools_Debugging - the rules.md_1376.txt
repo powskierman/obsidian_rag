@@ -1,0 +1,39 @@
+# Debugging - the rules.md
+
+---
+aliases:
+tags:
+created: 2022-11-29 18:45
+ContentType: Reference
+Backlink: ""
+---
+### Main Idea
+- 
+### References
+- 
+### Notes
+Debugging. The rules:
+
+
+
+1. Ask if it already worked once. Maybe also somewhere else
+
+2. Separate components to reduce complexity
+
+3. Exchange components
+
+4. Always buy two or more parts if they are affordable
+
+5. Reduce the number of possible interactions
+
+6. Only continue if all components tested so far work
+
+7. Never assume something is right before you checked twice
+### Related Notes
+- 
+### Questions / Ideas for Further Exploration
+- 
+### To-Do
+- 
+### Smart Connections Insights
+-

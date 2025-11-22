@@ -1,0 +1,16 @@
+---
+aliases: []
+tags: []
+---
+# Matter Architecture
+Date: 2023-04-03
+
+### Backlink
+[[]]
+
+### Reference
+-  - [Matter Architecture - The ESP Journal](https://blog.espressif.com/matter-38ccf1d60bcd)
+- 
+### Notes
+
+![[Pasted image 20230403164703.png]]

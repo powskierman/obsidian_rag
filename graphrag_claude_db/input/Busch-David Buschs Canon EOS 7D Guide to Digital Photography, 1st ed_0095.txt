@@ -1,0 +1,30 @@
+---
+bookId: "4699"
+title: David Busch's Canon EOS 7D Guide to Digital Photography, 1st ed (David Busch's Digital Photography Guides)
+author: Busch
+asin: B00B7R8232
+lastAnnotatedDate: 2015-06-22
+highlightsCount: 5
+reference: https://www.amazon.com/dp/B00B7R8232
+kindle_link: kindle://book?action=open&asin=B00B7R8232
+tags:
+  - book-notes
+  - photography
+---
+![](https://m.media-amazon.com/images/I/51OQUlzpwYL._SY160.jpg)
+## Highlights
+Partial. This is a faux spot mode, using roughly 9.4 percent of the image area to calculate exposure, which, as you can see in Figure 4.8, is a rather large spot, represented by a yellow disk. The status LCD icon is shown in the upper-left corner. Use this mode if the background is much brighter or darker than the subject. — location: [1490](kindle://book?action=open&asin=B00B7R8232&location=1490) ^ref-1441
+
+---
+Spot. This mode confines the reading to a limited area in the center of the viewfinder, as shown in Figure 4.10, making up only 2.3 percent of the image. This mode is useful when you want to base exposure on a small area in the frame, such as a spotlight performer on stage, surrounded by a black background. — location: [1493](kindle://book?action=open&asin=B00B7R8232&location=1493) ^ref-8618
+
+---
+Center-weighting works best for portraits, architectural photos, and other pictures in which the most important subject is located in the middle of the frame. — location: [1499](kindle://book?action=open&asin=B00B7R8232&location=1499) ^ref-61712
+
+---
+In Auto mode, the 7D selects an appropriate ISO sensitivity setting, color (white) balance, Picture Style, color space, noise reduction features, and use of the Auto Lighting Optimizer. — location: [1528](kindle://book?action=open&asin=B00B7R8232&location=1528) ^ref-46568
+
+---
+The camera will lock in ISO sensitivity, white balance, color space, noise reduction, and settings for the Auto Lighting Optimizer. But you can specify some other parameters, including selecting from three alternate Picture Styles in addition to Standard. When you set the Mode Dial to the CA position, — location: [1535](kindle://book?action=open&asin=B00B7R8232&location=1535) ^ref-1235
+
+---
