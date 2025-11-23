@@ -265,7 +265,13 @@ with st.sidebar:
                 if export_data['sources']:
                     md_content += "### 📚 Sources\n"
                     for source in export_data['sources']:
-                        md_content += f"- **{source.get('filename', 'Unknown')}**"
+                        filename = source.get('filename', 'Unknown')
+                        # Format as Obsidian link if it's not already
+                        if not filename.startswith("[["):
+                            md_content += f"- [[{filename}]]"
+                        else:
+                            md_content += f"- {filename}"
+                            
                         if 'relevance' in source:
                             md_content += f" ({source['relevance']:.0f}%)"
                         md_content += "\n"
