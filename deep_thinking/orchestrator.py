@@ -111,11 +111,18 @@ class DeepThinkingRAG:
         
         # Step 3: Generate final answer
         update_status("📝 Synthesizing final answer...")
-        state["final_answer"], state["citations"] = self.synthesizer.generate(state)
+        synthesis_result = self.synthesizer.generate(state)
+        
+        state["final_answer"] = synthesis_result["answer"]
+        state["citations"] = synthesis_result["citations"]
+        state["confidence_score"] = synthesis_result["confidence_score"]
+        state["confidence_justification"] = synthesis_result["confidence_justification"]
         
         return {
             "answer": state["final_answer"],
             "citations": state["citations"],
+            "confidence_score": state["confidence_score"],
+            "confidence_justification": state["confidence_justification"],
             "research_steps": state["past_steps"],
             "total_documents": len(state["retrieved_documents"])
         }

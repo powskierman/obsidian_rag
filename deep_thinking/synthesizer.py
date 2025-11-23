@@ -28,13 +28,15 @@ class FinalAnswerGenerator:
         Generate a comprehensive answer that:
         1. Directly addresses the original question
         2. Synthesizes findings from all research steps
-        3. Cites sources using format: [[Folder/Note Name]] or "Document Title"
+        3. Cites sources using Obsidian link format: [[Folder/Note Name]]
         4. Acknowledges any gaps or uncertainties
         
         Return ONLY a JSON object:
         {{
             "answer": "...",
-            "citations": ["[[Medical/CAR-T/Treatment Log 2023-05-15]]", "..."]
+            "citations": ["[[Medical/CAR-T/Treatment Log 2023-05-15]]", "[[Tech/ESP32/Specs]]"],
+            "confidence_score": 0.9,
+            "confidence_justification": "Detailed scan results found..."
         }}
         """
         
@@ -53,7 +55,17 @@ class FinalAnswerGenerator:
             content = content.strip()
             
             result = json.loads(content)
-            return result.get("answer", "Could not generate answer."), result.get("citations", [])
+            return {
+                "answer": result.get("answer", "Could not generate answer."),
+                "citations": result.get("citations", []),
+                "confidence_score": result.get("confidence_score", 0.0),
+                "confidence_justification": result.get("confidence_justification", "No justification provided.")
+            }
         except Exception as e:
             print(f"Error generating final answer: {e}")
-            return "Error generating answer.", []
+            return {
+                "answer": "Error generating answer.",
+                "citations": [],
+                "confidence_score": 0.0,
+                "confidence_justification": f"Error: {e}"
+            }

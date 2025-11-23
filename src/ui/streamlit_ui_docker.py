@@ -240,20 +240,45 @@ with st.sidebar:
     # Actions
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("💾 Export"):
-            if st.session_state.messages:
+        if st.button("💾 Export Answer"):
+            # Find last assistant message
+            last_answer = next((m for m in reversed(st.session_state.messages) if m["role"] == "assistant"), None)
+            
+            if last_answer:
                 export_data = {
                     "timestamp": datetime.now().isoformat(),
                     "model": model_option,
                     "search_mode": search_mode,
-                    "messages": st.session_state.messages
+                    "content": last_answer["content"],
+                    "sources": last_answer.get("sources", [])
                 }
+                
+                # Convert to Markdown
+                md_content = f"# RAG Answer Export\n\n"
+                md_content += f"**Date:** {export_data['timestamp']}\n"
+                md_content += f"**Model:** {export_data['model']}\n"
+                md_content += f"**Mode:** {export_data['search_mode']}\n\n"
+                md_content += "---\n\n"
+                
+                md_content += f"{export_data['content']}\n\n"
+                
+                if export_data['sources']:
+                    md_content += "### 📚 Sources\n"
+                    for source in export_data['sources']:
+                        md_content += f"- **{source.get('filename', 'Unknown')}**"
+                        if 'relevance' in source:
+                            md_content += f" ({source['relevance']:.0f}%)"
+                        md_content += "\n"
+                    md_content += "\n"
+                
                 st.download_button(
-                    "Download JSON",
-                    data=json.dumps(export_data, indent=2),
-                    file_name=f"rag_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                    mime="application/json"
+                    "Download Markdown",
+                    data=md_content,
+                    file_name=f"rag_answer_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
+                    mime="text/markdown"
                 )
+            else:
+                st.warning("No answer to export")
     
     with col2:
         pass
@@ -646,10 +671,22 @@ if prompt := st.chat_input("Ask about your notes..."):
                     
                     response_text = result["answer"]
                     
+                    # Display confidence
+                    conf_score = result.get("confidence_score", 0.0)
+                    conf_just = result.get("confidence_justification", "")
+                    
+                    if conf_score > 0:
+                        color = "green" if conf_score >= 0.8 else "orange" if conf_score >= 0.5 else "red"
+                        st.markdown(f"### 🎯 Confidence: :{color}[{conf_score*100:.0f}%]")
+                        st.caption(f"_{conf_just}_")
+                        st.divider()
+                    
                     # Prepare sources list
                     for citation in result["citations"]:
+                        # Clean Obsidian links
+                        clean_citation = citation.replace("[[", "").replace("]]", "")
                         sources_list.append({
-                            "filename": citation,
+                            "filename": clean_citation,
                             "filepath": "Deep Thinking Citation",
                             "relevance": 100,
                             "type": "Agent"
