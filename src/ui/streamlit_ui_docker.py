@@ -311,46 +311,8 @@ if prompt := st.chat_input("Ask about your notes..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Phase 3c: Auto-select search mode based on query patterns
-    import re
-
-    # Synthesis patterns that suggest graph-claude mode
-    synthesis_patterns = [
-        r'\bhow\s+(have|has|did|do|does|would)\b',
-        r'\bwhy\b',
-        r'\brelat(e|ed|ion|ionship)\b',
-        r'\bconnect(ed|ion)\b',
-        r'\bpattern\b',
-        r'\btrend\b',
-        r'\bcompare\b',
-        r'\bsynthesiz(e|ed)\b',
-        r'\banalyze\b',
-        r'\binfer\b',
-        r'\brelationship between\b',
-        r'\bhow.*over time\b',
-        r'\bjourney\b',
-        r'\bprogression\b',
-        r'\bhistory\b',
-        r'\bevolution\b',
-        r'\btimeline\b',
-        r'\b(has|have)\s+been\b',
-        r'\bsummar(y|ize)\b',
-        r'\boverview\b',
-        r'\bbenchmark(s)?\b',
-        r'\bmilestone(s)?\b',
-        r'\bmajor\s+(events?|steps?|changes?)\b',
-    ]
-
-    # Check if query matches synthesis patterns
-    query_lower = prompt.lower()
-    is_synthesis = any(re.search(pattern, query_lower) for pattern in synthesis_patterns)
-
-    # Override search mode if synthesis query detected
-    if is_synthesis:
-        search_mode = 'graph-claude'
-        st.caption(f"🧠 Auto-selected **graph-claude** mode (synthesis query detected)")
-    else:
-        search_mode = st.session_state.search_mode
+    # Use selected search mode
+    search_mode = st.session_state.search_mode
 
     # Generate response
     with st.chat_message("assistant"):
@@ -632,7 +594,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                 orchestrator = DeepThinkingRAG(
                     anthropic_client=client,
                     vector_service_url=EMBEDDING_SERVICE,
-                    graph_service_url=LIGHTRAG_SERVICE
+                    graph_service_url=CLAUDE_GRAPH_SERVICE
                 )
                 
                 # Create a container for progress updates
