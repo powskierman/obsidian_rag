@@ -73,6 +73,10 @@ with st.sidebar:
     st.title("🧠 Obsidian RAG")
     st.markdown("Hybrid AI-powered knowledge retrieval")
     
+    if st.button("🗑️ Clear Conversation", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
+    
     st.markdown("---")
     
     # Search Mode Selection
@@ -80,7 +84,7 @@ with st.sidebar:
     search_mode = st.radio(
         "Choose search method:",
         ["vector", "graph-claude", "hybrid", "Deep Thinking (Agentic)"],
-        index=2,
+        index=3,
         help="""
         - **vector**: Fast semantic search with Ollama (ChromaDB) 🔍
         - **graph-claude**: Claude Haiku-powered knowledge graph 🧠
@@ -252,9 +256,7 @@ with st.sidebar:
                 )
     
     with col2:
-        if st.button("🗑️ Clear Conversation"):
-            st.session_state.messages = []
-            st.rerun()
+        pass
 
 # Main chat interface
 st.title("💬 Chat with Your Knowledge Base")
