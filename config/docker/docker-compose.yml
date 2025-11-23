@@ -14,7 +14,7 @@ services:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -38,7 +38,7 @@ services:
       - GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -56,10 +56,11 @@ services:
     volumes:
       - ./streamlit.log:/app/streamlit.log:rw
       - ./src/ui/streamlit_ui_docker.py:/app/streamlit_ui_docker.py:ro
+      - ./deep_thinking:/app/deep_thinking:rw
     environment:
       - PYTHONUNBUFFERED=1
-      - EMBEDDING_SERVICE_URL=http://embedding-service:8000
-      - CLAUDE_GRAPH_SERVICE_URL=http://graph-service:8002
+      - EMBEDDING_SERVICE_URL=http://host.docker.internal:8000
+      - CLAUDE_GRAPH_SERVICE_URL=http://host.docker.internal:8002
       # LLM Provider Configuration
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
@@ -81,4 +82,5 @@ networks:
 
 volumes:
   chroma_db:
+
 

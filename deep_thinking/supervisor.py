@@ -40,6 +40,11 @@ class RetrievalSupervisor:
             n_results = 10 if self.enable_reranking else 5
             results = self._query_vector(query, filters, n_results=n_results)
             
+            # Fallback: If filtered search returns nothing, try without filters
+            if not results and filters:
+                print(f"⚠️  No results with filters {filters}. Retrying without filters...")
+                results = self._query_vector(query, filters=None, n_results=n_results)
+            
         elif strategy == "graph":
             # Use 'local' mode for specific entity questions
             results = self._query_graph(query, mode="local")
@@ -49,6 +54,12 @@ class RetrievalSupervisor:
             # Deep Thinking works great with vector-only search
             n_results = 10 if self.enable_reranking else 5
             vec_results = self._query_vector(query, filters, n_results=n_results)
+            
+            # Fallback for hybrid (vector part)
+            if not vec_results and filters:
+                print(f"⚠️  No results with filters {filters}. Retrying without filters...")
+                vec_results = self._query_vector(query, filters=None, n_results=n_results)
+                
             results = vec_results
         
         # Apply reranking if enabled

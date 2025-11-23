@@ -50,13 +50,15 @@ class ReflectionAgent:
         
         try:
             content = response.content[0].text.strip()
-            if content.startswith("```json"):
-                content = content[7:]
-            if content.endswith("```"):
-                content = content[:-3]
-            content = content.strip()
+            # Robust JSON extraction
+            start_idx = content.find('{')
+            end_idx = content.rfind('}')
             
-            reflection = json.loads(content)
+            if start_idx != -1 and end_idx != -1:
+                json_str = content[start_idx:end_idx+1]
+                reflection = json.loads(json_str)
+            else:
+                raise ValueError("No JSON object found in response")
             
             return PastStep(
                 step=step,
