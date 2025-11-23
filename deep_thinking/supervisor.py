@@ -1,11 +1,27 @@
 import requests
 from typing import List, Dict, Any
 from .state import Step, RAGState
+try:
+    from .reranker import Reranker
+    RERANKER_AVAILABLE = True
+except ImportError:
+    RERANKER_AVAILABLE = False
+    print("Warning: Reranker not available. Install sentence-transformers to enable reranking.")
 
 class RetrievalSupervisor:
-    def __init__(self, vector_service_url: str, graph_service_url: str):
+    def __init__(self, vector_service_url: str, graph_service_url: str, enable_reranking: bool = True):
         self.vector_service_url = vector_service_url
         self.graph_service_url = graph_service_url
+        self.enable_reranking = enable_reranking and RERANKER_AVAILABLE
+        
+        # Initialize reranker if available
+        if self.enable_reranking:
+            self.reranker = Reranker()
+            print("✅ Reranker initialized")
+        else:
+            self.reranker = None
+            if enable_reranking:
+                print("⚠️  Reranking disabled (sentence-transformers not installed)")
         
     def execute_step(self, step: Step, state: RAGState) -> List[Dict[str, Any]]:
         """
@@ -20,21 +36,24 @@ class RetrievalSupervisor:
         results = []
         
         if strategy == "vector":
-            results = self._query_vector(query, filters)
+            # Retrieve more results for reranking
+            n_results = 10 if self.enable_reranking else 5
+            results = self._query_vector(query, filters, n_results=n_results)
             
         elif strategy == "graph":
             # Use 'local' mode for specific entity questions
-            # Graph search typically doesn't support metadata filtering easily in LightRAG yet, 
-            # so we might skip it or apply post-filtering if possible. 
-            # For now, we pass it but the underlying service might ignore it.
             results = self._query_graph(query, mode="local")
             
         elif strategy == "hybrid":
             # Graph search disabled: LightRAG requires multiple sequential LLM calls
-            # Even with Claude, this takes 30+ seconds per query (too slow for Deep Thinking)
             # Deep Thinking works great with vector-only search
-            vec_results = self._query_vector(query, filters)
+            n_results = 10 if self.enable_reranking else 5
+            vec_results = self._query_vector(query, filters, n_results=n_results)
             results = vec_results
+        
+        # Apply reranking if enabled
+        if self.enable_reranking and results and len(results) > 0:
+            results = self.reranker.rerank(query, results, top_k=5)
             
         return results
     
@@ -52,15 +71,15 @@ class RetrievalSupervisor:
             "$or": [{"source": {"$contains": folder}} for folder in target_folders]
         }
     
-    def _query_vector(self, query: str, filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:
+    def _query_vector(self, query: str, filters: Dict[str, Any] = None, n_results: int = 10) -> List[Dict[str, Any]]:
         try:
             response = requests.post(
                 f'{self.vector_service_url}/query',
                 json={
                     "query": query,
-                    "n_results": 10,
+                    "n_results": n_results,
                     "filters": filters,
-                    "reranking": True,
+                    "reranking": False,  # We do our own reranking
                     "deduplicate": True
                 },
                 timeout=30

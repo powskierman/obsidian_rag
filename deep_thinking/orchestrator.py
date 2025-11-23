@@ -7,9 +7,19 @@ from .policy import PolicyAgent
 from .synthesizer import FinalAnswerGenerator
 
 class DeepThinkingRAG:
-    def __init__(self, anthropic_client, vector_service_url: str, graph_service_url: str):
+    def __init__(
+        self, 
+        anthropic_client, 
+        vector_service_url: str = "http://localhost:8000",
+        graph_service_url: str = "http://localhost:8003",
+        enable_reranking: bool = True
+    ):
         self.planner = PlannerAgent(anthropic_client)
-        self.supervisor = RetrievalSupervisor(vector_service_url, graph_service_url)
+        self.supervisor = RetrievalSupervisor(
+            vector_service_url, 
+            graph_service_url,
+            enable_reranking=enable_reranking
+        )
         self.reflector = ReflectionAgent(anthropic_client)
         self.policy = PolicyAgent(anthropic_client)
         self.synthesizer = FinalAnswerGenerator(anthropic_client)
