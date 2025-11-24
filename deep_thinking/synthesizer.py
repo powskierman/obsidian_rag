@@ -12,29 +12,58 @@ class FinalAnswerGenerator:
         Synthesize final answer with Obsidian-style citations.
         """
         # Format documents for citation
-        doc_text = ""
+        vault_docs = ""
+        web_docs = ""
+        image_urls = []
+        
         for i, doc in enumerate(state['retrieved_documents']):
-            doc_text += f"[{i+1}] {doc.get('source', 'Unknown')}: {doc.get('content', '')[:300]}...\n"
+            source = doc.get('source', 'Unknown')
+            content = doc.get('content', '')[:300]
+            
+            # Collect images from web results
+            if 'images' in doc and doc['images']:
+                image_urls.extend(doc['images'])
+            
+            if doc.get('type') == 'web':
+                web_docs += f"[{i+1}] WEB: {source}\nContent: {content}...\n\n"
+            else:
+                vault_docs += f"[{i+1}] VAULT: {source}\nContent: {content}...\n\n"
 
+        # Build image section for prompt
+        images_section = ""
+        if image_urls:
+            images_section = f"\n        Relevant Images Found:\n"
+            for idx, img_url in enumerate(image_urls[:5]):  # Limit to top 5 images
+                images_section += f"        - Image {idx+1}: {img_url}\n"
+        
         prompt = f"""
         Original question: "{state['original_question']}"
         
         Research summary:
         {state['accumulated_context']}
         
-        All retrieved documents:
-        {doc_text}
+        Vault Documents:
+        {vault_docs}
+        
+        Web Search Results:
+        {web_docs}
+        {images_section}
         
         Generate a comprehensive answer that:
         1. Directly addresses the original question
         2. Synthesizes findings from all research steps
-        3. Cites sources using Obsidian link format: [[Folder/Note Name]]
-        4. Acknowledges any gaps or uncertainties
+        3. Cites vault sources using Obsidian link format: [[Folder/Note Name]]
+        4. Cites web sources as [URL](URL) or [Title](URL)
+        5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard medical definitions, treatments, or external context found in the web results, even if they are general.
+        6. If images are provided above, embed relevant ones using markdown format: ![Description](image_url)
+           - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics
+           - Place images in appropriate sections (e.g., under "Hardware Connection" or "Wiring Diagram")
+        7. Acknowledges any gaps or uncertainties
         
         Return ONLY a JSON object:
         {{
             "answer": "...",
-            "citations": ["[[Medical/CAR-T/Treatment Log 2023-05-15]]", "[[Tech/ESP32/Specs]]"],
+            "citations": [["[[Medical/CAR-T/Treatment Log 2023-05-15]]", "https://example.com"],
             "confidence_score": 0.9,
             "confidence_justification": "Detailed scan results found..."
         }}

@@ -25,7 +25,9 @@ class PolicyAgent:
         - FINISH: Sufficient information gathered, generate answer
         - REVISE_PLAN: Current plan won't work, need different approach
         
-        Return ONLY a JSON object: {{"decision": "CONTINUE|FINISH|REVISE_PLAN", "reasoning": "..."}}
+        CRITICAL: Set "needs_external_enrichment": true if the research findings contain specific entities, technical terms, or claims that could be enriched with external data (specs, news, definitions, side effects), AND you haven't done a web search yet.
+        
+        Return ONLY a JSON object: {{"decision": "CONTINUE|FINISH|REVISE_PLAN", "reasoning": "...", "needs_external_enrichment": true|false}}
         """
         
         response = self.client.messages.create(
@@ -44,6 +46,20 @@ class PolicyAgent:
             
             decision_data = json.loads(content)
             decision = decision_data.get("decision", "CONTINUE")
+            
+            # Programmatic Check: Force REVISE_PLAN if external enrichment is needed but no web search
+            # This ensures we enrich personal notes with external data
+            
+            # Check if we have done a web search
+            has_web_search = any(step['step']['search_strategy'] == 'web' for step in state['past_steps'])
+            
+            # Check if we have a PLANNED web search remaining
+            remaining_steps = state['plan'][state['current_step_index']:]
+            has_planned_web = any(step['search_strategy'] == 'web' for step in remaining_steps)
+            
+            if decision_data.get("needs_external_enrichment") and not has_web_search and not has_planned_web and decision == "FINISH":
+                print("⚠️ Policy: External enrichment needed but no web search. Forcing REVISE_PLAN.")
+                return "REVISE_PLAN"
             
             # Validate decision
             if decision not in ["CONTINUE", "FINISH", "REVISE_PLAN"]:

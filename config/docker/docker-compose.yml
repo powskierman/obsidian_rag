@@ -67,6 +67,7 @@ services:
       - USE_GPT_OSS=${USE_GPT_OSS:-false}
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped

@@ -8,6 +8,14 @@ except ImportError:
     RERANKER_AVAILABLE = False
     print("Warning: Reranker not available. Install sentence-transformers to enable reranking.")
 
+import os
+try:
+    from tavily import TavilyClient
+    WEB_SEARCH_AVAILABLE = True
+except ImportError:
+    WEB_SEARCH_AVAILABLE = False
+    print("Warning: tavily-python not available.")
+
 class RetrievalSupervisor:
     def __init__(self, vector_service_url: str, graph_service_url: str, enable_reranking: bool = True):
         self.vector_service_url = vector_service_url
@@ -27,8 +35,14 @@ class RetrievalSupervisor:
         """
         Execute the search strategy specified in the step.
         """
-        query = step["sub_question"]
+        # For vault searches (vector/hybrid), use keywords if available.
+        # Keywords have better signal than sub_questions which may include generic words.
         strategy = step["search_strategy"]
+        if strategy in ["vector", "hybrid"] and step.get("keywords"):
+            # Join keywords for better retrieval
+            query = " ".join(step["keywords"])
+        else:
+            query = step["sub_question"]
         
         # Apply Obsidian folder filtering
         filters = self._build_filters(step["target_folders"])
@@ -61,6 +75,9 @@ class RetrievalSupervisor:
                 vec_results = self._query_vector(query, filters=None, n_results=n_results)
                 
             results = vec_results
+            
+        elif strategy == "web":
+            results = self._query_web(query)
         
         # Apply reranking if enabled
         if self.enable_reranking and results and len(results) > 0:
@@ -161,4 +178,51 @@ class RetrievalSupervisor:
             return []
         except Exception as e:
             print(f"Graph search exception: {e}")
+            return []
+
+    def _query_web(self, query: str, n_results: int = 5) -> List[Dict[str, Any]]:
+        if not WEB_SEARCH_AVAILABLE:
+            print("⚠️ Web search disabled (tavily-python not installed)")
+            return []
+            
+        api_key = os.getenv("TAVILY_API_KEY")
+        if not api_key:
+            print("⚠️ Web search disabled (TAVILY_API_KEY not set)")
+            return []
+
+        try:
+            print(f"DEBUG: Web Query: {query}")
+            tavily_client = TavilyClient(api_key=api_key)
+            # Use 'search' method with image support
+            response = tavily_client.search(
+                query, 
+                search_depth="advanced", 
+                max_results=n_results,
+                include_images=True  # Enable image retrieval
+            )
+            
+            formatted_results = []
+            images = response.get('images', [])
+            
+            if 'results' in response:
+                for i, res in enumerate(response['results']):
+                    doc = {
+                        "content": f"Title: {res['title']}\nSnippet: {res['content']}",
+                        "source": res['url'],
+                        "type": "web",
+                        "score": res.get('score', 1.0)
+                    }
+                    # Add first 2 images to first result if available
+                    if i == 0 and images:
+                        doc['images'] = images[:2]
+                    formatted_results.append(doc)
+            
+            # If we got images but no results, log it
+            if images and not formatted_results:
+                print(f"DEBUG: Found {len(images)} images but no text results")
+                
+            return formatted_results
+        except Exception as e:
+            print(f"Web search error: {e}")
+
             return []

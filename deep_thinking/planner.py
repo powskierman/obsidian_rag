@@ -11,31 +11,78 @@ class PlannerAgent:
         """
         Uses Claude to break down the question into 2-5 sub-steps.
         """
-        prompt = f"""
-        You are a research planner for an Obsidian vault containing:
+        system_prompt = """
+        You are an Augmented Research Planner for an Obsidian vault.
+        Your goal is to create a research plan that combines LOCAL vault data with EXTERNAL web context.
+        
+        Vault Contents:
         - Medical notes (folders: Medical/Scans/, Medical/Treatments/)
         - Technical projects (folders: Tech/ESP32/, Tech/HomeAssistant/)
         - Personal logs (Daily Notes)
         
+        CRITICAL SEARCH STRATEGY RULES:
+        1. Use "vector" or "hybrid" ONLY for searching the user's EXISTING notes and personal content
+        2. Use "web" for:
+           - Official documentation (ESPHome docs, product specs, API references)
+           - Hardware specifications and datasheets
+           - Wiring diagrams and pin configurations  
+           - Latest software versions or updates
+           - Medical treatment guidelines or drug information
+           - Any "how-to" or tutorial content that isn't in the vault
+           - Product comparisons or reviews
+        
+        3. If in doubt, prefer "web" over "vector" - it's better to get fresh, authoritative information
+        4. For technical queries, at MINIMUM have 2 web search steps
+        5. For medical queries, ALWAYS include web search for treatment protocols/side effects
+        """
+
+        user_prompt = f"""
         User question: "{question}"
         
         Create a research plan with 2-5 steps. For each step:
         1. Write a clear sub-question
-        2. Choose search strategy: "vector" (concepts), "graph" (entities/relationships), "hybrid"
+        2. Choose search strategy: "vector" (concepts), "graph" (entities/relationships), "web" (external/recent info), or "hybrid"
         3. List 3-5 keywords
         4. Suggest target folders if relevant (e.g. "Medical/", "Tech/")
         5. Explain why this step is needed
         
+        CRITICAL FOR VAULT SEARCHES:
+        When creating "vector" or "hybrid" steps that search the user's vault, you MUST include the KEY ENTITIES from the original question in your sub-question.
+        For example:
+        - If the question mentions "Nextion display", your vault search should ask "What Nextion display projects exist in my vault?" NOT just "What ESP32 projects exist?"
+        - If the question mentions "R-CHOP", your vault search should ask "What are my R-CHOP treatment notes?" NOT just "What are my treatment notes?"
+        
         Return ONLY a JSON array of steps. Do not include markdown formatting.
-        Example format:
+        
+        Example 1 (Technical Query):
         [
           {{
             "step_number": 1,
-            "sub_question": "...",
+            "sub_question": "What are the specs of ESP32?",
+            "search_strategy": "web",
+            "keywords": ["ESP32 specs", "datasheet"],
+            "target_folders": [],
+            "reasoning": "Need external specs"
+          }}
+        ]
+
+        Example 2 (Medical Journey - ENRICHMENT REQUIRED):
+        [
+          {{
+            "step_number": 1,
+            "sub_question": "Extract timeline from my lymphoma notes",
             "search_strategy": "vector",
-            "keywords": ["..."],
-            "target_folders": ["..."],
-            "reasoning": "..."
+            "keywords": ["lymphoma", "timeline", "diagnosis"],
+            "target_folders": ["Medical/"],
+            "reasoning": "Building timeline from vault"
+          }},
+          {{
+            "step_number": 2,
+            "sub_question": "What are the standard treatments for Diffuse Large B-Cell Lymphoma?",
+            "search_strategy": "web",
+            "keywords": ["DLBCL standard treatment", "R-CHOP side effects"],
+            "target_folders": [],
+            "reasoning": "Enriching personal notes with standard medical context"
           }}
         ]
         """
@@ -43,7 +90,8 @@ class PlannerAgent:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}]
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_prompt}]
         )
         
         try:
@@ -80,12 +128,19 @@ class PlannerAgent:
         {self._format_past_steps(state['past_steps'])}
         
         What information is still missing to answer the question?
+        
+        CRITICAL: If the research so far contains specific entities, technical terms, drugs, or conditions (e.g. "R-CHOP", "ESP32", "Python 3.12"), but lacks external context (side effects, specs, release dates), you MUST generate a "web" search step.
+        
+        For the "web" step:
+        1. Extract the SPECIFIC terms found in the research.
+        2. DO NOT use generic queries. Use the specific entities found.
+        
         Generate 1-2 additional search steps to fill gaps.
         
         Return ONLY a JSON array of new steps. Each step must have:
-        - sub_question: string
-        - search_strategy: "vector" | "graph" | "hybrid"
-        - keywords: array of strings
+        - sub_question: string (Specific query for web search)
+        - search_strategy: "vector" | "graph" | "hybrid" | "web"
+        - keywords: array of strings (The specific terms extracted)
         - target_folders: array of strings
         - reasoning: string
         """

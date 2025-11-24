@@ -3,7 +3,7 @@ from typing import TypedDict, List, Literal, Optional, Dict, Any
 class Step(TypedDict):
     step_number: int
     sub_question: str
-    search_strategy: Literal["vector", "graph", "hybrid"]
+    search_strategy: Literal["vector", "graph", "hybrid", "web"]
     keywords: List[str]
     target_folders: List[str]
     reasoning: str

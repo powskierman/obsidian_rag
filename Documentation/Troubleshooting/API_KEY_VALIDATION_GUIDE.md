@@ -1,4 +1,4 @@
-# Claude API Key Validation Guide
+# API Key Validation Guide
 
 ## Problem
 You were seeing "✅ Claude API key configured" in Streamlit but getting 401 authentication errors. This happened because:
@@ -43,6 +43,38 @@ ANTHROPIC_API_KEY=sk-ant-api03-XXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 Get your key from: https://console.anthropic.com/
+
+### 2b. Add TAV ILY_API_KEY (Required for Web Search)
+
+For Deep Thinking mode with web search, you also need:
+
+```bash
+TAVILY_API_KEY=tvly-XXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+Get your key from: https://tavily.com (free tier: 1000 searches/month)
+
+**Test Tavily Key**:
+```bash
+# Quick test
+curl -X POST https://api.tavily.com/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "api_key": "tvly-YOUR-KEY",
+    "query": "test",
+    "max_results": 1
+  }'
+
+# Or use Python
+python3 -c "
+from tavily import TavilyClient
+import os
+client = TavilyClient(api_key=os.getenv('TAVILY_API_KEY'))
+result = client.search('test', max_results=1)
+print('✅ Tavily API key is valid!')
+"
+```
+
 
 ### 3. Restart Docker Containers
 
