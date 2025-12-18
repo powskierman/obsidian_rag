@@ -9,6 +9,11 @@ import requests
 from datetime import datetime
 import json
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 from pathlib import Path
@@ -596,7 +601,23 @@ if prompt := st.chat_input("Ask about your notes..."):
                 response_text = context_text
             else:
                 # For other modes, use LLM to generate response
-                with st.spinner(f"💭 Thinking with {model_option} ({LLM_PROVIDER})..."):
+                # Get selected LLM provider from session state
+                active_provider = st.session_state.get('llm_provider', 'ollama')
+                
+                # Determine provider display name and model for spinner
+                provider_display = {"ollama": "Ollama", "gemini": "Gemini Pro", "claude": "Claude Sonnet", "gpt-oss": "GPT-OSS"}.get(active_provider, "Ollama")
+                
+                # Use correct model name based on provider
+                if active_provider == "gemini":
+                    display_model = "gemini-3-pro-preview"
+                elif active_provider == "claude":
+                    display_model = "claude-sonnet-4-5"
+                elif active_provider == "gpt-oss":
+                    display_model = model_option
+                else:  # ollama
+                    display_model = model_option
+                
+                with st.spinner(f"💭 Thinking with {display_model} ({provider_display})..."):
                     system_prompt = f"""You are an AI assistant helping Michel understand his Obsidian knowledge base.
 
 Context from notes:
@@ -613,12 +634,10 @@ Provide a thorough, accurate answer that:
 - If the context doesn't contain relevant information, say so clearly
 
 Answer:"""
-
-                    # Get selected LLM provider from session state
-                    active_provider = st.session_state.get('llm_provider', 'ollama')
                     
                     if active_provider == "claude":
                         # Use Claude API
+                        logger.info(f"🎯 CALLING CLAUDE API with model: claude-sonnet-4-5-20250929")
                         if not ANTHROPIC_API_KEY:
                             st.error("❌ Claude API key not configured")
                             st.stop()
@@ -645,6 +664,7 @@ Answer:"""
                     
                     elif active_provider == "gemini":
                         # Use Gemini API
+                        logger.info(f"🎯 CALLING GEMINI API with model: gemini-3-pro-preview")
                         if not GEMINI_API_KEY:
                             st.error("❌ Gemini API key not configured")
                             st.stop()
@@ -705,8 +725,9 @@ Answer:"""
                             st.error(f"Gemini API error: {e}")
                             st.stop()
                     
-                    elif LLM_PROVIDER == "GPT-OSS" or active_provider == "gpt-oss":
+                    elif active_provider == "gpt-oss":
                         # Use OpenAI-compatible API
+                        logger.info(f"🎯 CALLING GPT-OSS API with model: {model_option}")
                         llm_response = requests.post(
                             f'{LLM_HOST}/v1/chat/completions',
                             json={
@@ -734,6 +755,7 @@ Answer:"""
                             st.stop()
                     else:
                         # Use Ollama API
+                        logger.info(f"🎯 CALLING OLLAMA API with model: {model_option}")
                         ollama_response = requests.post(
                             f'{OLLAMA_HOST}/api/generate',
                             json={
