@@ -59,3 +59,20 @@ mem0_db/
 data/vault_processing/
 venv/
 venv_*/
+
+# Cleanup - temporary and backup files
+*\ 2
+*\ 2.*
+*.backup_*/
+feedback_db/
+.gemini_clipboard_*
+pip_version.txt
+obsidian_rag_unified_mcp.py
+
+# Documentation drafts and archives
+Documentation/Archive/
+Documentation/AUDIT_PLAN.md
+Documentation/Deep\ Thinking\ Implementation\ Plan.md
+Documentation/ORGANIZATION_SUMMARY.md
+Documentation/UPDATE_SUMMARY.md
+Documentation/deep-thinking-rag-improvement-proposal.md
