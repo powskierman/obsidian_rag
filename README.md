@@ -70,23 +70,41 @@ obsidian_rag/
 │   │   ├── embedding_service.py       # Vector search service (port 8000)
 │   │   ├── graph_query_service.py     # Graph query service (port 8002)
 │   │   └── graphrag_claude_service.py # GraphRAG wrapper
+│   ├── integrations/             # Service integrations
+│   │   ├── claude_graph_reasoner.py   # Claude graph reasoning
+│   │   ├── graphrag_unified_service.py # Unified GraphRAG service
+│   │   └── lightrag_service.py        # LightRAG integration
 │   ├── mcp/                      # MCP servers
 │   │   ├── obsidian_rag_unified_mcp.py   # Unified MCP (vault + graph)
 │   │   └── knowledge_graph_mcp.py        # Graph-only MCP
 │   ├── ui/                       # User interfaces
-│   │   └── streamlit_ui_docker.py     # Web UI (port 8501)
+│   │   ├── streamlit_ui_docker.py     # Main web UI (port 8501)
+│   │   └── streamlit_ui_enhanced.py   # Alternative UI
 │   └── utils/                    # Utilities
 │       ├── logging_config.py
+│       ├── query_feedback.py          # Query tracking and metrics
 │       └── validate_claude_api_key.py
+├── scripts/                      # Utility scripts
+│   ├── docker/                   # Docker management scripts
+│   ├── maintenance/              # Maintenance scripts
+│   ├── vault_management/         # Obsidian vault scanners
+│   │   ├── obsidian_scanner.py
+│   │   ├── simple_scanner.py
+│   │   └── watching_scanner.py
+│   └── *.sh                      # Various shell scripts
 ├── config/                       # Configuration files
 │   ├── docker/                   # Docker configs and Dockerfiles
 │   ├── examples/                 # Example .env files
 │   └── *.json                    # Rule configurations
-├── Scripts/                      # Utility scripts
-│   ├── docker/                   # Docker management scripts
-│   ├── maintenance/              # Maintenance scripts
-│   └── *.py, *.sh                # Various utilities
-├── Documentation/                # All documentation
+├── Documentation/                # All documentation (see Documentation/README.md)
+│   ├── Setup/                    # Installation and setup guides
+│   ├── Guides/                   # Usage and development guides
+│   ├── Reference/                # Reference documentation
+│   ├── Troubleshooting/          # Problem solving
+│   ├── Models/                   # LLM and embedding model docs
+│   ├── Graph/                    # Knowledge graph specifics
+│   ├── MCP/                      # MCP integration
+│   └── architecture/             # System design
 ├── graph_data/                   # Graph checkpoints and final graph
 └── chroma_db/                    # Vector database
 ```

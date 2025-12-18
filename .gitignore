@@ -76,3 +76,14 @@ Documentation/Deep\ Thinking\ Implementation\ Plan.md
 Documentation/ORGANIZATION_SUMMARY.md
 Documentation/UPDATE_SUMMARY.md
 Documentation/deep-thinking-rag-improvement-proposal.md
+
+# Additional cleanup patterns
+*\ 3
+*\ 3.*
+*\ Copy
+*\ Copy.*
+duplicate_*/
+temp_*/
+tmp_*/
+scanner.log
+embedding_service.log
