@@ -38,11 +38,11 @@ touch "$STREAMLIT_LOG_FILE" 2>/dev/null || {
     }
 }
 
-# Activate virtual environment if it exists (suppress any streamlit.log errors)
+# Activate virtual environment if it exists
 if [ -d "venv" ]; then
-    source venv/bin/activate 2>&1 | grep -v "streamlit.log" || true
+    source venv/bin/activate
 elif [ -d "venv_python313" ]; then
-    source venv_python313/bin/activate 2>&1 | grep -v "streamlit.log" || true
+    source venv_python313/bin/activate
 else
     echo "⚠️ Warning: No virtual environment found. Using system Python."
 fi
@@ -56,7 +56,14 @@ fi
 
 # Start embedding service
 echo "Starting embedding service..."
-python src/services/embedding_service.py > Scripts/logs/embedding_service.log 2>&1 &
+# Use explicit venv python path to ensure correct environment
+if [ -d "venv" ]; then
+    venv/bin/python src/services/embedding_service.py > Scripts/logs/embedding_service.log 2>&1 &
+elif [ -d "venv_python313" ]; then
+    venv_python313/bin/python src/services/embedding_service.py > Scripts/logs/embedding_service.log 2>&1 &
+else
+    python src/services/embedding_service.py > Scripts/logs/embedding_service.log 2>&1 &
+fi
 EMBED_PID=$!
 echo "  PID: $EMBED_PID"
 sleep 5  # Increased wait time for service to start
