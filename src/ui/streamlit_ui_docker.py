@@ -232,6 +232,8 @@ with st.sidebar:
     num_sources = st.slider("Sources", 1, 20, 5)
     temperature = st.slider("Temperature", 0.0, 1.0, 0.3, 0.1)
     show_sources = st.checkbox("Show Sources", value=True)
+    enhanced_search = st.checkbox("Enhanced Search", value=False, 
+                                   help="Add LLM Knowledge and Web Search sections (slower)")
     
     st.markdown("---")
     
@@ -240,18 +242,37 @@ with st.sidebar:
     with col1:
         if st.button("💾 Export"):
             if st.session_state.messages:
-                export_data = {
-                    "timestamp": datetime.now().isoformat(),
-                    "model": model_option,
-                    "search_mode": search_mode,
-                    "messages": st.session_state.messages
-                }
-                st.download_button(
-                    "Download JSON",
-                    data=json.dumps(export_data, indent=2),
-                    file_name=f"rag_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                    mime="application/json"
-                )
+                # Create markdown export
+                markdown_content = f"# RAG Chat Export\n\n"
+                markdown_content += f"**Date**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+                markdown_content += f"**Model**: {model_option}\n\n"
+                markdown_content += f"**Search Mode**: {search_mode}\n\n"
+                markdown_content += "---\n\n"
+                
+                for msg in st.session_state.messages:
+                    if msg["role"] == "user":
+                        markdown_content += f"## 👤 User\n\n{msg['content']}\n\n"
+                    else:
+                        markdown_content += f"## 🤖 Assistant\n\n{msg['content']}\n\n"
+                        if msg.get("sources"):
+                            markdown_content += "**Sources:**\n"
+                            for source in msg["sources"]:
+                                markdown_content += f"- {source.get('filename', 'Unknown')} ({source.get('relevance', 0):.0f}% relevant)\n"
+                            markdown_content += "\n"
+                    markdown_content += "---\n\n"
+                
+                # Save to Downloads directory
+                import os
+                downloads_path = os.path.expanduser("~/Downloads")
+                filename = f"rag_chat_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+                filepath = os.path.join(downloads_path, filename)
+                
+                try:
+                    with open(filepath, 'w', encoding='utf-8') as f:
+                        f.write(markdown_content)
+                    st.success(f"✅ Exported to {filepath}")
+                except Exception as e:
+                    st.error(f"❌ Export failed: {e}")
     
     with col2:
         if st.button("🗑️ Clear Conversation"):
@@ -776,8 +797,138 @@ Answer:"""
                         
                         response_text = ollama_response.json().get('response', '')
             
+            # Enhanced Search Sections (if enabled)
+            llm_knowledge_text = ""
+            web_search_text = ""
+            
+            if enhanced_search:
+                # Section 2: LLM Knowledge (context-aware - builds on vault findings)
+                with st.spinner("🧠 Gathering additional knowledge..."):
+                    try:
+                        # Include vault findings as context so LLM can build on them
+                        knowledge_prompt = f"""Based on the following information found in the user's vault:
+
+{response_text[:2000]}
+
+User's question: {prompt}
+
+Provide ADDITIONAL insights, clinical context, or alternative perspectives that COMPLEMENT (not repeat) the vault information. Focus on:
+1. Clinical implications of the findings
+2. Treatment considerations mentioned
+3. Additional context that would be helpful
+4. Answering aspects of the question not covered by vault notes"""
+                        
+                        if active_provider == "claude":
+                            from anthropic import Anthropic
+                            client = Anthropic(api_key=ANTHROPIC_API_KEY)
+                            knowledge_response = client.messages.create(
+                                model="claude-sonnet-4-5-20250929",
+                                max_tokens=4000,
+                                temperature=temperature,
+                                messages=[{"role": "user", "content": knowledge_prompt}]
+                            )
+                            llm_knowledge_text = knowledge_response.content[0].text
+                            
+                        elif active_provider == "gemini":
+                            gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent"
+                            knowledge_response = requests.post(
+                                gemini_url,
+                                headers={"x-goog-api-key": GEMINI_API_KEY, "Content-Type": "application/json"},
+                                json={
+                                    "contents": [{"role": "user", "parts": [{"text": knowledge_prompt}]}],
+                                    "generationConfig": {"temperature": temperature, "maxOutputTokens": 4000}
+                                },
+                                timeout=60
+                            )
+                            if knowledge_response.status_code == 200:
+                                result = knowledge_response.json()
+                                if 'candidates' in result and len(result['candidates']) > 0:
+                                    llm_knowledge_text = result['candidates'][0]['content']['parts'][0]['text']
+                                    
+                        else:  # Ollama
+                            knowledge_resp = requests.post(
+                                f'{OLLAMA_HOST}/api/generate',
+                                json={'model': model_option, 'prompt': knowledge_prompt, 'stream': False, 'options': {'temperature': temperature}},
+                                timeout=60
+                            )
+                            if knowledge_resp.status_code == 200:
+                                llm_knowledge_text = knowledge_resp.json().get('response', '')
+                    except Exception as e:
+                        llm_knowledge_text = f"_Could not retrieve LLM knowledge: {str(e)}_"
+                
+                # Section 3: Web Search (Gemini & Claude only) - Extract medical terms from vault context
+                if active_provider in ["gemini", "claude"]:
+                    with st.spinner("🌐 Searching the web..."):
+                        try:
+                            from tavily import TavilyClient
+                            TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+                            
+                            if TAVILY_API_KEY:
+                                # Extract key medical terms from vault response for better search
+                                # First 500 chars should capture main topics
+                                context_sample = response_text[:500]
+                                
+                                # Create focused medical search query
+                                search_query_prompt = f"Extract 3-5 key medical terms or concepts from this text to create a focused web search query: {context_sample}\n\nProvide only the search terms, no explanation."
+                                
+                                # Quick call to get search terms
+                                if active_provider == "claude":
+                                    from anthropic import Anthropic
+                                    client = Anthropic(api_key=ANTHROPIC_API_KEY)
+                                    terms_resp = client.messages.create(
+                                        model="claude-sonnet-4-5-20250929",
+                                        max_tokens=100,
+                                        messages=[{"role": "user", "content": search_query_prompt}]
+                                    )
+                                    search_terms = terms_resp.content[0].text.strip()
+                                else:  # gemini
+                                    gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent"
+                                    terms_resp = requests.post(
+                                        gemini_url,
+                                        headers={"x-goog-api-key": GEMINI_API_KEY, "Content-Type": "application/json"},
+                                        json={
+                                            "contents": [{"role": "user", "parts": [{"text": search_query_prompt}]}],
+                                            "generationConfig": {"maxOutputTokens": 100}
+                                        },
+                                        timeout=30
+                                    )
+                                    if terms_resp.status_code == 200:
+                                        result = terms_resp.json()
+                                        search_terms = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                                    else:
+                                        search_terms = prompt  # Fallback to original query
+                                
+                                # Use extracted terms for web search
+                                tavily = TavilyClient(api_key=TAVILY_API_KEY)
+                                search_response = tavily.search(query=search_terms, search_depth="advanced", max_results=5)
+                                
+                                if 'results' in search_response and search_response['results']:
+                                    web_results = []
+                                    for i, res in enumerate(search_response['results'][:3], 1):
+                                        web_results.append(f"{i}. **[{res['title']}]({res['url']})**\n   {res['content']}")
+                                    web_search_text = f"_Search terms used: {search_terms}_\n\n" + "\n\n".join(web_results)
+                                else:
+                                    web_search_text = "_No web results found._"
+                            else:
+                                web_search_text = "_Web search unavailable: TAVILY_API_KEY not set in .env_"
+                        except ImportError:
+                            web_search_text = "_Web search unavailable: tavily-python not installed_"
+                        except Exception as e:
+                            web_search_text = f"_Web search error: {str(e)}_"
+                else:
+                    web_search_text = f"_⚠️ Web search not available with {provider_display}_"
+            
+            # Format final response with sections
+            final_response = f"## 📚 Vault Knowledge\n\n{response_text}"
+            
+            if enhanced_search:
+                if llm_knowledge_text:
+                    final_response += f"\n\n---\n\n## 🧠 LLM Knowledge\n\n{llm_knowledge_text}"
+                if web_search_text:
+                    final_response += f"\n\n---\n\n## 🌐 Web Search\n\n{web_search_text}"
+            
             # Display response
-            st.markdown(response_text)
+            st.markdown(final_response)
             
             # Show sources
             if show_sources and sources_list:
@@ -790,7 +941,7 @@ Answer:"""
             # Save to history
             st.session_state.messages.append({
                 "role": "assistant",
-                "content": response_text,
+                "content": final_response,
                 "sources": sources_list,
                 "search_mode": search_mode
             })
