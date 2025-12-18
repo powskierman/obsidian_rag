@@ -10,6 +10,7 @@ requests==2.31.0
 torch>=2.2.0
 transformers>=4.35.0
 anthropic>=0.44.0
+google-generativeai>=0.3.0
 
 # MCP (Model Context Protocol)
 mcp>=0.9.0

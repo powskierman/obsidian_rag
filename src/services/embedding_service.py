@@ -26,6 +26,10 @@ try:
 except ImportError:
     print("⚠️  python-dotenv not installed. Using only system environment variables.")
 
+# Add parent directories to path for imports
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from query_feedback import log_query, save_feedback, get_metrics, get_all_mode_performance, get_database_stats
 
 app = Flask(__name__)

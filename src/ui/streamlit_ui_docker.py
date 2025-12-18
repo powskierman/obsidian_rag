@@ -10,14 +10,25 @@ from datetime import datetime
 import json
 import os
 
-# Service URLs (configurable via environment)
-EMBEDDING_SERVICE = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
-CLAUDE_GRAPH_SERVICE = os.getenv("CLAUDE_GRAPH_SERVICE_URL", "http://graph-service:8002")
-OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
+# Load environment variables from .env file
+from pathlib import Path
+try:
+    from dotenv import load_dotenv
+    env_file = Path('.env')
+    if env_file.exists():
+        load_dotenv(env_file)
+except ImportError:
+    pass  # python-dotenv not required, will use system env vars
+
+# Service URLs - updated for LOCAL execution (not Docker)
+EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
+CLAUDE_GRAPH_SERVICE_URL = os.getenv("CLAUDE_GRAPH_SERVICE_URL", "http://localhost:8002")
+OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 GPT_OSS_HOST = os.getenv("GPT_OSS_HOST", "http://host.docker.internal:12434/engines/llama.cpp")
 USE_GPT_OSS = os.getenv("USE_GPT_OSS", "false").lower() == "true"
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # Detect GPT-OSS endpoint
 def extract_entities_from_graph(graph_text: str) -> list:
@@ -87,55 +98,40 @@ with st.sidebar:
     
     # LLM Provider Selection
     st.subheader("🤖 LLM Provider")
-    llm_options = ["Ollama (Free)", "Claude API ($)"]
+    llm_options = ["Ollama (Free)", "Gemini Pro ($)", "Claude API ($)"]
+    default_index = {"ollama": 0, "gemini": 1, "claude": 2}.get(LLM_PROVIDER, 0)
     llm_choice = st.radio(
         "Choose LLM:",
         llm_options,
-        index=0 if LLM_PROVIDER == "ollama" else 1,
+        index=default_index,
         help="""
         - **Ollama**: Free, local models (llama3.2:3b)
-        - **Claude API**: High quality, paid ($0.02/query)
+        - **Gemini Pro**: Google's latest model, fast & high quality
+        - **Claude API**: Anthropic's model, excellent reasoning
         """
     )
-    selected_provider = "ollama" if llm_choice == llm_options[0] else "claude"
+    if llm_choice == llm_options[0]:
+        selected_provider = "ollama"
+    elif llm_choice == llm_options[1]:
+        selected_provider = "gemini"
+    else:
+        selected_provider = "claude"
     
     # Show API key status for Claude
     if selected_provider == "claude":
         if ANTHROPIC_API_KEY:
-            # Validate the key (cache result in session state to avoid repeated API calls)
-            validation_key = f"claude_key_validated_{ANTHROPIC_API_KEY[:20]}"
-            if validation_key not in st.session_state:
-                # Validate the key
-                try:
-                    from anthropic import Anthropic
-                    client = Anthropic(api_key=ANTHROPIC_API_KEY)
-                    # Quick validation call
-                    test_response = client.messages.create(
-                        model="claude-haiku-4-5",
-                        max_tokens=1,
-                        messages=[{"role": "user", "content": "Hi"}]
-                    )
-                    st.session_state[validation_key] = True
-                    st.success("✅ Claude API key configured and validated")
-                except Exception as e:
-                    error_msg = str(e)
-                    st.session_state[validation_key] = False
-                    if "401" in error_msg or "authentication" in error_msg.lower():
-                        st.error("❌ Claude API key is INVALID (401 error)")
-                        st.warning("💡 Your API key may be expired or revoked. Please:")
-                        st.info("1. Get a new key from: https://console.anthropic.com/\n2. Update `.env` file: `ANTHROPIC_API_KEY=sk-ant-...`\n3. Restart container: `docker-compose restart streamlit-ui`")
-                    else:
-                        st.warning(f"⚠️ Could not validate API key: {error_msg[:100]}")
-            else:
-                # Use cached validation result
-                if st.session_state[validation_key]:
-                    st.success("✅ Claude API key configured and validated")
-                else:
-                    st.error("❌ Claude API key is INVALID")
-                    st.info("💡 Update `.env` and restart: `docker-compose restart streamlit-ui`")
+            st.success("✅ Claude API key configured")
         else:
             st.error("❌ Set ANTHROPIC_API_KEY in .env file or docker-compose.yml")
             st.info("💡 Create a `.env` file in the project root with:\n```\nANTHROPIC_API_KEY=your-key-here\n```")
+    
+    # Show API key status for Gemini
+    elif selected_provider == "gemini":
+        if GEMINI_API_KEY:
+            st.success("✅ Gemini API key configured")
+        else:
+            st.error("❌ Set GEMINI_API_KEY in .env file")
+            st.info("💡 Create a `.env` file in the project root with:\n```\nGEMINI_API_KEY=your-key-here\n```\n\nGet your key from: https://makersuite.google.com/app/apikey")
     
     st.session_state.llm_provider = selected_provider
     
@@ -146,14 +142,14 @@ with st.sidebar:
     
     # Check embedding service
     try:
-        stats = requests.get(f'{EMBEDDING_SERVICE}/stats', timeout=2).json()
+        stats = requests.get(f'{EMBEDDING_SERVICE_URL}/stats', timeout=2).json()
         st.success(f"✅ Vector DB: {stats.get('total_documents', 0):,} chunks")
     except:
         st.error("⚠️ Vector service offline")
     
     # Check Claude Graph service
     try:
-        claude_graph_response = requests.get(f'{CLAUDE_GRAPH_SERVICE}/health', timeout=2)
+        claude_graph_response = requests.get(f'{CLAUDE_GRAPH_SERVICE_URL}/health', timeout=2)
         if claude_graph_response.status_code == 200:
             claude_graph_data = claude_graph_response.json()
             if claude_graph_data.get('graph_loaded'):
@@ -185,11 +181,19 @@ with st.sidebar:
             ollama_response = requests.get(f'{OLLAMA_HOST}/api/tags', timeout=2)
             if ollama_response.status_code == 200:
                 models_data = ollama_response.json().get('models', [])
-                available_models = [m.get('name', 'unknown') for m in models_data]
+                all_models = [m.get('name', 'unknown') for m in models_data]
+                
+                # Filter out embedding-only models (they can't generate text)
+                embedding_keywords = ['embed', 'nomic', 'minilm', 'bge', 'gte']
+                available_models = [
+                    model for model in all_models 
+                    if not any(keyword in model.lower() for keyword in embedding_keywords)
+                ]
+                
                 if available_models:
-                    st.success(f"✅ Ollama: {len(available_models)} models available")
+                    st.success(f"✅ Ollama: {len(available_models)} LLM models available")
                 else:
-                    st.warning("⚠️ No Ollama models found")
+                    st.warning("⚠️ No LLM models found (only embedding models)")
                     available_models = ["llama3.2:3b"]  # Fallback
             else:
                 st.warning("⚠️ Ollama unavailable")
@@ -302,46 +306,17 @@ if prompt := st.chat_input("Ask about your notes..."):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Phase 3c: Auto-select search mode based on query patterns
-    import re
-
+    # Phase 3c: Auto-select search mode based on query patterns (DISABLED - respects user choice)
+    # import re
+    
     # Synthesis patterns that suggest graph-claude mode
-    synthesis_patterns = [
-        r'\bhow\s+(have|has|did|do|does|would)\b',
-        r'\bwhy\b',
-        r'\brelat(e|ed|ion|ionship)\b',
-        r'\bconnect(ed|ion)\b',
-        r'\bpattern\b',
-        r'\btrend\b',
-        r'\bcompare\b',
-        r'\bsynthesiz(e|ed)\b',
-        r'\banalyze\b',
-        r'\binfer\b',
-        r'\brelationship between\b',
-        r'\bhow.*over time\b',
-        r'\bjourney\b',
-        r'\bprogression\b',
-        r'\bhistory\b',
-        r'\bevolution\b',
-        r'\btimeline\b',
-        r'\b(has|have)\s+been\b',
-        r'\bsummar(y|ize)\b',
-        r'\boverview\b',
-        r'\bbenchmark(s)?\b',
-        r'\bmilestone(s)?\b',
-        r'\bmajor\s+(events?|steps?|changes?)\b',
-    ]
-
-    # Check if query matches synthesis patterns
-    query_lower = prompt.lower()
-    is_synthesis = any(re.search(pattern, query_lower) for pattern in synthesis_patterns)
-
-    # Override search mode if synthesis query detected
-    if is_synthesis:
-        search_mode = 'graph-claude'
-        st.caption(f"🧠 Auto-selected **graph-claude** mode (synthesis query detected)")
-    else:
-        search_mode = st.session_state.search_mode
+    # synthesis_patterns = [
+    #     r'\bhow\s+(have|has|did|do|does|would)\b',
+    #     ... (patterns omitted)
+    # ]
+    
+    # Use the search mode selected by user in sidebar
+    search_mode = st.session_state.search_mode
 
     # Generate response
     with st.chat_message("assistant"):
@@ -360,7 +335,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                     }
                     
                     vault_response = requests.post(
-                        f'{EMBEDDING_SERVICE}/query',
+                        f'{EMBEDDING_SERVICE_URL}/query',
                         json=query_params,
                         timeout=30
                     )
@@ -410,7 +385,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                     # Step 1: Query graph for entities
                     try:
                         graph_response = requests.post(
-                            f'{CLAUDE_GRAPH_SERVICE}/query',
+                            f'{CLAUDE_GRAPH_SERVICE_URL}/query',
                             json={"query": prompt, "max_entities": 20},
                             timeout=30
                         )
@@ -433,7 +408,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                             }
                             
                             vault_response = requests.post(
-                                f'{EMBEDDING_SERVICE}/query',
+                                f'{EMBEDDING_SERVICE_URL}/query',
                                 json=query_params,
                                 timeout=30
                             )
@@ -487,7 +462,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                                 "deduplicate": True
                             }
                             vault_response = requests.post(
-                                f'{EMBEDDING_SERVICE}/query',
+                                f'{EMBEDDING_SERVICE_URL}/query',
                                 json=query_params,
                                 timeout=30
                             )
@@ -526,7 +501,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                         }
                         try:
                             vault_response = requests.post(
-                                f'{EMBEDDING_SERVICE}/query',
+                                f'{EMBEDDING_SERVICE_URL}/query',
                                 json=query_params,
                                 timeout=30
                             )
@@ -562,7 +537,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                 with st.spinner("🧠 Querying Claude knowledge graph..."):
                     try:
                         graph_response = requests.post(
-                            f'{CLAUDE_GRAPH_SERVICE}/query',
+                            f'{CLAUDE_GRAPH_SERVICE_URL}/query',
                             json={
                                 "query": prompt,
                                 "max_entities": 20
@@ -654,7 +629,7 @@ Answer:"""
                             
                             # Extract just the question from system_prompt
                             claude_response = client.messages.create(
-                                model="claude-haiku-4-5",
+                                model="claude-sonnet-4-5-20250929",
                                 max_tokens=4000,
                                 temperature=temperature,
                                 system=f"You are an AI assistant helping Michel understand his Obsidian knowledge base.\n\nContext from notes:\n{context_text}",
@@ -666,6 +641,68 @@ Answer:"""
                             response_text = claude_response.content[0].text
                         except Exception as e:
                             st.error(f"Claude API error: {e}")
+                            st.stop()
+                    
+                    elif active_provider == "gemini":
+                        # Use Gemini API
+                        if not GEMINI_API_KEY:
+                            st.error("❌ Gemini API key not configured")
+                            st.stop()
+                        
+                        try:
+                            # Create the prompt with context
+                            full_prompt = f"""You are an AI assistant helping Michel understand his Obsidian knowledge base.
+
+Context from notes:
+{context_text}
+
+User question: {prompt}
+
+Provide a thorough, accurate answer that:
+- References specific information from the context
+- Is medically accurate when discussing health topics
+- Includes technical details when relevant
+- Is supportive and encouraging
+- Cites which sources you used
+- If the context doesn't contain relevant information, say so clearly
+
+Answer:"""
+                            
+                            # Use Gemini 3 Pro Preview with REST API
+                            gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-preview:generateContent"
+                            gemini_response = requests.post(
+                                gemini_url,
+                                headers={
+                                    "x-goog-api-key": GEMINI_API_KEY,
+                                    "Content-Type": "application/json"
+                                },
+                                json={
+                                    "contents": [{
+                                        "role": "user",
+                                        "parts": [{"text": full_prompt}]
+                                    }],
+                                    "generationConfig": {
+                                        "temperature": temperature,
+                                        "maxOutputTokens": 4000
+                                    }
+                                },
+                                timeout=180
+                            )
+                            
+                            if gemini_response.status_code != 200:
+                                st.error(f"Gemini API error: {gemini_response.status_code}")
+                                st.code(gemini_response.text)
+                                st.stop()
+                            
+                            result = gemini_response.json()
+                            if 'candidates' in result and len(result['candidates']) > 0:
+                                response_text = result['candidates'][0]['content']['parts'][0]['text']
+                            else:
+                                st.error("Unexpected Gemini response format")
+                                st.code(json.dumps(result, indent=2))
+                                st.stop()
+                        except Exception as e:
+                            st.error(f"Gemini API error: {e}")
                             st.stop()
                     
                     elif LLM_PROVIDER == "GPT-OSS" or active_provider == "gpt-oss":
