@@ -109,27 +109,18 @@ obsidian_rag/
 
 ## Documentation
 
-See `Documentation/` for detailed guides:
+📚 **[Complete Documentation →](Documentation/README.md)**
 
-### Quick Start
-- **Quick Start**: `Documentation/QUICKSTART.md` - Get started quickly
+The `Documentation/` directory contains comprehensive guides organized by topic:
 
-### Graph Building
-- **Graph Builder Guide**: `Documentation/Graph/IMPROVED_GRAPH_BUILDER_GUIDE.md`
-- **Resuming Builds**: `Documentation/Graph/TRANSFER_BETWEEN_MACHINES.md`
-- **Graph Data Flow**: `Documentation/Graph/GRAPH_DATA_FLOW.md`
-- **Quality Improvements**: `Documentation/Graph/QUALITY_IMPROVEMENTS.md`
+- **[Quick Start](Documentation/README.md#quick-start)** - Get up and running fast
+- **[Setup & Installation](Documentation/README.md#setup--installation)** - Docker, models, API keys
+- **[Architecture](Documentation/README.md#architecture--design)** - System design and flow
+- **[Features](Documentation/README.md#features--capabilities)** - Enhanced search, knowledge graphs
+- **[Troubleshooting](Documentation/README.md#troubleshooting)** - Common issues and solutions
+- **[Development](Documentation/README.md#development--contributing)** - Contributing and testing
 
-### Setup
-- **Next Steps**: `Documentation/Setup/NEXT_STEPS.md`
-- **Cost Guide**: `Documentation/Setup/COST_DECISION_GUIDE.md`
-
-### Troubleshooting
-- **ChromaDB Issues**: `Documentation/Troubleshooting/CHROMADB_CORRUPTION_FIX.md`
-- **Docker Gateway**: `Documentation/DOCKER_GATEWAY_TROUBLESHOOTING.md`
-
-### Search Examples
-- **Query Examples**: `Documentation/SEARCH_EXAMPLES.md` - Comprehensive examples for all query methods
+**For new users:** Start with [`Documentation/START_HERE.md`](Documentation/START_HERE.md)
 
 ## Requirements
 

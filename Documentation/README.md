@@ -1,462 +1,232 @@
-# 🔍 Obsidian RAG System
+# Obsidian RAG Documentation
 
-*A production-ready, privacy-first RAG (Retrieval-Augmented Generation) system for searching your Obsidian vault using dual-mode AI search: Vector Search (ChromaDB) and Knowledge Graph Search (LightRAG).*
-
----
-
-## 🎯 What This Does
-
-- **🔍 Vector Search** - Fast semantic similarity search using ChromaDB
-- **🌐 Graph Search** - Intelligent knowledge graph reasoning using LightRAG
-- **🐳 Docker Integration** - One-command deployment with Docker Compose
-- **💻 Native Deployment** - Direct execution for maximum performance
-- **📊 Multiple Search Modes** - 5 different search strategies for different needs
-- **🔒 100% Local** - Your data never leaves your machine
+Welcome to the comprehensive documentation for the Obsidian RAG Knowledge Graph System. This guide will help you navigate all available documentation and get the most out of your RAG system.
 
 ---
 
-## ⚡ Quick Start (3 Steps)
+## 📚 Table of Contents
 
-### Prerequisites
-- Docker Desktop installed and running
-- Ollama installed with models
-- macOS (this guide assumes Apple Silicon)
-
-### 1️⃣ Configure Vault Path
-
-Edit `docker-compose.yml` line 35:
-```yaml
-- "/Users/yourname/path/to/vault:/app/vault:ro"
-```
-
-### 2️⃣ Start Services
-```bash
-./Scripts/docker_start.sh
-```
-
-### 3️⃣ Access UI
-Open http://localhost:8501 in your browser
-
-**Done!** 🎉
+- [Quick Start](#quick-start)
+- [Setup & Installation](#setup--installation)
+- [Architecture & Design](#architecture--design)
+- [Features & Capabilities](#features--capabilities)
+- [Models & Configuration](#models--configuration)
+- [Troubleshooting](#troubleshooting)
+- [Development & Contributing](#development--contributing)
+- [Additional Resources](#additional-resources)
 
 ---
 
-## 🔍 Understanding Search Modes
+## 🚀 Quick Start
 
-| Mode | Speed | Best For | Example Query |
-|------|-------|----------|---------------|
-| **Vector** | ⚡⚡⚡ Very Fast (100-500ms) | Quick lookups, finding similar content | "What are CAR-T side effects?" |
-| **Graph-Naive** | ⚡⚡ Fast (1-3s) | Simple entity lookup | "When was my PET scan?" |
-| **Graph-Local** | ⚡ Medium (3-10s) | Understanding relationships | "How does treatment A relate to outcome B?" |
-| **Graph-Global** | 🐌 Slow (10-30s) | Comprehensive synthesis | "Summarize my treatment journey" |
-| **Graph-Hybrid** | 🐢 Medium-Slow (5-20s) | Best overall results | Complex multi-part questions |
+**New to Obsidian RAG?** Start here:
 
-### When to Use Each Mode
-
-**Vector (Default)**: Start here! Best for most queries.
-- Quick answers
-- Finding specific information
-- Content similarity search
-
-**Graph-Naive**: Simple fact finding
-- Entity lookups
-- Date/time questions
-- Property queries
-
-**Graph-Local**: Understanding connections
-- Relationship questions
-- "How does X relate to Y?"
-- Exploring local context
-
-**Graph-Global**: Comprehensive answers
-- High-level summaries
-- Big picture understanding
-- Multiple related topics
-
-**Graph-Hybrid**: Best possible answer
-- Complex questions
-- When accuracy > speed
-- Multi-part queries
+- **[START_HERE.md](START_HERE.md)** - Complete getting started guide
+- **[QUICKSTART.md](QUICKSTART.md)** - Fast setup for experienced users
+- **[START_SERVICES.md](START_SERVICES.md)** - How to start the services
 
 ---
 
-## 🐳 Docker Deployment (Recommended)
+## ⚙️ Setup & Installation
 
-### Overview
-Docker Compose orchestrates three services:
-1. **Embedding Service** (ChromaDB) - Port 8000
-2. **LightRAG Service** - Port 8001  
-3. **Streamlit UI** - Port 8501
+### Docker Setup
+- **[DOCKER_SETUP_SUMMARY.md](DOCKER_SETUP_SUMMARY.md)** - Comprehensive Docker deployment guide
+- **[DOCKER_MODEL_RUNNER_INTEGRATION.md](DOCKER_MODEL_RUNNER_INTEGRATION.md)** - Integrating with Docker model runners
+- **[Docker/](Docker/)** - Docker-specific configuration and guides
 
-### Quick Commands
-```bash
-# Start everything
-./Scripts/docker_start.sh
+### Models & API Keys
+- **[QUICKSTART_MODELS.md](QUICKSTART_MODELS.md)** - Model setup quickstart
+- **[MODEL_SETUP_GUIDE.md](MODEL_SETUP_GUIDE.md)** - Detailed model configuration
+- **[Setup/](Setup/)** - Additional setup guides
+  - Cost decision guide
+  - Next steps after installation
+  - Configuration options
 
-# Check status
-./Scripts/docker_status.sh
-
-# View logs
-docker-compose logs -f
-
-# Stop everything
-./Scripts/docker_stop.sh
-
-# Rebuild after changes
-./Scripts/docker_rebuild.sh
-
-# Index vault for graph search
-./Scripts/index_with_lightrag.sh
-```
-
-### Architecture
-```
-┌─────────────────────────────────────────────────┐
-│         Browser (localhost:8501)                │
-└───────────────────┬─────────────────────────────┘
-                    │
-        ┌───────────▼──────────────┐
-        │   Streamlit UI           │
-        │   - Mode selector        │
-        │   - Chat interface       │
-        │   - Source display       │
-        └──────┬──────────┬────────┘
-               │          │
-    ┌──────────▼───┐  ┌──▼─────────────┐
-    │ Embedding    │  │ LightRAG       │
-    │ Service      │  │ Service        │
-    │ (ChromaDB)   │  │ (Graph)        │
-    │ :8000        │  │ :8001          │
-    └──────┬───────┘  └───┬────────────┘
-           │              │
-           └──────┬───────┘
-                  │
-         ┌────────▼────────────┐
-         │ Ollama (Host)       │
-         │ :11434              │
-         └─────────────────────┘
-```
+### GraphRAG Setup
+- **[GRAPHRAG_SETUP.md](GRAPHRAG_SETUP.md)** - Setting up GraphRAG features
+- **[GRAPHRAG_IMPLEMENTATION.md](GRAPHRAG_IMPLEMENTATION.md)** - Implementation details
 
 ---
 
-## 🎮 Common Usage
+## 🏗️ Architecture & Design
 
-### Daily Startup
-```bash
-./Scripts/docker_start.sh
-# Open http://localhost:8501
-```
+### System Overview
+- **[architecture/obsidian_rag_analysis.md](architecture/obsidian_rag_analysis.md)** - Complete system analysis
+- **[architecture/DEEP_THINKING_FLOW.md](architecture/DEEP_THINKING_FLOW.md)** - Deep thinking architecture flow
+- **[Deep Thinking Implementation Plan.md](Deep%20Thinking%20Implementation%20Plan.md)** - Detailed implementation plan
+- **[deep-thinking-rag-improvement-proposal.md](deep-thinking-rag-improvement-proposal.md)** - Enhancement proposals
 
-### Checking Status
-```bash
-./Scripts/docker_status.sh
-```
+### Data & Knowledge Graph
+- **[KNOWLEDGE_GRAPH_STATISTICS.md](KNOWLEDGE_GRAPH_STATISTICS.md)** - Graph statistics and metrics
+- **[Graph/](Graph/)** - Knowledge graph documentation
+  - Graph builder guide
+  - Quality improvements
+  - Data flow diagrams
+  - Transfer between machines
 
-### First-Time Graph Indexing
-```bash
-./Scripts/index_with_lightrag.sh
-# Takes 1-3 hours depending on vault size
-```
-
-### Viewing Logs
-```bash
-# All services
-docker-compose logs -f
-
-# Specific service
-docker-compose logs embedding-service
-docker-compose logs lightrag-service
-```
+### Database Management
+- **[DATABASE_MANAGEMENT.md](DATABASE_MANAGEMENT.md)** - Database operations guide
 
 ---
 
-## 🤖 Model Selection
+## ✨ Features & Capabilities
 
-### Recommended: Claude Haiku 3.5 (API)
-**Best value for money**
-- Cost: ~$1-2 for 1600 notes
-- Time: ~1 hour
-- Quality: Excellent
-- RAM: 0GB (cloud processing)
+### Enhanced Search
+- **[ENHANCED_SEARCH_PLAN.md](ENHANCED_SEARCH_PLAN.md)** - 3-section enhanced search (Vault + LLM + Web)
+- **[KNOWLEDGE_GRAPH_TEST_PROMPTS.md](KNOWLEDGE_GRAPH_TEST_PROMPTS.md)** - Sample queries to test the system
 
-### Alternative: Qwen2.5:7b (Local)
-**Best free option**
-- Cost: Free
-- Time: 2-3 hours
-- Quality: Very good
-- RAM: 8GB
+### Embedding Features
+- **[Embedding/](Embedding/)** - Embedding model guides
+  - Model selection
+  - Performance tuning
+  - Integration guides
 
-### Default: Llama3.2:3b (Local)
-**Fast & free (pre-configured)**
-- Cost: Free
-- Time: 1-2 hours
-- Quality: Good
-- RAM: 5GB
-
-See [QUICKSTART_MODELS.md](./QUICKSTART_MODELS.md) for detailed comparison.
+### Additional Features
+- **[Features/](Features/)** - Feature-specific documentation
 
 ---
 
-## 🆘 Troubleshooting
+## 🤖 Models & Configuration
 
-### Services Won't Start
+### LLM Providers
+- **[Models/README.md](Models/README.md)** - Overview of supported models
+- **[Models/SETUP.md](Models/SETUP.md)** - Model setup instructions
 
-```bash
-# Check Docker is running
-docker info
+Supported providers:
+- **Ollama** (Local, free)
+- **Gemini Pro** (Google, API key required)
+- **Claude Sonnet** (Anthropic, API key required)
+- **GPT-OSS** (OpenAI-compatible)
 
-# Check for port conflicts
-lsof -i :8000 :8001 :8501
-
-# View logs for errors
-docker-compose logs -f
-
-# Rebuild from scratch
-./Scripts/docker_rebuild.sh
-```
-
-### Can't Connect to Ollama
-
-```bash
-# Check Ollama is running
-ollama list
-
-# Start Ollama if needed
-ollama serve
-
-# Download required models
-ollama pull qwen2.5-coder:32b
-ollama pull nomic-embed-text
-```
-
-### Port Already in Use
-
-```bash
-# Stop all services
-./Scripts/docker_stop.sh
-
-# Kill specific processes
-lsof -ti:8000 :8001 :8501 | xargs kill
-
-# Restart
-./Scripts/docker_start.sh
-```
-
-### Graph Indexing Fails
-
-1. Check vault path in `docker-compose.yml`
-2. Ensure path is **absolute**, not relative
-3. Check permissions: `ls -la /path/to/vault`
-4. View logs: `docker-compose logs lightrag-service`
-
-### Slow Responses
-
-**Solutions:**
-- Reduce number of sources (10 → 5 → 3)
-- Disable re-ranking temporarily
-- Switch to faster model (e.g., `llama3.2:3b`)
-- Close other applications to free RAM
-
-### Out of Memory
-
-**Solutions:**
-- Use smaller model: `llama3.2:3b` instead of `32b`
-- Reduce `num_ctx` in code
-- Reduce number of sources
-- Increase Docker RAM allocation
+### Embedding Models
+- Sentence Transformers
+- Nomic Embed
+- Custom model integration
 
 ---
 
-## 📚 Documentation
+## 🔧 Troubleshooting
 
-### Quick Start Guides
-- **[START_HERE.md](./START_HERE.md)** - Your first steps
-- **[QUICKSTART.md](./QUICKSTART.md)** - 5-minute setup guide
-- **[QUICKSTART_MODELS.md](./QUICKSTART_MODELS.md)** - Model selection guide
+### Common Issues
+- **[Troubleshooting/](Troubleshooting/)** - Comprehensive troubleshooting guides
+  - **[API_KEY_VALIDATION_GUIDE.md](Troubleshooting/API_KEY_VALIDATION_GUIDE.md)** - API key issues
+  - **[CHROMADB_CORRUPTION_FIX.md](Troubleshooting/CHROMADB_CORRUPTION_FIX.md)** - Database corruption fixes
+  - **[DOCKER_TROUBLESHOOTING.md](Troubleshooting/DOCKER_TROUBLESHOOTING.md)** - Docker-specific issues
+  - **[TROUBLESHOOTING_STREAMLIT_MODEL_ERROR.md](Troubleshooting/TROUBLESHOOTING_STREAMLIT_MODEL_ERROR.md)** - Streamlit errors
+  - **[Queries.md](Troubleshooting/Queries.md)** - Query troubleshooting
 
-### Technical Guides
-- **[DOCKER_SETUP_SUMMARY.md](./DOCKER_SETUP_SUMMARY.md)** - Docker integration details
-- **[MODEL_GUIDE.md](./MODEL_GUIDE.md)** - Detailed model comparison
-
-### Organization Guides
-- **[VAULT_ORGANIZATION_GUIDE.md](./VAULT_ORGANIZATION_GUIDE.md)** - Vault organization
-- **[MCP_INTEGRATION_GUIDE.md](./MCP_INTEGRATION_GUIDE.md)** - MCP setup (advanced)
+### Specific Guides
+- **[TROUBLESHOOTING_QUERY.md](TROUBLESHOOTING_QUERY.md)** - Query debugging
 
 ---
 
-## 🎓 Understanding the Components
+## 👨‍💻 Development & Contributing
 
-### ChromaDB (Vector Search)
-- **What**: Stores document embeddings for semantic search
-- **Pros**: Very fast, scales well, low memory
-- **Best for**: Similarity search, quick lookups
-- **Speed**: 100-500ms
+### Development Guides
+- **[Development-MOC.md](Development-MOC.md)** - Development map of content
+- **[Tools-MOC.md](Tools-MOC.md)** - Tools and utilities guide
+- **[guides/](guides/)** - Development guides
+  - **[CODE_RESTRUCTURE_PLAN.md](guides/CODE_RESTRUCTURE_PLAN.md)** - Code organization
+  - **[TESTING.md](guides/TESTING.md)** - Testing guidelines
+  - **[PUSH_INSTRUCTIONS.md](guides/PUSH_INSTRUCTIONS.md)** - Git workflow
 
-### LightRAG (Knowledge Graph)
-- **What**: Extracts entities and relationships from content
-- **Pros**: Understands context, multi-hop reasoning
-- **Best for**: Complex queries, synthesis, relationships
-- **Speed**: 2-30 seconds (mode dependent)
+### MCP Integration
+- **[MCP/](MCP/)** - Model Context Protocol integration
+  - Setup instructions
+  - Unified server configuration
+  - Claude Desktop integration
 
-### Ollama
-- **What**: Local LLM runtime
-- **Models**: Qwen, Llama, etc.
-- **Role**: Generates responses and embeddings
-- **Interface**: http://localhost:11434
-
----
-
-## 💡 Best Practices
-
-### Query Tips
-1. **Start with vector search** - Fastest for testing
-2. **Use graph modes for relationships** - When you need context
-3. **Be specific** - "What are the side effects?" > "Tell me things"
-4. **Use keywords** - Helps with both vector and graph search
-5. **Follow up questions** - System remembers context
-
-### Indexing Tips
-1. **Index overnight first time** - Takes 1-3 hours
-2. **Re-index after major vault changes** - Keeps graph current
-3. **Monitor resources** - Graph modes use more memory
-4. **Use appropriate model** - Balance quality vs speed
-
-### Performance Tips
-1. **Vector search for speed** - When fast response matters
-2. **Graph search for depth** - When understanding matters
-3. **Monitor logs** - `docker-compose logs -f` shows activity
-4. **Close unused apps** - Frees RAM for AI processing
-
----
-
-## 📂 Project Structure
-
-```
-obsidian_rag/
-├── docker-compose.yml           # Service orchestration
-├── Dockerfile.*                 # Individual service Dockerfiles
-├── embedding_service.py         # Vector search API
-├── lightrag_service.py          # Graph search API
-├── streamlit_ui_docker.py      # Main UI
-├── requirements.txt            # Dependencies
-│
-├── Scripts/
-│   ├── docker_start.sh         # Start Docker services
-│   ├── docker_stop.sh          # Stop services
-│   ├── docker_status.sh        # Check health
-│   ├── docker_rebuild.sh       # Rebuild images
-│   ├── index_with_lightrag.sh  # Index vault
-│   ├── start_obsidian_rag.sh    # Native start
-│   └── check_status.sh          # Status check
-│
-├── chroma_db/                   # Vector database
-├── lightrag_db/                 # Knowledge graph
-└── Documentation/               # Guides and docs
-```
-
----
-
-## 🔧 Configuration
-
-### Environment Variables
-Set in `docker-compose.yml` or as environment variables:
-
-```bash
-# Vault path (required for LightRAG)
-OBSIDIAN_VAULT_PATH=/path/to/vault
-
-# Ollama configuration
-OLLAMA_HOST=http://host.docker.internal:11434
-
-# Model selection
-LLM_MODEL=qwen2.5-coder:32b
-EMBED_MODEL=nomic-embed-text
-
-# Service ports
-EMBEDDING_PORT=8000
-LIGHTRAG_PORT=8001
-STREAMLIT_PORT=8501
-```
-
-### Changing Models
-
-**Quick model switch:**
-```bash
-export LLM_MODEL=llama3.2:3b
-./Scripts/docker_rebuild.sh
-```
-
-**Available models:**
-- `qwen2.5-coder:32b` - Best quality, high RAM
-- `qwen2.5:7b` - Balanced, moderate RAM
-- `llama3.2:3b` - Fastest, low RAM
-- Custom Ollama models
-
----
-
-## ✅ Checklist
-
-Before starting, verify:
-
-- [ ] Docker Desktop is running
-- [ ] Ollama is running: `ollama list`
-- [ ] Models downloaded (check `ollama list`)
-- [ ] Vault path set in `docker-compose.yml`
-- [ ] Ports 8000, 8001, 8501 are available
-- [ ] At least 8GB RAM available
-- [ ] Internet connection (for model downloads)
-
----
-
-## 🎉 You're Ready!
-
-Your Obsidian RAG system is ready to use!
-
-**First Query Suggestions:**
-- "What topics do I write about most?"
-- "Show me my recent notes"
-- "Summarize my health journey"
-- "What are my Home Assistant automations?"
-
-**Access the UI**: http://localhost:8501
+### Claude Code Integration
+- **[CLAUDE_CODE_WEB_SETUP.md](CLAUDE_CODE_WEB_SETUP.md)** - Claude Code web integration
+- **[CLAUDE_CODE_WEB_INSTRUCTIONS.md](CLAUDE_CODE_WEB_INSTRUCTIONS.md)** - Usage instructions
+- **[guides/CLAUDE_CODE_WEB_INSTRUCTIONS.md](guides/CLAUDE_CODE_WEB_INSTRUCTIONS.md)** - Additional guide
 
 ---
 
 ## 📖 Additional Resources
 
-- **LightRAG GitHub**: https://github.com/HKUDS/LightRAG
-- **ChromaDB Docs**: https://docs.trychroma.com/
-- **Ollama Models**: https://ollama.ai/library
-- **Docker Compose**: https://docs.docker.com/compose/
+### Organization & Maintenance
+- **[VAULT_ORGANIZATION_GUIDE.md](VAULT_ORGANIZATION_GUIDE.md)** - Organizing your Obsidian vault
+- **[VAULT_STANDARDIZATION_GUIDE.md](VAULT_STANDARDIZATION_GUIDE.md)** - Standardizing vault structure
+- **[CLEANUP_REPORT.md](CLEANUP_REPORT.md)** - Repository cleanup report
+- **[CLEANUP_SUMMARY.md](CLEANUP_SUMMARY.md)** - Cleanup summary
+- **[ORGANIZATION_SUMMARY.md](ORGANIZATION_SUMMARY.md)** - Organization overview
+
+### Planning & Updates
+- **[AUDIT_PLAN.md](AUDIT_PLAN.md)** - System audit plan
+- **[UPDATE_SUMMARY.md](UPDATE_SUMMARY.md)** - Recent updates
+- **[📋 Implementation Checklist.md](%F0%9F%93%8B%20Implementation%20Checklist.md)** - Feature checklist
+
+### Index & Navigation
+- **[INDEX.md](INDEX.md)** - Documentation index
+- **[readme_final.md](readme_final.md)** - Final comprehensive README
+
+### Archive
+- **[Archive/](Archive/)** - Archived documentation (deprecated/historical)
+- **[Analysis/](Analysis/)** - System analysis reports
 
 ---
 
-## 🤝 Getting Help
+## 🔍 Quick Reference
 
-### Check Logs
-```bash
-docker-compose logs -f
-```
+### Configuration Files
+| File | Purpose |
+|------|---------|
+| `.env` | Environment variables (API keys, service URLs) |
+| `docker-compose.yml` | Docker service definitions |
+| `requirements.txt` | Python dependencies |
 
-### Check Service Health
-```bash
-./Scripts/docker_status.sh
-```
+### Service Ports
+| Service | Port | Description |
+|---------|------|-------------|
+| Streamlit UI | 8501 | Web interface |
+| Embedding Service | 8000 | Vector search API |
+| Graph Query Service | 8002 | Knowledge graph API |
 
-### Review Documentation
-- Start with [START_HERE.md](./START_HERE.md)
-- See [QUICKSTART.md](./QUICKSTART.md) for quick setup
-- Refer to [DOCKER_SETUP_SUMMARY.md](./DOCKER_SETUP_SUMMARY.md) for details
+### Key Directories
+| Directory | Purpose |
+|-----------|---------|
+| `src/` | Source code |
+| `Documentation/` | All documentation (you are here!) |
+| `Scripts/` | Utility scripts |
+| `config/` | Configuration files |
+| `graph_data/` | Knowledge graph data |
+| `chroma_db/` | Vector database |
 
 ---
 
-## 📝 License
+## 💡 Getting Help
 
-This project is designed for personal use with your own Obsidian vault.
+1. **Check the relevant section above** for your topic
+2. **Search the [Troubleshooting](#troubleshooting) section**
+3. **Review [KNOWLEDGE_GRAPH_TEST_PROMPTS.md](KNOWLEDGE_GRAPH_TEST_PROMPTS.md)** for query examples
+4. **Check the [Archive/](Archive/)** for historical context
 
 ---
 
-**Last Updated**: January 2025  
-**Version**: 1.0.0  
-**Status**: Production Ready ✅
+## 🎯 Recommended Reading Path
 
+### For New Users:
+1. [START_HERE.md](START_HERE.md)
+2. [QUICKSTART.md](QUICKSTART.md)
+3. [DOCKER_SETUP_SUMMARY.md](DOCKER_SETUP_SUMMARY.md)
+4. [QUICKSTART_MODELS.md](QUICKSTART_MODELS.md)
+5. [KNOWLEDGE_GRAPH_TEST_PROMPTS.md](KNOWLEDGE_GRAPH_TEST_PROMPTS.md)
+
+### For Developers:
+1. [architecture/obsidian_rag_analysis.md](architecture/obsidian_rag_analysis.md)
+2. [Development-MOC.md](Development-MOC.md)
+3. [guides/CODE_RESTRUCTURE_PLAN.md](guides/CODE_RESTRUCTURE_PLAN.md)
+4. [guides/TESTING.md](guides/TESTING.md)
+
+### For Advanced Features:
+1. [Deep Thinking Implementation Plan.md](Deep%20Thinking%20Implementation%20Plan.md)
+2. [ENHANCED_SEARCH_PLAN.md](ENHANCED_SEARCH_PLAN.md)
+3. [Graph/](Graph/)
+4. [MCP/](MCP/)
+
+---
+
+**Last Updated**: 2025-12-18
+
+*This documentation is actively maintained. If you find any broken links or outdated information, please update accordingly.*
