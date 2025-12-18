@@ -229,7 +229,7 @@ with st.sidebar:
             help="No models found. Please check your Ollama/GPT-OSS connection."
         )
     
-    num_sources = st.slider("Sources", 1, 20, 5)
+    num_sources = st.slider("Sources", 1, 50, 10)
     temperature = st.slider("Temperature", 0.0, 1.0, 0.3, 0.1)
     show_sources = st.checkbox("Show Sources", value=True)
     enhanced_search = st.checkbox("Enhanced Search", value=False, 
