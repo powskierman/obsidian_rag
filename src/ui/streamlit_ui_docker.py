@@ -736,10 +736,23 @@ Answer:"""
                                 st.stop()
                             
                             result = gemini_response.json()
-                            if 'candidates' in result and len(result['candidates']) > 0:
-                                response_text = result['candidates'][0]['content']['parts'][0]['text']
-                            else:
-                                st.error("Unexpected Gemini response format")
+                            try:
+                                candidates = result.get('candidates', [])
+                                if candidates and len(candidates) > 0:
+                                    content = candidates[0].get('content', {})
+                                    parts = content.get('parts', [])
+                                    if parts and len(parts) > 0:
+                                        response_text = parts[0].get('text', '')
+                                    else:
+                                        st.error("Unexpected Gemini response format: no parts found")
+                                        st.code(json.dumps(result, indent=2))
+                                        st.stop()
+                                else:
+                                    st.error("Unexpected Gemini response format: no candidates")
+                                    st.code(json.dumps(result, indent=2))
+                                    st.stop()
+                            except (KeyError, IndexError) as e:
+                                st.error(f"Error parsing Gemini response: {e}")
                                 st.code(json.dumps(result, indent=2))
                                 st.stop()
                         except Exception as e:
@@ -841,9 +854,17 @@ Provide ADDITIONAL insights, clinical context, or alternative perspectives that 
                                 timeout=60
                             )
                             if knowledge_response.status_code == 200:
-                                result = knowledge_response.json()
-                                if 'candidates' in result and len(result['candidates']) > 0:
-                                    llm_knowledge_text = result['candidates'][0]['content']['parts'][0]['text']
+                                try:
+                                    result = knowledge_response.json()
+                                    candidates = result.get('candidates', [])
+                                    if candidates and len(candidates) > 0:
+                                        content = candidates[0].get('content', {})
+                                        parts = content.get('parts', [])
+                                        if parts and len(parts) > 0:
+                                            llm_knowledge_text = parts[0].get('text', '')
+                                except (KeyError, IndexError, ValueError) as e:
+                                    logging.warning(f"Error parsing Gemini LLM knowledge response: {e}")
+                                    llm_knowledge_text = ""
                                     
                         else:  # Ollama
                             knowledge_resp = requests.post(
@@ -893,8 +914,22 @@ Provide ADDITIONAL insights, clinical context, or alternative perspectives that 
                                         timeout=30
                                     )
                                     if terms_resp.status_code == 200:
-                                        result = terms_resp.json()
-                                        search_terms = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                                        try:
+                                            result = terms_resp.json()
+                                            # Safely extract text from response
+                                            candidates = result.get('candidates', [])
+                                            if candidates and len(candidates) > 0:
+                                                content = candidates[0].get('content', {})
+                                                parts = content.get('parts', [])
+                                                if parts and len(parts) > 0:
+                                                    search_terms = parts[0].get('text', prompt).strip()
+                                                else:
+                                                    search_terms = prompt
+                                            else:
+                                                search_terms = prompt
+                                        except (KeyError, IndexError, ValueError) as e:
+                                            logging.warning(f"Error parsing Gemini response for search terms: {e}")
+                                            search_terms = prompt  # Fallback to original query
                                     else:
                                         search_terms = prompt  # Fallback to original query
                                 
