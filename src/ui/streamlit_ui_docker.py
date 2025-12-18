@@ -885,12 +885,19 @@ Provide ADDITIONAL insights, clinical context, or alternative perspectives that 
                             TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
                             
                             if TAVILY_API_KEY:
-                                # Extract key medical terms from vault response for better search
-                                # First 500 chars should capture main topics
-                                context_sample = response_text[:500]
+                                # Extract key concepts from vault response for better search
+                                # Use more context to understand what's actually relevant
+                                context_sample = response_text[:1000]
                                 
-                                # Create focused medical search query
-                                search_query_prompt = f"Extract 3-5 key medical terms or concepts from this text to create a focused web search query: {context_sample}\n\nProvide only the search terms, no explanation."
+                                # Create intelligent search query that captures specific details
+                                search_query_prompt = f"""Based on this text, extract 4-6 specific search terms or concepts that would find the most relevant and detailed information on the web. Focus on:
+- Specific names, technologies, medications, conditions, or entities mentioned
+- Technical terms or specialized concepts
+- Unique identifiers or specific details (dates, numbers, measurements, findings)
+
+Text: {context_sample}
+
+Provide only the search terms separated by spaces, no explanation or formatting."""
                                 
                                 # Quick call to get search terms
                                 if active_provider == "claude":
@@ -898,7 +905,7 @@ Provide ADDITIONAL insights, clinical context, or alternative perspectives that 
                                     client = Anthropic(api_key=ANTHROPIC_API_KEY)
                                     terms_resp = client.messages.create(
                                         model="claude-sonnet-4-5-20250929",
-                                        max_tokens=100,
+                                        max_tokens=150,
                                         messages=[{"role": "user", "content": search_query_prompt}]
                                     )
                                     search_terms = terms_resp.content[0].text.strip()
@@ -909,7 +916,7 @@ Provide ADDITIONAL insights, clinical context, or alternative perspectives that 
                                         headers={"x-goog-api-key": GEMINI_API_KEY, "Content-Type": "application/json"},
                                         json={
                                             "contents": [{"role": "user", "parts": [{"text": search_query_prompt}]}],
-                                            "generationConfig": {"maxOutputTokens": 100}
+                                            "generationConfig": {"maxOutputTokens": 150}
                                         },
                                         timeout=30
                                     )
