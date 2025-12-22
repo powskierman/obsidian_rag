@@ -411,7 +411,7 @@ obsidian_rag/
 │   └── index_vault.py                  ⭐ Vault indexing utility
 │
 ├── Backend Services
-│   ├── claude_graph_builder.py         Core graph logic (ClaudeGraphBuilder)
+│   ├── claude_graph_builder.py         Core graph logic (GraphBuilder)
 │   ├── graphrag_service.py             GraphRAG Flask API
 │   ├── graphrag_local_service.py       Local GraphRAG service
 │   ├── graphrag_claude_service.py      Claude-based GraphRAG

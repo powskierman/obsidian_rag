@@ -29,7 +29,7 @@ except ImportError:
     CHROMADB_AVAILABLE = False
 
 try:
-    from services.claude_graph_builder import ClaudeGraphBuilder
+    from services.claude_graph_builder import GraphBuilder
     GRAPH_BUILDER_AVAILABLE = True
 except ImportError:
     GRAPH_BUILDER_AVAILABLE = False
@@ -83,7 +83,7 @@ def load_knowledge_graph(graph_path: str) -> Optional[object]:
         if not graph_file.exists():
             return None
         
-        builder = ClaudeGraphBuilder(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+        builder = GraphBuilder(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
         builder.load_graph(str(graph_file))
         return builder
     except Exception as e:

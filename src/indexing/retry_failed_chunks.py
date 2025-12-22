@@ -13,7 +13,7 @@ import os
 import sys
 import logging
 from pathlib import Path
-from claude_graph_builder import ClaudeGraphBuilder
+from claude_graph_builder import GraphBuilder
 from build_knowledge_graph import get_chunks_from_filesystem, load_chromadb_from_disk, load_vault_files_directly
 
 # Configure logging
@@ -122,7 +122,7 @@ def retry_failed_chunks(
             return
     
     # Initialize builder with retry support
-    builder = ClaudeGraphBuilder(
+    builder = GraphBuilder(
         api_key=api_key,
         model="claude-sonnet-4-5-20250929" if use_sonnet else "claude-haiku-4-5",
         max_retries=max_retries

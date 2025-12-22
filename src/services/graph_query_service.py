@@ -6,7 +6,7 @@ Runs alongside your existing embedding service in Docker
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-from claude_graph_builder import ClaudeGraphBuilder, ClaudeGraphQuerier
+from kimi_graph_builder import GraphBuilder, GraphQuerier
 import logging
 
 app = Flask(__name__)
@@ -26,13 +26,13 @@ def initialize_graph(graph_path: str = None):
     """Initialize the knowledge graph"""
     global builder, querier, graph_loaded
     
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
-        logger.error("ANTHROPIC_API_KEY not set")
+        logger.error("OPENROUTER_API_KEY not set")
         return False
     
     try:
-        builder = ClaudeGraphBuilder(api_key=api_key)
+        builder = GraphBuilder(api_key=api_key)
         
         # If no path provided, try default locations
         if graph_path is None:
@@ -55,7 +55,7 @@ def initialize_graph(graph_path: str = None):
         
         if graph_file:
             builder.load_graph(graph_file)
-            querier = ClaudeGraphQuerier(builder, api_key=api_key)
+            querier = GraphQuerier(builder, api_key=api_key)
             graph_loaded = True
             logger.info(f"Graph loaded from {graph_file}: {builder.graph.number_of_nodes()} nodes, {builder.graph.number_of_edges()} edges")
             return True
@@ -102,8 +102,8 @@ def query_graph():
         if not user_query:
             return jsonify({'error': 'Query is required'}), 400
         
-        # Query with Claude
-        answer = querier.query_with_claude(user_query, max_entities=max_entities)
+        # Query with Kimi/LLM
+        answer = querier.query_with_llm(user_query, max_entities=max_entities)
         
         return jsonify({
             'answer': answer,

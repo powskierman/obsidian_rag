@@ -28,7 +28,7 @@ except ImportError:
     CHROMADB_AVAILABLE = False
 
 try:
-    from services.claude_graph_builder import ClaudeGraphBuilder
+    from services.claude_graph_builder import GraphBuilder
     GRAPH_BUILDER_AVAILABLE = True
 except ImportError:
     GRAPH_BUILDER_AVAILABLE = False
@@ -273,7 +273,7 @@ def classify_folders_for_all_notes(
     if graph_path:
         print("Loading knowledge graph...")
         try:
-            from services.claude_graph_builder import ClaudeGraphBuilder
+            from services.claude_graph_builder import GraphBuilder
             graph_file = Path(graph_path)
             if not graph_file.exists():
                 script_dir = Path(__file__).parent.parent
@@ -287,7 +287,7 @@ def classify_folders_for_all_notes(
                         break
             
             if graph_file.exists():
-                builder = ClaudeGraphBuilder(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+                builder = GraphBuilder(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
                 builder.load_graph(str(graph_file))
                 graph_builder = builder
                 print(f"✅ Loaded graph: {graph_builder.graph.number_of_nodes()} nodes")

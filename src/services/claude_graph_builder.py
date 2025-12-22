@@ -39,16 +39,22 @@ except OSError:
     pass
 
 
-class ClaudeGraphBuilder:
-    """Build knowledge graph using Claude's reasoning capabilities"""
+class GraphBuilder:
+    """Build knowledge graph using Kimi's reasoning capabilities"""
     
     def __init__(self, api_key: Optional[str] = None, model: str = None, max_retries: int = 3):
-        self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
-        self.client = Anthropic(api_key=self.api_key)
-        # Default to Haiku 4.5 for cost savings, but allow override via env var or parameter
-        # Use "claude-sonnet-4-5-20250929" for better quality if needed
-        self.model = model or os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5")
+        # Use OPENROUTER_API_KEY + KIMI_MODEL env vars
+        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
+        if not self.api_key:
+            raise RuntimeError("OPENROUTER_API_KEY not set")
+        
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=self.api_key,
+        )
+        self.model = model or os.environ.get("KIMI_MODEL", "moonshotai/kimi-k2-0905")
         self.max_retries = max_retries
+
         self.graph = nx.MultiDiGraph()
         self.entity_cache = {}
         self.extraction_stats = {
@@ -57,11 +63,9 @@ class ClaudeGraphBuilder:
             'relationships_extracted': 0,
             'errors': 0,
             'retries': 0,
-            'successful_retries': 0
+            'successful_retries': 0,
         }
-        # Track failed chunks for later retry
-        self.failed_chunks: List[Dict] = []
-        # Track processed chunk hashes to avoid duplicates
+        self.failed_chunks = []
         self.processed_chunks: Set[str] = set()
 
     def add_entity(self, name: str, entity_type: str = "unknown", **properties):
@@ -380,7 +384,7 @@ Guidelines:
             start = max(0, error_pos - 100)
             end = min(len(response_text), error_pos + 100)
             logger.debug(f"Context around error: {response_text[start:end]}")
-        raise ValueError(f"Malformed JSON response from Claude: {original_error}")
+        raise ValueError(f"Malformed JSON response from LLM: {original_error}")
     
     def _repair_json_strings(self, text: str) -> str:
         """Try to repair unterminated strings in JSON"""
@@ -910,7 +914,7 @@ Guidelines:
 class ClaudeGraphQuerier:
     """Query the knowledge graph using Claude's reasoning"""
     
-    def __init__(self, graph_builder: ClaudeGraphBuilder, api_key: Optional[str] = None, model: str = None):
+    def __init__(self, graph_builder: GraphBuilder, api_key: Optional[str] = None, model: str = None):
         self.graph = graph_builder.graph
         self.client = Anthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
         # Default to Haiku 4.5 for cost savings, but allow override via env var or parameter
@@ -1154,7 +1158,7 @@ if __name__ == "__main__":
     logger.info("=" * 50)
     
     # Initialize builder
-    builder = ClaudeGraphBuilder()
+    builder = GraphBuilder()
     
     # Example chunks (you'll load these from ChromaDB)
     example_chunks = [

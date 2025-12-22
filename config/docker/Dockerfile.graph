@@ -9,14 +9,14 @@ RUN apt-get update && \
 
 # Install dependencies
 RUN pip install --no-cache-dir \
-    anthropic \
+    openai \
     flask \
     flask-cors \
     networkx \
     tqdm
 
 # Copy service files
-COPY src/services/claude_graph_builder.py /app/
+COPY src/services/kimi_graph_builder.py /app/
 COPY src/services/graph_query_service.py /app/
 
 # Expose port

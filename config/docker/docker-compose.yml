@@ -14,14 +14,41 @@ services:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
     networks:
       - rag-network
 
-  # Claude Knowledge Graph Service
+  # LightRAG Knowledge Graph Service
+  lightrag-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.lightrag
+    container_name: obsidian-lightrag
+    ports:
+      - "8001:8001"
+    volumes:
+      - lightrag_storage:/app/lightrag_db
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - KIMI_MODEL=moonshotai/kimi-k2-0905
+      - LIGHTRAG_DIR=/app/lightrag_db
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - EMBED_MODEL=${EMBED_MODEL:-mxbai-embed-large}
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+
+  # Reasoning Graph Service (Kimi)
   graph-service:
     build:
       context: .
@@ -30,15 +57,16 @@ services:
     ports:
       - "8002:8002"
     volumes:
-      - ./graph_data:/app/graph_data:ro
-      - ./src/services/claude_graph_builder.py:/app/claude_graph_builder.py:ro
+      - graph_storage:/app/graph_data
+      - ./src/services/kimi_graph_builder.py:/app/kimi_graph_builder.py:ro
     environment:
       - PYTHONUNBUFFERED=1
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
+      - KIMI_MODEL=moonshotai/kimi-k2-0905
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -60,6 +88,8 @@ services:
       - PYTHONUNBUFFERED=1
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - CLAUDE_GRAPH_SERVICE_URL=http://graph-service:8002
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - KIMI_MODEL=moonshotai/kimi-k2-0905
       # LLM Provider Configuration
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
@@ -73,6 +103,7 @@ services:
       - rag-network
     depends_on:
       - embedding-service
+      - lightrag-service
       - graph-service
 
 networks:
@@ -81,4 +112,5 @@ networks:
 
 volumes:
   chroma_db:
-
+  lightrag_storage:
+  graph_storage:

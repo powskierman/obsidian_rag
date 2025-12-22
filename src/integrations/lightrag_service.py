@@ -12,6 +12,7 @@ from lightrag import LightRAG, QueryParam
 from lightrag.llm.ollama import ollama_model_complete, ollama_embed
 from lightrag.utils import EmbeddingFunc
 from lightrag.kg.shared_storage import initialize_pipeline_status
+from openai import AsyncOpenAI
 import logging
 
 app = Flask(__name__)
@@ -23,66 +24,121 @@ WORKING_DIR = os.getenv("LIGHTRAG_DIR", "./lightrag_db")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:32b")
 EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+KIMI_MODEL = os.getenv("KIMI_MODEL", "moonshotai/kimi-k2-0905")
 
 # Set Ollama host
 os.environ["OLLAMA_HOST"] = OLLAMA_HOST
 
-# Global RAG instance and event loop
+# Global RAG instance and lock (initialized lazily)
 rag_instance = None
-rag_lock = asyncio.Lock()
+rag_lock = None
 _loop = None
 
 
 def get_or_create_loop():
     """Get or create a global event loop"""
     global _loop
-    try:
-        _loop = asyncio.get_event_loop()
-    except RuntimeError:
-        _loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(_loop)
+    if _loop is None:
+        try:
+            _loop = asyncio.get_event_loop()
+        except RuntimeError:
+            _loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(_loop)
     return _loop
 
 
-async def get_rag():
-    """Get or create LightRAG instance"""
+async def openrouter_model_complete(
+    prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    """OpenRouter API wrapper for LightRAG"""
+    if not OPENROUTER_API_KEY:
+        logger.error("OPENROUTER_API_KEY not set")
+        return "Error: OPENROUTER_API_KEY not set"
+        
+    client = AsyncOpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=OPENROUTER_API_KEY,
+    )
+    
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+    
+    if history_messages:
+        messages.extend(history_messages)
+        
+    messages.append({"role": "user", "content": prompt})
+    
+    # Filter kwargs to only include supported ones
+    allowed_kwargs = ['temperature', 'max_tokens', 'top_p', 'response_format']
+    filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed_kwargs}
+    
+    try:
+        response = await client.chat.completions.create(
+            model=KIMI_MODEL,
+            messages=messages,
+            **filtered_kwargs
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        logger.error(f"OpenRouter API error: {e}")
+        return f"Error: {str(e)}"
+
+
+async def initialize_rag():
+    """Initialize LightRAG instance at startup"""
     global rag_instance
     
-    async with rag_lock:
-        if rag_instance is None:
-            logger.info("Initializing LightRAG...")
+    if rag_instance is None:
+        logger.info(f"Initializing LightRAG at startup (Working Dir: {WORKING_DIR})...")
+        try:
+            logger.info("Step 1: Constructing LightRAG instance...")
+            def wrapped_embed(texts):
+                return ollama_embed.func(
+                    texts,
+                    embed_model=EMBED_MODEL,
+                    host=OLLAMA_HOST,
+                    options={"num_ctx": 16384}
+                )
+
+            ef = EmbeddingFunc(
+                embedding_dim=768,
+                func=wrapped_embed
+            )
+            
             rag_instance = LightRAG(
                 working_dir=WORKING_DIR,
-                llm_model_func=ollama_model_complete,
-                llm_model_name=LLM_MODEL,
-                llm_model_kwargs={"options": {"num_ctx": 32768}},
-                embedding_func=EmbeddingFunc(
-                    embedding_dim=768,
-                    func=lambda texts: ollama_embed(
-                        texts,
-                        embed_model=EMBED_MODEL,
-                        host=OLLAMA_HOST
-                    )
-                ),
-                # Fix the cosine thresholds for better matching
-                cosine_threshold=0.05,  # Lower threshold for initial filtering
-                cosine_better_than_threshold=0.05,  # Lower threshold for result ranking
-                # Increase retrieval limits
-                top_k=100,  # More entities per query
-                chunk_top_k=50,  # More chunks per query
-                max_total_tokens=60000,  # More context
-                # Reduce async concurrency to avoid event loop conflicts
-                embedding_func_max_async=2,  # Reduce from default 8
-                llm_model_max_async=2,  # Reduce from default 4
-                # Improve chunking
-                chunk_token_size=800,  # Smaller chunks for better matching
-                chunk_overlap_token_size=200,  # More overlap
+                llm_model_func=openrouter_model_complete,
+                llm_model_name=KIMI_MODEL,
+                llm_model_kwargs={"temperature": 0.1},
+                embedding_func=ef,
+                cosine_threshold=0.05,
+                cosine_better_than_threshold=0.05,
+                top_k=100,
+                chunk_top_k=50,
+                max_total_tokens=60000,
+                embedding_func_max_async=2,
+                llm_model_max_async=2,
+                chunk_token_size=800,
+                chunk_overlap_token_size=200,
             )
+            logger.info("Step 2: Initializing storages...")
             await rag_instance.initialize_storages()
+            logger.info("Step 3: Initializing pipeline status...")
             await initialize_pipeline_status()
-            logger.info("✅ LightRAG initialized with pipeline status")
-        
-        return rag_instance
+            logger.info("✅ LightRAG initialized successfully")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize LightRAG at step: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            raise e
+
+def get_rag():
+    """Get the initialized LightRAG instance"""
+    if rag_instance is None:
+        raise RuntimeError("LightRAG not initialized. Check logs for startup errors.")
+    return rag_instance
 
 
 @app.route('/health', methods=['GET'])
@@ -91,8 +147,9 @@ def health():
     return jsonify({
         "status": "healthy",
         "service": "lightrag",
+        "llm_model": KIMI_MODEL,
         "ollama_host": OLLAMA_HOST,
-        "llm_model": LLM_MODEL
+        "embed_model": EMBED_MODEL
     }), 200
 
 
@@ -133,12 +190,13 @@ def insert_documents():
         if not texts:
             return jsonify({"error": "No texts provided"}), 400
         
-        # Run async insert
+        # Run async insert using the initialized RAG
         async def do_insert():
-            rag = await get_rag()
+            rag = get_rag()
             await rag.ainsert(texts)
         
-        asyncio.run(do_insert())
+        loop = get_or_create_loop()
+        loop.run_until_complete(do_insert())
         
         return jsonify({
             "status": "success",
@@ -152,7 +210,7 @@ def insert_documents():
 
 async def _do_query_async(query_text, mode):
     """Helper async method for querying"""
-    rag = await get_rag()
+    rag = get_rag()
     
     # Optimized query parameters for faster processing while maintaining quality
     if mode in ['global', 'hybrid']:
@@ -193,9 +251,9 @@ def query_graph():
         if mode not in valid_modes:
             return jsonify({"error": f"Invalid mode. Use: {valid_modes}"}), 400
         
-        # Run async query using asyncio.run (creates a fresh event loop each time)
-        # This avoids the "different event loop" error
-        result = asyncio.run(_do_query_async(query_text, mode))
+        # Run async query using run_until_complete on the shared loop
+        loop = get_or_create_loop()
+        result = loop.run_until_complete(_do_query_async(query_text, mode))
         
         return jsonify({
             "query": query_text,
@@ -236,10 +294,11 @@ def index_vault():
         
         # Insert into LightRAG
         async def do_index():
-            rag = await get_rag()
+            rag = get_rag()
             await rag.ainsert(notes)
         
-        asyncio.run(do_index())
+        loop = get_or_create_loop()
+        loop.run_until_complete(do_index())
         
         return jsonify({
             "status": "success",
@@ -259,7 +318,7 @@ if __name__ == '__main__':
 ╚══════════════════════════════════════════════════════════╝
 
 📂 Working Dir: {WORKING_DIR}
-🤖 LLM Model:   {LLM_MODEL}
+🤖 LLM Model:   {KIMI_MODEL}
 🔤 Embed Model: {EMBED_MODEL}
 🌐 Ollama Host: {OLLAMA_HOST}
 
@@ -269,9 +328,14 @@ Endpoints:
   POST /insert        - Insert documents
   POST /query         - Query knowledge graph
   POST /index-vault   - Index Obsidian vault
-
-Starting server...
 """)
-    
+    # Initialize RAG before starting the server
+    try:
+        loop = get_or_create_loop()
+        loop.run_until_complete(initialize_rag())
+    except Exception as e:
+        logger.error(f"Startup initialization failed: {e}")
+        # Continue to start server so health checks can report error
+        
     app.run(host='0.0.0.0', port=8001, debug=False)
 

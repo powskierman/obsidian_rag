@@ -10,16 +10,16 @@ import tempfile
 import pickle
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from claude_graph_builder import ClaudeGraphBuilder, ClaudeGraphQuerier
+from claude_graph_builder import GraphBuilder, ClaudeGraphQuerier
 
 
-class TestClaudeGraphBuilder:
-    """Test ClaudeGraphBuilder class"""
+class TestGraphBuilder:
+    """Test GraphBuilder class"""
 
     @pytest.mark.unit
     def test_initialization(self, mock_api_key):
         """Test graph builder initialization"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         assert builder.api_key == mock_api_key
         assert isinstance(builder.graph, nx.MultiDiGraph)
@@ -29,7 +29,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_add_entity(self, mock_api_key):
         """Test adding entity to graph"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
 
@@ -40,7 +40,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_add_duplicate_entity(self, mock_api_key):
         """Test adding duplicate entity updates existing"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
         builder.add_entity("CAR-T Therapy", entity_type="treatment", properties={'new_prop': 'value'})
@@ -54,7 +54,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_add_relationship(self, mock_api_key):
         """Test adding relationship between entities"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
         builder.add_entity("Lymphoma", entity_type="condition")
@@ -68,7 +68,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_get_entity_neighborhood(self, mock_api_key):
         """Test getting entity neighborhood"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         # Build small graph
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
@@ -87,7 +87,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_find_paths(self, mock_api_key):
         """Test finding paths between entities"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         # Create a path: A -> B -> C
         builder.add_entity("A", entity_type="test")
@@ -106,7 +106,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_find_paths_no_path(self, mock_api_key):
         """Test finding paths when no path exists"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         # Create disconnected entities
         builder.add_entity("A", entity_type="test")
@@ -120,7 +120,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_get_graph_stats(self, mock_api_key):
         """Test getting graph statistics"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         # Build small graph
         builder.add_entity("A", entity_type="test")
@@ -140,7 +140,7 @@ class TestClaudeGraphBuilder:
     @pytest.mark.unit
     def test_save_and_load_graph(self, mock_api_key):
         """Test saving and loading graph"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         # Build graph
         builder.add_entity("Test Entity", entity_type="test")
@@ -155,7 +155,7 @@ class TestClaudeGraphBuilder:
             builder.save_graph(tmp_path)
 
             # Load in new builder
-            new_builder = ClaudeGraphBuilder(api_key=mock_api_key)
+            new_builder = GraphBuilder(api_key=mock_api_key)
             new_builder.load_graph(tmp_path)
 
             # Verify
@@ -184,7 +184,7 @@ class TestGraphProcessing:
         mock_client.messages.create.return_value = mock_response
         mock_anthropic_class.return_value = mock_client
 
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         chunk = "CAR-T therapy is used to treat lymphoma."
 
         result = builder.process_chunk(chunk)
@@ -196,7 +196,7 @@ class TestGraphProcessing:
     @pytest.mark.unit
     def test_clean_entity_name(self, mock_api_key):
         """Test entity name cleaning"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
 
         # Test various cleaning scenarios
         cleaned = builder.clean_entity_name("  CAR-T Therapy  ")
@@ -208,12 +208,12 @@ class TestGraphProcessing:
     @pytest.mark.unit
     def test_merge_graphs(self, mock_api_key):
         """Test merging two graphs"""
-        builder1 = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder1 = GraphBuilder(api_key=mock_api_key)
         builder1.add_entity("A", entity_type="test")
         builder1.add_entity("B", entity_type="test")
         builder1.add_relationship("A", "B", "relates_to")
 
-        builder2 = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder2 = GraphBuilder(api_key=mock_api_key)
         builder2.add_entity("B", entity_type="test")
         builder2.add_entity("C", entity_type="test")
         builder2.add_relationship("B", "C", "relates_to")
@@ -236,7 +236,7 @@ class TestGraphQuerier:
     @pytest.mark.unit
     def test_search_entities(self, mock_api_key):
         """Test searching for entities"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
         builder.add_entity("Lymphoma Treatment", entity_type="treatment")
         builder.add_entity("Other Entity", entity_type="test")
@@ -254,7 +254,7 @@ class TestGraphQuerier:
     @pytest.mark.unit
     def test_get_entities_by_type(self, mock_api_key):
         """Test getting entities by type"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
         builder.add_entity("Lymphoma", entity_type="condition")
         builder.add_entity("Immunotherapy", entity_type="treatment")
@@ -284,7 +284,7 @@ class TestGraphQuerier:
         mock_client.messages.create.return_value = mock_response
         mock_anthropic_class.return_value = mock_client
 
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
         builder.add_entity("Lymphoma", entity_type="condition")
         builder.add_relationship("CAR-T Therapy", "Lymphoma", "treats")
@@ -302,7 +302,7 @@ class TestGraphEdgeCases:
     @pytest.mark.unit
     def test_empty_graph_stats(self, mock_api_key):
         """Test stats on empty graph"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         querier = ClaudeGraphQuerier(builder, api_key=mock_api_key)
 
         stats = querier.get_graph_stats()
@@ -314,7 +314,7 @@ class TestGraphEdgeCases:
     @pytest.mark.unit
     def test_self_loop(self, mock_api_key):
         """Test adding self-referential relationship"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         builder.add_entity("A", entity_type="test")
         builder.add_relationship("A", "A", "self_reference")
 
@@ -323,7 +323,7 @@ class TestGraphEdgeCases:
     @pytest.mark.unit
     def test_multiple_relationships_same_entities(self, mock_api_key):
         """Test multiple relationships between same entities"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         builder.add_entity("A", entity_type="test")
         builder.add_entity("B", entity_type="test")
 
@@ -337,7 +337,7 @@ class TestGraphEdgeCases:
     @pytest.mark.unit
     def test_nonexistent_entity_neighborhood(self, mock_api_key):
         """Test getting neighborhood of non-existent entity"""
-        builder = ClaudeGraphBuilder(api_key=mock_api_key)
+        builder = GraphBuilder(api_key=mock_api_key)
         querier = ClaudeGraphQuerier(builder, api_key=mock_api_key)
 
         neighborhood = querier.get_entity_neighborhood("NonExistent")

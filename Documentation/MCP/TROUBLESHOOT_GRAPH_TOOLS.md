@@ -97,14 +97,14 @@ Should show the file (about 10MB).
 ```bash
 cd "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag"
 python3 -c "
-from claude_graph_builder import ClaudeGraphBuilder
+from claude_graph_builder import GraphBuilder
 import os
 
 api_key = os.environ.get('ANTHROPIC_API_KEY')
 if not api_key:
     print('❌ ANTHROPIC_API_KEY not set')
 else:
-    builder = ClaudeGraphBuilder(api_key=api_key)
+    builder = GraphBuilder(api_key=api_key)
     builder.load_graph('graph_data/knowledge_graph_full.pkl')
     print(f'✅ Graph loaded: {builder.graph.number_of_nodes()} nodes, {builder.graph.number_of_edges()} edges')
 "

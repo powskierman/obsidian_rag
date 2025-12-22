@@ -112,7 +112,7 @@ obsidian_rag/
 ## Core Components
 
 ### Graph Building (`src/indexing/`)
-- **`claude_graph_builder.py`**: Core builder with ClaudeGraphBuilder and ClaudeGraphQuerier (includes retry logic, checkpointing, and error handling)
+- **`claude_graph_builder.py`**: Core builder with GraphBuilder and ClaudeGraphQuerier (includes retry logic, checkpointing, and error handling)
 - **`build_knowledge_graph.py`**: Main entry point for building graphs
 - **`retry_failed_chunks.py`**: Resume interrupted builds
 

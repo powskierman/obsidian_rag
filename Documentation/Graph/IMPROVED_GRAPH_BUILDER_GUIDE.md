@@ -53,10 +53,10 @@ python retry_failed_chunks.py
 If you have `graph_data/failed_chunks.pkl` from a previous run:
 
 ```python
-from claude_graph_builder import ClaudeGraphBuilder
+from claude_graph_builder import GraphBuilder
 import os
 
-builder = ClaudeGraphBuilder(
+builder = GraphBuilder(
     api_key=os.environ.get("ANTHROPIC_API_KEY"),
     model="claude-sonnet-4-5-20250929",  # Use Sonnet for better results
     max_retries=3
@@ -140,12 +140,12 @@ python retry_failed_chunks.py
 ### Example 2: Use Graph Builder for New Builds
 
 ```python
-from claude_graph_builder import ClaudeGraphBuilder
+from claude_graph_builder import GraphBuilder
 from build_knowledge_graph import get_chunks_from_filesystem
 import os
 
 # Initialize with Sonnet for better reliability
-builder = ClaudeGraphBuilder(
+builder = GraphBuilder(
     api_key=os.environ.get("ANTHROPIC_API_KEY"),
     model="claude-sonnet-4-5-20250929",  # More reliable
     max_retries=3

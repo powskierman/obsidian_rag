@@ -182,7 +182,7 @@ MCP Integration (for Claude Desktop):
   knowledge_graph_mcp.py       Graph-only search
   
 Utilities:
-  claude_graph_builder.py      Core graph building logic (ClaudeGraphBuilder)
+  claude_graph_builder.py      Core graph building logic (GraphBuilder)
   find_latest_checkpoint.py    Find latest graph checkpoint
   obsidian_scanner.py          Scan vault for markdown files
   logging_config.py            Logging setup

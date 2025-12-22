@@ -23,7 +23,7 @@ except ImportError:
     sys.exit(1)
 
 try:
-    from claude_graph_builder import ClaudeGraphBuilder, ClaudeGraphQuerier
+    from claude_graph_builder import GraphBuilder, ClaudeGraphQuerier
     GRAPH_AVAILABLE = True
 except ImportError:
     print("claude_graph_builder not found. Make sure it's in the same directory.", file=sys.stderr)
@@ -70,7 +70,7 @@ def load_graph():
             return False
         
         # Load graph
-        builder = ClaudeGraphBuilder(api_key=api_key)
+        builder = GraphBuilder(api_key=api_key)
         builder.load_graph(graph_path)
         querier = ClaudeGraphQuerier(builder, api_key=api_key)
         graph_loaded = True

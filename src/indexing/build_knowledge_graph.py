@@ -5,7 +5,7 @@ using Claude API and filesystem access
 
 import os
 from pathlib import Path
-from claude_graph_builder import ClaudeGraphBuilder, ClaudeGraphQuerier
+from claude_graph_builder import GraphBuilder, ClaudeGraphQuerier
 from tqdm import tqdm
 import chromadb
 import re
@@ -293,7 +293,7 @@ def build_graph_from_vault(
     logger.info("=" * 70)
     
     # Initialize builder
-    builder = ClaudeGraphBuilder(api_key=api_key)
+    builder = GraphBuilder(api_key=api_key)
     
     # Fetch chunks from filesystem
     if test_mode:
@@ -374,7 +374,7 @@ def test_graph_queries(graph_file: str, api_key: str):
     logger.info("=" * 70)
     
     # Load graph
-    builder = ClaudeGraphBuilder(api_key)
+    builder = GraphBuilder(api_key)
     builder.load_graph(graph_file)
     
     querier = ClaudeGraphQuerier(builder, api_key)
@@ -425,7 +425,7 @@ def resume_graph_building(
             existing_graph_file = str(graph_data_path)
     
     # Load existing graph
-    builder = ClaudeGraphBuilder(api_key=api_key)
+    builder = GraphBuilder(api_key=api_key)
     
     if not Path(existing_graph_file).exists():
         logger.error(f"Graph file not found: {existing_graph_file}")
@@ -555,7 +555,7 @@ def interactive_graph_query(graph_file: str, api_key: str):
     logger.info("=" * 70)
     
     # Load graph
-    builder = ClaudeGraphBuilder(api_key)
+    builder = GraphBuilder(api_key)
     builder.load_graph(graph_file)
     querier = ClaudeGraphQuerier(builder, api_key)
     
