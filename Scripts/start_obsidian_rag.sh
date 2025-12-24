@@ -117,6 +117,19 @@ else
     fi
 fi
 
+# Start File Watcher (automatic incremental indexing)
+echo "Starting File Watcher..."
+if [ -d "venv" ]; then
+    venv/bin/python Scripts/vault_management/watching_scanner.py --non-interactive > Scripts/logs/watcher.log 2>&1 &
+elif [ -d "venv_python313" ]; then
+    venv_python313/bin/python Scripts/vault_management/watching_scanner.py --non-interactive > Scripts/logs/watcher.log 2>&1 &
+else
+    python Scripts/vault_management/watching_scanner.py --non-interactive > Scripts/logs/watcher.log 2>&1 &
+fi
+WATCHER_PID=$!
+echo "  PID: $WATCHER_PID"
+sleep 1
+
 # Determine which Streamlit UI file to use
 STREAMLIT_UI=""
 if [ -f "src/ui/streamlit_ui_docker.py" ]; then
@@ -146,6 +159,7 @@ if ! kill -0 $STREAMLIT_PID 2>/dev/null; then
     echo "Check $STREAMLIT_LOG_FILE for details"
     kill $EMBED_PID 2>/dev/null
     kill $GRAPH_PID 2>/dev/null
+    kill $WATCHER_PID 2>/dev/null
     exit 1
 fi
 
@@ -153,11 +167,13 @@ echo ""
 echo "✅ System ready!"
 echo "📊 Embedding Service: http://localhost:8000 (PID: $EMBED_PID)"
 echo "📊 Knowledge Graph:  http://localhost:8002 (PID: $GRAPH_PID)"
+echo "👁️  File Watcher:      Active (PID: $WATCHER_PID)"
 echo "💬 Chat Interface:   http://localhost:8501 (PID: $STREAMLIT_PID)"
 echo ""
 echo "Logs:"
 echo "  tail -f Scripts/logs/embedding_service.log"
 echo "  tail -f Scripts/logs/graph_service.log"
+echo "  tail -f Scripts/logs/watcher.log"
 echo "  tail -f $STREAMLIT_LOG_FILE"
 echo ""
 echo "To stop: Scripts/stop_obsidian_rag.sh"

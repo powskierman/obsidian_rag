@@ -11,7 +11,8 @@ from datetime import datetime
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-import re
+import sys
+import argparse
 
 VAULT_PATH = "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel"
 EMBEDDING_URL = "http://localhost:8000"
@@ -177,7 +178,7 @@ class VaultHandler(FileSystemEventHandler):
         time.sleep(0.5)  # Wait for file to be fully written
         process_file(filepath)
 
-def initial_scan():
+def initial_scan(args=None):
     """Perform initial vault scan"""
     print("🚀 Obsidian Vault Scanner with File Watching")
     print("=" * 60)
@@ -197,13 +198,16 @@ def initial_scan():
     markdown_files = list(vault_path.rglob("*.md"))
     print(f"Found {len(markdown_files)} markdown files")
     
-    # Scan options
-    print("\nOptions:")
-    print("  1. Quick scan (skip, start watching only)")
-    print("  2. Full re-index (all files)")
-    print("  3. Smart scan (only new/modified files)")
+    choice = getattr(args, 'choice', None)
     
-    choice = input("\nChoice (1/2/3): ").strip()
+    if not choice:
+        # Scan options
+        print("\nOptions:")
+        print("  1. Quick scan (skip, start watching only)")
+        print("  2. Full re-index (all files)")
+        print("  3. Smart scan (only new/modified files)")
+        
+        choice = input("\nChoice (1/2/3): ").strip()
     
     if choice == "2":
         print("\n🔄 Starting full re-index...\n")
@@ -281,7 +285,16 @@ def watch_vault():
     print("✅ File watcher stopped")
 
 def main():
-    if initial_scan():
+    parser = argparse.ArgumentParser(description="Obsidian Vault Scanner with File Watching")
+    parser.add_argument("--non-interactive", action="store_true", help="Run without user input (defaults to quick scan)")
+    parser.add_argument("--choice", choices=["1", "2", "3"], help="Pre-select initial scan choice")
+    
+    args = parser.parse_args()
+    
+    if args.non_interactive and not args.choice:
+        args.choice = "1"  # Default to quick scan in non-interactive mode
+        
+    if initial_scan(args):
         watch_vault()
 
 if __name__ == "__main__":
