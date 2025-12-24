@@ -1,16 +1,20 @@
 #!/bin/bash
 
 # Get the directory where this script is located
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-PROJECT_ROOT="$( dirname "$DIR" )"
+PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd "$PROJECT_ROOT"
 
 echo "💎 Launching Obsidian RAG..."
 
-# 1. Run the existing start script in the background
-# We use 'bash' explicitly to ensure it runs correctly
-./Scripts/start_obsidian_rag.sh
+# Check if Streamlit is already running
+if curl -s --head --fail http://localhost:8501 > /dev/null; then
+    echo "✅ Obsidian RAG is already running. Skipping startup."
+else
+    echo "🚀 Services are offline. Starting Obsidian RAG..."
+    # Run the existing start script in the background
+    ./Scripts/start_obsidian_rag.sh
+fi
 
 echo "⏳ Waiting for UI to be ready..."
 
