@@ -34,7 +34,7 @@ Date: 2024-04-13
 
 },
 
-"NetworkKey": "2303C0A4CC3760581FEC0618EAD606CF",
+"NetworkKey": "<dummy key>",
 
 "NetworkName": "MyHome1988862038",
 
@@ -77,4 +77,4 @@ Date: 2024-04-13
 }
 ```
 - So the network key is:
-`"NetworkKey": "2303C0A4CC3760581FEC0618EAD606CF"`
+`"NetworkKey": "<dummy key>"`

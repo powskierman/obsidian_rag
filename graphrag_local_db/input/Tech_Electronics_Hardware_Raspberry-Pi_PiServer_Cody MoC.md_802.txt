@@ -17,4 +17,4 @@ Date: 2024-03-28
 - 
 ### Notes
 -  vscode access token
-	- `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`
+	- `<dummy key>`

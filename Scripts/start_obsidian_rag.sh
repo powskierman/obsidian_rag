@@ -47,6 +47,13 @@ else
     echo "⚠️ Warning: No virtual environment found. Using system Python."
 fi
 
+# Load variables from .env if it exists
+if [ -f ".env" ]; then
+    echo "📝 Loading environment variables from .env..."
+    # Export vars, ignoring comments and empty lines
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # Ensure log file doesn't exist as a directory before redirecting
 if [ -d "$STREAMLIT_LOG_FILE" ]; then
     echo "❌ Error: $STREAMLIT_LOG_FILE is still a directory. Please remove it manually:"
@@ -86,6 +93,30 @@ if ! curl -s http://localhost:8000/health > /dev/null 2>&1; then
     echo "It may still be initializing. Check logs: tail -f Scripts/logs/embedding_service.log"
 fi
 
+# Start Knowledge Graph service (kimi/gemini)
+echo "Starting Knowledge Graph service..."
+export GRAPH_PATH="graph_data/knowledge_graph_full.pkl"
+if [ -d "venv" ]; then
+    venv/bin/python src/services/graph_query_service.py > Scripts/logs/graph_service.log 2>&1 &
+elif [ -d "venv_python313" ]; then
+    venv_python313/bin/python src/services/graph_query_service.py > Scripts/logs/graph_service.log 2>&1 &
+else
+    python src/services/graph_query_service.py > Scripts/logs/graph_service.log 2>&1 &
+fi
+GRAPH_PID=$!
+echo "  PID: $GRAPH_PID"
+sleep 3
+
+# Verify graph service
+if ! kill -0 $GRAPH_PID 2>/dev/null; then
+    echo "⚠️ Warning: Knowledge Graph service failed to start"
+    echo "Check Scripts/logs/graph_service.log for details"
+else
+    if ! curl -s http://localhost:8002/health > /dev/null 2>&1; then
+        echo "⚠️ Warning: Knowledge Graph service started but not responding yet"
+    fi
+fi
+
 # Determine which Streamlit UI file to use
 STREAMLIT_UI=""
 if [ -f "src/ui/streamlit_ui_docker.py" ]; then
@@ -114,16 +145,19 @@ if ! kill -0 $STREAMLIT_PID 2>/dev/null; then
     echo "❌ Error: Streamlit UI failed to start"
     echo "Check $STREAMLIT_LOG_FILE for details"
     kill $EMBED_PID 2>/dev/null
+    kill $GRAPH_PID 2>/dev/null
     exit 1
 fi
 
 echo ""
 echo "✅ System ready!"
 echo "📊 Embedding Service: http://localhost:8000 (PID: $EMBED_PID)"
-echo "💬 Chat Interface: http://localhost:8501 (PID: $STREAMLIT_PID)"
+echo "📊 Knowledge Graph:  http://localhost:8002 (PID: $GRAPH_PID)"
+echo "💬 Chat Interface:   http://localhost:8501 (PID: $STREAMLIT_PID)"
 echo ""
 echo "Logs:"
 echo "  tail -f Scripts/logs/embedding_service.log"
+echo "  tail -f Scripts/logs/graph_service.log"
 echo "  tail -f $STREAMLIT_LOG_FILE"
 echo ""
 echo "To stop: Scripts/stop_obsidian_rag.sh"

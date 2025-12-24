@@ -125,20 +125,36 @@ obsidian_rag/
 - **`obsidian_rag_unified_mcp.py`**: Unified MCP server combining vault search and graph queries (recommended)
 - **`knowledge_graph_mcp.py`**: Graph-only MCP server (alternative if you only need graph queries)
 
-## Documentation
+## 📚 Documentation
 
-📚 **[Complete Documentation →](Documentation/README.md)**
+Detailed guides are organized into logical sections to help you find what you need quickly.
 
-The `Documentation/` directory contains comprehensive guides organized by topic:
+### 🏁 Getting Started
+- **[Start Here](Documentation/START_HERE.md)** - The best place to begin
+- **[Quickstart](Documentation/QUICKSTART.md)** - Rapid setup guide
+- **[Installation](Documentation/Setup/GETTING_STARTED.md)** - Detailed system installation
+- **[Start Services](Documentation/START_SERVICES.md)** - Managing the RAG services
 
-- **[Quick Start](Documentation/README.md#quick-start)** - Get up and running fast
-- **[Setup & Installation](Documentation/README.md#setup--installation)** - Docker, models, API keys
-- **[Architecture](Documentation/README.md#architecture--design)** - System design and flow
-- **[Features](Documentation/README.md#features--capabilities)** - Enhanced search, knowledge graphs
-- **[Troubleshooting](Documentation/README.md#troubleshooting)** - Common issues and solutions
-- **[Development](Documentation/README.md#development--contributing)** - Contributing and testing
+### ⚙️ Setup & Configuration
+- **[Docker Setup](Documentation/DOCKER_SETUP_SUMMARY.md)** - Containerized deployment
+- **[Model Configuration](Documentation/Setup/MODEL_SETUP_GUIDE.md)** - Setting up LLMs and Embeddings
+- **[API Key Validation](Documentation/Setup/API_KEY_VALIDATION_GUIDE.md)** - Troubleshooting Anthropic keys
+- **[GraphRAG Setup](Documentation/Setup/GRAPHRAG_SETUP.md)** - Advanced graph features
 
-**For new users:** Start with [`Documentation/START_HERE.md`](Documentation/START_HERE.md)
+### 🏗️ Architecture & Development
+- **[System Analysis](Documentation/architecture/obsidian_rag_analysis.md)** - Full architecture deep-dive
+- **[Deep Thinking Flow](Documentation/architecture/DEEP_THINKING_FLOW.md)** - Logic behind agentic search
+- **[Testing Guide](Documentation/Setup/TESTING.md)** - How to run and write tests
+- **[Code Restructure](Documentation/Analysis/CODE_RESTRUCTURE_PLAN.md)** - Project organization plan
+
+### 🚀 Usage & Integration
+- **[Knowledge Graph Guide](Documentation/Graph/BUILD_GRAPH_GUIDE.md)** - Building and querying graphs
+- **[CLI Search](Documentation/guides/README_CLI_SEARCH.md)** - Using the command-line interface
+- **[MCP Integration](Documentation/MCP/README.md)** - Using with Claude Desktop/Cursor
+- **[Troubleshooting](Documentation/README.md#troubleshooting)** - Common issues and fixes
+
+> [!TIP]
+> For the most comprehensive view of the system, check out the **[Documentation Dashboard](Documentation/README.md)**.
 
 ## Requirements
 

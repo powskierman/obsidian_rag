@@ -27,7 +27,7 @@ Date: 2023-08-05
     Channel Mask: 0x07fff800
     Ext PAN ID: 39758ec8144b07fb
     Mesh Local Prefix: fdf1:f1ad:d079:7dc0::/64
-    Network Key: f366cec7a446bab978d90d27abe38f23
+    Network Key: <dummy key>
     Network Name: OpenThread-5938
     PAN ID: 0x5938
     PSKc: 3ca67c969efb0d0c74a4d8ee923b576c

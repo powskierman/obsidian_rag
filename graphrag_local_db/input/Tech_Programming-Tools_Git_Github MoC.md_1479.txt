@@ -23,8 +23,8 @@ Creating a personal access token. Log in to your Github & in the upper-right cor
 Copy this and paste into password field
 
 -  Tokens
-	- xcode: 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
+	- xcode: <dummy key>
 	- Sourcegraph:
-		- `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`
+		- `<dummy key>`
 	- Github:
-		  `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`
+		  `<dummy key>`

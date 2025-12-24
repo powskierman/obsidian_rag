@@ -1,0 +1,8 @@
+title = "Local config exclusions"
+
+[allowlist]
+paths = [
+  ".env",
+  "claude_desktop_config_with_obsidian.json",
+]
+

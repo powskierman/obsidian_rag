@@ -17,4 +17,4 @@ Backlink:
 - https://github.com/nerding-io/n8n-nodes-mcp
 - keys:
 	- Google Maps API Key: 
-		- `AIzaSyCIe6FZPsD3p8f_cZuoWACb9p1pSMCrrBw`
+		- `<dummy key>`

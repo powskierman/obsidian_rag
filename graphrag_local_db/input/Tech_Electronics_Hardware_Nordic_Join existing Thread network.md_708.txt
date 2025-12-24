@@ -23,7 +23,7 @@ To get network credentials:
 ```
 ot-ctl dataset clear
 ot-ctl dataset panid 0xABCD    # Replace ABCD with the correct PAN ID
-ot-ctl dataset masterkey 00112233445566778899aabbccddeeff  # Replace with the actual key
+ot-ctl dataset masterkey <dummy key>  # Replace with the actual key
 ot-ctl dataset networkname MyThreadNetwork  # Replace with the actual network name
 ot-ctl dataset channel 15  # Replace 15 with the correct channel if needed
 ot-ctl dataset commit active

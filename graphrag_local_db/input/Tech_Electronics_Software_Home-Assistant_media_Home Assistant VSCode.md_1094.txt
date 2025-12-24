@@ -14,4 +14,4 @@ Date: 2023-09-24
 -  
 ### Notes
 - vscode long-lived access token: 
-	- `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`
+	- `<dummy key>`

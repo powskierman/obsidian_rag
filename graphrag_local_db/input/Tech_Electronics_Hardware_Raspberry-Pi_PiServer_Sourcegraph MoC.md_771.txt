@@ -19,4 +19,4 @@ Date: 2024-03-28
 - [seporaitissourcegraph-local A repository explaining how to run Sourcegraph single container, with many other features.](https://github.com/seporaitis/sourcegraph-local)
 - -  Github Access token:
 
-- `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`
+- `<dummy key>`

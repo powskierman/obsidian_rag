@@ -69,7 +69,7 @@ Date: 2024-06-22
       upload_port = 192.168.0.201
       upload_flags =
           --port=3232
-          --auth=b1b01df3b1785ca1a805c13069198a7b  ; if you have set an OTA password
+          --auth=<dummy key>  ; if you have set an OTA password
           --timeout=120
       extra_scripts = ota_upload.py
       ```

@@ -20,7 +20,7 @@ Date: 2024-08-19
 - [[Easily Set Thread Network Credentials]]
 	- 
 -  - #Canmore #Thread network:
-	- `"NetworkKey": "3091839359FA93F26EA6D49895878B7C"`
+	- `"NetworkKey": "<dummy key>"`
 	- Nodes:
 		- 0xa400: 
 			- HASS OTBR

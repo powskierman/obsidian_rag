@@ -12,6 +12,16 @@ else
     echo "Embedding service not running"
 fi
 
+# Stop Knowledge Graph service
+GRAPH_PID=$(lsof -ti:8002)
+if [ ! -z "$GRAPH_PID" ]; then
+    echo "Stopping knowledge graph service (PID: $GRAPH_PID)..."
+    kill $GRAPH_PID
+    sleep 1
+else
+    echo "Knowledge graph service not running"
+fi
+
 # Stop Streamlit
 STREAMLIT_PID=$(lsof -ti:8501)
 if [ ! -z "$STREAMLIT_PID" ]; then

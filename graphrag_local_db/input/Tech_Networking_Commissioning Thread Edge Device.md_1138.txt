@@ -25,7 +25,7 @@ Date: 2023-05-25
 - Go to:  Home Assistant****/Settings/Integrations/Thread/Gear/Configure/Information and copy:
 	- _operational_dataset:_  Dataset active -x:
 ```
-0e080000000000010000041056793e65085ede973a3ad5ad4b4859cc0c0402a0f7f8000300000b35060004001fffe00102fb000208fb02fb02fb020000051000112233445566778899aabbccddeeff0708fd000000fb01000103024e48
+0e080000000000010000041056793e65085ede973a3ad5ad4b4859cc0c0402a0f7f8000300000b35060004001fffe00102fb000208fb02fb02fb0200000510<dummy key>0708fd000000fb01000103024e48
 ```
 
 - At boot, an NRF device with the Matter lightbulb example, will provide the following information: 

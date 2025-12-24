@@ -223,7 +223,7 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://litellm:password@postgres:5432/litellm
-      - LITELLM_MASTER_KEY=sk-1234567890
+      - LITELLM_MASTER_KEY=<dummy key>
     volumes:
       - ./config.yaml:/app/config.yaml
     
@@ -272,7 +272,7 @@ import openai
 
 # Point to LiteLLM instead of OpenAI
 openai.api_base = "http://localhost:8000"
-openai.api_key = "sk-1234567890"  # Your LiteLLM key
+openai.api_key = "<dummy key>"  # Your LiteLLM key
 
 response = openai.ChatCompletion.create(
     model="ollama/llama3.2",  # Or any configured model
@@ -290,7 +290,7 @@ print(response.choices[0].message.content)
 // Use OpenAI node, change base URL
 Authentication: Header Auth
 Header Name: Authorization
-Header Value: Bearer sk-1234567890
+Header Value: Bearer <dummy key>
 
 Base URL: http://localhost:8000
 Model: ollama/llama3.2
@@ -304,7 +304,7 @@ curl http://localhost:8000/spend/logs
 
 # Set budget
 curl http://localhost:8000/budget/set \
-  -H "Authorization: Bearer sk-1234567890" \
+  -H "Authorization: Bearer <dummy key>" \
   -d '{"max_budget": 100, "budget_duration": "30d"}'
 ```
 

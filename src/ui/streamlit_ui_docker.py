@@ -89,11 +89,11 @@ with st.sidebar:
     st.subheader("🔍 Search Mode")
     search_mode = st.radio(
         "Choose search method:",
-        ["vector", "graph-claude", "hybrid"],
+        ["vector", "knowledge-graph", "hybrid"],
         index=2,
         help="""
         - **vector**: Fast semantic search with Ollama (ChromaDB) 🔍
-        - **graph-claude**: Claude Haiku-powered knowledge graph 🧠
+        - **knowledge-graph**: Kimi/Gemini-powered knowledge graph 🧠
         - **hybrid**: Best of both - graph-guided vector search 🔗
         """
     )
@@ -152,21 +152,21 @@ with st.sidebar:
     except:
         st.error("⚠️ Vector service offline")
     
-    # Check Claude Graph service
+    # Check Knowledge Graph service
     try:
-        claude_graph_response = requests.get(f'{CLAUDE_GRAPH_SERVICE_URL}/health', timeout=2)
-        if claude_graph_response.status_code == 200:
-            claude_graph_data = claude_graph_response.json()
-            if claude_graph_data.get('graph_loaded'):
-                nodes = claude_graph_data.get('nodes', 0)
-                edges = claude_graph_data.get('edges', 0)
-                st.success(f"✅ Claude Graph: {nodes:,} entities, {edges:,} relationships")
+        graph_response = requests.get(f'{CLAUDE_GRAPH_SERVICE_URL}/health', timeout=2)
+        if graph_response.status_code == 200:
+            graph_data = graph_response.json()
+            if graph_data.get('graph_loaded'):
+                nodes = graph_data.get('nodes', 0)
+                edges = graph_data.get('edges', 0)
+                st.success(f"✅ Knowledge Graph: {nodes:,} entities, {edges:,} relationships")
             else:
-                st.warning("⚠️ Claude Graph: Not loaded (build graph first)")
+                st.warning("⚠️ Knowledge Graph: Not loaded (build graph first)")
         else:
-            st.warning("⚠️ Claude Graph: Service unavailable")
+            st.warning("⚠️ Knowledge Graph: Service unavailable")
     except:
-        st.warning("⚠️ Claude Graph: Offline")
+        st.warning("⚠️ Knowledge Graph: Offline")
     
     # Check LLM service (Ollama or GPT-OSS) and get available models
     available_models = []
@@ -285,7 +285,7 @@ st.title("💬 Chat with Your Knowledge Base")
 # Display search mode indicator
 mode_emoji = {
     'vector': '🔍',
-    'graph-claude': '🧠',
+    'knowledge-graph': '🧠',
     'hybrid': '🔗'
 }
 st.caption(f"{mode_emoji.get(search_mode, '🔍')} Using: **{search_mode}** search")
@@ -558,9 +558,9 @@ if prompt := st.chat_input("Ask about your notes..."):
                             st.error("Vector search failed")
                             st.stop()
 
-            elif search_mode == 'graph-claude':
-                # Use Claude-powered knowledge graph
-                with st.spinner("🧠 Querying Claude knowledge graph..."):
+            elif search_mode == 'knowledge-graph':
+                # Use Kimi/Gemini-powered knowledge graph
+                with st.spinner("🧠 Querying Knowledge Graph..."):
                     try:
                         graph_response = requests.post(
                             f'{CLAUDE_GRAPH_SERVICE_URL}/query',
@@ -573,7 +573,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                         
                         if graph_response.status_code != 200:
                             if graph_response.status_code == 503:
-                                st.error("❌ Claude Graph not loaded. Build graph first using build_knowledge_graph.py")
+                                st.error("❌ Knowledge Graph not loaded. Build graph first using build_knowledge_graph.py")
                             else:
                                 st.error(f"Graph query failed: {graph_response.status_code}")
                             st.stop()
@@ -584,8 +584,6 @@ if prompt := st.chat_input("Ask about your notes..."):
                         if 'error' in graph_result:
                             error_msg = graph_result.get('error', 'Unknown error')
                             st.error(f"❌ Graph service error: {error_msg}")
-                            if 'credit balance' in str(error_msg).lower():
-                                st.info("💡 This error is from the graph service's Claude API call. Check your Anthropic account credits.")
                             st.stop()
                         
                         context_text = graph_result.get('answer', '')
@@ -594,17 +592,16 @@ if prompt := st.chat_input("Ask about your notes..."):
                             st.warning("No answer from knowledge graph")
                             st.stop()
                         
-                        # For Claude graph, the answer is already synthesized
-                        # We can use it directly or combine with vector search
+                        # For knowledge graph, the answer is already synthesized
                         sources_list = [{
                             "filename": "Knowledge Graph",
-                            "filepath": "Claude Graph",
+                            "filepath": "Knowledge Graph",
                             "relevance": 100
                         }]
                         
                     except requests.exceptions.ConnectionError:
-                        st.error("❌ Cannot connect to Claude Graph service. Is it running?")
-                        st.info("💡 Start it with: docker-compose up graph-service")
+                        st.error("❌ Cannot connect to Knowledge Graph service. Is it running?")
+                        st.info("💡 Start it with: ./Scripts/start_obsidian_rag.sh")
                         st.stop()
                     except Exception as e:
                         st.error(f"Graph query error: {e}")
@@ -616,8 +613,8 @@ if prompt := st.chat_input("Ask about your notes..."):
                 st.stop()
             
             # Step 2: Generate response with LLM
-            # For Claude graph, the answer is already synthesized, so we can display it directly
-            if search_mode == 'graph-claude':
+            # For knowledge graph, the answer is already synthesized, so we can display it directly
+            if search_mode == 'knowledge-graph':
                 # Claude graph already provides a complete answer from Claude
                 response_text = context_text
             else:

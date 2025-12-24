@@ -53,9 +53,9 @@ Password: 2260xlap
 
     c.  Password: 40H1ghl@nd
 
-    d.  Access key ID: AKIAR4ACOQWLEP2M6JPG
+    d.  Access key ID: <dummy key>
 
-    e.  Secret key: nAjJQbSJOt/c5ksb72eY0wWY57ZmZOJ1tnAkTtco
+    e.  Secret key: <dummy key>
 
     f.  Login: <https://128854164886.signin.aws.amazon.com/console>
 
@@ -64,7 +64,7 @@ Password: 2260xlap
 ```
 3.  AWS CLI access keys
 
-    a.  AWSAccessKeyId= AKIAI64G4YCQXO7XHB4A
+    a.  AWSAccessKeyId= <dummy key>
 
     b.  AWSSecretKey= /r4p/Fwu1inXcqE0v21Tc89DSbzq3yDwp/Gxvtab
 

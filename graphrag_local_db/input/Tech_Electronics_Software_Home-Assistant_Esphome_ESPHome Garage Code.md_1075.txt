@@ -54,7 +54,7 @@ key: "/nhDqyyNnBCg74Ujd7tykYrH6TMxtRsdF2gLjreO0eM="
 
 ota:
 
-password: "2ac009af0bd67fc64ba01fea7f712df9"
+password: "<dummy key>"
 
   
 

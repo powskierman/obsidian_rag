@@ -32,7 +32,7 @@ Channel: 15
 Channel Mask: 0x07fff800
 Ext PAN ID: 28df6e248ee7da88
 Mesh Local Prefix: fd7f:c78e:e559:a2a3::/64
-Network Key: 1da3eb13a8ad1523920d4e78881387be
+Network Key: <dummy key>
 Network Name: OpenThread-79ed
 PAN ID: 0x79ed
 PSKc: d1cc34b675b669e4f88a8b9c1c89a699

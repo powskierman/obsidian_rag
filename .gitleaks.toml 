@@ -1,0 +1,16 @@
+title = "Local config exclusions"
+
+[[rules]]
+description = "Ignore local env file"
+id = "ignore-env"
+regex = '''^$'''  # never matches; rule exists to use allowlist paths
+[allowlist]
+paths = [".env"]
+
+[[rules]]
+description = "Ignore local Claude desktop config"
+id = "ignore-claude-config"
+regex = '''^$'''
+[allowlist]
+paths = ["claude_desktop_config_with_obsidian.json"]
+

@@ -17,7 +17,7 @@ Date: 2023-08-05
 - Only the Network Key is required for a device to attach to a Thread network.
 	- Obtain the network key from an attached device:
 	- ot dataset active
-		- Network Key: f3a51dbd786319780c597d14f3292d67
+		- Network Key: <dummy key>
 - While not required, specifying the channel avoids the need to search across multiple channels, improving both latency and efficiency of the attach process.
 	- ot channel 15
 - After the device successfully attaches to a Thread network, the device will retrieve the complete Active Operational Dataset.
@@ -46,7 +46,7 @@ Date: 2023-08-05
     Channel Mask: 0x07fff800
     Ext PAN ID: 39758ec8144b07fb
     Mesh Local Prefix: fdf1:f1ad:d079:7dc0::/64
-    Network Key: f366cec7a446bab978d90d27abe38f23
+    Network Key: <dummy key>
     Network Name: OpenThread-5938
     PAN ID: 0x5938
     PSKc: 3ca67c969efb0d0c74a4d8ee923b576c

@@ -62,7 +62,7 @@ api:
 
 encryption:
 
-key: "fEmrKUec2jDa59/54VO3yImvPlnMhPp7rbK5dLol70s="
+key: "<dummy key>"
 
   
 
@@ -70,7 +70,7 @@ ota:
 
 - platform: esphome
 
-password: "8b0e0e9759379277aabb36188a183cda"
+password: "<dummy key>"
 
   
 

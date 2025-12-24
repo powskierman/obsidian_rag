@@ -19,6 +19,6 @@ Date: 2022-12-30
 ### Notes
 -  Keys:
 	- Secret key:
-	- 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
+	- <dummy key>
 	- Obsidian Smart Connections
-		- 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
+		- <dummy key>

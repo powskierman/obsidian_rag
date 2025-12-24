@@ -54,7 +54,7 @@ esp32:
 
 wifi:
   ssid: "NH2"
-  password: "seawolfpilot01"
+  password: "<dummy key>"
   manual_ip:
     static_ip: 192.168.0.242
     gateway: 192.168.0.1
