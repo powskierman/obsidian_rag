@@ -194,9 +194,10 @@ class RetrievalSupervisor:
             print(f"DEBUG: Web Query: {query}")
             tavily_client = TavilyClient(api_key=api_key)
             # Use 'search' method with image support
+            # Use 'basic' search depth for speed (advanced is too slow ~5-10s)
             response = tavily_client.search(
                 query, 
-                search_depth="advanced", 
+                search_depth="basic", 
                 max_results=n_results,
                 include_images=True  # Enable image retrieval
             )

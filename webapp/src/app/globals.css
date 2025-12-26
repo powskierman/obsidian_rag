@@ -1,0 +1,110 @@
+:root {
+  --background: #030308;
+  --foreground: #f8f8ff;
+  
+  /* Neon Palette */
+  --neon-blue: #00d2ff;
+  --neon-purple: #9d50bb;
+  --neon-cyan: #3aedff;
+  --accent-glow: rgba(0, 210, 255, 0.4);
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(16px);
+  
+  /* Gradients */
+  --grad-primary: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+  --grad-surface: linear-gradient(to bottom right, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
+  
+  /* Typography */
+  --font-main: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-main);
+  overflow-x: hidden;
+  min-height: 100vh;
+  background-image: 
+    radial-gradient(circle at 15% 25%, rgba(0, 210, 255, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(157, 80, 187, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, #030308 0%, transparent 100%);
+}
+
+.main-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 1.5rem 2rem;
+  gap: 1.5rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Glass Utilities */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.7);
+}
+
+/* Layout helpers */
+.header { display: flex; justify-content: space-between; align-items: center; }
+.logo-container { display: flex; align-items: center; gap: 0.8rem; }
+.logo-icon { font-size: 2rem; filter: drop-shadow(0 0 10px var(--neon-blue)); }
+.logo-text { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.8rem; letter-spacing: -1px; color: white; }
+
+.top-nav { display: flex; gap: 0.4rem; padding: 0.4rem; background: rgba(255, 255, 255, 0.03); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.08); }
+.nav-btn { padding: 0.6rem 1.4rem; border-radius: 10px; border: none; background: transparent; color: rgba(255, 255, 255, 0.5); cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease; }
+.nav-btn.active { background: rgba(255, 255, 255, 0.1); color: white; }
+
+/* Search Area */
+.search-container { display: flex; justify-content: center; align-items: center; padding: 1rem 0; width: 100%; }
+.search-wrapper { position: relative; width: 100%; max-width: 900px; border-radius: 50px; padding: 2px; background: var(--grad-primary); box-shadow: 0 0 40px var(--accent-glow); }
+.search-input { width: 100%; padding: 1.1rem 2.2rem; background: #050510; border: none; border-radius: 50px; color: white; font-size: 1.15rem; outline: none; }
+
+/* Global Animations */
+@keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(5px, -15px); } }
+
+.node-blob {
+  /* position: absolute;  <-- REMOVED to allow Flexbox flow */
+  position: relative;
+  padding: 0.7rem 1.2rem;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  animation: float 6s infinite ease-in-out;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap; /* Prevent text wrapping inside pill */
+}
+.node-blob:hover { transform: scale(1.1); z-index: 10; border-color: white; box-shadow: 0 0 30px var(--neon-blue); }
+.node-blob.purple { border-color: var(--neon-purple); }
+.node-blob.blue { border-color: var(--neon-blue); }
+.node-blob.cyan { border-color: var(--neon-cyan); }
+
+/* Chat Bubbles */
+.bot-bubble { background: rgba(255, 255, 255, 0.04); padding: 1rem 1.2rem; border-radius: 0 18px 18px 18px; font-size: 0.95rem; line-height: 1.6; border: 1px solid rgba(255, 255, 255, 0.05); }
+.user-bubble { background: var(--grad-primary); padding: 0.9rem 1.4rem; border-radius: 18px 18px 0 18px; font-size: 0.95rem; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }

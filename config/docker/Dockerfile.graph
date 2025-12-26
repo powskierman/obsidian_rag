@@ -13,7 +13,9 @@ RUN pip install --no-cache-dir \
     flask \
     flask-cors \
     networkx \
-    tqdm
+    tqdm \
+    requests \
+    tavily-python
 
 # Copy service files
 COPY src/services/kimi_graph_builder.py /app/

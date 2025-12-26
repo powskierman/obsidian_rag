@@ -6,6 +6,7 @@ Runs alongside your existing embedding service in Docker
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+import requests
 from kimi_graph_builder import GraphBuilder, GraphQuerier
 import logging
 
@@ -38,18 +39,18 @@ def initialize_graph(graph_path: str = None):
         if graph_path is None:
             graph_path = os.environ.get('GRAPH_PATH', '/app/graph_data/knowledge_graph_full.pkl')
         
-        # Try multiple possible locations
+        # Try multiple possible locations - prioritize env var, then docker paths
         possible_paths = [
             graph_path,
+            os.environ.get('GRAPH_PATH'),
             '/app/graph_data/knowledge_graph_full.pkl',
-            '/app/graph_data/knowledge_graph_test.pkl',
-            '/app/knowledge_graph_full.pkl',
-            '/app/knowledge_graph_test.pkl'
+            'graph_data/knowledge_graph_full.pkl', # Local fallback
+            'knowledge_graph_full.pkl' 
         ]
         
         graph_file = None
         for path in possible_paths:
-            if os.path.exists(path):
+            if path and os.path.exists(path):
                 graph_file = path
                 break
         
@@ -61,7 +62,12 @@ def initialize_graph(graph_path: str = None):
             return True
         else:
             logger.warning(f"Graph file not found. Tried: {possible_paths}")
-            return False
+            # Create a querier with empty graph so we can at least use client? 
+            # Actually querier wraps graph. KimiGraphBuilder inits empty graph.
+            # So let's init querier anyway.
+            querier = GraphQuerier(builder, api_key=api_key)
+            logger.info("Initialized with empty graph (waiting for build)")
+            return False # Graph NOT loaded from disk, but valid state
     except Exception as e:
         logger.error(f"Error loading graph: {e}")
         return False
@@ -81,33 +87,124 @@ def health():
 @app.route('/query', methods=['POST'])
 def query_graph():
     """
-    Query the knowledge graph with Claude
+    Query the knowledge graph with Claude + Hybrid RAG (Vector Search)
     
     POST body:
     {
         "query": "What treatments are mentioned?",
-        "max_entities": 20  // optional
+        "max_entities": 20,
+        "mode": "vector" | "graph" | "hybrid",
+        "web_search": boolean
     }
     """
+    # If graph not loaded, try init. If still not loaded, only allow vector/web modes.
     if not graph_loaded:
-        return jsonify({
-            'error': 'Graph not loaded. Please build graph first.'
-        }), 503
-    
+        initialize_graph()
+        
     try:
         data = request.json
+        logger.info(f"Received query request: {data}")
         user_query = data.get('query', '')
         max_entities = data.get('max_entities', 20)
+        mode = data.get('mode', 'hybrid')
+        web_search = data.get('web_search', False)
+        model = data.get('model') # Extract model for parameter passing
+        
+        # If still no graph and needing graph mode, warn but try to proceed (will be empty)
+        if not graph_loaded and mode in ['graph', 'hybrid'] and not web_search:
+             logger.warning("Graph mode requested but graph not loaded.")
+             # We can continue, likely yielding minimal results from graph part
+
         
         if not user_query:
             return jsonify({'error': 'Query is required'}), 400
+            
+        vector_context = ""
         
-        # Query with Kimi/LLM
-        answer = querier.query_with_llm(user_query, max_entities=max_entities)
+        # FEATURE: VECTOR SEARCH (Used in 'vector' and 'hybrid' modes)
+        if mode in ['vector', 'hybrid']:
+            try:
+                embedding_service_url = os.environ.get('EMBEDDING_SERVICE_URL', 'http://localhost:8000')
+                logger.info(f"Querying vector store at {embedding_service_url}...")
+                
+                vec_res = requests.post(
+                    f"{embedding_service_url}/query",
+                    json={
+                        "query": user_query,
+                        "n_results": 7,
+                        "reranking": True
+                    },
+                    timeout=5
+                )
+                
+                if vec_res.status_code == 200:
+                    vec_data = vec_res.json()
+                    docs = vec_data.get('documents', [[]])[0]
+                    metas = vec_data.get('metadatas', [[]])[0]
+                    
+                    context_parts = []
+                    for i, doc in enumerate(docs):
+                        meta = metas[i] if i < len(metas) else {}
+                        filename = meta.get('filename', 'Unknown')
+                        context_parts.append(f"Source: {filename}\nContent: {doc}")
+                    
+                    vector_context = "\n\n".join(context_parts)
+                    logger.info(f"Retrieved {len(docs)} vector chunks for context")
+                else:
+                    logger.warning(f"Embedding service returned {vec_res.status_code}: {vec_res.text}")
+            except Exception as ve:
+                logger.warning(f"Failed to fetch vector context: {ve}")
+
+        # TODO: Implement Web Search / Deep Thinking integration here when 'web_search' is True
+        if web_search:
+            # LEGACY BEHAVIOR: Simple, fast web search (No Deep Thinking Agents)
+            logger.info("Web search requested - using Legacy/Fast Web Search")
+            try:
+                from tavily import TavilyClient
+                tavily_api_key = os.environ.get("TAVILY_API_KEY")
+                if tavily_api_key:
+                    tavily = TavilyClient(api_key=tavily_api_key)
+                    # Use 'basic' depth for speed, as requested (Legacy was fast)
+                    tav_response = tavily.search(query=user_query, search_depth="basic", max_results=3)
+                    
+                    if 'results' in tav_response and tav_response['results']:
+                        web_context_parts = ["\n## 🌐 Web Search"]
+                        for i, res in enumerate(tav_response['results'][:3], 1):
+                            web_context_parts.append(f"**[{res['title']}]({res['url']})**\n{res['content']}")
+                        
+                        web_context_str = "\n\n".join(web_context_parts)
+                        # Prepend to vector context for higher visibility
+                        vector_context = f"{web_context_str}\n\n{vector_context}"
+                        logger.info(f"Added {len(tav_response['results'])} web results to context (Prepend)")
+                    else:
+                        logger.info("No web results found")
+                else:
+                    logger.warning("TAVILY_API_KEY not set, skipping web search")
+            except Exception as e:
+                logger.error(f"Legacy Web Search error: {e}")
+                # Continue without web results (graceful degradation)
+
+        # Generate Answer
+        # For 'vector' mode, we might want to skip graph context entirely to be pure,
+        # but 'query_with_llm' currently enforces graph context.
+        # For now, we'll pass vector_context to it.
+        # If mode is 'graph', we just pass empty vector_context (which we initialized to "")
+        
+        answer = querier.query_with_llm(
+            user_query, 
+            max_entities=max_entities, 
+            additional_context=vector_context, # Now prepended with web results for LLM
+            model=model
+        )
+        
+        # LEGACY/UX FEATURE: Explicitly append web search block to the answer for visibility
+        if web_search and 'web_context_str' in locals() and web_context_str:
+             answer += f"\n\n{web_context_str}"
         
         return jsonify({
             'answer': answer,
-            'query': user_query
+            'query': user_query,
+            'mode': mode
         })
     
     except Exception as e:
@@ -133,13 +230,6 @@ def get_entity(entity_name: str):
 def find_path():
     """
     Find paths between two entities
-    
-    POST body:
-    {
-        "source": "Entity 1",
-        "target": "Entity 2",
-        "max_depth": 3  // optional
-    }
     """
     if not graph_loaded:
         return jsonify({'error': 'Graph not loaded'}), 503
@@ -183,17 +273,10 @@ def get_stats():
 
 @app.route('/search_entities', methods=['POST'])
 def search_entities():
-    """
-    Search for entities by name
-    
-    POST body:
-    {
-        "query": "search term",
-        "limit": 10  // optional
-    }
-    """
+    """Search for entities by name"""
     if not graph_loaded:
-        return jsonify({'error': 'Graph not loaded'}), 503
+        initialize_graph() # Try to auto-init
+        # Proceed even if not loaded, search will just be empty (or fallback to file matches)
     
     try:
         data = request.json
@@ -208,10 +291,39 @@ def search_entities():
         for node in builder.graph.nodes():
             if search_query in node.lower():
                 node_data = dict(builder.graph.nodes[node])
+                sources = node_data.get('sources', [])
+                
+                # Fallback: If no sources in graph, check if a note exists with this name
+                if not sources:
+                    safe_name = node.replace('/', '_').replace('\\', '_')
+                    
+                    # Determine vault root
+                    vault_root = os.environ.get('VAULT_ROOT')
+                    if not vault_root:
+                        vault_root = os.environ.get('OBSIDIAN_VAULT_PATH')
+                    if not vault_root:
+                         vault_root = '/app/vault'
+                    
+                    # Check exact match first
+                    potential_path = os.path.join(vault_root, f"{safe_name}.md")
+                    if os.path.exists(potential_path):
+                        sources.append({'filename': f"{safe_name}.md", 'chunk_id': 'file_match'})
+                    else:
+                        # Recursive search for the filename
+                        if os.path.exists(vault_root):
+                            for root, dirs, files in os.walk(vault_root):
+                                if f"{safe_name}.md" in files:
+                                    rel_dir = os.path.relpath(root, vault_root)
+                                    rel_path = os.path.join(rel_dir, f"{safe_name}.md")
+                                    if rel_dir == '.': rel_path = f"{safe_name}.md"
+                                    sources.append({'filename': rel_path, 'chunk_id': 'file_match'})
+                                    break
+                
                 matching_entities.append({
                     'name': node,
                     'type': node_data.get('entity_type', 'Unknown'),
-                    'connections': builder.graph.degree(node)
+                    'connections': builder.graph.degree(node),
+                    'sources': sources
                 })
         
         # Sort by number of connections
@@ -228,10 +340,56 @@ def search_entities():
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/get_note_content', methods=['POST'])
+def get_note_content():
+    """Get raw content of a specific note"""
+    try:
+        data = request.json
+        filename = data.get('filename')
+        
+        if not filename:
+            return jsonify({'error': 'Filename is required'}), 400
+            
+        # Security check: Prevent path traversal
+        if '..' in filename or filename.startswith('/'):
+            return jsonify({'error': 'Invalid filename'}), 400
+            
+        # Determine vault root - check env vars with local fallback
+        vault_root = os.environ.get('VAULT_ROOT')
+        if not vault_root:
+            vault_root = os.environ.get('OBSIDIAN_VAULT_PATH')
+        if not vault_root:
+            vault_root = '/app/vault' # Docker default
+            
+        full_path = os.path.join(vault_root, filename)
+        
+        if not os.path.exists(full_path):
+             # Try finding it recursively if path is just basename
+            if '/' not in filename:
+                for root, dirs, files in os.walk(vault_root):
+                    if filename in files:
+                        full_path = os.path.join(root, filename)
+                        break
+            
+        if not os.path.exists(full_path):
+            return jsonify({'error': 'File not found'}), 404
+            
+        with open(full_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+            
+        return jsonify({
+            'filename': filename,
+            'content': content
+        })
+
+    except Exception as e:
+        logger.error(f"Error reading note: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 if __name__ == '__main__':
     # Initialize graph on startup
-    graph_path = os.environ.get('GRAPH_PATH')
-    initialize_graph(graph_path)
+    initialize_graph()
     
     # Run Flask app
     port = int(os.environ.get('PORT', 8002))

@@ -1,0 +1,18 @@
+#!/bin/bash
+# Get the absolute path to the project root (where the app is likely located, or hardcode it)
+# Assuming the App is placed in the project root for now, or we hardcode the path.
+# Better yet, let's point to the absolute path of the start script we know.
+
+PROJECT_ROOT="/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag"
+START_SCRIPT="$PROJECT_ROOT/scripts/start_obsidian_rag.sh"
+
+if [ -f "$START_SCRIPT" ]; then
+    # Open Terminal and run the script
+    osascript -e "tell application \"Terminal\" to do script \"'$START_SCRIPT'\""
+    osascript -e "tell application \"Terminal\" to activate"
+else
+    osa_script='display dialog "Startup script not found at:\n'
+    osa_script+=$START_SCRIPT
+    osa_script+='"\n\nPlease ensure the project is at the correct location." buttons {"OK"} default button "OK" with icon stop with title "Error"'
+    osascript -e "$osa_script"
+fi

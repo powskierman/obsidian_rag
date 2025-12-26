@@ -3,9 +3,9 @@ from typing import Literal
 from .state import RAGState
 
 class PolicyAgent:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5"
+    def __init__(self, client, model="moonshotai/kimi-k2-0905"):
+        self.client = client
+        self.model = model
 
     def decide(self, state: RAGState) -> Literal["CONTINUE", "FINISH", "REVISE_PLAN"]:
         """
@@ -30,14 +30,14 @@ class PolicyAgent:
         Return ONLY a JSON object: {{"decision": "CONTINUE|FINISH|REVISE_PLAN", "reasoning": "...", "needs_external_enrichment": true|false}}
         """
         
-        response = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=300,
             messages=[{"role": "user", "content": prompt}]
         )
         
         try:
-            content = response.content[0].text.strip()
+            content = response.choices[0].message.content.strip()
             if content.startswith("```json"):
                 content = content[7:]
             if content.endswith("```"):

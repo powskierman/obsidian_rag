@@ -59,11 +59,16 @@ services:
     volumes:
       - graph_storage:/app/graph_data
       - ./src/services/kimi_graph_builder.py:/app/kimi_graph_builder.py:ro
+      - ./src/services/graph_query_service.py:/app/graph_query_service.py:ro
+      - ./deep_thinking:/app/deep_thinking:ro
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
       - GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
       - KIMI_MODEL=moonshotai/kimi-k2-0905
+      - EMBEDDING_SERVICE_URL=http://obsidian-embedding:8000
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8002/health" ]
@@ -91,7 +96,7 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - KIMI_MODEL=moonshotai/kimi-k2-0905
       # LLM Provider Configuration
-      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_HOST=http://host.docker.internal:11434
       - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
       - USE_GPT_OSS=${USE_GPT_OSS:-false}
       - LLM_PROVIDER=${LLM_PROVIDER:-ollama}

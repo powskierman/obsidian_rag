@@ -12,8 +12,9 @@ import time
 import hashlib
 import logging
 import pickle
-from typing import List, Dict, Any, Optional, Union, Set
+from typing import Dict, List, Any, Optional, Tuple
 from openai import OpenAI
+import google.generativeai as genai
 import networkx as nx
 from pathlib import Path
 from datetime import datetime
@@ -350,8 +351,11 @@ class GraphQuerier:
             neighbors['incoming'].append({'source': s, 'relationship': d.get('relationship_type', 'related_to'), 'properties': d})
         return neighbors
     
-    def query_with_llm(self, user_query: str, max_entities: int = 20) -> str:
+    def query_with_llm(self, user_query: str, max_entities: int = 20, additional_context: str = "", model: str = None) -> str:
         """Query the knowledge graph using the LLM"""
+        
+        # Use provided model or default
+        use_model = model or self.model
         entities_in_query = [node for node in self.graph.nodes() if node.lower() in user_query.lower()]
         graph_context = [self.get_entity_neighborhood(e) for e in entities_in_query[:max_entities]]
         if not graph_context:
@@ -362,19 +366,45 @@ class GraphQuerier:
         context_text = "\n---\n".join([f"Entity: {c['entity']}\nRelationships: " + 
             ", ".join([f"{c['entity']} --[{r['relationship']}]--> {r['target']}" for r in c['outgoing']]) for c in graph_context])
         
-        prompt = f"""You are analyzing a personal knowledge graph. Answer the user's question based on the graph structure and relationships.
+        # DEEP THINKING / RESEARCH ASSISTANT PROMPT
+        prompt = f"""You are an expert Research Assistant helping Michel understand his Obsidian knowledge base.
+        
+        Context from notes and web:
+        {additional_context}
+        {context_text}
+        
+        User question: {user_query}
+        
+        REQUIREMENTS:
+        1. **Structure**: Use `##` headers. Start with an Executive Summary if complex.
+        2. **Content**:
+           - Answer the user's question directly.
+           - Synthesize findings from both Vault and Web.
+           - **Vault Citations**: Cite vault sources as `[[Note Name]]`.
+           - **Web Citations**: Cite web sources as `[Title](URL)`.
+        3. **Deep Thinking**:
+           - If the query is technical/engineering, use "Hardware Pathology" (diagnosing faults) and "Treatment" (fixes) metaphors where appropriate.
+           - If medical, focus on "Clinical Implications" and "Treatment Considerations".
+           - Highlighting specific "Known Defects" or "Common Pitfalls" is highly valued.
+        
+        Answer:"""
 
-Knowledge Graph Context:
-<graph>
-{context_text}
-</graph>
+        # Check if using Gemini model
+        if use_model.lower().startswith("gemini-"):
+            try:
+                genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+                gemini_model = genai.GenerativeModel(use_model)
+                logging.info(f"Using Gemini Prompt (First 500 chars): {prompt[:500]}...") 
+                logging.info(f"Using Gemini Prompt (Last 500 chars): ...{prompt[-500:]}")
+                response = gemini_model.generate_content(prompt)
+                return response.text
+            except Exception as e:
+                logging.error(f"Error calling Gemini API: {e}")
+                return f"Error generating response with Gemini: {str(e)}"
 
-User Question: {user_query}
-
-Provide a comprehensive answer cite specific entities when relevant."""
-
+        # Default to OpenRouter/OpenAI compatible (Claude, Kimi, etc.)
         response = self.client.chat.completions.create(
-            model=self.model,
+            model=use_model,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=3000
         )
@@ -383,3 +413,89 @@ Provide a comprehensive answer cite specific entities when relevant."""
     def get_graph_stats(self) -> Dict[str, Any]:
         """Get graph statistics"""
         return {'total_nodes': self.graph.number_of_nodes(), 'total_edges': self.graph.number_of_edges()}
+
+
+if __name__ == "__main__":
+    import requests
+    import argparse
+    
+    # Parse args for batch size
+    parser = argparse.ArgumentParser(description='Build Knowledge Graph from Vault Chunks')
+    parser.add_argument('--chunks', type=int, default=10000, help='Max chunks to process')
+    parser.add_argument('--batch', type=int, default=10, help='Batch size for saving')
+    args = parser.parse_args()
+
+    print("🚀 Starting Kimi Graph Builder...")
+    
+    # 1. Initialize Builder
+    try:
+        builder = GraphBuilder()
+        print("✅ GraphBuilder initialized")
+    except Exception as e:
+        print(f"❌ Failed to init builder: {e}")
+        exit(1)
+
+    # 2. Fetch chunks from Embedding Service
+    embedding_url = os.environ.get('EMBEDDING_SERVICE_URL', 'http://obsidian-embedding:8000')
+    print(f"🔌 Connecting to Embedding Service at {embedding_url}...")
+    
+    try:
+        # We need to get all documents. The embedding service might not have a 'dump all' endpoint
+        # usually, but let's try querying for everything or check if we can walk the vault locally.
+        # Since we are inside the container and have /app/vault mounted, we can read files directly!
+        # BUT, to keep chunking consistent with vector store, best to ask embedding service.
+        # Let's assume we can query with empty string or wild card? 
+        # Actually, let's look at embedding_service.py if we can... 
+        # For now, let's just use a simple hack: query for "common words" or check /stats
+        
+        # Better approach for this script: Walk the /app/vault directory and use basic chunking
+        # OR just call the embedding service query with a very broad term if it supports it.
+        # Let's try to hit /query with "*" if supported, or just verify files.
+        
+        # ACTUALLY, checking embedding_service.py would be best, but I can't see it right now.
+        # Let's trust the logic that we can just read the vault files we have mounted!
+        
+        vault_path = Path('/app/vault')
+        if not vault_path.exists():
+            print(f"❌ Vault path {vault_path} does not exist!")
+            exit(1)
+            
+        print(f"📂 Scanning vault at {vault_path}...")
+        md_files = list(vault_path.rglob("*.md"))
+        print(f"   Found {len(md_files)} markdown files.")
+        
+        # Limit files processed to avoid OOM
+        if args.chunks < len(md_files):
+            print(f"⚠️ Limiting to first {args.chunks} files to prevent OOM...")
+            md_files = md_files[:args.chunks]
+        
+        chunks = []
+        for f in md_files:
+            try:
+                content = f.read_text(encoding='utf-8')
+                if len(content) > 50:
+                    # Simple chunking for graph build
+                    chunks.append({
+                        'text': content,
+                        'metadata': {'filename': f.name, 'filepath': str(f), 'chunk_id': 'full_note'}
+                    })
+            except Exception as e:
+                # print(f"   Skipping {f.name}: {e}")
+                pass
+                
+        print(f"📚 Prepared {len(chunks)} chunks/files for processing.")
+        
+        # 3. Build Graph
+        print("🧠 Building Graph (this may take a while)...")
+        builder.build_graph_from_chunks(chunks, batch_size=args.batch)
+        
+        # 4. Save Final
+        save_path = '/app/graph_data/knowledge_graph_full.pkl'
+        builder.save_graph(save_path)
+        print(f"✅ Graph saved to {save_path}")
+        print(f"   Nodes: {builder.graph.number_of_nodes()}")
+        print(f"   Edges: {builder.graph.number_of_edges()}")
+        
+    except Exception as e:
+        print(f"❌ Error during build: {e}")
+        exit(1)

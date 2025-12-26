@@ -3,9 +3,9 @@ from typing import List, Dict, Any
 from .state import Step
 
 class PlannerAgent:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5" # Using the correct model ID
+    def __init__(self, client, model="moonshotai/kimi-k2-0905"):
+        self.client = client
+        self.model = model
 
     def create_plan(self, question: str, vault_context: Dict[str, Any]) -> List[Step]:
         """
@@ -19,6 +19,7 @@ class PlannerAgent:
         - Medical notes (folders: Medical/Scans/, Medical/Treatments/)
         - Technical projects (folders: Tech/ESP32/, Tech/HomeAssistant/)
         - Personal logs (Daily Notes)
+        - Recipes and Cooking notes (folders: Recipes/, Food/)
         
         CRITICAL SEARCH STRATEGY RULES:
         1. Use "vector" or "hybrid" ONLY for searching the user's EXISTING notes and personal content
@@ -31,7 +32,7 @@ class PlannerAgent:
            - Any "how-to" or tutorial content that isn't in the vault
            - Product comparisons or reviews
         
-        3. If in doubt, prefer "web" over "vector" - it's better to get fresh, authoritative information
+        3. If in doubt, prefer "vector" for personal topics (like recipes, logs) and "web" for technical/medical facts
         4. For technical queries, at MINIMUM have 2 web search steps
         5. For medical queries, ALWAYS include web search for treatment protocols/side effects
         """
@@ -43,7 +44,7 @@ class PlannerAgent:
         1. Write a clear sub-question
         2. Choose search strategy: "vector" (concepts), "graph" (entities/relationships), "web" (external/recent info), or "hybrid"
         3. List 3-5 keywords
-        4. Suggest target folders if relevant (e.g. "Medical/", "Tech/")
+        4. Suggest target folders if relevant (e.g. "Medical/", "Tech/", "Recipes/")
         5. Explain why this step is needed
         
         CRITICAL FOR VAULT SEARCHES:
@@ -66,7 +67,19 @@ class PlannerAgent:
           }}
         ]
 
-        Example 2 (Medical Journey - ENRICHMENT REQUIRED):
+        Example 2 (Cooking Query):
+        [
+          {{
+            "step_number": 1,
+            "sub_question": "How do I cook ribs?",
+            "search_strategy": "vector",
+            "keywords": ["ribs", "recipe", "cooking"],
+            "target_folders": ["Recipes/"],
+            "reasoning": "Checking for personal rib recipes"
+          }}
+        ]
+
+        Example 3 (Medical Journey - ENRICHMENT REQUIRED):
         [
           {{
             "step_number": 1,
@@ -87,15 +100,17 @@ class PlannerAgent:
         ]
         """
         
-        response = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=2000,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}]
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
         )
         
         try:
-            content = response.content[0].text.strip()
+            content = response.choices[0].message.content.strip()
             # Remove markdown code blocks if present
             if content.startswith("```json"):
                 content = content[7:]
@@ -145,14 +160,14 @@ class PlannerAgent:
         - reasoning: string
         """
         
-        response = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=1000,
             messages=[{"role": "user", "content": prompt}]
         )
         
         try:
-            content = response.content[0].text.strip()
+            content = response.choices[0].message.content.strip()
             if content.startswith("```json"):
                 content = content[7:]
             if content.endswith("```"):

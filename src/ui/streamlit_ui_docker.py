@@ -199,17 +199,17 @@ with st.sidebar:
                     st.success(f"✅ Ollama: {len(available_models)} LLM models available")
                 else:
                     st.warning("⚠️ No LLM models found (only embedding models)")
-                    available_models = ["llama3.2:3b"]  # Fallback
+                    available_models = ["nemotron-3-nano:latest"]  # Fallback
             else:
                 st.warning("⚠️ Ollama unavailable")
-                available_models = ["qwen2.5-coder:14b", "deepseek-r1:14b", "llama3.2:3b"]  # Fallback
+                available_models = ["nemotron-3-nano:latest", "llama2:latest", "llama3.2:3b"]  # Fallback
     except Exception as e:
         st.error(f"⚠️ {LLM_PROVIDER} offline: {str(e)[:50]}")
         # Fallback models
         if LLM_PROVIDER == "GPT-OSS":
             available_models = ["ai/gpt-oss:latest"]
         else:
-            available_models = ["qwen2.5-coder:14b", "deepseek-r1:14b", "llama3.2:3b"]
+            available_models = ["nemotron-3-nano:latest", "llama2:latest", "llama3.2:3b"]
     
     st.markdown("---")
     
@@ -413,7 +413,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                         graph_response = requests.post(
                             f'{CLAUDE_GRAPH_SERVICE_URL}/query',
                             json={"query": prompt, "max_entities": 20},
-                            timeout=30
+                            timeout=180
                         )
                         
                         if graph_response.status_code == 200:
@@ -568,7 +568,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                                 "query": prompt,
                                 "max_entities": 20
                             },
-                            timeout=30
+                            timeout=180
                         )
                         
                         if graph_response.status_code != 200:
@@ -655,7 +655,7 @@ Answer:"""
                     
                     if active_provider == "claude":
                         # Use Claude API
-                        logger.info(f"🎯 CALLING CLAUDE API with model: claude-sonnet-4-5-20250929")
+                        logger.info(f"🎯 CALLING CLAUDE API with model: claude-haiku-4-5-20251001")
                         if not ANTHROPIC_API_KEY:
                             st.error("❌ Claude API key not configured")
                             st.stop()
@@ -666,7 +666,7 @@ Answer:"""
                             
                             # Extract just the question from system_prompt
                             claude_response = client.messages.create(
-                                model="claude-sonnet-4-5-20250929",
+                                model="claude-haiku-4-5-20251001",
                                 max_tokens=4000,
                                 temperature=temperature,
                                 system=f"You are an AI assistant helping Michel understand his Obsidian knowledge base.\n\nContext from notes:\n{context_text}",

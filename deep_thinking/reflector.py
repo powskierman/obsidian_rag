@@ -3,9 +3,9 @@ from typing import List, Dict, Any
 from .state import Step, PastStep, RAGState
 
 class ReflectionAgent:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5"
+    def __init__(self, client, model="moonshotai/kimi-k2-0905"):
+        self.client = client
+        self.model = model
 
     def reflect(self, step: Step, documents: List[Dict[str, Any]], state: RAGState) -> PastStep:
         """
@@ -42,14 +42,14 @@ class ReflectionAgent:
         }}
         """
         
-        response = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
         
         try:
-            content = response.content[0].text.strip()
+            content = response.choices[0].message.content.strip()
             # Robust JSON extraction
             start_idx = content.find('{')
             end_idx = content.rfind('}')

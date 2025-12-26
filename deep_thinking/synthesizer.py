@@ -1,11 +1,12 @@
 import json
+import re
 from typing import List, Tuple
 from .state import RAGState
 
 class FinalAnswerGenerator:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5"
+    def __init__(self, client, model="moonshotai/kimi-k2-0905"):
+        self.client = client
+        self.model = model
 
     def generate(self, state: RAGState) -> Tuple[str, List[str]]:
         """
@@ -49,51 +50,81 @@ class FinalAnswerGenerator:
         {web_docs}
         {images_section}
         
-        Generate a comprehensive answer that:
-        1. Directly addresses the original question
-        2. Synthesizes findings from all research steps
-        3. Cites vault sources using Obsidian link format: [[Folder/Note Name]]
-        4. Cites web sources as [URL](URL) or [Title](URL)
-        5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard medical definitions, treatments, or external context found in the web results, even if they are general.
-        6. If images are provided above, embed relevant ones using markdown format: ![Description](image_url)
-           - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics
-           - Place images in appropriate sections (e.g., under "Hardware Connection" or "Wiring Diagram")
-        7. Acknowledges any gaps or uncertainties
+        You are an expert Research Assistant. Generate a high-quality, comprehensive report.
         
-        Return ONLY a JSON object:
+        REQUIREMENTS:
+        1. **Structure**: Start with an "## Executive Summary". Use `##` and `###` headers for all sections.
+        2. **Formatting**: Use standard Markdown only. 
+           - Use **Markdown Tables** for any comparison data (timeline, scan results, etc.).
+           - bold **key terms**.
+           - Do NOT use ascii lines like `----` or `____`. 
+        3. **Content**:
+           - Directly address the original question.
+           - Synthesize findings from search steps.
+           - Cite vault sources as `[[Folder/Note Name]]`.
+           - Cite web sources as `[Title](URL)`.
+        4. **Web Findings**: If web results are present, you MUST add a `## Web Context` section explaining any technical terms, definitions, or external context found in the web results.
+        5. **Images**: Embed relevant images if available: `![Description](image_url)`.
+        
+        Output Format (XML + JSON):
+        
+        <formatted_answer>
+        ## Executive Summary
+        (Brief overview...)
+        
+        ## Detailed Analysis
+        (Your content with tables...)
+        
+        ## Web Context
+        (If applicable...)
+        </formatted_answer>
+        
+        <metadata_json>
         {{
-            "answer": "...",
-            "citations": [["[[Medical/CAR-T/Treatment Log 2023-05-15]]", "https://example.com"],
+            "citations": [["[[Note Name]]", "URL"], ...],
             "confidence_score": 0.9,
             "confidence_justification": "Detailed scan results found..."
         }}
+        </metadata_json>
         """
         
-        response = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=3000,
             messages=[{"role": "user", "content": prompt}]
         )
         
         try:
-            content = response.content[0].text.strip()
-            if content.startswith("```json"):
-                content = content[7:]
-            if content.endswith("```"):
-                content = content[:-3]
-            content = content.strip()
+            content = response.choices[0].message.content.strip()
             
-            result = json.loads(content)
+            # Extract formatted answer
+            answer_match = re.search(r'<formatted_answer>(.*?)</formatted_answer>', content, re.DOTALL)
+            answer = answer_match.group(1).strip() if answer_match else "Could not parse answer from response."
+            
+            # Extract and parse metadata JSON
+            metadata_match = re.search(r'<metadata_json>(.*?)</metadata_json>', content, re.DOTALL)
+            metadata = {}
+            if metadata_match:
+                try:
+                    metadata_str = metadata_match.group(1).strip()
+                    if metadata_str.startswith("```json"):
+                        metadata_str = metadata_str[7:]
+                    if metadata_str.endswith("```"):
+                        metadata_str = metadata_str[:-3]
+                    metadata = json.loads(metadata_str.strip())
+                except:
+                    pass
+            
             return {
-                "answer": result.get("answer", "Could not generate answer."),
-                "citations": result.get("citations", []),
-                "confidence_score": result.get("confidence_score", 0.0),
-                "confidence_justification": result.get("confidence_justification", "No justification provided.")
+                "answer": answer,
+                "citations": metadata.get("citations", []),
+                "confidence_score": metadata.get("confidence_score", 0.0),
+                "confidence_justification": metadata.get("confidence_justification", "No justification provided.")
             }
         except Exception as e:
             print(f"Error generating final answer: {e}")
             return {
-                "answer": "Error generating answer.",
+                "answer": f"Error generating answer: {content[:200]}...",
                 "citations": [],
                 "confidence_score": 0.0,
                 "confidence_justification": f"Error: {e}"

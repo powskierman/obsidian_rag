@@ -9,20 +9,21 @@ from .synthesizer import FinalAnswerGenerator
 class DeepThinkingRAG:
     def __init__(
         self, 
-        anthropic_client, 
+        client, 
         vector_service_url: str = "http://localhost:8000",
-        graph_service_url: str = "http://localhost:8003",
-        enable_reranking: bool = True
+        graph_service_url: str = "http://localhost:8002",
+        enable_reranking: bool = True,
+        model: str = "moonshotai/kimi-k2-0905"
     ):
-        self.planner = PlannerAgent(anthropic_client)
+        self.planner = PlannerAgent(client, model=model)
         self.supervisor = RetrievalSupervisor(
             vector_service_url, 
             graph_service_url,
             enable_reranking=enable_reranking
         )
-        self.reflector = ReflectionAgent(anthropic_client)
-        self.policy = PolicyAgent(anthropic_client)
-        self.synthesizer = FinalAnswerGenerator(anthropic_client)
+        self.reflector = ReflectionAgent(client, model=model)
+        self.policy = PolicyAgent(client, model=model)
+        self.synthesizer = FinalAnswerGenerator(client, model=model)
         
     def query(self, question: str, max_iterations: int = 7, status_callback=None) -> Dict[str, Any]:
         """
