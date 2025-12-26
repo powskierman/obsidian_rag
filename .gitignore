@@ -88,3 +88,6 @@ tmp_*/
 scanner.log
 embedding_service.log
 claude_desktop_config_with_obsidian.json
+webapp/.next/
+webapp/node_modules/
+webapp/.turbo/
