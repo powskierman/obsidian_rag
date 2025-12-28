@@ -51,7 +51,8 @@
       "Bash(du -sh:*)",
       "Bash(du:*)",
       "Bash(xargs:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
