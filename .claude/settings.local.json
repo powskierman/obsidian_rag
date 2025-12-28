@@ -36,7 +36,8 @@
       "WebFetch(domain:levelup.gitconnected.com)",
       "WebFetch(domain:medium.com)",
       "Bash(git pull:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []
