@@ -350,28 +350,40 @@ class GraphQuerier:
             neighbors['incoming'].append({'source': s, 'relationship': d.get('relationship_type', 'related_to'), 'properties': d})
         return neighbors
     
-    def query_with_llm(self, user_query: str, max_entities: int = 20) -> str:
-        """Query the knowledge graph using the LLM"""
+    def query_with_llm(self, user_query: str, max_entities: int = 20, additional_context: str = "", custom_system_prompt: str = "") -> str:
+        """Query the knowledge graph using the LLM with optional additional context from vector search and custom system prompt"""
         entities_in_query = [node for node in self.graph.nodes() if node.lower() in user_query.lower()]
+        logger.info(f"=== GRAPH BUILDER DEBUG ===")
+        logger.info(f"Entities found in query: {entities_in_query[:10]}")
         graph_context = [self.get_entity_neighborhood(e) for e in entities_in_query[:max_entities]]
         if not graph_context:
             centrality = nx.degree_centrality(self.graph)
             top_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10]
+            logger.info(f"No entities in query, using top centrality nodes: {[node for node, _ in top_nodes]}")
             graph_context = [self.get_entity_neighborhood(node) for node, _ in top_nodes]
-        
-        context_text = "\n---\n".join([f"Entity: {c['entity']}\nRelationships: " + 
+
+        context_text = "\n---\n".join([f"Entity: {c['entity']}\nRelationships: " +
             ", ".join([f"{c['entity']} --[{r['relationship']}]--> {r['target']}" for r in c['outgoing']]) for c in graph_context])
-        
-        prompt = f"""You are analyzing a personal knowledge graph. Answer the user's question based on the graph structure and relationships.
 
-Knowledge Graph Context:
-<graph>
-{context_text}
-</graph>
+        logger.info(f"Graph context (first 500 chars): {context_text[:500]}")
+        logger.info(f"Using custom system prompt: {bool(custom_system_prompt)}")
 
-User Question: {user_query}
+        # Build prompt with optional custom system prompt
+        if custom_system_prompt:
+            # Use custom system prompt - user has personalized context
+            prompt_parts = [custom_system_prompt]
+        else:
+            # Use default generic prompt
+            prompt_parts = ["You are analyzing a personal knowledge graph. Answer the user's question based on the graph structure and relationships."]
 
-Provide a comprehensive answer cite specific entities when relevant."""
+        if additional_context:
+            prompt_parts.append(f"\nAdditional Context from Vector Search:\n<vector_context>\n{additional_context}\n</vector_context>")
+
+        prompt_parts.append(f"\nKnowledge Graph Context:\n<graph>\n{context_text}\n</graph>")
+        prompt_parts.append(f"\nUser Question: {user_query}")
+        prompt_parts.append("\nProvide a comprehensive answer cite specific entities when relevant.")
+
+        prompt = "\n".join(prompt_parts)
 
         response = self.client.chat.completions.create(
             model=self.model,

@@ -1,8 +1,0 @@
----
-tags:
-  - recipe
----
-# Coq au Vin
-
-![](Coq-au-Vin-image1.png){width="8.5625in" height="11.0625in"}
-

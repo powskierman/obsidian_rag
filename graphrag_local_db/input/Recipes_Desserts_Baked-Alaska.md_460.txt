@@ -1,9 +1,0 @@
-# Baked-Alaska.md
-
----
-tags:
-  - recipe
----
-# Baked Alaska
-
-![](Baked-Alaska-image1.png){width="11.0625in" height="8.5625in"}

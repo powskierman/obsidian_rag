@@ -3,9 +3,12 @@ Flask service for Claude-powered knowledge graph queries
 Runs alongside your existing embedding service in Docker
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 import os
+import re
+import requests
+import json
 from kimi_graph_builder import GraphBuilder, GraphQuerier
 import logging
 
@@ -20,6 +23,307 @@ logger = logging.getLogger(__name__)
 builder = None
 querier = None
 graph_loaded = False
+
+# Environment variables for vector service
+EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8000")
+
+
+def extract_entities_from_graph(graph_text: str) -> list:
+    """Extract key entities from graph response text."""
+    # Extract capitalized phrases (likely entities)
+    entities = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', graph_text)
+
+    # Common words to filter out
+    stopwords = {'The', 'This', 'That', 'These', 'Those', 'There', 'Here',
+                 'When', 'Where', 'What', 'How', 'Why', 'Based', 'Your'}
+
+    # Filter and deduplicate
+    entities = [e for e in entities if e not in stopwords]
+    entities = list(set(entities))[:10]  # Top 10 unique entities
+
+    return entities
+
+
+def call_llm(provider: str, model: str, system_prompt: str, user_query: str, temperature: float = 0.7) -> str:
+    """
+    Call the specified LLM provider with the given prompt.
+
+    Args:
+        provider: 'ollama', 'claude', 'gemini', or 'gpt-oss'
+        model: Model name (e.g., 'llama3.2', 'claude-sonnet-4-5-20250929', 'gemini-3-pro-preview')
+        system_prompt: System prompt with context
+        user_query: User's question
+        temperature: Temperature for generation
+
+    Returns:
+        LLM response text
+    """
+    logger.info(f"Calling LLM: provider={provider}, model={model}")
+
+    if provider == "claude":
+        # Use Claude API via Anthropic
+        from anthropic import Anthropic
+
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY not configured")
+
+        client = Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model=model,
+            max_tokens=4000,
+            temperature=temperature,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_query}]
+        )
+        return response.content[0].text
+
+    elif provider == "gemini":
+        # Use Gemini API via REST
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY not configured")
+
+        # Combine system prompt and user query for Gemini
+        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        gemini_response = requests.post(
+            gemini_url,
+            headers={
+                "x-goog-api-key": api_key,
+                "Content-Type": "application/json"
+            },
+            json={
+                "contents": [{
+                    "role": "user",
+                    "parts": [{"text": full_prompt}]
+                }],
+                "generationConfig": {
+                    "temperature": temperature,
+                    "maxOutputTokens": 4000
+                }
+            },
+            timeout=180
+        )
+
+        if gemini_response.status_code != 200:
+            raise ValueError(f"Gemini API error: {gemini_response.status_code} - {gemini_response.text}")
+
+        result = gemini_response.json()
+        candidates = result.get('candidates', [])
+        if candidates and len(candidates) > 0:
+            content = candidates[0].get('content', {})
+            parts = content.get('parts', [])
+            if parts and len(parts) > 0:
+                return parts[0].get('text', '')
+
+        raise ValueError("Unexpected Gemini response format")
+
+    elif provider == "gpt-oss":
+        # Use OpenAI-compatible API (gpt-oss)
+        llm_host = os.getenv("GPT_OSS_HOST", "http://host.docker.internal:12434/engines/llama.cpp")
+
+        # Combine system prompt and user query
+        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+
+        llm_response = requests.post(
+            f'{llm_host}/v1/chat/completions',
+            json={
+                'model': model,
+                'messages': [
+                    {'role': 'system', 'content': full_prompt}
+                ],
+                'max_tokens': 4096,
+                'temperature': temperature
+            },
+            timeout=180
+        )
+
+        if llm_response.status_code != 200:
+            raise ValueError(f"GPT-OSS API error: {llm_response.status_code} - {llm_response.text}")
+
+        result = llm_response.json()
+        if 'choices' in result and len(result['choices']) > 0:
+            return result['choices'][0]['message']['content']
+
+        raise ValueError("Unexpected GPT-OSS response format")
+
+    else:  # ollama (default)
+        ollama_host = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
+
+        # Combine system prompt and user query for Ollama
+        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+
+        ollama_response = requests.post(
+            f'{ollama_host}/api/generate',
+            json={
+                'model': model,
+                'prompt': full_prompt,
+                'stream': False,
+                'options': {
+                    'temperature': temperature
+                }
+            },
+            timeout=180
+        )
+
+        if ollama_response.status_code != 200:
+            raise ValueError(f"Ollama API error: {ollama_response.status_code} - {ollama_response.text}")
+
+        result = ollama_response.json()
+        return result.get('response', '')
+
+
+def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: str, temperature: float = 0.7):
+    """
+    Call the specified LLM provider with streaming enabled.
+
+    Args:
+        provider: 'ollama', 'claude', 'gemini', or 'gpt-oss'
+        model: Model name
+        system_prompt: System prompt with context
+        user_query: User's question
+        temperature: Temperature for generation
+
+    Yields:
+        Chunks of text from the LLM as they're generated
+    """
+    logger.info(f"Calling LLM with streaming: provider={provider}, model={model}")
+
+    if provider == "claude":
+        # Use Claude API with streaming
+        from anthropic import Anthropic
+
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY not configured")
+
+        client = Anthropic(api_key=api_key)
+
+        with client.messages.stream(
+            model=model,
+            max_tokens=4000,
+            temperature=temperature,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_query}]
+        ) as stream:
+            for text in stream.text_stream:
+                yield text
+
+    elif provider == "ollama":
+        # Use Ollama with streaming
+        ollama_host = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
+        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+
+        ollama_response = requests.post(
+            f'{ollama_host}/api/generate',
+            json={
+                'model': model,
+                'prompt': full_prompt,
+                'stream': True,
+                'options': {'temperature': temperature}
+            },
+            timeout=180,
+            stream=True
+        )
+
+        if ollama_response.status_code != 200:
+            raise ValueError(f"Ollama API error: {ollama_response.status_code}")
+
+        # Stream the response
+        for line in ollama_response.iter_lines():
+            if line:
+                try:
+                    chunk = json.loads(line)
+                    if 'response' in chunk:
+                        yield chunk['response']
+                except json.JSONDecodeError:
+                    continue
+
+    elif provider == "gpt-oss":
+        # Use OpenAI-compatible streaming
+        llm_host = os.getenv("GPT_OSS_HOST", "http://host.docker.internal:12434/engines/llama.cpp")
+        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+
+        llm_response = requests.post(
+            f'{llm_host}/v1/chat/completions',
+            json={
+                'model': model,
+                'messages': [{'role': 'system', 'content': full_prompt}],
+                'max_tokens': 4096,
+                'temperature': temperature,
+                'stream': True
+            },
+            timeout=180,
+            stream=True
+        )
+
+        if llm_response.status_code != 200:
+            raise ValueError(f"GPT-OSS API error: {llm_response.status_code}")
+
+        # Stream the response
+        for line in llm_response.iter_lines():
+            if line:
+                line_str = line.decode('utf-8')
+                if line_str.startswith('data: '):
+                    line_str = line_str[6:]
+                    if line_str == '[DONE]':
+                        break
+                    try:
+                        chunk = json.loads(line_str)
+                        if 'choices' in chunk and len(chunk['choices']) > 0:
+                            delta = chunk['choices'][0].get('delta', {})
+                            if 'content' in delta:
+                                yield delta['content']
+                    except json.JSONDecodeError:
+                        continue
+
+    elif provider == "gemini":
+        # Gemini doesn't support streaming in the same way, fall back to non-streaming
+        # but chunk the response for client-side streaming effect
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY not configured")
+
+        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
+        gemini_response = requests.post(
+            gemini_url,
+            headers={
+                "x-goog-api-key": api_key,
+                "Content-Type": "application/json"
+            },
+            json={
+                "contents": [{
+                    "role": "user",
+                    "parts": [{"text": full_prompt}]
+                }],
+                "generationConfig": {
+                    "temperature": temperature,
+                    "maxOutputTokens": 4000
+                }
+            },
+            timeout=180
+        )
+
+        if gemini_response.status_code != 200:
+            raise ValueError(f"Gemini API error: {gemini_response.status_code}")
+
+        result = gemini_response.json()
+        candidates = result.get('candidates', [])
+        if candidates and len(candidates) > 0:
+            content = candidates[0].get('content', {})
+            parts = content.get('parts', [])
+            if parts and len(parts) > 0:
+                text = parts[0].get('text', '')
+                # Chunk the response into words for streaming effect
+                words = text.split(' ')
+                for i, word in enumerate(words):
+                    yield word + (' ' if i < len(words) - 1 else '')
+        else:
+            raise ValueError("Unexpected Gemini response format")
 
 
 def initialize_graph(graph_path: str = None):
@@ -81,37 +385,561 @@ def health():
 @app.route('/query', methods=['POST'])
 def query_graph():
     """
-    Query the knowledge graph with Claude
-    
+    Unified query endpoint supporting vector, graph, and hybrid modes with LLM synthesis
+
     POST body:
     {
         "query": "What treatments are mentioned?",
-        "max_entities": 20  // optional
+        "mode": "vector" | "graph" | "hybrid",  // optional, default: "graph"
+        "llm_provider": "ollama" | "claude" | "gemini" | "gpt-oss",  // optional, default: "ollama"
+        "model": "llama3.2",  // optional, defaults based on provider
+        "temperature": 0.7,  // optional
+        "system_prompt": "Custom system instructions...",  // optional
+        "max_entities": 20,  // optional, for graph mode
+        "n_results": 10,  // optional, for vector/hybrid modes
+        "web_search": false,  // optional, enables web search with Tavily
+        "llm_knowledge": false,  // optional, adds complementary LLM insights
+        "conversation_history": []  // optional, list of {role, content} messages
     }
     """
-    if not graph_loaded:
-        return jsonify({
-            'error': 'Graph not loaded. Please build graph first.'
-        }), 503
-    
     try:
         data = request.json
         user_query = data.get('query', '')
+        mode = data.get('mode', 'graph')
+        llm_provider = data.get('llm_provider', 'ollama')
+        model = data.get('model', '')
+        temperature = data.get('temperature', 0.7)
+        custom_system_prompt = data.get('system_prompt', '')
         max_entities = data.get('max_entities', 20)
-        
+        n_results = data.get('n_results', 10)
+        web_search_enabled = data.get('web_search', False)
+        llm_knowledge_enabled = data.get('llm_knowledge', False)
+        conversation_history = data.get('conversation_history', [])
+
         if not user_query:
             return jsonify({'error': 'Query is required'}), 400
-        
-        # Query with Kimi/LLM
-        answer = querier.query_with_llm(user_query, max_entities=max_entities)
-        
-        return jsonify({
-            'answer': answer,
-            'query': user_query
-        })
-    
+
+        # Set default models based on provider
+        if not model:
+            model_defaults = {
+                'ollama': 'llama3.2',
+                'claude': 'claude-sonnet-4-5-20250929',
+                'gemini': 'gemini-3-pro-preview',
+                'gpt-oss': 'gpt-4'
+            }
+            model = model_defaults.get(llm_provider, 'llama3.2')
+
+        # Handle vector mode: Vector search + LLM synthesis
+        if mode == 'vector':
+            try:
+                # Get vector search results
+                vector_response = requests.post(
+                    f'{EMBEDDING_SERVICE_URL}/query',
+                    json={
+                        'query': user_query,
+                        'n_results': n_results,
+                        'reranking': True,
+                        'deduplicate': True
+                    },
+                    timeout=60
+                )
+
+                if vector_response.status_code != 200:
+                    return jsonify({'error': 'Vector search failed', 'mode': mode}), 503
+
+                vector_data = vector_response.json()
+                documents = vector_data.get('documents', [[]])[0]
+                metadatas = vector_data.get('metadatas', [[]])[0]
+                distances = vector_data.get('distances', [[]])[0]
+
+                # Build context from vector results
+                context_parts = []
+                vector_sources = []
+
+                for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                    # Calculate relevance
+                    if dist < 0:
+                        relevance = abs(dist) * 100
+                    else:
+                        relevance = (1 / (1 + dist)) * 100
+                    relevance = min(100, max(0, relevance))
+
+                    filename = meta.get('filename', 'unknown')
+                    filepath = meta.get('filepath', 'unknown')
+                    snippet = doc[:200] + "..." if len(doc) > 200 else doc
+
+                    context_parts.append(f"Source {i} ({filename}):\n{doc}\n")
+                    vector_sources.append({
+                        'filename': filename,
+                        'filepath': filepath,
+                        'relevance': relevance,
+                        'snippet': snippet
+                    })
+
+                context_text = "\n".join(context_parts)
+
+                # Build system prompt
+                if custom_system_prompt:
+                    system_prompt = custom_system_prompt
+                else:
+                    system_prompt = f"""You are an AI assistant helping analyze an Obsidian knowledge base.
+
+Context from notes:
+{context_text}
+
+Provide a thorough, accurate answer that:
+- References specific information from the context
+- Is medically accurate when discussing health topics
+- Includes technical details when relevant
+- Cites which sources you used
+- If the context doesn't contain relevant information, say so clearly"""
+
+                # Call LLM
+                answer = call_llm(llm_provider, model, system_prompt, user_query, temperature)
+
+                return jsonify({
+                    'answer': answer,
+                    'query': user_query,
+                    'mode': mode,
+                    'sources': vector_sources,
+                    'llm_provider': llm_provider,
+                    'model': model
+                })
+
+            except Exception as e:
+                logger.error(f"Vector mode error: {e}")
+                return jsonify({'error': str(e), 'mode': mode}), 500
+
+        # Handle graph and hybrid modes
+        else:
+            if not graph_loaded:
+                return jsonify({'error': 'Graph not loaded'}), 503
+
+            # Step 1: Query the knowledge graph with custom system prompt
+            logger.info(f"=== GRAPH QUERY DEBUG ===")
+            logger.info(f"Query: {user_query}")
+            logger.info(f"Mode: {mode}")
+            logger.info(f"LLM Provider: {llm_provider}")
+            logger.info(f"Model: {model}")
+            logger.info(f"Max Entities: {max_entities}")
+            logger.info(f"Custom System Prompt Present: {bool(custom_system_prompt)}")
+            logger.info(f"Custom System Prompt (first 200 chars): {custom_system_prompt[:200] if custom_system_prompt else 'None'}")
+
+            # Pass custom_system_prompt to graph query for personalized responses
+            graph_answer = querier.query_with_llm(
+                user_query,
+                max_entities=max_entities,
+                custom_system_prompt=custom_system_prompt
+            )
+            logger.info(f"Graph Answer (first 500 chars): {graph_answer[:500]}")
+
+            # Build base response
+            base_response = {
+                'answer': graph_answer,
+                'query': user_query,
+                'mode': mode
+            }
+
+            # Step 2: If mode is 'hybrid', enhance with vector search
+            if mode == 'hybrid':
+                try:
+                    # Extract entities from graph response
+                    entities = extract_entities_from_graph(graph_answer)
+
+                    # Enhanced vector search with entities
+                    enhanced_query = f"{user_query} {' '.join(entities)}"
+
+                    vector_response = requests.post(
+                        f'{EMBEDDING_SERVICE_URL}/query',
+                        json={
+                            'query': enhanced_query,
+                            'n_results': n_results,
+                            'reranking': True,
+                            'deduplicate': True
+                        },
+                        timeout=60
+                    )
+
+                    if vector_response.status_code == 200:
+                        vector_data = vector_response.json()
+                        documents = vector_data.get('documents', [[]])[0]
+                        metadatas = vector_data.get('metadatas', [[]])[0]
+                        distances = vector_data.get('distances', [[]])[0]
+
+                        # Build vector context
+                        vector_sources = []
+                        for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                            # Calculate relevance
+                            if dist < 0:
+                                relevance = abs(dist) * 100
+                            else:
+                                relevance = (1 / (1 + dist)) * 100
+                            relevance = min(100, max(0, relevance))
+
+                            filename = meta.get('filename', 'unknown')
+                            filepath = meta.get('filepath', 'unknown')
+                            snippet = doc[:200] + "..." if len(doc) > 200 else doc
+
+                            vector_sources.append({
+                                'filename': filename,
+                                'filepath': filepath,
+                                'relevance': relevance,
+                                'snippet': snippet
+                            })
+
+                        base_response['sources'] = vector_sources
+                        base_response['extracted_entities'] = entities
+                    else:
+                        logger.warning(f"Vector search failed with status {vector_response.status_code}")
+                        base_response['mode'] = 'graph'
+                        base_response['warning'] = 'Vector search unavailable, returned graph-only result'
+
+                except Exception as e:
+                    logger.error(f"Hybrid search error: {e}")
+                    base_response['mode'] = 'graph'
+                    base_response['warning'] = f'Hybrid search failed: {str(e)}'
+
+            # Step 3: If web search is requested, extract terms from combined context
+            if web_search_enabled:
+                try:
+                    from tavily import TavilyClient
+
+                    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
+                    if TAVILY_API_KEY:
+                        # Combine graph answer and vector sources for richer context
+                        combined_context = graph_answer
+                        if base_response.get('sources'):
+                            # Add top 3 vector source snippets to context
+                            top_sources = base_response['sources'][:3]
+                            source_text = "\n\n".join([f"Source: {s['snippet']}" for s in top_sources])
+                            combined_context = f"Graph Analysis:\n{graph_answer}\n\nVault Context:\n{source_text}"
+
+                        # Extract specific medical/technical terms from combined context
+                        search_terms_prompt = f"""Based on this combined knowledge, extract 4-6 specific medical terms, medications, procedures, measurements, or technical concepts that would find the most relevant and detailed clinical information on the web. Focus on:
+- Specific medical conditions, diseases, or syndromes mentioned
+- Medications, treatments, or procedures
+- Technical measurements, biomarkers, or test results
+- Specific medical entities (not general terms)
+
+Context:
+{combined_context[:1500]}
+
+Provide only the search terms separated by spaces, no explanation or formatting."""
+
+                        # Call OpenRouter with Kimi to extract search terms
+                        from openai import OpenAI
+                        client = OpenAI(
+                            base_url="https://openrouter.ai/api/v1",
+                            api_key=os.environ.get("OPENROUTER_API_KEY")
+                        )
+
+                        terms_response = client.chat.completions.create(
+                            model="moonshotai/kimi-k2-0905",
+                            messages=[{"role": "user", "content": search_terms_prompt}],
+                            max_tokens=100
+                        )
+                        search_terms = terms_response.choices[0].message.content.strip()
+
+                        logger.info(f"Web search terms extracted: {search_terms}")
+
+                        # Perform web search with extracted terms
+                        tavily = TavilyClient(api_key=TAVILY_API_KEY)
+                        search_response = tavily.search(query=search_terms, search_depth="advanced", max_results=5)
+
+                        if 'results' in search_response and search_response['results']:
+                            web_results = []
+                            for res in search_response['results'][:3]:
+                                web_results.append({
+                                    'title': res['title'],
+                                    'url': res['url'],
+                                    'content': res['content']
+                                })
+
+                            base_response['web_search'] = {
+                                'search_terms': search_terms,
+                                'results': web_results
+                            }
+                            logger.info(f"Web search returned {len(web_results)} results")
+                        else:
+                            base_response['web_search'] = {
+                                'search_terms': search_terms,
+                                'results': [],
+                                'message': 'No web results found'
+                            }
+                            logger.warning("Web search returned no results")
+                    else:
+                        base_response['web_search'] = {
+                            'error': 'TAVILY_API_KEY not configured'
+                        }
+                        logger.error("TAVILY_API_KEY not set")
+                except ImportError:
+                    base_response['web_search'] = {
+                        'error': 'tavily-python not installed'
+                    }
+                    logger.error("tavily-python package not installed")
+                except Exception as e:
+                    logger.error(f"Web search error: {e}")
+                    base_response['web_search'] = {
+                        'error': str(e)
+                    }
+
+            # Step 4: If LLM knowledge is requested, get additional insights
+            if llm_knowledge_enabled:
+                try:
+                    # Build knowledge prompt that complements the main answer
+                    # Use custom system prompt if provided, otherwise use default
+                    if custom_system_prompt:
+                        knowledge_prompt = f"""{custom_system_prompt}
+
+Based on the following information found in the user's vault:
+
+{graph_answer[:2000]}
+
+User's question: {user_query}
+
+Provide ADDITIONAL insights, clinical context, or alternative perspectives that COMPLEMENT (not repeat) the vault information."""
+                    else:
+                        knowledge_prompt = f"""Based on the following information found in the user's vault:
+
+{graph_answer[:2000]}
+
+User's question: {user_query}
+
+Provide ADDITIONAL insights, clinical context, or alternative perspectives that COMPLEMENT (not repeat) the vault information. Focus on:
+1. Clinical implications of the findings
+2. Treatment considerations mentioned
+3. Additional context that would be helpful
+4. Answering aspects of the question not covered by vault notes"""
+
+                    # Call LLM for additional knowledge
+                    llm_knowledge = call_llm(llm_provider, model, knowledge_prompt, user_query, temperature)
+                    base_response['llm_knowledge'] = llm_knowledge
+                    logger.info("LLM knowledge section generated")
+
+                except Exception as e:
+                    logger.error(f"LLM knowledge error: {e}")
+                    base_response['llm_knowledge'] = {
+                        'error': str(e)
+                    }
+
+            return jsonify(base_response)
+
     except Exception as e:
         logger.error(f"Error processing query: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/query_stream', methods=['POST'])
+def query_stream():
+    """
+    Streaming version of /query endpoint for real-time LLM responses.
+
+    Accepts same parameters as /query but returns Server-Sent Events (SSE) stream.
+
+    Request body:
+    {
+        "query": "What treatments are mentioned?",
+        "mode": "vector" | "graph" | "hybrid",
+        "llm_provider": "ollama" | "claude" | "gemini" | "gpt-oss",
+        "model": "llama2",
+        "temperature": 0.7,
+        "system_prompt": "Custom instructions...",
+        "n_results": 10,
+        "stream": true  // Must be true for streaming
+    }
+
+    Returns: Server-Sent Events stream with JSON chunks
+    """
+    try:
+        data = request.json
+        user_query = data.get('query', '')
+        mode = data.get('mode', 'vector')  # Default to vector for streaming
+        llm_provider = data.get('llm_provider', 'ollama')
+        model = data.get('model', '')
+        temperature = data.get('temperature', 0.7)
+        custom_system_prompt = data.get('system_prompt', '')
+        n_results = data.get('n_results', 10)
+
+        if not user_query:
+            return jsonify({'error': 'Query is required'}), 400
+
+        # Set default models
+        if not model:
+            model_defaults = {
+                'ollama': 'llama2',
+                'claude': 'claude-sonnet-4-5-20250929',
+                'gemini': 'gemini-3-pro-preview',
+                'gpt-oss': 'gpt-4'
+            }
+            model = model_defaults.get(llm_provider, 'llama2')
+
+        def generate_stream():
+            """Generator function for streaming response"""
+            try:
+                # Send metadata first
+                yield f"data: {json.dumps({'type': 'metadata', 'mode': mode, 'provider': llm_provider, 'model': model})}\n\n"
+
+                # Handle vector mode with streaming
+                if mode == 'vector':
+                    # Get vector search results
+                    vector_response = requests.post(
+                        f'{EMBEDDING_SERVICE_URL}/query',
+                        json={
+                            'query': user_query,
+                            'n_results': n_results,
+                            'reranking': True,
+                            'deduplicate': True
+                        },
+                        timeout=30
+                    )
+
+                    if vector_response.status_code != 200:
+                        yield f"data: {json.dumps({'type': 'error', 'message': 'Vector search failed'})}\n\n"
+                        return
+
+                    vector_data = vector_response.json()
+                    documents = vector_data.get('documents', [[]])[0]
+                    metadatas = vector_data.get('metadatas', [[]])[0]
+                    distances = vector_data.get('distances', [[]])[0]
+
+                    # Build context and sources
+                    context_parts = []
+                    vector_sources = []
+
+                    for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                        relevance = (1 / (1 + abs(dist))) * 100 if dist < 0 else (1 / (1 + dist)) * 100
+                        relevance = min(100, max(0, relevance))
+
+                        filename = meta.get('filename', 'unknown')
+                        filepath = meta.get('filepath', 'unknown')
+                        snippet = doc[:200] + "..." if len(doc) > 200 else doc
+
+                        context_parts.append(f"Source {i} ({filename}):\n{doc}\n")
+                        vector_sources.append({
+                            'filename': filename,
+                            'filepath': filepath,
+                            'relevance': relevance,
+                            'snippet': snippet
+                        })
+
+                    # Send sources
+                    yield f"data: {json.dumps({'type': 'sources', 'sources': vector_sources})}\n\n"
+
+                    context_text = "\n".join(context_parts)
+
+                    # Build system prompt
+                    if custom_system_prompt:
+                        system_prompt = custom_system_prompt
+                    else:
+                        system_prompt = f"""You are an AI assistant helping analyze an Obsidian knowledge base.
+
+Context from notes:
+{context_text}
+
+Provide a thorough, accurate answer that:
+- References specific information from the context
+- Is medically accurate when discussing health topics
+- Includes technical details when relevant
+- Cites which sources you used
+- If the context doesn't contain relevant information, say so clearly"""
+
+                    # Stream LLM response
+                    yield f"data: {json.dumps({'type': 'start'})}\n\n"
+
+                    for chunk in call_llm_stream(llm_provider, model, system_prompt, user_query, temperature):
+                        yield f"data: {json.dumps({'type': 'content', 'content': chunk})}\n\n"
+
+                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+                elif mode == 'graph':
+                    # Graph mode with streaming
+                    if not graph_loaded:
+                        yield f"data: {json.dumps({'type': 'error', 'message': 'Graph not loaded'})}\n\n"
+                        return
+
+                    # For graph mode, we can't stream the initial query result
+                    # but we can send it in chunks
+                    graph_answer = querier.query_with_llm(user_query, max_entities=20)
+
+                    yield f"data: {json.dumps({'type': 'start'})}\n\n"
+
+                    # Chunk the response for streaming effect
+                    words = graph_answer.split(' ')
+                    for i, word in enumerate(words):
+                        chunk = word + (' ' if i < len(words) - 1 else '')
+                        yield f"data: {json.dumps({'type': 'content', 'content': chunk})}\n\n"
+
+                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+                elif mode == 'hybrid':
+                    # Hybrid mode - similar to graph but with vector enhancement
+                    if not graph_loaded:
+                        yield f"data: {json.dumps({'type': 'error', 'message': 'Graph not loaded'})}\n\n"
+                        return
+
+                    # Get graph answer
+                    graph_answer = querier.query_with_llm(user_query, max_entities=20)
+
+                    # Extract entities and do vector search
+                    entities = extract_entities_from_graph(graph_answer)
+                    enhanced_query = f"{user_query} {' '.join(entities)}"
+
+                    vector_response = requests.post(
+                        f'{EMBEDDING_SERVICE_URL}/query',
+                        json={
+                            'query': enhanced_query,
+                            'n_results': n_results,
+                            'reranking': True,
+                            'deduplicate': True
+                        },
+                        timeout=60
+                    )
+
+                    vector_sources = []
+                    if vector_response.status_code == 200:
+                        vector_data = vector_response.json()
+                        documents = vector_data.get('documents', [[]])[0]
+                        metadatas = vector_data.get('metadatas', [[]])[0]
+                        distances = vector_data.get('distances', [[]])[0]
+
+                        for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
+                            relevance = (1 / (1 + abs(dist))) * 100 if dist < 0 else (1 / (1 + dist)) * 100
+                            vector_sources.append({
+                                'filename': meta.get('filename', 'unknown'),
+                                'filepath': meta.get('filepath', 'unknown'),
+                                'relevance': min(100, max(0, relevance)),
+                                'snippet': doc[:200] + "..." if len(doc) > 200 else doc
+                            })
+
+                    # Send sources and entities
+                    yield f"data: {json.dumps({'type': 'sources', 'sources': vector_sources})}\n\n"
+                    yield f"data: {json.dumps({'type': 'entities', 'entities': entities})}\n\n"
+
+                    # Stream the answer
+                    yield f"data: {json.dumps({'type': 'start'})}\n\n"
+
+                    words = graph_answer.split(' ')
+                    for i, word in enumerate(words):
+                        chunk = word + (' ' if i < len(words) - 1 else '')
+                        yield f"data: {json.dumps({'type': 'content', 'content': chunk})}\n\n"
+
+                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+            except Exception as e:
+                logger.error(f"Streaming error: {e}")
+                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+
+        return Response(
+            stream_with_context(generate_stream()),
+            mimetype='text/event-stream',
+            headers={
+                'Cache-Control': 'no-cache',
+                'X-Accel-Buffering': 'no'
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Error setting up stream: {e}")
         return jsonify({'error': str(e)}), 500
 
 

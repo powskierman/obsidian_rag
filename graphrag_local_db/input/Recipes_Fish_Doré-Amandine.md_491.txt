@@ -1,9 +1,0 @@
-# Doré-Amandine.md
-
----
-tags:
-  - recipe
----
-# Doré Amandine
-
-![](Doré-Amandine-image1.png){width="8.5625in" height="11.0625in"}
