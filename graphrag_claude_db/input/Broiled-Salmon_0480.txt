@@ -1,9 +1,0 @@
----
-tags:
-  - recipe
----
-# Broiled Salmon
-
-![](Broiled-Salmon-image1.png){width="8.5625in" height="11.0625in"}![](Broiled-Salmon-image2.png){width="8.5625in" height="11.0625in"}
-
-

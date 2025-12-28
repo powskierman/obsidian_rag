@@ -1,8 +1,0 @@
----
-tags:
-  - recipe
----
-# Pork Ribs
-
-![](Pork-Ribs-image1.png){width="8.5625in" height="11.0625in"}
-

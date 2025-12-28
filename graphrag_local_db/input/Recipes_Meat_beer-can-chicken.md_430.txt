@@ -1,9 +1,0 @@
-# beer-can-chicken.md
-
----
-tags:
-  - recipe
----
-# beer can chicken
-
-![](beer-can-chicken.docx-image1.png){width="8.5625in" height="11.0625in"}

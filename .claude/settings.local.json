@@ -36,7 +36,22 @@
       "WebFetch(domain:levelup.gitconnected.com)",
       "WebFetch(domain:medium.com)",
       "Bash(git pull:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)",
+      "Bash(ls:*)",
+      "Bash(kill:*)",
+      "Bash(cd:*)",
+      "Bash(echo \"Check localStorage in browser console:\nlocalStorage.getItem\\(''obsidian-rag-settings''\\)\n\nThis will show your current model setting.\")",
+      "Bash(du -sh:*)",
+      "Bash(du:*)",
+      "Bash(xargs:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

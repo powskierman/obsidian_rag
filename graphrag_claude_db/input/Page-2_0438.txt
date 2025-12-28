@@ -1,8 +1,0 @@
----
-tags:
-  - recipe
----
-# Page 2
-
-![](Sous-vide-Lamb-Shank_Page-2-image1.png){width="8.5625in" height="11.0625in"}
-

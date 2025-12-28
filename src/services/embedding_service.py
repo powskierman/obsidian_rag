@@ -5,6 +5,7 @@ Handles semantic search, indexing, and advanced retrieval features
 """
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import chromadb
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import os
@@ -33,6 +34,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from src.utils.query_feedback import log_query, save_feedback, get_metrics, get_all_mode_performance, get_database_stats
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for browser access
 
 # Initialize models
 print("Loading embedding model...")

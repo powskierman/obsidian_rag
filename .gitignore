@@ -49,13 +49,7 @@ graph_data/**/*.json
 graph_data/**/*.pkl
 graph_data/*.json
 graph_data/*.pkl
-graphrag_claude_db/
-graphrag_db/
-graphrag_local_db/
 htmlcov/
-lightrag_db/
-lightrag_db_backup_*/
-mem0_db/
 data/vault_processing/
 venv/
 venv_*/
@@ -88,7 +82,10 @@ tmp_*/
 scanner.log
 embedding_service.log
 claude_desktop_config_with_obsidian.json
-webapp/
+
+# Webapp build artifacts
 webapp/.next/
 webapp/node_modules/
 webapp/.turbo/
+webapp/dist/
+webapp/.cache/
