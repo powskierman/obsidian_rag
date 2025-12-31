@@ -51,7 +51,7 @@ class RetrievalSupervisor:
         
         if strategy == "vector":
             # Retrieve more results for reranking
-            n_results = 10 if self.enable_reranking else 5
+            n_results = 40 if self.enable_reranking else 10
             results = self._query_vector(query, filters, n_results=n_results)
             
             # Fallback: If filtered search returns nothing, try without filters
@@ -66,7 +66,7 @@ class RetrievalSupervisor:
         elif strategy == "hybrid":
             # Graph search disabled: LightRAG requires multiple sequential LLM calls
             # Deep Thinking works great with vector-only search
-            n_results = 10 if self.enable_reranking else 5
+            n_results = 40 if self.enable_reranking else 15
             vec_results = self._query_vector(query, filters, n_results=n_results)
             
             # Fallback for hybrid (vector part)
@@ -81,7 +81,7 @@ class RetrievalSupervisor:
         
         # Apply reranking if enabled
         if self.enable_reranking and results and len(results) > 0:
-            results = self.reranker.rerank(query, results, top_k=5)
+            results = self.reranker.rerank(query, results, top_k=15)
             
         return results
     

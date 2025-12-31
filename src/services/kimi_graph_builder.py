@@ -119,7 +119,9 @@ class GraphBuilder:
         prompt = f"""Analyze this text from a personal knowledge base and extract:
 
 1. **Entities**: Important concepts, people, places, treatments, technologies, projects, etc.
-2. **Relationships**: How these entities relate to each other
+2. **Relationships**: How these entities relate to each other.
+3. **Timeline**: Specific dates or sequences of events.
+4. **Importance**: Rate the clinical or central relevance of entities (1-10).
 
 Text to analyze:
 <text>
@@ -140,7 +142,8 @@ Extract entities and relationships in JSON format. IMPORTANT: Return ONLY valid 
       "properties": {{
         "description": "Brief description",
         "domain": "medical|technical|personal|general",
-        "importance": "high|medium|low"
+        "importance": 10,
+        "category": "treatment|symptom|metric|other"
       }}
     }}
   ],
@@ -148,23 +151,22 @@ Extract entities and relationships in JSON format. IMPORTANT: Return ONLY valid 
     {{
       "source": "Entity1 Name",
       "target": "Entity2 Name", 
-      "type": "treats|causes|uses|creates|relates_to|part_of|used_in|leads_to",
+      "type": "treats|causes|uses|creates|relates_to|part_of|used_in|leads_to|happened_on|followed_by",
       "properties": {{
         "description": "How they relate",
         "strength": "strong|medium|weak",
-        "temporal": "before|after|during|null"
+        "temporal": "2023-01-15|before|after|during|null",
+        "sequence_id": 1
       }}
     }}
   ]
 }}
 
 Guidelines:
-- Extract 3-10 most important entities per chunk
-- Focus on entities that connect to other knowledge
-- For medical content: extract treatments, conditions, medications, procedures
-- For technical content: extract technologies, projects, tools, methods
-- Relationships should be specific and meaningful
-- Use consistent entity names
+- **Importance Scoring**: Rate entities 1-10. 10 = Critical medical diagnosis/treatment or core project. 1 = Minor detail.
+- **Temporal Tracking**: If a relationship has a specific date or order, capture it in "temporal".
+- Extract 5-15 important entities per chunk.
+- For medical content: strictly identify treatments, conditions, medications, dosages.
 - Return ONLY the JSON object, no markdown code blocks, no explanations"""
 
         for attempt in range(self.max_retries):
@@ -350,12 +352,19 @@ class GraphQuerier:
             neighbors['incoming'].append({'source': s, 'relationship': d.get('relationship_type', 'related_to'), 'properties': d})
         return neighbors
     
-    def query_with_llm(self, user_query: str, max_entities: int = 20, additional_context: str = "", custom_system_prompt: str = "") -> str:
-        """Query the knowledge graph using the LLM with optional additional context from vector search and custom system prompt"""
+    def query_with_llm(self, user_query: str, max_entities: int = 20, additional_context: str = "", custom_system_prompt: str = "") -> tuple[str, list[dict]]:
+        """
+        Query the knowledge graph using the LLM with optional additional context.
+        Returns: (answer_text, context_nodes)
+        """
         entities_in_query = [node for node in self.graph.nodes() if node.lower() in user_query.lower()]
         logger.info(f"=== GRAPH BUILDER DEBUG ===")
         logger.info(f"Entities found in query: {entities_in_query[:10]}")
+        
+        # Get neighborhood for entities
         graph_context = [self.get_entity_neighborhood(e) for e in entities_in_query[:max_entities]]
+        
+        # Fallback to centrality if no entities found
         if not graph_context:
             centrality = nx.degree_centrality(self.graph)
             top_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10]
@@ -370,10 +379,8 @@ class GraphQuerier:
 
         # Build prompt with optional custom system prompt
         if custom_system_prompt:
-            # Use custom system prompt - user has personalized context
             prompt_parts = [custom_system_prompt]
         else:
-            # Use default generic prompt
             prompt_parts = ["You are analyzing a personal knowledge graph. Answer the user's question based on the graph structure and relationships."]
 
         if additional_context:
@@ -390,7 +397,8 @@ class GraphQuerier:
             messages=[{"role": "user", "content": prompt}],
             max_tokens=3000
         )
-        return response.choices[0].message.content
+        
+        return response.choices[0].message.content, graph_context
 
     def get_graph_stats(self) -> Dict[str, Any]:
         """Get graph statistics"""

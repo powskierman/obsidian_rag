@@ -37,6 +37,7 @@ export interface SettingsState {
   temperature: number;
   showSources: boolean;
   enhancedSearch: boolean;
+  deepThinking: boolean;
 }
 
 export interface ServicesStatus {
@@ -81,6 +82,7 @@ export const defaultSettings: SettingsState = {
   temperature: 0.3,
   showSources: true,
   enhancedSearch: false,
+  deepThinking: false,
 };
 
 export const defaultServices: ServicesStatus = {

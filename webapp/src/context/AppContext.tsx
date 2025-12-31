@@ -116,7 +116,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             chunks: stats.documents,
           },
           knowledgeGraph: {
-            available: stats.graph !== null && stats.graph.graph_loaded === true,
+            available: stats.graph !== null && (stats.graph.nodes > 0 || stats.graph.graph_loaded === true),
             entities: stats.graph?.nodes || 0,
             relationships: stats.graph?.edges || 0,
           },

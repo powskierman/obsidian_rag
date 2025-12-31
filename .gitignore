@@ -43,6 +43,8 @@ Scripts/logs/
 __pycache__/
 chroma_db/
 chroma_db_backup_*/
+lightrag_db/
+lightrag_db_backup_*/
 cleanup_analysis.md
 coverage.xml
 graph_data/**/*.json

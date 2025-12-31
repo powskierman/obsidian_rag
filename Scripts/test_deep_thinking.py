@@ -18,7 +18,7 @@ def main():
         return
 
     vector_url = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
-    graph_url = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8020") # Default to port 8020 if not set, but check docker-compose
+    graph_url = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8002") # Updated to active Graph Service port
 
     print(f"Using Vector Service: {vector_url}")
     print(f"Using Graph Service: {graph_url}")

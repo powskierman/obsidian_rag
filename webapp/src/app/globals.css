@@ -1,22 +1,115 @@
 @import "tailwindcss";
 
-@utility bg-gradient-radial {
-    background-image: radial-gradient(var(--tw-gradient-stops));
+@theme {
+    --color-glass-bg: rgba(10, 10, 20, 0.3);
+    --color-glass-border: rgba(176, 38, 255, 0.2);
+    --color-accent-purple: #b026ff;
+    --color-accent-gold: #ffd60a;
+    --backdrop-blur-xs: 2px;
+    --color-obsidian-violet: #9d4edd;
+    --color-obsidian-slate: #1a1a2e;
 }
 
-@utility bg-gradient-conic {
-    background-image: conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops));
-}
-
-:root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-}
-
+/* Base styles for the dark theme */
 body {
-    color: rgb(var(--foreground-rgb));
-    background: linear-gradient(to bottom,
-            transparent,
-            rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+    @apply bg-[#0a0a0a] text-gray-200;
+}
+
+/* Reusable Glass Class */
+.glass-panel {
+    @apply bg-glass-bg backdrop-blur-xl border border-glass-border shadow-lg;
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.4), rgba(20, 10, 30, 0.3));
+    box-shadow: 0 8px 32px 0 rgba(176, 38, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.glass-panel:hover {
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.5), rgba(20, 10, 30, 0.4));
+    box-shadow: 0 8px 32px 0 rgba(176, 38, 255, 0.15);
+}
+
+/* --- CUSTOM RANGE SLIDER STYLES --- */
+/* The slider itself */
+.slider {
+    -webkit-appearance: none;
+    /* Override default CSS styles */
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    /* Specified height */
+    background: rgba(255, 255, 255, 0.1);
+    /* Dark track */
+    border-radius: 5px;
+    outline: none;
+    /* Remove outline */
+    opacity: 0.7;
+    /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s;
+    /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1;
+    /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    /* Override default look */
+    appearance: none;
+    width: 16px;
+    /* Set a specific slider handle width */
+    height: 16px;
+    /* Slider handle height */
+    background: #a855f7;
+    /* Accent purple color */
+    border-radius: 50%;
+    cursor: pointer;
+    /* Cursor on hover */
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    /* Glowing effect */
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    /* Set a specific slider handle width */
+    height: 16px;
+    /* Slider handle height */
+    background: #a855f7;
+    /* Accent purple color */
+    border-radius: 50%;
+    cursor: pointer;
+    /* Cursor on hover */
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    /* Glowing effect */
+}
+
+/* Obsidian Theme Enhancements */
+h1 {
+    text-shadow: 0 0 20px rgba(176, 38, 255, 0.3);
+}
+
+input[type="text"]:focus {
+    box-shadow: 0 0 20px rgba(176, 38, 255, 0.3), 0 0 40px rgba(176, 38, 255, 0.1);
+}
+
+/* Smooth scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(176, 38, 255, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(176, 38, 255, 0.5);
 }

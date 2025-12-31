@@ -71,29 +71,58 @@ class FinalAnswerGenerator:
         
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=3000,
+            max_tokens=4096,
             messages=[{"role": "user", "content": prompt}]
         )
         
-        try:
-            content = response.content[0].text.strip()
-            if content.startswith("```json"):
-                content = content[7:]
-            if content.endswith("```"):
-                content = content[:-3]
-            content = content.strip()
+        content = response.content[0].text.strip()
+        
+        # 1. Try cleaning markdown code blocks
+        clean_content = content
+        if "```json" in clean_content:
+            clean_content = clean_content.split("```json")[1].split("```")[0].strip()
+        elif "```" in clean_content:
+            clean_content = clean_content.split("```")[1].split("```")[0].strip()
             
-            result = json.loads(content)
+        try:
+            # 2. Try direct JSON parse
+            result = json.loads(clean_content)
             return {
                 "answer": result.get("answer", "Could not generate answer."),
                 "citations": result.get("citations", []),
                 "confidence_score": result.get("confidence_score", 0.0),
-                "confidence_justification": result.get("confidence_justification", "No justification provided.")
+                "confidence_justification": result.get("confidence_justification", "")
+            }
+        except json.JSONDecodeError:
+            # 3. Fallback: Try identifying the JSON object with regex or simple finding
+            try:
+                import re
+                json_match = re.search(r'\{.*\}', content, re.DOTALL)
+                if json_match:
+                    possible_json = json_match.group(0)
+                    result = json.loads(possible_json)
+                    return {
+                        "answer": result.get("answer", "Could not generate answer."),
+                        "citations": result.get("citations", []),
+                        "confidence_score": result.get("confidence_score", 0.0),
+                        "confidence_justification": result.get("confidence_justification", "")
+                    }
+            except Exception:
+                pass
+                
+            # 4. Ultimate Fallback: Return raw content as the answer
+            # This ensures the user gets *something* even if formatting failed
+            print(f"JSON Parse failed. Returning raw content.")
+            return {
+                "answer": content, # Return the full raw text
+                "citations": [],
+                "confidence_score": 0.0,
+                "confidence_justification": "JSON parsing failed, returning raw output."
             }
         except Exception as e:
             print(f"Error generating final answer: {e}")
             return {
-                "answer": "Error generating answer.",
+                "answer": f"Error generating answer: {str(e)}",
                 "citations": [],
                 "confidence_score": 0.0,
                 "confidence_justification": f"Error: {e}"

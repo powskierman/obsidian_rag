@@ -1,5 +1,5 @@
 #!/bin/bash
-# Index Obsidian vault using Kimi K2 via OpenRouter
+# Index Obsidian vault using Kimi K2 via OpenRouter (Graph Service)
 
 set -e
 
@@ -28,57 +28,29 @@ fi
 echo "✅ OpenRouter API key found"
 echo ""
 
-# Check if lightrag service is running
-if ! docker ps | grep -q obsidian-lightrag; then
-    echo "⚠️  LightRAG service not running. Starting services..."
-    docker compose up -d lightrag-service
+# Check if graph service is running
+if ! docker ps | grep -q obsidian-graph-service; then
+    echo "⚠️  Graph service not running. Starting services..."
+    docker compose up -d graph-service
+    echo "Waiting for service to initialize..."
     sleep 5
 fi
 
-# Get vault path
-if [ ! -z "$OBSIDIAN_VAULT_PATH" ]; then
-    VAULT_PATH="$OBSIDIAN_VAULT_PATH"
-else
-    # Fallback to parsing docker-compose.yml
-    VAULT_PATH=$(grep "/app/vault" docker-compose.yml | head -n 1 | sed 's/^[[:space:]]*-[[:space:]]*//' | cut -d: -f1 | tr -d '"' | sed 's/\${OBSIDIAN_VAULT_PATH}//')
-fi
+echo "📂 Copying build script to container..."
+# Copy the build script to the container to ensure it's available
+docker cp src/services/build_graph.py obsidian-graph-service:/app/build_graph.py
 
-if [ -z "$VAULT_PATH" ] || [ ! -d "$VAULT_PATH" ]; then
-    if [ -d "./vault" ]; then
-        VAULT_PATH="./vault"
-    else
-        echo "❌ Error: Could not detect vault path"
-        exit 1
-    fi
-fi
-
-echo "📂 Vault path: $VAULT_PATH"
-echo "💰 Estimated cost: ~$0.10 per 1M tokens"
+echo "🚀 Starting indexing process inside container..."
+echo "Indices will be saved to: /app/graph_data/knowledge_graph_full.pkl"
+echo ""
+echo "This process may take a while depending on vault size..."
 echo ""
 
-read -p "Continue? (y/n) " -n 1 -r
-echo ""
+# Run the build script with any arguments passed to this shell script
+docker exec -it obsidian-graph-service python /app/build_graph.py "$@"
 
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "❌ Cancelled"
-    exit 1
-fi
-
-echo ""
-echo "🚀 Starting indexing with Kimi..."
-echo ""
-
-# Call the LightRAG service indexing endpoint
-# Using /app/vault because that's what's mounted inside the container
-curl -X POST http://localhost:8001/index-vault \
-     -H "Content-Type: application/json" \
-     -d '{"vault_path": "/app/vault"}'
-
-echo ""
 echo ""
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║                  ✅ Indexing Triggered!                     ║"
+echo "║                  ✅ Indexing Complete!                      ║"
 echo "╚════════════════════════════════════════════════════════════╝"
-echo ""
-echo "Monitor progress with: docker logs -f obsidian-lightrag"
 echo ""

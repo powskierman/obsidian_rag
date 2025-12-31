@@ -133,8 +133,15 @@ def deduplicate_sources(results):
 
 @app.route('/health', methods=['GET'])
 def health():
-    """Health check endpoint"""
-    return jsonify({"status": "healthy"}), 200
+    """Health check endpoint with stats"""
+    try:
+        count = collection.count()
+        return jsonify({
+            "status": "healthy",
+            "documents": count
+        }), 200
+    except:
+        return jsonify({"status": "healthy", "documents": 0}), 200
 
 @app.route('/stats', methods=['GET'])
 def stats():

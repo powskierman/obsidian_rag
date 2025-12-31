@@ -10,11 +10,41 @@ services:
     volumes:
       - ./chroma_db:/app/chroma_db:rw,cached
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
+      - ./src/services/embedding_service.py:/app/embedding_service.py:ro
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+
+  # LightRAG Service - Entity-centric knowledge graph for semantic search
+  lightrag-service:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.lightrag
+    container_name: obsidian-lightrag
+    ports:
+      - "8001:8001"
+    volumes:
+      - lightrag_storage:/app/lightrag_db
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - KIMI_MODEL=moonshotai/kimi-k2-0905
+      - LIGHTRAG_DIR=/app/lightrag_db
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -30,8 +60,10 @@ services:
     ports:
       - "8002:8002"
     volumes:
-      - graph_storage:/app/graph_data
+      - ./data/graph_data:/app/graph_data
       - ./src/services/kimi_graph_builder.py:/app/kimi_graph_builder.py:ro
+      - ./src/services/graph_query_service.py:/app/graph_query_service.py:ro
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
@@ -56,6 +88,39 @@ services:
     depends_on:
       - embedding-service
 
+  # Unified API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.gateway
+    container_name: obsidian-api-gateway
+    ports:
+      - "4000:3000"
+    volumes:
+      - ./src/services/api_gateway.py:/app/api_gateway.py:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - EMBEDDING_SERVICE_URL=http://embedding-service:8000
+      - GRAPH_SERVICE_URL=http://graph-service:8002
+      - LIGHTRAG_SERVICE_URL=http://lightrag-service:8001
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/api/v1/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - rag-network
+    depends_on:
+      - embedding-service
+      - graph-service
+      - lightrag-service
+
   # Streamlit UI
   streamlit-ui:
     build:
@@ -69,18 +134,7 @@ services:
       - ./src/ui/streamlit_ui_docker.py:/app/streamlit_ui_docker.py:ro
     environment:
       - PYTHONUNBUFFERED=1
-      - EMBEDDING_SERVICE_URL=http://embedding-service:8000
-      - CLAUDE_GRAPH_SERVICE_URL=http://graph-service:8002
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - KIMI_MODEL=moonshotai/kimi-k2-0905
-      # LLM Provider Configuration
-      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
-      - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
-      - USE_GPT_OSS=${USE_GPT_OSS:-false}
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - API_GATEWAY_URL=http://api-gateway:3000
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
@@ -97,3 +151,4 @@ networks:
 volumes:
   chroma_db:
   graph_storage:
+  lightrag_storage:

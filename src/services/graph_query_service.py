@@ -11,6 +11,7 @@ import requests
 import json
 from kimi_graph_builder import GraphBuilder, GraphQuerier
 import logging
+from openai import OpenAI
 
 app = Flask(__name__)
 CORS(app)
@@ -148,6 +149,27 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
             return result['choices'][0]['message']['content']
 
         raise ValueError("Unexpected GPT-OSS response format")
+
+    elif provider == "kimi":
+        # Use OpenRouter for Kimi
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY not configured")
+
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+        )
+
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query}
+            ],
+            temperature=temperature
+        )
+        return response.choices[0].message.content
 
     else:  # ollama (default)
         ollama_host = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
@@ -425,7 +447,8 @@ def query_graph():
                 'ollama': 'llama3.2',
                 'claude': 'claude-sonnet-4-5-20250929',
                 'gemini': 'gemini-3-pro-preview',
-                'gpt-oss': 'gpt-4'
+                'gpt-oss': 'gpt-4',
+                'kimi': 'moonshotai/kimi-k2-0905'
             }
             model = model_defaults.get(llm_provider, 'llama3.2')
 
@@ -526,27 +549,66 @@ Provide a thorough, accurate answer that:
             logger.info(f"Custom System Prompt (first 200 chars): {custom_system_prompt[:200] if custom_system_prompt else 'None'}")
 
             # Pass custom_system_prompt to graph query for personalized responses
-            graph_answer = querier.query_with_llm(
+            graph_answer, context_nodes = querier.query_with_llm(
                 user_query,
                 max_entities=max_entities,
                 custom_system_prompt=custom_system_prompt
             )
             logger.info(f"Graph Answer (first 500 chars): {graph_answer[:500]}")
 
+            # Extract entities directly from the context nodes used
+            raw_entities = [node['entity'] for node in context_nodes if 'entity' in node]
+            
+            # Filter out dates (YYYY-MM-DD) and specific noise words
+            import re
+            date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+            # Add specific terms user found irrelevant
+            stopwords = {'Readwise', 'Source', 'Context', 'Key', 'Attached', 'Static', 'Unknown'}
+            
+            verified_entities = []
+            for e in raw_entities:
+                # Skip dates
+                if date_pattern.match(e.strip()):
+                    continue
+                # Skip stopwords (case-insensitive check)
+                if e.strip().title() in stopwords or e.strip() in stopwords:
+                    continue
+                # Skip short numeric artifacts
+                if e.strip().isdigit() and len(e.strip()) < 4:
+                    continue
+                    
+                verified_entities.append(e)
+                
+            # Deduplicate with case normalization preference
+            # Prefer "ESP32" over "esp32", "IoT" over "iot" (heuristic: prefer more uppercase)
+            normalized_map = {}
+            for e in verified_entities:
+                norm = e.lower()
+                if norm not in normalized_map:
+                    normalized_map[norm] = e
+                else:
+                    # If current entity has more uppercase letters than stored one, replace it
+                    # e.g. "ESP32" (3 filtered upper) > "esp32" (0)
+                    current_upper = sum(1 for c in e if c.isupper())
+                    stored_upper = sum(1 for c in normalized_map[norm] if c.isupper())
+                    if current_upper > stored_upper:
+                        normalized_map[norm] = e
+            
+            entities = list(normalized_map.values())
+            logger.info(f"Extracted {len(entities)} verified graph entities for visualization (filtered from {len(raw_entities)})")
+
             # Build base response
             base_response = {
                 'answer': graph_answer,
                 'query': user_query,
-                'mode': mode
+                'mode': mode,
+                'extracted_entities': entities
             }
 
             # Step 2: If mode is 'hybrid', enhance with vector search
             if mode == 'hybrid':
                 try:
-                    # Extract entities from graph response
-                    entities = extract_entities_from_graph(graph_answer)
-
-                    # Enhanced vector search with entities
+                    # Enhanced vector search with verified entities
                     enhanced_query = f"{user_query} {' '.join(entities)}"
 
                     vector_response = requests.post(
@@ -568,6 +630,7 @@ Provide a thorough, accurate answer that:
 
                         # Build vector context
                         vector_sources = []
+                        context_parts = []
                         for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
                             # Calculate relevance
                             if dist < 0:
@@ -578,7 +641,10 @@ Provide a thorough, accurate answer that:
 
                             filename = meta.get('filename', 'unknown')
                             filepath = meta.get('filepath', 'unknown')
-                            snippet = doc[:200] + "..." if len(doc) > 200 else doc
+                            snippet = doc[:300] + "..." if len(doc) > 300 else doc
+                            
+                            doc_context = f"Source {i} ({filename}):\n{doc}\n"
+                            context_parts.append(doc_context)
 
                             vector_sources.append({
                                 'filename': filename,
@@ -589,6 +655,43 @@ Provide a thorough, accurate answer that:
 
                         base_response['sources'] = vector_sources
                         base_response['extracted_entities'] = entities
+                        
+                        # SYNTHESIS STEP: Re-generate answer using both Graph and Vector context
+                        logger.info("Synthesizing Hybrid Answer with Vector Context...")
+                        vector_context_text = "\n".join(context_parts)
+                        
+                        # Prepare context strings
+                        vault_context = f"=== GRAPH ANALYSIS ===\n{graph_answer}\n\n=== DOCUMENTS ===\n{vector_context_text}"
+                        memory_context = "(No specific memory context loaded)" # Placeholder until mem0 integration
+                        
+                        synthesis_system_prompt = f"""Your task is to answer questions by analyzing the retrieved materials and Michel’s personal context.
+
+### CONTEXT FROM MEMORY
+{memory_context}
+
+### RELEVANT NOTES FROM VAULT
+{vault_context}
+
+### USER QUESTION
+{user_query}
+
+When generating your answer:
+1. Reference Michel’s specific **medical timeline** (DLBCL, Yescarta, scans) when relevant.
+2. Incorporate insights from his **Obsidian notes**, citing which notes or sources you use.
+3. Maintain a **compassionate and supportive** tone for medical topics.
+4. Provide **technical depth** and precision for engineering and coding topics.
+5. Adapt to his **expert-level understanding** — avoid overexplaining known concepts.
+6. Be **concise but thorough**, focusing on clarity and reasoning.
+7. Avoid redundant or generic phrasing.
+
+Finally, provide your answer in a structured, easy-to-read format.
+
+**Answer:**
+"""
+                        # Call LLM for final synthesis
+                        final_answer = call_llm(llm_provider, model, synthesis_system_prompt, user_query, temperature)
+                        base_response['answer'] = final_answer
+                        
                     else:
                         logger.warning(f"Vector search failed with status {vector_response.status_code}")
                         base_response['mode'] = 'graph'

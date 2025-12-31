@@ -53,7 +53,11 @@
       "Bash(du:*)",
       "Bash(xargs:*)",
       "Bash(grep:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(npm install:*)",
+      "Read(//Volumes/max/Users/**)",
+      "Bash(rsync:*)",
+      "Read(//Volumes/max/**)"
     ],
     "deny": [],
     "ask": []
