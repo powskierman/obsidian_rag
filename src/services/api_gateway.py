@@ -36,6 +36,7 @@ app.add_middleware(
 # Configuration
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
 GRAPH_SERVICE_URL = os.getenv("GRAPH_SERVICE_URL", "http://localhost:8002")
+LIGHTRAG_SERVICE_URL = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8001")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 # thread pool for running synchronous Deep Thinking agents
@@ -59,6 +60,7 @@ async def health_check():
     """Aggregated health check with stats"""
     emb_data = {}
     graph_data = {}
+    lightrag_data = {}
 
     try:
         async with httpx.AsyncClient() as client:
@@ -82,21 +84,49 @@ async def health_check():
     except:
         graph_status = "unreachable"
 
+    try:
+        async with httpx.AsyncClient() as client:
+            lightrag_resp = await client.get(f"{LIGHTRAG_SERVICE_URL}/health", timeout=2.0)
+            if lightrag_resp.status_code == 200:
+                lightrag_data = lightrag_resp.json()
+                lightrag_status = "healthy"
+            else:
+                lightrag_status = "unhealthy"
+    except:
+        lightrag_status = "unreachable"
+
+    # Get LightRAG stats
+    try:
+        async with httpx.AsyncClient() as client:
+            stats_resp = await client.get(f"{LIGHTRAG_SERVICE_URL}/stats", timeout=2.0)
+            if stats_resp.status_code == 200:
+                lightrag_stats = stats_resp.json()
+                lightrag_data.update(lightrag_stats)
+    except:
+        pass
+
     return {
         "success": True,
         "data": {
             "gateway": "healthy",
             "services": {
                 "embedding": {
-                    "status": emb_status, 
+                    "status": emb_status,
                     "url": EMBEDDING_SERVICE_URL,
                     "count": emb_data.get("documents", 0) or emb_data.get("count", 0) # Handle various response formats
                 },
-                "graph": {
-                    "status": graph_status, 
+                "networkx": {
+                    "status": graph_status,
                     "url": GRAPH_SERVICE_URL,
                     "nodes": graph_data.get("nodes", 0),
                     "edges": graph_data.get("edges", 0)
+                },
+                "lightrag": {
+                    "status": lightrag_status,
+                    "url": LIGHTRAG_SERVICE_URL,
+                    "nodes": lightrag_data.get("graph_nodes", 0),
+                    "edges": lightrag_data.get("graph_edges", 0),
+                    "indexed_notes": lightrag_data.get("indexed_notes", 0)
                 }
             },
         }
@@ -145,6 +175,141 @@ async def unified_search(request: SearchRequest):
                 return response.json()
             except httpx.RequestError as e:
                 raise HTTPException(status_code=503, detail=f"Graph service unreachable: {str(e)}")
+
+class UnifiedQueryRequest(BaseModel):
+    query: str
+    mode: str = "hybrid"  # networkx, lightrag, hybrid
+    max_results: int = 10
+
+@app.post("/api/v1/query")
+async def unified_query(request: UnifiedQueryRequest):
+    """
+    Unified query endpoint that intelligently combines both knowledge graphs
+
+    Modes:
+    - networkx: Query only NetworkX graph (note-centric, wiki-links)
+    - lightrag: Query only LightRAG graph (entity-centric, semantic)
+    - hybrid: Query both and combine results (recommended)
+    """
+    mode = request.mode.lower()
+
+    # NetworkX only
+    if mode == "networkx":
+        async with httpx.AsyncClient() as client:
+            try:
+                payload = {
+                    "query": request.query,
+                    "mode": "hybrid",  # NetworkX's internal hybrid mode
+                    "n_results": request.max_results,
+                    "use_vector": True
+                }
+                response = await client.post(
+                    f"{GRAPH_SERVICE_URL}/query",
+                    json=payload,
+                    timeout=30.0
+                )
+                response.raise_for_status()
+                result = response.json()
+
+                return {
+                    "query": request.query,
+                    "mode": "networkx",
+                    "results": result,
+                    "metadata": {
+                        "source": "NetworkX Graph",
+                        "description": "Note-centric graph with wiki-link relationships"
+                    }
+                }
+            except Exception as e:
+                raise HTTPException(status_code=503, detail=f"NetworkX service error: {str(e)}")
+
+    # LightRAG only
+    elif mode == "lightrag":
+        async with httpx.AsyncClient() as client:
+            try:
+                payload = {
+                    "query": request.query,
+                    "mode": "hybrid"  # LightRAG's internal hybrid mode
+                }
+                response = await client.post(
+                    f"{LIGHTRAG_SERVICE_URL}/query",
+                    json=payload,
+                    timeout=60.0
+                )
+                response.raise_for_status()
+                result = response.json()
+
+                return {
+                    "query": request.query,
+                    "mode": "lightrag",
+                    "results": result,
+                    "metadata": {
+                        "source": "LightRAG Graph",
+                        "description": "Entity-centric graph with semantic relationships"
+                    }
+                }
+            except Exception as e:
+                raise HTTPException(status_code=503, detail=f"LightRAG service error: {str(e)}")
+
+    # Hybrid: Query both in parallel
+    else:
+        async with httpx.AsyncClient() as client:
+            try:
+                # Query both services in parallel
+                networkx_task = client.post(
+                    f"{GRAPH_SERVICE_URL}/query",
+                    json={
+                        "query": request.query,
+                        "mode": "hybrid",
+                        "n_results": request.max_results,
+                        "use_vector": True
+                    },
+                    timeout=30.0
+                )
+
+                lightrag_task = client.post(
+                    f"{LIGHTRAG_SERVICE_URL}/query",
+                    json={
+                        "query": request.query,
+                        "mode": "hybrid"
+                    },
+                    timeout=60.0
+                )
+
+                # Wait for both
+                responses = await asyncio.gather(networkx_task, lightrag_task, return_exceptions=True)
+
+                # Handle results
+                networkx_result = None
+                lightrag_result = None
+
+                if not isinstance(responses[0], Exception):
+                    networkx_result = responses[0].json()
+
+                if not isinstance(responses[1], Exception):
+                    lightrag_result = responses[1].json()
+
+                # Combine results
+                combined = {
+                    "query": request.query,
+                    "mode": "hybrid",
+                    "networkx": {
+                        "available": networkx_result is not None,
+                        "data": networkx_result
+                    },
+                    "lightrag": {
+                        "available": lightrag_result is not None,
+                        "data": lightrag_result
+                    },
+                    "metadata": {
+                        "description": "Combined results from both NetworkX (note links) and LightRAG (semantic entities)"
+                    }
+                }
+
+                return combined
+
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Hybrid query error: {str(e)}")
 
 @app.websocket("/api/v1/deep-research")
 async def deep_research_websocket(websocket: WebSocket):
