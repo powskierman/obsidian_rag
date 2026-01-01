@@ -1,6 +1,18 @@
 // Type definitions for Obsidian RAG webapp
 
-export type SearchMode = 'vector' | 'knowledge-graph' | 'hybrid';
+// Search modes matching backend API
+export type SearchMode =
+  // Single-source modes
+  | 'vector'          // Pure vector similarity (ChromaDB)
+  | 'notes'           // Note-centric graph (NetworkX)
+  | 'entities'        // Entity-centric graph (LightRAG)
+  // Dual-source modes
+  | 'notes+vector'    // NetworkX + ChromaDB
+  | 'entities+vector' // LightRAG + ChromaDB
+  | 'dual-graph'      // NetworkX + LightRAG
+  // Ultimate hybrid
+  | 'hybrid';         // All three sources
+
 export type LLMProvider = 'ollama' | 'gemini' | 'claude';
 
 export interface Message {

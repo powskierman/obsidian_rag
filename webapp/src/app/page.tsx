@@ -76,22 +76,22 @@ export default function Home() {
                         const data = JSON.parse(event.data);
 
                         if (data.type === 'log' || data.type === 'status') {
-                            setThinkingLog(data.content);
+                            setThinkingLog(data.content || data.message);
                         } else if (data.type === 'result') {
                             // Final result received
-                            if (data.markdown) {
+                            const answer = data.data?.answer || data.markdown || data.content;
+                            if (answer) {
                                 addMessage({
                                     role: 'assistant',
-                                    content: data.markdown,
+                                    content: answer,
                                     queryId,
                                     timestamp: new Date().toISOString(),
                                 });
-                            } else if (data.content) {
+                            } else {
+                                console.error('No answer found in result:', data);
                                 addMessage({
                                     role: 'assistant',
-                                    content: data.content,
-                                    queryId,
-                                    timestamp: new Date().toISOString(),
+                                    content: 'Error: Received result but no answer content found.',
                                 });
                             }
                             ws.close();
@@ -146,7 +146,8 @@ export default function Home() {
                     llmProvider,
                     modelToUse,
                     settings.temperature,
-                    settings.enhancedSearch
+                    settings.enhancedSearch,
+                    systemPrompt
                 );
 
                 let answer = result.answer;
@@ -321,25 +322,30 @@ export default function Home() {
                                                 value={input}
                                                 onChange={(e) => setInput(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                placeholder="Search (hybrid)..."
+                                                placeholder={`Search (${searchMode})...`}
                                                 className="flex-1 bg-transparent border-none text-white placeholder-white/30 px-4 py-2 text-lg focus:ring-0 focus:outline-none"
                                             />
 
-                                            {/* Embedded Toggles */}
-                                            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/5">
-                                                {['vector', 'graph', 'hybrid'].map((m) => (
-                                                    <button
-                                                        key={m}
-                                                        onClick={() => setSearchMode(m as any)}
-                                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${searchMode === m
-                                                            ? 'bg-accent-gold text-black shadow-lg shadow-yellow-500/20'
-                                                            : 'text-white/40 hover:text-white hover:bg-white/5'
-                                                            }`}
-                                                    >
-                                                        {m.charAt(0).toUpperCase() + m.slice(1)}
-                                                    </button>
-                                                ))}
-                                            </div>
+                                            {/* Mode Selector */}
+                                            <select
+                                                value={searchMode}
+                                                onChange={(e) => setSearchMode(e.target.value as any)}
+                                                className="bg-accent-gold text-black px-4 py-2 rounded-lg text-xs font-medium shadow-lg shadow-yellow-500/20 border-none focus:ring-2 focus:ring-yellow-500/50 cursor-pointer"
+                                            >
+                                                <optgroup label="🎯 Single Source">
+                                                    <option value="vector">Vector (ChromaDB)</option>
+                                                    <option value="notes">Notes (NetworkX)</option>
+                                                    <option value="entities">Entities (LightRAG)</option>
+                                                </optgroup>
+                                                <optgroup label="🔗 Dual Source">
+                                                    <option value="notes+vector">Notes + Vector</option>
+                                                    <option value="entities+vector">Entities + Vector</option>
+                                                    <option value="dual-graph">Dual Graph</option>
+                                                </optgroup>
+                                                <optgroup label="⚡ Ultimate">
+                                                    <option value="hybrid">Hybrid (All 3)</option>
+                                                </optgroup>
+                                            </select>
                                         </div>
                                     </div>
 

@@ -57,7 +57,8 @@
       "Bash(npm install:*)",
       "Read(//Volumes/max/Users/**)",
       "Bash(rsync:*)",
-      "Read(//Volumes/max/**)"
+      "Read(//Volumes/max/**)",
+      "Bash(awk:*)"
     ],
     "deny": [],
     "ask": []

@@ -180,134 +180,271 @@ class UnifiedQueryRequest(BaseModel):
     query: str
     mode: str = "hybrid"  # networkx, lightrag, hybrid
     max_results: int = 10
+    llm_provider: str = "ollama"
+    model: Optional[str] = None
+    temperature: float = 0.7
+    system_prompt: Optional[str] = None
 
 @app.post("/api/v1/query")
 async def unified_query(request: UnifiedQueryRequest):
     """
-    Unified query endpoint that intelligently combines both knowledge graphs
+    Enhanced unified query endpoint with multiple knowledge source modes
 
-    Modes:
-    - networkx: Query only NetworkX graph (note-centric, wiki-links)
-    - lightrag: Query only LightRAG graph (entity-centric, semantic)
-    - hybrid: Query both and combine results (recommended)
+    Single-source modes:
+    - vector: Pure vector similarity (ChromaDB, 7k chunks)
+    - notes (or networkx): Note-centric graph with wiki-links (16k nodes)
+    - entities (or lightrag): Entity-centric semantic graph (2k notes)
+
+    Dual-source modes:
+    - notes+vector: NetworkX graph + ChromaDB vectors
+    - entities+vector: LightRAG graph + ChromaDB vectors
+    - dual-graph: Both graphs (NetworkX + LightRAG)
+
+    Ultimate mode:
+    - hybrid: All three sources (Vector + Notes + Entities) - RECOMMENDED
     """
     mode = request.mode.lower()
 
-    # NetworkX only
-    if mode == "networkx":
-        async with httpx.AsyncClient() as client:
+    # Normalize mode aliases
+    mode_aliases = {
+        "networkx": "notes",
+        "lightrag": "entities"
+    }
+    mode = mode_aliases.get(mode, mode)
+
+    async with httpx.AsyncClient() as client:
+
+        # ===== SINGLE-SOURCE MODES =====
+
+        # Pure vector search
+        if mode == "vector":
             try:
-                payload = {
-                    "query": request.query,
-                    "mode": "hybrid",  # NetworkX's internal hybrid mode
-                    "n_results": request.max_results,
-                    "use_vector": True
-                }
-                response = await client.post(
-                    f"{GRAPH_SERVICE_URL}/query",
-                    json=payload,
-                    timeout=30.0
-                )
+                payload = {"query": request.query, "n_results": request.max_results}
+                response = await client.post(f"{EMBEDDING_SERVICE_URL}/query", json=payload, timeout=30.0)
                 response.raise_for_status()
                 result = response.json()
 
                 return {
                     "query": request.query,
-                    "mode": "networkx",
+                    "mode": "vector",
+                    "results": result,
+                    "metadata": {
+                        "source": "ChromaDB Vectors",
+                        "description": "Pure vector similarity search across 7,102 document chunks"
+                    }
+                }
+            except Exception as e:
+                raise HTTPException(status_code=503, detail=f"Vector service error: {str(e)}")
+
+        # NetworkX notes graph
+        elif mode == "notes":
+            try:
+                payload = {
+                    "query": request.query,
+                    "mode": "hybrid",
+                    "n_results": request.max_results,
+                    "use_vector": True,
+                    "llm_provider": request.llm_provider,
+                    "model": request.model,
+                    "temperature": request.temperature,
+                    "system_prompt": request.system_prompt
+                }
+                response = await client.post(f"{GRAPH_SERVICE_URL}/query", json=payload, timeout=30.0)
+                response.raise_for_status()
+                result = response.json()
+
+                return {
+                    "query": request.query,
+                    "mode": "notes",
                     "results": result,
                     "metadata": {
                         "source": "NetworkX Graph",
-                        "description": "Note-centric graph with wiki-link relationships"
+                        "description": "Note-centric graph with wiki-link relationships (16,212 nodes, 16,268 edges)"
                     }
                 }
             except Exception as e:
-                raise HTTPException(status_code=503, detail=f"NetworkX service error: {str(e)}")
+                raise HTTPException(status_code=503, detail=f"Notes graph error: {str(e)}")
 
-    # LightRAG only
-    elif mode == "lightrag":
-        async with httpx.AsyncClient() as client:
+        # LightRAG entities graph
+        elif mode == "entities":
             try:
                 payload = {
                     "query": request.query,
-                    "mode": "hybrid"  # LightRAG's internal hybrid mode
+                    "mode": "hybrid",
+                    "llm_provider": request.llm_provider,
+                    "model": request.model,
+                    "temperature": request.temperature,
+                    "system_prompt": request.system_prompt
                 }
-                response = await client.post(
-                    f"{LIGHTRAG_SERVICE_URL}/query",
-                    json=payload,
-                    timeout=60.0
-                )
+                response = await client.post(f"{LIGHTRAG_SERVICE_URL}/query", json=payload, timeout=60.0)
                 response.raise_for_status()
                 result = response.json()
 
                 return {
                     "query": request.query,
-                    "mode": "lightrag",
+                    "mode": "entities",
                     "results": result,
                     "metadata": {
                         "source": "LightRAG Graph",
-                        "description": "Entity-centric graph with semantic relationships"
+                        "description": "Entity-centric semantic graph (2,000 indexed notes)"
                     }
                 }
             except Exception as e:
-                raise HTTPException(status_code=503, detail=f"LightRAG service error: {str(e)}")
+                raise HTTPException(status_code=503, detail=f"Entities graph error: {str(e)}")
 
-    # Hybrid: Query both in parallel
-    else:
-        async with httpx.AsyncClient() as client:
+        # ===== DUAL-SOURCE MODES =====
+
+        # Notes + Vector
+        elif mode == "notes+vector":
             try:
-                # Query both services in parallel
-                networkx_task = client.post(
-                    f"{GRAPH_SERVICE_URL}/query",
-                    json={
+                tasks = [
+                    client.post(f"{GRAPH_SERVICE_URL}/query", json={
                         "query": request.query,
                         "mode": "hybrid",
                         "n_results": request.max_results,
-                        "use_vector": True
-                    },
-                    timeout=30.0
-                )
+                        "use_vector": True,
+                        "llm_provider": request.llm_provider,
+                        "model": request.model,
+                        "temperature": request.temperature,
+                        "system_prompt": request.system_prompt
+                    }, timeout=30.0),
+                    client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
+                        "query": request.query, "n_results": request.max_results
+                    }, timeout=30.0)
+                ]
+                responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                lightrag_task = client.post(
-                    f"{LIGHTRAG_SERVICE_URL}/query",
-                    json={
+                notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
+                vector_result = None if isinstance(responses[1], Exception) else responses[1].json()
+
+                return {
+                    "query": request.query,
+                    "mode": "notes+vector",
+                    "notes": {"available": notes_result is not None, "data": notes_result},
+                    "vector": {"available": vector_result is not None, "data": vector_result},
+                    "metadata": {"description": "Combined NetworkX graph + ChromaDB vectors"}
+                }
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Notes+Vector error: {str(e)}")
+
+        # Entities + Vector
+        elif mode == "entities+vector":
+            try:
+                tasks = [
+                    client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
                         "query": request.query,
-                        "mode": "hybrid"
-                    },
-                    timeout=60.0
-                )
+                        "mode": "hybrid",
+                        "llm_provider": request.llm_provider,
+                        "model": request.model,
+                        "temperature": request.temperature,
+                        "system_prompt": request.system_prompt
+                    }, timeout=60.0),
+                    client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
+                        "query": request.query, "n_results": request.max_results
+                    }, timeout=30.0)
+                ]
+                responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                # Wait for both
-                responses = await asyncio.gather(networkx_task, lightrag_task, return_exceptions=True)
+                entities_result = None if isinstance(responses[0], Exception) else responses[0].json()
+                vector_result = None if isinstance(responses[1], Exception) else responses[1].json()
 
-                # Handle results
-                networkx_result = None
-                lightrag_result = None
+                return {
+                    "query": request.query,
+                    "mode": "entities+vector",
+                    "entities": {"available": entities_result is not None, "data": entities_result},
+                    "vector": {"available": vector_result is not None, "data": vector_result},
+                    "metadata": {"description": "Combined LightRAG graph + ChromaDB vectors"}
+                }
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Entities+Vector error: {str(e)}")
 
-                if not isinstance(responses[0], Exception):
-                    networkx_result = responses[0].json()
+        # Dual-Graph (both graphs, no vectors)
+        elif mode == "dual-graph":
+            try:
+                tasks = [
+                    client.post(f"{GRAPH_SERVICE_URL}/query", json={
+                        "query": request.query,
+                        "mode": "hybrid",
+                        "n_results": request.max_results,
+                        "use_vector": True,
+                        "llm_provider": request.llm_provider,
+                        "model": request.model,
+                        "temperature": request.temperature,
+                        "system_prompt": request.system_prompt
+                    }, timeout=30.0),
+                    client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
+                        "query": request.query,
+                        "mode": "hybrid",
+                        "llm_provider": request.llm_provider,
+                        "model": request.model,
+                        "temperature": request.temperature,
+                        "system_prompt": request.system_prompt
+                    }, timeout=60.0)
+                ]
+                responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                if not isinstance(responses[1], Exception):
-                    lightrag_result = responses[1].json()
+                notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
+                entities_result = None if isinstance(responses[1], Exception) else responses[1].json()
 
-                # Combine results
-                combined = {
+                return {
+                    "query": request.query,
+                    "mode": "dual-graph",
+                    "notes": {"available": notes_result is not None, "data": notes_result},
+                    "entities": {"available": entities_result is not None, "data": entities_result},
+                    "metadata": {"description": "Combined NetworkX + LightRAG graphs"}
+                }
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Dual-graph error: {str(e)}")
+
+        # ===== ULTIMATE HYBRID MODE =====
+
+        # Hybrid: All three sources
+        else:
+            try:
+                tasks = [
+                    client.post(f"{GRAPH_SERVICE_URL}/query", json={
+                        "query": request.query,
+                        "mode": "hybrid",
+                        "n_results": request.max_results,
+                        "use_vector": True,
+                        "llm_provider": request.llm_provider,
+                        "model": request.model,
+                        "temperature": request.temperature,
+                        "system_prompt": request.system_prompt
+                    }, timeout=30.0),
+                    client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
+                        "query": request.query,
+                        "mode": "hybrid",
+                        "llm_provider": request.llm_provider,
+                        "model": request.model,
+                        "temperature": request.temperature,
+                        "system_prompt": request.system_prompt
+                    }, timeout=60.0),
+                    client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
+                        "query": request.query, "n_results": request.max_results
+                    }, timeout=30.0)
+                ]
+                responses = await asyncio.gather(*tasks, return_exceptions=True)
+
+                notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
+                entities_result = None if isinstance(responses[1], Exception) else responses[1].json()
+                vector_result = None if isinstance(responses[2], Exception) else responses[2].json()
+
+                return {
                     "query": request.query,
                     "mode": "hybrid",
-                    "networkx": {
-                        "available": networkx_result is not None,
-                        "data": networkx_result
-                    },
-                    "lightrag": {
-                        "available": lightrag_result is not None,
-                        "data": lightrag_result
-                    },
+                    "notes": {"available": notes_result is not None, "data": notes_result},
+                    "entities": {"available": entities_result is not None, "data": entities_result},
+                    "vector": {"available": vector_result is not None, "data": vector_result},
                     "metadata": {
-                        "description": "Combined results from both NetworkX (note links) and LightRAG (semantic entities)"
+                        "description": "Ultimate hybrid: All 3 sources (Vector + Notes + Entities)",
+                        "sources": {
+                            "vector": "ChromaDB (7,102 chunks)",
+                            "notes": "NetworkX Graph (16,212 nodes)",
+                            "entities": "LightRAG Graph (2,000 notes)"
+                        }
                     }
                 }
-
-                return combined
-
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Hybrid query error: {str(e)}")
 

@@ -16,12 +16,13 @@ export interface GraphResponse {
 export const api = {
   unifiedSearch: async (
     query: string,
-    mode: 'vector' | 'graph' | 'hybrid' = 'vector',
+    mode: 'vector' | 'notes' | 'entities' | 'notes+vector' | 'entities+vector' | 'dual-graph' | 'hybrid' = 'hybrid',
     n_results = 10,
     llm_provider = 'ollama',
     model = '',
     temperature = 0.7,
-    enhanced_search = false
+    enhanced_search = false,
+    system_prompt = ''
   ): Promise<{
     answer: string;
     sources?: SearchResult[];
@@ -32,7 +33,8 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
-      const response = await fetch(`${GATEWAY_URL}/api/v1/search`, {
+      // Use the new unified query endpoint
+      const response = await fetch(`${GATEWAY_URL}/api/v1/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,21 +42,66 @@ export const api = {
         body: JSON.stringify({
           query,
           mode,
-          n_results,
+          max_results: n_results,
           llm_provider,
           model,
           temperature,
-          enhanced_search
+          system_prompt: system_prompt || null
         })
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Unified search failed:', response.status, errorText);
-        throw new Error(`Unified search failed: ${response.status} ${errorText}`);
+        console.error('Unified query failed:', response.status, errorText);
+        throw new Error(`Unified query failed: ${response.status} ${errorText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      // Transform the new API response to match the expected format
+      // Handle different response structures based on mode
+      if (mode === 'hybrid') {
+        // Hybrid mode returns { notes, entities, vector }
+        // Prefer entities (LightRAG) result as it provides richer, synthesized content
+        const entitiesResult = data.entities?.data?.result || '';
+        const notesAnswer = data.notes?.data?.answer || '';
+
+        return {
+          answer: entitiesResult || notesAnswer || 'No results found',
+          sources: data.notes?.data?.sources || [],
+          extracted_entities: data.notes?.data?.extracted_entities || []
+        };
+      } else if (mode.includes('+') || mode === 'dual-graph') {
+        // Dual-source modes: prefer entities (LightRAG) if available, otherwise notes (NetworkX)
+        let answer = 'No results found';
+        let sources = [];
+
+        if (data.entities?.data) {
+          answer = data.entities.data.result || data.entities.data.answer || answer;
+        } else if (data.notes?.data) {
+          answer = data.notes.data.answer || data.notes.data.result || answer;
+        } else if (data.vector?.data) {
+          const vectorData = data.vector.data;
+          answer = vectorData.answer || vectorData.result || answer;
+          sources = vectorData.sources || [];
+        }
+
+        // Collect sources from all available sources
+        if (data.notes?.data?.sources) sources = data.notes.data.sources;
+        if (data.vector?.data?.sources) sources = [...sources, ...data.vector.data.sources];
+
+        return {
+          answer,
+          sources
+        };
+      } else {
+        // Single-source modes
+        const result = data.results || data;
+        return {
+          answer: result.answer || result.result || 'No results found',
+          sources: result.sources || []
+        };
+      }
     } catch (error) {
       console.error('Unified search error:', error);
       throw error;

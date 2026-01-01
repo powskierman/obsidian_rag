@@ -48,6 +48,22 @@ def get_or_create_loop():
     return _loop
 
 
+# Default system prompt for Michel's Obsidian Knowledge Base
+DEFAULT_SYSTEM_PROMPT = """You are a **Deep Thinking AI assistant** integrated with Michel's Obsidian Knowledge Base.
+
+Your task is to answer questions by analyzing the retrieved materials and Michel's personal context.
+
+When generating your answer:
+1. Reference Michel's specific **medical timeline** (DLBCL, Yescarta, scans) when relevant.
+2. Incorporate insights from his **Obsidian notes**, citing which notes or sources you use.
+3. Maintain a **compassionate and supportive** tone for medical topics.
+4. Provide **technical depth** and precision for engineering and coding topics.
+5. Adapt to his **expert-level understanding** — avoid overexplaining known concepts.
+6. Be **concise but thorough**, focusing on clarity and reasoning.
+7. Avoid redundant or generic phrasing.
+
+Finally, provide your answer in a structured, easy-to-read format."""
+
 async def openrouter_model_complete(
     prompt, system_prompt=None, history_messages=[], **kwargs
 ) -> str:
@@ -55,19 +71,36 @@ async def openrouter_model_complete(
     if not OPENROUTER_API_KEY:
         logger.error("OPENROUTER_API_KEY not set")
         return "Error: OPENROUTER_API_KEY not set"
-        
+
     client = AsyncOpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=OPENROUTER_API_KEY,
     )
-    
+
+    # Use provided system prompt or fall back to Michel's default prompt
+    effective_system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
+
+    # DEBUG LOGGING
+    debug_log_path = "/app/lightrag_db/prompt_debug.log"
+    with open(debug_log_path, "a") as f:
+        import datetime
+        timestamp = datetime.datetime.now().isoformat()
+        f.write(f"\n{'='*80}\n")
+        f.write(f"Timestamp: {timestamp}\n")
+        f.write(f"System prompt provided: {system_prompt is not None}\n")
+        f.write(f"Using DEFAULT_SYSTEM_PROMPT: {effective_system_prompt == DEFAULT_SYSTEM_PROMPT}\n")
+        f.write(f"Effective system prompt:\n{effective_system_prompt}\n")
+        f.write(f"User prompt (first 200 chars): {prompt[:200]}\n")
+        f.write(f"Model: {KIMI_MODEL}\n")
+        f.write(f"{'='*80}\n")
+
     messages = []
-    if system_prompt:
-        messages.append({"role": "system", "content": system_prompt})
-    
+    if effective_system_prompt:
+        messages.append({"role": "system", "content": effective_system_prompt})
+
     if history_messages:
         messages.extend(history_messages)
-        
+
     messages.append({"role": "user", "content": prompt})
     
     # Filter kwargs to only include supported ones
