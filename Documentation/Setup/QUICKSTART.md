@@ -210,9 +210,8 @@ obsidian_rag/
 - **[Testing Guide](../guides/TESTING.md)** - Verify everything works
 
 ### Advanced Topics
-- **[GraphRAG Setup](./GRAPHRAG_SETUP.md)** - Optimize knowledge graph
 - **[MCP Integration](../MCP/)** - Use with Claude desktop app
-- **[Docker Troubleshooting](../troubleshooting/DOCKER_TROUBLESHOOTING.md)** - Fix common issues
+- **[Docker Troubleshooting](../guides/troubleshooting/DOCKER_TROUBLESHOOTING.md)** - Fix common issues
 
 ---
 

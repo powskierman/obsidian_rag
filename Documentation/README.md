@@ -42,16 +42,11 @@ Welcome to the comprehensive documentation for the Obsidian RAG Knowledge Graph 
   - Next steps after installation
   - Configuration options
 
-### GraphRAG Setup
-- **[GRAPHRAG_SETUP.md](GRAPHRAG_SETUP.md)** - Setting up GraphRAG features
-- **[GRAPHRAG_IMPLEMENTATION.md](GRAPHRAG_IMPLEMENTATION.md)** - Implementation details
-
 ---
 
 ## 🏗️ Architecture & Design
 
 ### System Overview
-- **[architecture/obsidian_rag_analysis.md](architecture/obsidian_rag_analysis.md)** - Complete system analysis
 - **[architecture/DEEP_THINKING_FLOW.md](architecture/DEEP_THINKING_FLOW.md)** - Deep thinking architecture flow
 - **[Deep Thinking Implementation Plan.md](Deep%20Thinking%20Implementation%20Plan.md)** - Detailed implementation plan
 - **[deep-thinking-rag-improvement-proposal.md](deep-thinking-rag-improvement-proposal.md)** - Enhancement proposals

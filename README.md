@@ -69,10 +69,9 @@ obsidian_rag/
 │   │   ├── claude_graph_builder.py    # Core graph builder with retry logic
 │   │   ├── embedding_service.py       # Vector search service (port 8000)
 │   │   ├── graph_query_service.py     # Graph query service (port 8002)
-│   │   └── graphrag_claude_service.py # GraphRAG wrapper
+│   │   └── kimi_graph_builder.py      # Kimi-powered graph builder
 │   ├── integrations/             # Service integrations
 │   │   ├── claude_graph_reasoner.py   # Claude graph reasoning
-│   │   ├── graphrag_unified_service.py # Unified GraphRAG service
 │   │   └── lightrag_service.py        # LightRAG integration
 │   ├── mcp/                      # MCP servers
 │   │   ├── obsidian_rag_unified_mcp.py   # Unified MCP (vault + graph)
@@ -139,7 +138,6 @@ Detailed guides are organized into logical sections to help you find what you ne
 - **[Docker Setup](Documentation/DOCKER_SETUP_SUMMARY.md)** - Containerized deployment
 - **[Model Configuration](Documentation/Setup/MODEL_SETUP_GUIDE.md)** - Setting up LLMs and Embeddings
 - **[API Key Validation](Documentation/Setup/API_KEY_VALIDATION_GUIDE.md)** - Troubleshooting Anthropic keys
-- **[GraphRAG Setup](Documentation/Setup/GRAPHRAG_SETUP.md)** - Advanced graph features
 
 ### 🏗️ Architecture & Development
 - **[System Analysis](Documentation/architecture/obsidian_rag_analysis.md)** - Full architecture deep-dive

@@ -9,22 +9,23 @@ Main parts:
    - ChromaDB vector database
    - Handles indexing and semantic search
    - REST API for embedding and querying
-**GraphRAG-Local Service** (Docker Container) - Port 8003
-   - Microsoft GraphRAG with specialized Ollama integration
-   - Advanced knowledge graph construction and community detection
-   - Medical terminology optimization
-   - Global and local search capabilities
-   - GPT-OSS + nomic-embed-text integration
-**Streamlit UI** (Docker Container) - Port 8501
-   - Natural language queries
-   - Source citations with relevance scores
-   - Adjustable parameters (sources, temperature)
-   - Model selection interface
+- **Graph Query Service** (Docker Container) - Port 8002
+   - NetworkX knowledge graph (note-centric wiki-links)
+   - Graph querying and traversal
+   - REST API for graph operations
+- **LightRAG Service** (Docker Container) - Port 8001
+   - Entity-centric semantic knowledge graph
+   - Advanced entity extraction and relationship mapping
+   - Hybrid search capabilities
+- **Next.js Web UI** (Docker Container) - Port 3000
+   - Modern React-based interface
+   - 7-mode search system (Vector, Notes, Entities, Notes+Vector, Entities+Vector, Dual-Graph, Hybrid)
+   - Deep thinking integration
+   - Real-time chat with source citations
 **LLM** (Ollama Host) - Port 11434
-   - **Primary Model:** GPT-OSS (GraphRAG-Local optimized)
-   - Qwen 2.5 Coder 14B (traditional RAG default)
+   - Qwen 2.5 Coder 14B (default model)
    - DeepSeek R1:14b (reasoning model alternative)
-   - nomic-embed-text (GraphRAG embeddings)
+   - nomic-embed-text (embeddings)
    - Local inference, no API calls
 **Scanner Scripts** (Python)
    - `simple_scanner.py` - Basic one-time indexing
