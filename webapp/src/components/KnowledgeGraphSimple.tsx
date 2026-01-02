@@ -39,13 +39,13 @@ function FloatingNode({ position, color }: any) {
             const pulse = Math.sin(state.clock.elapsedTime * 0.8) * 0.08 + 1.0;
             meshRef.current.scale.setScalar(pulse);
 
-            // Subtle glow pulse
+            // Subtle glow pulse - check if ref current exists
             if (glowRef.current) {
                 const glowPulse = Math.sin(state.clock.elapsedTime * 0.6) * 0.1 + 1.05;
                 glowRef.current.scale.setScalar(glowPulse * 1.2);
             }
 
-            // Subtle outer glow breathing effect
+            // Subtle outer glow breathing effect - check if ref current exists
             if (outerGlowRef.current) {
                 const outerPulse = Math.sin(state.clock.elapsedTime * 0.4) * 0.12 + 1.08;
                 outerGlowRef.current.scale.setScalar(outerPulse * 1.4);
@@ -120,10 +120,14 @@ function ConnectionLine({ start, end }: { start: [number, number, number]; end: 
     }, [points]);
 
     useFrame((state) => {
-        if (lineRef.current?.material) {
+        // Safety check for lineRef and material
+        if (lineRef.current && lineRef.current.material) {
             // Subtle pulsing for connections
             const pulse = Math.sin(state.clock.elapsedTime * 1.5) * 0.15 + 0.25;
-            lineRef.current.material.opacity = pulse;
+            // Ensure opacity property exists before assignment
+            if ('opacity' in lineRef.current.material) {
+                lineRef.current.material.opacity = pulse;
+            }
         }
     });
 

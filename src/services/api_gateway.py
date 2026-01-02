@@ -460,23 +460,35 @@ async def deep_research_websocket(websocket: WebSocket):
     """
     await websocket.accept()
     
-    if not ANTHROPIC_API_KEY:
-        await websocket.send_json({"type": "error", "content": "ANTHROPIC_API_KEY not set"})
-        await websocket.close()
-        return
-
     try:
         data = await websocket.receive_json()
         query = data.get("query")
+        provider = data.get("provider", "claude").lower()
+        
         if not query:
             await websocket.send_json({"type": "error", "content": "No query provided"})
             return
 
-        # Initialize Agent
+        # Determine API Key based on provider
+        api_key = None
+        if provider == "claude":
+            api_key = ANTHROPIC_API_KEY
+            if not api_key:
+                await websocket.send_json({"type": "error", "content": "ANTHROPIC_API_KEY not configured"})
+                await websocket.close()
+                return
+        elif provider == "gemini":
+            api_key = os.getenv("GEMINI_API_KEY")
+            if not api_key:
+                await websocket.send_json({"type": "error", "content": "GEMINI_API_KEY not configured"})
+                await websocket.close()
+                return
+
+        # Initialize Agent with Universal Client
         # Note: We must use the INTERNAL Docker URLs here
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
         rag = DeepThinkingRAG(
-            anthropic_client=client,
+            provider=provider,
+            api_key=api_key,
             vector_service_url=EMBEDDING_SERVICE_URL,
             graph_service_url=GRAPH_SERVICE_URL,
             enable_reranking=True

@@ -5,24 +5,36 @@ from .supervisor import RetrievalSupervisor
 from .reflector import ReflectionAgent
 from .policy import PolicyAgent
 from .synthesizer import FinalAnswerGenerator
+from .utils.universal_client import UniversalClient
 
 class DeepThinkingRAG:
     def __init__(
         self, 
-        anthropic_client, 
+        provider: str = "claude",
+        api_key: str = None,
+        anthropic_client=None, # Backwards compatibility
         vector_service_url: str = "http://localhost:8000",
         graph_service_url: str = "http://localhost:8003",
         enable_reranking: bool = True
     ):
-        self.planner = PlannerAgent(anthropic_client)
+        # Initialize Universal Client
+        # If legacy anthropic_client is passed, wrap it (or just use provider logic)
+        if anthropic_client:
+            # We assume it's claude if client passed directly
+            self.client = UniversalClient(provider="claude", api_key=api_key)
+            self.client.anthropic = anthropic_client # Inject existing client
+        else:
+            self.client = UniversalClient(provider=provider, api_key=api_key)
+            
+        self.planner = PlannerAgent(self.client)
         self.supervisor = RetrievalSupervisor(
             vector_service_url, 
             graph_service_url,
             enable_reranking=enable_reranking
         )
-        self.reflector = ReflectionAgent(anthropic_client)
-        self.policy = PolicyAgent(anthropic_client)
-        self.synthesizer = FinalAnswerGenerator(anthropic_client)
+        self.reflector = ReflectionAgent(self.client)
+        self.policy = PolicyAgent(self.client)
+        self.synthesizer = FinalAnswerGenerator(self.client)
         
     def query(self, question: str, max_iterations: int = 7, status_callback=None) -> Dict[str, Any]:
         """

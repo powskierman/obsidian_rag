@@ -3,9 +3,9 @@ from typing import Literal
 from .state import RAGState
 
 class PolicyAgent:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5"
+    def __init__(self, client):
+        self.client = client
+        self.model = "claude-3-5-sonnet-20241022"
 
     def decide(self, state: RAGState) -> Literal["CONTINUE", "FINISH", "REVISE_PLAN"]:
         """
@@ -37,7 +37,10 @@ class PolicyAgent:
         )
         
         try:
-            content = response.content[0].text.strip()
+            if hasattr(response.content[0], 'text'):
+                content = response.content[0].text.strip()
+            else:
+                 content = str(response.content).strip()
             if content.startswith("```json"):
                 content = content[7:]
             if content.endswith("```"):

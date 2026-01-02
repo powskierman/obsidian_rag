@@ -3,9 +3,9 @@ from typing import List, Tuple
 from .state import RAGState
 
 class FinalAnswerGenerator:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5"
+    def __init__(self, client):
+        self.client = client
+        self.model = "claude-3-5-sonnet-20241022"
 
         # Michel's custom system prompt for compassionate, personalized responses
         self.system_prompt = """You are a **Deep Thinking AI assistant** integrated with Michel's Obsidian Knowledge Base.
@@ -92,7 +92,10 @@ Finally, provide your answer in a structured, easy-to-read format."""
             messages=[{"role": "user", "content": prompt}]
         )
         
-        content = response.content[0].text.strip()
+        if hasattr(response.content[0], 'text'):
+            content = response.content[0].text.strip()
+        else:
+             content = str(response.content).strip()
         
         # 1. Try cleaning markdown code blocks
         clean_content = content

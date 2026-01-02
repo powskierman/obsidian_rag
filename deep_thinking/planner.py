@@ -3,13 +3,13 @@ from typing import List, Dict, Any
 from .state import Step
 
 class PlannerAgent:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5" # Using the correct model ID
+    def __init__(self, client):
+        self.client = client
+        self.model = "claude-3-5-sonnet-20241022" # Default, client will override if needed
 
     def create_plan(self, question: str, vault_context: Dict[str, Any]) -> List[Step]:
         """
-        Uses Claude to break down the question into 2-5 sub-steps.
+        Uses LLM to break down the question into 2-5 sub-steps.
         """
         system_prompt = """
         You are an Augmented Research Planner for an Obsidian vault.
@@ -95,7 +95,13 @@ class PlannerAgent:
         )
         
         try:
-            content = response.content[0].text.strip()
+            # UniversalClient returns object with .content list or text directly?
+            # UniversalMessage wraps content list of objects with .text
+            if hasattr(response.content[0], 'text'):
+                content = response.content[0].text.strip()
+            else:
+                 content = str(response.content).strip()
+                 
             # Remove markdown code blocks if present
             if content.startswith("```json"):
                 content = content[7:]
@@ -152,7 +158,11 @@ class PlannerAgent:
         )
         
         try:
-            content = response.content[0].text.strip()
+            if hasattr(response.content[0], 'text'):
+                content = response.content[0].text.strip()
+            else:
+                 content = str(response.content).strip()
+                 
             if content.startswith("```json"):
                 content = content[7:]
             if content.endswith("```"):

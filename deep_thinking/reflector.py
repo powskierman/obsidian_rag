@@ -3,9 +3,9 @@ from typing import List, Dict, Any
 from .state import Step, PastStep, RAGState
 
 class ReflectionAgent:
-    def __init__(self, anthropic_client):
-        self.client = anthropic_client
-        self.model = "claude-sonnet-4-5"
+    def __init__(self, client):
+        self.client = client
+        self.model = "claude-3-5-sonnet-20241022"
 
     def reflect(self, step: Step, documents: List[Dict[str, Any]], state: RAGState) -> PastStep:
         """
@@ -49,7 +49,10 @@ class ReflectionAgent:
         )
         
         try:
-            content = response.content[0].text.strip()
+            if hasattr(response.content[0], 'text'):
+                content = response.content[0].text.strip()
+            else:
+                 content = str(response.content).strip()
             # Robust JSON extraction
             start_idx = content.find('{')
             end_idx = content.rfind('}')
