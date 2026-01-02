@@ -63,31 +63,57 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
         <p className="text-sm text-white/60 mb-6">Configure search and response parameters</p>
 
         <div className="space-y-6">
-          {/* Model Selection */}
+          {/* LLM Provider Selection */}
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              Model Selection
+            <label className="block text-sm font-medium text-white mb-3">
+              LLM Provider
             </label>
-            <select
-              value={settings.model}
-              onChange={(e) => handleModelChange(e.target.value)}
-              disabled={isLoadingModels}
-              className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-3 py-2 focus:outline-none focus:border-[#0A84FF] disabled:opacity-50"
-            >
-              {isLoadingModels ? (
-                <option>Loading models...</option>
-              ) : availableModels.length > 0 ? (
-                availableModels.map((model) => (
-                  <option key={model} value={model}>
-                    {model}
-                  </option>
-                ))
-              ) : (
-                <option>No models available</option>
-              )}
-            </select>
-            <p className="text-xs text-white/40 mt-1">Choose the LLM model for responses</p>
+            <div className="bg-[#2C2C2E] p-1 rounded-xl flex border border-[#3C3C3E]">
+              {['ollama', 'gemini', 'claude'].map((provider) => (
+                <button
+                  key={provider}
+                  onClick={() => useApp().setLLMProvider(provider as any)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${useApp().llmProvider === provider
+                    ? 'bg-[#0A84FF] text-white shadow-lg'
+                    : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+                    }`}
+                >
+                  {provider}
+                </button>
+              ))}
+            </div>
           </div>
+
+          {/* Model Selection (Conditional) */}
+          {useApp().llmProvider === 'ollama' && (
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Models
+              </label>
+              <select
+                value={settings.model}
+                onChange={(e) => handleModelChange(e.target.value)}
+                disabled={isLoadingModels}
+                className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF] disabled:opacity-50 appearance-none cursor-pointer"
+              >
+                {isLoadingModels ? (
+                  <option>Loading models...</option>
+                ) : availableModels.length > 0 ? (
+                  availableModels.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
+                    </option>
+                  ))
+                ) : (
+                  <option>No models available</option>
+                )}
+              </select>
+              <p className="text-xs text-white/40 mt-1.5 flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-[#0A84FF]" />
+                Choose the local Ollama model
+              </p>
+            </div>
+          )}
 
           {/* Number of Sources */}
           <div>

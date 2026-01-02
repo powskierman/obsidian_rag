@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Download, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import SearchModeSelector from './sidebar/SearchModeSelector';
 
 export default function ChatSidebar() {
     const {
         searchMode,
-        llmProvider, setLLMProvider,
+        llmProvider,
         settings, updateSettings,
         clearMessages,
         services,
@@ -93,40 +92,10 @@ export default function ChatSidebar() {
                 </button>
 
 
-                {/* Search Parameters - Compact */}
                 <div className="space-y-3 py-3 border-y border-white/10">
-                    {/* Search Mode */}
-                    <div className="flex flex-col items-center gap-1" title={`Mode: ${searchMode}`}>
-                        <span className="text-[10px] text-white/40 uppercase tracking-wide">Mode</span>
-                        <span className="text-[9px] font-mono text-accent-gold font-semibold text-center leading-tight">
-                            {searchMode === 'hybrid' ? '⚡3' :
-                                searchMode === 'vector' ? '🔮V' :
-                                    searchMode === 'notes' ? '🕸️N' :
-                                        searchMode === 'entities' ? '⚡E' :
-                                            searchMode === 'notes+vector' ? 'NV' :
-                                                searchMode === 'entities+vector' ? 'EV' :
-                                                    searchMode === 'dual-graph' ? '2G' : searchMode.slice(0, 3).toUpperCase()}
-                        </span>
-                    </div>
-
-                    {/* LLM Provider */}
-                    <div className="flex flex-col items-center gap-1" title={`Provider: ${llmProvider}`}>
-                        <span className="text-[10px] text-white/40 uppercase tracking-wide">LLM</span>
-                        <span className="text-[9px] font-mono text-purple-400 font-semibold">
-                            {llmProvider === 'ollama' ? 'OLL' : llmProvider === 'gemini' ? 'GEM' : 'CLA'}
-                        </span>
-                    </div>
-
-                    {/* Deep Thinking */}
-                    <div className="flex flex-col items-center gap-1" title={`Deep Thinking: ${settings?.deepThinking ? 'On' : 'Off'}`}>
-                        <span className="text-[10px] text-white/40 uppercase tracking-wide">DT</span>
-                        <div className={`w-2 h-2 rounded-full ${settings?.deepThinking ? 'bg-accent-gold' : 'bg-white/20'}`} />
-                    </div>
-
-                    {/* Enhanced Search */}
-                    <div className="flex flex-col items-center gap-1" title={`Enhanced: ${settings?.enhancedSearch ? 'On' : 'Off'}`}>
-                        <span className="text-[10px] text-white/40 uppercase tracking-wide">ES</span>
-                        <div className={`w-2 h-2 rounded-full ${settings?.enhancedSearch ? 'bg-accent-gold' : 'bg-white/20'}`} />
+                    {/* Compact History Indicator */}
+                    <div className="flex flex-col items-center gap-1 text-center" title="Chat History">
+                        <span className="text-[10px] text-white/40 uppercase tracking-wide">History</span>
                     </div>
                 </div>
 
@@ -169,43 +138,6 @@ export default function ChatSidebar() {
                 >
                     <ChevronLeft size={16} className="text-white/60" />
                 </button>
-            </div>
-
-            {/* Search Mode Selector */}
-            <div className="mb-2">
-                <SearchModeSelector />
-            </div>
-
-            {/* LLM Provider */}
-            <div className="space-y-2">
-                <div className="bg-black/20 p-1 rounded-lg flex">
-                    {['Ollama', 'Gemini', 'Claude'].map((llm) => (
-                        <button
-                            key={llm}
-                            onClick={() => setLLMProvider(llm.toLowerCase() as any)}
-                            className={`flex-1 py-1.5 rounded-md text-[11px] font-medium transition-all ${llmProvider === llm.toLowerCase() ? 'bg-[#fbbf24] text-black shadow-sm font-bold' : 'text-gray-400 hover:text-gray-200'}`}
-                        >
-                            {llm}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Ollama Model Selector */}
-                {llmProvider === 'ollama' && services.ollama.models.length > 0 && (
-                    <div className="bg-white/5 p-2 rounded-lg border border-white/5">
-                        <select
-                            value={settings?.model || 'llama3.2:latest'}
-                            onChange={(e) => updateSettings({ model: e.target.value })}
-                            className="w-full bg-black/40 border border-white/10 rounded-md px-2 py-1 text-[11px] text-white focus:outline-none focus:ring-1 focus:ring-accent-gold/50"
-                        >
-                            {services.ollama.models.map((model) => (
-                                <option key={model} value={model}>
-                                    {model}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                )}
             </div>
 
 

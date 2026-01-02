@@ -363,6 +363,7 @@ export default function Home() {
                                                     </optgroup>
                                                     <optgroup label="⚡ Ultimate">
                                                         <option value="hybrid">Hybrid (All 3)</option>
+                                                        <option value="cascading">Cascading (Waterfall)</option>
                                                     </optgroup>
                                                 </select>
                                             </div>

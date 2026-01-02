@@ -16,7 +16,7 @@ export interface GraphResponse {
 export const api = {
   unifiedSearch: async (
     query: string,
-    mode: 'vector' | 'notes' | 'entities' | 'notes+vector' | 'entities+vector' | 'dual-graph' | 'hybrid' = 'hybrid',
+    mode: 'vector' | 'notes' | 'entities' | 'notes+vector' | 'entities+vector' | 'dual-graph' | 'hybrid' | 'cascading' = 'hybrid',
     n_results = 10,
     llm_provider = 'ollama',
     model = '',
