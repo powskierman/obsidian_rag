@@ -136,12 +136,12 @@ async def get_stats():
     """Get aggregated stats for UI"""
     health_data = await health_check()
     services = health_data.get("data", {}).get("services", {})
-    
+
     return {
         "documents": services.get("embedding", {}).get("count", 0),
         "graph": {
-            "nodes": services.get("graph", {}).get("nodes", 0),
-            "edges": services.get("graph", {}).get("edges", 0)
+            "nodes": services.get("networkx", {}).get("nodes", 0),
+            "edges": services.get("networkx", {}).get("edges", 0)
         }
     }
 @app.post("/api/v1/search")

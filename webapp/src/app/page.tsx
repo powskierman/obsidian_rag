@@ -2,9 +2,12 @@
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import ChatSidebar from '../components/ChatSidebar';
 import ThinkingIndicator from '../components/ThinkingIndicator';
 import PromptModal from '../components/PromptModal';
+import VaultInfoModal from '../components/VaultInfoModal';
 import ForceGraph from '../components/ForceGraph';
 import SourcesDisplay from '../components/chat/SourcesDisplay';
 import RatingButtons from '../components/chat/RatingButtons';
@@ -39,6 +42,7 @@ export default function Home() {
 
     const [input, setInput] = useState('');
     const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
+    const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
     const [thinkingLog, setThinkingLog] = useState<string>('');
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -272,7 +276,10 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center gap-1 bg-[#1C1C1E] p-1 rounded-lg border border-[#2C2C2E]">
-                        <button className="px-3 py-1.5 rounded-md text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all">
+                        <button
+                            onClick={() => setIsVaultModalOpen(true)}
+                            className="px-3 py-1.5 rounded-md text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                        >
                             Vault
                         </button>
                         <div className="w-[1px] h-4 bg-white/10" />
@@ -372,10 +379,28 @@ export default function Home() {
                                         : 'bg-[#1C1C1E] border border-[#2C2C2E] text-white/90 rounded-bl-none shadow-xl'
                                         }`}
                                 >
-                                    <div className="prose prose-invert prose-sm max-w-none">
-                                        {(typeof msg.content === 'string' ? msg.content : String(msg.content || '')).split('\n').map((line, j) => (
-                                            <p key={j} className="mb-2 last:mb-0 leading-relaxed opacity-90">{line}</p>
-                                        ))}
+                                    <div className={`prose max-w-none ${msg.role === 'assistant' ? 'prose-invert' : 'prose-neutral'}`}>
+                                        <ReactMarkdown
+                                            remarkPlugins={[remarkGfm]}
+                                            components={{
+                                                h1: ({node, ...props}) => <h1 className="text-2xl font-bold mb-4 mt-6 first:mt-0" {...props} />,
+                                                h2: ({node, ...props}) => <h2 className="text-xl font-bold mb-3 mt-5 first:mt-0" {...props} />,
+                                                h3: ({node, ...props}) => <h3 className="text-lg font-semibold mb-2 mt-4 first:mt-0" {...props} />,
+                                                p: ({node, ...props}) => <p className="mb-3 leading-relaxed" {...props} />,
+                                                ul: ({node, ...props}) => <ul className="list-disc list-inside mb-3 space-y-1" {...props} />,
+                                                ol: ({node, ...props}) => <ol className="list-decimal list-inside mb-3 space-y-1" {...props} />,
+                                                li: ({node, ...props}) => <li className="leading-relaxed" {...props} />,
+                                                a: ({node, ...props}) => <a className="text-purple-400 hover:text-purple-300 underline" {...props} />,
+                                                code: ({node, inline, ...props}: any) =>
+                                                    inline
+                                                        ? <code className="bg-black/30 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+                                                        : <code className="block bg-black/30 p-3 rounded-lg text-sm font-mono overflow-x-auto mb-3" {...props} />,
+                                                strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                                                em: ({node, ...props}) => <em className="italic" {...props} />,
+                                            }}
+                                        >
+                                            {typeof msg.content === 'string' ? msg.content : String(msg.content || '')}
+                                        </ReactMarkdown>
                                     </div>
 
                                     {/* Sources Display */}
@@ -449,6 +474,11 @@ export default function Home() {
                     setSystemPrompt(newPrompt);
                     setIsPromptModalOpen(false);
                 }}
+            />
+
+            <VaultInfoModal
+                isOpen={isVaultModalOpen}
+                onClose={() => setIsVaultModalOpen(false)}
             />
         </div>
         </>
