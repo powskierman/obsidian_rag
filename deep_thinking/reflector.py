@@ -5,7 +5,7 @@ from .state import Step, PastStep, RAGState
 class ReflectionAgent:
     def __init__(self, client):
         self.client = client
-        self.model = "claude-3-5-sonnet-20241022"
+        self.model = "claude-sonnet-4-5-20241022"
 
     def reflect(self, step: Step, documents: List[Dict[str, Any]], state: RAGState) -> PastStep:
         """

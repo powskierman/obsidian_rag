@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Settings } from 'lucide-react';
 import ChatSidebar from '../components/ChatSidebar';
 import ThinkingIndicator from '../components/ThinkingIndicator';
 import PromptModal from '../components/PromptModal';
 import VaultInfoModal from '../components/VaultInfoModal';
+import SettingsPanelModal from '../components/sidebar/SettingsPanelModal';
 import ForceGraph from '../components/ForceGraph';
 import SourcesDisplay from '../components/chat/SourcesDisplay';
 import RatingButtons from '../components/chat/RatingButtons';
@@ -43,6 +45,7 @@ export default function Home() {
     const [input, setInput] = useState('');
     const [isPromptModalOpen, setIsPromptModalOpen] = useState(false);
     const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [thinkingLog, setThinkingLog] = useState<string>('');
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -139,9 +142,7 @@ export default function Home() {
 
             } else {
                 // Standard Unified Search (HTTP)
-
-                // Map frontend mode to backend mode
-                const backendMode = searchMode === 'knowledge-graph' ? 'graph' : searchMode;
+                const backendMode = searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
                 const modelToUse = llmProvider === 'ollama' ? settings.model : '';
@@ -149,7 +150,7 @@ export default function Home() {
                 // Unified Search Call
                 const result = await api.unifiedSearch(
                     userMsg,
-                    backendMode as 'vector' | 'graph' | 'hybrid',
+                    backendMode as any,
                     settings.sources,
                     llmProvider,
                     modelToUse,
@@ -263,7 +264,7 @@ export default function Home() {
             {/* 3D Knowledge Graph Background - Outside main container */}
             <div className="fixed inset-0 pointer-events-none">
                 <ErrorBoundary fallback={<FallbackBackground />}>
-                    <KnowledgeGraph3D nodeCount={120} />
+                    <KnowledgeGraph3D />
                 </ErrorBoundary>
             </div>
 
@@ -273,10 +274,9 @@ export default function Home() {
 
                 <div className="flex-1 flex flex-col h-full relative min-w-0">
                     {/* Header */}
-                    <header className="h-16 border-b border-[#1C1C1E] flex items-center justify-between px-6 bg-[#000000]/60 backdrop-blur-xl sticky top-0 z-30">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold tracking-tight">Deep Thinking</span>
-                            <span className="px-2 py-0.5 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-[10px] font-medium text-white/60 uppercase tracking-wider">Beta</span>
+                    <header className="h-32 border-b border-[#1C1C1E] flex items-center justify-between px-6 bg-[#000000]/60 backdrop-blur-xl sticky top-0 z-30">
+                        <div className="flex items-center pt-6">
+                            <img src="/logo.png" alt="Obsidian RAG" className="w-[150px] h-auto object-contain" />
                         </div>
 
                         <div className="flex items-center gap-1 bg-[#1C1C1E] p-1 rounded-lg border border-[#2C2C2E]">
@@ -293,6 +293,14 @@ export default function Home() {
                             >
                                 <span>Prompt</span>
                                 {systemPrompt && <div className="w-1.5 h-1.5 rounded-full bg-[#0A84FF]" />}
+                            </button>
+                            <div className="w-[1px] h-4 bg-white/10" />
+                            <button
+                                onClick={() => setIsSettingsModalOpen(true)}
+                                className="px-2 py-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                                title="Settings"
+                            >
+                                <Settings size={18} />
                             </button>
                         </div>
                     </header>
@@ -484,6 +492,12 @@ export default function Home() {
                     isOpen={isVaultModalOpen}
                     onClose={() => setIsVaultModalOpen(false)}
                 />
+
+                {isSettingsModalOpen && (
+                    <SettingsPanelModal
+                        onClose={() => setIsSettingsModalOpen(false)}
+                    />
+                )}
             </div>
         </>
     );

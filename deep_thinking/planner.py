@@ -5,7 +5,7 @@ from .state import Step
 class PlannerAgent:
     def __init__(self, client):
         self.client = client
-        self.model = "claude-3-5-sonnet-20241022" # Default, client will override if needed
+        self.model = "claude-sonnet-4-5-20241022" # Default, client will override if needed
 
     def create_plan(self, question: str, vault_context: Dict[str, Any]) -> List[Step]:
         """

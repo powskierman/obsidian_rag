@@ -5,7 +5,7 @@ from .state import RAGState
 class FinalAnswerGenerator:
     def __init__(self, client):
         self.client = client
-        self.model = "claude-3-5-sonnet-20241022"
+        self.model = "claude-sonnet-4-5-20241022"
 
         # Michel's custom system prompt for compassionate, personalized responses
         self.system_prompt = """You are a **Deep Thinking AI assistant** integrated with Michel's Obsidian Knowledge Base.
@@ -69,7 +69,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
         1. Directly addresses the original question
         2. Synthesizes findings from all research steps
         3. Cites vault sources using Obsidian link format: [[Folder/Note Name]]
-        4. Cites web sources as [URL](URL) or [Title](URL)
+        4. Cites web sources using markdown links with the ACTUAL page title from the web results (NOT the word "Title"): [Actual Page Title](https://example.com)
         5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard medical definitions, treatments, or external context found in the web results, even if they are general.
         6. If images are provided above, embed relevant ones using markdown format: ![Description](image_url)
            - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics

@@ -55,7 +55,7 @@ class UniversalClient:
              
         # Map Gemini models to Claude if provider switched but model name stuck
         if "gemini" in model.lower():
-            model = "claude-3-5-sonnet-20241022"
+            model = "claude-sonnet-4-5-20241022"
             
         return self.anthropic.messages.create(
             model=model,
@@ -72,11 +72,11 @@ class UniversalClient:
 
         # Map Claude models to Gemini if provider switched but model name stuck
         if "claude" in model.lower():
-            model = "gemini-2.0-flash-exp"
+            model = "gemini-3-pro-preview"
             
         # Ensure model has 'models/' prefix or matches known ID
         if not model.startswith("models/") and not model.startswith("gemini-"):
-             model = "gemini-2.0-flash-exp"
+             model = "gemini-3-pro-preview"
 
 
         # Construct prompt
@@ -93,13 +93,16 @@ class UniversalClient:
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         
+        # Gemini needs sufficient output tokens - ensure minimum of 8192
+        output_tokens = max(max_tokens, 8192)
+        
         payload = {
             "contents": [{
                 "parts": [{"text": full_content}]
             }],
             "generationConfig": {
                 "temperature": temperature,
-                "maxOutputTokens": max_tokens
+                "maxOutputTokens": output_tokens
             }
         }
 
@@ -117,11 +120,20 @@ class UniversalClient:
                 raise ValueError(error_msg)
                 
             data = response.json()
+            logger.debug(f"Gemini raw response: {data}")
+            
             candidates = data.get("candidates", [])
             if not candidates:
-                raise ValueError("No candidates returned from Gemini")
+                error_detail = data.get("error", {}).get("message", "Unknown error")
+                raise ValueError(f"No candidates returned from Gemini: {error_detail}")
+            
+            # Safely access the content parts
+            content_obj = candidates[0].get("content", {})
+            parts = content_obj.get("parts", [])
+            if not parts:
+                raise ValueError(f"No content parts in Gemini response: {candidates[0]}")
                 
-            content = candidates[0].get("content", {}).get("parts", [])[0].get("text", "")
+            content = parts[0].get("text", "")
             return UniversalMessage(content)
             
         except Exception as e:

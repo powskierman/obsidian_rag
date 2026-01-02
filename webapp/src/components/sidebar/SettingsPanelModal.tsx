@@ -150,14 +150,12 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             </div>
             <button
               onClick={() => handleToggle('showSources')}
-              className={`relative w-12 h-6 rounded-full transition-colors ${
-                settings.showSources ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
-              }`}
+              className={`relative w-12 h-6 rounded-full transition-colors ${settings.showSources ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
+                }`}
             >
               <div
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                  settings.showSources ? 'translate-x-6' : 'translate-x-0'
-                }`}
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${settings.showSources ? 'translate-x-6' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>
@@ -170,14 +168,30 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             </div>
             <button
               onClick={() => handleToggle('enhancedSearch')}
-              className={`relative w-12 h-6 rounded-full transition-colors ${
-                settings.enhancedSearch ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
-              }`}
+              className={`relative w-12 h-6 rounded-full transition-colors ${settings.enhancedSearch ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
+                }`}
             >
               <div
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
-                  settings.enhancedSearch ? 'translate-x-6' : 'translate-x-0'
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${settings.enhancedSearch ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+              />
+            </button>
+          </div>
+
+          {/* Deep Thinking Toggle */}
+          <div className="flex items-center justify-between p-3 bg-[#2C2C2E] rounded-lg border border-[#3C3C3E]">
+            <div>
+              <div className="text-sm font-medium text-white">Deep Thinking</div>
+              <div className="text-xs text-white/40 mt-1">Enable agentic reasoning for complex tasks</div>
+            </div>
+            <button
+              onClick={() => updateSettings({ ...settings, deepThinking: !settings.deepThinking })}
+              className={`relative w-12 h-6 rounded-full transition-colors ${settings.deepThinking ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
                 }`}
+            >
+              <div
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${settings.deepThinking ? 'translate-x-6' : 'translate-x-0'
+                  }`}
               />
             </button>
           </div>

@@ -11,7 +11,9 @@ export type SearchMode =
   | 'entities+vector' // LightRAG + ChromaDB
   | 'dual-graph'      // NetworkX + LightRAG
   // Ultimate hybrid
-  | 'hybrid';         // All three sources
+  | 'hybrid'          // All three sources
+  // New experimental modes
+  | 'cascading';      // 5-Stage Waterfall
 
 export type LLMProvider = 'ollama' | 'gemini' | 'claude';
 

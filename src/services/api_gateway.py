@@ -20,7 +20,14 @@ except ImportError:
     # Fallback for local dev if in src/services
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     from deep_thinking.orchestrator import DeepThinkingRAG
+
+# Import CascadingRetriever - handle both package and direct execution
+try:
+    from cascading_retriever import CascadingRetriever
+except ImportError:
+    from src.services.cascading_retriever import CascadingRetriever
 
 app = FastAPI(title="Obsidian RAG Unified API", version="1.0")
 
@@ -399,7 +406,8 @@ async def unified_query(request: UnifiedQueryRequest):
         # ===== ULTIMATE HYBRID MODE =====
 
         # Hybrid: All three sources
-        else:
+        # Hybrid: All three sources
+        elif mode == "hybrid":
             try:
                 tasks = [
                     client.post(f"{GRAPH_SERVICE_URL}/query", json={
@@ -447,6 +455,42 @@ async def unified_query(request: UnifiedQueryRequest):
                 }
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Hybrid query error: {str(e)}")
+
+        # ===== CASCADING RETRIEVAL MODE =====
+        elif mode == "cascading":
+            try:
+                # Determine API Key for retriever if needed (though it mainly calls services)
+                # If it needs to do LLM calls itself, we'd pass the key.
+                # Currently CascadingRetriever just calls other services, but let's be safe.
+                api_key = None
+                if request.llm_provider == "anthropic":
+                    api_key = ANTHROPIC_API_KEY
+                
+                retriever = CascadingRetriever(
+                    embed_url=EMBEDDING_SERVICE_URL,
+                    graph_url=GRAPH_SERVICE_URL,
+                    lightrag_url=LIGHTRAG_SERVICE_URL,
+                    llm_provider=request.llm_provider,
+                    api_key=api_key
+                )
+                
+                # Execute cascading pipeline
+                result = await retriever.retrieve(request.query, max_results=request.max_results)
+                
+                return {
+                    "query": request.query,
+                    "mode": "cascading",
+                    "results": result,
+                    "metadata": {
+                        "description": "5-Stage Cascading Retrieval (Anchor -> Entity -> Expand -> Vector -> Synthesis)",
+                        "stages": ["Note Discovery", "Entity Extraction", "Semantic Expansion", "Vector Search"]
+                    }
+                }
+            except Exception as e:
+                # Log full trace if possible
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(status_code=500, detail=f"Cascading retrieval error: {str(e)}")
 
 @app.websocket("/api/v1/deep-research")
 async def deep_research_websocket(websocket: WebSocket):

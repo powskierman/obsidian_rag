@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY src/services/api_gateway.py .
+COPY src/services/cascading_retriever.py .
 COPY src/utils/ ./src/utils/
 COPY deep_thinking/ ./deep_thinking/
 
