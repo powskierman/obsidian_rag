@@ -108,7 +108,10 @@
       "Bash(then rmdir Analysis)",
       "Bash(else ls -la Analysis)",
       "Bash(fi:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(./venv/bin/python:*)",
+      "Bash(./venv/bin/pip:*)",
+      "Bash(python3.12:*)"
     ],
     "deny": [],
     "ask": []
