@@ -44,7 +44,7 @@ cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
 # Initialize ChromaDB
 print("Initializing ChromaDB (SOTA Branch)...")
-chroma_client = chromadb.PersistentClient(path="./chroma_db_sota")
+chroma_client = chromadb.PersistentClient(path="./chroma_db")
 collection = chroma_client.get_or_create_collection(
     name="obsidian_vault_sota",
     metadata={"hnsw:space": "cosine"}
