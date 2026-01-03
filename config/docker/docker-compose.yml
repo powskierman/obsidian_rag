@@ -2,7 +2,7 @@ services:
   # ChromaDB Embedding Service
   embedding-service:
     build:
-      context: .
+      context: ../..
       dockerfile: config/docker/Dockerfile.embedding
     container_name: obsidian-embedding
     ports:
@@ -25,7 +25,7 @@ services:
   # LightRAG Service - Entity-centric knowledge graph for semantic search
   lightrag-service:
     build:
-      context: .
+      context: ../..
       dockerfile: Dockerfile.lightrag
     container_name: obsidian-lightrag
     ports:
@@ -54,7 +54,7 @@ services:
   # Reasoning Graph Service (Kimi)
   graph-service:
     build:
-      context: .
+      context: ../..
       dockerfile: config/docker/Dockerfile.graph
     container_name: obsidian-graph-service
     ports:
@@ -91,7 +91,7 @@ services:
   # Unified API Gateway
   api-gateway:
     build:
-      context: .
+      context: ../..
       dockerfile: config/docker/Dockerfile.gateway
     container_name: obsidian-api-gateway
     ports:
@@ -124,7 +124,7 @@ services:
   # Streamlit UI
   streamlit-ui:
     build:
-      context: .
+      context: ../..
       dockerfile: config/docker/Dockerfile.streamlit
     container_name: obsidian-ui
     ports:

@@ -61,14 +61,25 @@ export const api = {
       // Transform the new API response to match the expected format
       // Handle different response structures based on mode
       if (mode === 'hybrid') {
-        // Hybrid mode returns { notes, entities, vector }
-        // Prefer entities (LightRAG) result as it provides richer, synthesized content
         const entitiesResult = data.entities?.data?.result || '';
         const notesAnswer = data.notes?.data?.answer || '';
+        const notesSources = data.notes?.data?.sources || [];
+
+        // Flatten and format vector sources if available
+        let vectorSources: SearchResult[] = [];
+        const vectorData = data.vector?.data;
+        if (vectorData && vectorData.documents && vectorData.documents[0]) {
+          vectorSources = vectorData.documents[0].map((doc: string, i: number) => ({
+            filename: vectorData.metadatas[0][i]?.filename || 'unknown',
+            filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
+            relevance: vectorData.distances[0][i] !== undefined ? (1 / (1 + vectorData.distances[0][i])) : 0.5,
+            snippet: doc.substring(0, 300) + '...'
+          }));
+        }
 
         return {
           answer: entitiesResult || notesAnswer || 'No results found',
-          sources: data.notes?.data?.sources || [],
+          sources: [...notesSources, ...vectorSources],
           extracted_entities: data.notes?.data?.extracted_entities || []
         };
       } else if (mode.includes('+') || mode === 'dual-graph') {
