@@ -324,17 +324,7 @@ def index_vault(vault_path, embedding_service_url="http://localhost:8000", limit
         else:
             failed_files += 1
             failed_file_list.append(str(filepath))
-            try:
-                stats_response = requests.get(f"{embedding_service_url}/stats", timeout=5)
-                if stats_response.status_code == 200:
-                    current_stats = stats_response.json()
-                    current_count = current_stats.get('total_documents', 0)
-                    print(f"\n--- Progress: {i}/{len(md_files)} files ---")
-                    print(f"    Processed: {processed_files}, Failed/Skipped: {failed_files}")
-                    print(f"    Documents in DB: {current_count}")
-                    print(f"    Chunks added: {total_chunks}\n")
-            except:
-                pass
+        processed += 1
     
     print()
     print(f"✅ Indexing complete!")
