@@ -656,6 +656,25 @@ Provide a thorough, accurate answer that:
                 'extracted_entities': entities
             }
 
+            # Pre-populate sources from graph context nodes as initial fallback
+            graph_sources = []
+            seen_source_files = set()
+            for node in context_nodes:
+                node_props = node.get('properties', {})
+                # Our GraphBuilder adds 'sources' list to properties
+                node_sources = node_props.get('sources', [])
+                for src in node_sources:
+                    fname = src.get('filename', 'Unknown')
+                    if fname not in seen_source_files and fname != 'Unknown':
+                        seen_source_files.add(fname)
+                        graph_sources.append({
+                            'filename': fname,
+                            'filepath': fname,
+                            'relevance': 85.0,
+                            'snippet': f"Context: {node['entity']} mentioned. {node_props.get('description', '')}"
+                        })
+            base_response['sources'] = graph_sources
+
             # Step 2: If mode is 'hybrid', enhance with vector search
             if mode == 'hybrid':
                 try:
@@ -708,7 +727,14 @@ Provide a thorough, accurate answer that:
                                 'snippet': snippet
                             })
 
-                        base_response['sources'] = vector_sources
+                        # Merge vector sources with graph fallbacks (prefer vector info for overlaps)
+                        final_sources = vector_sources.copy()
+                        vector_filenames = {s['filename'] for s in vector_sources}
+                        for g_src in graph_sources:
+                            if g_src['filename'] not in vector_filenames:
+                                final_sources.append(g_src)
+                        
+                        base_response['sources'] = final_sources
                         base_response['extracted_entities'] = entities
                         
                         # SYNTHESIS STEP: Re-generate answer using both Graph and Vector context

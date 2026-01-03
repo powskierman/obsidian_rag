@@ -77,9 +77,16 @@ export const api = {
           }));
         }
 
+        const allSources = [...notesSources, ...vectorSources];
+        const uniqueSources = allSources.filter((src, index, self) =>
+          index === self.findIndex((t) => (
+            t.filename === src.filename
+          ))
+        );
+
         return {
           answer: notesAnswer || entitiesResult || 'No results found',
-          sources: [...notesSources, ...vectorSources],
+          sources: uniqueSources,
           extracted_entities: data.notes?.data?.extracted_entities || []
         };
       } else if (mode.includes('+') || mode === 'dual-graph') {

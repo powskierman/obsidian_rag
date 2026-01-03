@@ -419,7 +419,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "model": request.model,
                         "temperature": request.temperature,
                         "system_prompt": request.system_prompt
-                    }, timeout=30.0),
+                    }, timeout=90.0),
                     client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
                         "query": request.query,
                         "mode": "hybrid",
@@ -427,7 +427,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "model": request.model,
                         "temperature": request.temperature,
                         "system_prompt": request.system_prompt
-                    }, timeout=60.0),
+                    }, timeout=90.0),
                     client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
                         "query": request.query, "n_results": request.max_results
                     }, timeout=30.0)
