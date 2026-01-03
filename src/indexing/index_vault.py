@@ -338,7 +338,7 @@ def index_vault(vault_path, embedding_service_url="http://localhost:8000", limit
     
     print()
     print(f"✅ Indexing complete!")
-    print(f"   Files processed: {processed_files}/{len(md_files)}")
+    print(f"   Files processed: {processed}/{len(all_files)}")
     if failed_files > 0:
         print(f"   Files skipped/failed: {failed_files}")
         print(f"\n   Failed/Skipped files:")
@@ -346,7 +346,7 @@ def index_vault(vault_path, embedding_service_url="http://localhost:8000", limit
             print(f"     • {failed_file}")
         if len(failed_file_list) > 10:
             print(f"     ... and {len(failed_file_list) - 10} more")
-    print(f"   Chunks added: {total_chunks}")
+    print(f"   Chunks added: {added_total}")
     
     # Get final stats
     try:
