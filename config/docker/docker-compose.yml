@@ -2,15 +2,15 @@ services:
   # ChromaDB Embedding Service
   embedding-service:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile.embedding
     container_name: obsidian-embedding
     ports:
       - "8000:8000"
     volumes:
-      - ../../chroma_db:/app/chroma_db:rw,cached
+      - ./chroma_db:/app/chroma_db:rw,cached
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
-      - ../../src/services/embedding_service.py:/app/embedding_service.py:ro
+      - ./src/services/embedding_service.py:/app/embedding_service.py:ro
     environment:
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
@@ -25,7 +25,7 @@ services:
   # LightRAG Service - Entity-centric knowledge graph for semantic search
   lightrag-service:
     build:
-      context: ../..
+      context: .
       dockerfile: Dockerfile.lightrag
     container_name: obsidian-lightrag
     ports:
@@ -54,15 +54,15 @@ services:
   # Reasoning Graph Service (Kimi)
   graph-service:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile.graph
     container_name: obsidian-graph-service
     ports:
       - "8002:8002"
     volumes:
-      - ../../data/graph_data:/app/graph_data
-      - ../../src/services/kimi_graph_builder.py:/app/kimi_graph_builder.py:ro
-      - ../../src/services/graph_query_service.py:/app/graph_query_service.py:ro
+      - ./data/graph_data:/app/graph_data
+      - ./src/services/kimi_graph_builder.py:/app/kimi_graph_builder.py:ro
+      - ./src/services/graph_query_service.py:/app/graph_query_service.py:ro
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
@@ -91,13 +91,13 @@ services:
   # Unified API Gateway
   api-gateway:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile.gateway
     container_name: obsidian-api-gateway
     ports:
       - "4000:3000"
     volumes:
-      - ../../src/services/api_gateway.py:/app/api_gateway.py:ro
+      - ./src/services/api_gateway.py:/app/api_gateway.py:ro
     environment:
       - PYTHONUNBUFFERED=1
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
@@ -124,14 +124,14 @@ services:
   # Streamlit UI
   streamlit-ui:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile.streamlit
     container_name: obsidian-ui
     ports:
       - "8501:8501"
     volumes:
-      - ../../streamlit.log:/app/streamlit.log:rw
-      - ../../src/ui/streamlit_ui_docker.py:/app/streamlit_ui_docker.py:ro
+      - ./streamlit.log:/app/streamlit.log:rw
+      - ./src/ui/streamlit_ui_docker.py:/app/streamlit_ui_docker.py:ro
     environment:
       - PYTHONUNBUFFERED=1
       - API_GATEWAY_URL=http://api-gateway:3000
