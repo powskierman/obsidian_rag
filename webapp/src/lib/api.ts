@@ -1,5 +1,5 @@
-const GATEWAY_URL = 'http://127.0.0.1:3000';
-const WS_GATEWAY_URL = 'ws://127.0.0.1:3000';
+const GATEWAY_URL = 'http://127.0.0.1:4000';
+const WS_GATEWAY_URL = 'ws://127.0.0.1:4000';
 
 export interface SearchResult {
   filename: string;

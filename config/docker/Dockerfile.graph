@@ -21,6 +21,7 @@ RUN pip install --no-cache-dir \
 # Copy service files
 COPY src/services/kimi_graph_builder.py /app/
 COPY src/services/graph_query_service.py /app/
+COPY src/utils/ /app/src/utils/
 
 # Expose port
 EXPOSE 8002
