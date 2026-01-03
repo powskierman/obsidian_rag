@@ -16,9 +16,37 @@ import threading
 import sys
 from pathlib import Path
 
-# Add src to sys.path to allow imports from utils
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from utils.memory_manager import get_memory_manager
+# Add necessary directories to sys.path for local vs Docker layouts
+current_dir = Path(__file__).parent.resolve()
+# Docker setup: services are in /app, utils are in /app/utils
+# Local setup: services are in src/services, utils are in src/utils
+potential_roots = [
+    current_dir,           # Docker /app/
+    current_dir.parent,    # /app/src/
+    current_dir.parent.parent # Project Root
+]
+
+for pr in potential_roots:
+    if pr.exists() and (pr / "utils").exists():
+        if str(pr) not in sys.path:
+            sys.path.insert(0, str(pr))
+            break
+    if pr.exists() and (pr / "src" / "utils").exists():
+        src_path = str(pr / "src")
+        if src_path not in sys.path:
+            sys.path.insert(0, src_path)
+            break
+
+try:
+    from utils.memory_manager import get_memory_manager
+except ImportError as e:
+    logger.error(f"Critical Import Error: {e}")
+    # Fallback to direct import if possible
+    try:
+        from src.utils.memory_manager import get_memory_manager
+    except ImportError:
+        logger.error("All memory_manager import attempts failed.")
+        def get_memory_manager(): return None
 
 app = Flask(__name__)
 CORS(app)

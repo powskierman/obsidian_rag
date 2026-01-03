@@ -16,8 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code
 COPY src/services/api_gateway.py .
 COPY src/services/cascading_retriever.py .
-COPY src/utils/ ./src/utils/
-COPY deep_thinking/ ./deep_thinking/
+COPY src/utils/ /app/utils/
+COPY deep_thinking/ /app/deep_thinking/
 
 # Expose port 3000
 EXPOSE 3000

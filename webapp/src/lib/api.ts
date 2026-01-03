@@ -78,7 +78,7 @@ export const api = {
         }
 
         return {
-          answer: entitiesResult || notesAnswer || 'No results found',
+          answer: notesAnswer || entitiesResult || 'No results found',
           sources: [...notesSources, ...vectorSources],
           extracted_entities: data.notes?.data?.extracted_entities || []
         };
