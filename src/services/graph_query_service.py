@@ -12,6 +12,13 @@ import json
 from kimi_graph_builder import GraphBuilder, GraphQuerier
 import logging
 from openai import OpenAI
+import threading
+import sys
+from pathlib import Path
+
+# Add src to sys.path to allow imports from utils
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils.memory_manager import get_memory_manager
 
 app = Flask(__name__)
 CORS(app)
@@ -27,8 +34,6 @@ graph_loaded = False
 
 # Environment variables for vector service
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8000")
-
-
 def extract_entities_from_graph(graph_text: str) -> list:
     """Extract key entities from graph response text."""
     # Extract capitalized phrases (likely entities)
@@ -43,6 +48,24 @@ def extract_entities_from_graph(graph_text: str) -> list:
     entities = list(set(entities))[:10]  # Top 10 unique entities
 
     return entities
+
+
+def generate_hyde_text(user_query: str, llm_provider: str, model: str) -> str:
+    """Generate a hypothetical answer to improve vector search (HyDE)."""
+    hyde_prompt = f"""You are a helpful assistant. Provide a concise, hypothetical but technically accurate answer to the following question. 
+This answer will be used to help find relevant documents in a knowledge base.
+
+Question: {user_query}
+
+Hypothetical Answer:"""
+    
+    try:
+        logger.info(f"Generating HyDE hypothetical answer for query: {user_query}")
+        hyde_answer = call_llm(llm_provider, model, hyde_prompt, user_query, temperature=0.3)
+        return hyde_answer
+    except Exception as e:
+        logger.error(f"HyDE generation failed: {e}")
+        return user_query # Fallback to original query
 
 
 def call_llm(provider: str, model: str, system_prompt: str, user_query: str, temperature: float = 0.7) -> str:
@@ -608,8 +631,12 @@ Provide a thorough, accurate answer that:
             # Step 2: If mode is 'hybrid', enhance with vector search
             if mode == 'hybrid':
                 try:
-                    # Enhanced vector search with verified entities
-                    enhanced_query = f"{user_query} {' '.join(entities)}"
+                    # === STEP 2a: HyDE Enhancement ===
+                    # Generate hypothetical answer for better vector retrieval
+                    hyde_text = generate_hyde_text(user_query, llm_provider, model)
+                    
+                    # Search using both original query and hypothetical answer
+                    enhanced_query = f"{user_query} {hyde_text} {' '.join(entities)}"
 
                     vector_response = requests.post(
                         f'{EMBEDDING_SERVICE_URL}/query',
@@ -662,7 +689,13 @@ Provide a thorough, accurate answer that:
                         
                         # Prepare context strings
                         vault_context = f"=== GRAPH ANALYSIS ===\n{graph_answer}\n\n=== DOCUMENTS ===\n{vector_context_text}"
-                        memory_context = "(No specific memory context loaded)" # Placeholder until mem0 integration
+                        
+                        # === STEP 2b: Personal Memory Integration ===
+                        logger.info("Fetching Personal Memories from mem0...")
+                        memory_manager = get_memory_manager()
+                        memory_context = memory_manager.search_memory(user_query)
+                        if not memory_context:
+                            memory_context = "(No specific personal history found for this query)"
                         
                         synthesis_system_prompt = f"""Your task is to answer questions by analyzing the retrieved materials and Michel’s personal context.
 
@@ -691,6 +724,17 @@ Finally, provide your answer in a structured, easy-to-read format.
                         # Call LLM for final synthesis
                         final_answer = call_llm(llm_provider, model, synthesis_system_prompt, user_query, temperature)
                         base_response['answer'] = final_answer
+                        
+                        # === STEP 2c: Async Memory Update ===
+                        def update_mem0():
+                            try:
+                                interaction = f"User asked: {user_query}\nAssistant answered: {final_answer}"
+                                memory_manager.add_memory(interaction)
+                                logger.info("mem0 personal memory updated successfully")
+                            except Exception as ex:
+                                logger.error(f"Failed to update mem0: {ex}")
+                        
+                        threading.Thread(target=update_mem0, daemon=True).start()
                         
                     else:
                         logger.warning(f"Vector search failed with status {vector_response.status_code}")
