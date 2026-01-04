@@ -38,7 +38,7 @@ services:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - KIMI_MODEL=moonshotai/kimi-k2-0905
-      - LIGHTRAG_DIR=/app/lightrag_db
+      - LIGHTRAG_DIR=${LIGHTRAG_DIR:-/app/lightrag_db}
       - OLLAMA_HOST=http://host.docker.internal:11434
       - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
     extra_hosts:
@@ -68,7 +68,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
+      - GRAPH_PATH=${GRAPH_PATH:-/app/graph_data/knowledge_graph_full.pkl}
       - KIMI_MODEL=moonshotai/kimi-k2-0905
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
