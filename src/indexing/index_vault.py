@@ -159,8 +159,13 @@ def process_file(filepath, embedding_service_url="http://localhost:8000"):
             if vault_path:
                 rel_path = str(filepath.relative_to(Path(vault_path)))
                 metadata['filepath'] = rel_path
+                # Add folder parts for robust contains filtering
+                # Path("a/b/c.md").parts -> ("a", "b", "c.md")
+                parts = Path(rel_path).parent.parts
+                metadata['folder_parts'] = list(parts)
             else:
                 metadata['filepath'] = str(filepath)
+                metadata['folder_parts'] = []
         except (ValueError, TypeError):
             metadata['filepath'] = str(filepath)
         

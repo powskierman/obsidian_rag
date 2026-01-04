@@ -923,6 +923,8 @@ Provide ADDITIONAL insights, clinical context, or alternative perspectives that 
                         'error': str(e)
                     }
 
+            # Add response alias for researcher compatibility
+            base_response['response'] = base_response.get('answer', '')
             return jsonify(base_response)
 
     except Exception as e:

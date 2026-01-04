@@ -219,9 +219,20 @@ def query_documents():
             if filters:
                 # Build where clause from filters
                 conditions = []
-                if 'tags' in filters:
-                    for tag in filters['tags']:
-                        conditions.append({"tags": {"$contains": tag}})
+                for key, value in filters.items():
+                    if isinstance(value, dict) and "$contains" in value:
+                        # Handle list-based contains (e.g., tags)
+                        conditions.append({key: {"$contains": value["$contains"]}})
+                    elif isinstance(value, list):
+                        # Handle OR for multiple values if list provided
+                        if len(value) > 1:
+                            conditions.append({key: {"$in": value}})
+                        elif len(value) == 1:
+                            conditions.append({key: value[0]})
+                    else:
+                        # Default to exact match
+                        conditions.append({key: value})
+                
                 if conditions:
                     where_clause = {"$and": conditions} if len(conditions) > 1 else conditions[0]
 

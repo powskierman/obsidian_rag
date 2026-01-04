@@ -64,17 +64,18 @@ class RetrievalSupervisor:
             results = self._query_graph(query, mode="local")
             
         elif strategy == "hybrid":
-            # Graph search disabled: LightRAG requires multiple sequential LLM calls
-            # Deep Thinking works great with vector-only search
+            # True Hybrid: Combine Graph and Vector results
             n_results = 40 if self.enable_reranking else 15
             vec_results = self._query_vector(query, filters, n_results=n_results)
+            graph_results = self._query_graph(query, mode="hybrid")
             
-            # Fallback for hybrid (vector part)
-            if not vec_results and filters:
+            # Combine results
+            results = vec_results + graph_results
+            
+            # Fallback for hybrid if nothing found
+            if not results and filters:
                 print(f"⚠️  No results with filters {filters}. Retrying without filters...")
-                vec_results = self._query_vector(query, filters=None, n_results=n_results)
-                
-            results = vec_results
+                results = self._query_vector(query, filters=None, n_results=n_results)
             
         elif strategy == "web":
             results = self._query_web(query)
@@ -92,11 +93,11 @@ class RetrievalSupervisor:
         
         # If only one folder, simple filter
         if len(target_folders) == 1:
-            return {"source": {"$contains": target_folders[0]}}
+            return {"folder_parts": {"$contains": target_folders[0]}}
             
         # If multiple folders, use $or
         return {
-            "$or": [{"source": {"$contains": folder}} for folder in target_folders]
+            "$or": [{"folder_parts": {"$contains": folder}} for folder in target_folders]
         }
     
     def _query_vector(self, query: str, filters: Dict[str, Any] = None, n_results: int = 10) -> List[Dict[str, Any]]:
@@ -160,14 +161,16 @@ class RetrievalSupervisor:
                         "type": "graph",
                         "score": 1.0
                     }]
-                # If it returns a dict with response:
-                elif isinstance(data, dict) and "response" in data:
-                     return [{
-                        "content": data["response"],
-                        "source": "LightRAG Knowledge Graph",
-                        "type": "graph",
-                        "score": 1.0
-                    }]
+                # If it returns a dict with response or answer (graph-service uses answer):
+                elif isinstance(data, dict):
+                    content = data.get("answer") or data.get("response")
+                    if content:
+                        return [{
+                            "content": content,
+                            "source": "Knowledge Graph",
+                            "type": "graph",
+                            "score": 1.0
+                        }]
                 return []
             else:
                 print(f"Graph search error: {response.status_code}")
