@@ -93,11 +93,11 @@ class RetrievalSupervisor:
         
         # If only one folder, simple filter
         if len(target_folders) == 1:
-            return {"folder_parts": {"$contains": target_folders[0]}}
+            return {f"dir_{target_folders[0]}": True}
             
         # If multiple folders, use $or
         return {
-            "$or": [{"folder_parts": {"$contains": folder}} for folder in target_folders]
+            "$or": [{f"dir_{folder}": True} for folder in target_folders]
         }
     
     def _query_vector(self, query: str, filters: Dict[str, Any] = None, n_results: int = 10) -> List[Dict[str, Any]]:

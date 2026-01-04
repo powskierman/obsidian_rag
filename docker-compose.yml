@@ -8,9 +8,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./src:/app/src:ro
       - ./chroma_db:/app/chroma_db:rw,cached
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
-      - ./src/services/embedding_service.py:/app/embedding_service.py:ro
     environment:
       - PYTHONUNBUFFERED=1
       - CHROMA_COLLECTION=${CHROMA_COLLECTION:-obsidian_vault}
@@ -61,15 +61,14 @@ services:
     ports:
       - "8002:8002"
     volumes:
+      - ./src:/app/src:ro
       - ./data/graph_data:/app/graph_data
-      - ./src/services/kimi_graph_builder.py:/app/kimi_graph_builder.py:ro
-      - ./src/services/graph_query_service.py:/app/graph_query_service.py:ro
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - GRAPH_PATH=${GRAPH_PATH:-/app/graph_data/knowledge_graph_full.pkl}
-      - KIMI_MODEL=moonshotai/kimi-k2-0905
+      - KIMI_MODEL=openai/gpt-4o-mini
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -98,7 +97,7 @@ services:
     ports:
       - "4000:3000"
     volumes:
-      - ./src/services/api_gateway.py:/app/api_gateway.py:ro
+      - ./src:/app/src:ro
     environment:
       - PYTHONUNBUFFERED=1
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
@@ -131,8 +130,8 @@ services:
     ports:
       - "8501:8501"
     volumes:
+      - ./src:/app/src:ro
       - ./streamlit.log:/app/streamlit.log:rw
-      - ./src/ui/streamlit_ui_docker.py:/app/streamlit_ui_docker.py:ro
     environment:
       - PYTHONUNBUFFERED=1
       - API_GATEWAY_URL=http://api-gateway:3000

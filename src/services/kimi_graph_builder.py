@@ -190,16 +190,24 @@ Guidelines:
                 
                 # Add source metadata
                 for entity in graph_data.get('entities', []):
-                    if 'properties' not in entity: entity['properties'] = {}
-                    if 'sources' not in entity['properties']: entity['properties']['sources'] = []
+                    if 'properties' not in entity or not isinstance(entity['properties'], dict): 
+                        entity['properties'] = {}
+                    
+                    if 'sources' not in entity['properties']: 
+                        entity['properties']['sources'] = []
+                        
                     entity['properties']['sources'].append({
                         'filename': metadata.get('filename', 'Unknown'),
                         'chunk_id': metadata.get('chunk_id', 'Unknown')
                     })
                 
                 for rel in graph_data.get('relationships', []):
-                    if 'properties' not in rel: rel['properties'] = {}
-                    if 'sources' not in rel['properties']: rel['properties']['sources'] = []
+                    if 'properties' not in rel or not isinstance(rel['properties'], dict): 
+                        rel['properties'] = {}
+                    
+                    if 'sources' not in rel['properties']: 
+                        rel['properties']['sources'] = []
+                        
                     rel['properties']['sources'].append({
                         'filename': metadata.get('filename', 'Unknown'),
                         'chunk_id': metadata.get('chunk_id', 'Unknown')
@@ -306,7 +314,11 @@ Guidelines:
         with open(filepath, 'rb') as f:
             data = pickle.load(f)
             self.graph = data['graph']
-            self.extraction_stats = data.get('stats', self.extraction_stats)
+            # Safely update stats ensuring all keys exist (handling backwards compatibility)
+            loaded_stats = data.get('stats', {})
+            if isinstance(loaded_stats, dict):
+                self.extraction_stats.update(loaded_stats)
+            # self.extraction_stats already initialized with defaults in __init__
             self.processed_chunks = set(data.get('processed_chunks', []))
             self.entity_cache = {name.lower(): name for name in self.graph.nodes()}
 

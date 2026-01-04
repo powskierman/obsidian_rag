@@ -159,13 +159,14 @@ def process_file(filepath, embedding_service_url="http://localhost:8000"):
             if vault_path:
                 rel_path = str(filepath.relative_to(Path(vault_path)))
                 metadata['filepath'] = rel_path
-                # Add folder parts for robust contains filtering
-                # Path("a/b/c.md").parts -> ("a", "b", "c.md")
+                # Add individual folder flags for robust filtering in ChromaDB
+                # ChromaDB doesn't support list metadata, so we use dir_<name>: True
                 parts = Path(rel_path).parent.parts
-                metadata['folder_parts'] = list(parts)
+                for part in parts:
+                    if part:
+                        metadata[f'dir_{part}'] = True
             else:
                 metadata['filepath'] = str(filepath)
-                metadata['folder_parts'] = []
         except (ValueError, TypeError):
             metadata['filepath'] = str(filepath)
         

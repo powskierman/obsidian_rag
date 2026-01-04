@@ -37,6 +37,13 @@ for pr in potential_roots:
             sys.path.insert(0, src_path)
             break
 
+app = Flask(__name__)
+CORS(app)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 try:
     from utils.memory_manager import get_memory_manager
 except ImportError as e:
@@ -47,13 +54,6 @@ except ImportError as e:
     except ImportError:
         logger.error("All memory_manager import attempts failed.")
         def get_memory_manager(): return None
-
-app = Flask(__name__)
-CORS(app)
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Global graph builder and querier
 builder = None

@@ -190,7 +190,10 @@ def add_document():
         return jsonify({"status": "success", "id": doc_id}), 200
     
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"❌ Error adding document: {e}\n{error_trace}")
+        return jsonify({"error": str(e), "traceback": error_trace}), 500
 
 @app.route('/query', methods=['POST'])
 def query_documents():
