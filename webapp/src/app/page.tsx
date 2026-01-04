@@ -92,9 +92,60 @@ export default function Home() {
                             // Final result received
                             const answer = data.data?.answer || data.markdown || data.content;
                             if (answer) {
+                                // Extract and map citations to structured Source objects
+                                const rawCitations = data.data?.citations || [];
+                                // Flatten if the model returned nested lists accidentally
+                                const flatCitations = Array.isArray(rawCitations) ? rawCitations.flat() : [rawCitations];
+
+                                const mappedSources: Source[] = flatCitations.map((cit: any) => {
+                                    const citStr = typeof cit === 'string' ? cit : JSON.stringify(cit);
+
+                                    // Handle Obsidian link format [[Path/To/File]]
+                                    if (citStr.includes('[[') && citStr.includes(']]')) {
+                                        const match = citStr.match(/\[\[(.*?)\]\]/);
+                                        const inner = match ? match[1] : citStr;
+                                        return {
+                                            filename: inner.split('/').pop() || inner,
+                                            filepath: inner,
+                                            relevance: 95,
+                                            snippet: 'Cited via Research Reasoning'
+                                        };
+                                    }
+
+                                    // Handle standard markdown-ish links [Note Name]
+                                    if (citStr.startsWith('[') && citStr.endsWith(']')) {
+                                        const inner = citStr.substring(1, citStr.length - 1);
+                                        return {
+                                            filename: inner.split('/').pop() || inner,
+                                            filepath: inner,
+                                            relevance: 90,
+                                            snippet: 'Identified during analysis'
+                                        };
+                                    }
+
+                                    // Handle URLs
+                                    if (citStr.startsWith('http')) {
+                                        return {
+                                            filename: 'Web Source',
+                                            filepath: citStr,
+                                            relevance: 85,
+                                            snippet: citStr
+                                        };
+                                    }
+
+                                    // Fallback for other formats
+                                    return {
+                                        filename: citStr,
+                                        filepath: citStr,
+                                        relevance: 80,
+                                        snippet: 'Retrieved during research'
+                                    };
+                                });
+
                                 addMessage({
                                     role: 'assistant',
                                     content: answer,
+                                    sources: settings.showSources ? mappedSources : undefined,
                                     queryId,
                                     timestamp: new Date().toISOString(),
                                 });
