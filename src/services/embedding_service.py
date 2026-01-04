@@ -43,10 +43,11 @@ print("Loading cross-encoder for re-ranking...")
 cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
 # Initialize ChromaDB
-print("Initializing ChromaDB (SOTA Branch)...")
+COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "obsidian_vault")
+print(f"Initializing ChromaDB (Collection: {COLLECTION_NAME})...")
 chroma_client = chromadb.PersistentClient(path="./chroma_db")
 collection = chroma_client.get_or_create_collection(
-    name="obsidian_vault_sota",
+    name=COLLECTION_NAME,
     metadata={"hnsw:space": "cosine"}
 )
 

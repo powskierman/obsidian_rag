@@ -13,6 +13,7 @@ services:
       - ./src/services/embedding_service.py:/app/embedding_service.py:ro
     environment:
       - PYTHONUNBUFFERED=1
+      - CHROMA_COLLECTION=${CHROMA_COLLECTION:-obsidian_vault}
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
