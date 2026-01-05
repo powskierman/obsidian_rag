@@ -168,6 +168,37 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             <p className="text-xs text-white/40 mt-1">Controls randomness in responses</p>
           </div>
 
+          {/* Filter Threshold */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-medium text-white">
+                Filter Threshold
+              </label>
+              <span className="text-sm font-mono text-[#0A84FF]">{(settings.distanceThreshold ?? 5.0).toFixed(1)}</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="15"
+              step="0.5"
+              value={settings.distanceThreshold ?? 5.0}
+              onChange={(e) => {
+                const newThreshold = Number(e.target.value);
+                console.log('🎚️ Threshold slider changed to:', newThreshold);
+                updateSettings({ ...settings, distanceThreshold: newThreshold });
+              }}
+              className="w-full h-2 bg-[#2C2C2E] rounded-lg appearance-none cursor-pointer slider"
+              style={{
+                background: `linear-gradient(to right, #0A84FF 0%, #0A84FF ${((settings.distanceThreshold ?? 5.0) / 15) * 100}%, #2C2C2E ${((settings.distanceThreshold ?? 5.0) / 15) * 100}%, #2C2C2E 100%)`
+              }}
+            />
+            <div className="flex justify-between text-xs text-white/40 mt-1">
+              <span>0.0 (Strict)</span>
+              <span>15.0 (Loose)</span>
+            </div>
+            <p className="text-xs text-white/40 mt-1">Filter out low-quality search results</p>
+          </div>
+
           {/* Show Sources Toggle */}
           <div className="flex items-center justify-between p-3 bg-[#2C2C2E] rounded-lg border border-[#3C3C3E]">
             <div>

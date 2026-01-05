@@ -1,21 +1,26 @@
 services:
   # Redirect data to local home folder (OUTSIDE of iCloud)
-  # This prevents "bad object" errors and sync corruption
+  # This prevents SQLite corruption and sync collisions
 
   embedding-service:
     volumes:
+      - ./src:/app/src:ro
       - /Users/michel/obsidian_rag_local_data/chroma_db:/app/chroma_db
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - CHROMA_COLLECTION=obsidian_vault_sota
 
   lightrag-service:
     volumes:
       - /Users/michel/obsidian_rag_local_data/lightrag_db:/app/lightrag_db
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - LIGHTRAG_DIR=/app/lightrag_db
 
   graph-service:
     volumes:
+      - ./src:/app/src:ro
       - /Users/michel/obsidian_rag_local_data/graph_data:/app/graph_data
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - GRAPH_PATH=/app/graph_data/knowledge_graph_sota.pkl

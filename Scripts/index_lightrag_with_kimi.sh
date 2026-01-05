@@ -1,5 +1,5 @@
 #!/bin/bash
-# Index Obsidian vault into LightRAG using Kimi K2 via OpenRouter
+# Index Obsidian vault into LightRAG using GPT-4o-mini via OpenRouter
 #
 # This script indexes your vault into the LightRAG entity-centric knowledge graph.
 # NOTE: Keep index_with_kimi.sh separate - that's for NetworkX graph indexing!
@@ -7,7 +7,7 @@
 set -e
 
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║    Index LightRAG with Kimi K2 (via OpenRouter)            ║"
+echo "║    Index LightRAG with GPT-4o-mini (via OpenRouter)        ║"
 echo "║    Entity-centric knowledge graph (Port 8001)              ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
@@ -30,7 +30,7 @@ if [ -z "$OPENROUTER_API_KEY" ]; then
 fi
 
 echo "✅ OpenRouter API key found"
-echo "🤖 LLM Model: moonshotai/kimi-k2-0905"
+echo "🤖 LLM Model: openai/gpt-4o-mini"
 echo "🔤 Embed Model: nomic-embed-text (via Ollama)"
 echo ""
 
@@ -73,10 +73,10 @@ NOTE_COUNT=$(find "$VAULT_PATH" -name "*.md" | wc -l | xargs)
 echo "📚 Found $NOTE_COUNT markdown files"
 echo ""
 
-# Cost estimates for Kimi K2
-echo "💰 Estimated cost with Kimi K2:"
-echo "   ~\$0.50-1.00 for $NOTE_COUNT notes (much cheaper than Claude!)"
-echo "⏱️  Estimated time: 30-60 minutes"
+# Cost estimates for GPT-4o-mini
+echo "💰 Estimated cost with GPT-4o-mini:"
+echo "   ~\$0.25-0.50 for $NOTE_COUNT notes (highly optimized!)"
+echo "⏱️  Estimated time: 20-40 minutes"
 echo ""
 
 read -p "Continue with indexing? (y/n) " -n 1 -r
@@ -88,7 +88,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
-echo "🚀 Starting LightRAG indexing with Kimi K2..."
+echo "🚀 Starting LightRAG indexing with GPT-4o-mini..."
 echo "📊 This will create an entity-centric knowledge graph"
 echo "🔗 Nodes: ~20,000+ entities extracted from your notes"
 echo "🔗 Edges: ~30,000+ relationships between entities"

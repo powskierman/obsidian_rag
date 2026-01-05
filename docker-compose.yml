@@ -14,6 +14,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - CHROMA_COLLECTION=${CHROMA_COLLECTION:-obsidian_vault}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - EMBED_MODEL=${EMBED_MODEL:-all-MiniLM-L6-v2}
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
@@ -37,7 +39,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - KIMI_MODEL=moonshotai/kimi-k2-0905
+      - KIMI_MODEL=openai/gpt-4o-mini
       - LIGHTRAG_DIR=${LIGHTRAG_DIR:-/app/lightrag_db}
       - OLLAMA_HOST=http://host.docker.internal:11434
       - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}

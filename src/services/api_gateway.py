@@ -190,6 +190,7 @@ class UnifiedQueryRequest(BaseModel):
     llm_provider: str = "ollama"
     model: Optional[str] = None
     temperature: float = 0.7
+    distance_threshold: float = 5.0
     system_prompt: Optional[str] = None
 
 @app.post("/api/v1/query")
@@ -218,6 +219,8 @@ async def unified_query(request: UnifiedQueryRequest):
         "lightrag": "entities"
     }
     mode = mode_aliases.get(mode, mode)
+    print(f"DEBUG: Unified query incoming mode: {mode}")
+    print(f"🎯 API Gateway received distance_threshold: {request.distance_threshold}")
 
     async with httpx.AsyncClient() as client:
 
@@ -226,7 +229,7 @@ async def unified_query(request: UnifiedQueryRequest):
         # Pure vector search
         if mode == "vector":
             try:
-                payload = {"query": request.query, "n_results": request.max_results}
+                payload = {"query": request.query, "n_results": request.max_results, "distance_threshold": request.distance_threshold}
                 response = await client.post(f"{EMBEDDING_SERVICE_URL}/query", json=payload, timeout=30.0)
                 response.raise_for_status()
                 result = response.json()
@@ -248,7 +251,7 @@ async def unified_query(request: UnifiedQueryRequest):
             try:
                 payload = {
                     "query": request.query,
-                    "mode": "hybrid",
+                    "mode": "graph",
                     "n_results": request.max_results,
                     "use_vector": True,
                     "llm_provider": request.llm_provider,
@@ -256,7 +259,7 @@ async def unified_query(request: UnifiedQueryRequest):
                     "temperature": request.temperature,
                     "system_prompt": request.system_prompt
                 }
-                response = await client.post(f"{GRAPH_SERVICE_URL}/query", json=payload, timeout=30.0)
+                response = await client.post(f"{GRAPH_SERVICE_URL}/query", json=payload, timeout=120.0)
                 response.raise_for_status()
                 result = response.json()
 
@@ -314,9 +317,9 @@ async def unified_query(request: UnifiedQueryRequest):
                         "model": request.model,
                         "temperature": request.temperature,
                         "system_prompt": request.system_prompt
-                    }, timeout=30.0),
+                    }, timeout=120.0),
                     client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
-                        "query": request.query, "n_results": request.max_results
+                        "query": request.query, "n_results": request.max_results, "distance_threshold": request.distance_threshold
                     }, timeout=30.0)
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -347,7 +350,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "system_prompt": request.system_prompt
                     }, timeout=60.0),
                     client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
-                        "query": request.query, "n_results": request.max_results
+                        "query": request.query, "n_results": request.max_results, "distance_threshold": request.distance_threshold
                     }, timeout=30.0)
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
@@ -378,7 +381,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "model": request.model,
                         "temperature": request.temperature,
                         "system_prompt": request.system_prompt
-                    }, timeout=30.0),
+                    }, timeout=120.0),
                     client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
                         "query": request.query,
                         "mode": "hybrid",
@@ -429,7 +432,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "system_prompt": request.system_prompt
                     }, timeout=90.0),
                     client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
-                        "query": request.query, "n_results": request.max_results
+                        "query": request.query, "n_results": request.max_results, "distance_threshold": request.distance_threshold
                     }, timeout=30.0)
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)

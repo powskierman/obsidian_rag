@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Define variables
-LABEL="com.obsidianrag.webapp"
+LABEL="com.obsidianrag.unified"
 PLIST_NAME="${LABEL}.plist"
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
 PLIST_PATH="$LAUNCH_AGENTS_DIR/$PLIST_NAME"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-START_SCRIPT="$SCRIPT_DIR/start_webapp.sh"
+START_SCRIPT="$SCRIPT_DIR/start_all_services.sh"
 
 # Ensure LaunchAgents directory exists
 mkdir -p "$LAUNCH_AGENTS_DIR"
@@ -30,7 +30,7 @@ cat <<EOF > "$PLIST_PATH"
     <key>StandardErrorPath</key>
     <string>$SCRIPT_DIR/logs/launch_agent.error.log</string>
     <key>WorkingDirectory</key>
-    <string>$SCRIPT_DIR/../webapp</string>
+    <string>$SCRIPT_DIR/..</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>

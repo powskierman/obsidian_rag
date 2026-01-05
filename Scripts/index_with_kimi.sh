@@ -1,10 +1,10 @@
 #!/bin/bash
-# Index Obsidian vault using Kimi K2 via OpenRouter (Graph Service)
+# Index Obsidian vault using GPT-4o-mini via OpenRouter (Graph Service)
 
 set -e
 
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║             Index with Kimi K2 (via OpenRouter)            ║"
+echo "║             Index with GPT-4o-mini (via OpenRouter)        ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 

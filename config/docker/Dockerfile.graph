@@ -16,7 +16,8 @@ RUN pip install --no-cache-dir \
     tqdm \
     requests \
     tavily-python \
-    anthropic
+    anthropic \
+    mem0ai
 
 # Copy service files
 COPY src/services/kimi_graph_builder.py /app/

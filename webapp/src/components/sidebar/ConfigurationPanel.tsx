@@ -13,12 +13,18 @@ export default function ConfigurationPanel() {
   const [activePanel, setActivePanel] = useState<'search' | 'llm' | 'services' | 'settings' | 'actions' | null>(null);
 
   const getSearchModeLabel = () => {
-    const labels = {
+    const labels: Record<string, string> = {
       'vector': 'Vector',
       'knowledge-graph': 'Knowledge-Graph',
-      'hybrid': 'Hybrid'
+      'hybrid': 'Hybrid',
+      'cascading': 'Cascading',
+      'notes': 'Notes',
+      'entities': 'Entities',
+      'notes+vector': 'Notes+Vector',
+      'entities+vector': 'Entities+Vector',
+      'dual-graph': 'Dual-Graph'
     };
-    return labels[searchMode] || 'Hybrid';
+    return labels[searchMode] || searchMode;
   };
 
   const getLLMProviderLabel = () => {

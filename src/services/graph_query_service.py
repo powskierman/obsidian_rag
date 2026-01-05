@@ -477,6 +477,7 @@ def query_graph():
     """
     try:
         data = request.json
+        logger.info(f"FULL PAYLOAD RECEIVED: {json.dumps(data)}")
         user_query = data.get('query', '')
         mode = data.get('mode', 'graph')
         llm_provider = data.get('llm_provider', 'ollama')
@@ -747,7 +748,11 @@ Provide a thorough, accurate answer that:
                         # === STEP 2b: Personal Memory Integration ===
                         logger.info("Fetching Personal Memories from mem0...")
                         memory_manager = get_memory_manager()
-                        memory_context = memory_manager.search_memory(user_query)
+                        memory_context = ""
+                        if memory_manager:
+                            memory_context = memory_manager.search_memory(user_query)
+                        else:
+                            logger.warning("Memory manager not available (mem0 import likely failed)")
                         if not memory_context:
                             memory_context = "(No specific personal history found for this query)"
                         

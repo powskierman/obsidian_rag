@@ -1,4 +1,6 @@
 #!/bin/bash
+# start_webapp.sh
+# Optimized startup for the Next.js Webapp
 
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,7 +14,7 @@ cd "$WEBAPP_DIR" || exit 1
 # Ensure logs directory exists
 mkdir -p "$SCRIPT_DIR/logs"
 
-echo "🚀 Starting Webapp..." | tee -a "$LOG_FILE"
+echo "🚀 Starting Webapp (Dev Mode)..." | tee -a "$LOG_FILE"
 echo "📅 Date: $(date)" | tee -a "$LOG_FILE"
 
 # Load NVM if present to ensure npm is available
@@ -21,27 +23,23 @@ if [ -s "$NVM_DIR/nvm.sh" ]; then
     . "$NVM_DIR/nvm.sh"
 fi
 
-# check if node_modules exists
+# 1. Install dependencies if node_modules missing
 if [ ! -d "node_modules" ]; then
     echo "📦 Installing dependencies..." | tee -a "$LOG_FILE"
-    if [ -f "package-lock.json" ]; then
-        npm ci >> "$LOG_FILE" 2>&1
-    else
-        npm install >> "$LOG_FILE" 2>&1
-    fi
+    npm install >> "$LOG_FILE" 2>&1
 fi
 
-# Build
-echo "🏗️ Building Webapp..." | tee -a "$LOG_FILE"
-npm run build >> "$LOG_FILE" 2>&1
-
-if [ $? -ne 0 ]; then
-    echo "❌ Build failed. Check $LOG_FILE for details." | tee -a "$LOG_FILE"
-    exit 1
+# 2. Clear any existing Next process on port 3000
+PORT_PID=$(lsof -t -i:3000)
+if [ ! -z "$PORT_PID" ]; then
+    echo "🧹 Killing existing process on port 3000 (PID: $PORT_PID)..." | tee -a "$LOG_FILE"
+    kill -9 "$PORT_PID" >> "$LOG_FILE" 2>&1
 fi
 
-# Start
-echo "🌐 Starting Webapp server..." | tee -a "$LOG_FILE"
-npm start >> "$LOG_FILE" 2>&1 &
+# 3. Start in Dev Mode (fastest startup)
+echo "🌐 Launching Next.js on http://localhost:3000..." | tee -a "$LOG_FILE"
+# Use -p 3000 explicitly and binding to 0.0.0.0 for accessibility
+npm run dev -- -p 3000 >> "$LOG_FILE" 2>&1 &
 WEBAPP_PID=$!
+
 echo "✅ Webapp started with PID $WEBAPP_PID" | tee -a "$LOG_FILE"

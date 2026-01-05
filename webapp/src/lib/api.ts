@@ -21,6 +21,7 @@ export const api = {
     llm_provider = 'ollama',
     model = '',
     temperature = 0.7,
+    distance_threshold = 5.0,
     enhanced_search = false,
     system_prompt = ''
   ): Promise<{
@@ -33,21 +34,25 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
+      const requestBody = {
+        query,
+        mode,
+        max_results: n_results,
+        llm_provider,
+        model,
+        temperature,
+        distance_threshold,
+        system_prompt: system_prompt || null
+      };
+      console.log('🌐 API request body:', requestBody);
+
       // Use the new unified query endpoint
       const response = await fetch(`${GATEWAY_URL}/api/v1/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          query,
-          mode,
-          max_results: n_results,
-          llm_provider,
-          model,
-          temperature,
-          system_prompt: system_prompt || null
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
@@ -84,8 +89,15 @@ export const api = {
           ))
         );
 
+        let answer = notesAnswer || entitiesResult;
+        if (!answer && vectorSources.length > 0) {
+          answer = `Knowledge graph search was inconclusive, but found ${vectorSources.length} relevant snippets via vector search.`;
+        } else if (!answer) {
+          answer = 'No results found';
+        }
+
         return {
-          answer: notesAnswer || entitiesResult || 'No results found',
+          answer,
           sources: uniqueSources,
           extracted_entities: data.notes?.data?.extracted_entities || []
         };
@@ -112,8 +124,25 @@ export const api = {
           answer,
           sources
         };
+      } else if (mode === 'vector') {
+        const vectorData = data.results || data;
+        let sources: SearchResult[] = [];
+
+        if (vectorData.documents && vectorData.documents[0]) {
+          sources = vectorData.documents[0].map((doc: string, i: number) => ({
+            filename: vectorData.metadatas[0][i]?.filename || 'unknown',
+            filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
+            relevance: vectorData.distances[0][i] !== undefined ? (1 / (1 + vectorData.distances[0][i])) : 0.8,
+            snippet: doc
+          }));
+        }
+
+        return {
+          answer: sources.length > 0 ? `Found ${sources.length} matching snippets in your vault.` : 'No results found',
+          sources: sources
+        };
       } else {
-        // Single-source modes
+        // Other single-source modes (notes, entities)
         const result = data.results || data;
         return {
           answer: result.answer || result.result || 'No results found',

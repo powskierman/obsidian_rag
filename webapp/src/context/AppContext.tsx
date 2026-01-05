@@ -93,7 +93,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [systemPrompt]);
 
   const updateSettings = (newSettings: Partial<SettingsState>) => {
-    setSettings(prev => ({ ...prev, ...newSettings }));
+    const updated = { ...settings, ...newSettings };
+    console.log('⚙️ Settings updated:', updated);
+    setSettings(updated);
   };
 
   const updateServices = (newServices: Partial<ServicesStatus>) => {

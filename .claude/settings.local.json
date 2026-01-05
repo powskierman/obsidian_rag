@@ -111,7 +111,10 @@
       "Bash(git mv:*)",
       "Bash(./venv/bin/python:*)",
       "Bash(./venv/bin/pip:*)",
-      "Bash(python3.12:*)"
+      "Bash(python3.12:*)",
+      "Bash(/dev/null)",
+      "Read(//Volumes/michel/obsidian_rag_local_data/**)",
+      "Bash(sqlite3:*)"
     ],
     "deny": [],
     "ask": []

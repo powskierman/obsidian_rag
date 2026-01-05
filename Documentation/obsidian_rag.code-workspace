@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../../../iCloud~md~obsidian/Documents/Michel/Tech/AI/RAG/Obsidian_RAG"
+		}
+	],
+	"settings": {
+		"terminal.explorerKind": "external"
+	}
+}

@@ -49,6 +49,7 @@ export interface SettingsState {
   model: string;
   sources: number;
   temperature: number;
+  distanceThreshold: number;
   showSources: boolean;
   enhancedSearch: boolean;
   deepThinking: boolean;
@@ -94,6 +95,7 @@ export const defaultSettings: SettingsState = {
   model: 'llama3.2:latest',
   sources: 10,
   temperature: 0.3,
+  distanceThreshold: 5.0,
   showSources: true,
   enhancedSearch: false,
   deepThinking: false,

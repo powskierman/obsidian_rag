@@ -78,10 +78,10 @@ def expand_query(query):
     
     return variations[:5]  # Limit to 5 variations
 
-def rerank_results(query, documents, distances):
+def rerank_results(query, documents, distances, metadatas):
     """Re-rank results using cross-encoder for better precision"""
     if len(documents) <= 1:
-        return documents, distances
+        return documents, distances, metadatas
     
     # Create pairs for cross-encoder
     pairs = [(query, doc) for doc in documents]
@@ -93,9 +93,10 @@ def rerank_results(query, documents, distances):
     sorted_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
     
     reranked_docs = [documents[i] for i in sorted_indices]
+    reranked_meta = [metadatas[i] for i in sorted_indices]
     reranked_dists = [float(1 - scores[i]) for i in sorted_indices]  # Convert to distance and ensure Python float
     
-    return reranked_docs, reranked_dists
+    return reranked_docs, reranked_dists, reranked_meta
 
 def deduplicate_sources(results):
     """Remove duplicate sources, keep best chunk from each file"""
@@ -207,12 +208,22 @@ def query_documents():
         use_dedup = data.get('deduplicate', True)
         filters = data.get('filters', {})
         mode = data.get('mode', 'vector')  # Retrieve mode for metrics
+        distance_threshold = data.get('distance_threshold', 5.0)  # Filter out results with distance > threshold
+        print(f"🔍 Embedding Service received distance_threshold: {distance_threshold}")
 
         if not query:
             return jsonify({"error": "Missing query"}), 400
 
+        # Clean query fluff for better semantic match
+        clean_query = query.lower()
+        starters = ["find notes on", "find notes about", "search for", "look for", "give me info on"]
+        for starter in starters:
+            if clean_query.startswith(starter):
+                clean_query = clean_query[len(starter):].strip()
+                break
+        
         # Expand query for better recall
-        query_variations = expand_query(query)
+        query_variations = expand_query(clean_query)
 
         # Search with expanded queries
         all_results = []
@@ -274,23 +285,43 @@ def query_documents():
 
         # Re-rank if enabled
         if use_reranking and len(unique_docs) > 1:
-            unique_docs, unique_dist = rerank_results(query, unique_docs, unique_dist)
+            unique_docs, unique_dist, unique_meta = rerank_results(clean_query, unique_docs, unique_dist, unique_meta)
 
         # Deduplicate sources if enabled
         merged_results = {
-            'documents': [unique_docs[:n_results*2]],
-            'metadatas': [unique_meta[:n_results*2]],
-            'distances': [unique_dist[:n_results*2]]
+            'documents': [unique_docs],
+            'metadatas': [unique_meta],
+            'distances': [unique_dist]
         }
 
         if use_dedup:
             merged_results = deduplicate_sources(merged_results)
 
+        # Apply distance threshold filtering BEFORE trimming to n_results
+        filtered_docs = []
+        filtered_meta = []
+        filtered_dist = []
+
+        total_before = len(merged_results['documents'][0])
+        for doc, meta, dist in zip(
+            merged_results['documents'][0],
+            merged_results['metadatas'][0],
+            merged_results['distances'][0]
+        ):
+            if dist <= distance_threshold:
+                filtered_docs.append(doc)
+                filtered_meta.append(meta)
+                filtered_dist.append(dist)
+
+        total_after = len(filtered_docs)
+        filtered_out = total_before - total_after
+        print(f"📊 Distance filtering: {total_before} results before, {total_after} passed (threshold: {distance_threshold}), {filtered_out} filtered out")
+
         # Trim to requested size and ensure all floats are Python native
         final_results = {
-            'documents': [merged_results['documents'][0][:n_results]],
-            'metadatas': [merged_results['metadatas'][0][:n_results]],
-            'distances': [[float(d) for d in merged_results['distances'][0][:n_results]]]
+            'documents': [filtered_docs[:n_results]],
+            'metadatas': [filtered_meta[:n_results]],
+            'distances': [[float(d) for d in filtered_dist[:n_results]]]
         }
 
         # Log metrics
