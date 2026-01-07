@@ -33,12 +33,14 @@
 .env
 .env.*
 .env.claude
+.claude/settings.local.json
 .hypothesis/
 .idea/
 .pytest_cache/
 .tox/
 .vscode/
 Archive/old_databases/
+Archive/v1_data_backup_*/
 Scripts/logs/
 __pycache__/
 chroma_db/
@@ -51,6 +53,8 @@ graph_data/**/*.json
 graph_data/**/*.pkl
 graph_data/*.json
 graph_data/*.pkl
+data/graph_data/**/*.json
+data/graph_data/**/*.pkl
 htmlcov/
 data/vault_processing/
 venv/
@@ -67,6 +71,7 @@ obsidian_rag_unified_mcp.py
 
 # Documentation drafts and archives
 Documentation/Archive/
+Documentation/Notes/.obsidian/
 Documentation/AUDIT_PLAN.md
 Documentation/Deep\ Thinking\ Implementation\ Plan.md
 Documentation/ORGANIZATION_SUMMARY.md
