@@ -383,38 +383,42 @@ export default function Home() {
 
                                         {/* Spotlight Search Bar */}
                                         <div className="relative">
-                                            <div className="relative bg-[#0B0D12]/80 border border-white/10 rounded-2xl flex items-center p-2 shadow-lg">
-                                                <input
-                                                    autoFocus
-                                                    type="text"
-                                                    value={input}
-                                                    onChange={(e) => setInput(e.target.value)}
-                                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                    placeholder={`Search (${searchMode})...`}
-                                                    className="flex-1 bg-transparent border-none text-white placeholder-white/30 px-4 py-2 text-lg focus:ring-0 focus:outline-none"
-                                                />
+                                            <div className="rounded-2xl p-[1px] bg-gradient-to-r from-[#FFD60A]/50 via-[#6B8CFF]/35 to-[#00D1C1]/35">
+                                                <div className="rounded-[16px] p-[1px] bg-white/10">
+                                                    <div className="relative bg-[#0B0D12]/80 border border-white/10 rounded-[15px] flex items-center p-2 shadow-lg">
+                                                        <input
+                                                            autoFocus
+                                                            type="text"
+                                                            value={input}
+                                                            onChange={(e) => setInput(e.target.value)}
+                                                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                                            placeholder={`Search (${searchMode})...`}
+                                                            className="flex-1 bg-transparent border-none text-white placeholder-white/30 px-4 py-2 text-lg focus:ring-0 focus:outline-none"
+                                                        />
 
-                                                {/* Mode Selector */}
-                                                <select
-                                                    value={searchMode}
-                                                    onChange={(e) => setSearchMode(e.target.value as any)}
-                                                    className="bg-accent-gold text-black px-4 py-2 rounded-lg text-xs font-medium shadow-lg shadow-yellow-500/20 border-none focus:ring-2 focus:ring-yellow-500/50 cursor-pointer"
-                                                >
-                                                    <optgroup label="🎯 Single Source">
-                                                        <option value="vector">Vector (ChromaDB)</option>
-                                                        <option value="notes">Notes (NetworkX)</option>
-                                                        <option value="entities">Entities (LightRAG)</option>
-                                                    </optgroup>
-                                                    <optgroup label="🔗 Dual Source">
-                                                        <option value="notes+vector">Notes + Vector</option>
-                                                        <option value="entities+vector">Entities + Vector</option>
-                                                        <option value="dual-graph">Dual Graph</option>
-                                                    </optgroup>
-                                                    <optgroup label="⚡ Ultimate">
-                                                        <option value="hybrid">Hybrid (All 3)</option>
-                                                        <option value="cascading">Cascading (Waterfall)</option>
-                                                    </optgroup>
-                                                </select>
+                                                        {/* Mode Selector */}
+                                                        <select
+                                                            value={searchMode}
+                                                            onChange={(e) => setSearchMode(e.target.value as any)}
+                                                            className="bg-accent-gold text-black px-4 py-2 rounded-lg text-xs font-medium shadow-lg shadow-yellow-500/20 border-none focus:ring-2 focus:ring-yellow-500/50 cursor-pointer"
+                                                        >
+                                                            <optgroup label="🎯 Single Source">
+                                                                <option value="vector">Vector (ChromaDB)</option>
+                                                                <option value="notes">Notes (NetworkX)</option>
+                                                                <option value="entities">Entities (LightRAG)</option>
+                                                            </optgroup>
+                                                            <optgroup label="🔗 Dual Source">
+                                                                <option value="notes+vector">Notes + Vector</option>
+                                                                <option value="entities+vector">Entities + Vector</option>
+                                                                <option value="dual-graph">Dual Graph</option>
+                                                            </optgroup>
+                                                            <optgroup label="⚡ Ultimate">
+                                                                <option value="hybrid">Hybrid (All 3)</option>
+                                                                <option value="cascading">Cascading (Waterfall)</option>
+                                                            </optgroup>
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -500,24 +504,30 @@ export default function Home() {
                     {messages.length > 0 && (
                         <div className="p-6 bg-gradient-to-t from-black via-black/95 to-transparent">
                             <div className="max-w-3xl mx-auto relative">
-                                <input
-                                    type="text"
-                                    value={input}
-                                    autoFocus
-                                    onChange={(e) => setInput(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                    placeholder={`Ask about your vault (${searchMode} mode)...`}
-                                    className="w-full bg-[#121418] border border-[#2C2C2E] rounded-2xl py-4 px-5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-[#FFD60A]/50 focus:ring-1 focus:ring-[#FFD60A]/50 transition-colors shadow-lg"
-                                />
-                                <button
-                                    onClick={handleSendMessage}
-                                    disabled={isLoading || !input.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-[#FFD60A] text-black hover:bg-[#FFC600] disabled:opacity-50 disabled:hover:bg-[#FFD60A] transition-colors shadow-lg hover:shadow-yellow-500/20"
-                                >
-                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
-                                    </svg>
-                                </button>
+                                <div className="rounded-2xl p-[1px] bg-gradient-to-r from-[#FFD60A]/45 via-[#6B8CFF]/30 to-[#00D1C1]/30">
+                                    <div className="rounded-[16px] p-[1px] bg-white/10">
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={input}
+                                                autoFocus
+                                                onChange={(e) => setInput(e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                                placeholder={`Ask about your vault (${searchMode} mode)...`}
+                                                className="w-full bg-[#121418] border border-[#2C2C2E] rounded-[15px] py-4 px-5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-[#FFD60A]/50 focus:ring-1 focus:ring-[#FFD60A]/50 transition-colors shadow-lg"
+                                            />
+                                            <button
+                                                onClick={handleSendMessage}
+                                                disabled={isLoading || !input.trim()}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-[#FFD60A] text-black hover:bg-[#FFC600] disabled:opacity-50 disabled:hover:bg-[#FFD60A] transition-colors shadow-lg hover:shadow-yellow-500/20"
+                                            >
+                                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div className="text-center mt-3">
                                 <span className="text-[10px] text-white/20 font-medium tracking-wide uppercase">
