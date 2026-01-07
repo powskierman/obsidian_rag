@@ -309,7 +309,7 @@ export default function Home() {
 
                 <div className="flex-1 flex flex-col h-full relative min-w-0">
                     {/* Header */}
-                    <header className="h-32 border-b border-[#1C1C1E] flex items-center justify-between px-6 bg-[#000000]/60 backdrop-blur-xl sticky top-0 z-30">
+                    <header className="h-32 border-b border-[#1C1C1E] flex items-center justify-between px-6 bg-[#0B0D12]/90 sticky top-0 z-30">
                         <div className="flex items-center pt-6">
                             <img src="/logo.png" alt="Obsidian RAG" className="w-[150px] h-auto object-contain" />
                         </div>
@@ -382,9 +382,8 @@ export default function Home() {
                                         </div>
 
                                         {/* Spotlight Search Bar */}
-                                        <div className="relative group">
-                                            <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl opacity-30 blur group-hover:opacity-50 transition duration-500" />
-                                            <div className="relative bg-[#000000]/40 backdrop-blur-2xl border border-white/10 rounded-2xl flex items-center p-2 shadow-2xl">
+                                        <div className="relative">
+                                            <div className="relative bg-[#0B0D12]/80 border border-white/10 rounded-2xl flex items-center p-2 shadow-lg">
                                                 <input
                                                     autoFocus
                                                     type="text"
@@ -421,12 +420,12 @@ export default function Home() {
 
                                         {/* Status Pills */}
                                         <div className="flex items-center justify-center gap-4">
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                                                 <span className="text-xs font-mono text-purple-200">V: 7,055 chunks</span>
                                             </div>
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
                                                 <span className="text-xs font-mono text-indigo-200">G: Online</span>
                                             </div>
                                         </div>
@@ -439,7 +438,7 @@ export default function Home() {
                                     <div
                                         className={`max-w-[85%] rounded-2xl p-4 ${msg.role === 'user'
                                             ? 'bg-[#FFD60A] text-black shadow-lg shadow-yellow-500/10 rounded-br-none font-medium'
-                                            : 'bg-[#1C1C1E] border border-[#2C2C2E] text-white/90 rounded-bl-none shadow-xl'
+                                            : 'bg-[#1C1C1E] border border-[#2C2C2E] text-white/90 rounded-bl-none shadow-md'
                                             }`}
                                     >
                                         <div className={`prose max-w-none ${msg.role === 'assistant' ? 'prose-invert' : 'prose-neutral'}`}>
@@ -508,12 +507,12 @@ export default function Home() {
                                     onChange={(e) => setInput(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                                     placeholder={`Ask about your vault (${searchMode} mode)...`}
-                                    className="w-full bg-[#1C1C1E]/80 backdrop-blur-xl border border-[#2C2C2E] rounded-2xl py-4 px-5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-[#FFD60A]/50 focus:ring-1 focus:ring-[#FFD60A]/50 transition-all shadow-2xl"
+                                    className="w-full bg-[#121418] border border-[#2C2C2E] rounded-2xl py-4 px-5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-[#FFD60A]/50 focus:ring-1 focus:ring-[#FFD60A]/50 transition-colors shadow-lg"
                                 />
                                 <button
                                     onClick={handleSendMessage}
                                     disabled={isLoading || !input.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-[#FFD60A] text-black hover:bg-[#FFC600] disabled:opacity-50 disabled:hover:bg-[#FFD60A] transition-all shadow-lg hover:shadow-yellow-500/20"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-[#FFD60A] text-black hover:bg-[#FFC600] disabled:opacity-50 disabled:hover:bg-[#FFD60A] transition-colors shadow-lg hover:shadow-yellow-500/20"
                                 >
                                     <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />

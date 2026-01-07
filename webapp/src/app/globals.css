@@ -17,15 +17,13 @@ body {
 
 /* Reusable Glass Class */
 .glass-panel {
-    @apply bg-glass-bg backdrop-blur-xl border border-glass-border shadow-lg;
-    background: linear-gradient(135deg, rgba(10, 10, 20, 0.4), rgba(20, 10, 30, 0.3));
-    box-shadow: 0 8px 32px 0 rgba(176, 38, 255, 0.1);
-    transition: all 0.3s ease;
+    @apply bg-glass-bg border border-glass-border;
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.6), rgba(20, 10, 30, 0.4));
+    transition: background 0.2s ease;
 }
 
 .glass-panel:hover {
-    background: linear-gradient(135deg, rgba(10, 10, 20, 0.5), rgba(20, 10, 30, 0.4));
-    box-shadow: 0 8px 32px 0 rgba(176, 38, 255, 0.15);
+    background: linear-gradient(135deg, rgba(10, 10, 20, 0.7), rgba(20, 10, 30, 0.5));
 }
 
 /* --- CUSTOM RANGE SLIDER STYLES --- */
@@ -89,11 +87,11 @@ body {
 
 /* Obsidian Theme Enhancements */
 h1 {
-    text-shadow: 0 0 20px rgba(176, 38, 255, 0.3);
+    text-shadow: 0 0 8px rgba(176, 38, 255, 0.2);
 }
 
 input[type="text"]:focus {
-    box-shadow: 0 0 20px rgba(176, 38, 255, 0.3), 0 0 40px rgba(176, 38, 255, 0.1);
+    box-shadow: 0 0 12px rgba(176, 38, 255, 0.2);
 }
 
 /* Smooth scrollbar styling */

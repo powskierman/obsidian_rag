@@ -128,7 +128,7 @@ export default function ChatSidebar() {
             {/* Header with Collapse Button */}
             <div className="flex items-center justify-between px-2 py-1 mb-2 relative">
                 <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
                     <span className="text-[10px] font-medium text-gray-400 font-mono tracking-wider">BRAIN_ONLINE</span>
                 </div>
                 <button

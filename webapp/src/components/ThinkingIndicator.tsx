@@ -21,7 +21,7 @@ export default function ThinkingIndicator({ message }: { message?: string }) {
     }, [message]);
 
     return (
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 animate-pulse">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
             <div className="relative w-4 h-4">
                 <div className="absolute inset-0 rounded-full border-2 border-[#0A84FF] border-r-transparent animate-spin" />
             </div>

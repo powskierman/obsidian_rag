@@ -1,9 +1,6 @@
 'use client';
 
 export default function FallbackBackground() {
-    const noiseDataUrl =
-        "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='120' height='120' filter='url(%23n)' opacity='0.35'/></svg>";
-
     return (
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
             <div
@@ -20,10 +17,11 @@ export default function FallbackBackground() {
             <div
                 className="absolute inset-0"
                 style={{
-                    backgroundImage: `url("${noiseDataUrl}")`,
-                    backgroundSize: '180px 180px',
-                    opacity: 0.08,
-                    mixBlendMode: 'soft-light'
+                    backgroundImage:
+                        'repeating-linear-gradient(0deg, rgba(255,255,255,0.02), rgba(255,255,255,0.02) 1px, transparent 1px, transparent 2px),' +
+                        'repeating-linear-gradient(90deg, rgba(255,255,255,0.015), rgba(255,255,255,0.015) 1px, transparent 1px, transparent 2px)',
+                    backgroundSize: '2px 2px, 3px 3px',
+                    opacity: 0.05
                 }}
             />
         </div>

@@ -28,8 +28,8 @@ export default function PromptModal({ isOpen, onClose, currentPrompt, onSave }: 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div className="bg-[#1C1C1E] rounded-2xl border border-[#2C2C2E] w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <div className="bg-[#1C1C1E] rounded-2xl border border-[#2C2C2E] w-full max-w-2xl shadow-lg overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="p-4 border-b border-[#2C2C2E] flex items-center justify-between bg-[#2C2C2E]/30">
                     <h3 className="font-semibold text-white">Configure Search Prompt</h3>
                     <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
