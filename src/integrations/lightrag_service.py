@@ -53,14 +53,19 @@ DEFAULT_SYSTEM_PROMPT = """You are a **Deep Thinking AI assistant** integrated w
 
 Your task is to answer questions by analyzing the retrieved materials and Michel's personal context.
 
+**CRITICAL INSTRUCTION**: You will be provided with relevant context from Michel's notes. Your job is to SYNTHESIZE and SUMMARIZE this information to answer the question. DO NOT claim "insufficient information" unless the retrieved context is genuinely empty or completely unrelated to the query.
+
 When generating your answer:
-1. Reference Michel's specific **medical timeline** (DLBCL, Yescarta, scans) when relevant.
-2. Incorporate insights from his **Obsidian notes**, citing which notes or sources you use.
-3. Maintain a **compassionate and supportive** tone for medical topics.
-4. Provide **technical depth** and precision for engineering and coding topics.
-5. Adapt to his **expert-level understanding** — avoid overexplaining known concepts.
-6. Be **concise but thorough**, focusing on clarity and reasoning.
-7. Avoid redundant or generic phrasing.
+1. **USE THE PROVIDED CONTEXT**: Synthesize information from the retrieved documents, chunks, and entities.
+2. Reference Michel's specific **medical timeline** (DLBCL, Yescarta, scans) when relevant.
+3. Incorporate insights from his **Obsidian notes**, citing which notes or sources you use.
+4. Maintain a **compassionate and supportive** tone for medical topics.
+5. Provide **technical depth** and precision for engineering and coding topics.
+6. Adapt to his **expert-level understanding** — avoid overexplaining known concepts.
+7. Be **concise but thorough**, focusing on clarity and reasoning.
+8. Avoid redundant or generic phrasing.
+9. **Ground answers in the notes**; avoid generic background not present in sources.
+10. If the retrieved context is unrelated or missing, say "Not found in notes."
 
 Finally, provide your answer in a structured, easy-to-read format."""
 
@@ -271,27 +276,26 @@ async def _do_query_async(query_text, mode):
     """Helper async method for querying"""
     rag = get_rag()
     
-    # Optimized query parameters for faster processing while maintaining quality
     if mode in ['global', 'hybrid']:
-        # For computationally expensive modes, reduce parameters
         param = QueryParam(
             mode=mode,
-            chunk_top_k=50,  # Reduced for faster processing
-            top_k=75,  # Reduced entities for speed
-            max_total_tokens=32000,  # Reduced token limit
-            only_need_context=False
+            chunk_top_k=50,
+            top_k=75,
+            max_total_tokens=32000
         )
     else:
-        # For local/naive modes, can use higher values
         param = QueryParam(
             mode=mode,
             chunk_top_k=100,
             top_k=150,
-            max_total_tokens=60000,
-            only_need_context=False
+            max_total_tokens=60000
         )
-    result = await rag.aquery(query_text, param=param)
+
+    # Use LightRAG's in-library response path with a stronger system prompt
+    result = await rag.aquery(query_text, param=param, system_prompt=DEFAULT_SYSTEM_PROMPT)
     return result
+
+
 
 
 @app.route('/query', methods=['POST'])
@@ -449,4 +453,3 @@ Endpoints:
         # Continue to start server so health checks can report error
         
     app.run(host='0.0.0.0', port=8001, debug=False)
-
