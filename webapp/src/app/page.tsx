@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Settings } from 'lucide-react';
@@ -13,16 +12,10 @@ import SettingsPanelModal from '../components/sidebar/SettingsPanelModal';
 import ForceGraph from '../components/ForceGraph';
 import SourcesDisplay from '../components/chat/SourcesDisplay';
 import RatingButtons from '../components/chat/RatingButtons';
-import { ErrorBoundary } from '../components/ErrorBoundary';
 import FallbackBackground from '../components/FallbackBackground';
 import { api } from '../lib/api';
 import { useApp } from '../context/AppContext';
 import { Message, Source } from '../lib/types';
-
-// Dynamically import simplified knowledge graph - NO SSR
-const KnowledgeGraph3D = dynamic(() => import('../components/KnowledgeGraphSimple'), {
-    ssr: false,
-});
 
 export default function Home() {
     console.log('Home component rendering');
@@ -48,15 +41,6 @@ export default function Home() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [thinkingLog, setThinkingLog] = useState<string>('');
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
-    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-    React.useEffect(() => {
-        setDimensions({ width: window.innerWidth, height: window.innerHeight });
-        const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -314,12 +298,8 @@ export default function Home() {
 
     return (
         <>
-            {/* 3D Knowledge Graph Background - Outside main container */}
-            <div className="fixed inset-0 pointer-events-none">
-                <ErrorBoundary fallback={<FallbackBackground />}>
-                    <KnowledgeGraph3D />
-                </ErrorBoundary>
-            </div>
+            {/* Lightweight CSS background */}
+            <FallbackBackground />
 
             {/* Main UI - positioned above background */}
             <div className="flex h-screen bg-transparent text-white font-sans overflow-hidden selection:bg-[#FFD60A] selection:text-black relative">
