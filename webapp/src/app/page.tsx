@@ -41,6 +41,7 @@ export default function Home() {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [thinkingLog, setThinkingLog] = useState<string>('');
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
+    const [showGraph, setShowGraph] = useState(false);
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -48,6 +49,7 @@ export default function Home() {
         const queryId = Date.now().toString();
         setInput('');
         setThinkingLog('');
+        setShowGraph(false);
 
         // Add user message
         addMessage({ role: 'user', content: userMsg });
@@ -343,16 +345,31 @@ export default function Home() {
                         <div className="max-w-3xl mx-auto space-y-6">
                             {graphData && (
                                 <div className="mb-6">
-                                    <ForceGraph
-                                        data={graphData}
-                                        width={700}
-                                        height={350}
-                                        onNodeClick={(node) => {
-                                            setInput(node.name);
-                                            // Optional: Auto-search
-                                            // handleSendMessage(); 
-                                        }}
-                                    />
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="text-xs text-white/50">Graph preview</div>
+                                        <button
+                                            onClick={() => setShowGraph(!showGraph)}
+                                            className="text-xs text-white/60 hover:text-white underline underline-offset-2"
+                                        >
+                                            {showGraph ? 'Hide Graph' : 'Show Graph'}
+                                        </button>
+                                    </div>
+                                    {showGraph ? (
+                                        <ForceGraph
+                                            data={graphData}
+                                            width={700}
+                                            height={350}
+                                            onNodeClick={(node) => {
+                                                setInput(node.name);
+                                                // Optional: Auto-search
+                                                // handleSendMessage(); 
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="text-xs text-white/40 border border-white/10 rounded-xl p-4 bg-black/30">
+                                            Graph rendering is off to reduce CPU/GPU usage. Click "Show Graph" to render.
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
