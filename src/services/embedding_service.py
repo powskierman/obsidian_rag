@@ -59,12 +59,29 @@ def expand_query(query):
     """Expand query with variations for better recall"""
     variations = [query]
     
-    # Add hyphen variations
+    # 1. Clean query of stop words for a "keyword only" variation
+    # This matches "Nextion ESP32" from "Nextion and ESP32"
+    stop_words = {'and', 'or', 'the', 'a', 'an', 'in', 'on', 'with', 'for', 'to', 'of'}
+    words = query.lower().split()
+    keywords = [w for w in words if w not in stop_words]
+    
+    if len(keywords) < len(words):
+        keyword_query = " ".join(keywords)
+        variations.append(keyword_query)
+        
+    # 2. Add individual key terms if they are significant (e.g. unique prod names)
+    # This helps if "Nextion" appears alone in a doc without "ESP32"
+    if len(keywords) > 1:
+        for w in keywords:
+            if len(w) > 4: # Only for substantial words
+                variations.append(w)
+    
+    # 3. Add hyphen variations
     if '-' in query:
         variations.append(query.replace('-', ' '))
         variations.append(query.replace('-', ''))
     
-    # Add common medical synonyms
+    # 4. Add common medical synonyms
     medical_synonyms = {
         'car-t': ['car t', 'cart', 'cell therapy', 'yescarta'],
         'pet scan': ['pet-ct', 'pet ct scan', 'positron emission'],
@@ -76,7 +93,16 @@ def expand_query(query):
         if term in query_lower:
             variations.extend(synonyms)
     
-    return variations[:5]  # Limit to 5 variations
+    # Deduplicate while preserving order
+    seen = set()
+    unique_vars = []
+    for v in variations:
+        if v not in seen:
+            unique_vars.append(v)
+            seen.add(v)
+            
+    return unique_vars[:6]  # Limit to 6 variations
+
 
 def rerank_results(query, documents, distances, metadatas):
     """Re-rank results using cross-encoder for better precision"""
@@ -208,8 +234,11 @@ def query_documents():
         use_dedup = data.get('deduplicate', True)
         filters = data.get('filters', {})
         mode = data.get('mode', 'vector')  # Retrieve mode for metrics
-        distance_threshold = data.get('distance_threshold', 5.0)  # Filter out results with distance > threshold
-        print(f"🔍 Embedding Service received distance_threshold: {distance_threshold}")
+        
+        # NEW: Accept relevance_threshold (0-100) instead of distance_threshold
+        # For backward compatibility, check both parameters
+        relevance_threshold = data.get('relevance_threshold', data.get('distance_threshold', 0))
+        print(f"🔍 Embedding Service received relevance_threshold: {relevance_threshold}%")
 
         if not query:
             return jsonify({"error": "Missing query"}), 400
@@ -297,7 +326,10 @@ def query_documents():
         if use_dedup:
             merged_results = deduplicate_sources(merged_results)
 
-        # Apply distance threshold filtering BEFORE trimming to n_results
+        # Apply RELEVANCE threshold filtering (convert distance to relevance %)
+        # Use same formula as frontend: 100 / (1 + exp(distance / 2))
+        import math
+        
         filtered_docs = []
         filtered_meta = []
         filtered_dist = []
@@ -308,14 +340,18 @@ def query_documents():
             merged_results['metadatas'][0],
             merged_results['distances'][0]
         ):
-            if dist <= distance_threshold:
+            # Calculate relevance percentage from distance
+            relevance = max(0, min(100, 100 / (1 + math.exp(dist / 2))))
+            
+            # Filter by relevance threshold
+            if relevance >= relevance_threshold:
                 filtered_docs.append(doc)
                 filtered_meta.append(meta)
                 filtered_dist.append(dist)
 
         total_after = len(filtered_docs)
         filtered_out = total_before - total_after
-        print(f"📊 Distance filtering: {total_before} results before, {total_after} passed (threshold: {distance_threshold}), {filtered_out} filtered out")
+        print(f"📊 Relevance filtering: {total_before} results before, {total_after} passed (threshold: {relevance_threshold}%), {filtered_out} filtered out")
 
         # Trim to requested size and ensure all floats are Python native
         final_results = {

@@ -199,7 +199,7 @@ export default function Home() {
                 const modelToUse = llmProvider === 'ollama' ? settings.model : '';
 
                 // Unified Search Call
-                console.log('📡 Sending query with distanceThreshold:', settings.distanceThreshold);
+                console.log('📡 Sending query with relevanceThreshold:', settings.relevanceThreshold);
                 const result = await api.unifiedSearch(
                     userMsg,
                     backendMode as any,
@@ -207,7 +207,7 @@ export default function Home() {
                     llmProvider,
                     modelToUse,
                     settings.temperature,
-                    settings.distanceThreshold,
+                    settings.relevanceThreshold,
                     settings.enhancedSearch,
                     systemPrompt
                 );

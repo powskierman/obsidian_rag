@@ -21,7 +21,7 @@ export const api = {
     llm_provider = 'ollama',
     model = '',
     temperature = 0.7,
-    distance_threshold = 5.0,
+    relevance_threshold = 0,  // 0-100%, 0 = show all results
     enhanced_search = false,
     system_prompt = ''
   ): Promise<{
@@ -41,7 +41,7 @@ export const api = {
         llm_provider,
         model,
         temperature,
-        distance_threshold,
+        relevance_threshold,
         system_prompt: system_prompt || null
       };
       console.log('🌐 API request body:', requestBody);
@@ -74,12 +74,22 @@ export const api = {
         let vectorSources: SearchResult[] = [];
         const vectorData = data.vector?.data;
         if (vectorData && vectorData.documents && vectorData.documents[0]) {
-          vectorSources = vectorData.documents[0].map((doc: string, i: number) => ({
-            filename: vectorData.metadatas[0][i]?.filename || 'unknown',
-            filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
-            relevance: vectorData.distances[0][i] !== undefined ? (1 / (1 + vectorData.distances[0][i])) : 0.5,
-            snippet: doc.substring(0, 300) + '...'
-          }));
+          vectorSources = vectorData.documents[0].map((doc: string, i: number) => {
+            const dist = vectorData.distances[0][i];
+            // ChromaDB returns negative cosine distances (more negative = better match)
+            // Typical range: -10 (excellent) to +2 (poor)
+            // Use inverse exponential decay for better differentiation
+            const relevance = dist !== undefined
+              ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
+              : 50;
+
+            return {
+              filename: vectorData.metadatas[0][i]?.filename || 'unknown',
+              filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
+              relevance,
+              snippet: doc.substring(0, 300) + '...'
+            };
+          });
         }
 
         const allSources = [...notesSources, ...vectorSources];
@@ -129,12 +139,21 @@ export const api = {
         let sources: SearchResult[] = [];
 
         if (vectorData.documents && vectorData.documents[0]) {
-          sources = vectorData.documents[0].map((doc: string, i: number) => ({
-            filename: vectorData.metadatas[0][i]?.filename || 'unknown',
-            filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
-            relevance: vectorData.distances[0][i] !== undefined ? (1 / (1 + vectorData.distances[0][i])) : 0.8,
-            snippet: doc
-          }));
+          sources = vectorData.documents[0].map((doc: string, i: number) => {
+            const dist = vectorData.distances[0][i];
+            // ChromaDB returns negative cosine distances (more negative = better match)
+            // Use inverse exponential decay for better differentiation
+            const relevance = dist !== undefined
+              ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
+              : 50;
+
+            return {
+              filename: vectorData.metadatas[0][i]?.filename || 'unknown',
+              filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
+              relevance,
+              snippet: doc
+            };
+          });
         }
 
         return {

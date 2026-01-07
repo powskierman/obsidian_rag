@@ -76,26 +76,26 @@ export default function SettingsPanel() {
         </div>
       </div>
 
-      {/* Distance Threshold Slider */}
+      {/* Relevance Filter Slider */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-xs text-white/60">Filter Threshold</label>
+          <label className="text-xs text-white/60">Relevance Filter</label>
           <span className="text-xs text-white/80 font-mono">
-            {settings.distanceThreshold.toFixed(1)}
+            {Math.round(settings.relevanceThreshold)}%
           </span>
         </div>
         <input
           type="range"
           min="0"
-          max="15"
-          step="0.5"
-          value={settings.distanceThreshold}
-          onChange={(e) => updateSettings({ distanceThreshold: parseFloat(e.target.value) })}
+          max="100"
+          step="5"
+          value={settings.relevanceThreshold}
+          onChange={(e) => updateSettings({ relevanceThreshold: parseFloat(e.target.value) })}
           className="w-full h-1 bg-[#2C2C2E] rounded-lg appearance-none cursor-pointer accent-[#0A84FF]"
         />
         <div className="flex justify-between text-[10px] text-white/30">
-          <span>0.0 (strict)</span>
-          <span>15.0 (loose)</span>
+          <span>0% (all)</span>
+          <span>100% (perfect)</span>
         </div>
       </div>
 
