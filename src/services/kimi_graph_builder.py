@@ -354,7 +354,17 @@ class GraphQuerier:
     def get_entity_neighborhood(self, entity: str, depth: int = 1) -> Dict[str, Any]:
         """Get entities connected to this entity"""
         entity = entity.strip().strip('"\'')
-        matches = [n for n in self.graph.nodes() if entity.lower() in n.lower() or n.lower() in entity.lower()]
+        # Strict matching: Prefer exact match, then strict start/containment
+        if self.graph.has_node(entity):
+             matches = [entity]
+        else:
+             # Only match if it's a significant substring, not just "a" in "Apple"
+             # Avoid "or" matching "Tensorflow"
+             matches = [n for n in self.graph.nodes() if (entity.lower() == n.lower())]
+             
+             if not matches and len(entity) > 3:
+                 matches = [n for n in self.graph.nodes() if entity.lower() in n.lower()]
+
         if not matches: return {'entity': entity, 'found': False}
         entity = max(matches, key=lambda n: self.graph.degree(n))
         neighbors = {'entity': entity, 'found': True, 'properties': dict(self.graph.nodes[entity]), 'outgoing': [], 'incoming': []}
@@ -369,7 +379,52 @@ class GraphQuerier:
         Query the knowledge graph using the LLM with optional additional context.
         Returns: (answer_text, context_nodes)
         """
-        entities_in_query = [node for node in self.graph.nodes() if node.lower() in user_query.lower()]
+        # Improved entity extraction with word boundaries
+        import re
+        query_lower = user_query.lower()
+        entities_in_query = []
+
+        # Filter out stopword/low-signal entities that pollute matching (e.g., "and")
+        stopwords = {
+            "and", "or", "the", "a", "an", "in", "on", "with", "for", "to", "of",
+            "from", "by", "is", "are", "was", "were", "be", "been", "it", "this",
+            "that", "these", "those", "as", "at", "via", "etc"
+        }
+
+        def is_noise_entity(name: str) -> bool:
+            name_lower = name.lower().strip()
+            if len(name_lower) <= 2 or name_lower.isdigit():
+                return True
+            if name_lower in stopwords:
+                return True
+            tokens = [t for t in re.split(r"\W+", name_lower) if t]
+            return bool(tokens) and all(t in stopwords for t in tokens)
+        
+        # Sort nodes by length (longest first) to match "Machine Learning" before "Learning"
+        all_nodes = sorted(list(self.graph.nodes()), key=len, reverse=True)
+        
+        for node in all_nodes:
+            node_lower = node.lower()
+            # Skip short/noise nodes (single chars or 2 chars)
+            if len(node_lower) <= 2 or is_noise_entity(node_lower):
+                continue 
+            
+            # Check for exact word match in query
+            # \b matches word boundary. escape(node_lower) handles special chars.
+            if re.search(r'\b' + re.escape(node_lower) + r'\b', query_lower):
+                entities_in_query.append(node)
+                continue # Found exact match, move to next node
+
+            # Fallback: Relaxed matching for technical terms (length > 3)
+            # This catches "Nextion" in "NextionDisplay" or "esp32" in "esp32-c3" logic
+            # IF the query explicitly contains the term as a word 
+            if len(node_lower) > 3 and node_lower in query_lower:
+                 # Verify it's not a common word substring (e.g. "ion" in "Nextion")
+                 # Check if the node string appears in the query surrounded by boundaries OR if query parts appear in node
+                 if node_lower in query_lower:
+                     entities_in_query.append(node)
+
+
         logger.info(f"=== GRAPH BUILDER DEBUG ===")
         logger.info(f"Entities found in query: {entities_in_query[:10]}")
         
@@ -377,11 +432,25 @@ class GraphQuerier:
         graph_context = [self.get_entity_neighborhood(e) for e in entities_in_query[:max_entities]]
         
         # Fallback to centrality if no entities found
+        # Fallback to centrality if no entities found AND query is empty/summary-like
         if not graph_context:
-            centrality = nx.degree_centrality(self.graph)
-            top_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10]
-            logger.info(f"No entities in query, using top centrality nodes: {[node for node, _ in top_nodes]}")
-            graph_context = [self.get_entity_neighborhood(node) for node, _ in top_nodes]
+            # ONLY fallback if the query is literally "summary" or empty.
+            # ABSOLUTELY NEVER fallback for specific technical queries.
+            # This is the root cause of the "Xcode" / "iOS" spam.
+            is_generic_summary = user_query.strip().lower() in ["summary", "overview", "graph", "nodes", "concepts"]
+            
+            if is_generic_summary:
+                centrality = nx.degree_centrality(self.graph)
+                top_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10]
+                logger.info(f"Summary query detected, using top centrality nodes: {[node for node, _ in top_nodes]}")
+                graph_context = [self.get_entity_neighborhood(node) for node, _ in top_nodes]
+            else:
+                # If we didn't find "nextion" in the graph, DO NOT show "Xcode".
+                # Just return empty context so the Vector search can take over.
+                logger.info(f"No specific graph entities found for: '{user_query}'. Returning empty graph context.")
+                return "I couldn't find specific entities in the knowledge graph. Relying on document search.", []
+
+
 
         context_text = "\n---\n".join([f"Entity: {c['entity']}\nRelationships: " +
             ", ".join([f"{c['entity']} --[{r['relationship']}]--> {r['target']}" for r in c['outgoing']]) for c in graph_context])

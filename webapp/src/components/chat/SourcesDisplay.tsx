@@ -7,10 +7,33 @@ interface SourcesDisplayProps {
 
 export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(sources.length <= 3);
+  const vaultName = 'Michel';
+  const vaultRoot = '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel';
 
   if (!sources || sources.length === 0) {
     return null;
   }
+
+  const buildSourceLink = (source: Source) => {
+    const filepath = source.filepath?.trim();
+    if (filepath) {
+      const looksAbsolute = filepath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(filepath);
+      if (looksAbsolute) {
+        if (filepath.startsWith(vaultRoot)) {
+          const relPath = filepath.slice(vaultRoot.length).replace(/^\/+/, '');
+          if (relPath) {
+            return `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(relPath)}`;
+          }
+        }
+        return `obsidian://open?path=${encodeURIComponent(filepath)}`;
+      }
+    }
+    const filename = source.filename?.trim();
+    if (filename) {
+      return `obsidian://search?vault=${encodeURIComponent(vaultName)}&query=${encodeURIComponent(filename)}`;
+    }
+    return null;
+  };
 
   return (
     <div className="mt-4 pt-4 border-t border-[#2C2C2E]">
@@ -42,7 +65,19 @@ export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
               <div className="flex items-start justify-between mb-2">
                 <div className="font-medium text-white flex items-center gap-2">
                   <span className="text-white/40">{idx + 1}.</span>
-                  <span>{source.filename}</span>
+                  {(() => {
+                    const link = buildSourceLink(source);
+                    if (!link) return <span>{source.filename}</span>;
+                    return (
+                      <a
+                        href={link}
+                        className="text-[#0A84FF] hover:text-[#6AB7FF] underline underline-offset-2"
+                        title="Open in Obsidian"
+                      >
+                        {source.filename}
+                      </a>
+                    );
+                  })()}
                 </div>
                 <span className="text-[#0A84FF] font-mono text-xs">
                   {source.relevance.toFixed(0)}%

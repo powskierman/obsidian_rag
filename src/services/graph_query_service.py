@@ -78,6 +78,70 @@ def extract_entities_from_graph(graph_text: str) -> list:
     return entities
 
 
+def relevance_from_distance(dist: float) -> float:
+    """Convert distance score to relevance percentage (0-100)."""
+    import math
+    try:
+        relevance = 100 / (1 + math.exp(dist / 2))
+        return max(0.0, min(100.0, relevance))
+    except Exception:
+        return 50.0
+
+
+DEFAULT_INTEGRATION_KEYWORDS = [
+    "integrate", "integration", "connect", "connection", "interface", "interfacing",
+    "link", "bridge", "combine", "pair", "between", "with", "and",
+    "serial", "uart", "i2c", "spi", "gpio", "pinout", "wiring",
+    "protocol", "driver", "library", "firmware", "upload", "flash",
+    "display", "screen", "hmi"
+]
+
+
+def load_keyword_boosts() -> dict:
+    """Load keyword boost config from env or use defaults."""
+    raw = os.getenv("GRAPH_KEYWORD_BOOSTS", "").strip()
+    if not raw:
+        return {"integration": {"weight": 4.0, "keywords": DEFAULT_INTEGRATION_KEYWORDS}}
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception:
+        logger.warning("Invalid GRAPH_KEYWORD_BOOSTS; using defaults")
+    return {"integration": {"weight": 4.0, "keywords": DEFAULT_INTEGRATION_KEYWORDS}}
+
+
+def is_integration_intent(user_query: str, query_terms: set[str]) -> bool:
+    """Heuristic intent detection for integration-style queries."""
+    query_lower = user_query.lower()
+    if " and " in query_lower or " with " in query_lower or " between " in query_lower:
+        return True
+    if len(query_terms) >= 2:
+        return True
+    cues = {
+        "integrate", "integration", "connect", "connection", "interface", "interfacing",
+        "link", "bridge", "combine", "pair", "hookup", "wiring", "serial", "uart", "i2c", "spi"
+    }
+    return any(cue in query_lower for cue in cues)
+
+
+def count_keyword_hits(text: str, keywords: list[str]) -> int:
+    """Count keyword hits with a light boundary check for short terms."""
+    import re
+    hits = 0
+    for kw in keywords:
+        kw = kw.lower().strip()
+        if not kw:
+            continue
+        if len(kw) <= 3:
+            if re.search(r'\b' + re.escape(kw) + r'\b', text):
+                hits += 1
+        else:
+            if kw in text:
+                hits += 1
+    return hits
+
+
 def generate_hyde_text(user_query: str, llm_provider: str, model: str) -> str:
     """Generate a hypothetical answer to improve vector search (HyDE)."""
     hyde_prompt = f"""You are a helpful assistant. Provide a concise, hypothetical but technically accurate answer to the following question. 
@@ -507,14 +571,16 @@ def query_graph():
         # Handle vector mode: Vector search + LLM synthesis
         if mode == 'vector':
             try:
-                # Get vector search results
+                # Get vector search results with threshold to filter noise
+                # Pass relevance_threshold to filter out low quality matches (e.g. 73% iOS nonsense)
                 vector_response = requests.post(
                     f'{EMBEDDING_SERVICE_URL}/query',
                     json={
                         'query': user_query,
                         'n_results': n_results,
                         'reranking': True,
-                        'deduplicate': True
+                        'deduplicate': True,
+                        'relevance_threshold': 75  # Filter out noise < 75%
                     },
                     timeout=60
                 )
@@ -530,15 +596,31 @@ def query_graph():
                 # Build context from vector results
                 context_parts = []
                 vector_sources = []
+                
+                # Combine into list for proper sorting locally
+                combined_results = []
 
-                for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
-                    # Calculate relevance
-                    if dist < 0:
-                        relevance = abs(dist) * 100
-                    else:
-                        relevance = (1 / (1 + dist)) * 100
-                    relevance = min(100, max(0, relevance))
+                for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances)):
+                    # Calculate relevance compatible with embedding service logic
+                    relevance = relevance_from_distance(dist)
 
+                    if relevance < 75:  # Double check filtering
+                        continue
+                        
+                    combined_results.append({
+                        'doc': doc,
+                        'meta': meta,
+                        'relevance': relevance
+                    })
+
+                # Sort by relevance descending
+                combined_results.sort(key=lambda x: x['relevance'], reverse=True)
+
+                for i, res in enumerate(combined_results, 1):
+                    doc = res['doc']
+                    meta = res['meta']
+                    relevance = res['relevance']
+                    
                     filename = meta.get('filename', 'unknown')
                     filepath = meta.get('filepath', 'unknown')
                     snippet = doc[:200] + "..." if len(doc) > 200 else doc
@@ -550,6 +632,7 @@ def query_graph():
                         'relevance': relevance,
                         'snippet': snippet
                     })
+
 
                 context_text = "\n".join(context_parts)
 
@@ -564,10 +647,11 @@ Context from notes:
 
 Provide a thorough, accurate answer that:
 - References specific information from the context
+- Uses only the provided context; avoid generic background
 - Is medically accurate when discussing health topics
 - Includes technical details when relevant
 - Cites which sources you used
-- If the context doesn't contain relevant information, say so clearly"""
+- If a specific detail isn't in the notes, say "Not found in notes" clearly"""
 
                 # Call LLM
                 answer = call_llm(llm_provider, model, system_prompt, user_query, temperature)
@@ -658,23 +742,102 @@ Provide a thorough, accurate answer that:
             }
 
             # Pre-populate sources from graph context nodes as initial fallback
+            query_terms = {t for t in re.split(r"\W+", user_query.lower()) if len(t) > 2}
+            stopwords = {
+                "and", "or", "the", "a", "an", "in", "on", "with", "for", "to", "of",
+                "from", "by", "is", "are", "was", "were", "be", "been", "it", "this",
+                "that", "these", "those", "as", "at", "via", "etc"
+            }
+            query_terms = {t for t in query_terms if t not in stopwords}
+            is_summary_query = user_query.strip().lower() in ["summary", "overview", "graph", "nodes", "concepts"]
+            keyword_boosts = load_keyword_boosts()
+            integration_cfg = keyword_boosts.get("integration", {})
+            integration_keywords = integration_cfg.get("keywords", DEFAULT_INTEGRATION_KEYWORDS)
+            integration_weight = float(integration_cfg.get("weight", 4.0))
+            integration_intent = is_integration_intent(user_query, query_terms)
+
             graph_sources = []
             seen_source_files = set()
+            total_source_count = 0
+            MAX_GRAPH_SOURCES = 40  # Cap total sources from graph
+            
             for node in context_nodes:
+                if total_source_count >= MAX_GRAPH_SOURCES:
+                    break
+                    
                 node_props = node.get('properties', {})
+                entity_name = node.get('entity', '')
+                entity_text = f"{entity_name} {node_props.get('description', '')}".lower()
+                match_terms = [term for term in query_terms if term in entity_text]
+                match_strength = len(match_terms)
+                # Only surface sources for entities that match query terms
+                if not is_summary_query and query_terms:
+                    if match_strength == 0:
+                        continue
                 # Our GraphBuilder adds 'sources' list to properties
                 node_sources = node_props.get('sources', [])
+                
+                # Limit sources per node to prevent one central node from pulling in hundreds of files
+                node_source_limit = 8
+                current_node_sources = 0
+                
                 for src in node_sources:
+                    if total_source_count >= MAX_GRAPH_SOURCES or current_node_sources >= node_source_limit:
+                        break
+                        
                     fname = src.get('filename', 'Unknown')
-                    if fname not in seen_source_files and fname != 'Unknown':
+                    # Basic validation of filename
+                    if not fname or fname == 'Unknown' or '.' not in fname:
+                        continue
+                        
+                    if fname not in seen_source_files:
                         seen_source_files.add(fname)
+                        
+                        # Calculate dynamic relevance
+                        # Range will be roughly 70% to 95%
+                        importance = node_props.get('importance', 5)
+                        try:
+                            importance_val = float(importance)
+                        except:
+                            importance_val = 5.0
+                            
+                        # Boost relevance if the entity name is actually in the query
+                        entity_name = node.get('entity', '').lower()
+                        query_lower = user_query.lower()
+                        entity_match = entity_name in query_lower or query_lower in entity_name
+                        
+                        keyword_hits = 0
+                        if integration_intent:
+                            keyword_hits = count_keyword_hits(
+                                f"{entity_text} {fname.lower()}",
+                                integration_keywords
+                            )
+                        keyword_boost = keyword_hits * integration_weight
+                        base_rel = 70.0 + (match_strength * 8.0)
+                        relevance = min(95.0, base_rel + (importance_val * 1.5) + keyword_boost)
+                        
                         graph_sources.append({
                             'filename': fname,
                             'filepath': fname,
-                            'relevance': 85.0,
-                            'snippet': f"Context: {node['entity']} mentioned. {node_props.get('description', '')}"
+                            'relevance': relevance,
+                            'snippet': f"Context: {node['entity']} mentioned. {node_props.get('description', '')}",
+                            'match_strength': match_strength
                         })
+                        total_source_count += 1
+                        current_node_sources += 1
+            
+            if graph_sources and not is_summary_query:
+                graph_sources.sort(
+                    key=lambda x: (x.get('match_strength', 0) * 10) + x['relevance'],
+                    reverse=True
+                )
+                graph_sources = graph_sources[:MAX_GRAPH_SOURCES]
+
+            for source in graph_sources:
+                source.pop('match_strength', None)
+
             base_response['sources'] = graph_sources
+
 
             # Step 2: If mode is 'hybrid', enhance with vector search
             if mode == 'hybrid':
@@ -692,7 +855,8 @@ Provide a thorough, accurate answer that:
                             'query': enhanced_query,
                             'n_results': n_results,
                             'reranking': True,
-                            'deduplicate': True
+                            'deduplicate': True,
+                            'relevance_threshold': 75  # Filter out noise < 75%
                         },
                         timeout=60
                     )
@@ -707,12 +871,11 @@ Provide a thorough, accurate answer that:
                         vector_sources = []
                         context_parts = []
                         for i, (doc, meta, dist) in enumerate(zip(documents, metadatas, distances), 1):
-                            # Calculate relevance
-                            if dist < 0:
-                                relevance = abs(dist) * 100
-                            else:
-                                relevance = (1 / (1 + dist)) * 100
-                            relevance = min(100, max(0, relevance))
+                            # Calculate relevance matching embedding service logic
+                            relevance = relevance_from_distance(dist)
+
+                            if relevance < 75: continue
+
 
                             filename = meta.get('filename', 'unknown')
                             filepath = meta.get('filepath', 'unknown')
@@ -728,15 +891,23 @@ Provide a thorough, accurate answer that:
                                 'snippet': snippet
                             })
 
-                        # Merge vector sources with graph fallbacks (prefer vector info for overlaps)
-                        final_sources = vector_sources.copy()
-                        vector_filenames = {s['filename'] for s in vector_sources}
-                        for g_src in graph_sources:
-                            if g_src['filename'] not in vector_filenames:
-                                final_sources.append(g_src)
-                        
+                        # CRITICAL FIX: If we found good vector sources, REPLACE the potential fallback graph sources
+                        # This prevents showing "Hacking with iOS" (from central nodes) when we actually found "Nextion MoC" via vector
+                        if vector_sources:
+                            # Only keep graph sources if they are highly relevant (>80%) - i.e. actual entity matches
+                            # "Hacking with iOS" usually comes in at ~73% from the graph fallback logic
+                            high_quality_graph_sources = [s for s in graph_sources if s['relevance'] > 80]
+                            
+                            # Combine: Strong Vector matches + Strong Graph matches
+                            final_sources = vector_sources + high_quality_graph_sources
+                            logger.info(f"Hybrid Merge: {len(vector_sources)} vector sources + {len(high_quality_graph_sources)} graph sources")
+                        else:
+                             # No vector sources found? Keep the graph ones (better than nothing)
+                             final_sources = graph_sources
+
                         base_response['sources'] = final_sources
                         base_response['extracted_entities'] = entities
+
                         
                         # SYNTHESIS STEP: Re-generate answer using both Graph and Vector context
                         logger.info("Synthesizing Hybrid Answer with Vector Context...")
@@ -756,7 +927,9 @@ Provide a thorough, accurate answer that:
                         if not memory_context:
                             memory_context = "(No specific personal history found for this query)"
                         
-                        synthesis_system_prompt = f"""Your task is to answer questions by analyzing the retrieved materials and Michel’s personal context.
+                        synthesis_system_prompt = f"""Your task is to answer questions by analyzing the retrieved materials and Michel's personal context.
+
+**CRITICAL INSTRUCTION**: You have been provided with extensive context from Michel's notes, memory, and knowledge graphs. Your job is to SYNTHESIZE and SUMMARIZE this information to answer the question. DO NOT claim "insufficient information" unless the retrieved context is genuinely empty or completely unrelated to the query.
 
 ### CONTEXT FROM MEMORY
 {memory_context}
@@ -768,13 +941,16 @@ Provide a thorough, accurate answer that:
 {user_query}
 
 When generating your answer:
-1. Reference Michel’s specific **medical timeline** (DLBCL, Yescarta, scans) when relevant.
-2. Incorporate insights from his **Obsidian notes**, citing which notes or sources you use.
-3. Maintain a **compassionate and supportive** tone for medical topics.
-4. Provide **technical depth** and precision for engineering and coding topics.
-5. Adapt to his **expert-level understanding** — avoid overexplaining known concepts.
-6. Be **concise but thorough**, focusing on clarity and reasoning.
-7. Avoid redundant or generic phrasing.
+1. **USE THE PROVIDED CONTEXT**: Synthesize information from the retrieved documents, graph analysis, and memory.
+2. Reference Michel's specific **medical timeline** (DLBCL, Yescarta, scans) when relevant.
+3. Incorporate insights from his **Obsidian notes**, citing which notes or sources you use.
+4. Maintain a **compassionate and supportive** tone for medical topics.
+5. Provide **technical depth** and precision for engineering and coding topics.
+6. Adapt to his **expert-level understanding** — avoid overexplaining known concepts.
+7. Be **concise but thorough**, focusing on clarity and reasoning.
+8. Avoid redundant or generic phrasing.
+9. **Ground the answer in the notes**; avoid generic background not present in sources.
+10. If a specific detail is missing, say "Not found in notes" and suggest what to search for next.
 
 Finally, provide your answer in a structured, easy-to-read format.
 

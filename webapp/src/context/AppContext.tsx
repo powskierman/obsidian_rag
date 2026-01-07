@@ -40,7 +40,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     if (savedSettings) {
       try {
-        setSettings(JSON.parse(savedSettings));
+        const parsed = JSON.parse(savedSettings);
+
+        // MIGRATION: Convert old distanceThreshold to new relevanceThreshold
+        if ('distanceThreshold' in parsed && !('relevanceThreshold' in parsed)) {
+          console.log('🔄 Migrating old distanceThreshold to relevanceThreshold');
+          const legacy = Number(parsed.distanceThreshold);
+          const legacyValue = Number.isFinite(legacy) ? legacy : 0;
+          const mapped = Math.round(100 / (1 + Math.exp(legacyValue / 2)));
+          parsed.relevanceThreshold = Math.max(0, Math.min(100, mapped));
+          delete parsed.distanceThreshold;
+        }
+
+        setSettings(parsed);
       } catch (e) {
         console.error('Failed to load settings:', e);
       }
