@@ -90,10 +90,9 @@ def relevance_from_distance(dist: float) -> float:
 
 DEFAULT_INTEGRATION_KEYWORDS = [
     "integrate", "integration", "connect", "connection", "interface", "interfacing",
-    "link", "bridge", "combine", "pair", "between", "with", "and",
+    "link", "bridge", "combine", "pair",
     "serial", "uart", "i2c", "spi", "gpio", "pinout", "wiring",
-    "protocol", "driver", "library", "firmware", "upload", "flash",
-    "display", "screen", "hmi"
+    "protocol", "driver", "library", "firmware", "upload", "flash", "hookup"
 ]
 
 
@@ -114,10 +113,6 @@ def load_keyword_boosts() -> dict:
 def is_integration_intent(user_query: str, query_terms: set[str]) -> bool:
     """Heuristic intent detection for integration-style queries."""
     query_lower = user_query.lower()
-    if " and " in query_lower or " with " in query_lower or " between " in query_lower:
-        return True
-    if len(query_terms) >= 2:
-        return True
     cues = {
         "integrate", "integration", "connect", "connection", "interface", "interfacing",
         "link", "bridge", "combine", "pair", "hookup", "wiring", "serial", "uart", "i2c", "spi"
@@ -140,6 +135,37 @@ def count_keyword_hits(text: str, keywords: list[str]) -> int:
             if kw in text:
                 hits += 1
     return hits
+
+
+def normalize_text(text: str) -> str:
+    """Normalize text for loose matching (alnum only)."""
+    return re.sub(r"[^a-z0-9]+", "", text.lower())
+
+
+def term_in_text(term: str, text: str, normalized_text: str) -> bool:
+    """Check for whole-word or normalized substring matches."""
+    if not term:
+        return False
+    if re.search(r"\b" + re.escape(term) + r"\b", text):
+        return True
+    return term in normalized_text
+
+
+def expand_query_terms(user_query: str, query_terms: set[str]) -> set[str]:
+    """Add normalized term variants for letter+number combos (e.g., esp-32 -> esp32)."""
+    expanded = set(query_terms)
+    for match in re.finditer(r"\b([a-z]+)\s*[-_ ]\s*(\d{1,4})\b", user_query.lower()):
+        expanded.add(f"{match.group(1)}{match.group(2)}")
+    return expanded
+
+
+def count_term_matches(terms: set[str], text: str) -> int:
+    """Count how many query terms appear in text."""
+    if not terms:
+        return 0
+    text_lower = text.lower()
+    text_norm = normalize_text(text_lower)
+    return sum(1 for term in terms if term_in_text(term, text_lower, text_norm))
 
 
 def generate_hyde_text(user_query: str, llm_provider: str, model: str) -> str:
@@ -749,17 +775,31 @@ Provide a thorough, accurate answer that:
                 "that", "these", "those", "as", "at", "via", "etc"
             }
             query_terms = {t for t in query_terms if t not in stopwords}
+            query_terms = expand_query_terms(user_query, query_terms)
             is_summary_query = user_query.strip().lower() in ["summary", "overview", "graph", "nodes", "concepts"]
             keyword_boosts = load_keyword_boosts()
             integration_cfg = keyword_boosts.get("integration", {})
             integration_keywords = integration_cfg.get("keywords", DEFAULT_INTEGRATION_KEYWORDS)
             integration_weight = float(integration_cfg.get("weight", 4.0))
             integration_intent = is_integration_intent(user_query, query_terms)
+            term_count = len(query_terms)
+            hardware_terms = {
+                "nextion", "esp32", "esp8266", "esp", "uart", "gpio", "i2c", "spi",
+                "pinout", "wiring", "display", "screen", "hmi", "sensor", "board", "pcb"
+            }
+            hardware_query = any(term in query_terms for term in hardware_terms)
+            query_has_integration = any(t.startswith("integrat") for t in query_terms)
+            query_has_agent = any(t.startswith("agent") for t in query_terms)
+            query_has_supervisor = "supervisor" in query_terms
+            query_has_moc = "moc" in query_terms
 
             graph_sources = []
             seen_source_files = set()
             total_source_count = 0
             MAX_GRAPH_SOURCES = 40  # Cap total sources from graph
+            ai_folder_markers = [
+                "tech/ai/", "/ai/", "rag/", "obsidian_rag"
+            ]
             
             for node in context_nodes:
                 if total_source_count >= MAX_GRAPH_SOURCES:
@@ -768,12 +808,26 @@ Provide a thorough, accurate answer that:
                 node_props = node.get('properties', {})
                 entity_name = node.get('entity', '')
                 entity_text = f"{entity_name} {node_props.get('description', '')}".lower()
-                match_terms = [term for term in query_terms if term in entity_text]
+                entity_text_norm = normalize_text(entity_text)
+                match_terms = [
+                    term for term in query_terms
+                    if term_in_text(term, entity_text, entity_text_norm)
+                ]
                 match_strength = len(match_terms)
                 # Only surface sources for entities that match query terms
                 if not is_summary_query and query_terms:
                     if match_strength == 0:
-                        continue
+                        filename_match = False
+                        for src in node_props.get('sources', []):
+                            fname = src.get('filename', '').lower()
+                            if not fname:
+                                continue
+                            if count_term_matches(query_terms, fname) > 0:
+                                filename_match = True
+                                break
+                        if not filename_match:
+                            continue
+                        match_strength = 1
                 # Our GraphBuilder adds 'sources' list to properties
                 node_sources = node_props.get('sources', [])
                 
@@ -786,12 +840,19 @@ Provide a thorough, accurate answer that:
                         break
                         
                     fname = src.get('filename', 'Unknown')
+                    fname_lower = fname.lower()
+                    fname_norm = normalize_text(fname_lower)
                     # Basic validation of filename
                     if not fname or fname == 'Unknown' or '.' not in fname:
                         continue
                         
                     if fname not in seen_source_files:
                         seen_source_files.add(fname)
+                        filename_match_count = count_term_matches(query_terms, fname_lower)
+                        if not is_summary_query and term_count >= 2:
+                            if match_strength < 2 and filename_match_count < 2:
+                                if not (match_strength == 1 and filename_match_count >= 1 and term_count <= 3):
+                                    continue
                         
                         # Calculate dynamic relevance
                         # Range will be roughly 70% to 95%
@@ -807,28 +868,48 @@ Provide a thorough, accurate answer that:
                         entity_match = entity_name in query_lower or query_lower in entity_name
                         
                         keyword_hits = 0
-                        if integration_intent:
+                        if integration_intent and match_strength > 0:
                             keyword_hits = count_keyword_hits(
-                                f"{entity_text} {fname.lower()}",
+                                f"{entity_text} {fname_lower}",
                                 integration_keywords
                             )
-                        keyword_boost = keyword_hits * integration_weight
-                        base_rel = 70.0 + (match_strength * 8.0)
-                        relevance = min(95.0, base_rel + (importance_val * 1.5) + keyword_boost)
+                        keyword_boost = min(keyword_hits * integration_weight, 8.0)
+                        effective_match_strength = max(match_strength, min(filename_match_count, 2))
+                        term_count_safe = max(1, term_count)
+                        coverage = effective_match_strength / term_count_safe
+                        base_rel = 55.0 + (coverage * 25.0)
+                        entity_match_bonus = 5.0 if entity_match else 0.0
+                        relevance = min(
+                            95.0,
+                            base_rel + (importance_val * 1.5) + keyword_boost + entity_match_bonus
+                        )
+                        if coverage < 0.5:
+                            relevance = min(relevance, 78.0)
+                        if hardware_query and any(marker in fname_lower for marker in ai_folder_markers):
+                            relevance -= 12.0
+                        if not query_has_moc and term_in_text("moc", fname_lower, fname_norm):
+                            relevance -= 6.0
+                        if not query_has_agent and term_in_text("agent", fname_lower, fname_norm):
+                            relevance -= 10.0
+                        if not query_has_supervisor and term_in_text("supervisor", fname_lower, fname_norm):
+                            relevance -= 10.0
+                        if not query_has_integration and term_in_text("integration", fname_lower, fname_norm):
+                            relevance -= 4.0
+                        relevance = max(0.0, relevance)
                         
                         graph_sources.append({
                             'filename': fname,
                             'filepath': fname,
                             'relevance': relevance,
                             'snippet': f"Context: {node['entity']} mentioned. {node_props.get('description', '')}",
-                            'match_strength': match_strength
+                            'match_strength': effective_match_strength
                         })
                         total_source_count += 1
                         current_node_sources += 1
             
             if graph_sources and not is_summary_query:
                 graph_sources.sort(
-                    key=lambda x: (x.get('match_strength', 0) * 10) + x['relevance'],
+                    key=lambda x: (x.get('match_strength', 0), x['relevance']),
                     reverse=True
                 )
                 graph_sources = graph_sources[:MAX_GRAPH_SOURCES]
