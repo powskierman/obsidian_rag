@@ -67,6 +67,9 @@ open htmlcov/index.html
 # Single file
 pytest unit/test_frontmatter.py
 
+# Override addopts for a quick, no-coverage run
+pytest -o addopts="" tests/integration/test_search_modes.py
+
 # Single class
 pytest unit/test_tag_generation.py::TestContentTypeDetection
 
