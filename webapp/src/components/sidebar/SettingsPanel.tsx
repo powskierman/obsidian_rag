@@ -2,7 +2,8 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function SettingsPanel() {
-  const { settings, updateSettings, services } = useApp();
+  const { settings, updateSettings, services, llmProvider } = useApp();
+  const enhancedDisabled = settings.deepThinking;
 
   return (
     <div className="space-y-4">
@@ -14,24 +15,38 @@ export default function SettingsPanel() {
       </div>
 
       {/* Model Selector */}
-      <div className="space-y-2">
-        <label className="text-xs text-white/60">Model</label>
-        <select
-          value={settings.model}
-          onChange={(e) => updateSettings({ model: e.target.value })}
-          className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
-        >
-          {services.ollama.models.length > 0 ? (
-            services.ollama.models.map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))
-          ) : (
-            <option value="llama3.2:latest">llama3.2:latest</option>
-          )}
-        </select>
-      </div>
+      {llmProvider === 'ollama' && (
+        <div className="space-y-2">
+          <label className="text-xs text-white/60">Model</label>
+          <select
+            value={settings.model}
+            onChange={(e) => updateSettings({ model: e.target.value })}
+            className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
+          >
+            {services.ollama.models.length > 0 ? (
+              services.ollama.models.map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))
+            ) : (
+              <option value="llama3.2:latest">llama3.2:latest</option>
+            )}
+          </select>
+        </div>
+      )}
+
+      {llmProvider === 'openrouter' && (
+        <div className="space-y-2">
+          <label className="text-xs text-white/60">OpenRouter Model</label>
+          <input
+            value={settings.model}
+            onChange={(e) => updateSettings({ model: e.target.value })}
+            placeholder="openrouter/auto or anthropic/claude-3.5-sonnet"
+            className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
+          />
+        </div>
+      )}
 
       {/* Sources Slider */}
       <div className="space-y-2">
@@ -113,15 +128,16 @@ export default function SettingsPanel() {
           </span>
         </label>
 
-        <label className="flex items-center gap-2 cursor-pointer group">
+        <label className={`flex items-center gap-2 group ${enhancedDisabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
           <input
             type="checkbox"
             checked={settings.enhancedSearch}
+            disabled={enhancedDisabled}
             onChange={(e) => updateSettings({ enhancedSearch: e.target.checked })}
             className="w-4 h-4 rounded border-[#2C2C2E] bg-[#1C1C1E] text-[#0A84FF] focus:ring-[#0A84FF] focus:ring-offset-0"
           />
           <span className="text-sm text-white/80 group-hover:text-white transition-colors">
-            Enhanced Search
+            {enhancedDisabled ? 'Enhanced Search (Deep Thinking)' : 'Enhanced Search'}
           </span>
         </label>
       </div>

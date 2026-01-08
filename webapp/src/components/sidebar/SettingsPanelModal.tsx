@@ -7,9 +7,10 @@ interface SettingsPanelModalProps {
 }
 
 export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps) {
-  const { settings, updateSettings } = useApp();
+  const { settings, updateSettings, llmProvider, setLLMProvider } = useApp();
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
+  const enhancedDisabled = settings.deepThinking;
 
   useEffect(() => {
     const loadModels = async () => {
@@ -39,6 +40,9 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
   };
 
   const handleToggle = (key: 'showSources' | 'enhancedSearch') => {
+    if (key === 'enhancedSearch' && enhancedDisabled) {
+      return;
+    }
     updateSettings({ ...settings, [key]: !settings[key] });
   };
 
@@ -69,11 +73,11 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               LLM Provider
             </label>
             <div className="bg-[#2C2C2E] p-1 rounded-xl flex border border-[#3C3C3E]">
-              {['ollama', 'gemini', 'claude'].map((provider) => (
+              {['ollama', 'gemini', 'claude', 'openrouter'].map((provider) => (
                 <button
                   key={provider}
-                  onClick={() => useApp().setLLMProvider(provider as any)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${useApp().llmProvider === provider
+                  onClick={() => setLLMProvider(provider as any)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${llmProvider === provider
                     ? 'bg-[#0A84FF] text-white shadow-lg'
                     : 'text-white/40 hover:text-white/60 hover:bg-white/5'
                     }`}
@@ -85,7 +89,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
           </div>
 
           {/* Model Selection (Conditional) */}
-          {useApp().llmProvider === 'ollama' && (
+          {llmProvider === 'ollama' && (
             <div>
               <label className="block text-sm font-medium text-white mb-2">
                 Models
@@ -111,6 +115,23 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               <p className="text-xs text-white/40 mt-1.5 flex items-center gap-1.5">
                 <span className="w-1 h-1 rounded-full bg-[#0A84FF]" />
                 Choose the local Ollama model
+              </p>
+            </div>
+          )}
+
+          {llmProvider === 'openrouter' && (
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                OpenRouter Model
+              </label>
+              <input
+                value={settings.model}
+                onChange={(e) => handleModelChange(e.target.value)}
+                placeholder="openrouter/auto or anthropic/claude-3.5-sonnet"
+                className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
+              />
+              <p className="text-xs text-white/40 mt-1.5">
+                Use any OpenRouter model ID.
               </p>
             </div>
           )}
@@ -218,13 +239,16 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
           </div>
 
           {/* Enhanced Search Toggle */}
-          <div className="flex items-center justify-between p-3 bg-[#2C2C2E] rounded-lg border border-[#3C3C3E]">
+          <div className={`flex items-center justify-between p-3 bg-[#2C2C2E] rounded-lg border border-[#3C3C3E] ${enhancedDisabled ? 'opacity-60' : ''}`}>
             <div>
               <div className="text-sm font-medium text-white">Enhanced Search</div>
-              <div className="text-xs text-white/40 mt-1">Enable re-ranking and deduplication</div>
+              <div className="text-xs text-white/40 mt-1">
+                {enhancedDisabled ? 'Disabled while Deep Thinking is enabled' : 'Enable re-ranking and deduplication'}
+              </div>
             </div>
             <button
               onClick={() => handleToggle('enhancedSearch')}
+              disabled={enhancedDisabled}
               className={`relative w-12 h-6 rounded-full transition-colors ${settings.enhancedSearch ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
                 }`}
             >

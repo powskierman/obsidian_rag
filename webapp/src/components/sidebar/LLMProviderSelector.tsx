@@ -23,6 +23,13 @@ const llmProviders = [
     cost: '$',
     requiresApiKey: true,
     apiKeyEnvVar: 'ANTHROPIC_API_KEY'
+  },
+  {
+    id: 'openrouter' as LLMProvider,
+    label: 'OpenRouter',
+    cost: '$',
+    requiresApiKey: true,
+    apiKeyEnvVar: 'OPENROUTER_API_KEY'
   }
 ];
 
@@ -69,12 +76,23 @@ export default function LLMProviderSelector() {
                 {provider.label} ({provider.cost})
               </div>
               {provider.requiresApiKey && (() => {
-                const hasKey = provider.id === 'gemini' ? apiKeys.gemini : apiKeys.anthropic;
-                if (!hasKey) {
+                const hasKey = provider.id === 'gemini'
+                  ? apiKeys.gemini
+                  : provider.id === 'claude'
+                    ? apiKeys.anthropic
+                    : true;
+                if (!hasKey && provider.id !== 'openrouter') {
                   return (
                     <div className="text-xs text-yellow-500/70 mt-1 flex items-center gap-1">
                       <span>⚠️</span>
                       <span>API key required</span>
+                    </div>
+                  );
+                } else if (provider.id === 'openrouter' && llmProvider === provider.id) {
+                  return (
+                    <div className="text-xs text-white/50 mt-1 flex items-center gap-1">
+                      <span>🔑</span>
+                      <span>Set OPENROUTER_API_KEY</span>
                     </div>
                   );
                 } else if (llmProvider === provider.id) {

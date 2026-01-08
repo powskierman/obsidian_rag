@@ -191,7 +191,7 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
     Call the specified LLM provider with the given prompt.
 
     Args:
-        provider: 'ollama', 'claude', 'gemini', or 'gpt-oss'
+        provider: 'ollama', 'claude', 'gemini', 'gpt-oss', 'kimi', or 'openrouter'
         model: Model name (e.g., 'llama3.2', 'claude-sonnet-4-5-20250929', 'gemini-3-pro-preview')
         system_prompt: System prompt with context
         user_query: User's question
@@ -291,6 +291,30 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
 
         raise ValueError("Unexpected GPT-OSS response format")
 
+    elif provider == "openrouter":
+        # Use OpenRouter for flexible model access
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY not configured")
+
+        if not model:
+            model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+        )
+
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query}
+            ],
+            temperature=temperature
+        )
+        return response.choices[0].message.content
+
     elif provider == "kimi":
         # Use OpenRouter for Kimi
         api_key = os.getenv("OPENROUTER_API_KEY")
@@ -343,7 +367,7 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
     Call the specified LLM provider with streaming enabled.
 
     Args:
-        provider: 'ollama', 'claude', 'gemini', or 'gpt-oss'
+        provider: 'ollama', 'claude', 'gemini', 'gpt-oss', 'kimi', or 'openrouter'
         model: Model name
         system_prompt: System prompt with context
         user_query: User's question
@@ -373,6 +397,33 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
         ) as stream:
             for text in stream.text_stream:
                 yield text
+
+    elif provider == "openrouter":
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY not configured")
+
+        if not model:
+            model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+        )
+
+        stream = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query}
+            ],
+            temperature=temperature,
+            stream=True
+        )
+        for chunk in stream:
+            delta = chunk.choices[0].delta.content if chunk.choices else None
+            if delta:
+                yield delta
 
     elif provider == "ollama":
         # Use Ollama with streaming
@@ -590,7 +641,8 @@ def query_graph():
                 'claude': 'claude-sonnet-4-5-20250929',
                 'gemini': 'gemini-3-pro-preview',
                 'gpt-oss': 'gpt-4',
-                'kimi': 'moonshotai/kimi-k2-0905'
+                'kimi': 'moonshotai/kimi-k2-0905',
+                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto')
             }
             model = model_defaults.get(llm_provider, 'llama3.2')
 
@@ -1205,7 +1257,7 @@ def query_stream():
     {
         "query": "What treatments are mentioned?",
         "mode": "vector" | "graph" | "hybrid",
-        "llm_provider": "ollama" | "claude" | "gemini" | "gpt-oss",
+        "llm_provider": "ollama" | "claude" | "gemini" | "gpt-oss" | "kimi" | "openrouter",
         "model": "llama2",
         "temperature": 0.7,
         "system_prompt": "Custom instructions...",
@@ -1234,7 +1286,9 @@ def query_stream():
                 'ollama': 'llama2',
                 'claude': 'claude-sonnet-4-5-20250929',
                 'gemini': 'gemini-3-pro-preview',
-                'gpt-oss': 'gpt-4'
+                'gpt-oss': 'gpt-4',
+                'kimi': 'moonshotai/kimi-k2-0905',
+                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto')
             }
             model = model_defaults.get(llm_provider, 'llama2')
 

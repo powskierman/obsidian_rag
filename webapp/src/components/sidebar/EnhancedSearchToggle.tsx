@@ -2,15 +2,22 @@ import { useApp } from '../../context/AppContext';
 
 export default function EnhancedSearchToggle() {
   const { settings, updateSettings } = useApp();
+  const isDisabled = settings.deepThinking;
 
   const handleToggle = () => {
+    if (isDisabled) {
+      return;
+    }
     updateSettings({ enhancedSearch: !settings.enhancedSearch });
   };
 
   return (
     <button
       onClick={handleToggle}
-      className="w-full flex items-center justify-between p-3 rounded-lg bg-[#1C1C1E] border border-[#2C2C2E] hover:border-[#0A84FF]/50 transition-all group"
+      aria-disabled={isDisabled}
+      className={`w-full flex items-center justify-between p-3 rounded-lg bg-[#1C1C1E] border border-[#2C2C2E] transition-all group ${
+        isDisabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-[#0A84FF]/50'
+      }`}
     >
       <div className="flex items-center gap-3">
         <span className="text-xl">🌐</span>
@@ -19,7 +26,7 @@ export default function EnhancedSearchToggle() {
             Enhanced Search
           </div>
           <div className="text-sm text-white font-medium">
-            {settings.enhancedSearch ? 'Enabled' : 'Disabled'}
+            {isDisabled ? 'Disabled (Deep Thinking)' : settings.enhancedSearch ? 'Enabled' : 'Disabled'}
           </div>
         </div>
       </div>

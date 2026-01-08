@@ -182,7 +182,7 @@ export default function Home() {
                 const backendMode = searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
-                const modelToUse = llmProvider === 'ollama' ? settings.model : '';
+                const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' ? settings.model : '';
 
                 // Unified Search Call
                 console.log('📡 Sending query with relevanceThreshold:', settings.relevanceThreshold);

@@ -34,7 +34,7 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
-      const enableWebSearch = enhanced_search && ['gemini', 'claude', 'kimi'].includes(llm_provider);
+      const enableWebSearch = enhanced_search && ['gemini', 'claude', 'kimi', 'openrouter'].includes(llm_provider);
       const enableLlmKnowledge = enhanced_search;
       const requestBody = {
         query,

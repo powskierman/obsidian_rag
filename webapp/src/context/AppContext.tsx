@@ -106,6 +106,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateSettings = (newSettings: Partial<SettingsState>) => {
     const updated = { ...settings, ...newSettings };
+    if (updated.deepThinking) {
+      updated.enhancedSearch = false;
+    }
     console.log('⚙️ Settings updated:', updated);
     setSettings(updated);
   };

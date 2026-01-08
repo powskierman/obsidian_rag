@@ -15,7 +15,7 @@ export type SearchMode =
   // New experimental modes
   | 'cascading';      // 5-Stage Waterfall
 
-export type LLMProvider = 'ollama' | 'gemini' | 'claude';
+export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter';
 
 export interface Message {
   role: 'user' | 'assistant';

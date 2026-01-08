@@ -31,6 +31,14 @@ const llmProviders = [
     icon: '🤖',
     requiresApiKey: true,
     apiKeyEnvVar: 'ANTHROPIC_API_KEY'
+  },
+  {
+    id: 'openrouter' as LLMProvider,
+    label: 'OpenRouter',
+    cost: '$',
+    icon: '🧭',
+    requiresApiKey: true,
+    apiKeyEnvVar: 'OPENROUTER_API_KEY'
   }
 ];
 
@@ -75,7 +83,11 @@ export default function LLMProviderPanel({ currentProvider, onSelect, onClose }:
 
         <div className="space-y-2">
           {llmProviders.map((provider) => {
-            const hasKey = provider.id === 'gemini' ? apiKeys.gemini : apiKeys.anthropic;
+            const hasKey = provider.id === 'gemini'
+              ? apiKeys.gemini
+              : provider.id === 'claude'
+                ? apiKeys.anthropic
+                : true;
             const showWarning = provider.requiresApiKey && !hasKey;
 
             return (
@@ -102,7 +114,13 @@ export default function LLMProviderPanel({ currentProvider, onSelect, onClose }:
                       {provider.label} ({provider.cost})
                     </span>
                   </div>
-                  {showWarning && (
+                  {provider.id === 'openrouter' && currentProvider === provider.id && (
+                    <p className="text-xs text-white/50 flex items-center gap-1 mt-1">
+                      <span>🔑</span>
+                      <span>Set OPENROUTER_API_KEY</span>
+                    </p>
+                  )}
+                  {showWarning && provider.id !== 'openrouter' && (
                     <p className="text-xs text-yellow-500/70 flex items-center gap-1 mt-1">
                       <span>⚠️</span>
                       <span>API key required</span>

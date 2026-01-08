@@ -31,7 +31,8 @@ export default function ConfigurationPanel() {
     const labels = {
       'ollama': 'Ollama',
       'gemini': 'Gemini Pro',
-      'claude': 'Claude API'
+      'claude': 'Claude API',
+      'openrouter': 'OpenRouter'
     };
     return labels[llmProvider] || 'Ollama';
   };
