@@ -34,6 +34,8 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
+      const enableWebSearch = enhanced_search && ['gemini', 'claude', 'kimi'].includes(llm_provider);
+      const enableLlmKnowledge = enhanced_search;
       const requestBody = {
         query,
         mode,
@@ -42,6 +44,8 @@ export const api = {
         model,
         temperature,
         relevance_threshold,
+        web_search: enableWebSearch,
+        llm_knowledge: enableLlmKnowledge,
         system_prompt: system_prompt || null
       };
       console.log('🌐 API request body:', requestBody);

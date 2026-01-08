@@ -226,6 +226,8 @@ class UnifiedQueryRequest(BaseModel):
     relevance_threshold: float = 0  # 0-100%, 0 = show all results
     distance_threshold: Optional[float] = None  # Legacy support (deprecated)
     system_prompt: Optional[str] = None
+    web_search: bool = False
+    llm_knowledge: bool = False
 
 @app.post("/api/v1/query")
 async def unified_query(request: UnifiedQueryRequest):
@@ -438,6 +440,8 @@ async def unified_query(request: UnifiedQueryRequest):
                     "llm_provider": request.llm_provider,
                     "model": request.model,
                     "temperature": request.temperature,
+                    "web_search": request.web_search,
+                    "llm_knowledge": request.llm_knowledge,
                     "system_prompt": request.system_prompt
                 }
                 response = await client.post(f"{GRAPH_SERVICE_URL}/query", json=payload, timeout=120.0)
@@ -466,6 +470,8 @@ async def unified_query(request: UnifiedQueryRequest):
                     "llm_provider": request.llm_provider,
                     "model": request.model,
                     "temperature": request.temperature,
+                    "web_search": request.web_search,
+                    "llm_knowledge": request.llm_knowledge,
                     "system_prompt": request.system_prompt
                 }
                 response = await client.post(f"{LIGHTRAG_SERVICE_URL}/query", json=payload, timeout=60.0)
@@ -499,6 +505,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "llm_provider": request.llm_provider,
                         "model": request.model,
                         "temperature": request.temperature,
+                        "web_search": request.web_search,
+                        "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
                     }, timeout=120.0),
                     client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
@@ -531,6 +539,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "llm_provider": request.llm_provider,
                         "model": request.model,
                         "temperature": request.temperature,
+                        "web_search": request.web_search,
+                        "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
                     }, timeout=60.0),
                     client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
@@ -565,6 +575,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "llm_provider": request.llm_provider,
                         "model": request.model,
                         "temperature": request.temperature,
+                        "web_search": request.web_search,
+                        "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
                     }, timeout=120.0),
                     client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
@@ -573,6 +585,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "llm_provider": request.llm_provider,
                         "model": request.model,
                         "temperature": request.temperature,
+                        "web_search": request.web_search,
+                        "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
                     }, timeout=60.0)
                 ]
@@ -608,6 +622,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "llm_provider": request.llm_provider,
                         "model": request.model,
                         "temperature": request.temperature,
+                        "web_search": request.web_search,
+                        "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
                     }, timeout=90.0),
                     client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
@@ -616,6 +632,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "llm_provider": request.llm_provider,
                         "model": request.model,
                         "temperature": request.temperature,
+                        "web_search": request.web_search,
+                        "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
                     }, timeout=90.0),
                     client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
