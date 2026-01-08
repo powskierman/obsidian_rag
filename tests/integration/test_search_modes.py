@@ -60,11 +60,11 @@ def _default_responses() -> Dict[str, Callable[[Dict[str, Any]], FakeResponse]]:
     }
     graph_result = {
         "answer": "Graph answer",
-        "sources": [{"filename": "note.md", "filepath": "/vault/note.md", "relevance": 0.9, "snippet": "snippet"}],
+        "sources": [{"filename": "note.md", "filepath": "/vault/note.md", "relevance": 90.0, "snippet": "snippet"}],
     }
     lightrag_result = {
         "answer": "Entities answer",
-        "sources": [{"filename": "entity.md", "filepath": "/vault/entity.md", "relevance": 0.8, "snippet": "snippet"}],
+        "sources": [{"filename": "entity.md", "filepath": "/vault/entity.md", "relevance": 80.0, "snippet": "snippet"}],
     }
 
     return {

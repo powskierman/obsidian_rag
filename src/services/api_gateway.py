@@ -4,6 +4,8 @@ import json
 import asyncio
 import anthropic
 import uvicorn
+import math
+import re
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -30,6 +32,35 @@ def _load_deep_thinking_rag():
         sys.path.append(base_path)
         from deep_thinking.orchestrator import DeepThinkingRAG
         return DeepThinkingRAG
+
+
+def _apply_relevance_filter(sources: Any, threshold: float) -> Any:
+    if not isinstance(sources, list):
+        return sources
+    if not threshold or threshold <= 0:
+        return sources
+    filtered = []
+    for src in sources:
+        if not isinstance(src, dict):
+            filtered.append(src)
+            continue
+        try:
+            relevance = float(src.get("relevance", 0))
+        except (TypeError, ValueError):
+            filtered.append(src)
+            continue
+        if relevance >= threshold:
+            filtered.append(src)
+    return filtered
+
+
+def _filter_result_sources(result: Any, threshold: float) -> Any:
+    if not isinstance(result, dict):
+        return result
+    sources = result.get("sources")
+    if isinstance(sources, list):
+        result["sources"] = _apply_relevance_filter(sources, threshold)
+    return result
 
 app = FastAPI(title="Obsidian RAG Unified API", version="1.0")
 
@@ -247,9 +278,120 @@ async def unified_query(request: UnifiedQueryRequest):
 
             result = await retriever.retrieve(request.query, max_results=request.max_results)
 
+            answer = ""
+            sources = []
+            anchor_sources = []
+            vector_sources = []
+            stages = result.get("stages", {}) if isinstance(result, dict) else {}
+
+            # Prefer graph answer if present from the anchor stage
+            anchors = stages.get("anchors", {})
+            if isinstance(anchors, dict):
+                answer = anchors.get("answer", "") or anchors.get("result", "")
+                anchor_sources = anchors.get("sources", []) or []
+
+            # Build sources from vector stage if available
+            vector_snippets_by_path = {}
+            vector_snippets_by_name = {}
+            vector_data = stages.get("vectors", {})
+            if isinstance(vector_data, dict) and vector_data.get("documents"):
+                docs = vector_data.get("documents", [[]])[0]
+                metas = vector_data.get("metadatas", [[]])[0]
+                dists = vector_data.get("distances", [[]])[0]
+                for doc, meta, dist in zip(docs, metas, dists):
+                    try:
+                        relevance = max(0.0, min(100.0, 100 / (1 + math.exp(dist / 2))))
+                    except Exception:
+                        relevance = 50.0
+                    doc_text = doc if isinstance(doc, str) else ""
+                    snippet = (doc_text[:300] + "...") if len(doc_text) > 300 else doc_text
+                    filename = meta.get("filename", "unknown")
+                    filepath = meta.get("filepath", "unknown")
+                    vector_sources.append({
+                        "filename": filename,
+                        "filepath": filepath,
+                        "relevance": relevance,
+                        "snippet": snippet
+                    })
+                    if filepath and (filepath not in vector_snippets_by_path or relevance > vector_snippets_by_path[filepath]["relevance"]):
+                        vector_snippets_by_path[filepath] = {"snippet": snippet, "relevance": relevance}
+                    if filename and (filename not in vector_snippets_by_name or relevance > vector_snippets_by_name[filename]["relevance"]):
+                        vector_snippets_by_name[filename] = {"snippet": snippet, "relevance": relevance}
+
+            def _is_boilerplate_snippet(text: str) -> bool:
+                if not text:
+                    return True
+                return bool(re.match(r"^\s*context\s*:", text, re.IGNORECASE))
+
+            if anchor_sources and (vector_snippets_by_path or vector_snippets_by_name):
+                for src in anchor_sources:
+                    snippet = src.get("snippet", "")
+                    if not _is_boilerplate_snippet(snippet):
+                        continue
+                    filepath = src.get("filepath", "")
+                    filename = src.get("filename", "")
+                    replacement = None
+                    if filepath in vector_snippets_by_path:
+                        replacement = vector_snippets_by_path[filepath]["snippet"]
+                    elif filename in vector_snippets_by_name:
+                        replacement = vector_snippets_by_name[filename]["snippet"]
+                    if replacement:
+                        src["snippet"] = replacement
+
+            sources = anchor_sources + vector_sources
+
+            # Deduplicate sources by filename, keep highest relevance
+            deduped = {}
+            for src in sources:
+                fname = src.get("filename", "unknown")
+                rel = src.get("relevance", 0) or 0
+                if fname not in deduped or rel > deduped[fname].get("relevance", 0):
+                    deduped[fname] = src
+            sources = sorted(deduped.values(), key=lambda s: s.get("relevance", 0), reverse=True)
+            sources = _apply_relevance_filter(sources, effective_relevance_threshold)
+
+            query_terms = set(re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{1,}", request.query.lower()))
+            filename_stopwords = {
+                "a", "an", "and", "or", "the", "to", "of", "in", "on", "for", "with", "from", "by",
+                "doc", "docs", "documentation", "guide", "readme", "overview", "index", "notes", "note",
+                "setup", "quickstart", "reference", "example", "examples", "workflow", "implementation",
+                "instructions", "tutorial", "how", "template"
+            }
+
+            def _diversity_key(src: Dict[str, Any]) -> str:
+                name = src.get("filename") or src.get("filepath") or ""
+                base = os.path.splitext(os.path.basename(name))[0]
+                tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{1,}", base.lower())
+                for token in tokens:
+                    if token in query_terms or token in filename_stopwords:
+                        continue
+                    return token
+                return base.lower() if base else "unknown"
+
+            diversity_cap = 3
+            diversity_counts = {}
+            diversified = []
+            for src in sources:
+                key = _diversity_key(src)
+                count = diversity_counts.get(key, 0)
+                if count >= diversity_cap:
+                    continue
+                diversity_counts[key] = count + 1
+                diversified.append(src)
+            sources = diversified[:request.max_results]
+
+            if not answer:
+                answer = f"Found {len(sources)} matching snippets in your vault." if sources else "No results found"
+
+            if isinstance(result, dict):
+                result["answer"] = answer
+                result["sources"] = sources
+
             return {
                 "query": request.query,
                 "mode": "cascading",
+                "answer": answer,
+                "sources": sources,
                 "results": result,
                 "metadata": {
                     "description": "5-Stage Cascading Retrieval (Anchor -> Entity -> Expand -> Vector -> Synthesis)",
@@ -301,6 +443,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 response = await client.post(f"{GRAPH_SERVICE_URL}/query", json=payload, timeout=120.0)
                 response.raise_for_status()
                 result = response.json()
+                result = _filter_result_sources(result, effective_relevance_threshold)
 
                 return {
                     "query": request.query,
@@ -328,6 +471,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 response = await client.post(f"{LIGHTRAG_SERVICE_URL}/query", json=payload, timeout=60.0)
                 response.raise_for_status()
                 result = response.json()
+                result = _filter_result_sources(result, effective_relevance_threshold)
 
                 return {
                     "query": request.query,
@@ -364,6 +508,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
                 notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
+                notes_result = _filter_result_sources(notes_result, effective_relevance_threshold)
                 vector_result = None if isinstance(responses[1], Exception) else responses[1].json()
 
                 return {
@@ -395,6 +540,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
                 entities_result = None if isinstance(responses[0], Exception) else responses[0].json()
+                entities_result = _filter_result_sources(entities_result, effective_relevance_threshold)
                 vector_result = None if isinstance(responses[1], Exception) else responses[1].json()
 
                 return {
@@ -434,6 +580,8 @@ async def unified_query(request: UnifiedQueryRequest):
 
                 notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
                 entities_result = None if isinstance(responses[1], Exception) else responses[1].json()
+                notes_result = _filter_result_sources(notes_result, effective_relevance_threshold)
+                entities_result = _filter_result_sources(entities_result, effective_relevance_threshold)
 
                 return {
                     "query": request.query,
@@ -478,6 +626,8 @@ async def unified_query(request: UnifiedQueryRequest):
 
                 notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
                 entities_result = None if isinstance(responses[1], Exception) else responses[1].json()
+                notes_result = _filter_result_sources(notes_result, effective_relevance_threshold)
+                entities_result = _filter_result_sources(entities_result, effective_relevance_threshold)
                 vector_result = None if isinstance(responses[2], Exception) else responses[2].json()
 
                 return {

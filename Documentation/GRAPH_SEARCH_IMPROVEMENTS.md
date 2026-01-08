@@ -1,59 +1,43 @@
 # Graph Search Improvements
 
-This note captures the changes made to reduce irrelevant sources in NetworkX graph search results.
+This note summarizes the current graph-source ranking safeguards in `src/services/graph_query_service.py` and related filters in `src/services/kimi_graph_builder.py`.
 
 ## Problem
 
-Queries like "nextion and esp32" were returning unrelated sources (e.g., Xcode/iOS notes). The cause was:
+Graph-only queries were surfacing unrelated sources due to low-signal terms and central-node leakage.
 
-- Graph entity matching allowed low-signal tokens (like "and") to be treated as entities.
-- Graph sources were derived from central nodes, not strictly tied to query terms.
+## Current Behavior (Condensed)
 
-## Fixes Applied
+1. **Entity noise filtering** (`kimi_graph_builder.py`)
+   - Stopwords, dates, and numeric artifacts are excluded before matching.
 
-### 1) Stopword/Noise Entity Filter
+2. **Query-term gating with normalization** (`graph_query_service.py`)
+   - Entity matching uses word boundaries plus normalized text (e.g., `esp-32` -> `esp32`).
+   - If entity text does not match, filename matches can still allow the source.
 
-**File:** `src/services/kimi_graph_builder.py`
+3. **Multi-term coverage requirements**
+   - For multi-term queries, sources must match at least two terms (entity or filename) to pass.
+   - Low-coverage results are capped to avoid flooding.
 
-- Added a stopword and low-signal entity filter inside `query_with_llm`.
-- Entities like "and", "the", or numeric-only strings are skipped before matching.
-- Prevents noisy entity matches from pulling unrelated context nodes.
+4. **Integration boosting (explicit only)**
+   - Integration intent requires explicit cues (connect, wiring, uart, etc.).
+   - Keyword list is trimmed and boost is capped.
 
-### 2) Query-Term Gating for Sources
+5. **Downranking generic docs**
+   - When the query is hardware-centric, AI/RAG docs are downranked.
+   - Filenames containing `MoC`, `Agent`, or `Supervisor` are downranked unless requested.
 
-**File:** `src/services/graph_query_service.py`
+6. **Sorting**
+   - Sources are sorted by match strength, then relevance.
 
-- Sources are only collected from context nodes whose entity name/description matches query terms.
-- Summary-style queries still allow broader coverage (e.g., "overview").
-
-### 3) Match-Strength Ranking and Capping
-
-**File:** `src/services/graph_query_service.py`
-
-- Each source is scored with a `match_strength` (count of query terms matched).
-- Sources are sorted by `match_strength` then relevance.
-- Only the top match-strength band is kept and capped to avoid flooding results.
-
-### 4) Integration Keyword Boosting (Generic)
-
-**File:** `src/services/graph_query_service.py`
-
-- Detects integration intent (e.g., queries with multiple entities or "connect/integrate").
-- Boosts sources whose entity name/description or filename includes generic integration keywords (UART, serial, wiring, protocol, library, etc.).
-- Configurable via `GRAPH_KEYWORD_BOOSTS` JSON env var.
-
-## Deployment Notes
-
-The graph service container copies code at build time, so changes require:
+## Deployment
 
 ```bash
 docker compose build graph-service
 docker compose up -d graph-service
 ```
 
-## Quick Verification
-
-Run a query that previously returned irrelevant sources:
+## Quick Check
 
 ```bash
 curl -X POST http://localhost:8002/query \
@@ -61,4 +45,4 @@ curl -X POST http://localhost:8002/query \
   -d '{"query":"nextion and esp32","mode":"graph"}'
 ```
 
-Expected: sources are limited to Nextion/ESP32-related notes, no Xcode/iOS entries.
+Expected: Nextion/ESP32 notes rise; AI/agent/system notes are suppressed.

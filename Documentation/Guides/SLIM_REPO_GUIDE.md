@@ -68,7 +68,7 @@ git push origin main --force
 - `lightrag_db_backup_*/`
 - `graphrag_claude_db/`
 - `graphrag_db/`
-- `Archive/old_databases/`
+- `Documentation/Archive/old_databases/`
 
 ## Recommendation
 **Use Option 1 (Fresh Start)** if:
@@ -83,4 +83,3 @@ git push origin main --force
 **Use Option 2 (Filter-Branch)** if:
 - BFG is not available
 - You prefer built-in git tools
-
