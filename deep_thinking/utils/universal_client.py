@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Universal LLM Client wrapper for Deep Thinking Agent.
-Supports Anthropic (Claude) and Google (Gemini) APIs with a unified interface.
+Supports Anthropic (Claude), Google (Gemini), and OpenRouter APIs with a unified interface.
 Mimics the Anthropic client interface (messages.create).
 """
 
@@ -45,6 +45,8 @@ class UniversalClient:
             return self._create_claude(model, messages, max_tokens, temperature, system)
         elif self.provider == "gemini":
             return self._create_gemini(model, messages, max_tokens, temperature, system)
+        elif self.provider == "openrouter":
+            return self._create_openrouter(model, messages, max_tokens, temperature, system)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
@@ -138,4 +140,52 @@ class UniversalClient:
             
         except Exception as e:
             logger.error(f"Gemini request failed: {e}")
+            raise e
+
+    def _create_openrouter(self, model: str, messages: List[Dict[str, str]],
+                           max_tokens: int, temperature: float, system: str):
+        api_key = self.api_key or os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY not configured")
+
+        if not model or "/" not in model:
+            model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+
+        openrouter_messages = list(messages)
+        if system:
+            openrouter_messages = [{"role": "system", "content": system}] + openrouter_messages
+
+        payload = {
+            "model": model,
+            "messages": openrouter_messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+
+        try:
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json=payload,
+                timeout=60
+            )
+
+            if response.status_code != 200:
+                error_msg = f"OpenRouter API Error {response.status_code}: {response.text}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            data = response.json()
+            choices = data.get("choices", [])
+            if not choices:
+                raise ValueError("No choices returned from OpenRouter")
+
+            message = choices[0].get("message", {})
+            content = message.get("content", "")
+            return UniversalMessage(content)
+        except Exception as e:
+            logger.error(f"OpenRouter request failed: {e}")
             raise e

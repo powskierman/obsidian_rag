@@ -1,4 +1,5 @@
 from typing import Dict, Any, List
+import os
 from .state import RAGState
 from .planner import PlannerAgent
 from .supervisor import RetrievalSupervisor
@@ -12,6 +13,7 @@ class DeepThinkingRAG:
         self, 
         provider: str = "claude",
         api_key: str = None,
+        model: str = None,
         anthropic_client=None, # Backwards compatibility
         vector_service_url: str = "http://localhost:8000",
         graph_service_url: str = "http://localhost:8003",
@@ -35,6 +37,16 @@ class DeepThinkingRAG:
         self.reflector = ReflectionAgent(self.client)
         self.policy = PolicyAgent(self.client)
         self.synthesizer = FinalAnswerGenerator(self.client)
+
+        default_model = model
+        if not default_model and provider == "openrouter":
+            default_model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+
+        if default_model:
+            self.planner.model = default_model
+            self.reflector.model = default_model
+            self.policy.model = default_model
+            self.synthesizer.model = default_model
         
     def query(self, question: str, max_iterations: int = 7, status_callback=None) -> Dict[str, Any]:
         """

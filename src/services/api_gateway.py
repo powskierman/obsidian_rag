@@ -682,6 +682,7 @@ async def deep_research_websocket(websocket: WebSocket):
         data = await websocket.receive_json()
         query = data.get("query")
         provider = data.get("provider", "claude").lower()
+        model = data.get("model")
         
         if not query:
             await websocket.send_json({"type": "error", "content": "No query provided"})
@@ -701,6 +702,12 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.send_json({"type": "error", "content": "GEMINI_API_KEY not configured"})
                 await websocket.close()
                 return
+        elif provider == "openrouter":
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            if not api_key:
+                await websocket.send_json({"type": "error", "content": "OPENROUTER_API_KEY not configured"})
+                await websocket.close()
+                return
 
         # Initialize Agent with Universal Client
         # Note: We must use the INTERNAL Docker URLs here
@@ -708,6 +715,7 @@ async def deep_research_websocket(websocket: WebSocket):
         rag = DeepThinkingRAG(
             provider=provider,
             api_key=api_key,
+            model=model,
             vector_service_url=EMBEDDING_SERVICE_URL,
             graph_service_url=GRAPH_SERVICE_URL,
             enable_reranking=True

@@ -64,7 +64,8 @@ export default function Home() {
                     // Send query AND selected provider
                     ws.send(JSON.stringify({
                         query: userMsg,
-                        provider: llmProvider
+                        provider: llmProvider,
+                        model: llmProvider === 'openrouter' ? settings.model : undefined
                     }));
                 };
 
