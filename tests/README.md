@@ -34,6 +34,13 @@ tests/
 └── fixtures/            # Test data (if needed)
 ```
 
+Additional focused tests:
+- `tests/unit/test_embedding_dedup.py`
+- `tests/unit/test_embedding_service_query.py`
+- `tests/unit/test_deep_thinking_filters.py`
+- `tests/unit/test_api_gateway_filters.py`
+- `tests/integration/test_deep_research_websocket.py`
+
 ## Test Categories
 
 - **Unit Tests**: Fast, isolated tests (~90+ tests)
@@ -69,6 +76,12 @@ pytest unit/test_frontmatter.py
 
 # Override addopts for a quick, no-coverage run
 pytest -o addopts="" tests/integration/test_search_modes.py
+
+# Deep thinking websocket integration
+pytest -m integration tests/integration/test_deep_research_websocket.py
+
+# Embedding service query unit tests
+pytest -o addopts="" tests/unit/test_embedding_service_query.py
 
 # Single class
 pytest unit/test_tag_generation.py::TestContentTypeDetection

@@ -382,6 +382,9 @@ async def unified_query(request: UnifiedQueryRequest):
                 diversified.append(src)
             sources = diversified[:request.max_results]
 
+            if not answer and isinstance(result, dict):
+                answer = result.get("answer", "") or ""
+
             if not answer:
                 answer = f"Found {len(sources)} matching snippets in your vault." if sources else "No results found"
 
