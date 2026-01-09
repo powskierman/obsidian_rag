@@ -134,7 +134,7 @@ async def _post_json(
     for attempt in range(REQUEST_RETRIES + 1):
         try:
             response = await client.post(url, json=payload, timeout=timeout)
-            if response.status_code >= 500:
+            if response.status_code >= 400:
                 raise httpx.HTTPStatusError(
                     f"{service} {response.status_code}",
                     request=response.request,
@@ -145,6 +145,10 @@ async def _post_json(
         except (httpx.RequestError, httpx.HTTPStatusError) as exc:
             last_exception = exc
             _record_failure(service)
+            if isinstance(exc, httpx.HTTPStatusError):
+                status = exc.response.status_code if exc.response is not None else 500
+                if status < 500:
+                    break
             if attempt >= REQUEST_RETRIES:
                 break
             await asyncio.sleep(REQUEST_BACKOFF * (2 ** attempt))

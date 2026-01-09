@@ -539,8 +539,11 @@ def get_query_metrics():
 
 @app.route('/delete', methods=['POST'])
 def delete_document():
-    """Delete document by ID"""
+    """Delete document by ID (requires EMBEDDING_CLEAR_TOKEN)."""
     try:
+        if not _admin_token_valid():
+            return jsonify({"error": "Forbidden"}), 403
+
         data = request.json
         doc_id = data.get('id')
 
