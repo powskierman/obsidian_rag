@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 export default function SettingsPanel() {
   const { settings, updateSettings, services, llmProvider } = useApp();
   const enhancedDisabled = settings.deepThinking;
+  const modelSelectValue = settings.model;
 
   return (
     <div className="space-y-4">
@@ -19,7 +20,7 @@ export default function SettingsPanel() {
         <div className="space-y-2">
           <label className="text-xs text-white/60">Model</label>
           <select
-            value={settings.model}
+            value={modelSelectValue}
             onChange={(e) => updateSettings({ model: e.target.value })}
             className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
           >
@@ -42,7 +43,7 @@ export default function SettingsPanel() {
           <input
             value={settings.model}
             onChange={(e) => updateSettings({ model: e.target.value })}
-            placeholder="openrouter/auto or anthropic/claude-3.5-sonnet"
+            placeholder="openrouter/auto or anthropic/claude-sonnet-4-5"
             className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
           />
         </div>

@@ -36,7 +36,17 @@ export default function ChatSidebar() {
             minute: '2-digit'
         });
 
-        const searchModeLabel = searchMode.charAt(0).toUpperCase() + searchMode.slice(1);
+        const searchModeLabel = ({
+            'vector': 'Vector',
+            'notes': 'Notes',
+            'entities': 'Entities',
+            'notes+vector': 'Notes+Vector',
+            'entities+vector': 'Entities+Vector',
+            'dual-graph': 'Dual-Graph',
+            'hybrid': 'Hybrid',
+            'cascading': 'Cascading',
+            'deep-thinking': 'Deep Thinking'
+        } as Record<string, string>)[searchMode] || searchMode;
 
         let markdown = `# Obsidian RAG Conversation\n`;
         markdown += `**Date:** ${timestamp}\n`;

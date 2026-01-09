@@ -6,24 +6,30 @@ interface SearchModePanelProps {
   onClose: () => void;
 }
 
-const searchModes = [
+const searchModeGroups = [
   {
-    id: 'vector' as SearchMode,
-    label: 'Vector',
-    description: 'Fast semantic search',
-    icon: '🔍'
+    title: 'Single Source',
+    modes: [
+      { id: 'vector' as SearchMode, label: 'Vector', description: 'ChromaDB semantic search', icon: '🔍' },
+      { id: 'notes' as SearchMode, label: 'Notes', description: 'NetworkX note graph', icon: '🧩' },
+      { id: 'entities' as SearchMode, label: 'Entities', description: 'LightRAG entity graph', icon: '🧠' }
+    ]
   },
   {
-    id: 'knowledge-graph' as SearchMode,
-    label: 'Knowledge-Graph',
-    description: 'Deep reasoning & connections',
-    icon: '🧠'
+    title: 'Dual Source',
+    modes: [
+      { id: 'notes+vector' as SearchMode, label: 'Notes + Vector', description: 'NetworkX + ChromaDB', icon: '🔗' },
+      { id: 'entities+vector' as SearchMode, label: 'Entities + Vector', description: 'LightRAG + ChromaDB', icon: '🧬' },
+      { id: 'dual-graph' as SearchMode, label: 'Dual Graph', description: 'NetworkX + LightRAG', icon: '🧠' }
+    ]
   },
   {
-    id: 'hybrid' as SearchMode,
-    label: 'Hybrid',
-    description: 'Best of both worlds',
-    icon: '🔗'
+    title: 'Ultimate',
+    modes: [
+      { id: 'hybrid' as SearchMode, label: 'Hybrid', description: 'All three sources', icon: '⚡' },
+      { id: 'cascading' as SearchMode, label: 'Cascading', description: 'Waterfall retrieval', icon: '🌊' },
+      { id: 'deep-thinking' as SearchMode, label: 'Deep Thinking', description: 'Agentic reasoning', icon: '🧠' }
+    ]
   }
 ];
 
@@ -53,32 +59,39 @@ export default function SearchModePanel({ currentMode, onSelect, onClose }: Sear
 
         <p className="text-sm text-white/60 mb-4">Choose your search method:</p>
 
-        <div className="space-y-2">
-          {searchModes.map((mode) => (
-            <label
-              key={mode.id}
-              className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
-                currentMode === mode.id
-                  ? 'bg-[#0A84FF]/10 border-[#0A84FF]'
-                  : 'bg-[#1C1C1E] border-[#2C2C2E] hover:border-white/20'
-              }`}
-            >
-              <input
-                type="radio"
-                name="searchMode"
-                value={mode.id}
-                checked={currentMode === mode.id}
-                onChange={() => handleSelect(mode.id)}
-                className="w-5 h-5 text-[#0A84FF] bg-transparent border-2 border-white/20 focus:ring-2 focus:ring-[#0A84FF] cursor-pointer"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg">{mode.icon}</span>
-                  <span className="text-white font-medium">{mode.label}</span>
-                </div>
-                <p className="text-sm text-white/60">{mode.description}</p>
+        <div className="space-y-4">
+          {searchModeGroups.map((group) => (
+            <div key={group.title} className="space-y-2">
+              <div className="text-xs font-semibold text-white/40 uppercase tracking-wider px-1">
+                {group.title}
               </div>
-            </label>
+              {group.modes.map((mode) => (
+                <label
+                  key={mode.id}
+                  className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                    currentMode === mode.id
+                      ? 'bg-[#0A84FF]/10 border-[#0A84FF]'
+                      : 'bg-[#1C1C1E] border-[#2C2C2E] hover:border-white/20'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="searchMode"
+                    value={mode.id}
+                    checked={currentMode === mode.id}
+                    onChange={() => handleSelect(mode.id)}
+                    className="w-5 h-5 text-[#0A84FF] bg-transparent border-2 border-white/20 focus:ring-2 focus:ring-[#0A84FF] cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-lg">{mode.icon}</span>
+                      <span className="text-white font-medium">{mode.label}</span>
+                    </div>
+                    <p className="text-sm text-white/60">{mode.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
           ))}
         </div>
       </div>

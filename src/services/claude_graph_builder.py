@@ -40,19 +40,16 @@ except OSError:
 
 
 class GraphBuilder:
-    """Build knowledge graph using Kimi's reasoning capabilities"""
+    """Build knowledge graph using Claude's reasoning capabilities"""
     
     def __init__(self, api_key: Optional[str] = None, model: str = None, max_retries: int = 3):
-        # Use OPENROUTER_API_KEY + KIMI_MODEL env vars
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
+        # Prefer explicit api_key, then Anthropic env var.
+        self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
         if not self.api_key:
-            raise RuntimeError("OPENROUTER_API_KEY not set")
-        
-        self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=self.api_key,
-        )
-        self.model = model or os.environ.get("KIMI_MODEL", "moonshotai/kimi-k2-0905")
+            raise RuntimeError("ANTHROPIC_API_KEY not set")
+
+        self.client = Anthropic(api_key=self.api_key)
+        self.model = model or os.environ.get("CLAUDE_GRAPH_MODEL", "claude-3-5-sonnet-20240620")
         self.max_retries = max_retries
 
         self.graph = nx.MultiDiGraph()
@@ -289,6 +286,14 @@ Guidelines:
                     logger.info(f"Retrying in {wait_time}s...")
                     time.sleep(wait_time)
                     continue
+
+    def process_chunk(self, chunk_text: str, metadata: Optional[Dict] = None) -> Dict[str, Any]:
+        """Compatibility wrapper to extract and add graph data from a chunk."""
+        metadata = metadata or {}
+        graph_data = self.extract_graph_from_chunk(chunk_text, metadata)
+        if graph_data:
+            self.add_to_graph(graph_data)
+        return graph_data
     
     def _parse_json_response(self, response_text: str, metadata: Dict, attempt: int = 0) -> Dict[str, Any]:
         """
@@ -1124,11 +1129,17 @@ If the graph doesn't contain enough information, say so clearly."""
     
     def get_graph_stats(self) -> Dict[str, Any]:
         """Get statistics about the graph"""
+        node_count = self.graph.number_of_nodes()
+        edge_count = self.graph.number_of_edges()
+        try:
+            is_connected = nx.is_weakly_connected(self.graph) if node_count > 0 else False
+        except nx.NetworkXPointlessConcept:
+            is_connected = False
         return {
-            'total_nodes': self.graph.number_of_nodes(),
-            'total_edges': self.graph.number_of_edges(),
-            'density': nx.density(self.graph),
-            'is_connected': nx.is_weakly_connected(self.graph),
+            'total_nodes': node_count,
+            'total_edges': edge_count,
+            'density': nx.density(self.graph) if node_count > 1 else 0.0,
+            'is_connected': is_connected,
             'top_entities': self._get_top_entities(10)
         }
     

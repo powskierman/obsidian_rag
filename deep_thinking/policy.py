@@ -5,7 +5,7 @@ from .state import RAGState
 class PolicyAgent:
     def __init__(self, client):
         self.client = client
-        self.model = "claude-sonnet-4-5-20241022"
+        self.model = "claude-sonnet-4-5-20250929"
 
     def decide(self, state: RAGState) -> Literal["CONTINUE", "FINISH", "REVISE_PLAN"]:
         """

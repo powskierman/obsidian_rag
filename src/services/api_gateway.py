@@ -683,10 +683,37 @@ async def deep_research_websocket(websocket: WebSocket):
         query = data.get("query")
         provider = data.get("provider", "claude").lower()
         model = data.get("model")
+        supported_providers = {"claude", "gemini", "openrouter"}
+
+        def _select_fallback_provider():
+            if os.getenv("OPENROUTER_API_KEY"):
+                return "openrouter"
+            if ANTHROPIC_API_KEY:
+                return "claude"
+            if os.getenv("GEMINI_API_KEY"):
+                return "gemini"
+            return None
         
         if not query:
             await websocket.send_json({"type": "error", "content": "No query provided"})
             return
+
+        # Normalize provider for Deep Thinking
+        if provider not in supported_providers:
+            fallback_provider = _select_fallback_provider()
+            if not fallback_provider:
+                await websocket.send_json({
+                    "type": "error",
+                    "content": "Deep Thinking supports Claude, Gemini, or OpenRouter only. No compatible API key found."
+                })
+                await websocket.close()
+                return
+            await websocket.send_json({
+                "type": "log",
+                "message": f"Deep Thinking does not support '{provider}'. Using '{fallback_provider}'."
+            })
+            provider = fallback_provider
+            model = None
 
         # Determine API Key based on provider
         api_key = None

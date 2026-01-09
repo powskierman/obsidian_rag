@@ -13,7 +13,8 @@ export type SearchMode =
   // Ultimate hybrid
   | 'hybrid'          // All three sources
   // New experimental modes
-  | 'cascading';      // 5-Stage Waterfall
+  | 'cascading'       // 5-Stage Waterfall
+  | 'deep-thinking';  // Agentic reasoning mode
 
 export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter';
 

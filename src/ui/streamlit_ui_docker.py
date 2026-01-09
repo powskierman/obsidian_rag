@@ -96,7 +96,8 @@ with st.sidebar:
             else:
                 st.error(f"❌ Embedding: {emb_status}")
                 
-            graph_status = services.get('graph', {}).get('status', 'unknown')
+            graph_service = services.get('networkx') or services.get('graph', {})
+            graph_status = graph_service.get('status', 'unknown')
             if graph_status == 'healthy':
                 st.caption("✅ Graph Service")
             else:

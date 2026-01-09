@@ -5,7 +5,7 @@ from .state import RAGState
 class FinalAnswerGenerator:
     def __init__(self, client):
         self.client = client
-        self.model = "claude-sonnet-4-5-20241022"
+        self.model = "claude-sonnet-4-5-20250929"
 
         # Michel's custom system prompt for compassionate, personalized responses
         self.system_prompt = """You are a **Deep Thinking AI assistant** integrated with Michel's Obsidian Knowledge Base.

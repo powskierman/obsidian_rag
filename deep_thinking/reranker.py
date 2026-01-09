@@ -15,6 +15,10 @@ class Reranker:
     nuanced semantic relationships better than bi-encoders.
     """
     
+    
+    # Cache models to avoid reloading on every request/instance
+    _model_cache = {}
+
     def __init__(self, model_name: str = 'cross-encoder/ms-marco-MiniLM-L-6-v2'):
         """
         Initialize the reranker with a cross-encoder model.
@@ -23,7 +27,11 @@ class Reranker:
             model_name: HuggingFace model name. Default is a fast, accurate model
                        trained on MS MARCO passage ranking dataset.
         """
-        self.model = CrossEncoder(model_name)
+        if model_name not in self._model_cache:
+            print(f"Loading Reranker model: {model_name}...")
+            self._model_cache[model_name] = CrossEncoder(model_name)
+        
+        self.model = self._model_cache[model_name]
         self.model_name = model_name
         
     def rerank(

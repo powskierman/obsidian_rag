@@ -12,7 +12,7 @@ import SettingsPanelModal from '../components/sidebar/SettingsPanelModal';
 import ForceGraph from '../components/ForceGraph';
 import SourcesDisplay from '../components/chat/SourcesDisplay';
 import RatingButtons from '../components/chat/RatingButtons';
-import FallbackBackground from '../components/FallbackBackground';
+import StaticHexBackground from '../components/StaticHexBackground';
 import { api } from '../lib/api';
 import { useApp } from '../context/AppContext';
 import { Message, Source } from '../lib/types';
@@ -42,6 +42,7 @@ export default function Home() {
     const [thinkingLog, setThinkingLog] = useState<string>('');
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
     const [showGraph, setShowGraph] = useState(false);
+    const modeLabel = searchMode === 'deep-thinking' ? 'deep thinking' : searchMode;
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -180,7 +181,7 @@ export default function Home() {
 
             } else {
                 // Standard Unified Search (HTTP)
-                const backendMode = searchMode;
+                const backendMode = searchMode === 'deep-thinking' ? 'hybrid' : searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
                 const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' ? settings.model : '';
@@ -301,8 +302,8 @@ export default function Home() {
 
     return (
         <>
-            {/* Lightweight CSS background */}
-            <FallbackBackground />
+            {/* Lightweight Static Hex Background */}
+            <StaticHexBackground />
 
             {/* Main UI - positioned above background */}
             <div className="flex h-screen bg-transparent text-white font-sans overflow-hidden selection:bg-[#FFD60A] selection:text-black relative">
@@ -393,7 +394,7 @@ export default function Home() {
                                                             value={input}
                                                             onChange={(e) => setInput(e.target.value)}
                                                             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                            placeholder={`Search (${searchMode})...`}
+                                                            placeholder={`Search (${modeLabel})...`}
                                                             className="flex-1 bg-transparent border-none text-white placeholder-white/30 px-4 py-2 text-lg focus:ring-0 focus:outline-none"
                                                         />
 
@@ -416,6 +417,7 @@ export default function Home() {
                                                             <optgroup label="⚡ Ultimate">
                                                                 <option value="hybrid">Hybrid (All 3)</option>
                                                                 <option value="cascading">Cascading (Waterfall)</option>
+                                                                <option value="deep-thinking">Deep Thinking (Agentic)</option>
                                                             </optgroup>
                                                         </select>
                                                     </div>
@@ -514,7 +516,7 @@ export default function Home() {
                                                 autoFocus
                                                 onChange={(e) => setInput(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                placeholder={`Ask about your vault (${searchMode} mode)...`}
+                                                placeholder={`Ask about your vault (${modeLabel} mode)...`}
                                                 className="w-full bg-[#121418] border border-[#2C2C2E] rounded-[15px] py-4 px-5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-[#FFD60A]/50 focus:ring-1 focus:ring-[#FFD60A]/50 transition-colors shadow-lg"
                                             />
                                             <button
@@ -532,7 +534,7 @@ export default function Home() {
                             </div>
                             <div className="text-center mt-3">
                                 <span className="text-[10px] text-white/20 font-medium tracking-wide uppercase">
-                                    Mode: {searchMode} • Model: {settings.model}
+                                    Mode: {modeLabel} • Model: {settings.model}
                                 </span>
                             </div>
                         </div>

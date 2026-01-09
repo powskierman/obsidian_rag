@@ -21,26 +21,63 @@ import shutil
 
 def parse_frontmatter(content: str) -> tuple[Dict | None, str]:
     """Extract frontmatter from markdown content."""
-    frontmatter_pattern = r'^---\s*\n(.*?)\n---\s*\n(.*)$'
-    match = re.match(frontmatter_pattern, content, re.DOTALL)
-    
-    if not match:
+    def repair_unescaped_quotes(text: str) -> str | None:
+        repaired_lines = []
+        changed = False
+        for line in text.splitlines():
+            match = re.match(r'^(\s*[^:#]+:\s*)"(.*)"\s*$', line)
+            if match:
+                key = match.group(1)
+                value = match.group(2)
+                if '"' in value:
+                    value = value.replace("'", "''")
+                    repaired_lines.append(f"{key}'{value}'")
+                    changed = True
+                    continue
+            repaired_lines.append(line)
+        if not changed:
+            return None
+        return "\n".join(repaired_lines)
+
+    if not content.startswith('---'):
         return None, content
-    
-    frontmatter_text = match.group(1)
-    body = match.group(2)
-    
+
+    lines = content.splitlines(keepends=True)
+    if not lines or lines[0].strip() != '---':
+        return None, content
+
+    end_idx = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == '---':
+            end_idx = i
+            break
+
+    if end_idx is None:
+        return None, content
+
+    frontmatter_text = ''.join(lines[1:end_idx])
+    body = ''.join(lines[end_idx + 1:])
+
     try:
-        frontmatter = yaml.safe_load(frontmatter_text)
-        # Ensure frontmatter is a dict, not a string or other type
+        frontmatter = yaml.safe_load(frontmatter_text) if frontmatter_text.strip() else {}
         if frontmatter is None:
             frontmatter = {}
         elif not isinstance(frontmatter, dict):
-            # If YAML parsed to a non-dict (e.g., string), treat as no frontmatter
             return None, content
         return frontmatter, body
     except yaml.YAMLError:
-        return None, content
+        repaired = repair_unescaped_quotes(frontmatter_text)
+        if not repaired:
+            return None, content
+        try:
+            frontmatter = yaml.safe_load(repaired)
+            if frontmatter is None:
+                frontmatter = {}
+            elif not isinstance(frontmatter, dict):
+                return None, content
+            return frontmatter, body
+        except yaml.YAMLError:
+            return None, content
 
 
 def apply_tags_to_note(file_path: Path, vault_root: Path, tags_to_add: List[str], backlink: str | None = None, dry_run: bool = True) -> Dict:
@@ -278,4 +315,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

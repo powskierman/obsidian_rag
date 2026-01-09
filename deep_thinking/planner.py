@@ -5,7 +5,7 @@ from .state import Step
 class PlannerAgent:
     def __init__(self, client):
         self.client = client
-        self.model = "claude-sonnet-4-5-20241022" # Default, client will override if needed
+        self.model = "claude-sonnet-4-5-20250929"
 
     def create_plan(self, question: str, vault_context: Dict[str, Any]) -> List[Step]:
         """
@@ -16,7 +16,7 @@ class PlannerAgent:
         Your goal is to create a research plan that combines LOCAL vault data with EXTERNAL web context.
         
         Vault Contents:
-        - Medical notes (folders: Medical/Scans/, Medical/Treatments/)
+        - Medical notes (folders: Medical/Lymphoma/, Medical/Scans/, Medical/Treatments/)
         - Technical projects (folders: Tech/ESP32/, Tech/HomeAssistant/)
         - Personal logs (Daily Notes)
         

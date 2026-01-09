@@ -46,6 +46,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     updateSettings({ ...settings, [key]: !settings[key] });
   };
 
+  const modelSelectValue = settings.model;
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
       <div className="bg-[#1C1C1E] rounded-2xl border border-[#2C2C2E] p-6 w-[450px] max-w-[90vw] max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
@@ -95,7 +97,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
                 Models
               </label>
               <select
-                value={settings.model}
+                value={modelSelectValue}
                 onChange={(e) => handleModelChange(e.target.value)}
                 disabled={isLoadingModels}
                 className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF] disabled:opacity-50 appearance-none cursor-pointer"
@@ -126,8 +128,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               </label>
               <input
                 value={settings.model}
-                onChange={(e) => handleModelChange(e.target.value)}
-                placeholder="openrouter/auto or anthropic/claude-3.5-sonnet"
+                onChange={(e) => updateSettings({ ...settings, model: e.target.value })}
+                placeholder="openrouter/auto or anthropic/claude-sonnet-4-5"
                 className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
               />
               <p className="text-xs text-white/40 mt-1.5">
@@ -259,23 +261,6 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             </button>
           </div>
 
-          {/* Deep Thinking Toggle */}
-          <div className="flex items-center justify-between p-3 bg-[#2C2C2E] rounded-lg border border-[#3C3C3E]">
-            <div>
-              <div className="text-sm font-medium text-white">Deep Thinking</div>
-              <div className="text-xs text-white/40 mt-1">Enable agentic reasoning for complex tasks</div>
-            </div>
-            <button
-              onClick={() => updateSettings({ ...settings, deepThinking: !settings.deepThinking })}
-              className={`relative w-12 h-6 rounded-full transition-colors ${settings.deepThinking ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
-                }`}
-            >
-              <div
-                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${settings.deepThinking ? 'translate-x-6' : 'translate-x-0'
-                  }`}
-              />
-            </button>
-          </div>
         </div>
 
         <div className="mt-6 pt-4 border-t border-[#2C2C2E]">

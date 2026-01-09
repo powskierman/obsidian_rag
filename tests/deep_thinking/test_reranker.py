@@ -3,6 +3,15 @@ Unit tests for Cross-Encoder Reranker
 """
 
 import unittest
+import sys
+import types
+
+fake_st = types.SimpleNamespace(
+    CrossEncoder=lambda *args, **kwargs: types.SimpleNamespace(
+        predict=lambda pairs: [0.9 for _ in pairs]
+    )
+)
+sys.modules.setdefault("sentence_transformers", fake_st)
 from deep_thinking.reranker import Reranker
 
 

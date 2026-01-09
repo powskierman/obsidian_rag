@@ -20,7 +20,7 @@ interface AppContextType extends AppState {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [searchMode, setSearchMode] = useState<SearchMode>('hybrid');
+  const [searchMode, setSearchModeState] = useState<SearchMode>('hybrid');
   const [llmProvider, setLLMProvider] = useState<LLMProvider>('ollama');
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [services, setServices] = useState<ServicesStatus>(defaultServices);
@@ -37,6 +37,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const savedSearchMode = localStorage.getItem('obsidian-rag-search-mode');
     const savedProvider = localStorage.getItem('obsidian-rag-llm-provider');
     const savedPrompt = localStorage.getItem('obsidian-rag-system-prompt');
+    let parsedSettings: SettingsState | null = null;
 
     if (savedSettings) {
       try {
@@ -53,6 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
 
         setSettings(parsed);
+        parsedSettings = parsed;
       } catch (e) {
         console.error('Failed to load settings:', e);
       }
@@ -70,8 +72,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    if (savedSearchMode) {
-      setSearchMode(savedSearchMode as SearchMode);
+    if (parsedSettings?.deepThinking) {
+      setSearchModeState('deep-thinking');
+    } else if (savedSearchMode) {
+      setSearchModeState(savedSearchMode as SearchMode);
     }
 
     if (savedProvider) {
@@ -111,6 +115,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     console.log('⚙️ Settings updated:', updated);
     setSettings(updated);
+  };
+
+  const setSearchMode = (mode: SearchMode) => {
+    setSearchModeState(mode);
+    if (mode === 'deep-thinking') {
+      setSettings((prev) => ({ ...prev, deepThinking: true, enhancedSearch: false }));
+    } else {
+      setSettings((prev) => ({ ...prev, deepThinking: false }));
+    }
   };
 
   const updateServices = (newServices: Partial<ServicesStatus>) => {

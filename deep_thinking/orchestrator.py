@@ -39,14 +39,37 @@ class DeepThinkingRAG:
         self.synthesizer = FinalAnswerGenerator(self.client)
 
         default_model = model
-        if not default_model and provider == "openrouter":
-            default_model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+        if not default_model:
+            if provider == "openrouter":
+                default_model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+            elif provider == "claude":
+                default_model = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
+            elif provider == "gemini":
+                default_model = os.getenv("GEMINI_MODEL", "gemini-3-pro-preview")
 
         if default_model:
             self.planner.model = default_model
             self.reflector.model = default_model
             self.policy.model = default_model
             self.synthesizer.model = default_model
+
+    def _should_force_vault_step(self, question: str) -> bool:
+        lowered = question.lower()
+        vault_markers = [
+            "my ",
+            "mine",
+            "vault",
+            "notes",
+            "note ",
+            "scan",
+            "pet",
+            "ct",
+            "mri",
+            "report",
+            "pdf",
+            "log"
+        ]
+        return any(marker in lowered for marker in vault_markers)
         
     def query(self, question: str, max_iterations: int = 7, status_callback=None) -> Dict[str, Any]:
         """
@@ -79,6 +102,21 @@ class DeepThinkingRAG:
         update_status("🤔 Planning research strategy...")
         state["plan"] = self.planner.create_plan(question, state["user_context"])
         update_status("📋 Plan created", {"plan": state["plan"]})
+
+        has_vault_step = any(
+            step.get("search_strategy") in ("vector", "hybrid") for step in state["plan"]
+        )
+        if not has_vault_step and self._should_force_vault_step(question):
+            state["plan"] = [{
+                "step_number": 1,
+                "sub_question": question,
+                "search_strategy": "vector",
+                "keywords": [],
+                "target_folders": [],
+                "reasoning": "Ensure vault retrieval for personal content."
+            }] + state["plan"]
+            for idx, step in enumerate(state["plan"], start=1):
+                step["step_number"] = idx
         
         # Step 2: Execute plan with reflection loop
         while state["should_continue"] and state["iteration_count"] < max_iterations:
@@ -93,7 +131,11 @@ class DeepThinkingRAG:
                 update_status(f"👣 Step {current_step['step_number']}: {current_step['sub_question']}")
                 
                 # Execute retrieval
-                documents = self.supervisor.execute_step(current_step, state)
+                documents = self.supervisor.execute_step(
+                    current_step,
+                    state,
+                    trace_callback=update_status
+                )
                 state["retrieved_documents"].extend(documents)
                 update_status(f"   Found {len(documents)} documents.")
                 

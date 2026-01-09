@@ -57,7 +57,7 @@ class UniversalClient:
              
         # Map Gemini models to Claude if provider switched but model name stuck
         if "gemini" in model.lower():
-            model = "claude-sonnet-4-5-20241022"
+            model = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
             
         return self.anthropic.messages.create(
             model=model,
@@ -74,7 +74,7 @@ class UniversalClient:
 
         # Map Claude models to Gemini if provider switched but model name stuck
         if "claude" in model.lower():
-            model = "gemini-3-pro-preview"
+            model = os.getenv("GEMINI_MODEL", "gemini-3-pro-preview")
             
         # Ensure model has 'models/' prefix or matches known ID
         if not model.startswith("models/") and not model.startswith("gemini-"):

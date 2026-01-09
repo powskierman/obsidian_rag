@@ -172,8 +172,7 @@ class TestGraphProcessing:
 
     @pytest.mark.unit
     @pytest.mark.requires_api
-    @patch('claude_graph_builder.anthropic.Anthropic')
-    def test_process_chunk_mocked(self, mock_anthropic_class, mock_api_key):
+    def test_process_chunk_mocked(self, mock_api_key):
         """Test processing a chunk with mocked API"""
         # Setup mock
         mock_client = MagicMock()
@@ -182,10 +181,10 @@ class TestGraphProcessing:
             text='{"entities": [{"name": "CAR-T", "type": "treatment"}], "relationships": [{"source": "CAR-T", "target": "Lymphoma", "type": "treats"}]}'
         )]
         mock_client.messages.create.return_value = mock_response
-        mock_anthropic_class.return_value = mock_client
 
         builder = GraphBuilder(api_key=mock_api_key)
-        chunk = "CAR-T therapy is used to treat lymphoma."
+        builder.client = mock_client
+        chunk = "CAR-T therapy is used to treat lymphoma and can cause notable side effects in patients."
 
         result = builder.process_chunk(chunk)
 
@@ -272,8 +271,7 @@ class TestGraphQuerier:
         assert "Immunotherapy" in treatments
 
     @pytest.mark.unit
-    @patch('claude_graph_builder.anthropic.Anthropic')
-    def test_query_with_claude_mocked(self, mock_anthropic_class, mock_api_key):
+    def test_query_with_claude_mocked(self, mock_api_key):
         """Test querying graph with Claude (mocked)"""
         # Setup mock
         mock_client = MagicMock()
@@ -282,7 +280,6 @@ class TestGraphQuerier:
             text='CAR-T therapy is a treatment for lymphoma.'
         )]
         mock_client.messages.create.return_value = mock_response
-        mock_anthropic_class.return_value = mock_client
 
         builder = GraphBuilder(api_key=mock_api_key)
         builder.add_entity("CAR-T Therapy", entity_type="treatment")
@@ -290,6 +287,7 @@ class TestGraphQuerier:
         builder.add_relationship("CAR-T Therapy", "Lymphoma", "treats")
 
         querier = ClaudeGraphQuerier(builder, api_key=mock_api_key)
+        querier.client = mock_client
         result = querier.query_with_claude("What treats lymphoma?", max_entities=10)
 
         assert result is not None

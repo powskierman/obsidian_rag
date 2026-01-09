@@ -24,6 +24,7 @@ export default function ActionsPanel({ onClose }: ActionsPanelProps) {
       'knowledge-graph': 'Knowledge-Graph',
       'hybrid': 'Hybrid',
       'cascading': 'Cascading',
+      'deep-thinking': 'Deep Thinking',
       'notes': 'Notes',
       'entities': 'Entities',
       'notes+vector': 'Notes+Vector',

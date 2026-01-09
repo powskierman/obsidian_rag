@@ -13,6 +13,10 @@ from datetime import datetime
 import time
 import numpy as np
 from pathlib import Path
+import re
+
+# Fix for tokenizers parallelism/deadlock issues in Docker
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Load environment variables from .env.local if it exists
 try:
@@ -55,52 +59,76 @@ def get_embedding(text):
     """Generate embedding for text"""
     return embedding_model.encode(text).tolist()
 
+TOKEN_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9/._-]{1,}")
+STOP_WORDS = {
+    "and", "or", "the", "a", "an", "in", "on", "with", "for", "to", "of", "from",
+    "by", "is", "are", "was", "were", "be", "been", "it", "this", "that", "these",
+    "those", "as", "at", "via", "etc", "my", "me", "your", "you", "we", "our", "us",
+    "please", "review", "provide", "assessment", "assess", "summarize", "summary",
+    "explain", "show", "find", "search", "notes", "note", "file", "files", "doc",
+    "docs", "page", "pages", "what", "which", "who", "where", "when", "why", "how",
+    "details", "detail", "dates", "date", "findings", "finding", "report", "reports",
+    "result", "results", "information", "info", "data", "overview", "vault"
+}
+
+def _dedupe_keep_order(items):
+    seen = set()
+    output = []
+    for item in items:
+        if item not in seen:
+            output.append(item)
+            seen.add(item)
+    return output
+
+def _extract_significant_terms(query: str) -> list[str]:
+    tokens = TOKEN_PATTERN.findall(query)
+    terms = []
+    for token in tokens:
+        lower = token.lower()
+        if lower.isdigit():
+            continue
+        if lower in STOP_WORDS:
+            continue
+        if len(lower) < 2 and not any(ch.isdigit() for ch in lower) and not any(ch in "/_-." for ch in lower):
+            continue
+        terms.append(lower)
+    return _dedupe_keep_order(terms)
+
 def expand_query(query):
     """Expand query with variations for better recall"""
-    variations = [query]
+    variations = []
     
     # 1. Clean query of stop words for a "keyword only" variation
     # This matches "Nextion ESP32" from "Nextion and ESP32"
-    stop_words = {'and', 'or', 'the', 'a', 'an', 'in', 'on', 'with', 'for', 'to', 'of'}
-    words = query.lower().split()
-    keywords = [w for w in words if w not in stop_words]
+    words = [w.lower() for w in TOKEN_PATTERN.findall(query)]
+    keywords = [w for w in words if w not in STOP_WORDS]
     
-    if len(keywords) < len(words):
-        keyword_query = " ".join(keywords)
+    keyword_query = " ".join(keywords)
+    if keyword_query:
         variations.append(keyword_query)
         
-    # 2. Add individual key terms if they are significant (e.g. unique prod names)
-    # This helps if "Nextion" appears alone in a doc without "ESP32"
-    if len(keywords) > 1:
-        for w in keywords:
-            if len(w) > 4: # Only for substantial words
-                variations.append(w)
-    
+    # 2. Add significant terms as a compact query and singletons
+    # Helps include important tokens while staying domain-agnostic.
+    significant_terms = _extract_significant_terms(query)
+    if significant_terms:
+        variations.append(" ".join(significant_terms))
+        if len(significant_terms) > 3:
+            variations.append(" ".join(significant_terms[:3]))
+        bigrams = [" ".join(pair) for pair in zip(significant_terms, significant_terms[1:])]
+        variations.extend(bigrams[:3])
+        for term in significant_terms:
+            if len(term) >= 4 or any(ch.isdigit() for ch in term) or any(ch in "/_-." for ch in term):
+                variations.append(term)
+
     # 3. Add hyphen variations
     if '-' in query:
         variations.append(query.replace('-', ' '))
         variations.append(query.replace('-', ''))
-    
-    # 4. Add common medical synonyms
-    medical_synonyms = {
-        'car-t': ['car t', 'cart', 'cell therapy', 'yescarta'],
-        'pet scan': ['pet-ct', 'pet ct scan', 'positron emission'],
-        'lymphoma': ['dlbcl', 'b-cell lymphoma'],
-    }
-    
-    query_lower = query.lower()
-    for term, synonyms in medical_synonyms.items():
-        if term in query_lower:
-            variations.extend(synonyms)
-    
+
     # Deduplicate while preserving order
-    seen = set()
-    unique_vars = []
-    for v in variations:
-        if v not in seen:
-            unique_vars.append(v)
-            seen.add(v)
-            
+    variations.append(query)
+    unique_vars = _dedupe_keep_order(variations)
+
     return unique_vars[:6]  # Limit to 6 variations
 
 
@@ -126,8 +154,6 @@ def rerank_results(query, documents, distances, metadatas):
 
 def deduplicate_sources(results):
     """Remove duplicate sources, keep best chunk from each file"""
-    seen_files = {}
-    
     documents = results.get('documents', [[]])[0]
     metadatas = results.get('metadatas', [[]])[0]
     distances = results.get('distances', [[]])[0]
@@ -135,23 +161,22 @@ def deduplicate_sources(results):
     unique_docs = []
     unique_meta = []
     unique_dist = []
+    index_map = {}
     
     for doc, meta, dist in zip(documents, metadatas, distances):
         filepath = meta.get('filepath', '')
-        
-        if filepath not in seen_files or dist < seen_files[filepath]['distance']:
-            seen_files[filepath] = {'distance': dist, 'index': len(unique_docs)}
-            
-            if filepath in [m.get('filepath') for m in unique_meta]:
-                # Replace existing entry
-                idx = seen_files[filepath]['index']
+
+        if filepath in index_map:
+            idx = index_map[filepath]
+            if dist < unique_dist[idx]:
                 unique_docs[idx] = doc
                 unique_meta[idx] = meta
                 unique_dist[idx] = dist
-            else:
-                unique_docs.append(doc)
-                unique_meta.append(meta)
-                unique_dist.append(dist)
+        else:
+            index_map[filepath] = len(unique_docs)
+            unique_docs.append(doc)
+            unique_meta.append(meta)
+            unique_dist.append(dist)
     
     return {
         'documents': [unique_docs],
@@ -182,6 +207,9 @@ def stats():
             "estimated_notes": int(count / 4.4)
         })
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"❌ Query error for '{query}': {e}\n{error_trace}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/add', methods=['POST'])
@@ -226,8 +254,15 @@ def add_document():
 def query_documents():
     """Query documents with advanced features"""
     start_time = time.time()
+    query = None
+    n_results = None
+    use_reranking = None
+    use_dedup = None
+    filters = None
+    mode = None
+    relevance_threshold = None
     try:
-        data = request.json
+        data = request.json or {}
         query = data.get('query')
         n_results = data.get('n_results', 5)
         use_reranking = data.get('reranking', True)
@@ -256,37 +291,50 @@ def query_documents():
 
         # Search with expanded queries
         all_results = []
+        query_errors = []
         for q in query_variations:
+            if not q:
+                continue
             q_embedding = get_embedding(q)
 
             where_clause = None
             if filters:
-                # Build where clause from filters
-                conditions = []
-                for key, value in filters.items():
-                    if isinstance(value, dict) and "$contains" in value:
-                        # Handle list-based contains (e.g., tags)
-                        conditions.append({key: {"$contains": value["$contains"]}})
-                    elif isinstance(value, list):
-                        # Handle OR for multiple values if list provided
-                        if len(value) > 1:
-                            conditions.append({key: {"$in": value}})
-                        elif len(value) == 1:
-                            conditions.append({key: value[0]})
-                    else:
-                        # Default to exact match
-                        conditions.append({key: value})
-                
-                if conditions:
-                    where_clause = {"$and": conditions} if len(conditions) > 1 else conditions[0]
+                # Preserve advanced filters (e.g., $or/$and) as-is
+                if any(key.startswith("$") for key in filters.keys()):
+                    where_clause = filters
+                else:
+                    # Build where clause from simple filters
+                    conditions = []
+                    for key, value in filters.items():
+                        if isinstance(value, dict) and "$contains" in value:
+                            # Handle list-based contains (e.g., tags)
+                            conditions.append({key: {"$contains": value["$contains"]}})
+                        elif isinstance(value, list):
+                            # Handle OR for multiple values if list provided
+                            if len(value) > 1:
+                                conditions.append({key: {"$in": value}})
+                            elif len(value) == 1:
+                                conditions.append({key: value[0]})
+                        else:
+                            # Default to exact match
+                            conditions.append({key: value})
+                    
+                    if conditions:
+                        where_clause = {"$and": conditions} if len(conditions) > 1 else conditions[0]
 
-            results = collection.query(
-                query_embeddings=[q_embedding],
-                n_results=n_results * 2,  # Get extra for deduplication
-                where=where_clause
-            )
+            try:
+                results = collection.query(
+                    query_embeddings=[q_embedding],
+                    n_results=n_results * 2,  # Get extra for deduplication
+                    where=where_clause
+                )
+                all_results.append(results)
+            except Exception as e:
+                query_errors.append(f"{e}")
+                print(f"❌ Chroma query failed for variation '{q}' filters={filters}: {e}")
 
-            all_results.append(results)
+        if not all_results and query_errors:
+            raise RuntimeError(f"Chroma query failed for all variations: {query_errors[-1]}")
 
         # Merge results from all variations
         merged_docs = []
@@ -381,7 +429,19 @@ def query_documents():
         return jsonify(final_results), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        import traceback
+        error_trace = traceback.format_exc()
+        debug_payload = {
+            "query": query,
+            "n_results": n_results,
+            "use_reranking": use_reranking,
+            "use_dedup": use_dedup,
+            "filters": filters,
+            "mode": mode,
+            "relevance_threshold": relevance_threshold
+        }
+        print(f"❌ Query error: {e}\nPayload: {debug_payload}\n{error_trace}")
+        return jsonify({"error": str(e), "traceback": error_trace}), 500
 
 @app.route('/feedback', methods=['POST'])
 def submit_feedback():

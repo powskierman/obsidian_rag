@@ -18,6 +18,8 @@ export default function ChatHistory() {
         return '🧠';
       case 'hybrid':
         return '🔗';
+      case 'deep-thinking':
+        return '🧠';
       default:
         return '💬';
     }
