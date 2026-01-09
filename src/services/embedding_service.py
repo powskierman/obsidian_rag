@@ -55,6 +55,26 @@ collection = chroma_client.get_or_create_collection(
     metadata={"hnsw:space": "cosine"}
 )
 
+
+def _reset_collection():
+    global collection
+    try:
+        chroma_client.delete_collection(name=COLLECTION_NAME)
+    except Exception:
+        pass
+    collection = chroma_client.get_or_create_collection(
+        name=COLLECTION_NAME,
+        metadata={"hnsw:space": "cosine"}
+    )
+
+
+def _admin_token_valid() -> bool:
+    expected_token = os.getenv("EMBEDDING_CLEAR_TOKEN")
+    if not expected_token:
+        return False
+    provided = request.headers.get("X-Admin-Token")
+    return provided == expected_token
+
 def get_embedding(text):
     """Generate embedding for text"""
     return embedding_model.encode(text).tolist()
@@ -248,6 +268,39 @@ def add_document():
         import traceback
         error_trace = traceback.format_exc()
         print(f"❌ Error adding document: {e}\n{error_trace}")
+        return jsonify({"error": str(e), "traceback": error_trace}), 500
+
+
+@app.route('/upsert', methods=['POST'])
+def upsert_document():
+    """Upsert document by ID (insert or replace)."""
+    try:
+        data = request.json
+        doc_id = data.get('id')
+        text = data.get('text')
+        metadata = data.get('metadata', {})
+
+        if not doc_id or not text:
+            return jsonify({"error": "Missing id or text"}), 400
+
+        if not metadata:
+            metadata = {"source": "default"}
+
+        metadata['indexed_at'] = datetime.now().isoformat()
+        embedding = get_embedding(text)
+
+        collection.upsert(
+            ids=[doc_id],
+            embeddings=[embedding],
+            documents=[text],
+            metadatas=[metadata]
+        )
+
+        return jsonify({"status": "success", "id": doc_id}), 200
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"❌ Error upserting document: {e}\n{error_trace}")
         return jsonify({"error": str(e), "traceback": error_trace}), 500
 
 @app.route('/query', methods=['POST'])
@@ -497,6 +550,37 @@ def delete_document():
         collection.delete(ids=[doc_id])
         return jsonify({"status": "success"}), 200
 
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/clear', methods=['POST'])
+def clear_collection():
+    """Clear and recreate the collection (requires EMBEDDING_CLEAR_TOKEN)."""
+    try:
+        if not _admin_token_valid():
+            return jsonify({"error": "Forbidden"}), 403
+
+        _reset_collection()
+        return jsonify({"status": "cleared"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/delete_by_filepath', methods=['POST'])
+def delete_by_filepath():
+    """Delete all chunks by filepath (requires EMBEDDING_CLEAR_TOKEN)."""
+    try:
+        if not _admin_token_valid():
+            return jsonify({"error": "Forbidden"}), 403
+
+        data = request.json
+        filepath = data.get('filepath')
+        if not filepath:
+            return jsonify({"error": "Missing filepath"}), 400
+
+        collection.delete(where={"filepath": filepath})
+        return jsonify({"status": "success", "filepath": filepath}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

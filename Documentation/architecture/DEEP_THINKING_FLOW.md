@@ -12,10 +12,45 @@ Use this only if you need long-form, multi-hop analysis; standard search modes a
 
 ```mermaid
 flowchart TD
-    U["User Query"] --> P["Planner Agent<br/>Research plan (3-7 steps)"]
-    P --> S["Retrieval Supervisor<br/>Execute searches (vault + web + graphs)"]
-    S --> R["Reflection Agent<br/>Extract findings, assess confidence"]
-    R --> C["Policy Agent<br/>Decide: continue / revise / finish"]
-    C -->|continue| S
-    C -->|finish| Y["Synthesizer Agent<br/>Final answer with citations + images"]
+    Start((User Query)) --> Planner["Planner Agent"]
+    subgraph Phase1["Phase 1: Research Strategy"]
+        Planner -->|Decompose & Strategize| Plan["Research Plan"]
+        Plan --> InitState["Initialize RAG State"]
+    end
+
+    subgraph Phase2["Phase 2: The Reasoning Loop"]
+        InitState --> LoopStart{More Steps?}
+        LoopStart -->|Yes| Supervisor["Retrieval Supervisor"]
+        subgraph Retrieval["Multi-Source Retrieval"]
+            Supervisor -->|Strategy: Vector| Vector["Vector Search"]
+            Supervisor -->|Strategy: Graph| Graph["Graph Service - NetworkX"]
+            Supervisor -->|Strategy: Hybrid| Hybrid["Vector + Graph"]
+            Supervisor -->|Strategy: Web| Web["Tavily Search (optional)"]
+        end
+
+        Vector --> Reranker["Cross-Encoder Reranker (optional)"]
+        Graph --> Reranker
+        Hybrid --> Reranker
+        Web --> Reranker
+
+        Reranker --> Documents["Top 20 Reranked Blocks"]
+        Documents --> Reflector["Reflection Agent"]
+        Reflector -->|Extract Findings| Context["Update Accumulated Context"]
+        Context --> Policy["Policy Agent"]
+
+        Policy --> Decision{Decision?}
+        Decision -->|CONTINUE| LoopStart
+        Decision -->|REVISE_PLAN| Revise["Planner: Extend Plan"]
+        Revise --> LoopStart
+        Decision -->|FINISH| Synthesis
+        LoopStart -->|Plan Exhausted| Synthesis
+    end
+
+    subgraph Phase3["Phase 3: Answer Generation"]
+    Synthesis["Synthesizer Agent"] -->|Evidence Fusion|FinalAnswer["Final Response"]
+        FinalAnswer --> Citations["Source Citations"]
+        FinalAnswer --> Confidence["Confidence Score + Justification"]
+    end
+
+    Confidence --> End((Final Output))
 ```

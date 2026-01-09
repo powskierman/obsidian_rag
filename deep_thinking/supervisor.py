@@ -1,5 +1,6 @@
 import requests
 from typing import List, Dict, Any
+import time
 from .state import Step, RAGState
 try:
     from .reranker import Reranker
@@ -178,46 +179,48 @@ class RetrievalSupervisor:
             if trace_callback:
                 trace_callback(message, details)
 
-        try:
-            trace("[DeepThinking] vector request", {"query": query, "filters": filters, "n_results": n_results})
-            response = requests.post(
-                f'{self.vector_service_url}/query',
-                json={
-                    "query": query,
-                    "n_results": n_results,
-                    "filters": filters,
-                    "reranking": False,  # We do our own reranking
-                    "deduplicate": True
-                },
-                timeout=30
-            )
-            if response.status_code == 200:
-                data = response.json()
-                # Normalize format - embedding service returns documents/metadatas/distances arrays
-                normalized = []
-                documents = data.get("documents", [[]])[0]
-                metadatas = data.get("metadatas", [[]])[0]
-                distances = data.get("distances", [[]])[0]
-                
-                for doc, meta, dist in zip(documents, metadatas, distances):
-                    normalized.append({
-                        "content": doc,
-                        "source": meta.get("filepath", "Unknown"),
-                        "type": "vector",
-                        "score": float(1 - dist) if dist < 1 else 0.0  # Convert distance to similarity score
-                    })
-                trace("[DeepThinking] vector response", {"status": response.status_code, "count": len(normalized)})
-                return normalized
-            else:
-                error_body = response.text[:500] if response.text else ""
-                trace(
-                    "[DeepThinking] vector error",
-                    {"status": response.status_code, "body": error_body}
+        retries = 2
+        backoff = 0.5
+        for attempt in range(retries + 1):
+            try:
+                trace("[DeepThinking] vector request", {"query": query, "filters": filters, "n_results": n_results, "attempt": attempt + 1})
+                response = requests.post(
+                    f'{self.vector_service_url}/query',
+                    json={
+                        "query": query,
+                        "n_results": n_results,
+                        "filters": filters,
+                        "reranking": False,  # We do our own reranking
+                        "deduplicate": True
+                    },
+                    timeout=30
                 )
-                return []
-        except Exception as e:
-            trace("[DeepThinking] vector exception", {"error": str(e)})
-            return []
+                if response.status_code == 200:
+                    data = response.json()
+                    # Normalize format - embedding service returns documents/metadatas/distances arrays
+                    normalized = []
+                    documents = data.get("documents", [[]])[0]
+                    metadatas = data.get("metadatas", [[]])[0]
+                    distances = data.get("distances", [[]])[0]
+                    
+                    for doc, meta, dist in zip(documents, metadatas, distances):
+                        normalized.append({
+                            "content": doc,
+                            "source": meta.get("filepath", "Unknown"),
+                            "type": "vector",
+                            "score": float(1 - dist) if dist < 1 else 0.0  # Convert distance to similarity score
+                        })
+                    trace("[DeepThinking] vector response", {"status": response.status_code, "count": len(normalized)})
+                    return normalized
+
+                error_body = response.text[:500] if response.text else ""
+                trace("[DeepThinking] vector error", {"status": response.status_code, "body": error_body})
+            except Exception as e:
+                trace("[DeepThinking] vector exception", {"error": str(e)})
+
+            if attempt < retries:
+                time.sleep(backoff * (2 ** attempt))
+        return []
 
     def _query_graph(
         self,
@@ -233,63 +236,56 @@ class RetrievalSupervisor:
             if trace_callback:
                 trace_callback(message, details)
 
-        try:
-            trace("[DeepThinking] graph request", {"query": query, "mode": mode})
-            response = requests.post(
-                f'{self.graph_service_url}/query',
-                json={
-                    "query": query,
-                    "mode": mode,
-                    "top_k": 30,
-                    "chunk_top_k": 10
-                },
-                timeout=300  # Increased from 180 to 300 seconds
-            )
-            if response.status_code == 200:
-                data = response.json()
-                # LightRAG returns a string response usually, but we might want chunks if available.
-                # If the API returns just a string, we wrap it.
-                # Assuming standard LightRAG response format.
-                # If it returns a string directly:
-                if isinstance(data, str):
-                     results = [{
-                        "content": data,
-                        "source": "LightRAG Knowledge Graph",
-                        "type": "graph",
-                        "score": 1.0
-                    }]
-                     trace("[DeepThinking] graph response", {"status": response.status_code, "count": len(results)})
-                     return results
-                # If it returns a dict with response or answer (graph-service uses answer):
-                elif isinstance(data, dict):
-                    content = data.get("answer") or data.get("response")
-                    if content:
-                        results = [{
-                            "content": content,
-                            "source": "Knowledge Graph",
+        retries = 2
+        backoff = 0.5
+        for attempt in range(retries + 1):
+            try:
+                trace("[DeepThinking] graph request", {"query": query, "mode": mode, "attempt": attempt + 1})
+                response = requests.post(
+                    f'{self.graph_service_url}/query',
+                    json={
+                        "query": query,
+                        "mode": mode,
+                        "top_k": 30,
+                        "chunk_top_k": 10
+                    },
+                    timeout=300  # Increased from 180 to 300 seconds
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    # LightRAG returns a string response usually, but we might want chunks if available.
+                    if isinstance(data, str):
+                         results = [{
+                            "content": data,
+                            "source": "LightRAG Knowledge Graph",
                             "type": "graph",
                             "score": 1.0
                         }]
-                        trace("[DeepThinking] graph response", {"status": response.status_code, "count": len(results)})
-                        return results
-                return []
-            else:
+                         trace("[DeepThinking] graph response", {"status": response.status_code, "count": len(results)})
+                         return results
+                    elif isinstance(data, dict):
+                        content = data.get("answer") or data.get("response")
+                        if content:
+                            results = [{
+                                "content": content,
+                                "source": "Knowledge Graph",
+                                "type": "graph",
+                                "score": 1.0
+                            }]
+                            trace("[DeepThinking] graph response", {"status": response.status_code, "count": len(results)})
+                            return results
+                    return []
+
                 error_body = response.text[:500] if response.text else ""
-                trace(
-                    "[DeepThinking] graph error",
-                    {"status": response.status_code, "body": error_body}
-                )
-                return []
-        except requests.exceptions.Timeout:
-            trace(
-                "[DeepThinking] graph timeout",
-                {"query": f"{query[:50]}..."}
-            )
-            # Return empty results instead of crashing
-            return []
-        except Exception as e:
-            trace("[DeepThinking] graph exception", {"error": str(e)})
-            return []
+                trace("[DeepThinking] graph error", {"status": response.status_code, "body": error_body})
+            except requests.exceptions.Timeout:
+                trace("[DeepThinking] graph timeout", {"query": f"{query[:50]}..."})
+            except Exception as e:
+                trace("[DeepThinking] graph exception", {"error": str(e)})
+
+            if attempt < retries:
+                time.sleep(backoff * (2 ** attempt))
+        return []
 
     def _query_web(self, query: str, n_results: int = 5, trace_callback=None) -> List[Dict[str, Any]]:
         def trace(message: str, details: Dict[str, Any] | None = None) -> None:

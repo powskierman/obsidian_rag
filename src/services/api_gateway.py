@@ -6,6 +6,7 @@ import anthropic
 import uvicorn
 import math
 import re
+import time
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -78,6 +79,77 @@ EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:800
 GRAPH_SERVICE_URL = os.getenv("GRAPH_SERVICE_URL", "http://localhost:8002")
 LIGHTRAG_SERVICE_URL = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8001")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+
+# Reliability controls
+REQUEST_RETRIES = int(os.getenv("RAG_REQUEST_RETRIES", "2"))
+REQUEST_BACKOFF = float(os.getenv("RAG_REQUEST_BACKOFF", "0.5"))
+CIRCUIT_FAILURE_THRESHOLD = int(os.getenv("RAG_CIRCUIT_FAILURES", "3"))
+CIRCUIT_RESET_SECONDS = int(os.getenv("RAG_CIRCUIT_RESET_SECONDS", "30"))
+ENABLE_FALLBACKS = os.getenv("RAG_ENABLE_FALLBACKS", "true").lower() in ("1", "true", "yes")
+
+_circuit_state = {}
+
+
+class CircuitOpenError(RuntimeError):
+    pass
+
+
+def _circuit_is_open(service: str) -> bool:
+    state = _circuit_state.get(service)
+    if not state:
+        return False
+    opened_at = state.get("opened_at")
+    if not opened_at:
+        return False
+    if time.monotonic() - opened_at < CIRCUIT_RESET_SECONDS:
+        return True
+    _circuit_state[service] = {"failures": 0, "opened_at": None}
+    return False
+
+
+def _record_success(service: str) -> None:
+    _circuit_state[service] = {"failures": 0, "opened_at": None}
+
+
+def _record_failure(service: str) -> None:
+    state = _circuit_state.get(service, {"failures": 0, "opened_at": None})
+    failures = state.get("failures", 0) + 1
+    opened_at = state.get("opened_at")
+    if failures >= CIRCUIT_FAILURE_THRESHOLD:
+        opened_at = time.monotonic()
+    _circuit_state[service] = {"failures": failures, "opened_at": opened_at}
+
+
+async def _post_json(
+    client: httpx.AsyncClient,
+    url: str,
+    payload: dict,
+    timeout: float,
+    service: str
+) -> httpx.Response:
+    if _circuit_is_open(service):
+        raise CircuitOpenError(f"{service} circuit open")
+
+    last_exception = None
+    for attempt in range(REQUEST_RETRIES + 1):
+        try:
+            response = await client.post(url, json=payload, timeout=timeout)
+            if response.status_code >= 500:
+                raise httpx.HTTPStatusError(
+                    f"{service} {response.status_code}",
+                    request=response.request,
+                    response=response
+                )
+            _record_success(service)
+            return response
+        except (httpx.RequestError, httpx.HTTPStatusError) as exc:
+            last_exception = exc
+            _record_failure(service)
+            if attempt >= REQUEST_RETRIES:
+                break
+            await asyncio.sleep(REQUEST_BACKOFF * (2 ** attempt))
+
+    raise last_exception or RuntimeError(f"{service} request failed")
 
 # thread pool for running synchronous Deep Thinking agents
 executor = ThreadPoolExecutor(max_workers=5)
@@ -416,8 +488,15 @@ async def unified_query(request: UnifiedQueryRequest):
         if mode == "vector":
             try:
                 payload = {"query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold}
-                response = await client.post(f"{EMBEDDING_SERVICE_URL}/query", json=payload, timeout=30.0)
-                response.raise_for_status()
+                response = await _post_json(
+                    client,
+                    f"{EMBEDDING_SERVICE_URL}/query",
+                    payload,
+                    timeout=30.0,
+                    service="vector"
+                )
+                if response.status_code != 200:
+                    raise HTTPException(status_code=response.status_code, detail=response.text)
                 result = response.json()
 
                 return {
@@ -447,8 +526,15 @@ async def unified_query(request: UnifiedQueryRequest):
                     "llm_knowledge": request.llm_knowledge,
                     "system_prompt": request.system_prompt
                 }
-                response = await client.post(f"{GRAPH_SERVICE_URL}/query", json=payload, timeout=120.0)
-                response.raise_for_status()
+                response = await _post_json(
+                    client,
+                    f"{GRAPH_SERVICE_URL}/query",
+                    payload,
+                    timeout=120.0,
+                    service="graph"
+                )
+                if response.status_code != 200:
+                    raise HTTPException(status_code=response.status_code, detail=response.text)
                 result = response.json()
                 result = _filter_result_sources(result, effective_relevance_threshold)
 
@@ -462,6 +548,33 @@ async def unified_query(request: UnifiedQueryRequest):
                     }
                 }
             except Exception as e:
+                if ENABLE_FALLBACKS:
+                    try:
+                        fallback_payload = {
+                            "query": request.query,
+                            "n_results": request.max_results,
+                            "relevance_threshold": effective_relevance_threshold
+                        }
+                        fallback_response = await _post_json(
+                            client,
+                            f"{EMBEDDING_SERVICE_URL}/query",
+                            fallback_payload,
+                            timeout=30.0,
+                            service="vector"
+                        )
+                        if fallback_response.status_code == 200:
+                            fallback_result = fallback_response.json()
+                            return {
+                                "query": request.query,
+                                "mode": "notes",
+                                "results": fallback_result,
+                                "metadata": {
+                                    "source": "Fallback Vector",
+                                    "description": "NetworkX unavailable; returned vector results"
+                                }
+                            }
+                    except Exception:
+                        pass
                 raise HTTPException(status_code=503, detail=f"Notes graph error: {str(e)}")
 
         # LightRAG entities graph
@@ -477,8 +590,15 @@ async def unified_query(request: UnifiedQueryRequest):
                     "llm_knowledge": request.llm_knowledge,
                     "system_prompt": request.system_prompt
                 }
-                response = await client.post(f"{LIGHTRAG_SERVICE_URL}/query", json=payload, timeout=60.0)
-                response.raise_for_status()
+                response = await _post_json(
+                    client,
+                    f"{LIGHTRAG_SERVICE_URL}/query",
+                    payload,
+                    timeout=60.0,
+                    service="lightrag"
+                )
+                if response.status_code != 200:
+                    raise HTTPException(status_code=response.status_code, detail=response.text)
                 result = response.json()
                 result = _filter_result_sources(result, effective_relevance_threshold)
 
@@ -492,6 +612,33 @@ async def unified_query(request: UnifiedQueryRequest):
                     }
                 }
             except Exception as e:
+                if ENABLE_FALLBACKS:
+                    try:
+                        fallback_payload = {
+                            "query": request.query,
+                            "n_results": request.max_results,
+                            "relevance_threshold": effective_relevance_threshold
+                        }
+                        fallback_response = await _post_json(
+                            client,
+                            f"{EMBEDDING_SERVICE_URL}/query",
+                            fallback_payload,
+                            timeout=30.0,
+                            service="vector"
+                        )
+                        if fallback_response.status_code == 200:
+                            fallback_result = fallback_response.json()
+                            return {
+                                "query": request.query,
+                                "mode": "entities",
+                                "results": fallback_result,
+                                "metadata": {
+                                    "source": "Fallback Vector",
+                                    "description": "LightRAG unavailable; returned vector results"
+                                }
+                            }
+                    except Exception:
+                        pass
                 raise HTTPException(status_code=503, detail=f"Entities graph error: {str(e)}")
 
         # ===== DUAL-SOURCE MODES =====
@@ -500,7 +647,7 @@ async def unified_query(request: UnifiedQueryRequest):
         elif mode == "notes+vector":
             try:
                 tasks = [
-                    client.post(f"{GRAPH_SERVICE_URL}/query", json={
+                    _post_json(client, f"{GRAPH_SERVICE_URL}/query", {
                         "query": request.query,
                         "mode": "hybrid",
                         "n_results": request.max_results,
@@ -511,10 +658,10 @@ async def unified_query(request: UnifiedQueryRequest):
                         "web_search": request.web_search,
                         "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
-                    }, timeout=120.0),
-                    client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
+                    }, timeout=120.0, service="graph"),
+                    _post_json(client, f"{EMBEDDING_SERVICE_URL}/query", {
                         "query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold
-                    }, timeout=30.0)
+                    }, timeout=30.0, service="vector")
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -536,7 +683,7 @@ async def unified_query(request: UnifiedQueryRequest):
         elif mode == "entities+vector":
             try:
                 tasks = [
-                    client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
+                    _post_json(client, f"{LIGHTRAG_SERVICE_URL}/query", {
                         "query": request.query,
                         "mode": "hybrid",
                         "llm_provider": request.llm_provider,
@@ -545,10 +692,10 @@ async def unified_query(request: UnifiedQueryRequest):
                         "web_search": request.web_search,
                         "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
-                    }, timeout=60.0),
-                    client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
+                    }, timeout=60.0, service="lightrag"),
+                    _post_json(client, f"{EMBEDDING_SERVICE_URL}/query", {
                         "query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold
-                    }, timeout=30.0)
+                    }, timeout=30.0, service="vector")
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -570,7 +717,7 @@ async def unified_query(request: UnifiedQueryRequest):
         elif mode == "dual-graph":
             try:
                 tasks = [
-                    client.post(f"{GRAPH_SERVICE_URL}/query", json={
+                    _post_json(client, f"{GRAPH_SERVICE_URL}/query", {
                         "query": request.query,
                         "mode": "hybrid",
                         "n_results": request.max_results,
@@ -581,8 +728,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "web_search": request.web_search,
                         "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
-                    }, timeout=120.0),
-                    client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
+                    }, timeout=120.0, service="graph"),
+                    _post_json(client, f"{LIGHTRAG_SERVICE_URL}/query", {
                         "query": request.query,
                         "mode": "hybrid",
                         "llm_provider": request.llm_provider,
@@ -591,7 +738,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "web_search": request.web_search,
                         "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
-                    }, timeout=60.0)
+                    }, timeout=60.0, service="lightrag")
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -617,7 +764,7 @@ async def unified_query(request: UnifiedQueryRequest):
         elif mode == "hybrid":
             try:
                 tasks = [
-                    client.post(f"{GRAPH_SERVICE_URL}/query", json={
+                    _post_json(client, f"{GRAPH_SERVICE_URL}/query", {
                         "query": request.query,
                         "mode": "hybrid",
                         "n_results": request.max_results,
@@ -628,8 +775,8 @@ async def unified_query(request: UnifiedQueryRequest):
                         "web_search": request.web_search,
                         "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
-                    }, timeout=90.0),
-                    client.post(f"{LIGHTRAG_SERVICE_URL}/query", json={
+                    }, timeout=90.0, service="graph"),
+                    _post_json(client, f"{LIGHTRAG_SERVICE_URL}/query", {
                         "query": request.query,
                         "mode": "hybrid",
                         "llm_provider": request.llm_provider,
@@ -638,10 +785,10 @@ async def unified_query(request: UnifiedQueryRequest):
                         "web_search": request.web_search,
                         "llm_knowledge": request.llm_knowledge,
                         "system_prompt": request.system_prompt
-                    }, timeout=90.0),
-                    client.post(f"{EMBEDDING_SERVICE_URL}/query", json={
+                    }, timeout=90.0, service="lightrag"),
+                    _post_json(client, f"{EMBEDDING_SERVICE_URL}/query", {
                         "query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold
-                    }, timeout=30.0)
+                    }, timeout=30.0, service="vector")
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 

@@ -9,6 +9,7 @@ from pathlib import Path
 import requests
 import time
 from datetime import datetime
+import re
 
 # Try to import tqdm for progress bar, fallback to simple iteration
 try:
@@ -50,27 +51,72 @@ def should_process(filepath):
     
     return True
 
+def sanitize_content(content: str) -> str:
+    """Normalize and sanitize raw file content before parsing."""
+    if not content:
+        return ""
+    content = content.replace("\ufeff", "")
+    content = content.replace("\r\n", "\n").replace("\r", "\n")
+    content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", content)
+    return content
+
+
+def _normalize_metadata_value(value):
+    if value is None:
+        return None
+    if isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, list):
+        return ", ".join(str(item) for item in value if item is not None)
+    return str(value)
+
+
 def extract_metadata(content):
-    """Extract YAML frontmatter metadata (like the old working version)"""
+    """Extract YAML frontmatter metadata with validation."""
     metadata = {}
-    if content.startswith('---'):
-        try:
-            end = content.find('---', 3)
-            if end != -1:
-                frontmatter = content[3:end].strip()
-                for line in frontmatter.split('\n'):
-                    line = line.strip()
-                    if ':' in line and not line.startswith('#'):
-                        key, value = line.split(':', 1)
-                        key = key.strip()
-                        value = value.strip().strip('"\'')  # Strip quotes like old version
-                        if key and value:
-                            metadata[key] = value
-                # Remove frontmatter from content
-                content = content[end+3:].strip()
-        except Exception as e:
-            print(f"  ⚠️ Warning: Failed to parse frontmatter: {e}")
-    return metadata, content
+    if not content.startswith('---'):
+        return metadata, content
+
+    lines = content.splitlines()
+    if not lines or lines[0].strip() != '---':
+        return metadata, content
+
+    end_idx = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == '---':
+            end_idx = i
+            break
+
+    if end_idx is None:
+        return metadata, content
+
+    frontmatter_text = "\n".join(lines[1:end_idx])
+    body = "\n".join(lines[end_idx + 1:])
+
+    parsed = None
+    try:
+        import yaml
+        parsed = yaml.safe_load(frontmatter_text) if frontmatter_text.strip() else {}
+    except Exception:
+        parsed = None
+
+    if isinstance(parsed, dict):
+        for key, value in parsed.items():
+            norm_value = _normalize_metadata_value(value)
+            if norm_value is None or key is None:
+                continue
+            metadata[str(key).strip()] = norm_value
+    else:
+        for line in frontmatter_text.split('\n'):
+            line = line.strip()
+            if ':' in line and not line.startswith('#'):
+                key, value = line.split(':', 1)
+                key = key.strip()
+                value = value.strip().strip('"\'')
+                if key and value:
+                    metadata[key] = value
+
+    return metadata, body.strip()
 
 def smart_chunk_document(content, max_size=1000, overlap=200):
     """Split content into overlapping chunks with smart boundaries (like old working version)"""
@@ -124,7 +170,12 @@ def smart_chunk_document(content, max_size=1000, overlap=200):
     
     return chunks if chunks else [content[:max_size].strip()]
 
-def process_file(filepath, embedding_service_url="http://localhost:8000"):
+def process_file(
+    filepath,
+    embedding_service_url="http://localhost:8000",
+    refresh_existing: bool = False,
+    admin_token: str | None = None
+):
     """Process a single file and add to embedding service"""
     try:
         filepath = Path(filepath)
@@ -149,6 +200,9 @@ def process_file(filepath, embedding_service_url="http://localhost:8000"):
         if not content or not content.strip():
             return 0
         
+        # Normalize content before parsing
+        content = sanitize_content(content)
+
         # Extract metadata
         metadata, content = extract_metadata(content)
         
@@ -181,6 +235,20 @@ def process_file(filepath, embedding_service_url="http://localhost:8000"):
         except:
             pass
         
+        # Optionally delete existing chunks for this filepath
+        if refresh_existing and admin_token:
+            try:
+                delete_resp = requests.post(
+                    f"{embedding_service_url}/delete_by_filepath",
+                    json={"filepath": metadata.get("filepath", str(filepath))},
+                    headers={"X-Admin-Token": admin_token},
+                    timeout=10
+                )
+                if delete_resp.status_code != 200:
+                    print(f"  ⚠️  Failed to clear existing chunks: {delete_resp.status_code}")
+            except Exception as e:
+                print(f"  ⚠️  Failed to clear existing chunks: {e}")
+
         # Chunk document
         chunks = smart_chunk_document(content)
         if not chunks:
@@ -236,7 +304,7 @@ def process_file(filepath, embedding_service_url="http://localhost:8000"):
             for attempt in range(3):
                 try:
                     response = requests.post(
-                        f"{embedding_service_url}/add",
+                        f"{embedding_service_url}/upsert",
                         json=payload,
                         timeout=30
                     )
@@ -265,7 +333,13 @@ def process_file(filepath, embedding_service_url="http://localhost:8000"):
         print(f"❌ Error processing {filepath}: {e}")
         return 0
 
-def index_vault(vault_path, embedding_service_url="http://localhost:8000", limit=None):
+def index_vault(
+    vault_path,
+    embedding_service_url="http://localhost:8000",
+    limit=None,
+    refresh_existing: bool = False,
+    admin_token: str | None = None
+):
     """Index entire Obsidian vault"""
     vault_path = Path(vault_path)
     
@@ -324,7 +398,12 @@ def index_vault(vault_path, embedding_service_url="http://localhost:8000", limit
     failed_file_list = []
     
     for filepath in tqdm(all_files, desc="Indexing"):
-        added = process_file(filepath, embedding_service_url)
+        added = process_file(
+            filepath,
+            embedding_service_url,
+            refresh_existing=refresh_existing,
+            admin_token=admin_token
+        )
         if added > 0:
             added_total += added
         else:
@@ -364,6 +443,9 @@ if __name__ == "__main__":
     parser.add_argument("vault_path", nargs="?", help="Path to your Obsidian vault")
     parser.add_argument("--limit", type=int, help="Limit indexing to N files (for testing)")
     parser.add_argument("--url", help="Embedding service URL", default=os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000"))
+    parser.add_argument("--clear", action="store_true", help="Clear the embedding collection before indexing")
+    parser.add_argument("--clear-token", help="Token for /clear endpoint (EMBEDDING_CLEAR_TOKEN)")
+    parser.add_argument("--refresh", action="store_true", help="Delete existing chunks per file before upserting")
     
     args = parser.parse_args()
     
@@ -378,5 +460,34 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(1)
     
-    index_vault(vault_path, args.url, limit=args.limit)
+    admin_token = args.clear_token or os.getenv("EMBEDDING_CLEAR_TOKEN")
 
+    if args.clear:
+        if not admin_token:
+            print("❌ Missing clear token. Set EMBEDDING_CLEAR_TOKEN or pass --clear-token.")
+            sys.exit(1)
+        try:
+            response = requests.post(
+                f"{args.url}/clear",
+                headers={"X-Admin-Token": admin_token},
+                timeout=10
+            )
+            if response.status_code != 200:
+                print(f"❌ Failed to clear collection: {response.status_code} {response.text}")
+                sys.exit(1)
+            print("🧹 Cleared embedding collection.")
+        except Exception as e:
+            print(f"❌ Failed to clear collection: {e}")
+            sys.exit(1)
+
+    if args.refresh and not admin_token:
+        print("❌ Missing admin token. Set EMBEDDING_CLEAR_TOKEN or pass --clear-token.")
+        sys.exit(1)
+
+    index_vault(
+        vault_path,
+        args.url,
+        limit=args.limit,
+        refresh_existing=args.refresh,
+        admin_token=admin_token
+    )

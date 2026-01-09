@@ -33,3 +33,13 @@
   docker compose build graph-service
   docker compose up -d graph-service
   ```
+
+## Reliability Controls
+
+The API gateway has retry + circuit-breaker settings:
+
+- `RAG_REQUEST_RETRIES` (default: 2)
+- `RAG_REQUEST_BACKOFF` (default: 0.5 seconds)
+- `RAG_CIRCUIT_FAILURES` (default: 3)
+- `RAG_CIRCUIT_RESET_SECONDS` (default: 30)
+- `RAG_ENABLE_FALLBACKS` (default: true)

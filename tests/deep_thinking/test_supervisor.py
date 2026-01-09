@@ -1,5 +1,15 @@
+import sys
+import types
 import unittest
 from unittest.mock import MagicMock, patch
+
+fake_st = types.SimpleNamespace(
+    CrossEncoder=lambda *args, **kwargs: types.SimpleNamespace(
+        predict=lambda pairs: [0.9 for _ in pairs]
+    )
+)
+sys.modules.setdefault("sentence_transformers", fake_st)
+
 from deep_thinking.supervisor import RetrievalSupervisor
 
 class TestRetrievalSupervisor(unittest.TestCase):
@@ -8,7 +18,7 @@ class TestRetrievalSupervisor(unittest.TestCase):
 
     def test_build_filters_single(self):
         filters = self.supervisor._build_filters(["Medical/"])
-        self.assertEqual(filters, {"source": {"$contains": "Medical/"}})
+        self.assertEqual(filters, {"dir_Medical": True})
 
     def test_build_filters_multiple(self):
         filters = self.supervisor._build_filters(["Medical/", "Tech/"])

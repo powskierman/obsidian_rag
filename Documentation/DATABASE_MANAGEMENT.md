@@ -23,3 +23,34 @@ docker compose up -d
 ```
 
 If you use a different indexing path, pick the relevant script from `Scripts/`.
+
+## Reindex Embeddings (Clear + Rebuild)
+
+The embedding service now supports a protected clear endpoint.
+
+```bash
+export EMBEDDING_CLEAR_TOKEN="your-token"
+
+# Clear and rebuild embeddings with sanitization + metadata validation
+python src/indexing/index_vault.py /path/to/vault \
+  --url http://localhost:8000 \
+  --clear \
+  --clear-token "$EMBEDDING_CLEAR_TOKEN"
+```
+
+Notes:
+- `index_vault.py` normalizes content (line endings, control chars) and validates frontmatter metadata.
+- Clearing requires the `EMBEDDING_CLEAR_TOKEN` env var (or `--clear-token`).
+
+## Incremental Updates (Upsert)
+
+`index_vault.py` now upserts chunks so new notes and edits update the existing database. To remove stale chunks (e.g., when files shrink), use:
+
+```bash
+export EMBEDDING_CLEAR_TOKEN="your-token"
+
+python src/indexing/index_vault.py /path/to/vault \
+  --url http://localhost:8000 \
+  --refresh \
+  --clear-token "$EMBEDDING_CLEAR_TOKEN"
+```
