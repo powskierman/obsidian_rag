@@ -34,6 +34,7 @@ os.environ["OLLAMA_HOST"] = OLLAMA_HOST
 rag_instance = None
 rag_lock = None
 _loop = None
+SUPPORTED_EXTENSIONS = {".md", ".pdf"}
 
 
 def get_or_create_loop():
@@ -46,6 +47,32 @@ def get_or_create_loop():
             _loop = asyncio.new_event_loop()
             asyncio.set_event_loop(_loop)
     return _loop
+
+
+def extract_pdf_text(pdf_path: Path) -> str:
+    """Extract text from a PDF file using pypdf."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        logger.warning(f"pypdf not installed; skipping PDF: {pdf_path}")
+        return ""
+
+    try:
+        reader = PdfReader(str(pdf_path))
+    except Exception as e:
+        logger.warning(f"Failed to read PDF {pdf_path}: {e}")
+        return ""
+
+    pages_text = []
+    for page_index, page in enumerate(reader.pages, start=1):
+        try:
+            page_text = page.extract_text() or ""
+        except Exception:
+            page_text = ""
+        if page_text.strip():
+            pages_text.append(f"[Page {page_index}]\n{page_text}")
+
+    return "\n\n".join(pages_text).strip()
 
 
 # Default system prompt for Michel's Obsidian Knowledge Base
@@ -331,7 +358,7 @@ def query_graph():
 
 @app.route('/index-vault', methods=['POST'])
 def index_vault():
-    """Index all markdown files from a vault directory (INCREMENTAL)"""
+    """Index all markdown and PDF files from a vault directory (INCREMENTAL)"""
     try:
         data = request.json or {}
         vault_path = data.get('vault_path', './vault')
@@ -350,22 +377,25 @@ def index_vault():
                 indexed_files = set(line.strip() for line in f if line.strip())
             logger.info(f"Found {len(indexed_files)} already-indexed files")
 
-        # Find all markdown files
-        all_md_files = list(vault_dir.rglob("*.md"))
-        logger.info(f"Found {len(all_md_files)} total markdown files in vault")
+        # Find all markdown and PDF files
+        all_files = [
+            path for path in vault_dir.rglob("*")
+            if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS
+        ]
+        logger.info(f"Found {len(all_files)} total markdown/PDF files in vault")
 
         # Filter to only NEW files (not yet indexed)
         new_files = []
-        for md_file in all_md_files:
+        for vault_file in all_files:
             # Try both absolute and relative paths for compatibility
-            abs_path = str(md_file)
-            rel_path = str(md_file.relative_to(vault_dir.parent))
+            abs_path = str(vault_file)
+            rel_path = str(vault_file.relative_to(vault_dir.parent))
 
             # Check if file is already indexed (check both path formats)
             already_indexed = abs_path in indexed_files or rel_path in indexed_files
 
             if force_reindex or not already_indexed:
-                new_files.append((md_file, abs_path))
+                new_files.append((vault_file, abs_path))
 
         logger.info(f"Found {len(new_files)} NEW files to index")
 
@@ -373,7 +403,7 @@ def index_vault():
             return jsonify({
                 "status": "success",
                 "message": "No new files to index",
-                "total_files": len(all_md_files),
+                "total_files": len(all_files),
                 "already_indexed": len(indexed_files),
                 "newly_indexed": 0
             }), 200
@@ -382,18 +412,23 @@ def index_vault():
         notes_to_index = []
         successfully_read = []
 
-        for md_file, file_path in new_files:
+        for vault_file, file_path in new_files:
             try:
-                with open(md_file, "r", encoding="utf-8") as f:
-                    content = f.read().strip()
-                    if content:
-                        notes_to_index.append(content)
-                        successfully_read.append(file_path)
+                if vault_file.suffix.lower() == ".pdf":
+                    content = extract_pdf_text(vault_file)
+                else:
+                    with open(vault_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+
+                content = content.strip()
+                if content:
+                    notes_to_index.append(content)
+                    successfully_read.append(file_path)
             except Exception as e:
-                logger.warning(f"Could not read {md_file}: {e}")
+                logger.warning(f"Could not read {vault_file}: {e}")
 
         if not notes_to_index:
-            return jsonify({"error": "No readable markdown files found"}), 400
+            return jsonify({"error": "No readable markdown/PDF files found"}), 400
 
         logger.info(f"Indexing {len(notes_to_index)} new files...")
 
@@ -415,7 +450,7 @@ def index_vault():
 
         return jsonify({
             "status": "success",
-            "total_files": len(all_md_files),
+            "total_files": len(all_files),
             "already_indexed": len(indexed_files),
             "newly_indexed": len(notes_to_index),
             "vault_path": vault_path

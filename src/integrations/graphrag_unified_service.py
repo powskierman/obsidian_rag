@@ -34,6 +34,7 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:14b")
 EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 VAULT_PATH = os.getenv("VAULT_PATH", "/app/vault")
+SUPPORTED_EXTENSIONS = {".md", ".pdf"}
 
 # Global state
 is_initialized = False
@@ -55,6 +56,32 @@ def check_graphrag_available():
 
 
 GRAPHRAG_AVAILABLE = check_graphrag_available()
+
+
+def extract_pdf_text(pdf_path: Path) -> str:
+    """Extract text from a PDF file using pypdf."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        logger.warning(f"pypdf not installed; skipping PDF: {pdf_path}")
+        return ""
+
+    try:
+        reader = PdfReader(str(pdf_path))
+    except Exception as e:
+        logger.warning(f"Failed to read PDF {pdf_path}: {e}")
+        return ""
+
+    pages_text = []
+    for page_index, page in enumerate(reader.pages, start=1):
+        try:
+            page_text = page.extract_text() or ""
+        except Exception:
+            page_text = ""
+        if page_text.strip():
+            pages_text.append(f"[Page {page_index}]\n{page_text}")
+
+    return "\n\n".join(pages_text).strip()
 
 
 def initialize_graphrag_workspace():
@@ -247,7 +274,7 @@ def stats():
 
 @app.route('/index-vault', methods=['POST'])
 def index_vault():
-    """Index all markdown files from vault directory"""
+    """Index all markdown and PDF files from vault directory"""
     try:
         data = request.json or {}
         vault_path = data.get('vault_path', VAULT_PATH)
@@ -258,7 +285,7 @@ def index_vault():
                 "status": "error"
             }), 500
 
-        # Load markdown files
+        # Load markdown and PDF files
         notes = []
         vault_dir = Path(vault_path)
 
@@ -266,23 +293,33 @@ def index_vault():
             return jsonify({"error": f"Vault path not found: {vault_path}"}), 400
 
         logger.info(f"Scanning vault at {vault_path}...")
-        for md_file in vault_dir.rglob("*.md"):
+        vault_files = [
+            path for path in vault_dir.rglob("*")
+            if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS
+        ]
+        for vault_file in vault_files:
             try:
-                with open(md_file, "r", encoding="utf-8") as f:
-                    content = f.read().strip()
-                    if content and len(content) > 50:  # Skip very short files
-                        notes.append({
-                            "content": content,
-                            "filename": md_file.name,
-                            "filepath": str(md_file.relative_to(vault_dir))
-                        })
+                if vault_file.suffix.lower() == ".pdf":
+                    content = extract_pdf_text(vault_file)
+                else:
+                    with open(vault_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+
+                content = content.strip()
+                if content and len(content) > 50:  # Skip very short files
+                    notes.append({
+                        "content": content,
+                        "filename": vault_file.name,
+                        "filepath": str(vault_file.relative_to(vault_dir)),
+                        "filetype": vault_file.suffix.lower().lstrip(".")
+                    })
             except Exception as e:
-                logger.warning(f"Could not read {md_file}: {e}")
+                logger.warning(f"Could not read {vault_file}: {e}")
 
         if not notes:
-            return jsonify({"error": "No markdown files found"}), 400
+            return jsonify({"error": "No markdown/PDF files found"}), 400
 
-        logger.info(f"Found {len(notes)} markdown files to index")
+        logger.info(f"Found {len(notes)} markdown/PDF files to index")
 
         # Write documents to input directory
         input_dir = Path(WORKING_DIR) / "input"
@@ -525,9 +562,6 @@ Starting server...
         verify_models()
 
     app.run(host='0.0.0.0', port=8002, debug=False)
-
-
-
 
 
 

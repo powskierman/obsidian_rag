@@ -62,5 +62,15 @@ else
     echo "❌ Error: start_webapp.sh not found." | tee -a "$LOG_FILE"
 fi
 
+# 4. Start Vault Watcher
+echo "Starting vault watcher..." | tee -a "$LOG_FILE"
+if [ -f "$SCRIPT_DIR/start_watcher.sh" ]; then
+    bash "$SCRIPT_DIR/start_watcher.sh" >> "$LOG_FILE" 2>&1 &
+    WATCHER_PID=$!
+    echo "   Watcher triggered (PID: $WATCHER_PID)" | tee -a "$LOG_FILE"
+else
+    echo "   Watcher script not found." | tee -a "$LOG_FILE"
+fi
+
 echo "🎬 Startup script finished. Services are running in the background." | tee -a "$LOG_FILE"
 echo "📜 Monitor logs: tail -f $LOG_FILE" | tee -a "$LOG_FILE"

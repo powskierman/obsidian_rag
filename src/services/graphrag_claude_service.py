@@ -27,6 +27,7 @@ WORKING_DIR = "/app/ragtest"
 VAULT_DIR = "/app/vault"
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
+SUPPORTED_EXTENSIONS = {".md", ".pdf"}
 
 def verify_claude_setup() -> bool:
     """Verify Claude API key is available"""
@@ -61,6 +62,32 @@ def verify_ollama_setup() -> bool:
         logger.error(f"❌ Failed to connect to Ollama: {e}")
         return False
 
+
+def extract_pdf_text(pdf_path: Path) -> str:
+    """Extract text from a PDF file using pypdf."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        logger.warning(f"pypdf not installed; skipping PDF: {pdf_path}")
+        return ""
+
+    try:
+        reader = PdfReader(str(pdf_path))
+    except Exception as e:
+        logger.warning(f"Failed to read PDF {pdf_path}: {e}")
+        return ""
+
+    pages_text = []
+    for page_index, page in enumerate(reader.pages, start=1):
+        try:
+            page_text = page.extract_text() or ""
+        except Exception:
+            page_text = ""
+        if page_text.strip():
+            pages_text.append(f"[Page {page_index}]\n{page_text}")
+
+    return "\n\n".join(pages_text).strip()
+
 def initialize_workspace() -> bool:
     """Initialize GraphRAG workspace"""
     try:
@@ -92,12 +119,22 @@ def copy_vault_files() -> int:
 
         # Copy vault files and convert to txt
         file_count = 0
-        for file_path in Path(VAULT_DIR).rglob("*.md"):
+        vault_files = [
+            path for path in Path(VAULT_DIR).rglob("*")
+            if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS
+        ]
+        for file_path in vault_files:
             if file_path.is_file():
                 try:
-                    # Read markdown file
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read()
+                    if file_path.suffix.lower() == ".pdf":
+                        content = extract_pdf_text(file_path)
+                    else:
+                        # Read markdown file
+                        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read()
+
+                    if not content or not content.strip():
+                        continue
 
                     # Write as txt file
                     txt_filename = f"{file_path.stem}_{file_count:04d}.txt"

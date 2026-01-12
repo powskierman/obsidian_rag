@@ -26,6 +26,7 @@ mcp>=0.9.0
 python-dotenv==1.0.0
 pyyaml==6.0.1
 networkx>=3.0
+pypdf>=4.0.0
 
 # Testing
 pytest>=7.4.0
@@ -35,5 +36,4 @@ pytest-mock>=3.11.0
 pytest-timeout>=2.1.0
 httpx>=0.24.0
 websockets>=12.0
-
 

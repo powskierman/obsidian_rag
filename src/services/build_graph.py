@@ -19,8 +19,36 @@ CHUNK_SIZE = 4000
 CHUNK_OVERLAP = 200
 
 def get_markdown_files(vault_path: str) -> List[str]:
-    """Recursively find all markdown files in the vault"""
-    return glob.glob(os.path.join(vault_path, "**/*.md"), recursive=True)
+    """Recursively find all markdown and PDF files in the vault"""
+    md_files = glob.glob(os.path.join(vault_path, "**/*.md"), recursive=True)
+    pdf_files = glob.glob(os.path.join(vault_path, "**/*.pdf"), recursive=True)
+    return md_files + pdf_files
+
+
+def extract_pdf_text(pdf_path: str) -> str:
+    """Extract text from a PDF file using pypdf."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        logger.warning(f"pypdf not installed; skipping PDF: {pdf_path}")
+        return ""
+
+    try:
+        reader = PdfReader(pdf_path)
+    except Exception as e:
+        logger.warning(f"Failed to read PDF {pdf_path}: {e}")
+        return ""
+
+    pages_text = []
+    for page_index, page in enumerate(reader.pages, start=1):
+        try:
+            page_text = page.extract_text() or ""
+        except Exception:
+            page_text = ""
+        if page_text.strip():
+            pages_text.append(f"[Page {page_index}]\n{page_text}")
+
+    return "\n\n".join(pages_text).strip()
 
 def simple_chunk_text(text: str, chunk_size: int = 4000, overlap: int = 200) -> List[str]:
     """Simple character-based chunking with overlap"""
@@ -79,21 +107,28 @@ def process_vault():
     
     logger.info(f"Scanning vault at {VAULT_PATH}...")
     files = get_markdown_files(VAULT_PATH)
-    logger.info(f"Found {len(files)} markdown files")
+    logger.info(f"Found {len(files)} markdown/PDF files")
     
     all_chunks = []
     
     logger.info("Reading and chunking files...")
     for filepath in tqdm(files, desc="Chunking files"):
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                content = f.read()
+            if Path(filepath).suffix.lower() == ".pdf":
+                content = extract_pdf_text(filepath)
+            else:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+            if not content or not content.strip():
+                continue
                 
             file_chunks = simple_chunk_text(content, CHUNK_SIZE, CHUNK_OVERLAP)
             
             # Create metadata
             rel_path = os.path.relpath(filepath, VAULT_PATH)
             filename = os.path.basename(filepath)
+            filetype = Path(filepath).suffix.lower().lstrip(".")
             
             for i, chunk in enumerate(file_chunks):
                 all_chunks.append({
@@ -101,6 +136,7 @@ def process_vault():
                     'metadata': {
                         'filename': filename,
                         'filepath': rel_path,
+                        'filetype': filetype,
                         'chunk_id': i,
                         'total_chunks': len(file_chunks)
                     }

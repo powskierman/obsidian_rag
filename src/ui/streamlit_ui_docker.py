@@ -76,6 +76,12 @@ with st.sidebar:
     
     enhanced_search = st.checkbox("Enhanced Search", value=False, 
                                    help="Add LLM Knowledge and Web Search sections to standard results")
+    show_sources = st.checkbox(
+        "Show Sources",
+        value=True,
+        help="Display cited sources with answers"
+    )
+    st.session_state.show_sources = show_sources
     
     st.markdown("---")
     

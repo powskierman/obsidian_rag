@@ -81,6 +81,31 @@ def smart_chunk_document(content, max_size=1000, overlap=200):
     return chunks if chunks else [content[:max_size].strip()]
 
 
+def extract_pdf_text(pdf_path: Path) -> str:
+    """Extract text from a PDF file using pypdf."""
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        logger.warning(f"pypdf not installed; skipping PDF: {pdf_path}")
+        return ""
+
+    try:
+        reader = PdfReader(str(pdf_path))
+    except Exception as e:
+        logger.warning(f"Failed to read PDF {pdf_path}: {e}")
+        return ""
+
+    pages_text = []
+    for page_index, page in enumerate(reader.pages, start=1):
+        try:
+            page_text = page.extract_text() or ""
+        except Exception:
+            page_text = ""
+        if page_text.strip():
+            pages_text.append(f"[Page {page_index}]\n{page_text}")
+
+    return "\n\n".join(pages_text).strip()
+
 def load_chromadb_from_disk(chroma_db_path: str) -> list:
     """
     Load all chunks directly from ChromaDB on disk
@@ -178,22 +203,26 @@ def load_vault_files_directly(vault_path: str, max_files: int = None) -> list:
             logger.error(f"Vault path does not exist: {vault_path}")
             return []
         
-        # Find all markdown files
-        md_files = list(vault_dir.rglob('*.md'))
-        
+        # Find all markdown and PDF files
+        md_files = list(vault_dir.rglob("*.md"))
+        pdf_files = list(vault_dir.rglob("*.pdf"))
+        vault_files = md_files + pdf_files
+
         if max_files:
-            md_files = md_files[:max_files]
-        
-        logger.info(f"Found {len(md_files)} markdown files")
+            vault_files = vault_files[:max_files]
+
+        logger.info(f"Found {len(vault_files)} markdown/PDF files")
         
         chunks = []
-        for md_file in tqdm(md_files, desc="Reading files"):
+        for vault_file in tqdm(vault_files, desc="Reading files"):
             try:
-                with open(md_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Remove frontmatter
-                content = re.sub(r'^---\n.*?\n---\n', '', content, flags=re.DOTALL)
+                if vault_file.suffix.lower() == ".pdf":
+                    content = extract_pdf_text(vault_file)
+                else:
+                    with open(vault_file, "r", encoding="utf-8") as f:
+                        content = f.read()
+                    # Remove frontmatter
+                    content = re.sub(r'^---\n.*?\n---\n', '', content, flags=re.DOTALL)
                 
                 # Skip if too short
                 if len(content.strip()) < 100:
@@ -207,15 +236,16 @@ def load_vault_files_directly(vault_path: str, max_files: int = None) -> list:
                     chunks.append({
                         'text': chunk_text,
                         'metadata': {
-                            'filename': md_file.name,
-                            'filepath': str(md_file.relative_to(vault_dir)),
-                            'chunk_id': f"{md_file.stem}_{i}",
+                            'filename': vault_file.name,
+                            'filepath': str(vault_file.relative_to(vault_dir)),
+                            'filetype': vault_file.suffix.lower().lstrip("."),
+                            'chunk_id': f"{vault_file.stem}_{i}",
                             'total_chunks': len(chunks_from_file)
                         }
                     })
                     
             except Exception as e:
-                logger.error(f"Error reading {md_file}: {e}")
+                logger.error(f"Error reading {vault_file}: {e}")
                 continue
         
         logger.info(f"Created {len(chunks)} chunks from vault files")

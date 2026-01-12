@@ -1,5 +1,19 @@
-const GATEWAY_URL = 'http://127.0.0.1:4000';
-const WS_GATEWAY_URL = 'ws://127.0.0.1:4000';
+const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://127.0.0.1:4000';
+const WS_GATEWAY_URL = process.env.NEXT_PUBLIC_WS_GATEWAY_URL || 'ws://127.0.0.1:4000';
+const EMBEDDING_URL = process.env.NEXT_PUBLIC_EMBEDDING_URL || 'http://127.0.0.1:8000';
+const GRAPH_URL = process.env.NEXT_PUBLIC_GRAPH_URL || 'http://127.0.0.1:8002';
+
+const tryFetchJson = async (url: string): Promise<any | null> => {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return null;
+    }
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
 
 export interface SearchResult {
   filename: string;
@@ -179,19 +193,29 @@ export const api = {
   },
 
   getStats: async () => {
-    try {
-      const response = await fetch(`${GATEWAY_URL}/api/v1/stats`);
-      if (!response.ok) return { documents: 0, graph: null };
-
-      const data = await response.json();
+    const gatewayData = await tryFetchJson(`${GATEWAY_URL}/api/v1/stats`);
+    if (gatewayData) {
       return {
-        documents: data.documents || 0,
-        graph: data.graph || null
+        documents: gatewayData.documents || 0,
+        graph: gatewayData.graph || null
       };
-    } catch (error) {
-      console.error('Stats error:', error);
-      return { documents: 0, graph: null };
     }
+
+    const [embeddingData, graphData] = await Promise.all([
+      tryFetchJson(`${EMBEDDING_URL}/stats`),
+      tryFetchJson(`${GRAPH_URL}/stats`)
+    ]);
+
+    const documents = embeddingData?.total_documents || embeddingData?.documents || 0;
+    const graph = graphData
+      ? {
+          nodes: graphData.total_nodes ?? graphData.nodes ?? 0,
+          edges: graphData.total_edges ?? graphData.edges ?? 0,
+          graph_loaded: true
+        }
+      : null;
+
+    return { documents, graph };
   },
 
   getOllamaModels: async (): Promise<string[]> => {
