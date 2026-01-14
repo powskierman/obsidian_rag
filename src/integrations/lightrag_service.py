@@ -6,6 +6,7 @@ Provides hybrid search combining knowledge graphs with vector similarity
 
 import os
 import asyncio
+import re
 from pathlib import Path
 from flask import Flask, request, jsonify
 from lightrag import LightRAG, QueryParam
@@ -35,6 +36,16 @@ rag_instance = None
 rag_lock = None
 _loop = None
 SUPPORTED_EXTENSIONS = {".md", ".pdf"}
+INLINE_TAG_PATTERN = re.compile(r"(?<!\\w)#([A-Za-z0-9][A-Za-z0-9/_-]*)")
+
+def _get_float_env(name: str, default: str) -> float:
+    try:
+        return float(os.getenv(name, default))
+    except ValueError:
+        return float(default)
+
+COSINE_THRESHOLD = _get_float_env("LIGHTRAG_COSINE_THRESHOLD", "0.03")
+COSINE_BETTER_THAN_THRESHOLD = _get_float_env("LIGHTRAG_COSINE_BETTER_THAN_THRESHOLD", "0.03")
 
 
 def get_or_create_loop():
@@ -83,40 +94,47 @@ def _dedupe_keep_order(items):
             seen.add(item)
     return output
 
-def _extract_frontmatter_tags(lines) -> list[str]:
+def _parse_frontmatter_value(raw_value: str) -> list[str]:
+    value = raw_value.strip()
+    if not value:
+        return []
+    if value.startswith("[") and value.endswith("]"):
+        items = value[1:-1].split(",")
+        return [item.strip().strip("'\"") for item in items if item.strip()]
+    return [value.strip().strip("'\"")]
+
+def _extract_frontmatter_fields(lines) -> tuple[list[str], list[str]]:
     tags = []
-    in_tags_block = False
+    aliases = []
+    in_block = None
     for line in lines:
         stripped = line.strip()
         if not stripped:
             continue
-        if stripped.startswith("tags:"):
-            value = stripped.split(":", 1)[1].strip()
-            if value.startswith("[") and value.endswith("]"):
-                items = value[1:-1].split(",")
-                for item in items:
-                    tag = item.strip().strip("'\"")
-                    if tag:
-                        tags.append(tag)
-            elif value:
-                tag = value.strip().strip("'\"")
-                if tag:
-                    tags.append(tag)
-            else:
-                in_tags_block = True
+        lower = stripped.lower()
+        if lower.startswith("tags:"):
+            tags.extend(_parse_frontmatter_value(stripped.split(":", 1)[1]))
+            in_block = "tags" if stripped.endswith(":") else None
             continue
-        if in_tags_block:
+        if lower.startswith("aliases:") or lower.startswith("alias:"):
+            aliases.extend(_parse_frontmatter_value(stripped.split(":", 1)[1]))
+            in_block = "aliases" if stripped.endswith(":") else None
+            continue
+        if in_block == "tags":
             if stripped.startswith("-"):
-                tag = stripped[1:].strip().strip("'\"")
-                if tag:
-                    tags.append(tag)
-            elif stripped and not stripped.startswith("#"):
-                in_tags_block = False
-    return _dedupe_keep_order(tags)
+                tags.append(stripped[1:].strip().strip("'\""))
+                continue
+            in_block = None
+        elif in_block == "aliases":
+            if stripped.startswith("-"):
+                aliases.append(stripped[1:].strip().strip("'\""))
+                continue
+            in_block = None
+    return _dedupe_keep_order(tags), _dedupe_keep_order(aliases)
 
-def _split_frontmatter(content: str) -> tuple[list[str], str]:
+def _split_frontmatter(content: str) -> tuple[list[str], list[str], str]:
     if not content.startswith("---"):
-        return [], content
+        return [], [], content
     lines = content.splitlines()
     end_idx = None
     for i in range(1, len(lines)):
@@ -124,10 +142,11 @@ def _split_frontmatter(content: str) -> tuple[list[str], str]:
             end_idx = i
             break
     if end_idx is None:
-        return [], content
+        return [], [], content
     frontmatter_lines = lines[1:end_idx]
     body = "\n".join(lines[end_idx + 1:])
-    return _extract_frontmatter_tags(frontmatter_lines), body
+    tags, aliases = _extract_frontmatter_fields(frontmatter_lines)
+    return tags, aliases, body
 
 def _extract_headings(content: str, max_headings: int = 12) -> list[str]:
     headings = []
@@ -141,7 +160,27 @@ def _extract_headings(content: str, max_headings: int = 12) -> list[str]:
             break
     return _dedupe_keep_order(headings)
 
-def _build_index_text(file_path: Path, content: str, headings: list[str], tags: list[str]) -> str:
+def _extract_inline_tags(content: str) -> list[str]:
+    tags = []
+    in_code_block = False
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block or stripped.startswith("#"):
+            continue
+        for match in INLINE_TAG_PATTERN.finditer(line):
+            tags.append(match.group(1))
+    return _dedupe_keep_order(tags)
+
+def _build_index_text(
+    file_path: Path,
+    content: str,
+    headings: list[str],
+    tags: list[str],
+    aliases: list[str],
+) -> str:
     content = content.strip()
     if not content:
         return ""
@@ -153,8 +192,25 @@ def _build_index_text(file_path: Path, content: str, headings: list[str], tags: 
         prefix_lines.append("Headings: " + " | ".join(headings))
     if tags:
         prefix_lines.append("Tags: " + ", ".join(tags))
+    if aliases:
+        prefix_lines.append("Aliases: " + ", ".join(aliases))
     prefix = "\n".join(prefix_lines)
     return f"{prefix}\n\n{content}"
+
+def _choose_query_mode(query_text: str, requested_mode: str) -> str:
+    tokens = re.findall(r"[\\w/-]+", query_text)
+    token_count = len(tokens)
+    has_digit = any(any(ch.isdigit() for ch in token) for token in tokens)
+    if requested_mode in {"local", "global", "hybrid"}:
+        if token_count <= 3 or (has_digit and token_count <= 6):
+            return "naive"
+    return requested_mode
+
+def _is_not_found_result(result_text: str) -> bool:
+    if not result_text:
+        return True
+    text = result_text.strip().lower()
+    return text.startswith("not found in notes")
 
 
 # Default system prompt for Michel's Obsidian Knowledge Base
@@ -260,8 +316,8 @@ async def initialize_rag():
                 llm_model_name=KIMI_MODEL,
                 llm_model_kwargs={"temperature": 0.1},
                 embedding_func=ef,
-                cosine_threshold=0.05,
-                cosine_better_than_threshold=0.05,
+                cosine_threshold=COSINE_THRESHOLD,
+                cosine_better_than_threshold=COSINE_BETTER_THAN_THRESHOLD,
                 top_k=100,
                 chunk_top_k=50,
                 max_total_tokens=60000,
@@ -423,9 +479,16 @@ def query_graph():
         if mode not in valid_modes:
             return jsonify({"error": f"Invalid mode. Use: {valid_modes}"}), 400
         
+        mode = _choose_query_mode(query_text, mode)
+
         # Run async query using run_until_complete on the shared loop
         loop = get_or_create_loop()
         result = loop.run_until_complete(_do_query_async(query_text, mode))
+
+        if isinstance(result, str) and _is_not_found_result(result) and mode != "naive":
+            fallback_mode = "naive"
+            result = loop.run_until_complete(_do_query_async(query_text, fallback_mode))
+            mode = fallback_mode
         
         return jsonify({
             "query": query_text,
@@ -498,13 +561,15 @@ def index_vault():
             try:
                 if vault_file.suffix.lower() == ".pdf":
                     content = extract_pdf_text(vault_file)
-                    content = _build_index_text(vault_file, content, [], [])
+                    content = _build_index_text(vault_file, content, [], [], [])
                 else:
                     with open(vault_file, "r", encoding="utf-8") as f:
                         raw_content = f.read()
-                    tags, body = _split_frontmatter(raw_content)
+                    tags, aliases, body = _split_frontmatter(raw_content)
+                    inline_tags = _extract_inline_tags(body)
+                    tags = _dedupe_keep_order(tags + inline_tags)
                     headings = _extract_headings(body)
-                    content = _build_index_text(vault_file, body, headings, tags)
+                    content = _build_index_text(vault_file, body, headings, tags, aliases)
 
                 content = content.strip()
                 if content:

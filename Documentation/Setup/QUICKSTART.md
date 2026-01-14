@@ -37,7 +37,13 @@ curl -s -X POST http://localhost:4000/api/v1/search \
 Run the appropriate script from `Scripts/`:
 
 ```bash
-./Scripts/index_with_lightrag.sh
+./Scripts/index_with_lightrag.sh "$OBSIDIAN_VAULT_PATH"
+```
+
+To force a full LightRAG rebuild:
+
+```bash
+./Scripts/index_with_lightrag.sh --force "$OBSIDIAN_VAULT_PATH"
 ```
 
 See `Documentation/Setup/INDEXING_SCRIPTS_GUIDE.md` for options.

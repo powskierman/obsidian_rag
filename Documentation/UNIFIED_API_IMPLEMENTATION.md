@@ -28,3 +28,6 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 ```
 
 The gateway proxies to the embedding service, graph service, and LightRAG service based on mode.
+
+LightRAG behavior:
+- In `entities` mode, if LightRAG returns "Not found in notes", the gateway falls back to vector results (when fallbacks are enabled).

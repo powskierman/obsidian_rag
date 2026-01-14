@@ -30,10 +30,10 @@
 4. ✅ **Tested** - Your vector search finds ESP32 successfully
 
 ### The Real Problem:
-The 0.2 cosine threshold issue is **NOT** caused by the embedding model quality. It's a **LightRAG configuration issue**.
+The cosine threshold issue is **NOT** caused by the embedding model quality. It's a **LightRAG configuration issue**.
 
 Better embeddings won't necessarily fix the graph search issue because:
-- The 0.2 threshold is hardcoded in LightRAG
+- The threshold is now configurable in the LightRAG service
 - Even perfect embeddings might not pass if similarity is calculated differently
 - The fundamental issue is how LightRAG filters chunks, not embedding quality
 
@@ -53,11 +53,12 @@ top_k=80         # ✅ Already increased
 - 100-500ms response time
 - No threshold issues
 
-### Option 3: Patch LightRAG Source (Advanced)
-```python
-# Would need to edit LightRAG's internal threshold
-# From 0.2 to 0.1 or lower
-# Inside container: /app/LightRAG/lightrag/
+### Option 3: Tune LightRAG thresholds (Preferred)
+Set environment variables (no reindex required):
+
+```bash
+export LIGHTRAG_COSINE_THRESHOLD=0.03
+export LIGHTRAG_COSINE_BETTER_THAN_THRESHOLD=0.03
 ```
 
 ---
@@ -115,4 +116,3 @@ When Nomic v2 models are added to Ollama:
 1. Using vector search for ESP32, lymphoma queries ✅
 2. Potentially fixing graph search threshold if you really need it
 3. Waiting for Ollama to add v2 support if you want to upgrade later
-

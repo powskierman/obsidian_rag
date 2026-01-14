@@ -19,10 +19,16 @@ This repo keeps generated data out of Git. These directories are expected to be 
 docker compose up -d
 
 # Index your vault (choose the script that matches your graph mode)
-./Scripts/index_with_lightrag.sh
+./Scripts/index_with_lightrag.sh "$OBSIDIAN_VAULT_PATH"
 ```
 
 If you use a different indexing path, pick the relevant script from `Scripts/`.
+
+Force a full LightRAG rebuild:
+
+```bash
+./Scripts/index_with_lightrag.sh --force "$OBSIDIAN_VAULT_PATH"
+```
 
 ## Reindex Embeddings (Clear + Rebuild)
 

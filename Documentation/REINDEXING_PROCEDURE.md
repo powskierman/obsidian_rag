@@ -95,6 +95,20 @@ curl -s -X POST http://localhost:8001/index-vault \
   -d "{\"vault_path\": \"/app/vault\", \"force\": true}"
 ```
 
+LightRAG indexing now injects note context into each indexed document:
+- filename + title
+- headings (first 12)
+- frontmatter tags + inline `#tags`
+- frontmatter aliases
+
+If you change any of these inputs, force a reindex to update the stored chunks.
+
+Optional tuning (no reindex required):
+```bash
+export LIGHTRAG_COSINE_THRESHOLD=0.03
+export LIGHTRAG_COSINE_BETTER_THAN_THRESHOLD=0.03
+```
+
 ## 5) Monitoring
 
 Vector:

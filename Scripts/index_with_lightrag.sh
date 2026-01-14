@@ -15,8 +15,23 @@ fi
 echo "✅ LightRAG service is ready"
 echo ""
 
-# Get vault path from user or use default
-VAULT_PATH="${1:-./vault}"
+FORCE_REINDEX=false
+VAULT_PATH="./vault"
+
+for arg in "$@"; do
+    case "$arg" in
+        --force)
+            FORCE_REINDEX=true
+            ;;
+        -*)
+            echo "Unknown option: $arg"
+            exit 1
+            ;;
+        *)
+            VAULT_PATH="$arg"
+            ;;
+    esac
+done
 
 echo "📂 Vault path: $VAULT_PATH"
 echo ""
@@ -25,9 +40,16 @@ echo "   (This may take several minutes for large vaults)"
 echo ""
 
 # Send indexing request
+FORCE_FLAG=""
+if [ "$FORCE_REINDEX" = true ]; then
+    FORCE_FLAG=", \"force\": true"
+    echo "⚠️  Force reindex enabled"
+    echo ""
+fi
+
 RESPONSE=$(curl -s -X POST http://localhost:8001/index-vault \
     -H "Content-Type: application/json" \
-    -d "{\"vault_path\": \"$VAULT_PATH\"}")
+    -d "{\"vault_path\": \"$VAULT_PATH\"$FORCE_FLAG}")
 
 # Check response
 if echo "$RESPONSE" | grep -q '"status":"success"'; then
@@ -49,5 +71,4 @@ fi
 
 echo ""
 echo "=========================================="
-
 

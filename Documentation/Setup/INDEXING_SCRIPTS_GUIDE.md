@@ -15,3 +15,19 @@ Use these scripts in `Scripts/` to build or rebuild indexes.
 - After cloning to a new machine.
 
 Pick the script that matches your desired graph mode. If unsure, start with `index_with_lightrag.sh`.
+
+## LightRAG indexing notes
+
+`index_with_lightrag.sh` now accepts `--force` to reindex everything:
+
+```bash
+./Scripts/index_with_lightrag.sh --force "$OBSIDIAN_VAULT_PATH"
+```
+
+LightRAG indexing prepends note context to each document so title searches are reliable:
+- filename + title
+- headings (first 12)
+- frontmatter tags + inline `#tags`
+- frontmatter aliases
+
+If you change any of the above behavior, reindex LightRAG to apply it.

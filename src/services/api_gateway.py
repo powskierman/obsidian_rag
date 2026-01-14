@@ -63,6 +63,16 @@ def _filter_result_sources(result: Any, threshold: float) -> Any:
         result["sources"] = _apply_relevance_filter(sources, threshold)
     return result
 
+def _lightrag_result_text(result: Any) -> str:
+    if not isinstance(result, dict):
+        return ""
+    text = result.get("result") or result.get("answer") or ""
+    return text if isinstance(text, str) else ""
+
+def _lightrag_result_empty(result: Any) -> bool:
+    text = _lightrag_result_text(result).strip().lower()
+    return not text or text.startswith("not found in notes")
+
 app = FastAPI(title="Obsidian RAG Unified API", version="1.0")
 
 # CORS
@@ -605,6 +615,31 @@ async def unified_query(request: UnifiedQueryRequest):
                     raise HTTPException(status_code=response.status_code, detail=response.text)
                 result = response.json()
                 result = _filter_result_sources(result, effective_relevance_threshold)
+
+                if ENABLE_FALLBACKS and _lightrag_result_empty(result):
+                    fallback_payload = {
+                        "query": request.query,
+                        "n_results": request.max_results,
+                        "relevance_threshold": effective_relevance_threshold
+                    }
+                    fallback_response = await _post_json(
+                        client,
+                        f"{EMBEDDING_SERVICE_URL}/query",
+                        fallback_payload,
+                        timeout=30.0,
+                        service="vector"
+                    )
+                    if fallback_response.status_code == 200:
+                        fallback_result = fallback_response.json()
+                        return {
+                            "query": request.query,
+                            "mode": "entities",
+                            "results": fallback_result,
+                            "metadata": {
+                                "source": "Fallback Vector",
+                                "description": "LightRAG returned no matches; returned vector results"
+                            }
+                        }
 
                 return {
                     "query": request.query,
