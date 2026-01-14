@@ -75,7 +75,6 @@ venv_*/
 feedback_db/
 .gemini_clipboard_*
 pip_version.txt
-obsidian_rag_unified_mcp.py
 
 # Documentation drafts and archives
 Documentation/Archive/
