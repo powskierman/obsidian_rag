@@ -1,4 +1,6 @@
 import json
+import os
+import re
 from typing import List, Tuple
 from .state import RAGState
 
@@ -85,9 +87,14 @@ Finally, provide your answer in a structured, easy-to-read format."""
         }}
         """
         
+        provider = getattr(self.client, "provider", "").lower()
+        max_tokens = int(os.getenv("DEEP_THINKING_MAX_TOKENS", "4096"))
+        if provider == "claude":
+            max_tokens = int(os.getenv("DEEP_THINKING_CLAUDE_MAX_TOKENS", "8192"))
+
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=4096,
+            max_tokens=max_tokens,
             system=self.system_prompt,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -116,7 +123,6 @@ Finally, provide your answer in a structured, easy-to-read format."""
         except json.JSONDecodeError:
             # 3. Fallback: Try identifying the JSON object with regex or simple finding
             try:
-                import re
                 json_match = re.search(r'\{.*\}', content, re.DOTALL)
                 if json_match:
                     possible_json = json_match.group(0)
@@ -130,11 +136,16 @@ Finally, provide your answer in a structured, easy-to-read format."""
             except Exception:
                 pass
                 
-            # 4. Ultimate Fallback: Return raw content as the answer
+            # 4. Resilient parsing: attempt to salvage fields from malformed JSON
+            salvaged = self._salvage_fields(content)
+            if salvaged:
+                return salvaged
+
+            # 5. Ultimate Fallback: Return raw content as the answer
             # This ensures the user gets *something* even if formatting failed
-            print(f"JSON Parse failed. Returning raw content.")
+            print("JSON Parse failed. Returning raw content.")
             return {
-                "answer": content, # Return the full raw text
+                "answer": content,  # Return the full raw text
                 "citations": [],
                 "confidence_score": 0.0,
                 "confidence_justification": "JSON parsing failed, returning raw output."
@@ -147,3 +158,103 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 "confidence_score": 0.0,
                 "confidence_justification": f"Error: {e}"
             }
+
+    @staticmethod
+    def _scan_json_string(raw: str, start: int) -> str:
+        buf = []
+        escaped = False
+        for idx in range(start, len(raw)):
+            char = raw[idx]
+            if escaped:
+                buf.append(char)
+                escaped = False
+                continue
+            if char == "\\":
+                escaped = True
+                continue
+            if char == '"':
+                return "".join(buf)
+            buf.append(char)
+        return "".join(buf)
+
+    @classmethod
+    def _extract_json_string(cls, raw: str, key: str) -> str | None:
+        token = f'"{key}"'
+        key_index = raw.find(token)
+        if key_index == -1:
+            return None
+        colon_index = raw.find(":", key_index + len(token))
+        if colon_index == -1:
+            return None
+        quote_index = raw.find('"', colon_index + 1)
+        if quote_index == -1:
+            return None
+        return cls._scan_json_string(raw, quote_index + 1)
+
+    @staticmethod
+    def _extract_json_number(raw: str, key: str) -> float | None:
+        match = re.search(rf'"{re.escape(key)}"\s*:\s*([0-9]+(?:\.[0-9]+)?)', raw)
+        if not match:
+            return None
+        try:
+            return float(match.group(1))
+        except ValueError:
+            return None
+
+    @staticmethod
+    def _extract_json_list(raw: str, key: str):
+        token = f'"{key}"'
+        key_index = raw.find(token)
+        if key_index == -1:
+            return None
+        start = raw.find("[", key_index)
+        if start == -1:
+            return None
+        depth = 0
+        for idx in range(start, len(raw)):
+            char = raw[idx]
+            if char == "[":
+                depth += 1
+            elif char == "]":
+                depth -= 1
+                if depth == 0:
+                    candidate = raw[start:idx + 1]
+                    try:
+                        return json.loads(candidate)
+                    except Exception:
+                        return None
+        return None
+
+    @staticmethod
+    def _extract_citations_from_text(raw: str) -> List[str]:
+        citations = []
+        seen = set()
+        for match in re.findall(r"\[\[[^\]]+\]\]", raw):
+            if match not in seen:
+                citations.append(match)
+                seen.add(match)
+        for match in re.findall(r"https?://[^\s)>\"]+", raw):
+            if match not in seen:
+                citations.append(match)
+                seen.add(match)
+        return citations
+
+    def _salvage_fields(self, raw: str) -> dict | None:
+        answer = self._extract_json_string(raw, "answer")
+        citations = self._extract_json_list(raw, "citations")
+        confidence_score = self._extract_json_number(raw, "confidence_score")
+        confidence_justification = self._extract_json_string(raw, "confidence_justification")
+
+        if citations is None:
+            citations = []
+        if not citations:
+            citations = self._extract_citations_from_text(raw)
+
+        if answer or citations or confidence_score is not None or confidence_justification:
+            return {
+                "answer": answer or raw,
+                "citations": citations,
+                "confidence_score": confidence_score or 0.0,
+                "confidence_justification": confidence_justification or ""
+            }
+        return None

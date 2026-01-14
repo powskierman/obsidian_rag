@@ -14,7 +14,7 @@ export default function SettingsModal({ isOpen, onClose, currentModel, onModelCh
 
     // Legacy Controls State
     const [searchMode, setSearchMode] = useState<'vector' | 'hybrid' | 'graph'>('hybrid');
-    const [llmProvider, setLlmProvider] = useState<'ollama' | 'gemini' | 'claude'>('gemini');
+    const [llmProvider, setLlmProvider] = useState<'ollama' | 'gemini' | 'claude' | 'chatgpt'>('gemini');
 
     useEffect(() => {
         if (isOpen) {
@@ -84,6 +84,10 @@ export default function SettingsModal({ isOpen, onClose, currentModel, onModelCh
                            <button onClick={() => setLlmProvider('claude')} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${llmProvider === 'claude' ? 'bg-[#0A84FF]/10 border-[#0A84FF] text-white' : 'bg-[#1C1C1E] border-[#2C2C2E] text-white/60'}`}>
                                 <div className="text-sm font-medium">Claude API ($)</div>
                                 {llmProvider === 'claude' && <div className="w-2 h-2 rounded-full bg-[#0A84FF]" />}
+                           </button>
+                           <button onClick={() => setLlmProvider('chatgpt')} className={`flex items-center justify-between p-3 rounded-xl border transition-all ${llmProvider === 'chatgpt' ? 'bg-[#0A84FF]/10 border-[#0A84FF] text-white' : 'bg-[#1C1C1E] border-[#2C2C2E] text-white/60'}`}>
+                                <div className="text-sm font-medium">ChatGPT (OpenAI) ($)</div>
+                                {llmProvider === 'chatgpt' && <div className="w-2 h-2 rounded-full bg-[#0A84FF]" />}
                            </button>
                         </div>
                     </div>

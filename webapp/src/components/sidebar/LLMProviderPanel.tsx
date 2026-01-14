@@ -39,13 +39,22 @@ const llmProviders = [
     icon: '🧭',
     requiresApiKey: true,
     apiKeyEnvVar: 'OPENROUTER_API_KEY'
+  },
+  {
+    id: 'chatgpt' as LLMProvider,
+    label: 'ChatGPT (OpenAI)',
+    cost: '$',
+    icon: '🧠',
+    requiresApiKey: true,
+    apiKeyEnvVar: 'OPENAI_API_KEY'
   }
 ];
 
 export default function LLMProviderPanel({ currentProvider, onSelect, onClose }: LLMProviderPanelProps) {
-  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean }>({
+  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean; openai: boolean }>({
     gemini: false,
-    anthropic: false
+    anthropic: false,
+    openai: false
   });
 
   useEffect(() => {
@@ -87,7 +96,9 @@ export default function LLMProviderPanel({ currentProvider, onSelect, onClose }:
               ? apiKeys.gemini
               : provider.id === 'claude'
                 ? apiKeys.anthropic
-                : true;
+                : provider.id === 'chatgpt'
+                  ? apiKeys.openai
+                  : true;
             const showWarning = provider.requiresApiKey && !hasKey;
 
             return (
@@ -120,7 +131,13 @@ export default function LLMProviderPanel({ currentProvider, onSelect, onClose }:
                       <span>Set OPENROUTER_API_KEY</span>
                     </p>
                   )}
-                  {showWarning && provider.id !== 'openrouter' && (
+                  {provider.id === 'chatgpt' && currentProvider === provider.id && (
+                    <p className="text-xs text-white/50 flex items-center gap-1 mt-1">
+                      <span>🔑</span>
+                      <span>Set OPENAI_API_KEY</span>
+                    </p>
+                  )}
+                  {showWarning && !['openrouter', 'chatgpt'].includes(provider.id) && (
                     <p className="text-xs text-yellow-500/70 flex items-center gap-1 mt-1">
                       <span>⚠️</span>
                       <span>API key required</span>

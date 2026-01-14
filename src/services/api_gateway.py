@@ -837,7 +837,7 @@ async def deep_research_websocket(websocket: WebSocket):
         query = data.get("query")
         provider = data.get("provider", "claude").lower()
         model = data.get("model")
-        supported_providers = {"claude", "gemini", "openrouter"}
+        supported_providers = {"claude", "gemini", "openrouter", "chatgpt"}
 
         def _select_fallback_provider():
             if os.getenv("OPENROUTER_API_KEY"):
@@ -846,6 +846,8 @@ async def deep_research_websocket(websocket: WebSocket):
                 return "claude"
             if os.getenv("GEMINI_API_KEY"):
                 return "gemini"
+            if os.getenv("OPENAI_API_KEY"):
+                return "chatgpt"
             return None
         
         if not query:
@@ -858,7 +860,7 @@ async def deep_research_websocket(websocket: WebSocket):
             if not fallback_provider:
                 await websocket.send_json({
                     "type": "error",
-                    "content": "Deep Thinking supports Claude, Gemini, or OpenRouter only. No compatible API key found."
+                    "content": "Deep Thinking supports Claude, Gemini, OpenRouter, or ChatGPT only. No compatible API key found."
                 })
                 await websocket.close()
                 return
@@ -887,6 +889,12 @@ async def deep_research_websocket(websocket: WebSocket):
             api_key = os.getenv("OPENROUTER_API_KEY")
             if not api_key:
                 await websocket.send_json({"type": "error", "content": "OPENROUTER_API_KEY not configured"})
+                await websocket.close()
+                return
+        elif provider == "chatgpt":
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                await websocket.send_json({"type": "error", "content": "OPENAI_API_KEY not configured"})
                 await websocket.close()
                 return
 

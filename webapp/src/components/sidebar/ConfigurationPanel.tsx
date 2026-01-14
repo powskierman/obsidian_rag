@@ -33,7 +33,8 @@ export default function ConfigurationPanel() {
       'ollama': 'Ollama',
       'gemini': 'Gemini Pro',
       'claude': 'Claude API',
-      'openrouter': 'OpenRouter'
+      'openrouter': 'OpenRouter',
+      'chatgpt': 'ChatGPT'
     };
     return labels[llmProvider] || 'Ollama';
   };

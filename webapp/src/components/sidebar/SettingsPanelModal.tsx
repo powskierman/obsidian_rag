@@ -75,7 +75,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               LLM Provider
             </label>
             <div className="bg-[#2C2C2E] p-1 rounded-xl flex border border-[#3C3C3E]">
-              {['ollama', 'gemini', 'claude', 'openrouter'].map((provider) => (
+              {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt'].map((provider) => (
                 <button
                   key={provider}
                   onClick={() => setLLMProvider(provider as any)}
@@ -134,6 +134,23 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               />
               <p className="text-xs text-white/40 mt-1.5">
                 Use any OpenRouter model ID.
+              </p>
+            </div>
+          )}
+
+          {llmProvider === 'chatgpt' && (
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                OpenAI Model
+              </label>
+              <input
+                value={settings.model}
+                onChange={(e) => updateSettings({ ...settings, model: e.target.value })}
+                placeholder="gpt-4o-mini"
+                className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
+              />
+              <p className="text-xs text-white/40 mt-1.5">
+                Use any OpenAI chat model ID.
               </p>
             </div>
           )}

@@ -191,7 +191,7 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
     Call the specified LLM provider with the given prompt.
 
     Args:
-        provider: 'ollama', 'claude', 'gemini', 'gpt-oss', 'kimi', or 'openrouter'
+        provider: 'ollama', 'claude', 'gemini', 'gpt-oss', 'kimi', 'openrouter', or 'chatgpt'
         model: Model name (e.g., 'llama3.2', 'claude-sonnet-4-5-20250929', 'gemini-3-pro-preview')
         system_prompt: System prompt with context
         user_query: User's question
@@ -315,6 +315,25 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
         )
         return response.choices[0].message.content
 
+    elif provider == "chatgpt":
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY not configured")
+
+        if not model:
+            model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query}
+            ],
+            temperature=temperature
+        )
+        return response.choices[0].message.content
+
     elif provider == "kimi":
         # Use OpenRouter for Kimi
         api_key = os.getenv("OPENROUTER_API_KEY")
@@ -367,7 +386,7 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
     Call the specified LLM provider with streaming enabled.
 
     Args:
-        provider: 'ollama', 'claude', 'gemini', 'gpt-oss', 'kimi', or 'openrouter'
+        provider: 'ollama', 'claude', 'gemini', 'gpt-oss', 'kimi', 'openrouter', or 'chatgpt'
         model: Model name
         system_prompt: System prompt with context
         user_query: User's question
@@ -424,6 +443,10 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
             delta = chunk.choices[0].delta.content if chunk.choices else None
             if delta:
                 yield delta
+    elif provider == "chatgpt":
+        response_text = call_llm(provider, model, system_prompt, user_query, temperature)
+        if response_text:
+            yield response_text
 
     elif provider == "ollama":
         # Use Ollama with streaming
@@ -642,7 +665,8 @@ def query_graph():
                 'gemini': 'gemini-3-pro-preview',
                 'gpt-oss': 'gpt-4',
                 'kimi': 'moonshotai/kimi-k2-0905',
-                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto')
+                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto'),
+                'chatgpt': os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
             }
             model = model_defaults.get(llm_provider, 'llama3.2')
 
@@ -1288,7 +1312,8 @@ def query_stream():
                 'gemini': 'gemini-3-pro-preview',
                 'gpt-oss': 'gpt-4',
                 'kimi': 'moonshotai/kimi-k2-0905',
-                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto')
+                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto'),
+                'chatgpt': os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
             }
             model = model_defaults.get(llm_provider, 'llama2')
 

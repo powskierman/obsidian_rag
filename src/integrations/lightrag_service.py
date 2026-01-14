@@ -74,6 +74,88 @@ def extract_pdf_text(pdf_path: Path) -> str:
 
     return "\n\n".join(pages_text).strip()
 
+def _dedupe_keep_order(items):
+    seen = set()
+    output = []
+    for item in items:
+        if item not in seen:
+            output.append(item)
+            seen.add(item)
+    return output
+
+def _extract_frontmatter_tags(lines) -> list[str]:
+    tags = []
+    in_tags_block = False
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("tags:"):
+            value = stripped.split(":", 1)[1].strip()
+            if value.startswith("[") and value.endswith("]"):
+                items = value[1:-1].split(",")
+                for item in items:
+                    tag = item.strip().strip("'\"")
+                    if tag:
+                        tags.append(tag)
+            elif value:
+                tag = value.strip().strip("'\"")
+                if tag:
+                    tags.append(tag)
+            else:
+                in_tags_block = True
+            continue
+        if in_tags_block:
+            if stripped.startswith("-"):
+                tag = stripped[1:].strip().strip("'\"")
+                if tag:
+                    tags.append(tag)
+            elif stripped and not stripped.startswith("#"):
+                in_tags_block = False
+    return _dedupe_keep_order(tags)
+
+def _split_frontmatter(content: str) -> tuple[list[str], str]:
+    if not content.startswith("---"):
+        return [], content
+    lines = content.splitlines()
+    end_idx = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == "---":
+            end_idx = i
+            break
+    if end_idx is None:
+        return [], content
+    frontmatter_lines = lines[1:end_idx]
+    body = "\n".join(lines[end_idx + 1:])
+    return _extract_frontmatter_tags(frontmatter_lines), body
+
+def _extract_headings(content: str, max_headings: int = 12) -> list[str]:
+    headings = []
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            heading = stripped.lstrip("#").strip()
+            if heading:
+                headings.append(heading)
+        if len(headings) >= max_headings:
+            break
+    return _dedupe_keep_order(headings)
+
+def _build_index_text(file_path: Path, content: str, headings: list[str], tags: list[str]) -> str:
+    content = content.strip()
+    if not content:
+        return ""
+    prefix_lines = [
+        f"Title: {file_path.stem}",
+        f"Filename: {file_path.name}",
+    ]
+    if headings:
+        prefix_lines.append("Headings: " + " | ".join(headings))
+    if tags:
+        prefix_lines.append("Tags: " + ", ".join(tags))
+    prefix = "\n".join(prefix_lines)
+    return f"{prefix}\n\n{content}"
+
 
 # Default system prompt for Michel's Obsidian Knowledge Base
 DEFAULT_SYSTEM_PROMPT = """You are a **Deep Thinking AI assistant** integrated with Michel's Obsidian Knowledge Base.
@@ -416,9 +498,13 @@ def index_vault():
             try:
                 if vault_file.suffix.lower() == ".pdf":
                     content = extract_pdf_text(vault_file)
+                    content = _build_index_text(vault_file, content, [], [])
                 else:
                     with open(vault_file, "r", encoding="utf-8") as f:
-                        content = f.read()
+                        raw_content = f.read()
+                    tags, body = _split_frontmatter(raw_content)
+                    headings = _extract_headings(body)
+                    content = _build_index_text(vault_file, body, headings, tags)
 
                 content = content.strip()
                 if content:

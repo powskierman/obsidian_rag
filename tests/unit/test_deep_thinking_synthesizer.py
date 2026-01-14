@@ -1,0 +1,79 @@
+import types
+
+import pytest
+
+from deep_thinking.synthesizer import FinalAnswerGenerator
+
+
+class FakeResponse:
+    def __init__(self, text: str):
+        self.content = [types.SimpleNamespace(text=text)]
+
+
+class FakeMessages:
+    def __init__(self, response_text: str):
+        self.response_text = response_text
+        self.calls = []
+
+    def create(self, **kwargs):
+        self.calls.append(kwargs)
+        return FakeResponse(self.response_text)
+
+
+class FakeClient:
+    def __init__(self, provider: str, response_text: str):
+        self.provider = provider
+        self.messages = FakeMessages(response_text)
+
+
+def make_state():
+    return {
+        "original_question": "What is the status?",
+        "user_context": {},
+        "plan": [],
+        "current_step_index": 0,
+        "past_steps": [],
+        "accumulated_context": "",
+        "retrieved_documents": [],
+        "iteration_count": 0,
+        "max_iterations": 1,
+        "should_continue": False,
+        "final_answer": "",
+        "citations": [],
+    }
+
+
+@pytest.mark.unit
+def test_synthesizer_uses_claude_max_tokens(monkeypatch):
+    response_text = (
+        "{\"answer\":\"ok\",\"citations\":[],"
+        "\"confidence_score\":0.9,\"confidence_justification\":\"fine\"}"
+    )
+    client = FakeClient("claude", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    monkeypatch.setenv("DEEP_THINKING_CLAUDE_MAX_TOKENS", "1234")
+
+    result = generator.generate(make_state())
+
+    assert result["answer"] == "ok"
+    assert client.messages.calls[0]["max_tokens"] == 1234
+
+
+@pytest.mark.unit
+def test_synthesizer_salvages_fields_from_malformed_json():
+    response_text = (
+        "{\"answer\":\"Hello\","
+        "\"citations\":[\"[[Note]]\",\"https://example.com\"],"
+        "\"confidence_score\":0.82,"
+        "\"confidence_justification\":\"OK\""
+    )
+    client = FakeClient("claude", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    result = generator.generate(make_state())
+
+    assert result["answer"] == "Hello"
+    assert result["citations"] == ["[[Note]]", "https://example.com"]
+    assert result["confidence_score"] == 0.82
+    assert result["confidence_justification"] == "OK"

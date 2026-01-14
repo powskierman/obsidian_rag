@@ -30,14 +30,22 @@ const llmProviders = [
     cost: '$',
     requiresApiKey: true,
     apiKeyEnvVar: 'OPENROUTER_API_KEY'
+  },
+  {
+    id: 'chatgpt' as LLMProvider,
+    label: 'ChatGPT (OpenAI)',
+    cost: '$',
+    requiresApiKey: true,
+    apiKeyEnvVar: 'OPENAI_API_KEY'
   }
 ];
 
 export default function LLMProviderSelector() {
   const { llmProvider, setLLMProvider } = useApp();
-  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean }>({
+  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean; openai: boolean }>({
     gemini: false,
-    anthropic: false
+    anthropic: false,
+    openai: false
   });
 
   useEffect(() => {
@@ -80,8 +88,10 @@ export default function LLMProviderSelector() {
                   ? apiKeys.gemini
                   : provider.id === 'claude'
                     ? apiKeys.anthropic
-                    : true;
-                if (!hasKey && provider.id !== 'openrouter') {
+                    : provider.id === 'chatgpt'
+                      ? apiKeys.openai
+                      : true;
+                if (!hasKey && !['openrouter', 'chatgpt'].includes(provider.id)) {
                   return (
                     <div className="text-xs text-yellow-500/70 mt-1 flex items-center gap-1">
                       <span>⚠️</span>
@@ -93,6 +103,13 @@ export default function LLMProviderSelector() {
                     <div className="text-xs text-white/50 mt-1 flex items-center gap-1">
                       <span>🔑</span>
                       <span>Set OPENROUTER_API_KEY</span>
+                    </div>
+                  );
+                } else if (provider.id === 'chatgpt' && llmProvider === provider.id) {
+                  return (
+                    <div className="text-xs text-white/50 mt-1 flex items-center gap-1">
+                      <span>🔑</span>
+                      <span>Set OPENAI_API_KEY</span>
                     </div>
                   );
                 } else if (llmProvider === provider.id) {

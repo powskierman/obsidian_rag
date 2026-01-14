@@ -48,7 +48,7 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
-      const enableWebSearch = enhanced_search && ['gemini', 'claude', 'kimi', 'openrouter'].includes(llm_provider);
+      const enableWebSearch = enhanced_search && ['gemini', 'claude', 'kimi', 'openrouter', 'chatgpt'].includes(llm_provider);
       const enableLlmKnowledge = enhanced_search;
       const requestBody = {
         query,
@@ -245,16 +245,16 @@ export const api = {
     console.log("Feedback not yet implemented in V1 Gateway", feedback);
   },
 
-  checkApiKeys: async (): Promise<{ gemini: boolean; anthropic: boolean }> => {
+  checkApiKeys: async (): Promise<{ gemini: boolean; anthropic: boolean; openai: boolean }> => {
     try {
       const response = await fetch('/api/check-api-keys');
       if (!response.ok) {
-        return { gemini: false, anthropic: false };
+        return { gemini: false, anthropic: false, openai: false };
       }
       return await response.json();
     } catch (error) {
       console.error('Failed to check API keys:', error);
-      return { gemini: false, anthropic: false };
+      return { gemini: false, anthropic: false, openai: false };
     }
   },
 

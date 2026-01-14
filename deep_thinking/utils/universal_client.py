@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Universal LLM Client wrapper for Deep Thinking Agent.
-Supports Anthropic (Claude), Google (Gemini), and OpenRouter APIs with a unified interface.
+Supports Anthropic (Claude), Google (Gemini), OpenRouter, and ChatGPT (OpenAI) APIs with a unified interface.
 Mimics the Anthropic client interface (messages.create).
 """
 
@@ -47,6 +47,8 @@ class UniversalClient:
             return self._create_gemini(model, messages, max_tokens, temperature, system)
         elif self.provider == "openrouter":
             return self._create_openrouter(model, messages, max_tokens, temperature, system)
+        elif self.provider in ("chatgpt", "openai"):
+            return self._create_openai(model, messages, max_tokens, temperature, system)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
@@ -188,4 +190,52 @@ class UniversalClient:
             return UniversalMessage(content)
         except Exception as e:
             logger.error(f"OpenRouter request failed: {e}")
+            raise e
+
+    def _create_openai(self, model: str, messages: List[Dict[str, str]],
+                       max_tokens: int, temperature: float, system: str):
+        api_key = self.api_key or os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY not configured")
+
+        if not model or "gemini" in model.lower() or "claude" in model.lower():
+            model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+        openai_messages = list(messages)
+        if system:
+            openai_messages = [{"role": "system", "content": system}] + openai_messages
+
+        payload = {
+            "model": model,
+            "messages": openai_messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+
+        try:
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json=payload,
+                timeout=60
+            )
+
+            if response.status_code != 200:
+                error_msg = f"OpenAI API Error {response.status_code}: {response.text}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            data = response.json()
+            choices = data.get("choices", [])
+            if not choices:
+                raise ValueError("No choices returned from OpenAI")
+
+            message = choices[0].get("message", {})
+            content = message.get("content", "")
+            return UniversalMessage(content)
+        except Exception as e:
+            logger.error(f"OpenAI request failed: {e}")
             raise e

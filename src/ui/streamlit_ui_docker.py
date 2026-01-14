@@ -60,7 +60,7 @@ with st.sidebar:
     
     # LLM Provider Selection (passed to backend)
     st.subheader("🤖 LLM Provider")
-    llm_options = ["Ollama", "Gemini", "Claude", "Kimi", "GPT-OSS"]
+    llm_options = ["Ollama", "Gemini", "Claude", "ChatGPT", "Kimi", "GPT-OSS", "OpenRouter"]
     llm_choice = st.selectbox(
         "Choose Backend LLM:",
         llm_options,
@@ -272,7 +272,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                         'temperature': temperature,
                         'n_results': num_sources,
                         'llm_knowledge': enhanced_search,
-                        'web_search': enhanced_search and st.session_state.llm_provider in ["gemini", "claude", "kimi"]
+                        'web_search': enhanced_search and st.session_state.llm_provider in ["gemini", "claude", "kimi", "openrouter", "chatgpt"]
                     }
                     
                     response = requests.post(

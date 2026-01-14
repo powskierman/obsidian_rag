@@ -66,7 +66,7 @@ export default function Home() {
                     ws.send(JSON.stringify({
                         query: userMsg,
                         provider: llmProvider,
-                        model: llmProvider === 'openrouter' ? settings.model : undefined
+                        model: (llmProvider === 'openrouter' || llmProvider === 'chatgpt') ? settings.model : undefined
                     }));
                 };
 
@@ -184,7 +184,7 @@ export default function Home() {
                 const backendMode = searchMode === 'deep-thinking' ? 'hybrid' : searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
-                const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' ? settings.model : '';
+                const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' ? settings.model : '';
 
                 // Unified Search Call
                 console.log('📡 Sending query with relevanceThreshold:', settings.relevanceThreshold);

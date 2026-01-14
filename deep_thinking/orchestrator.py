@@ -46,6 +46,8 @@ class DeepThinkingRAG:
                 default_model = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
             elif provider == "gemini":
                 default_model = os.getenv("GEMINI_MODEL", "gemini-3-pro-preview")
+            elif provider in ("chatgpt", "openai"):
+                default_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
         if default_model:
             self.planner.model = default_model
