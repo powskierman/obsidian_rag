@@ -73,12 +73,45 @@ def _lightrag_result_empty(result: Any) -> bool:
     text = _lightrag_result_text(result).strip().lower()
     return not text or text.startswith("not found in notes")
 
+def _parse_allowed_origins() -> List[str]:
+    raw = os.getenv("OBSIDIAN_RAG_ALLOWED_ORIGINS", "").strip()
+    if raw:
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8501",
+        "http://127.0.0.1:8501",
+    ]
+
+
+def _get_api_key() -> Optional[str]:
+    return os.getenv("OBSIDIAN_RAG_API_KEY")
+
+
+def _is_authorized(headers: Any) -> bool:
+    expected = _get_api_key()
+    if not expected:
+        return True
+    try:
+        provided = headers.get("x-api-key") or headers.get("X-API-Key")
+    except AttributeError:
+        provided = None
+    return provided == expected
+
+
+def _auth_headers() -> Dict[str, str]:
+    api_key = _get_api_key()
+    if not api_key:
+        return {}
+    return {"X-API-Key": api_key}
+
 app = FastAPI(title="Obsidian RAG Unified API", version="1.0")
 
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_parse_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -98,6 +131,12 @@ CIRCUIT_RESET_SECONDS = int(os.getenv("RAG_CIRCUIT_RESET_SECONDS", "30"))
 ENABLE_FALLBACKS = os.getenv("RAG_ENABLE_FALLBACKS", "true").lower() in ("1", "true", "yes")
 
 _circuit_state = {}
+
+@app.middleware("http")
+async def _require_api_key(request: Request, call_next):
+    if not _is_authorized(request.headers):
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+    return await call_next(request)
 
 
 class CircuitOpenError(RuntimeError):
@@ -143,7 +182,7 @@ async def _post_json(
     last_exception = None
     for attempt in range(REQUEST_RETRIES + 1):
         try:
-            response = await client.post(url, json=payload, timeout=timeout)
+            response = await client.post(url, json=payload, timeout=timeout, headers=_auth_headers())
             if response.status_code >= 400:
                 raise httpx.HTTPStatusError(
                     f"{service} {response.status_code}",
@@ -190,7 +229,11 @@ async def health_check():
 
     try:
         async with httpx.AsyncClient() as client:
-            emb_resp = await client.get(f"{EMBEDDING_SERVICE_URL}/health", timeout=2.0)
+            emb_resp = await client.get(
+                f"{EMBEDDING_SERVICE_URL}/health",
+                timeout=2.0,
+                headers=_auth_headers()
+            )
             if emb_resp.status_code == 200:
                 emb_data = emb_resp.json()
                 emb_status = "healthy"
@@ -201,7 +244,11 @@ async def health_check():
 
     try:
         async with httpx.AsyncClient() as client:
-            graph_resp = await client.get(f"{GRAPH_SERVICE_URL}/health", timeout=2.0)
+            graph_resp = await client.get(
+                f"{GRAPH_SERVICE_URL}/health",
+                timeout=2.0,
+                headers=_auth_headers()
+            )
             if graph_resp.status_code == 200:
                 graph_data = graph_resp.json()
                 graph_status = "healthy"
@@ -212,7 +259,11 @@ async def health_check():
 
     try:
         async with httpx.AsyncClient() as client:
-            lightrag_resp = await client.get(f"{LIGHTRAG_SERVICE_URL}/health", timeout=2.0)
+            lightrag_resp = await client.get(
+                f"{LIGHTRAG_SERVICE_URL}/health",
+                timeout=2.0,
+                headers=_auth_headers()
+            )
             if lightrag_resp.status_code == 200:
                 lightrag_data = lightrag_resp.json()
                 lightrag_status = "healthy"
@@ -224,7 +275,11 @@ async def health_check():
     # Get LightRAG stats
     try:
         async with httpx.AsyncClient() as client:
-            stats_resp = await client.get(f"{LIGHTRAG_SERVICE_URL}/stats", timeout=2.0)
+            stats_resp = await client.get(
+                f"{LIGHTRAG_SERVICE_URL}/stats",
+                timeout=2.0,
+                headers=_auth_headers()
+            )
             if stats_resp.status_code == 200:
                 lightrag_stats = stats_resp.json()
                 lightrag_data.update(lightrag_stats)
@@ -284,7 +339,12 @@ async def unified_search(request: SearchRequest):
                     "query": request.query,
                     "n_results": request.n_results
                 }
-                response = await client.post(f"{EMBEDDING_SERVICE_URL}/query", json=payload, timeout=30.0)
+                response = await client.post(
+                    f"{EMBEDDING_SERVICE_URL}/query",
+                    json=payload,
+                    timeout=30.0,
+                    headers=_auth_headers()
+                )
                 response.raise_for_status()
                 return response.json()
             except httpx.RequestError as e:
@@ -296,7 +356,12 @@ async def unified_search(request: SearchRequest):
             try:
                 # Graph service expects robust payload
                 payload = request.model_dump()
-                response = await client.post(f"{GRAPH_SERVICE_URL}/query", json=payload, timeout=120.0)
+                response = await client.post(
+                    f"{GRAPH_SERVICE_URL}/query",
+                    json=payload,
+                    timeout=120.0,
+                    headers=_auth_headers()
+                )
                 response.raise_for_status()
                 return response.json()
             except httpx.RequestError as e:
@@ -865,6 +930,10 @@ async def deep_research_websocket(websocket: WebSocket):
       {"type": "status", "content": "🤔 Planning..."} 
       {"type": "answer", "data": {...}}
     """
+    if not _is_authorized(websocket.headers):
+        await websocket.close(code=4401)
+        return
+
     await websocket.accept()
     
     try:

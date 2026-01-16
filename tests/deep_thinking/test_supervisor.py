@@ -49,18 +49,19 @@ class TestRetrievalSupervisor(unittest.TestCase):
         
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["type"], "vector")
-        # Verify filters were passed
-        mock_post.assert_called_with(
-            'http://vector/query',
-            json={
-                "query": "q",
-                "n_results": 10,
-                "where": {"source": {"$contains": "Medical/"}},
-                "reranking": True,
-                "deduplicate": True
-            },
-            timeout=30
-        )
+        self.assertEqual(results[0]["source"], "path")
+
+        expected_n_results = 60 if self.supervisor.enable_reranking else 20
+        first_call_args, first_call_kwargs = mock_post.call_args_list[0]
+        self.assertEqual(first_call_args[0], 'http://vector/query')
+        self.assertEqual(first_call_kwargs["timeout"], 30)
+
+        payload = first_call_kwargs["json"]
+        self.assertEqual(payload["query"], "q Medical")
+        self.assertEqual(payload["n_results"], expected_n_results)
+        self.assertEqual(payload["filters"], {"dir_Medical": True})
+        self.assertFalse(payload["reranking"])
+        self.assertTrue(payload["deduplicate"])
 
     @patch('requests.post')
     def test_execute_step_graph(self, mock_post):

@@ -54,11 +54,14 @@ class PolicyAgent:
             # This ensures we enrich personal notes with external data
             
             # Check if we have done a web search
-            has_web_search = any(step['step']['search_strategy'] == 'web' for step in state['past_steps'])
+            has_web_search = any(
+                step.get('step', {}).get('search_strategy') == 'web'
+                for step in state.get('past_steps', [])
+            )
             
             # Check if we have a PLANNED web search remaining
-            remaining_steps = state['plan'][state['current_step_index']:]
-            has_planned_web = any(step['search_strategy'] == 'web' for step in remaining_steps)
+            remaining_steps = state.get('plan', [])[state.get('current_step_index', 0):]
+            has_planned_web = any(step.get('search_strategy') == 'web' for step in remaining_steps)
             
             if decision_data.get("needs_external_enrichment") and not has_web_search and not has_planned_web and decision == "FINISH":
                 print("⚠️ Policy: External enrichment needed but no web search. Forcing REVISE_PLAN.")

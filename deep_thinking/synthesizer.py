@@ -3,6 +3,16 @@ import os
 import re
 from typing import List, Tuple
 from .state import RAGState
+try:
+    from src.utils.prompt_builder import build_prompt_appendix, build_provider_guardrails
+except ImportError:
+    try:
+        from utils.prompt_builder import build_prompt_appendix, build_provider_guardrails
+    except ImportError:
+        def build_prompt_appendix(user_query: str, provider: str) -> str:
+            return ""
+        def build_provider_guardrails(provider: str) -> str:
+            return ""
 
 class FinalAnswerGenerator:
     def __init__(self, client):
@@ -86,23 +96,41 @@ Finally, provide your answer in a structured, easy-to-read format."""
             "confidence_justification": "Detailed scan results found..."
         }}
         """
-        
+
         provider = getattr(self.client, "provider", "").lower()
+        prompt_appendix = build_prompt_appendix(state["original_question"], provider)
+        if prompt_appendix:
+            prompt = f"{prompt}\n\n{prompt_appendix}\n"
+
         max_tokens = int(os.getenv("DEEP_THINKING_MAX_TOKENS", "4096"))
         if provider == "claude":
             max_tokens = int(os.getenv("DEEP_THINKING_CLAUDE_MAX_TOKENS", "8192"))
+        if provider in ("chatgpt", "openai"):
+            max_tokens = int(os.getenv("DEEP_THINKING_OPENAI_MAX_TOKENS", str(max_tokens)))
+
+        system_prompt = self.system_prompt
+        guardrails = build_provider_guardrails(provider)
+        if guardrails:
+            system_prompt = f"{system_prompt}\n\n{guardrails}"
 
         response = self.client.messages.create(
             model=self.model,
             max_tokens=max_tokens,
-            system=self.system_prompt,
+            system=system_prompt,
             messages=[{"role": "user", "content": prompt}]
         )
         
         if hasattr(response.content[0], 'text'):
-            content = response.content[0].text.strip()
+            raw_content = response.content[0].text
         else:
-             content = str(response.content).strip()
+            raw_content = response.content
+
+        if raw_content is None:
+            content = ""
+        elif isinstance(raw_content, str):
+            content = raw_content.strip()
+        else:
+            content = str(raw_content).strip()
         
         # 1. Try cleaning markdown code blocks
         clean_content = content
@@ -114,8 +142,19 @@ Finally, provide your answer in a structured, easy-to-read format."""
         try:
             # 2. Try direct JSON parse
             result = json.loads(clean_content)
+            answer = result.get("answer") or ""
+            if not answer.strip():
+                salvaged = self._salvage_fields(content)
+                salvaged_answer = ""
+                if salvaged:
+                    salvaged_answer = salvaged.get("answer") or ""
+                if salvaged_answer.strip():
+                    answer = salvaged_answer
+                else:
+                    answer = self._fallback_answer(state, content)
+
             return {
-                "answer": result.get("answer", "Could not generate answer."),
+                "answer": answer,
                 "citations": result.get("citations", []),
                 "confidence_score": result.get("confidence_score", 0.0),
                 "confidence_justification": result.get("confidence_justification", "")
@@ -145,7 +184,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
             # This ensures the user gets *something* even if formatting failed
             print("JSON Parse failed. Returning raw content.")
             return {
-                "answer": content,  # Return the full raw text
+                "answer": self._fallback_answer(state, content),
                 "citations": [],
                 "confidence_score": 0.0,
                 "confidence_justification": "JSON parsing failed, returning raw output."
@@ -153,7 +192,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
         except Exception as e:
             print(f"Error generating final answer: {e}")
             return {
-                "answer": f"Error generating answer: {str(e)}",
+                "answer": self._fallback_answer(state, f"Error generating answer: {str(e)}"),
                 "citations": [],
                 "confidence_score": 0.0,
                 "confidence_justification": f"Error: {e}"
@@ -250,11 +289,41 @@ Finally, provide your answer in a structured, easy-to-read format."""
         if not citations:
             citations = self._extract_citations_from_text(raw)
 
-        if answer or citations or confidence_score is not None or confidence_justification:
+        answer_value = answer
+        if answer_value is None:
+            answer_value = ""
+        if isinstance(answer_value, str) and not answer_value.strip():
+            answer_value = ""
+
+        if answer_value or citations or confidence_score is not None or confidence_justification:
             return {
-                "answer": answer or raw,
+                "answer": answer_value,
                 "citations": citations,
                 "confidence_score": confidence_score or 0.0,
                 "confidence_justification": confidence_justification or ""
             }
         return None
+
+    @staticmethod
+    def _fallback_answer(state: RAGState, raw: str) -> str:
+        context = (state.get("accumulated_context") or "").strip()
+        if context:
+            note = ""
+            raw_text = str(raw or "").strip()
+            if raw_text:
+                for marker in (
+                    "Error generating answer",
+                    "API Error",
+                    "No choices returned",
+                    "Empty response from OpenAI",
+                    "Unsupported provider",
+                    "No candidates returned",
+                ):
+                    if marker in raw_text:
+                        snippet = raw_text[:240]
+                        note = f" ({snippet})"
+                        break
+            return "No response from model" + note + ". Using retrieved context summary:\n\n" + context
+        if raw:
+            return raw
+        return "No response from model. Please retry."

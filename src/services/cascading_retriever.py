@@ -1,7 +1,9 @@
 import asyncio
 import logging
+import os
 from typing import List, Dict, Any, Optional
 import httpx
+import math
 import re
 
 logger = logging.getLogger(__name__)
@@ -39,6 +41,12 @@ class CascadingRetriever:
         }
         self.vector_thresholds = [75, 60]
 
+    def _service_headers(self) -> Dict[str, str]:
+        api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+        if not api_key:
+            return {}
+        return {"X-API-Key": api_key}
+
     def _extract_terms(self, text: str) -> set:
         tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", text.lower())
         return {t for t in tokens if t not in self.stopwords and not t.isdigit()}
@@ -72,7 +80,12 @@ class CascadingRetriever:
                 "llm_provider": self.llm_provider
             }
             try:
-                notes_resp = await client.post(f"{self.graph_url}/query", json=notes_payload, timeout=30.0)
+                notes_resp = await client.post(
+                    f"{self.graph_url}/query",
+                    json=notes_payload,
+                    timeout=30.0,
+                    headers=self._service_headers()
+                )
                 notes_data = notes_resp.json() if notes_resp.status_code == 200 else {}
             except Exception as e:
                 logger.error(f"Stage 1 fail: {e}")
@@ -99,7 +112,8 @@ class CascadingRetriever:
                                 "deduplicate": True,
                                 "relevance_threshold": threshold
                             },
-                            timeout=30.0
+                            timeout=30.0,
+                            headers=self._service_headers()
                         )
                         vec_data = vec_resp.json() if vec_resp.status_code == 200 else {}
                         if self._vector_has_docs(vec_data):
@@ -137,7 +151,12 @@ class CascadingRetriever:
                 expansion_query = " ".join(sorted(extracted_entities)) or query
                 logger.info(f"Stage 3: Expanding on '{expansion_query}'")
                 lr_payload = {"query": expansion_query, "mode": "hybrid"}
-                lr_resp = await client.post(f"{self.lightrag_url}/query", json=lr_payload, timeout=60.0)
+                lr_resp = await client.post(
+                    f"{self.lightrag_url}/query",
+                    json=lr_payload,
+                    timeout=60.0,
+                    headers=self._service_headers()
+                )
                 if lr_resp.status_code == 200:
                     expanded_context = lr_resp.json()
                     expanded_text = ""
@@ -177,7 +196,12 @@ class CascadingRetriever:
                             "deduplicate": True,
                             "relevance_threshold": threshold
                         }
-                        vec_resp = await client.post(f"{self.embed_url}/query", json=vec_payload, timeout=30.0)
+                        vec_resp = await client.post(
+                            f"{self.embed_url}/query",
+                            json=vec_payload,
+                            timeout=30.0,
+                            headers=self._service_headers()
+                        )
                         vector_chunks = vec_resp.json() if vec_resp.status_code == 200 else {}
                         if self._vector_has_docs(vector_chunks):
                             vector_query = candidate

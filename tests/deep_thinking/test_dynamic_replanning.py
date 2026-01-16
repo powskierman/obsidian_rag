@@ -1,8 +1,4 @@
-import sys
 from unittest.mock import MagicMock, patch
-
-# Mock requests before importing modules that use it
-sys.modules["requests"] = MagicMock()
 
 import unittest
 from deep_thinking.orchestrator import DeepThinkingRAG

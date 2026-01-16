@@ -1,5 +1,7 @@
 from typing import Dict, Any, List
 import os
+import json
+from datetime import datetime, timezone
 from .state import RAGState
 from .planner import PlannerAgent
 from .supervisor import RetrievalSupervisor
@@ -19,14 +21,23 @@ class DeepThinkingRAG:
         graph_service_url: str = "http://localhost:8003",
         enable_reranking: bool = True
     ):
-        # Initialize Universal Client
-        # If legacy anthropic_client is passed, wrap it (or just use provider logic)
-        if anthropic_client:
-            # We assume it's claude if client passed directly
-            self.client = UniversalClient(provider="claude", api_key=api_key)
-            self.client.anthropic = anthropic_client # Inject existing client
+        provider_name = provider if isinstance(provider, str) else "claude"
+
+        # Legacy signature support: DeepThinkingRAG(client, vector_url, graph_url)
+        if anthropic_client is None and not isinstance(provider, str):
+            anthropic_client = provider
+            if isinstance(api_key, str) and api_key.startswith("http"):
+                vector_service_url = api_key
+                api_key = None
+            if isinstance(model, str) and model.startswith("http"):
+                graph_service_url = model
+                model = None
+
+        # Initialize Universal Client or use provided client directly.
+        if anthropic_client is not None:
+            self.client = anthropic_client
         else:
-            self.client = UniversalClient(provider=provider, api_key=api_key)
+            self.client = UniversalClient(provider=provider_name, api_key=api_key)
             
         self.planner = PlannerAgent(self.client)
         self.supervisor = RetrievalSupervisor(
@@ -40,13 +51,13 @@ class DeepThinkingRAG:
 
         default_model = model
         if not default_model:
-            if provider == "openrouter":
+            if provider_name == "openrouter":
                 default_model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
-            elif provider == "claude":
+            elif provider_name == "claude":
                 default_model = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
-            elif provider == "gemini":
+            elif provider_name == "gemini":
                 default_model = os.getenv("GEMINI_MODEL", "gemini-3-pro-preview")
-            elif provider in ("chatgpt", "openai"):
+            elif provider_name in ("chatgpt", "openai"):
                 default_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
         if default_model:
@@ -72,17 +83,41 @@ class DeepThinkingRAG:
             "log"
         ]
         return any(marker in lowered for marker in vault_markers)
+
         
     def query(self, question: str, max_iterations: int = 7, status_callback=None) -> Dict[str, Any]:
         """
         Main reasoning loop.
         status_callback: Optional function that accepts (status_msg, details_dict)
         """
+        log_path = os.getenv("DEEP_THINKING_LOG_PATH", "/tmp/deep_thinking.log")
+        log_file = None
+        try:
+            log_dir = os.path.dirname(log_path)
+            if log_dir:
+                os.makedirs(log_dir, exist_ok=True)
+            log_file = open(log_path, "a", encoding="utf-8")
+        except Exception:
+            log_file = None
+
+        def log_line(msg: str, details: dict | None) -> None:
+            if not log_file:
+                return
+            payload = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "message": msg
+            }
+            if details is not None:
+                payload["details"] = details
+            log_file.write(json.dumps(payload) + "\n")
+            log_file.flush()
+
         def update_status(msg, details=None):
             if status_callback:
                 status_callback(msg, details)
             else:
                 print(f"{msg} {details if details else ''}")
+            log_line(msg, details)
 
         # Initialize state
         state: RAGState = {
@@ -119,6 +154,7 @@ class DeepThinkingRAG:
             }] + state["plan"]
             for idx, step in enumerate(state["plan"], start=1):
                 step["step_number"] = idx
+
         
         # Step 2: Execute plan with reflection loop
         while state["should_continue"] and state["iteration_count"] < max_iterations:
@@ -180,13 +216,24 @@ class DeepThinkingRAG:
         # Step 3: Generate final answer
         update_status("📝 Synthesizing final answer...")
         synthesis_result = self.synthesizer.generate(state)
+        if isinstance(synthesis_result, (tuple, list)):
+            answer = synthesis_result[0] if len(synthesis_result) > 0 else ""
+            citations = synthesis_result[1] if len(synthesis_result) > 1 else []
+            confidence_score = synthesis_result[2] if len(synthesis_result) > 2 else 0.0
+            confidence_justification = synthesis_result[3] if len(synthesis_result) > 3 else ""
+            synthesis_result = {
+                "answer": answer,
+                "citations": citations,
+                "confidence_score": confidence_score,
+                "confidence_justification": confidence_justification
+            }
         
         state["final_answer"] = synthesis_result["answer"]
         state["citations"] = synthesis_result["citations"]
         state["confidence_score"] = synthesis_result["confidence_score"]
         state["confidence_justification"] = synthesis_result["confidence_justification"]
         
-        return {
+        output = {
             "answer": state["final_answer"],
             "citations": state["citations"],
             "confidence_score": state["confidence_score"],
@@ -194,3 +241,7 @@ class DeepThinkingRAG:
             "research_steps": state["past_steps"],
             "total_documents": len(state["retrieved_documents"])
         }
+        log_line("✅ Synthesis complete", {"answer_length": len(state["final_answer"] or "")})
+        if log_file:
+            log_file.close()
+        return output

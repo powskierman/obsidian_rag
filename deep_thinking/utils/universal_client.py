@@ -205,12 +205,22 @@ class UniversalClient:
         if system:
             openai_messages = [{"role": "system", "content": system}] + openai_messages
 
+        token_param = "max_tokens"
+        restrict_temperature = False
+        if model:
+            model_lower = model.lower()
+            if model_lower.startswith(("gpt-5", "o1", "o3")):
+                token_param = "max_completion_tokens"
+                restrict_temperature = True
+
+        timeout = float(os.getenv("OPENAI_TIMEOUT", "60"))
         payload = {
             "model": model,
             "messages": openai_messages,
-            "max_tokens": max_tokens,
-            "temperature": temperature
+            token_param: max_tokens
         }
+        if not restrict_temperature:
+            payload["temperature"] = temperature
 
         try:
             response = requests.post(
@@ -220,7 +230,7 @@ class UniversalClient:
                     "Content-Type": "application/json"
                 },
                 json=payload,
-                timeout=60
+                timeout=timeout
             )
 
             if response.status_code != 200:
@@ -231,11 +241,34 @@ class UniversalClient:
             data = response.json()
             choices = data.get("choices", [])
             if not choices:
-                raise ValueError("No choices returned from OpenAI")
+                error_detail = data.get("error", {}).get("message", "No choices returned from OpenAI")
+                raise ValueError(error_detail)
 
             message = choices[0].get("message", {})
-            content = message.get("content", "")
-            return UniversalMessage(content)
+            content = message.get("content")
+            if content is None:
+                content = message.get("refusal")
+            if content is None:
+                content = choices[0].get("text")
+            if content is None:
+                content = choices[0].get("delta", {}).get("content")
+
+            if isinstance(content, list):
+                parts = []
+                for part in content:
+                    if isinstance(part, dict):
+                        if "text" in part:
+                            parts.append(str(part["text"]))
+                        continue
+                    parts.append(str(part))
+                content = "".join(parts)
+
+            if content is None or content == "":
+                finish_reason = choices[0].get("finish_reason")
+                reason_note = f" (finish_reason={finish_reason})" if finish_reason else ""
+                raise ValueError(f"Empty response from OpenAI{reason_note}")
+
+            return UniversalMessage(str(content))
         except Exception as e:
             logger.error(f"OpenAI request failed: {e}")
             raise e

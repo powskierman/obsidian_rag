@@ -64,6 +64,13 @@ class RetrievalSupervisor:
             original_question = state.get("original_question", "")
             if original_question and original_question.lower() not in query.lower():
                 query = f"{query} {original_question}"
+            if step.get("target_folders"):
+                folder_tokens = []
+                for folder in step["target_folders"]:
+                    parts = [part for part in folder.replace("\\", "/").split("/") if part]
+                    folder_tokens.extend(parts)
+                if folder_tokens:
+                    query = f"{query} {' '.join(folder_tokens)}"
         else:
             query = step["sub_question"]
         
@@ -83,7 +90,13 @@ class RetrievalSupervisor:
             )
             results = self._query_vector(query, filters, n_results=n_results, trace_callback=trace)
             trace(f"{debug_prefix} vector output", summarize(results))
-            
+
+            if step.get("target_folders") and results:
+                filtered_results = self._filter_results_by_target_folders(results, step["target_folders"])
+                if filtered_results and len(filtered_results) >= min_results:
+                    results = filtered_results
+                    trace(f"{debug_prefix} vector path filter", summarize(results))
+
             # Fallback: If filtered search returns too few, try without filters
             if filters and len(results) < min_results:
                 trace(
@@ -91,6 +104,10 @@ class RetrievalSupervisor:
                     {"reason": "too_few_results", "count": len(results)}
                 )
                 results = self._query_vector(query, filters=None, n_results=n_results, trace_callback=trace)
+                if step.get("target_folders") and results:
+                    filtered_results = self._filter_results_by_target_folders(results, step["target_folders"])
+                    if filtered_results and len(filtered_results) >= min_results:
+                        results = filtered_results
                 trace(f"{debug_prefix} vector retry output", summarize(results))
             
         elif strategy == "graph":
@@ -107,7 +124,12 @@ class RetrievalSupervisor:
             )
             vec_results = self._query_vector(query, filters, n_results=n_results, trace_callback=trace)
             graph_results = self._query_graph(query, mode="hybrid", trace_callback=trace)
-            
+
+            if step.get("target_folders") and vec_results:
+                filtered_vec = self._filter_results_by_target_folders(vec_results, step["target_folders"])
+                if filtered_vec and len(filtered_vec) >= min_results:
+                    vec_results = filtered_vec
+
             # Combine results
             results = vec_results + graph_results
             trace(
@@ -126,6 +148,10 @@ class RetrievalSupervisor:
                     {"reason": "too_few_vector_results", "vector_count": len(vec_results)}
                 )
                 vec_results = self._query_vector(query, filters=None, n_results=n_results, trace_callback=trace)
+                if step.get("target_folders") and vec_results:
+                    filtered_vec = self._filter_results_by_target_folders(vec_results, step["target_folders"])
+                    if filtered_vec and len(filtered_vec) >= min_results:
+                        vec_results = filtered_vec
                 results = vec_results + graph_results
                 trace(
                     f"{debug_prefix} hybrid retry output",
@@ -163,6 +189,25 @@ class RetrievalSupervisor:
         if len(filters) == 1:
             return filters[0]
         return {"$or": filters}
+
+    @staticmethod
+    def _filter_results_by_target_folders(results: List[Dict[str, Any]], target_folders: List[str]) -> List[Dict[str, Any]]:
+        if not results or not target_folders:
+            return results
+        normalized_folders = []
+        for folder in target_folders:
+            norm = folder.replace("\\", "/").strip()
+            if not norm.endswith("/"):
+                norm = f"{norm}/"
+            normalized_folders.append(norm.lower())
+
+        filtered = []
+        for item in results:
+            source = item.get("source") or ""
+            source_norm = source.replace("\\", "/").lower()
+            if any(folder in source_norm for folder in normalized_folders):
+                filtered.append(item)
+        return filtered
     
     def _query_vector(
         self,
@@ -199,17 +244,31 @@ class RetrievalSupervisor:
                     data = response.json()
                     # Normalize format - embedding service returns documents/metadatas/distances arrays
                     normalized = []
-                    documents = data.get("documents", [[]])[0]
-                    metadatas = data.get("metadatas", [[]])[0]
-                    distances = data.get("distances", [[]])[0]
-                    
-                    for doc, meta, dist in zip(documents, metadatas, distances):
-                        normalized.append({
-                            "content": doc,
-                            "source": meta.get("filepath", "Unknown"),
-                            "type": "vector",
-                            "score": float(1 - dist) if dist < 1 else 0.0  # Convert distance to similarity score
-                        })
+                    if "documents" in data:
+                        documents = data.get("documents", [[]])[0]
+                        metadatas = data.get("metadatas", [[]])[0]
+                        distances = data.get("distances", [[]])[0]
+
+                        for doc, meta, dist in zip(documents, metadatas, distances):
+                            normalized.append({
+                                "content": doc,
+                                "source": meta.get("filepath", "Unknown"),
+                                "type": "vector",
+                                "score": float(1 - dist) if dist < 1 else 0.0  # Convert distance to similarity score
+                            })
+                    elif "results" in data:
+                        for item in data.get("results", []):
+                            meta = item.get("metadata", {}) or {}
+                            source = meta.get("file_path") or meta.get("filepath") or meta.get("source")
+                            if not source:
+                                source = item.get("source", "Unknown")
+                            score = item.get("score")
+                            normalized.append({
+                                "content": item.get("text") or item.get("content") or "",
+                                "source": source,
+                                "type": "vector",
+                                "score": float(score) if score is not None else 0.0
+                            })
                     trace("[DeepThinking] vector response", {"status": response.status_code, "count": len(normalized)})
                     return normalized
 

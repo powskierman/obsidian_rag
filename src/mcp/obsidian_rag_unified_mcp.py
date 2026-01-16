@@ -1,15 +1,32 @@
 #!/usr/bin/env python3
 """
-Unified Obsidian RAG MCP Server for Claude Desktop
-Combines enhanced vault search with knowledge graph queries
+Unified Obsidian RAG MCP Server for ChatGPT Desktop
+Combines enhanced vault search with knowledge graph queries.
 """
 
 import asyncio
 import json
-import requests
+import logging
 import os
+import pickle
+import re
 import sys
 from pathlib import Path
+
+import requests
+
+try:
+    import networkx as nx
+    NETWORKX_AVAILABLE = True
+except ImportError:
+    NETWORKX_AVAILABLE = False
+
+try:
+    from dotenv import load_dotenv
+    _env_path = Path(__file__).resolve().parents[2] / ".env"
+    load_dotenv(_env_path, override=False)
+except Exception:
+    pass
 
 # Add current directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,106 +40,286 @@ except ImportError as e:
     print(f"MCP import error: {e}", file=sys.stderr)
     sys.exit(1)
 
-# Lazy import for graph builder to avoid read-only filesystem issues
-GRAPH_AVAILABLE = None  # Will be determined when needed
-def _check_graph_available():
-    """Check if graph builder is available (lazy import)"""
-    global GRAPH_AVAILABLE
-    if GRAPH_AVAILABLE is not None:
-        return GRAPH_AVAILABLE
-    
-    try:
-        # Try importing - this may fail if graph_data directory can't be created
-        # The claude_graph_builder now handles OSError gracefully, so import should work
-        import claude_graph_builder
-        GRAPH_AVAILABLE = True
-        return True
-    except (ImportError, OSError, Exception) as e:
-        GRAPH_AVAILABLE = False
-        # Only print warning if it's not a read-only filesystem issue (which is expected)
-        if "Read-only file system" not in str(e):
-            print(f"Warning: Graph features unavailable: {e}", file=sys.stderr)
-        return False
+# Graph availability
+GRAPH_AVAILABLE = NETWORKX_AVAILABLE
+logger = logging.getLogger(__name__)
 
 # Service URLs
 EMBEDDING_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
 GRAPH_SERVICE_URL = os.getenv("CLAUDE_GRAPH_SERVICE_URL", "http://localhost:8002")
 
+def _service_headers() -> dict:
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    if not api_key:
+        return {}
+    return {"X-API-Key": api_key}
+
 # Initialize server
 app = Server("obsidian-rag-unified")
+
+class OpenAIGraphQuerier:
+    """Query the knowledge graph using OpenAI for synthesis."""
+
+    def __init__(self, graph):
+        self.graph = graph
+        self.api_key = os.environ.get("OPENAI_API_KEY")
+        self.model = os.environ.get("OPENAI_MODEL", "gpt-5-mini")
+        self.timeout = float(os.environ.get("OPENAI_TIMEOUT", "60"))
+
+    def find_paths(self, source: str, target: str, max_depth: int = 3):
+        source = source.strip().strip('"\'')
+        target = target.strip().strip('"\'')
+
+        def find_best_match(name: str):
+            name_lower = name.lower()
+            matches = [
+                n for n in self.graph.nodes()
+                if name_lower in n.lower() or n.lower() in name_lower
+            ]
+            if not matches:
+                return None
+            return max(matches, key=lambda n: self.graph.degree(n))
+
+        s_ent = source if self.graph.has_node(source) else find_best_match(source)
+        t_ent = target if self.graph.has_node(target) else find_best_match(target)
+        if not s_ent or not t_ent:
+            return []
+        try:
+            paths = list(nx.all_simple_paths(self.graph.to_undirected(), s_ent, t_ent, cutoff=max_depth))
+            return paths[:10]
+        except Exception:
+            return []
+
+    def get_entity_neighborhood(self, entity: str, depth: int = 1):
+        entity = entity.strip().strip('"\'')
+        if self.graph.has_node(entity):
+            matches = [entity]
+        else:
+            matches = [n for n in self.graph.nodes() if entity.lower() == n.lower()]
+            if not matches and len(entity) > 3:
+                matches = [n for n in self.graph.nodes() if entity.lower() in n.lower()]
+
+        if not matches:
+            return {"entity": entity, "found": False}
+
+        entity = max(matches, key=lambda n: self.graph.degree(n))
+        neighbors = {
+            "entity": entity,
+            "found": True,
+            "properties": dict(self.graph.nodes[entity]),
+            "outgoing": [],
+            "incoming": []
+        }
+
+        for _, t, d in self.graph.out_edges(entity, data=True):
+            neighbors["outgoing"].append({
+                "target": t,
+                "relationship": d.get("relationship_type", "related_to"),
+                "properties": d
+            })
+        for s, _, d in self.graph.in_edges(entity, data=True):
+            neighbors["incoming"].append({
+                "source": s,
+                "relationship": d.get("relationship_type", "related_to"),
+                "properties": d
+            })
+        return neighbors
+
+    def _extract_entities(self, user_query: str, max_entities: int = 20):
+        query_lower = user_query.lower()
+        entities_in_query = []
+        stopwords = {
+            "and", "or", "the", "a", "an", "in", "on", "with", "for", "to", "of",
+            "from", "by", "is", "are", "was", "were", "be", "been", "it", "this",
+            "that", "these", "those", "as", "at", "via", "etc"
+        }
+
+        def is_noise_entity(name: str) -> bool:
+            name_lower = name.lower().strip()
+            if len(name_lower) <= 2 or name_lower.isdigit():
+                return True
+            if name_lower in stopwords:
+                return True
+            tokens = [t for t in re.split(r"\W+", name_lower) if t]
+            return bool(tokens) and all(t in stopwords for t in tokens)
+
+        all_nodes = sorted(list(self.graph.nodes()), key=len, reverse=True)
+        for node in all_nodes:
+            node_lower = node.lower()
+            if len(node_lower) <= 2 or is_noise_entity(node_lower):
+                continue
+            if re.search(r"\b" + re.escape(node_lower) + r"\b", query_lower):
+                entities_in_query.append(node)
+                continue
+            if len(node_lower) > 3 and node_lower in query_lower:
+                entities_in_query.append(node)
+
+        return entities_in_query[:max_entities]
+
+    def _build_context(self, user_query: str, max_entities: int = 20):
+        entities_in_query = self._extract_entities(user_query, max_entities)
+        graph_context = [self.get_entity_neighborhood(e) for e in entities_in_query]
+
+        if not graph_context:
+            return "I couldn't find specific entities in the knowledge graph. Relying on document search.", []
+
+        blocks = []
+        for context in graph_context:
+            outgoing = ", ".join([
+                f"{context['entity']} --[{r['relationship']}]--> {r['target']}"
+                for r in context.get("outgoing", [])
+            ])
+            incoming = ", ".join([
+                f"{r['source']} --[{r['relationship']}]--> {context['entity']}"
+                for r in context.get("incoming", [])
+            ])
+            blocks.append(
+                f"Entity: {context['entity']}\n"
+                f"Outgoing: {outgoing}\n"
+                f"Incoming: {incoming}"
+            )
+
+        context_text = "\n---\n".join(blocks)
+        return context_text, graph_context
+
+    def _call_openai(self, prompt: str):
+        if not self.api_key:
+            raise ValueError("OPENAI_API_KEY not configured")
+
+        model_lower = (self.model or "").lower()
+        token_param = "max_tokens"
+        restrict_temperature = False
+        if model_lower.startswith(("gpt-5", "o1", "o3")):
+            token_param = "max_completion_tokens"
+            restrict_temperature = True
+
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are analyzing a personal knowledge graph. "
+                        "Answer the user's question using only the provided graph context. "
+                        "If the graph context is thin, say so briefly."
+                    )
+                },
+                {"role": "user", "content": prompt}
+            ],
+            token_param: 1200
+        }
+        if not restrict_temperature:
+            payload["temperature"] = 0.4
+
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            },
+            json=payload,
+            timeout=self.timeout
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f"OpenAI API Error {response.status_code}: {response.text}")
+
+        data = response.json()
+        choices = data.get("choices", [])
+        if not choices:
+            raise ValueError("No choices returned from OpenAI")
+        message = choices[0].get("message", {})
+        return message.get("content", "")
+
+    def query_with_openai(self, user_query: str, max_entities: int = 20):
+        context_text, graph_context = self._build_context(user_query, max_entities)
+        if not graph_context:
+            return context_text
+        prompt = (
+            f"Knowledge Graph Context:\n<graph>\n{context_text}\n</graph>\n\n"
+            f"User Question: {user_query}\n"
+            "Provide a concise, evidence-based answer citing specific entities when relevant."
+        )
+        return self._call_openai(prompt)
+
+    def get_graph_stats(self):
+        graph = self.graph
+        try:
+            is_connected = nx.is_connected(graph.to_undirected())
+        except Exception:
+            is_connected = False
+
+        top_entities = [
+            {"entity": node, "connections": degree}
+            for node, degree in graph.degree()
+        ]
+        top_entities.sort(key=lambda item: item["connections"], reverse=True)
+
+        return {
+            "total_nodes": graph.number_of_nodes(),
+            "total_edges": graph.number_of_edges(),
+            "density": nx.density(graph),
+            "is_connected": is_connected,
+            "top_entities": top_entities
+        }
+
 
 # Global graph querier (lazy-loaded)
 querier = None
 graph_loaded = False
 
+def _resolve_graph_path():
+    graph_path = os.environ.get("KNOWLEDGE_GRAPH_PATH")
+    if graph_path:
+        return Path(graph_path)
+
+    script_dir = Path(__file__).parent.absolute()
+    default_paths = [
+        script_dir / "graph_data" / "knowledge_graph_full.pkl",
+        script_dir / "graph_data" / "knowledge_graph_test.pkl",
+        script_dir / "graph_data" / "knowledge_graph.pkl",
+        script_dir / "knowledge_graph_full.pkl",
+        script_dir / "knowledge_graph_test.pkl",
+        script_dir / "knowledge_graph.pkl",
+        Path("graph_data/knowledge_graph_full.pkl"),
+        Path("graph_data/knowledge_graph_test.pkl"),
+        Path("graph_data/knowledge_graph.pkl"),
+        Path("knowledge_graph_full.pkl"),
+        Path("knowledge_graph_test.pkl"),
+        Path("knowledge_graph.pkl")
+    ]
+    for path in default_paths:
+        if path.exists():
+            return path.absolute()
+    return None
+
 def load_graph():
     """Load the knowledge graph"""
     global querier, graph_loaded
-    
+
     if graph_loaded:
         return True
-    
-    # Lazy import check
-    if not _check_graph_available():
+
+    if not GRAPH_AVAILABLE:
         return False
-    
-    # Import here to avoid read-only filesystem issues at module load
-    from claude_graph_builder import ClaudeGraphBuilder, ClaudeGraphQuerier
-    
+
     try:
-        # Get API key
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if not api_key:
+        graph_path = _resolve_graph_path()
+        if not graph_path or not graph_path.exists():
+            print("Graph file not found. Set KNOWLEDGE_GRAPH_PATH to a valid .pkl file.", file=sys.stderr)
             return False
-        
-        # Get graph file path
-        graph_path = os.environ.get("KNOWLEDGE_GRAPH_PATH")
-        if not graph_path:
-            # Try default locations - use absolute paths based on script location
-            script_dir = Path(__file__).parent.absolute()
-            default_paths = [
-                script_dir / "graph_data" / "knowledge_graph_full.pkl",
-                script_dir / "graph_data" / "knowledge_graph_test.pkl",
-                script_dir / "graph_data" / "knowledge_graph.pkl",
-                script_dir / "knowledge_graph_full.pkl",
-                script_dir / "knowledge_graph_test.pkl",
-                script_dir / "knowledge_graph.pkl",
-                # Also try relative paths (for backward compatibility)
-                Path("graph_data/knowledge_graph_full.pkl"),
-                Path("graph_data/knowledge_graph_test.pkl"),
-                Path("graph_data/knowledge_graph.pkl"),
-                Path("knowledge_graph_full.pkl"),
-                Path("knowledge_graph_test.pkl"),
-                Path("knowledge_graph.pkl")
-            ]
-            for path in default_paths:
-                if path.exists():
-                    graph_path = str(path.absolute())
-                    break
-        
-        if not graph_path:
+
+        with open(graph_path, "rb") as handle:
+            graph = pickle.load(handle)
+
+        if not isinstance(graph, nx.Graph):
+            print("Graph file did not contain a valid NetworkX graph.", file=sys.stderr)
             return False
-        
-        # Convert to absolute path if relative
-        graph_path_obj = Path(graph_path)
-        if not graph_path_obj.is_absolute():
-            # If relative, try from script directory
-            script_dir = Path(__file__).parent.absolute()
-            graph_path_obj = script_dir / graph_path
-        
-        if not graph_path_obj.exists():
-            print(f"Graph file not found: {graph_path_obj}", file=sys.stderr)
-            return False
-        
-        graph_path = str(graph_path_obj.absolute())
-        
-        # Load graph
-        builder = ClaudeGraphBuilder(api_key=api_key)
-        builder.load_graph(graph_path)
-        querier = ClaudeGraphQuerier(builder, api_key=api_key)
+
+        querier = OpenAIGraphQuerier(graph)
         graph_loaded = True
         return True
-        
+
     except Exception as e:
         print(f"Error loading graph: {e}", file=sys.stderr)
         return False
@@ -170,7 +367,7 @@ async def list_tools() -> list[Tool]:
     ]
     
     # Add graph tools if available (lazy check)
-    if _check_graph_available():
+    if GRAPH_AVAILABLE:
         # Try to load graph (but don't fail if it can't load)
         try:
             load_graph()  # Try to load graph
@@ -181,7 +378,7 @@ async def list_tools() -> list[Tool]:
             tools.extend([
                 Tool(
                     name="obsidian_graph_query",
-                    description="Query your knowledge graph using Claude's reasoning. Ask questions about entities, relationships, and connections in your vault. Returns comprehensive answers based on graph structure.",
+                    description="Query your knowledge graph using OpenAI synthesis. Ask questions about entities, relationships, and connections in your vault. Returns answers based on graph structure.",
                     inputSchema={
                         "type": "object",
                         "properties": {
@@ -312,10 +509,15 @@ async def search_vault(arguments: dict) -> list[TextContent]:
                 "reranking": True,
                 "deduplicate": True
             },
+            headers=_service_headers(),
             timeout=15
         )
-        
-        if response.status_code != 200:
+
+        status_code = getattr(response, "status_code", None)
+        if not isinstance(status_code, int):
+            raise requests.exceptions.ConnectionError("Invalid response from embedding service")
+
+        if status_code != 200:
             return [TextContent(
                 type="text",
                 text=f"❌ Search failed: {response.status_code}\n"
@@ -368,7 +570,11 @@ async def get_vault_statistics(arguments: dict) -> list[TextContent]:
     try:
         # Try embedding service stats
         try:
-            stats_response = requests.get(f"{EMBEDDING_URL}/stats", timeout=5)
+            stats_response = requests.get(
+                f"{EMBEDDING_URL}/stats",
+                timeout=5,
+                headers=_service_headers()
+            )
             if stats_response.status_code == 200:
                 stats = stats_response.json()
                 output = "📊 **Vault Statistics:**\n\n"
@@ -390,41 +596,46 @@ async def get_vault_statistics(arguments: dict) -> list[TextContent]:
 
 async def query_knowledge_graph(arguments: dict) -> list[TextContent]:
     """Query knowledge graph"""
+    query = arguments.get("query", "")
+    max_entities = arguments.get("max_entities", 20)
+
+    if not query:
+        return [TextContent(type="text", text="❌ Query is required")]
+
     if not GRAPH_AVAILABLE:
         return [TextContent(
             type="text",
-            text="❌ Knowledge graph not available. claude_graph_builder.py not found."
+            text="❌ Knowledge graph not available. Make sure networkx is installed."
         )]
     
     if not load_graph():
         return [TextContent(
             type="text",
             text="❌ Could not load knowledge graph. Make sure:\n"
-                 "1. ANTHROPIC_API_KEY is set\n"
-                 "2. KNOWLEDGE_GRAPH_PATH points to a valid .pkl file\n"
-                 "3. Or knowledge_graph_full.pkl exists in graph_data/"
+                 "1. KNOWLEDGE_GRAPH_PATH points to a valid .pkl file\n"
+                 "2. Or knowledge_graph_full.pkl exists in graph_data/"
         )]
     
-    query = arguments.get("query", "")
-    max_entities = arguments.get("max_entities", 20)
-    
-    if not query:
-        return [TextContent(type="text", text="❌ Query is required")]
-    
     try:
-        answer = querier.query_with_claude(query, max_entities=max_entities)
+        if not os.environ.get("OPENAI_API_KEY"):
+            return [TextContent(
+                type="text",
+                text="❌ OPENAI_API_KEY not configured for graph queries."
+            )]
+
+        answer = querier.query_with_openai(query, max_entities=max_entities)
         return [TextContent(type="text", text=answer)]
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Graph query error: {str(e)}")]
 
 async def get_entity_info(arguments: dict) -> list[TextContent]:
     """Get entity information"""
-    if not load_graph():
-        return [TextContent(type="text", text="❌ Graph not loaded")]
-    
     entity_name = arguments.get("entity_name", "")
     if not entity_name:
         return [TextContent(type="text", text="❌ Entity name is required")]
+
+    if not load_graph():
+        return [TextContent(type="text", text="❌ Graph not loaded")]
     
     try:
         neighborhood = querier.get_entity_neighborhood(entity_name)
@@ -455,15 +666,15 @@ async def get_entity_info(arguments: dict) -> list[TextContent]:
 
 async def find_entity_path(arguments: dict) -> list[TextContent]:
     """Find path between entities"""
-    if not load_graph():
-        return [TextContent(type="text", text="❌ Graph not loaded")]
-    
     source = arguments.get("source", "")
     target = arguments.get("target", "")
     max_depth = arguments.get("max_depth", 3)
     
     if not source or not target:
         return [TextContent(type="text", text="❌ Both source and target are required")]
+
+    if not load_graph():
+        return [TextContent(type="text", text="❌ Graph not loaded")]
     
     try:
         paths = querier.find_paths(source, target, max_depth=max_depth)
@@ -484,14 +695,15 @@ async def find_entity_path(arguments: dict) -> list[TextContent]:
 
 async def search_entities(arguments: dict) -> list[TextContent]:
     """Search entities"""
-    if not load_graph():
-        return [TextContent(type="text", text="❌ Graph not loaded")]
-    
-    search_term = arguments.get("search_term", "").lower()
+    search_term = arguments.get("search_term") or arguments.get("query") or ""
+    search_term = search_term.lower()
     limit = arguments.get("limit", 10)
     
     if not search_term:
         return [TextContent(type="text", text="❌ Search term is required")]
+
+    if not load_graph():
+        return [TextContent(type="text", text="❌ Graph not loaded")]
     
     try:
         matching_entities = []
@@ -552,4 +764,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

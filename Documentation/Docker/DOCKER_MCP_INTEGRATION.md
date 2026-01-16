@@ -14,4 +14,4 @@ docker compose up -d
 curl -s http://localhost:4000/api/v1/health
 ```
 
-If Claude Desktop cannot connect, ensure the gateway port `4000` is accessible locally.
+If ChatGPT Desktop cannot connect, ensure the gateway port `4000` is accessible locally.

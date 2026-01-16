@@ -52,7 +52,6 @@ def test_reranking_integration():
     print("✅ Reranking can be disabled")
     
     print("\n✅ All integration tests passed!")
-    return True
 
 if __name__ == "__main__":
     try:

@@ -29,8 +29,10 @@ def test_deep_research_provider_fallback(monkeypatch):
     monkeypatch.setattr(api_gateway, "_load_deep_thinking_rag", lambda: FakeRAG)
 
     client = TestClient(api_gateway.app)
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else {}
 
-    with client.websocket_connect("/api/v1/deep-research") as ws:
+    with client.websocket_connect("/api/v1/deep-research", headers=headers) as ws:
         ws.send_json({"query": "test", "provider": "ollama"})
 
         result = None
@@ -54,8 +56,10 @@ def test_deep_research_provider_fallback(monkeypatch):
 def test_deep_research_missing_query(monkeypatch):
     monkeypatch.setattr(api_gateway, "_load_deep_thinking_rag", lambda: FakeRAG)
     client = TestClient(api_gateway.app)
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else {}
 
-    with client.websocket_connect("/api/v1/deep-research") as ws:
+    with client.websocket_connect("/api/v1/deep-research", headers=headers) as ws:
         ws.send_json({"query": ""})
         msg = ws.receive_json()
         assert msg["type"] == "error"

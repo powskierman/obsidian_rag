@@ -7,6 +7,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch, AsyncMock
 import asyncio
 
+pytest.importorskip("mcp")
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from obsidian_rag_unified_mcp import (
     app,

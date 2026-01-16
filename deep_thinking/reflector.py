@@ -1,4 +1,6 @@
 import json
+import os
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 from .state import Step, PastStep, RAGState
 
@@ -70,11 +72,12 @@ class ReflectionAgent:
                 confidence=reflection.get("confidence", 0.0)
             )
         except Exception as e:
-            print(f"Error parsing reflection: {e}")
+            self._log_debug("Reflection parse error", {"error": str(e), "response": content[:1000] if content else ""})
+            key_findings = self._fallback_key_findings(documents)
             return PastStep(
                 step=step,
                 documents_found=len(documents),
-                key_findings="Error analyzing results.",
+                key_findings=key_findings,
                 confidence=0.0
             )
 
@@ -84,3 +87,31 @@ class ReflectionAgent:
             summary += f"Step {ps['step']['step_number']}: {ps['step']['sub_question']}\n"
             summary += f"Finding: {ps['key_findings']}\n\n"
         return summary
+
+    @staticmethod
+    def _fallback_key_findings(documents: List[Dict[str, Any]]) -> str:
+        if not documents:
+            return "No documents retrieved for this step."
+        sources = []
+        for doc in documents[:3]:
+            source = doc.get("source") or "Unknown"
+            sources.append(source)
+        source_text = ", ".join(sources)
+        return f"Retrieved {len(documents)} documents. Top sources: {source_text}."
+
+    @staticmethod
+    def _log_debug(message: str, details: Dict[str, Any]) -> None:
+        log_path = os.getenv("DEEP_THINKING_LOG_PATH", "/tmp/deep_thinking.log")
+        try:
+            log_dir = os.path.dirname(log_path)
+            if log_dir:
+                os.makedirs(log_dir, exist_ok=True)
+            payload = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "message": message,
+                "details": details
+            }
+            with open(log_path, "a", encoding="utf-8") as handle:
+                handle.write(json.dumps(payload) + "\n")
+        except Exception:
+            pass

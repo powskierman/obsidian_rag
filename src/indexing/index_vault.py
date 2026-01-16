@@ -24,6 +24,12 @@ except ImportError:
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SUPPORTED_EXTENSIONS = {".md", ".pdf"}
 
+def _service_headers() -> dict:
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    if not api_key:
+        return {}
+    return {"X-API-Key": api_key}
+
 def get_file_hash(filepath):
     """Get MD5 hash of file to detect changes"""
     hash_obj = hashlib.md5()
@@ -353,7 +359,7 @@ def process_file(
                 delete_resp = requests.post(
                     f"{embedding_service_url}/delete_by_filepath",
                     json={"filepath": metadata.get("filepath", str(filepath))},
-                    headers={"X-Admin-Token": admin_token},
+                    headers={**_service_headers(), "X-Admin-Token": admin_token},
                     timeout=10
                 )
                 if delete_resp.status_code != 200:
@@ -420,6 +426,7 @@ def process_file(
                     response = requests.post(
                         f"{embedding_service_url}/{endpoint}",
                         json=payload,
+                        headers=_service_headers(),
                         timeout=30
                     )
                     if response.status_code == 404 and not use_add_endpoint:
@@ -427,6 +434,7 @@ def process_file(
                         response = requests.post(
                             f"{embedding_service_url}/add",
                             json=payload,
+                            headers=_service_headers(),
                             timeout=30
                         )
                     if response.status_code == 200:
@@ -500,7 +508,11 @@ def index_vault(
     
     # Check if service is available
     try:
-        response = requests.get(f"{embedding_service_url}/health", timeout=5)
+        response = requests.get(
+            f"{embedding_service_url}/health",
+            timeout=5,
+            headers=_service_headers()
+        )
         if response.status_code != 200:
             print(f"❌ Embedding service not healthy")
             return
@@ -511,7 +523,10 @@ def index_vault(
     
     # Check if service is up
     try:
-        response = requests.get(f"{embedding_service_url}/stats")
+        response = requests.get(
+            f"{embedding_service_url}/stats",
+            headers=_service_headers()
+        )
         if response.status_code == 200:
             stats = response.json()
             initial_count = stats.get('total_documents', 0)
@@ -560,6 +575,16 @@ def index_vault(
         if removed_keys:
             for key in removed_keys:
                 cache.pop(key, None)
+                if admin_token:
+                    try:
+                        requests.post(
+                            f"{embedding_service_url}/delete_by_filepath",
+                            json={"filepath": key},
+                            headers={**_service_headers(), "X-Admin-Token": admin_token},
+                            timeout=10
+                        )
+                    except Exception as e:
+                        print(f"  ⚠️  Failed to delete stale chunks for {key}: {e}")
             cache_dirty = True
             print(f"🧹 Removed {len(removed_keys)} stale cache entries")
 
@@ -620,7 +645,11 @@ def index_vault(
     
     # Get final stats
     try:
-        response = requests.get(f"{embedding_service_url}/stats", timeout=5)
+        response = requests.get(
+            f"{embedding_service_url}/stats",
+            timeout=5,
+            headers=_service_headers()
+        )
         if response.status_code == 200:
             stats = response.json()
             final_count = stats.get('total_documents', 0)
@@ -671,7 +700,7 @@ if __name__ == "__main__":
         try:
             response = requests.post(
                 f"{args.url}/clear",
-                headers={"X-Admin-Token": admin_token},
+                headers={**_service_headers(), "X-Admin-Token": admin_token},
                 timeout=10
             )
             if response.status_code != 200:

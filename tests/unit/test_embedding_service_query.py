@@ -2,6 +2,7 @@
 Unit tests for embedding_service query behavior (filters, dedup, threshold).
 """
 import importlib
+import os
 import sys
 import types
 
@@ -76,7 +77,9 @@ def test_query_preserves_advanced_filters(embedding_module):
     client = embedding_module.app.test_client()
     filters = {"$or": [{"dir_Medical": True}, {"dir_Lymphoma": True}]}
 
-    response = client.post("/query", json={"query": "pet scan", "filters": filters})
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else None
+    response = client.post("/query", json={"query": "pet scan", "filters": filters}, headers=headers)
     assert response.status_code == 200
     assert embedding_module.collection.last_where == filters
 
@@ -86,7 +89,9 @@ def test_query_builds_simple_filter_and_dedups_sources(embedding_module):
     client = embedding_module.app.test_client()
     filters = {"dir_Medical": True, "dir_Lymphoma": True}
 
-    response = client.post("/query", json={"query": "pet scan", "filters": filters})
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else None
+    response = client.post("/query", json={"query": "pet scan", "filters": filters}, headers=headers)
     assert response.status_code == 200
 
     where_clause = embedding_module.collection.last_where
@@ -104,9 +109,12 @@ def test_query_builds_simple_filter_and_dedups_sources(embedding_module):
 def test_query_relevance_threshold_filters(embedding_module):
     client = embedding_module.app.test_client()
 
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else None
     response = client.post(
         "/query",
         json={"query": "pet scan", "relevance_threshold": 95},
+        headers=headers,
     )
     assert response.status_code == 200
     payload = response.get_json()

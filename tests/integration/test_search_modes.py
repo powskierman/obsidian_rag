@@ -3,6 +3,7 @@ Tests for unified query search modes in the API gateway.
 """
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List
+import os
 
 import httpx
 import pytest
@@ -35,8 +36,14 @@ class FakeAsyncClient:
     async def __aexit__(self, exc_type, exc, tb) -> bool:
         return False
 
-    async def post(self, url: str, json: Dict[str, Any] = None, timeout: float = None) -> FakeResponse:
-        self.calls.append({"url": url, "json": json, "timeout": timeout})
+    async def post(
+        self,
+        url: str,
+        json: Dict[str, Any] = None,
+        timeout: float = None,
+        headers: Dict[str, Any] = None
+    ) -> FakeResponse:
+        self.calls.append({"url": url, "json": json, "timeout": timeout, "headers": headers})
         if url not in self.routes:
             raise AssertionError(f"Unexpected POST url: {url}")
         return self.routes[url](json)
@@ -84,7 +91,9 @@ def _post_query(client: TestClient, mode: str) -> httpx.Response:
         "temperature": 0.2,
         "relevance_threshold": 12.5,
     }
-    return client.post("/api/v1/query", json=payload)
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else None
+    return client.post("/api/v1/query", json=payload, headers=headers)
 
 
 @pytest.mark.integration

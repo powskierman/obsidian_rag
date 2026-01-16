@@ -4,6 +4,7 @@ Improves retrieval precision by reranking documents based on query-document rele
 """
 
 from typing import List, Dict, Any
+import re
 from sentence_transformers import CrossEncoder
 
 
@@ -92,8 +93,20 @@ class Reranker:
             List of reranked documents above threshold, up to top_k
         """
         reranked = self.rerank(query, documents, top_k=len(documents))
-        
-        # Filter by threshold and limit to top_k
-        filtered = [doc for doc in reranked if doc["rerank_score"] >= threshold]
-        
+
+        query_terms = [
+            term for term in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", query.lower())
+            if term not in {"and", "or", "the", "a", "an", "of", "to", "in", "on", "for", "with", "by"}
+        ]
+
+        filtered = []
+        for doc in reranked:
+            if doc["rerank_score"] < threshold:
+                continue
+            if query_terms:
+                content = doc.get("content", "").lower()
+                if not any(term in content for term in query_terms):
+                    continue
+            filtered.append(doc)
+
         return filtered[:top_k]

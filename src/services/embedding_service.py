@@ -37,8 +37,38 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from src.utils.query_feedback import log_query, save_feedback, get_metrics, get_all_mode_performance, get_database_stats
 
+def _parse_allowed_origins() -> list[str]:
+    raw = os.getenv("OBSIDIAN_RAG_ALLOWED_ORIGINS", "").strip()
+    if raw:
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8501",
+        "http://127.0.0.1:8501",
+    ]
+
+
+def _get_api_key() -> str | None:
+    return os.getenv("OBSIDIAN_RAG_API_KEY")
+
+
+def _api_key_valid() -> bool:
+    expected = _get_api_key()
+    if not expected:
+        return True
+    provided = request.headers.get("X-API-Key")
+    return provided == expected
+
+
 app = Flask(__name__)
-CORS(app)  # Enable CORS for browser access
+CORS(app, resources={r"/*": {"origins": _parse_allowed_origins()}})
+
+
+@app.before_request
+def _require_api_key():
+    if not _api_key_valid():
+        return jsonify({"error": "Unauthorized"}), 401
 
 # Initialize models
 print("Loading embedding model...")
@@ -229,7 +259,7 @@ def stats():
     except Exception as e:
         import traceback
         error_trace = traceback.format_exc()
-        print(f"❌ Query error for '{query}': {e}\n{error_trace}")
+        print(f"❌ Stats error: {e}\n{error_trace}")
         return jsonify({"error": str(e)}), 500
 
 @app.route('/add', methods=['POST'])
@@ -268,7 +298,7 @@ def add_document():
         import traceback
         error_trace = traceback.format_exc()
         print(f"❌ Error adding document: {e}\n{error_trace}")
-        return jsonify({"error": str(e), "traceback": error_trace}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/upsert', methods=['POST'])
@@ -301,7 +331,7 @@ def upsert_document():
         import traceback
         error_trace = traceback.format_exc()
         print(f"❌ Error upserting document: {e}\n{error_trace}")
-        return jsonify({"error": str(e), "traceback": error_trace}), 500
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/query', methods=['POST'])
 def query_documents():
@@ -494,7 +524,7 @@ def query_documents():
             "relevance_threshold": relevance_threshold
         }
         print(f"❌ Query error: {e}\nPayload: {debug_payload}\n{error_trace}")
-        return jsonify({"error": str(e), "traceback": error_trace}), 500
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/feedback', methods=['POST'])
 def submit_feedback():

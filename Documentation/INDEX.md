@@ -45,6 +45,7 @@ This index lists current, supported docs. Historical plans and fixes are in `Doc
 - Documentation/Features/SEARCH_COMPARISON_RESULTS.md
 - Documentation/Features/SEARCH_EXAMPLES.md
 - Documentation/Features/COMBINED_SEARCH_WORKFLOW.md
+- Documentation/Features/CHATGPT_PARITY_IMPLEMENTATION_REPORT.md
 
 ## Models
 - Documentation/Models/README.md
@@ -53,6 +54,7 @@ This index lists current, supported docs. Historical plans and fixes are in `Doc
 ## MCP Integration
 - Documentation/MCP/MCP_SETUP_INSTRUCTIONS.md
 - Documentation/MCP/MCP_VAULT_SEARCH_GUIDE.md
+- Documentation/MCP/CHATGPT_DEEP_SEARCH_GUIDE.md
 - Documentation/MCP/MCP_CAPABILITIES_COMPARISON.md
 - Documentation/MCP/FORCE_UNIFIED_SERVER.md
 - Documentation/MCP/TROUBLESHOOT_GRAPH_TOOLS.md

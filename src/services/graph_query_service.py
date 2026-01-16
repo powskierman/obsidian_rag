@@ -37,8 +37,45 @@ for pr in potential_roots:
             sys.path.insert(0, src_path)
             break
 
+def _parse_allowed_origins() -> list[str]:
+    raw = os.getenv("OBSIDIAN_RAG_ALLOWED_ORIGINS", "").strip()
+    if raw:
+        return [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8501",
+        "http://127.0.0.1:8501",
+    ]
+
+
+def _get_api_key() -> str | None:
+    return os.getenv("OBSIDIAN_RAG_API_KEY")
+
+
+def _api_key_valid() -> bool:
+    expected = _get_api_key()
+    if not expected:
+        return True
+    provided = request.headers.get("X-API-Key")
+    return provided == expected
+
+
+def _service_headers() -> dict:
+    api_key = _get_api_key()
+    if not api_key:
+        return {}
+    return {"X-API-Key": api_key}
+
+
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": _parse_allowed_origins()}})
+
+
+@app.before_request
+def _require_api_key():
+    if not _api_key_valid():
+        return jsonify({"error": "Unauthorized"}), 401
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -54,6 +91,17 @@ except ImportError as e:
     except ImportError:
         logger.error("All memory_manager import attempts failed.")
         def get_memory_manager(): return None
+
+try:
+    from utils.prompt_builder import build_prompt_appendix, build_vault_system_prompt
+except ImportError:
+    try:
+        from src.utils.prompt_builder import build_prompt_appendix, build_vault_system_prompt
+    except ImportError:
+        def build_prompt_appendix(user_query: str, provider: str) -> str:
+            return ""
+        def build_vault_system_prompt(context_text: str, user_query: str, provider: str, custom_prompt: str | None = None) -> str:
+            return custom_prompt or ""
 
 # Global graph builder and querier
 builder = None
@@ -324,14 +372,24 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
             model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
         client = OpenAI(api_key=api_key)
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
+        restricted_temp = False
+        if model:
+            model_lower = model.lower()
+            if model_lower.startswith(("gpt-5", "o1", "o3")):
+                restricted_temp = True
+
+        request_payload = {
+            "model": model,
+            "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_query}
-            ],
-            temperature=temperature
-        )
+            ]
+        }
+        if not restricted_temp:
+            request_payload["temperature"] = temperature
+
+        request_timeout = float(os.getenv("OPENAI_TIMEOUT", "60"))
+        response = client.chat.completions.create(timeout=request_timeout, **request_payload)
         return response.choices[0].message.content
 
     elif provider == "kimi":
@@ -641,7 +699,6 @@ def query_graph():
     """
     try:
         data = request.json
-        logger.info(f"FULL PAYLOAD RECEIVED: {json.dumps(data)}")
         user_query = data.get('query', '')
         mode = data.get('mode', 'graph')
         llm_provider = data.get('llm_provider', 'ollama')
@@ -653,6 +710,16 @@ def query_graph():
         web_search_enabled = data.get('web_search', False)
         llm_knowledge_enabled = data.get('llm_knowledge', False)
         conversation_history = data.get('conversation_history', [])
+
+        logger.info(
+            "Query request: mode=%s provider=%s model=%s n_results=%s web_search=%s llm_knowledge=%s",
+            mode,
+            llm_provider,
+            model or "default",
+            n_results,
+            web_search_enabled,
+            llm_knowledge_enabled,
+        )
 
         if not user_query:
             return jsonify({'error': 'Query is required'}), 400
@@ -684,7 +751,8 @@ def query_graph():
                         'deduplicate': True,
                         'relevance_threshold': 75  # Filter out noise < 75%
                     },
-                    timeout=60
+                    timeout=60,
+                    headers=_service_headers()
                 )
 
                 if vector_response.status_code != 200:
@@ -739,21 +807,12 @@ def query_graph():
                 context_text = "\n".join(context_parts)
 
                 # Build system prompt
-                if custom_system_prompt:
-                    system_prompt = custom_system_prompt
-                else:
-                    system_prompt = f"""You are an AI assistant helping analyze an Obsidian knowledge base.
-
-Context from notes:
-{context_text}
-
-Provide a thorough, accurate answer that:
-- References specific information from the context
-- Uses only the provided context; avoid generic background
-- Is medically accurate when discussing health topics
-- Includes technical details when relevant
-- Cites which sources you used
-- If a specific detail isn't in the notes, say "Not found in notes" clearly"""
+                system_prompt = build_vault_system_prompt(
+                    context_text=context_text,
+                    user_query=user_query,
+                    provider=llm_provider,
+                    custom_prompt=custom_system_prompt
+                )
 
                 # Call LLM
                 answer = call_llm(llm_provider, model, system_prompt, user_query, temperature)
@@ -1015,7 +1074,8 @@ Provide a thorough, accurate answer that:
                             'deduplicate': True,
                             'relevance_threshold': 75  # Filter out noise < 75%
                         },
-                        timeout=60
+                        timeout=60,
+                        headers=_service_headers()
                     )
 
                     if vector_response.status_code == 200:
@@ -1113,6 +1173,9 @@ Finally, provide your answer in a structured, easy-to-read format.
 
 **Answer:**
 """
+                        synthesis_appendix = build_prompt_appendix(user_query, llm_provider)
+                        if synthesis_appendix:
+                            synthesis_system_prompt = f"{synthesis_system_prompt}\n\n{synthesis_appendix}"
                         # Call LLM for final synthesis
                         final_answer = call_llm(llm_provider, model, synthesis_system_prompt, user_query, temperature)
                         base_response['answer'] = final_answer
@@ -1334,7 +1397,8 @@ def query_stream():
                             'reranking': True,
                             'deduplicate': True
                         },
-                        timeout=30
+                        timeout=30,
+                        headers=_service_headers()
                     )
 
                     if vector_response.status_code != 200:
@@ -1372,20 +1436,12 @@ def query_stream():
                     context_text = "\n".join(context_parts)
 
                     # Build system prompt
-                    if custom_system_prompt:
-                        system_prompt = custom_system_prompt
-                    else:
-                        system_prompt = f"""You are an AI assistant helping analyze an Obsidian knowledge base.
-
-Context from notes:
-{context_text}
-
-Provide a thorough, accurate answer that:
-- References specific information from the context
-- Is medically accurate when discussing health topics
-- Includes technical details when relevant
-- Cites which sources you used
-- If the context doesn't contain relevant information, say so clearly"""
+                    system_prompt = build_vault_system_prompt(
+                        context_text=context_text,
+                        user_query=user_query,
+                        provider=llm_provider,
+                        custom_prompt=custom_system_prompt
+                    )
 
                     # Stream LLM response
                     yield f"data: {json.dumps({'type': 'start'})}\n\n"
@@ -1403,7 +1459,7 @@ Provide a thorough, accurate answer that:
 
                     # For graph mode, we can't stream the initial query result
                     # but we can send it in chunks
-                    graph_answer = querier.query_with_llm(user_query, max_entities=20)
+                    graph_answer, _ = querier.query_with_llm(user_query, max_entities=20)
 
                     yield f"data: {json.dumps({'type': 'start'})}\n\n"
 
@@ -1422,7 +1478,7 @@ Provide a thorough, accurate answer that:
                         return
 
                     # Get graph answer
-                    graph_answer = querier.query_with_llm(user_query, max_entities=20)
+                    graph_answer, _ = querier.query_with_llm(user_query, max_entities=20)
 
                     # Extract entities and do vector search
                     entities = extract_entities_from_graph(graph_answer)
@@ -1436,7 +1492,8 @@ Provide a thorough, accurate answer that:
                             'reranking': True,
                             'deduplicate': True
                         },
-                        timeout=60
+                        timeout=60,
+                        headers=_service_headers()
                     )
 
                     vector_sources = []

@@ -77,3 +77,46 @@ def test_synthesizer_salvages_fields_from_malformed_json():
     assert result["citations"] == ["[[Note]]", "https://example.com"]
     assert result["confidence_score"] == 0.82
     assert result["confidence_justification"] == "OK"
+
+
+@pytest.mark.unit
+def test_synthesizer_uses_openai_max_tokens_and_guardrails(monkeypatch):
+    response_text = (
+        "{\"answer\":\"ok\",\"citations\":[],"
+        "\"confidence_score\":0.9,\"confidence_justification\":\"fine\"}"
+    )
+    client = FakeClient("chatgpt", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    monkeypatch.setenv("DEEP_THINKING_OPENAI_MAX_TOKENS", "2222")
+
+    result = generator.generate(make_state())
+
+    assert result["answer"] == "ok"
+    assert client.messages.calls[0]["max_tokens"] == 2222
+    assert "Do not ask for permissions" in client.messages.calls[0]["system"]
+
+
+@pytest.mark.unit
+def test_synthesizer_falls_back_when_answer_empty():
+    response_text = "{\"answer\":\"\",\"citations\":[],\"confidence_score\":0.5}"
+    client = FakeClient("chatgpt", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    result = generator.generate(make_state())
+
+    assert result["answer"] == response_text
+
+
+@pytest.mark.unit
+def test_synthesizer_uses_context_when_answer_empty():
+    response_text = "{\"answer\":\"\",\"citations\":[],\"confidence_score\":0.5}"
+    client = FakeClient("chatgpt", response_text)
+    generator = FinalAnswerGenerator(client)
+    state = make_state()
+    state["accumulated_context"] = "Step 1: Found scan notes."
+
+    result = generator.generate(state)
+
+    assert "No response from model" in result["answer"]
+    assert "Found scan notes" in result["answer"]

@@ -35,7 +35,7 @@ class TestReflectionAgent(unittest.TestCase):
         
         past_step = self.reflector.reflect(step, documents, state)
         
-        self.assertEqual(past_step["key_findings"], "Error analyzing results.")
+        self.assertEqual(past_step["key_findings"], "No documents retrieved for this step.")
         self.assertEqual(past_step["confidence"], 0.0)
 
 if __name__ == '__main__':
