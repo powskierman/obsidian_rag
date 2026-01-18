@@ -19,8 +19,27 @@ class FinalAnswerGenerator:
         self.client = client
         self.model = "claude-sonnet-4-5-20250929"
 
+        # Try to load user profile from mem0 for system prompt
+        user_profile_text = ""
+        try:
+             # Importing here to avoid circular imports if any
+             from src.utils.memory_manager import get_memory_manager
+             mem_manager = get_memory_manager()
+             if mem_manager:
+                 # Get all memories to build a profile
+                 all_memories = mem_manager.get_all_memories()
+                 if all_memories:
+                     # Filter for relevant facts if needed, or take top N
+                     facts = [m.get('text', '') for m in all_memories if isinstance(m, dict)]
+                     # Limit to top 20 facts to avoid context bloat
+                     if facts:
+                         user_profile_text = "\n\nUser Profile & Preferences:\n" + "\n".join([f"- {f}" for f in facts[:20]])
+        except Exception:
+             pass
+
         # Michel's custom system prompt for compassionate, personalized responses
-        self.system_prompt = """You are a **Deep Thinking AI assistant** integrated with Michel's Obsidian Knowledge Base.
+        self.system_prompt = f"""You are a **Deep Thinking AI assistant** integrated with Michel's Obsidian Knowledge Base.
+{user_profile_text}
 
 Your task is to answer questions by analyzing the retrieved materials and Michel's personal context.
 
@@ -44,18 +63,34 @@ Finally, provide your answer in a structured, easy-to-read format."""
         web_docs = ""
         image_urls = []
         
-        for i, doc in enumerate(state['retrieved_documents']):
-            source = doc.get('source', 'Unknown')
-            content = doc.get('content', '')[:300]
-            
-            # Collect images from web results
-            if 'images' in doc and doc['images']:
-                image_urls.extend(doc['images'])
-            
-            if doc.get('type') == 'web':
-                web_docs += f"[{i+1}] WEB: {source}\nContent: {content}...\n\n"
-            else:
-                vault_docs += f"[{i+1}] VAULT: {source}\nContent: {content}...\n\n"
+        # Priority 1: Use Raw Context Buffer if available (high fidelity)
+        raw_buffer = state.get("raw_context_buffer", [])
+        if raw_buffer:
+            for i, item in enumerate(raw_buffer):
+                source = item.get("source", "Unknown")
+                # Context buffer has full text, usually truncated naturally by retrieval or reasonable limit
+                # We typically allow more here than the standard loop
+                content = item.get("content", "")[:2000] 
+                
+                if "http" in source and not "localhost" in source:
+                    web_docs += f"[{i+1}] WEB: {source}\nContent: {content}\n\n"
+                else:
+                    vault_docs += f"[{i+1}] VAULT: {source}\nContent: {content}\n\n"
+                    
+        # Priority 2: Fallback to standard retrieved_documents (if buffer empty)
+        else:
+            for i, doc in enumerate(state['retrieved_documents']):
+                source = doc.get('source', 'Unknown')
+                content = doc.get('content', '')[:500] # Increased from 300
+                
+                # Collect images from web results
+                if 'images' in doc and doc['images']:
+                    image_urls.extend(doc['images'])
+                
+                if doc.get('type') == 'web':
+                    web_docs += f"[{i+1}] WEB: {source}\nContent: {content}...\n\n"
+                else:
+                    vault_docs += f"[{i+1}] VAULT: {source}\nContent: {content}...\n\n"
 
         # Build image section for prompt
         images_section = ""
