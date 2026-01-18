@@ -167,7 +167,68 @@ class RetrievalSupervisor:
             results = self.reranker.rerank(query, results, top_k=20)
             trace(f"{debug_prefix} reranked output", summarize(results))
             
+        # [NEW] Full Content Expansion for Critical Medical Files
+        # If we found a file that looks like a medical report, read the WHOLE file.
+        if strategy in ["vector", "hybrid"] and results:
+             results = self._expand_full_content(results, trace)
+
         return results
+    
+    def _expand_full_content(self, results: List[Dict[str, Any]], trace_func) -> List[Dict[str, Any]]:
+        """
+        For high-value medical documents (Scans, Reports), load full content from disk
+        instead of relying on the vector chunk.
+        """
+        expanded_results = []
+        vault_root = os.getenv("OBSIDIAN_VAULT_PATH", "/app/vault")
+        
+        # Keywords that trigger full read
+        triggers = ["scan", "report", "pet", "ct", "mri", "biopsy", "discharge", "consult"]
+        
+        for doc in results:
+            source = doc.get("source", "")
+            # Only process if local file and matches trigger
+            if not source or "http" in source or not any(t in source.lower() for t in triggers):
+                expanded_results.append(doc)
+                continue
+                
+            # Construct full path
+            # Source usually comes as relative path from vector DB (e.g., "Medical/Scan.md")
+            full_path = os.path.join(vault_root, source)
+            
+            try:
+                content = ""
+                if os.path.exists(full_path):
+                     if source.lower().endswith(".pdf"):
+                         # Attempt simplistic PDF read if pypdf is available
+                         try:
+                             import pypdf
+                             reader = pypdf.PdfReader(full_path)
+                             text = []
+                             for page in reader.pages:
+                                 text.append(page.extract_text())
+                             content = "\n".join(text)
+                             trace_func(f"   📖 Expanded PDF: {source}", {"length": len(content)})
+                         except Exception as e:
+                             trace_func(f"   ⚠️ PDF Read Failed: {source}", {"error": str(e)})
+                             content = doc.get("content", "") # Fallback to chunk
+                     else:
+                         # Assume text/markdown
+                         with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
+                             content = f.read()
+                         trace_func(f"   📖 Expanded Note: {source}", {"length": len(content)})
+                
+                if content:
+                    doc["content"] = content
+                    # Mark as expanded so we know it is high fidelity
+                    doc["is_full_content"] = True
+                
+                expanded_results.append(doc)
+            except Exception as e:
+                trace_func(f"   ⚠️ Expansion Failed: {source}", {"error": str(e)})
+                expanded_results.append(doc)
+                
+        return expanded_results
     
     def _build_filters(self, target_folders: List[str]) -> Dict[str, Any]:
         """Convert Obsidian folder paths to ChromaDB metadata filters."""
