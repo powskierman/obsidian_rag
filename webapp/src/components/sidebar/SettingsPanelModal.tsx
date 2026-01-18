@@ -78,7 +78,20 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt'].map((provider) => (
                 <button
                   key={provider}
-                  onClick={() => setLLMProvider(provider as any)}
+                  onClick={() => {
+                    setLLMProvider(provider as any);
+                    // Reset model to default when switching providers to avoid stale IDs
+                    const defaults: Record<string, string> = {
+                      ollama: availableModels[0] || 'mistral',
+                      openrouter: 'google/gemini-2.0-flash-exp:free', // Good default
+                      chatgpt: 'gpt-4o',
+                      gemini: 'gemini-1.5-pro',
+                      claude: 'claude-3-5-sonnet-latest'
+                    };
+                    if (defaults[provider]) {
+                      updateSettings({ ...settings, model: defaults[provider] });
+                    }
+                  }}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${llmProvider === provider
                     ? 'bg-[#0A84FF] text-white shadow-lg'
                     : 'text-white/40 hover:text-white/60 hover:bg-white/5'
