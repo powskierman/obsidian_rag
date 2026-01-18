@@ -941,7 +941,7 @@ async def deep_research_websocket(websocket: WebSocket):
         query = data.get("query")
         provider = data.get("provider", "claude").lower()
         model = data.get("model")
-        supported_providers = {"claude", "gemini", "openrouter", "chatgpt"}
+        supported_providers = {"claude", "gemini", "openrouter", "chatgpt", "ollama"}
 
         def _select_fallback_provider():
             if os.getenv("OPENROUTER_API_KEY"):
@@ -952,6 +952,8 @@ async def deep_research_websocket(websocket: WebSocket):
                 return "gemini"
             if os.getenv("OPENAI_API_KEY"):
                 return "chatgpt"
+            if os.getenv("OLLAMA_HOST"): # Basic check for Ollama
+                return "ollama"
             return None
         
         if not query:
@@ -964,7 +966,7 @@ async def deep_research_websocket(websocket: WebSocket):
             if not fallback_provider:
                 await websocket.send_json({
                     "type": "error",
-                    "content": "Deep Thinking supports Claude, Gemini, OpenRouter, or ChatGPT only. No compatible API key found."
+                    "content": "Deep Thinking supports Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found."
                 })
                 await websocket.close()
                 return
@@ -1001,6 +1003,8 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.send_json({"type": "error", "content": "OPENAI_API_KEY not configured"})
                 await websocket.close()
                 return
+        elif provider == "ollama":
+            api_key = "ollama" # No key needed, but passing string to avoid validation errors downstream
 
         # Initialize Agent with Universal Client
         # Note: We must use the INTERNAL Docker URLs here
