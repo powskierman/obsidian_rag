@@ -49,6 +49,8 @@ class UniversalClient:
             return self._create_openrouter(model, messages, max_tokens, temperature, system)
         elif self.provider in ("chatgpt", "openai"):
             return self._create_openai(model, messages, max_tokens, temperature, system)
+        elif self.provider == "ollama":
+            return self._create_ollama(model, messages, max_tokens, temperature, system)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
@@ -271,4 +273,70 @@ class UniversalClient:
             return UniversalMessage(str(content))
         except Exception as e:
             logger.error(f"OpenAI request failed: {e}")
+            raise e
+    def _create_ollama(self, model: str, messages: List[Dict[str, str]],
+                       max_tokens: int, temperature: float, system: str):
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        if "host.docker.internal" in ollama_host:
+             # If running outside docker but env var is set for docker, try localhost fallback
+             pass # Python request library handles DNS, but usually better to stick to what's given
+
+        if not model or "claude" in model or "gpt" in model:
+            # Fallback to a common default or env var
+            model = os.getenv("OLLAMA_MODEL", "mistral") # Default fallback
+
+        # Ollama API structure: POST /api/chat
+        # Messages format: same as OpenAI
+        
+        ollama_messages = list(messages)
+        # DeepSeek R1 and some other models degrade with system prompts, but most support it.
+        # Check for deepseek-r1 specifically to avoid system prompt if desired, 
+        # but generally Ollama handles system messages by converting them to the model template.
+        is_deepseek_r1 = "deepseek-r1" in model.lower()
+        
+        if system and not is_deepseek_r1:
+            ollama_messages = [{"role": "system", "content": system}] + ollama_messages
+        elif system and is_deepseek_r1:
+            # For DeepSeek R1, prepend system prompt to first user message or just ignore (per user preference)
+            # We'll prepend to first message to keep context
+            if ollama_messages:
+                 ollama_messages[0]["content"] = f"{system}\n\n{ollama_messages[0]['content']}"
+
+        payload = {
+            "model": model,
+            "messages": ollama_messages,
+            "stream": False,
+            "options": {
+                "temperature": temperature,
+                "num_ctx": 32768, # Ensure large context for RAG
+                "num_predict": max_tokens
+            }
+        }
+
+        try:
+            # Ensure host has protocol
+            if not ollama_host.startswith("http"):
+                ollama_host = f"http://{ollama_host}"
+                
+            url = f"{ollama_host}/api/chat"
+            response = requests.post(url, json=payload, timeout=120)
+            
+            if response.status_code != 200:
+                 error_msg = f"Ollama API Error {response.status_code}: {response.text}"
+                 logger.error(error_msg)
+                 raise ValueError(error_msg)
+
+            data = response.json()
+            message = data.get("message", {})
+            content = message.get("content", "")
+            
+            # DeepSeek R1 <think> block handling
+            # If the model emits thought blocks, we might want to keep them or strip them.
+            # For "Deep Thinking" agent, keeping them in the logs/trace but returning clean answer is tricky.
+            # For now, we return full content. The Synthesizer might see extra text, but it usually handles it.
+            
+            return UniversalMessage(content)
+
+        except Exception as e:
+            logger.error(f"Ollama request failed: {e}")
             raise e

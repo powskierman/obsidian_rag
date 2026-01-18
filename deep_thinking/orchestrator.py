@@ -60,6 +60,8 @@ class DeepThinkingRAG:
         if not default_model:
             if provider_name == "openrouter":
                 default_model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+            elif provider_name == "ollama":
+                default_model = os.getenv("OLLAMA_MODEL", "mistral")
             elif provider_name == "claude":
                 default_model = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
             elif provider_name == "gemini":
