@@ -245,12 +245,12 @@ export const api = {
     console.log("Feedback not yet implemented in V1 Gateway", feedback);
   },
 
-  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean }; models: Record<string, string> }> => {
+  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; perplexity: boolean }; models: Record<string, string> }> => {
     try {
       const response = await fetch('/api/env-config');
       if (!response.ok) {
         return {
-          keys: { gemini: false, anthropic: false, openai: false },
+          keys: { gemini: false, anthropic: false, openai: false, perplexity: false },
           models: {}
         };
       }
@@ -258,7 +258,7 @@ export const api = {
     } catch (error) {
       console.error('Failed to get env config:', error);
       return {
-        keys: { gemini: false, anthropic: false, openai: false },
+        keys: { gemini: false, anthropic: false, openai: false, perplexity: false },
         models: {}
       };
     }

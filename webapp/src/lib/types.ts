@@ -16,7 +16,7 @@ export type SearchMode =
   | 'cascading'       // 5-Stage Waterfall
   | 'deep-thinking';  // Agentic reasoning mode
 
-export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt';
+export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'perplexity';
 
 export interface Message {
   role: 'user' | 'assistant';

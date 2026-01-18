@@ -941,9 +941,11 @@ async def deep_research_websocket(websocket: WebSocket):
         query = data.get("query")
         provider = data.get("provider", "claude").lower()
         model = data.get("model")
-        supported_providers = {"claude", "gemini", "openrouter", "chatgpt", "ollama"}
+        supported_providers = {"claude", "gemini", "openrouter", "chatgpt", "ollama", "perplexity"}
 
         def _select_fallback_provider():
+            if os.getenv("PERPLEXITY_API_KEY"):
+                return "perplexity"
             if os.getenv("OPENROUTER_API_KEY"):
                 return "openrouter"
             if ANTHROPIC_API_KEY:
@@ -966,7 +968,7 @@ async def deep_research_websocket(websocket: WebSocket):
             if not fallback_provider:
                 await websocket.send_json({
                     "type": "error",
-                    "content": "Deep Thinking supports Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found."
+                    "content": "Deep Thinking supports Perplexity, Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found."
                 })
                 await websocket.close()
                 return
@@ -1001,6 +1003,12 @@ async def deep_research_websocket(websocket: WebSocket):
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
                 await websocket.send_json({"type": "error", "content": "OPENAI_API_KEY not configured"})
+                await websocket.close()
+                return
+        elif provider == "perplexity":
+            api_key = os.getenv("PERPLEXITY_API_KEY")
+            if not api_key:
+                await websocket.send_json({"type": "error", "content": "PERPLEXITY_API_KEY not configured"})
                 await websocket.close()
                 return
         elif provider == "ollama":

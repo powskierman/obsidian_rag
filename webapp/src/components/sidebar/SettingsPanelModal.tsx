@@ -80,7 +80,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               LLM Provider
             </label>
             <div className="bg-[#2C2C2E] p-1 rounded-xl flex border border-[#3C3C3E]">
-              {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt'].map((provider) => (
+              {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'perplexity'].map((provider) => (
                 <button
                   key={provider}
                   onClick={() => {
@@ -92,7 +92,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
                       openrouter: envConfig['openrouter'] || 'google/gemini-2.0-flash-exp:free',
                       chatgpt: envConfig['chatgpt'] || 'gpt-4o',
                       gemini: envConfig['gemini'] || 'gemini-1.5-pro',
-                      claude: envConfig['claude'] || 'claude-3-5-sonnet-latest'
+                      claude: envConfig['claude'] || 'claude-3-5-sonnet-latest',
+                      perplexity: envConfig['perplexity'] || 'llama-3.1-sonar-large-128k-online'
                     };
 
                     const newModel = defaults[provider] || '';
@@ -172,6 +173,23 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               />
               <p className="text-xs text-white/40 mt-1.5">
                 Use any OpenAI chat model ID.
+              </p>
+            </div>
+          )}
+
+          {llmProvider === 'perplexity' && (
+            <div>
+              <label className="block text-sm font-medium text-white mb-2">
+                Perplexity Model
+              </label>
+              <input
+                value={settings.model}
+                onChange={(e) => updateSettings({ ...settings, model: e.target.value })}
+                placeholder="llama-3.1-sonar-large-128k-online"
+                className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
+              />
+              <p className="text-xs text-white/40 mt-1.5">
+                Use a Perplexity online model ID.
               </p>
             </div>
           )}

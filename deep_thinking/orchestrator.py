@@ -68,6 +68,8 @@ class DeepThinkingRAG:
                 default_model = os.getenv("GEMINI_MODEL", "gemini-3-pro-preview")
             elif provider_name in ("chatgpt", "openai"):
                 default_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+            elif provider_name == "perplexity":
+                default_model = os.getenv("PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online")
 
         if default_model:
             self.planner.model = default_model

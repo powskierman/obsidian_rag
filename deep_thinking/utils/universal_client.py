@@ -51,8 +51,69 @@ class UniversalClient:
             return self._create_openai(model, messages, max_tokens, temperature, system)
         elif self.provider == "ollama":
             return self._create_ollama(model, messages, max_tokens, temperature, system)
+        elif self.provider == "perplexity":
+            return self._create_perplexity(model, messages, max_tokens, temperature, system)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
+
+    def _create_perplexity(self, model: str, messages: List[Dict[str, str]], 
+                           max_tokens: int, temperature: float, system: str):
+        api_key = self.api_key or os.getenv("PERPLEXITY_API_KEY")
+        if not api_key:
+            raise ValueError("PERPLEXITY_API_KEY not configured")
+        
+        # Default to a good online model
+        if not model or "claude" in model or "gpt" in model:
+            model = os.getenv("PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online")
+
+        pplx_messages = list(messages)
+        if system:
+            pplx_messages = [{"role": "system", "content": system}] + pplx_messages
+
+        payload = {
+            "model": model,
+            "messages": pplx_messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+            "return_citations": True  # Perplexity specific feature
+        }
+
+        try:
+            response = requests.post(
+                "https://api.perplexity.ai/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json=payload,
+                timeout=60
+            )
+
+            if response.status_code != 200:
+                error_msg = f"Perplexity API Error {response.status_code}: {response.text}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            data = response.json()
+            choices = data.get("choices", [])
+            if not choices:
+                raise ValueError("No choices returned from Perplexity")
+
+            message = choices[0].get("message", {})
+            content = message.get("content", "")
+            
+            # Perplexity returns citations which are useful
+            citations = data.get("citations", [])
+            if citations:
+                # Append citations references if not present
+                content += "\n\n**Perplexity Citations:**\n"
+                for i, cit in enumerate(citations):
+                    content += f"[{i+1}] {cit}\n"
+
+            return UniversalMessage(content)
+        except Exception as e:
+            logger.error(f"Perplexity request failed: {e}")
+            raise e
 
     def _create_claude(self, model: str, messages: List[Dict[str, str]], 
                        max_tokens: int, temperature: float, system: str):
