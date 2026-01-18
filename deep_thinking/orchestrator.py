@@ -9,6 +9,13 @@ from .reflector import ReflectionAgent
 from .policy import PolicyAgent
 from .synthesizer import FinalAnswerGenerator
 from .utils.universal_client import UniversalClient
+try:
+    from src.utils.memory_manager import get_memory_manager
+except ImportError:
+    try:
+        from utils.memory_manager import get_memory_manager
+    except ImportError:
+        def get_memory_manager(): return None
 
 class DeepThinkingRAG:
     def __init__(
@@ -132,8 +139,21 @@ class DeepThinkingRAG:
             "max_iterations": max_iterations,
             "should_continue": True,
             "final_answer": "",
-            "citations": []
+            "citations": [],
+            "raw_context_buffer": []  # New: Store raw text snippets
         }
+        
+        # Step 0: Get User Context from mem0
+        try:
+            mem_manager = get_memory_manager()
+            if mem_manager:
+                update_status("🧠 Retrieving user memories...")
+                memories = mem_manager.search_memory(question, limit=5)
+                if memories:
+                    state["user_context"]["memories"] = memories
+                    update_status("   Context loaded", {"length": len(memories)})
+        except Exception as e:
+            update_status(f"⚠️ Memory retrieval failed: {e}")
         
         # Step 1: Create plan
         update_status("🤔 Planning research strategy...")
@@ -176,6 +196,14 @@ class DeepThinkingRAG:
                 )
                 state["retrieved_documents"].extend(documents)
                 update_status(f"   Found {len(documents)} documents.")
+                
+                # Update Raw Context Buffer (Keep top 3 docs per step full text)
+                for doc in documents[:3]:
+                    state["raw_context_buffer"].append({
+                        "source": doc.get("source", "Unknown"),
+                        "content": doc.get("content", ""),
+                        "step": current_step["step_number"]
+                    })
                 
                 # Reflect on findings
                 past_step = self.reflector.reflect(current_step, documents, state)

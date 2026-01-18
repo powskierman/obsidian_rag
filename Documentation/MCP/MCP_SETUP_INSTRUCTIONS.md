@@ -73,6 +73,71 @@ Ask ChatGPT:
 - "What treatments are mentioned in my notes?"
 - "How does ESP32 relate to Home Assistant?"
 
+## ChatGPT Connector (HTTPS)
+
+ChatGPT connectors require a public HTTPS `/mcp` endpoint. Run the server in HTTP mode locally, then expose it with a tunnel (ngrok or Cloudflare Tunnel).
+
+1. Set an API key for the HTTP server (recommended):
+   ```bash
+   export MCP_HTTP_API_KEY="your-strong-key"
+   ```
+
+2. Start the HTTP MCP server:
+   ```bash
+   /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
+     /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/obsidian_rag_unified_mcp.py \
+     --transport http --host 127.0.0.1 --port 8811 --path /mcp
+   ```
+
+3. Expose it with ngrok:
+   ```bash
+   ngrok http 8811
+   ```
+
+4. In ChatGPT: Settings → Connectors → Create
+   - Connector URL: `https://<your-ngrok-subdomain>.ngrok-free.app/mcp`
+   - Auth: API key
+     - Header: `Authorization`
+     - Value: `Bearer your-strong-key`
+     - Alternatively, use header `X-API-Key` with the same value.
+
+Notes:
+- If the HTTP server fails to start, install `uvicorn` in the venv.
+- Keep the tunnel running while you use the connector.
+
+### OAuth Mode (for ChatGPT connectors that require OAuth)
+
+If the connector UI only offers OAuth, enable OAuth mode and restart the server using your public HTTPS base URL.
+
+1. Start ngrok first and copy the HTTPS URL:
+   ```bash
+   ngrok http 8811
+   ```
+
+2. Export the public URL and enable OAuth:
+   ```bash
+   export MCP_HTTP_AUTH_MODE="oauth"
+   export MCP_HTTP_PUBLIC_URL="https://<your-ngrok-subdomain>.ngrok-free.app"
+   ```
+
+3. Start the server:
+   ```bash
+   /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
+     /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/obsidian_rag_unified_mcp.py \
+     --transport http --host 127.0.0.1 --port 8811 --path /mcp
+   ```
+
+4. In ChatGPT: Settings → Connectors → Create
+   - Connector URL: `https://<your-ngrok-subdomain>.ngrok-free.app/mcp`
+   - Auth: OAuth
+
+Optional: pre-register a client (skip if you want dynamic registration):
+```bash
+export MCP_OAUTH_CLIENT_ID="my-client"
+export MCP_OAUTH_CLIENT_SECRET="my-secret"
+export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
+```
+
 ## Available Tools
 
 ### Vault Search

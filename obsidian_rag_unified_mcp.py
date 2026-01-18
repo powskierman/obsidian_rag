@@ -15,6 +15,7 @@ GRAPH_SERVICE_URL = getattr(_module, "GRAPH_SERVICE_URL", None)
 
 load_graph = _module.load_graph
 search_vault = _module.search_vault
+search_vault_full = _module.search_vault_full
 get_vault_statistics = _module.get_vault_statistics
 
 async def query_knowledge_graph(arguments: dict):
@@ -41,6 +42,16 @@ async def get_graph_stats(arguments: dict):
     _module.load_graph = load_graph
     return await _module.get_graph_stats(arguments)
 
+async def read_vault_note(arguments: dict):
+    return await _module.read_vault_note(arguments)
+
+
+async def read_attachment_text(arguments: dict):
+    return await _module.read_attachment_text(arguments)
+
+async def search_vault_full(arguments: dict):
+    return await _module.search_vault_full(arguments)
+
 
 TextContent = _module.TextContent
 
@@ -52,10 +63,16 @@ async def call_tool(name: str, arguments: dict):
     try:
         if name in {"obsidian_semantic_search", "obsidian_simple_search", "search_vault"}:
             return await search_vault(arguments)
+        if name == "search_vault_full":
+            return await search_vault_full(arguments)
         if name in {"get_vault_stats", "obsidian_vault_stats"}:
             return await get_vault_statistics(arguments)
         if name in {"obsidian_graph_query", "query_knowledge_graph"}:
             return await query_knowledge_graph(arguments)
+        if name == "read_vault_note":
+            return await read_vault_note(arguments)
+        if name == "read_attachment_text":
+            return await read_attachment_text(arguments)
         if name == "get_entity_info":
             return await get_entity_info(arguments)
         if name == "find_entity_path":
@@ -97,17 +114,23 @@ __all__ = [
     "querier",
     "load_graph",
     "search_vault",
+    "search_vault_full",
     "get_vault_statistics",
     "query_knowledge_graph",
     "get_entity_info",
     "find_entity_path",
     "search_entities",
     "get_graph_stats",
+    "read_vault_note",
+    "read_attachment_text",
     "list_tools",
     "call_tool",
 ]
 
 if __name__ == "__main__":
-    import asyncio
+    if hasattr(_module, "cli"):
+        _module.cli()
+    else:
+        import asyncio
 
-    asyncio.run(_module.main())
+        asyncio.run(_module.main())
