@@ -166,33 +166,55 @@ class UniversalClient:
             "temperature": temperature
         }
 
-        try:
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
-                json=payload,
-                timeout=60
-            )
+        # Add identifying headers for better OpenRouter citizenship & stability
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:3000", # Client URL
+            "X-Title": "Obsidian RAG" # App Name
+        }
 
-            if response.status_code != 200:
-                error_msg = f"OpenRouter API Error {response.status_code}: {response.text}"
-                logger.error(error_msg)
-                raise ValueError(error_msg)
+        retries = 3
+        for attempt in range(retries):
+            try:
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=60
+                )
 
-            data = response.json()
-            choices = data.get("choices", [])
-            if not choices:
-                raise ValueError("No choices returned from OpenRouter")
+                if response.status_code == 200:
+                    data = response.json()
+                    choices = data.get("choices", [])
+                    if not choices:
+                        raise ValueError("No choices returned from OpenRouter")
 
-            message = choices[0].get("message", {})
-            content = message.get("content", "")
-            return UniversalMessage(content)
-        except Exception as e:
-            logger.error(f"OpenRouter request failed: {e}")
-            raise e
+                    message = choices[0].get("message", {})
+                    content = message.get("content", "")
+                    return UniversalMessage(content)
+                elif response.status_code >= 500:
+                    # Retry on server errors
+                    logger.warning(f"OpenRouter 5xx error (attempt {attempt+1}/{retries}): {response.text}")
+                    if attempt < retries - 1:
+                        import time
+                        time.sleep(1 * (attempt + 1))
+                        continue
+                    else:
+                        raise ValueError(f"OpenRouter API Error {response.status_code}: {response.text}")
+                else:
+                    # Don't retry client errors (4xx)
+                    error_msg = f"OpenRouter API Error {response.status_code}: {response.text}"
+                    logger.error(error_msg)
+                    raise ValueError(error_msg)
+
+            except Exception as e:
+                logger.error(f"OpenRouter request failed (attempt {attempt+1}/{retries}): {e}")
+                if attempt < retries - 1:
+                    import time
+                    time.sleep(1)
+                    continue
+                raise e
 
     def _create_openai(self, model: str, messages: List[Dict[str, str]],
                        max_tokens: int, temperature: float, system: str):
