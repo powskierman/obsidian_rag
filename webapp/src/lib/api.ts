@@ -209,10 +209,10 @@ export const api = {
     const documents = embeddingData?.total_documents || embeddingData?.documents || 0;
     const graph = graphData
       ? {
-          nodes: graphData.total_nodes ?? graphData.nodes ?? 0,
-          edges: graphData.total_edges ?? graphData.edges ?? 0,
-          graph_loaded: true
-        }
+        nodes: graphData.total_nodes ?? graphData.nodes ?? 0,
+        edges: graphData.total_edges ?? graphData.edges ?? 0,
+        graph_loaded: true
+      }
       : null;
 
     return { documents, graph };
@@ -245,16 +245,22 @@ export const api = {
     console.log("Feedback not yet implemented in V1 Gateway", feedback);
   },
 
-  checkApiKeys: async (): Promise<{ gemini: boolean; anthropic: boolean; openai: boolean }> => {
+  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean }; models: Record<string, string> }> => {
     try {
-      const response = await fetch('/api/check-api-keys');
+      const response = await fetch('/api/env-config');
       if (!response.ok) {
-        return { gemini: false, anthropic: false, openai: false };
+        return {
+          keys: { gemini: false, anthropic: false, openai: false },
+          models: {}
+        };
       }
       return await response.json();
     } catch (error) {
-      console.error('Failed to check API keys:', error);
-      return { gemini: false, anthropic: false, openai: false };
+      console.error('Failed to get env config:', error);
+      return {
+        keys: { gemini: false, anthropic: false, openai: false },
+        models: {}
+      };
     }
   },
 
