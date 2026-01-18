@@ -176,47 +176,64 @@ class RetrievalSupervisor:
     
     def _expand_full_content(self, results: List[Dict[str, Any]], trace_func) -> List[Dict[str, Any]]:
         """
-        For high-value medical documents (Scans, Reports), load full content from disk
-        instead of relying on the vector chunk.
+        Universal Content Expansion:
+        Load full content from disk for ANY local file to ensure high-fidelity context.
+        Limits: 100KB text size to prevent context overflow.
         """
         expanded_results = []
         vault_root = os.getenv("OBSIDIAN_VAULT_PATH", "/app/vault")
         
-        # Keywords that trigger full read
-        triggers = ["scan", "report", "pet", "ct", "mri", "biopsy", "discharge", "consult"]
+        # Supported extensions for expansion
+        SUPPORTED_EXTS = {".md", ".txt", ".pdf", ".py", ".js", ".json", ".yml", ".yaml", ".sh", ".css", ".html"}
+        MAX_SIZE_BYTES = 100 * 1024 # 100KB limit
         
         for doc in results:
             source = doc.get("source", "")
-            # Only process if local file and matches trigger
-            if not source or "http" in source or not any(t in source.lower() for t in triggers):
+            
+            # 1. Check if eligible for expansion (local file + supported extension)
+            if not source or "http" in source:
                 expanded_results.append(doc)
                 continue
                 
-            # Construct full path
-            # Source usually comes as relative path from vector DB (e.g., "Medical/Scan.md")
+            ext = os.path.splitext(source)[1].lower()
+            if ext not in SUPPORTED_EXTS:
+                expanded_results.append(doc)
+                continue
+
+            # 2. Construct full path and check existence
             full_path = os.path.join(vault_root, source)
             
             try:
                 content = ""
                 if os.path.exists(full_path):
-                     if source.lower().endswith(".pdf"):
+                     # Check file size first
+                     file_size = os.path.getsize(full_path)
+                     if file_size > MAX_SIZE_BYTES and ext != ".pdf": # PDF size != text size
+                         trace_func(f"   ⚠️ File too large to expand: {source}", {"size": file_size, "limit": MAX_SIZE_BYTES})
+                         expanded_results.append(doc)
+                         continue
+                         
+                     if ext == ".pdf":
                          # Attempt simplistic PDF read if pypdf is available
                          try:
                              import pypdf
                              reader = pypdf.PdfReader(full_path)
+                             # Safety: Limit max pages to read
+                             max_pages = 20
                              text = []
-                             for page in reader.pages:
+                             for i, page in enumerate(reader.pages):
+                                 if i >= max_pages: break
                                  text.append(page.extract_text())
                              content = "\n".join(text)
-                             trace_func(f"   📖 Expanded PDF: {source}", {"length": len(content)})
+                             trace_func(f"   📖 Expanded PDF: {source}", {"pages": len(text)})
                          except Exception as e:
                              trace_func(f"   ⚠️ PDF Read Failed: {source}", {"error": str(e)})
                              content = doc.get("content", "") # Fallback to chunk
                      else:
-                         # Assume text/markdown
+                         # Assume text/markdown/code
                          with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
-                             content = f.read()
-                         trace_func(f"   📖 Expanded Note: {source}", {"length": len(content)})
+                             content = f.read(MAX_SIZE_BYTES) # Read up to limit
+                         trace_func(f"   📖 Expanded File: {source}", {"length": len(content)})
                 
                 if content:
                     doc["content"] = content
