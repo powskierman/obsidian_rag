@@ -6,6 +6,7 @@ A comprehensive RAG (Retrieval-Augmented Generation) system for your Obsidian va
 
 - **Semantic Search**: Fast vector-based search using ChromaDB and sentence transformers
 - **Knowledge Graph**: Entity-relationship graph built with Claude AI for intelligent querying
+- **Deep Thinking Agent**: Agentic reasoning with multi-step planning and reflection (supports Perplexity, Ollama, OpenRouter, etc.)
 - **Multiple Interfaces**: Web UI (Streamlit), CLI, and MCP integration for Claude Desktop/Cursor
 - **Docker Support**: Full containerized deployment with docker-compose
 - **Resume Capability**: Checkpoint-based graph building that can resume after interruptions
