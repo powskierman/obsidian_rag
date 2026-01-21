@@ -175,8 +175,14 @@ def sanitize_content(content: str) -> str:
     content = content.replace("\ufeff", "")
     content = content.replace("\r\n", "\n").replace("\r", "\n")
     content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", content)
+    
+    # Remove Obsidian comments %% ... %%
+    content = re.sub(r'%%.*?%%', '', content, flags=re.DOTALL)
+    
+    # Remove block references ^blockid at end of lines
+    content = re.sub(r'\s\^[a-zA-Z0-9-]+$', '', content, flags=re.MULTILINE)
+    
     return content
-
 
 def _normalize_metadata_value(value):
     if value is None:
@@ -186,7 +192,6 @@ def _normalize_metadata_value(value):
     if isinstance(value, list):
         return ", ".join(str(item) for item in value if item is not None)
     return str(value)
-
 
 def extract_metadata(content):
     """Extract YAML frontmatter metadata with validation."""
@@ -262,6 +267,7 @@ def smart_chunk_document(content, max_size=1000, overlap=200):
         break_points = [
             chunk.rfind('\n\n'),      # Paragraph break
             chunk.rfind('\n# '),      # Header
+            chunk.rfind('\n- '),      # List item
             chunk.rfind('. '),        # Sentence end
             chunk.rfind('! '),        # Exclamation
             chunk.rfind('? '),        # Question
@@ -400,8 +406,21 @@ def process_file(
             modified_date = metadata.get('modified', 'Unknown Date')
             if ' ' in modified_date: # Clean up ISO format for readability if possible
                 modified_date = modified_date.split('T')[0]
-                
-            anchored_text = f"[Source: {source_filename}] [Date: {modified_date}]\n{chunk_text}"
+            
+            context_parts = [f"Source: {source_filename}", f"Date: {modified_date}"]
+            
+            # Add Tags if present
+            tags = metadata.get('tags')
+            if tags:
+                context_parts.append(f"Tags: {tags}")
+            
+            # Add Aliases if present
+            aliases = metadata.get('aliases')
+            if aliases:
+                context_parts.append(f"Aliases: {aliases}")
+
+            context_str = "[" + "] [".join(context_parts) + "]"
+            anchored_text = f"{context_str}\n{chunk_text}"
 
             # Prepare request
             payload = {

@@ -15,7 +15,9 @@ echo ""
 # Source .env file if it exists
 if [ -f ".env" ]; then
     echo "📝 Sourcing .env file..."
-    export $(grep -v '^#' .env | xargs)
+    set -a
+    source .env
+    set +a
 fi
 
 # Check for API key

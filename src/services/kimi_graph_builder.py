@@ -123,7 +123,7 @@ class GraphBuilder:
 3. **Timeline**: Specific dates or sequences of events.
 4. **Importance**: Rate the clinical or central relevance of entities (1-10).
 
-Text to analyze:
+Text to analyze (may include File/Tags context headers):
 <text>
 {chunk_text[:8000]}
 </text>
@@ -163,6 +163,7 @@ Extract entities and relationships in JSON format. IMPORTANT: Return ONLY valid 
 }}
 
 Guidelines:
+- **Context**: Use the "File:" and "Tags:" lines at the start of the text to identify the domain and main topics.
 - **Importance Scoring**: Rate entities 1-10. 10 = Critical medical diagnosis/treatment or core project. 1 = Minor detail.
 - **Temporal Tracking**: If a relationship has a specific date or order, capture it in "temporal".
 - Extract 5-15 important entities per chunk.

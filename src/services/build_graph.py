@@ -11,6 +11,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
 VAULT_PATH = "/app/vault"
@@ -50,22 +51,101 @@ def extract_pdf_text(pdf_path: str) -> str:
 
     return "\n\n".join(pages_text).strip()
 
+def _normalize_metadata_value(value):
+    if value is None:
+        return None
+    if isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, list):
+        return ", ".join(str(item) for item in value if item is not None)
+    return str(value)
+
+def extract_metadata(content):
+    """Extract YAML frontmatter metadata with validation."""
+    metadata = {}
+    if not content.startswith('---'):
+        return metadata, content
+
+    lines = content.splitlines()
+    if not lines or lines[0].strip() != '---':
+        return metadata, content
+
+    end_idx = None
+    for i in range(1, len(lines)):
+        if lines[i].strip() == '---':
+            end_idx = i
+            break
+
+    if end_idx is None:
+        return metadata, content
+
+    frontmatter_text = "\n".join(lines[1:end_idx])
+    body = "\n".join(lines[end_idx + 1:])
+
+    parsed = None
+    try:
+        import yaml
+        parsed = yaml.safe_load(frontmatter_text) if frontmatter_text.strip() else {}
+    except Exception:
+        parsed = None
+
+    if isinstance(parsed, dict):
+        for key, value in parsed.items():
+            norm_value = _normalize_metadata_value(value)
+            if norm_value is None or key is None:
+                continue
+            metadata[str(key).strip()] = norm_value
+    else:
+        for line in frontmatter_text.split('\n'):
+            line = line.strip()
+            if ':' in line and not line.startswith('#'):
+                key, value = line.split(':', 1)
+                key = key.strip()
+                value = value.strip().strip('"\'')
+                if key and value:
+                    metadata[key] = value
+
+    return metadata, body.strip()
+
 def simple_chunk_text(text: str, chunk_size: int = 4000, overlap: int = 200) -> List[str]:
-    """Simple character-based chunking with overlap"""
-    if not text:
-        return []
+    """Smart chunking with natural break points"""
+    if not text: return []
+    if len(text) <= chunk_size: return [text.strip()]
     
     chunks = []
     start = 0
-    text_len = len(text)
-    
-    while start < text_len:
+    while start < len(text):
         end = start + chunk_size
+        if end >= len(text):
+            chunks.append(text[start:].strip())
+            break
+            
         chunk = text[start:end]
-        chunks.append(chunk)
-        start += chunk_size - overlap
         
-    return chunks
+        # Smart break points
+        break_points = [
+            chunk.rfind('\n\n'),      # Paragraph break
+            chunk.rfind('\n# '),      # Header
+            chunk.rfind('\n- '),      # List item
+            chunk.rfind('. '),        # Sentence end
+            chunk.rfind('\n'),        # Line break
+        ]
+        
+        best_break = -1
+        for bp in break_points:
+            if bp > chunk_size * 0.5: # Be stricter for graph chunks, keep 50% min
+                best_break = bp
+                break
+        
+        if best_break > 0:
+            end = start + best_break + 1
+            chunks.append(text[start:end].strip())
+        else:
+            chunks.append(chunk.strip()) # Fallback to hard cut
+            
+        start = max(end - overlap, start + 1)
+        
+    return [c for c in chunks if c.strip()]
 
 import shutil
 import argparse
@@ -114,11 +194,18 @@ def process_vault():
     logger.info("Reading and chunking files...")
     for filepath in tqdm(files, desc="Chunking files"):
         try:
+            metadata = {}
             if Path(filepath).suffix.lower() == ".pdf":
                 content = extract_pdf_text(filepath)
             else:
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    content = f.read()
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        raw_content = f.read()
+                except UnicodeDecodeError:
+                    # Fallback for files with invalid encoding
+                    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+                        raw_content = f.read()
+                metadata, content = extract_metadata(raw_content)
 
             if not content or not content.strip():
                 continue
@@ -130,15 +217,26 @@ def process_vault():
             filename = os.path.basename(filepath)
             filetype = Path(filepath).suffix.lower().lstrip(".")
             
+            # Build context header
+            context_parts = [f"File: {filename}"]
+            if 'tags' in metadata:
+                context_parts.append(f"Tags: {metadata['tags']}")
+            
+            context_header = "\n".join(context_parts)
+            
             for i, chunk in enumerate(file_chunks):
+                # Prepend context to the chunk so the LLM sees it
+                chunk_with_context = f"{context_header}\n---\n{chunk}"
+                
                 all_chunks.append({
-                    'text': chunk,
+                    'text': chunk_with_context,
                     'metadata': {
                         'filename': filename,
                         'filepath': rel_path,
                         'filetype': filetype,
                         'chunk_id': i,
-                        'total_chunks': len(file_chunks)
+                        'total_chunks': len(file_chunks),
+                        **metadata  # Include all extracted metadata in the dictionary
                     }
                 })
         except Exception as e:
