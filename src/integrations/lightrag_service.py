@@ -198,11 +198,13 @@ def _build_index_text(
     return f"{prefix}\n\n{content}"
 
 def _choose_query_mode(query_text: str, requested_mode: str) -> str:
-    tokens = re.findall(r"[\\w/-]+", query_text)
+    # Use standard word characters, plus forward slash and hyphen for technical terms
+    tokens = re.findall(r"[\w/-]+", query_text)
     token_count = len(tokens)
-    has_digit = any(any(ch.isdigit() for ch in token) for token in tokens)
+    
     if requested_mode in {"local", "global", "hybrid"}:
-        if token_count <= 3 or (has_digit and token_count <= 6):
+        # Only force naive for extremely short queries (1-2 words) that are likely just lookup terms
+        if token_count <= 2:
             return "naive"
     return requested_mode
 
@@ -210,7 +212,11 @@ def _is_not_found_result(result_text: str) -> bool:
     if not result_text:
         return True
     text = result_text.strip().lower()
-    return text.startswith("not found in notes")
+    # Log the result for debugging
+    if text.startswith("not found in notes"):
+        logger.info(f"Refusing result because it starts with 'not found': {text[:100]}...")
+        return True
+    return False
 
 
 # Default system prompt for Michel's Obsidian Knowledge Base
@@ -479,7 +485,9 @@ def query_graph():
         if mode not in valid_modes:
             return jsonify({"error": f"Invalid mode. Use: {valid_modes}"}), 400
         
+        logging.info(f"Incoming query: '{query_text}' | Requested mode: '{mode}'")
         mode = _choose_query_mode(query_text, mode)
+        logging.info(f"Effective mode after heuristic: '{mode}'")
 
         # Run async query using run_until_complete on the shared loop
         loop = get_or_create_loop()

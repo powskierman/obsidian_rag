@@ -8,6 +8,7 @@ import re
 
 logger = logging.getLogger(__name__)
 
+
 class CascadingRetriever:
     """
     Implements a 5-stage 'Waterfall' retrieval pipeline:
@@ -17,28 +18,65 @@ class CascadingRetriever:
     4. Target: Use new keywords to run high-precision Vector Search.
     5. Synthesize: Package results for the LLM.
     """
+
     def __init__(
         self,
         embed_url: str = "http://localhost:8000",
         graph_url: str = "http://localhost:8002",
         lightrag_url: str = "http://localhost:8001",
         llm_provider: str = "claude",  # Default, can be overridden per query
-        api_key: Optional[str] = None
+        api_key: Optional[str] = None,
     ):
         self.embed_url = embed_url
         self.graph_url = graph_url
         self.lightrag_url = lightrag_url
         self.llm_provider = llm_provider
         self.api_key = api_key
-        
+
         # We might need a lightweight LLM client for entity extraction if not using regex
         # For now, we'll rely on the services or simple extraction
         self.stopwords = {
-            "and", "or", "the", "a", "an", "in", "on", "with", "for", "to", "of",
-            "from", "by", "is", "are", "was", "were", "be", "been", "it", "this",
-            "that", "these", "those", "as", "at", "via", "etc", "notes", "note",
-            "file", "files", "doc", "docs", "page", "pages", "summary"
+            "and",
+            "or",
+            "the",
+            "a",
+            "an",
+            "in",
+            "on",
+            "with",
+            "for",
+            "to",
+            "of",
+            "from",
+            "by",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "it",
+            "this",
+            "that",
+            "these",
+            "those",
+            "as",
+            "at",
+            "via",
+            "etc",
+            "notes",
+            "note",
+            "file",
+            "files",
+            "doc",
+            "docs",
+            "page",
+            "pages",
+            "summary",
         }
+
+        # Remove overly aggressive stopword filtering for technical terms
+        # Keep core English stopwords but allow technical terms like "ESPHome"
         self.vector_thresholds = [75, 60]
 
     def _service_headers(self) -> Dict[str, str]:
@@ -63,13 +101,13 @@ class CascadingRetriever:
             return False
         docs = vector_data.get("documents", [[]])[0]
         return bool(docs)
-        
+
     async def retrieve(self, query: str, max_results: int = 10) -> Dict[str, Any]:
         async with httpx.AsyncClient() as client:
             # Stage 1: Note Discovery (NetworkX)
             # We search for notes that *title match* or have high vector similarity to the query
             logger.info(f"Stage 1: Note Discovery for '{query}'")
-            
+
             # Using the graph service's hybrid search but emphasizing note titles/anchors
             # We assume the graph service has a mode or we can just filter its results
             notes_payload = {
@@ -77,14 +115,14 @@ class CascadingRetriever:
                 "mode": "graph",
                 "n_results": 5,
                 "max_entities": 15,
-                "llm_provider": self.llm_provider
+                "llm_provider": self.llm_provider,
             }
             try:
                 notes_resp = await client.post(
                     f"{self.graph_url}/query",
                     json=notes_payload,
                     timeout=30.0,
-                    headers=self._service_headers()
+                    headers=self._service_headers(),
                 )
                 notes_data = notes_resp.json() if notes_resp.status_code == 200 else {}
             except Exception as e:
@@ -110,12 +148,14 @@ class CascadingRetriever:
                                 "n_results": 5,
                                 "reranking": True,
                                 "deduplicate": True,
-                                "relevance_threshold": threshold
+                                "relevance_threshold": threshold,
                             },
                             timeout=30.0,
-                            headers=self._service_headers()
+                            headers=self._service_headers(),
                         )
-                        vec_data = vec_resp.json() if vec_resp.status_code == 200 else {}
+                        vec_data = (
+                            vec_resp.json() if vec_resp.status_code == 200 else {}
+                        )
                         if self._vector_has_docs(vec_data):
                             break
                     if self._vector_has_docs(vec_data):
@@ -124,24 +164,30 @@ class CascadingRetriever:
                         dists = vec_data.get("distances", [[]])[0]
                         for doc, meta, dist in zip(docs, metas, dists):
                             try:
-                                relevance = max(0.0, min(100.0, 100 / (1 + math.exp(dist / 2))))
+                                relevance = max(
+                                    0.0, min(100.0, 100 / (1 + math.exp(dist / 2)))
+                                )
                             except Exception:
                                 relevance = 50.0
-                            anchors.append({
-                                "filename": meta.get("filename", "unknown"),
-                                "filepath": meta.get("filepath", "unknown"),
-                                "relevance": relevance,
-                                "snippet": (doc[:300] + "...") if len(doc) > 300 else doc
-                            })
+                            anchors.append(
+                                {
+                                    "filename": meta.get("filename", "unknown"),
+                                    "filepath": meta.get("filepath", "unknown"),
+                                    "relevance": relevance,
+                                    "snippet": (doc[:300] + "...")
+                                    if len(doc) > 300
+                                    else doc,
+                                }
+                            )
                 except Exception as e:
                     logger.error(f"Stage 1 fallback fail: {e}")
-            
+
             extracted_entities = set()
             if anchors:
                 extracted_entities = self._extract_from_sources(anchors)
             if not extracted_entities:
                 extracted_entities = self._extract_terms(query)
-            
+
             # Stage 3: Semantic Expansion (LightRAG)
             # Use the extracted entities to find related concepts in LightRAG
             expanded_context = {}
@@ -155,7 +201,7 @@ class CascadingRetriever:
                     f"{self.lightrag_url}/query",
                     json=lr_payload,
                     timeout=60.0,
-                    headers=self._service_headers()
+                    headers=self._service_headers(),
                 )
                 if lr_resp.status_code == 200:
                     expanded_context = lr_resp.json()
@@ -178,9 +224,13 @@ class CascadingRetriever:
                 if term not in combined_terms:
                     combined_terms.append(term)
             combined_terms = combined_terms[:12]
-            enhanced_query = query if not combined_terms else f"{query} " + " ".join(combined_terms)
-            
-            logger.info(f"Stage 4: Vector Search with raw query, fallback to enhanced query if needed")
+            enhanced_query = (
+                query if not combined_terms else f"{query} " + " ".join(combined_terms)
+            )
+
+            logger.info(
+                f"Stage 4: Vector Search with raw query, fallback to enhanced query if needed"
+            )
             try:
                 vector_chunks = {}
                 vector_query = None
@@ -194,15 +244,17 @@ class CascadingRetriever:
                             "n_results": max_results,
                             "reranking": True,
                             "deduplicate": True,
-                            "relevance_threshold": threshold
+                            "relevance_threshold": threshold,
                         }
                         vec_resp = await client.post(
                             f"{self.embed_url}/query",
                             json=vec_payload,
                             timeout=30.0,
-                            headers=self._service_headers()
+                            headers=self._service_headers(),
                         )
-                        vector_chunks = vec_resp.json() if vec_resp.status_code == 200 else {}
+                        vector_chunks = (
+                            vec_resp.json() if vec_resp.status_code == 200 else {}
+                        )
                         if self._vector_has_docs(vector_chunks):
                             vector_query = candidate
                             break
@@ -218,18 +270,20 @@ class CascadingRetriever:
                 "query": query,
                 "stages": {
                     "anchors": {
-                        "answer": notes_data.get("answer", "") if isinstance(notes_data, dict) else "",
-                        "sources": anchors
+                        "answer": notes_data.get("answer", "")
+                        if isinstance(notes_data, dict)
+                        else "",
+                        "sources": anchors,
                     },
                     "entities": sorted(extracted_entities),
                     "expansion": {
                         "query": expansion_query if extracted_entities else query,
                         "terms": sorted(expansion_terms),
-                        "raw": expanded_context
+                        "raw": expanded_context,
                     },
                     "vectors": vector_chunks,
                     "vector_query": vector_query,
-                    "enhanced_query": enhanced_query
+                    "enhanced_query": enhanced_query,
                 },
                 # We return raw data, the API gateway or UI can choose to synthesize it via LLM
                 # Or we can do it here if we had an LLM client.

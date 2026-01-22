@@ -31,12 +31,11 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - lightrag_storage:/app/lightrag_db
+      - ./lightrag_db:/app/lightrag_db
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - KIMI_MODEL=moonshotai/kimi-k2-0905
+      - KIMI_MODEL=google/gemini-2.0-flash-exp
       - LIGHTRAG_DIR=/app/lightrag_db
       - OLLAMA_HOST=http://host.docker.internal:11434
       - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
@@ -68,7 +67,7 @@ services:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
-      - KIMI_MODEL=moonshotai/kimi-k2-0905
+      - KIMI_MODEL=google/gemini-2.0-flash-exp
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}

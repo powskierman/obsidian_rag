@@ -25,13 +25,18 @@ def _load_deep_thinking_rag():
     """Lazy-load DeepThinkingRAG to avoid heavy ML imports during test collection."""
     try:
         from deep_thinking.orchestrator import DeepThinkingRAG
+
         return DeepThinkingRAG
     except ImportError:
         import sys
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+        base_path = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
         sys.path.append(base_path)
         sys.path.append(base_path)
         from deep_thinking.orchestrator import DeepThinkingRAG
+
         return DeepThinkingRAG
 
 
@@ -61,7 +66,11 @@ def _filter_result_sources(result: Any, threshold: float) -> Any:
     sources = result.get("sources")
     if isinstance(sources, list):
         result["sources"] = _apply_relevance_filter(sources, threshold)
+    # LightRAG responses may not have sources field - don't break them
+    elif sources is None:
+        pass  # Keep result as-is
     return result
+
 
 def _lightrag_result_text(result: Any) -> str:
     if not isinstance(result, dict):
@@ -69,9 +78,11 @@ def _lightrag_result_text(result: Any) -> str:
     text = result.get("result") or result.get("answer") or ""
     return text if isinstance(text, str) else ""
 
+
 def _lightrag_result_empty(result: Any) -> bool:
     text = _lightrag_result_text(result).strip().lower()
     return not text or text.startswith("not found in notes")
+
 
 def _parse_allowed_origins() -> List[str]:
     raw = os.getenv("OBSIDIAN_RAG_ALLOWED_ORIGINS", "").strip()
@@ -106,6 +117,7 @@ def _auth_headers() -> Dict[str, str]:
         return {}
     return {"X-API-Key": api_key}
 
+
 app = FastAPI(title="Obsidian RAG Unified API", version="1.0")
 
 # CORS
@@ -128,9 +140,14 @@ REQUEST_RETRIES = int(os.getenv("RAG_REQUEST_RETRIES", "2"))
 REQUEST_BACKOFF = float(os.getenv("RAG_REQUEST_BACKOFF", "0.5"))
 CIRCUIT_FAILURE_THRESHOLD = int(os.getenv("RAG_CIRCUIT_FAILURES", "3"))
 CIRCUIT_RESET_SECONDS = int(os.getenv("RAG_CIRCUIT_RESET_SECONDS", "30"))
-ENABLE_FALLBACKS = os.getenv("RAG_ENABLE_FALLBACKS", "true").lower() in ("1", "true", "yes")
+ENABLE_FALLBACKS = os.getenv("RAG_ENABLE_FALLBACKS", "true").lower() in (
+    "1",
+    "true",
+    "yes",
+)
 
 _circuit_state = {}
+
 
 @app.middleware("http")
 async def _require_api_key(request: Request, call_next):
@@ -170,11 +187,7 @@ def _record_failure(service: str) -> None:
 
 
 async def _post_json(
-    client: httpx.AsyncClient,
-    url: str,
-    payload: dict,
-    timeout: float,
-    service: str
+    client: httpx.AsyncClient, url: str, payload: dict, timeout: float, service: str
 ) -> httpx.Response:
     if _circuit_is_open(service):
         raise CircuitOpenError(f"{service} circuit open")
@@ -182,12 +195,14 @@ async def _post_json(
     last_exception = None
     for attempt in range(REQUEST_RETRIES + 1):
         try:
-            response = await client.post(url, json=payload, timeout=timeout, headers=_auth_headers())
+            response = await client.post(
+                url, json=payload, timeout=timeout, headers=_auth_headers()
+            )
             if response.status_code >= 400:
                 raise httpx.HTTPStatusError(
                     f"{service} {response.status_code}",
                     request=response.request,
-                    response=response
+                    response=response,
                 )
             _record_success(service)
             return response
@@ -200,12 +215,14 @@ async def _post_json(
                     break
             if attempt >= REQUEST_RETRIES:
                 break
-            await asyncio.sleep(REQUEST_BACKOFF * (2 ** attempt))
+            await asyncio.sleep(REQUEST_BACKOFF * (2**attempt))
 
     raise last_exception or RuntimeError(f"{service} request failed")
 
+
 # thread pool for running synchronous Deep Thinking agents
 executor = ThreadPoolExecutor(max_workers=5)
+
 
 class SearchRequest(BaseModel):
     query: str
@@ -220,6 +237,7 @@ class SearchRequest(BaseModel):
     reranking: bool = True
     deduplicate: bool = True
 
+
 @app.get("/api/v1/health")
 async def health_check():
     """Aggregated health check with stats"""
@@ -230,9 +248,7 @@ async def health_check():
     try:
         async with httpx.AsyncClient() as client:
             emb_resp = await client.get(
-                f"{EMBEDDING_SERVICE_URL}/health",
-                timeout=2.0,
-                headers=_auth_headers()
+                f"{EMBEDDING_SERVICE_URL}/health", timeout=2.0, headers=_auth_headers()
             )
             if emb_resp.status_code == 200:
                 emb_data = emb_resp.json()
@@ -245,9 +261,7 @@ async def health_check():
     try:
         async with httpx.AsyncClient() as client:
             graph_resp = await client.get(
-                f"{GRAPH_SERVICE_URL}/health",
-                timeout=2.0,
-                headers=_auth_headers()
+                f"{GRAPH_SERVICE_URL}/health", timeout=2.0, headers=_auth_headers()
             )
             if graph_resp.status_code == 200:
                 graph_data = graph_resp.json()
@@ -260,9 +274,7 @@ async def health_check():
     try:
         async with httpx.AsyncClient() as client:
             lightrag_resp = await client.get(
-                f"{LIGHTRAG_SERVICE_URL}/health",
-                timeout=2.0,
-                headers=_auth_headers()
+                f"{LIGHTRAG_SERVICE_URL}/health", timeout=2.0, headers=_auth_headers()
             )
             if lightrag_resp.status_code == 200:
                 lightrag_data = lightrag_resp.json()
@@ -276,9 +288,7 @@ async def health_check():
     try:
         async with httpx.AsyncClient() as client:
             stats_resp = await client.get(
-                f"{LIGHTRAG_SERVICE_URL}/stats",
-                timeout=2.0,
-                headers=_auth_headers()
+                f"{LIGHTRAG_SERVICE_URL}/stats", timeout=2.0, headers=_auth_headers()
             )
             if stats_resp.status_code == 200:
                 lightrag_stats = stats_resp.json()
@@ -294,24 +304,27 @@ async def health_check():
                 "embedding": {
                     "status": emb_status,
                     "url": EMBEDDING_SERVICE_URL,
-                    "count": emb_data.get("documents", 0) or emb_data.get("count", 0) # Handle various response formats
+                    "count": emb_data.get("documents", 0)
+                    or emb_data.get("count", 0),  # Handle various response formats
                 },
                 "networkx": {
                     "status": graph_status,
                     "url": GRAPH_SERVICE_URL,
                     "nodes": graph_data.get("nodes", 0),
-                    "edges": graph_data.get("edges", 0)
+                    "edges": graph_data.get("edges", 0),
                 },
                 "lightrag": {
                     "status": lightrag_status,
                     "url": LIGHTRAG_SERVICE_URL,
                     "nodes": lightrag_data.get("graph_nodes", 0),
                     "edges": lightrag_data.get("graph_edges", 0),
-                    "indexed_notes": lightrag_data.get("indexed_notes", 0)
-                }
+                    "indexed_notes": lightrag_data.get("indexed_notes", 0),
+                },
             },
-        }
+        },
     }
+
+
 @app.get("/api/v1/stats")
 async def get_stats():
     """Get aggregated stats for UI"""
@@ -322,33 +335,34 @@ async def get_stats():
         "documents": services.get("embedding", {}).get("count", 0),
         "graph": {
             "nodes": services.get("networkx", {}).get("nodes", 0),
-            "edges": services.get("networkx", {}).get("edges", 0)
-        }
+            "edges": services.get("networkx", {}).get("edges", 0),
+        },
     }
+
+
 @app.post("/api/v1/search")
 async def unified_search(request: SearchRequest):
     """Unified search endpoint acting as a proxy/router"""
     mode = request.mode.lower()
-    
+
     # 1. Vector Only -> Embedding Service
     if mode == "vector":
         async with httpx.AsyncClient() as client:
             try:
                 # Embedding service expects keys: query, n_results
-                payload = {
-                    "query": request.query,
-                    "n_results": request.n_results
-                }
+                payload = {"query": request.query, "n_results": request.n_results}
                 response = await client.post(
                     f"{EMBEDDING_SERVICE_URL}/query",
                     json=payload,
                     timeout=30.0,
-                    headers=_auth_headers()
+                    headers=_auth_headers(),
                 )
                 response.raise_for_status()
                 return response.json()
             except httpx.RequestError as e:
-                raise HTTPException(status_code=503, detail=f"Embedding service unreachable: {str(e)}")
+                raise HTTPException(
+                    status_code=503, detail=f"Embedding service unreachable: {str(e)}"
+                )
 
     # 2. Graph / Hybrid -> Graph Service
     else:
@@ -360,12 +374,15 @@ async def unified_search(request: SearchRequest):
                     f"{GRAPH_SERVICE_URL}/query",
                     json=payload,
                     timeout=120.0,
-                    headers=_auth_headers()
+                    headers=_auth_headers(),
                 )
                 response.raise_for_status()
                 return response.json()
             except httpx.RequestError as e:
-                raise HTTPException(status_code=503, detail=f"Graph service unreachable: {str(e)}")
+                raise HTTPException(
+                    status_code=503, detail=f"Graph service unreachable: {str(e)}"
+                )
+
 
 class UnifiedQueryRequest(BaseModel):
     query: str
@@ -379,6 +396,7 @@ class UnifiedQueryRequest(BaseModel):
     system_prompt: Optional[str] = None
     web_search: bool = False
     llm_knowledge: bool = False
+
 
 @app.post("/api/v1/query")
 async def unified_query(request: UnifiedQueryRequest):
@@ -401,18 +419,22 @@ async def unified_query(request: UnifiedQueryRequest):
     mode = request.mode.lower()
 
     # Normalize mode aliases
-    mode_aliases = {
-        "networkx": "notes",
-        "lightrag": "entities"
-    }
+    mode_aliases = {"networkx": "notes", "lightrag": "entities"}
     mode = mode_aliases.get(mode, mode)
     print(f"DEBUG: Unified query incoming mode: {mode}")
     effective_relevance_threshold = request.relevance_threshold
     if effective_relevance_threshold == 0 and request.distance_threshold is not None:
         import math
-        effective_relevance_threshold = 100 / (1 + math.exp(request.distance_threshold / 2))
-        effective_relevance_threshold = max(0.0, min(100.0, effective_relevance_threshold))
-    print(f"🎯 API Gateway received relevance_threshold: {effective_relevance_threshold}%")
+
+        effective_relevance_threshold = 100 / (
+            1 + math.exp(request.distance_threshold / 2)
+        )
+        effective_relevance_threshold = max(
+            0.0, min(100.0, effective_relevance_threshold)
+        )
+    print(
+        f"🎯 API Gateway received relevance_threshold: {effective_relevance_threshold}%"
+    )
 
     # ===== CASCADING RETRIEVAL MODE =====
     if mode == "cascading":
@@ -426,10 +448,12 @@ async def unified_query(request: UnifiedQueryRequest):
                 graph_url=GRAPH_SERVICE_URL,
                 lightrag_url=LIGHTRAG_SERVICE_URL,
                 llm_provider=request.llm_provider,
-                api_key=api_key
+                api_key=api_key,
             )
 
-            result = await retriever.retrieve(request.query, max_results=request.max_results)
+            result = await retriever.retrieve(
+                request.query, max_results=request.max_results
+            )
 
             answer = ""
             sources = []
@@ -457,19 +481,35 @@ async def unified_query(request: UnifiedQueryRequest):
                     except Exception:
                         relevance = 50.0
                     doc_text = doc if isinstance(doc, str) else ""
-                    snippet = (doc_text[:300] + "...") if len(doc_text) > 300 else doc_text
+                    snippet = (
+                        (doc_text[:300] + "...") if len(doc_text) > 300 else doc_text
+                    )
                     filename = meta.get("filename", "unknown")
                     filepath = meta.get("filepath", "unknown")
-                    vector_sources.append({
-                        "filename": filename,
-                        "filepath": filepath,
-                        "relevance": relevance,
-                        "snippet": snippet
-                    })
-                    if filepath and (filepath not in vector_snippets_by_path or relevance > vector_snippets_by_path[filepath]["relevance"]):
-                        vector_snippets_by_path[filepath] = {"snippet": snippet, "relevance": relevance}
-                    if filename and (filename not in vector_snippets_by_name or relevance > vector_snippets_by_name[filename]["relevance"]):
-                        vector_snippets_by_name[filename] = {"snippet": snippet, "relevance": relevance}
+                    vector_sources.append(
+                        {
+                            "filename": filename,
+                            "filepath": filepath,
+                            "relevance": relevance,
+                            "snippet": snippet,
+                        }
+                    )
+                    if filepath and (
+                        filepath not in vector_snippets_by_path
+                        or relevance > vector_snippets_by_path[filepath]["relevance"]
+                    ):
+                        vector_snippets_by_path[filepath] = {
+                            "snippet": snippet,
+                            "relevance": relevance,
+                        }
+                    if filename and (
+                        filename not in vector_snippets_by_name
+                        or relevance > vector_snippets_by_name[filename]["relevance"]
+                    ):
+                        vector_snippets_by_name[filename] = {
+                            "snippet": snippet,
+                            "relevance": relevance,
+                        }
 
             def _is_boilerplate_snippet(text: str) -> bool:
                 if not text:
@@ -500,15 +540,48 @@ async def unified_query(request: UnifiedQueryRequest):
                 rel = src.get("relevance", 0) or 0
                 if fname not in deduped or rel > deduped[fname].get("relevance", 0):
                     deduped[fname] = src
-            sources = sorted(deduped.values(), key=lambda s: s.get("relevance", 0), reverse=True)
+            sources = sorted(
+                deduped.values(), key=lambda s: s.get("relevance", 0), reverse=True
+            )
             sources = _apply_relevance_filter(sources, effective_relevance_threshold)
 
-            query_terms = set(re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{1,}", request.query.lower()))
+            query_terms = set(
+                re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{1,}", request.query.lower())
+            )
             filename_stopwords = {
-                "a", "an", "and", "or", "the", "to", "of", "in", "on", "for", "with", "from", "by",
-                "doc", "docs", "documentation", "guide", "readme", "overview", "index", "notes", "note",
-                "setup", "quickstart", "reference", "example", "examples", "workflow", "implementation",
-                "instructions", "tutorial", "how", "template"
+                "a",
+                "an",
+                "and",
+                "or",
+                "the",
+                "to",
+                "of",
+                "in",
+                "on",
+                "for",
+                "with",
+                "from",
+                "by",
+                "doc",
+                "docs",
+                "documentation",
+                "guide",
+                "readme",
+                "overview",
+                "index",
+                "notes",
+                "note",
+                "setup",
+                "quickstart",
+                "reference",
+                "example",
+                "examples",
+                "workflow",
+                "implementation",
+                "instructions",
+                "tutorial",
+                "how",
+                "template",
             }
 
             def _diversity_key(src: Dict[str, Any]) -> str:
@@ -531,13 +604,17 @@ async def unified_query(request: UnifiedQueryRequest):
                     continue
                 diversity_counts[key] = count + 1
                 diversified.append(src)
-            sources = diversified[:request.max_results]
+            sources = diversified[: request.max_results]
 
             if not answer and isinstance(result, dict):
                 answer = result.get("answer", "") or ""
 
             if not answer:
-                answer = f"Found {len(sources)} matching snippets in your vault." if sources else "No results found"
+                answer = (
+                    f"Found {len(sources)} matching snippets in your vault."
+                    if sources
+                    else "No results found"
+                )
 
             if isinstance(result, dict):
                 result["answer"] = answer
@@ -551,31 +628,44 @@ async def unified_query(request: UnifiedQueryRequest):
                 "results": result,
                 "metadata": {
                     "description": "5-Stage Cascading Retrieval (Anchor -> Entity -> Expand -> Vector -> Synthesis)",
-                    "stages": ["Note Discovery", "Entity Extraction", "Semantic Expansion", "Vector Search"]
-                }
+                    "stages": [
+                        "Note Discovery",
+                        "Entity Extraction",
+                        "Semantic Expansion",
+                        "Vector Search",
+                    ],
+                },
             }
         except Exception as e:
             import traceback
+
             traceback.print_exc()
-            raise HTTPException(status_code=500, detail=f"Cascading retrieval error: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Cascading retrieval error: {str(e)}"
+            )
 
     async with httpx.AsyncClient() as client:
-
         # ===== SINGLE-SOURCE MODES =====
 
         # Pure vector search
         if mode == "vector":
             try:
-                payload = {"query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold}
+                payload = {
+                    "query": request.query,
+                    "n_results": request.max_results,
+                    "relevance_threshold": effective_relevance_threshold,
+                }
                 response = await _post_json(
                     client,
                     f"{EMBEDDING_SERVICE_URL}/query",
                     payload,
                     timeout=30.0,
-                    service="vector"
+                    service="vector",
                 )
                 if response.status_code != 200:
-                    raise HTTPException(status_code=response.status_code, detail=response.text)
+                    raise HTTPException(
+                        status_code=response.status_code, detail=response.text
+                    )
                 result = response.json()
 
                 return {
@@ -584,11 +674,13 @@ async def unified_query(request: UnifiedQueryRequest):
                     "results": result,
                     "metadata": {
                         "source": "ChromaDB Vectors",
-                        "description": "Pure vector similarity search across 7,102 document chunks"
-                    }
+                        "description": "Pure vector similarity search across 7,102 document chunks",
+                    },
                 }
             except Exception as e:
-                raise HTTPException(status_code=503, detail=f"Vector service error: {str(e)}")
+                raise HTTPException(
+                    status_code=503, detail=f"Vector service error: {str(e)}"
+                )
 
         # NetworkX notes graph
         elif mode == "notes":
@@ -603,17 +695,19 @@ async def unified_query(request: UnifiedQueryRequest):
                     "temperature": request.temperature,
                     "web_search": request.web_search,
                     "llm_knowledge": request.llm_knowledge,
-                    "system_prompt": request.system_prompt
+                    "system_prompt": request.system_prompt,
                 }
                 response = await _post_json(
                     client,
                     f"{GRAPH_SERVICE_URL}/query",
                     payload,
                     timeout=120.0,
-                    service="graph"
+                    service="graph",
                 )
                 if response.status_code != 200:
-                    raise HTTPException(status_code=response.status_code, detail=response.text)
+                    raise HTTPException(
+                        status_code=response.status_code, detail=response.text
+                    )
                 result = response.json()
                 result = _filter_result_sources(result, effective_relevance_threshold)
 
@@ -623,8 +717,8 @@ async def unified_query(request: UnifiedQueryRequest):
                     "results": result,
                     "metadata": {
                         "source": "NetworkX Graph",
-                        "description": "Note-centric graph with wiki-link relationships (16,212 nodes, 16,268 edges)"
-                    }
+                        "description": "Note-centric graph with wiki-link relationships (16,212 nodes, 16,268 edges)",
+                    },
                 }
             except Exception as e:
                 if ENABLE_FALLBACKS:
@@ -632,14 +726,14 @@ async def unified_query(request: UnifiedQueryRequest):
                         fallback_payload = {
                             "query": request.query,
                             "n_results": request.max_results,
-                            "relevance_threshold": effective_relevance_threshold
+                            "relevance_threshold": effective_relevance_threshold,
                         }
                         fallback_response = await _post_json(
                             client,
                             f"{EMBEDDING_SERVICE_URL}/query",
                             fallback_payload,
                             timeout=30.0,
-                            service="vector"
+                            service="vector",
                         )
                         if fallback_response.status_code == 200:
                             fallback_result = fallback_response.json()
@@ -649,12 +743,14 @@ async def unified_query(request: UnifiedQueryRequest):
                                 "results": fallback_result,
                                 "metadata": {
                                     "source": "Fallback Vector",
-                                    "description": "NetworkX unavailable; returned vector results"
-                                }
+                                    "description": "NetworkX unavailable; returned vector results",
+                                },
                             }
                     except Exception:
                         pass
-                raise HTTPException(status_code=503, detail=f"Notes graph error: {str(e)}")
+                raise HTTPException(
+                    status_code=503, detail=f"Notes graph error: {str(e)}"
+                )
 
         # LightRAG entities graph
         elif mode == "entities":
@@ -667,17 +763,19 @@ async def unified_query(request: UnifiedQueryRequest):
                     "temperature": request.temperature,
                     "web_search": request.web_search,
                     "llm_knowledge": request.llm_knowledge,
-                    "system_prompt": request.system_prompt
+                    "system_prompt": request.system_prompt,
                 }
                 response = await _post_json(
                     client,
                     f"{LIGHTRAG_SERVICE_URL}/query",
                     payload,
                     timeout=60.0,
-                    service="lightrag"
+                    service="lightrag",
                 )
                 if response.status_code != 200:
-                    raise HTTPException(status_code=response.status_code, detail=response.text)
+                    raise HTTPException(
+                        status_code=response.status_code, detail=response.text
+                    )
                 result = response.json()
                 result = _filter_result_sources(result, effective_relevance_threshold)
 
@@ -685,14 +783,14 @@ async def unified_query(request: UnifiedQueryRequest):
                     fallback_payload = {
                         "query": request.query,
                         "n_results": request.max_results,
-                        "relevance_threshold": effective_relevance_threshold
+                        "relevance_threshold": effective_relevance_threshold,
                     }
                     fallback_response = await _post_json(
                         client,
                         f"{EMBEDDING_SERVICE_URL}/query",
                         fallback_payload,
                         timeout=30.0,
-                        service="vector"
+                        service="vector",
                     )
                     if fallback_response.status_code == 200:
                         fallback_result = fallback_response.json()
@@ -702,18 +800,25 @@ async def unified_query(request: UnifiedQueryRequest):
                             "results": fallback_result,
                             "metadata": {
                                 "source": "Fallback Vector",
-                                "description": "LightRAG returned no matches; returned vector results"
-                            }
+                                "description": "LightRAG returned no matches; returned vector results",
+                            },
                         }
+
+                # Extract answer and sources from LightRAG response
+                answer = (
+                    result.get("result") or result.get("answer") or "No results found"
+                )
+                sources = result.get("sources", [])
 
                 return {
                     "query": request.query,
                     "mode": "entities",
-                    "results": result,
+                    "answer": answer,
+                    "sources": sources,
                     "metadata": {
                         "source": "LightRAG Graph",
-                        "description": "Entity-centric semantic graph (2,000 indexed notes)"
-                    }
+                        "description": "Entity-centric semantic graph (2,000 indexed notes)",
+                    },
                 }
             except Exception as e:
                 if ENABLE_FALLBACKS:
@@ -721,14 +826,14 @@ async def unified_query(request: UnifiedQueryRequest):
                         fallback_payload = {
                             "query": request.query,
                             "n_results": request.max_results,
-                            "relevance_threshold": effective_relevance_threshold
+                            "relevance_threshold": effective_relevance_threshold,
                         }
                         fallback_response = await _post_json(
                             client,
                             f"{EMBEDDING_SERVICE_URL}/query",
                             fallback_payload,
                             timeout=30.0,
-                            service="vector"
+                            service="vector",
                         )
                         if fallback_response.status_code == 200:
                             fallback_result = fallback_response.json()
@@ -738,12 +843,14 @@ async def unified_query(request: UnifiedQueryRequest):
                                 "results": fallback_result,
                                 "metadata": {
                                     "source": "Fallback Vector",
-                                    "description": "LightRAG unavailable; returned vector results"
-                                }
+                                    "description": "LightRAG unavailable; returned vector results",
+                                },
                             }
                     except Exception:
                         pass
-                raise HTTPException(status_code=503, detail=f"Entities graph error: {str(e)}")
+                raise HTTPException(
+                    status_code=503, detail=f"Entities graph error: {str(e)}"
+                )
 
         # ===== DUAL-SOURCE MODES =====
 
@@ -751,115 +858,203 @@ async def unified_query(request: UnifiedQueryRequest):
         elif mode == "notes+vector":
             try:
                 tasks = [
-                    _post_json(client, f"{GRAPH_SERVICE_URL}/query", {
-                        "query": request.query,
-                        "mode": "hybrid",
-                        "n_results": request.max_results,
-                        "use_vector": True,
-                        "llm_provider": request.llm_provider,
-                        "model": request.model,
-                        "temperature": request.temperature,
-                        "web_search": request.web_search,
-                        "llm_knowledge": request.llm_knowledge,
-                        "system_prompt": request.system_prompt
-                    }, timeout=120.0, service="graph"),
-                    _post_json(client, f"{EMBEDDING_SERVICE_URL}/query", {
-                        "query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold
-                    }, timeout=30.0, service="vector")
+                    _post_json(
+                        client,
+                        f"{GRAPH_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "mode": "hybrid",
+                            "n_results": request.max_results,
+                            "use_vector": True,
+                            "llm_provider": request.llm_provider,
+                            "model": request.model,
+                            "temperature": request.temperature,
+                            "web_search": request.web_search,
+                            "llm_knowledge": request.llm_knowledge,
+                            "system_prompt": request.system_prompt,
+                        },
+                        timeout=120.0,
+                        service="graph",
+                    ),
+                    _post_json(
+                        client,
+                        f"{EMBEDDING_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "n_results": request.max_results,
+                            "relevance_threshold": effective_relevance_threshold,
+                        },
+                        timeout=30.0,
+                        service="vector",
+                    ),
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
-                notes_result = _filter_result_sources(notes_result, effective_relevance_threshold)
-                vector_result = None if isinstance(responses[1], Exception) else responses[1].json()
+                notes_result = (
+                    None if isinstance(responses[0], Exception) else responses[0].json()
+                )
+                notes_result = _filter_result_sources(
+                    notes_result, effective_relevance_threshold
+                )
+                vector_result = (
+                    None if isinstance(responses[1], Exception) else responses[1].json()
+                )
 
                 return {
                     "query": request.query,
                     "mode": "notes+vector",
-                    "notes": {"available": notes_result is not None, "data": notes_result},
-                    "vector": {"available": vector_result is not None, "data": vector_result},
-                    "metadata": {"description": "Combined NetworkX graph + ChromaDB vectors"}
+                    "notes": {
+                        "available": notes_result is not None,
+                        "data": notes_result,
+                    },
+                    "vector": {
+                        "available": vector_result is not None,
+                        "data": vector_result,
+                    },
+                    "metadata": {
+                        "description": "Combined NetworkX graph + ChromaDB vectors"
+                    },
                 }
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Notes+Vector error: {str(e)}")
+                raise HTTPException(
+                    status_code=500, detail=f"Notes+Vector error: {str(e)}"
+                )
 
         # Entities + Vector
         elif mode == "entities+vector":
             try:
                 tasks = [
-                    _post_json(client, f"{LIGHTRAG_SERVICE_URL}/query", {
-                        "query": request.query,
-                        "mode": "hybrid",
-                        "llm_provider": request.llm_provider,
-                        "model": request.model,
-                        "temperature": request.temperature,
-                        "web_search": request.web_search,
-                        "llm_knowledge": request.llm_knowledge,
-                        "system_prompt": request.system_prompt
-                    }, timeout=60.0, service="lightrag"),
-                    _post_json(client, f"{EMBEDDING_SERVICE_URL}/query", {
-                        "query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold
-                    }, timeout=30.0, service="vector")
+                    _post_json(
+                        client,
+                        f"{LIGHTRAG_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "mode": "hybrid",
+                            "llm_provider": request.llm_provider,
+                            "model": request.model,
+                            "temperature": request.temperature,
+                            "web_search": request.web_search,
+                            "llm_knowledge": request.llm_knowledge,
+                            "system_prompt": request.system_prompt,
+                        },
+                        timeout=60.0,
+                        service="lightrag",
+                    ),
+                    _post_json(
+                        client,
+                        f"{EMBEDDING_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "n_results": request.max_results,
+                            "relevance_threshold": effective_relevance_threshold,
+                        },
+                        timeout=30.0,
+                        service="vector",
+                    ),
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                entities_result = None if isinstance(responses[0], Exception) else responses[0].json()
-                entities_result = _filter_result_sources(entities_result, effective_relevance_threshold)
-                vector_result = None if isinstance(responses[1], Exception) else responses[1].json()
+                entities_result = (
+                    None if isinstance(responses[0], Exception) else responses[0].json()
+                )
+                entities_result = _filter_result_sources(
+                    entities_result, effective_relevance_threshold
+                )
+                vector_result = (
+                    None if isinstance(responses[1], Exception) else responses[1].json()
+                )
 
                 return {
                     "query": request.query,
                     "mode": "entities+vector",
-                    "entities": {"available": entities_result is not None, "data": entities_result},
-                    "vector": {"available": vector_result is not None, "data": vector_result},
-                    "metadata": {"description": "Combined LightRAG graph + ChromaDB vectors"}
+                    "entities": {
+                        "available": entities_result is not None,
+                        "data": entities_result,
+                    },
+                    "vector": {
+                        "available": vector_result is not None,
+                        "data": vector_result,
+                    },
+                    "metadata": {
+                        "description": "Combined LightRAG graph + ChromaDB vectors"
+                    },
                 }
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Entities+Vector error: {str(e)}")
+                raise HTTPException(
+                    status_code=500, detail=f"Entities+Vector error: {str(e)}"
+                )
 
         # Dual-Graph (both graphs, no vectors)
         elif mode == "dual-graph":
             try:
                 tasks = [
-                    _post_json(client, f"{GRAPH_SERVICE_URL}/query", {
-                        "query": request.query,
-                        "mode": "hybrid",
-                        "n_results": request.max_results,
-                        "use_vector": True,
-                        "llm_provider": request.llm_provider,
-                        "model": request.model,
-                        "temperature": request.temperature,
-                        "web_search": request.web_search,
-                        "llm_knowledge": request.llm_knowledge,
-                        "system_prompt": request.system_prompt
-                    }, timeout=120.0, service="graph"),
-                    _post_json(client, f"{LIGHTRAG_SERVICE_URL}/query", {
-                        "query": request.query,
-                        "mode": "hybrid",
-                        "llm_provider": request.llm_provider,
-                        "model": request.model,
-                        "temperature": request.temperature,
-                        "web_search": request.web_search,
-                        "llm_knowledge": request.llm_knowledge,
-                        "system_prompt": request.system_prompt
-                    }, timeout=60.0, service="lightrag")
+                    _post_json(
+                        client,
+                        f"{GRAPH_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "mode": "hybrid",
+                            "n_results": request.max_results,
+                            "use_vector": True,
+                            "llm_provider": request.llm_provider,
+                            "model": request.model,
+                            "temperature": request.temperature,
+                            "web_search": request.web_search,
+                            "llm_knowledge": request.llm_knowledge,
+                            "system_prompt": request.system_prompt,
+                        },
+                        timeout=120.0,
+                        service="graph",
+                    ),
+                    _post_json(
+                        client,
+                        f"{LIGHTRAG_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "mode": "hybrid",
+                            "llm_provider": request.llm_provider,
+                            "model": request.model,
+                            "temperature": request.temperature,
+                            "web_search": request.web_search,
+                            "llm_knowledge": request.llm_knowledge,
+                            "system_prompt": request.system_prompt,
+                        },
+                        timeout=60.0,
+                        service="lightrag",
+                    ),
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
-                entities_result = None if isinstance(responses[1], Exception) else responses[1].json()
-                notes_result = _filter_result_sources(notes_result, effective_relevance_threshold)
-                entities_result = _filter_result_sources(entities_result, effective_relevance_threshold)
+                notes_result = (
+                    None if isinstance(responses[0], Exception) else responses[0].json()
+                )
+                entities_result = (
+                    None if isinstance(responses[1], Exception) else responses[1].json()
+                )
+                notes_result = _filter_result_sources(
+                    notes_result, effective_relevance_threshold
+                )
+                entities_result = _filter_result_sources(
+                    entities_result, effective_relevance_threshold
+                )
 
                 return {
                     "query": request.query,
                     "mode": "dual-graph",
-                    "notes": {"available": notes_result is not None, "data": notes_result},
-                    "entities": {"available": entities_result is not None, "data": entities_result},
-                    "metadata": {"description": "Combined NetworkX + LightRAG graphs"}
+                    "notes": {
+                        "available": notes_result is not None,
+                        "data": notes_result,
+                    },
+                    "entities": {
+                        "available": entities_result is not None,
+                        "data": entities_result,
+                    },
+                    "metadata": {"description": "Combined NetworkX + LightRAG graphs"},
                 }
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Dual-graph error: {str(e)}")
+                raise HTTPException(
+                    status_code=500, detail=f"Dual-graph error: {str(e)}"
+                )
 
         # ===== ULTIMATE HYBRID MODE =====
 
@@ -868,66 +1063,108 @@ async def unified_query(request: UnifiedQueryRequest):
         elif mode == "hybrid":
             try:
                 tasks = [
-                    _post_json(client, f"{GRAPH_SERVICE_URL}/query", {
-                        "query": request.query,
-                        "mode": "hybrid",
-                        "n_results": request.max_results,
-                        "use_vector": True,
-                        "llm_provider": request.llm_provider,
-                        "model": request.model,
-                        "temperature": request.temperature,
-                        "web_search": request.web_search,
-                        "llm_knowledge": request.llm_knowledge,
-                        "system_prompt": request.system_prompt
-                    }, timeout=90.0, service="graph"),
-                    _post_json(client, f"{LIGHTRAG_SERVICE_URL}/query", {
-                        "query": request.query,
-                        "mode": "hybrid",
-                        "llm_provider": request.llm_provider,
-                        "model": request.model,
-                        "temperature": request.temperature,
-                        "web_search": request.web_search,
-                        "llm_knowledge": request.llm_knowledge,
-                        "system_prompt": request.system_prompt
-                    }, timeout=90.0, service="lightrag"),
-                    _post_json(client, f"{EMBEDDING_SERVICE_URL}/query", {
-                        "query": request.query, "n_results": request.max_results, "relevance_threshold": effective_relevance_threshold
-                    }, timeout=30.0, service="vector")
+                    _post_json(
+                        client,
+                        f"{GRAPH_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "mode": "hybrid",
+                            "n_results": request.max_results,
+                            "use_vector": True,
+                            "llm_provider": request.llm_provider,
+                            "model": request.model,
+                            "temperature": request.temperature,
+                            "web_search": request.web_search,
+                            "llm_knowledge": request.llm_knowledge,
+                            "system_prompt": request.system_prompt,
+                        },
+                        timeout=90.0,
+                        service="graph",
+                    ),
+                    _post_json(
+                        client,
+                        f"{LIGHTRAG_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "mode": "hybrid",
+                            "llm_provider": request.llm_provider,
+                            "model": request.model,
+                            "temperature": request.temperature,
+                            "web_search": request.web_search,
+                            "llm_knowledge": request.llm_knowledge,
+                            "system_prompt": request.system_prompt,
+                        },
+                        timeout=90.0,
+                        service="lightrag",
+                    ),
+                    _post_json(
+                        client,
+                        f"{EMBEDDING_SERVICE_URL}/query",
+                        {
+                            "query": request.query,
+                            "n_results": request.max_results,
+                            "relevance_threshold": effective_relevance_threshold,
+                        },
+                        timeout=30.0,
+                        service="vector",
+                    ),
                 ]
                 responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-                notes_result = None if isinstance(responses[0], Exception) else responses[0].json()
-                entities_result = None if isinstance(responses[1], Exception) else responses[1].json()
-                notes_result = _filter_result_sources(notes_result, effective_relevance_threshold)
-                entities_result = _filter_result_sources(entities_result, effective_relevance_threshold)
-                vector_result = None if isinstance(responses[2], Exception) else responses[2].json()
+                notes_result = (
+                    None if isinstance(responses[0], Exception) else responses[0].json()
+                )
+                entities_result = (
+                    None if isinstance(responses[1], Exception) else responses[1].json()
+                )
+                notes_result = _filter_result_sources(
+                    notes_result, effective_relevance_threshold
+                )
+                entities_result = _filter_result_sources(
+                    entities_result, effective_relevance_threshold
+                )
+                vector_result = (
+                    None if isinstance(responses[2], Exception) else responses[2].json()
+                )
 
                 return {
                     "query": request.query,
                     "mode": "hybrid",
-                    "notes": {"available": notes_result is not None, "data": notes_result},
-                    "entities": {"available": entities_result is not None, "data": entities_result},
-                    "vector": {"available": vector_result is not None, "data": vector_result},
+                    "notes": {
+                        "available": notes_result is not None,
+                        "data": notes_result,
+                    },
+                    "entities": {
+                        "available": entities_result is not None,
+                        "data": entities_result,
+                    },
+                    "vector": {
+                        "available": vector_result is not None,
+                        "data": vector_result,
+                    },
                     "metadata": {
                         "description": "Ultimate hybrid: All 3 sources (Vector + Notes + Entities)",
                         "sources": {
                             "vector": "ChromaDB (7,102 chunks)",
                             "notes": "NetworkX Graph (16,212 nodes)",
-                            "entities": "LightRAG Graph (2,000 notes)"
-                        }
-                    }
+                            "entities": "LightRAG Graph (2,000 notes)",
+                        },
+                    },
                 }
             except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Hybrid query error: {str(e)}")
+                raise HTTPException(
+                    status_code=500, detail=f"Hybrid query error: {str(e)}"
+                )
+
 
 @app.websocket("/api/v1/deep-research")
 async def deep_research_websocket(websocket: WebSocket):
     """
     WebSocket endpoint for Deep Thinking Agent.
     Client sends JSON: {"query": "..."}
-    Server streams messages: 
+    Server streams messages:
       {"type": "log", "content": "..."}
-      {"type": "status", "content": "🤔 Planning..."} 
+      {"type": "status", "content": "🤔 Planning..."}
       {"type": "answer", "data": {...}}
     """
     if not _is_authorized(websocket.headers):
@@ -935,13 +1172,20 @@ async def deep_research_websocket(websocket: WebSocket):
         return
 
     await websocket.accept()
-    
+
     try:
         data = await websocket.receive_json()
         query = data.get("query")
         provider = data.get("provider", "claude").lower()
         model = data.get("model")
-        supported_providers = {"claude", "gemini", "openrouter", "chatgpt", "ollama", "perplexity"}
+        supported_providers = {
+            "claude",
+            "gemini",
+            "openrouter",
+            "chatgpt",
+            "ollama",
+            "perplexity",
+        }
 
         def _select_fallback_provider():
             if os.getenv("PERPLEXITY_API_KEY"):
@@ -954,10 +1198,10 @@ async def deep_research_websocket(websocket: WebSocket):
                 return "gemini"
             if os.getenv("OPENAI_API_KEY"):
                 return "chatgpt"
-            if os.getenv("OLLAMA_HOST"): # Basic check for Ollama
+            if os.getenv("OLLAMA_HOST"):  # Basic check for Ollama
                 return "ollama"
             return None
-        
+
         if not query:
             await websocket.send_json({"type": "error", "content": "No query provided"})
             return
@@ -966,16 +1210,20 @@ async def deep_research_websocket(websocket: WebSocket):
         if provider not in supported_providers:
             fallback_provider = _select_fallback_provider()
             if not fallback_provider:
-                await websocket.send_json({
-                    "type": "error",
-                    "content": "Deep Thinking supports Perplexity, Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found."
-                })
+                await websocket.send_json(
+                    {
+                        "type": "error",
+                        "content": "Deep Thinking supports Perplexity, Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found.",
+                    }
+                )
                 await websocket.close()
                 return
-            await websocket.send_json({
-                "type": "log",
-                "message": f"Deep Thinking does not support '{provider}'. Using '{fallback_provider}'."
-            })
+            await websocket.send_json(
+                {
+                    "type": "log",
+                    "message": f"Deep Thinking does not support '{provider}'. Using '{fallback_provider}'.",
+                }
+            )
             provider = fallback_provider
             model = None
 
@@ -984,35 +1232,45 @@ async def deep_research_websocket(websocket: WebSocket):
         if provider == "claude":
             api_key = ANTHROPIC_API_KEY
             if not api_key:
-                await websocket.send_json({"type": "error", "content": "ANTHROPIC_API_KEY not configured"})
+                await websocket.send_json(
+                    {"type": "error", "content": "ANTHROPIC_API_KEY not configured"}
+                )
                 await websocket.close()
                 return
         elif provider == "gemini":
             api_key = os.getenv("GEMINI_API_KEY")
             if not api_key:
-                await websocket.send_json({"type": "error", "content": "GEMINI_API_KEY not configured"})
+                await websocket.send_json(
+                    {"type": "error", "content": "GEMINI_API_KEY not configured"}
+                )
                 await websocket.close()
                 return
         elif provider == "openrouter":
             api_key = os.getenv("OPENROUTER_API_KEY")
             if not api_key:
-                await websocket.send_json({"type": "error", "content": "OPENROUTER_API_KEY not configured"})
+                await websocket.send_json(
+                    {"type": "error", "content": "OPENROUTER_API_KEY not configured"}
+                )
                 await websocket.close()
                 return
         elif provider == "chatgpt":
             api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
-                await websocket.send_json({"type": "error", "content": "OPENAI_API_KEY not configured"})
+                await websocket.send_json(
+                    {"type": "error", "content": "OPENAI_API_KEY not configured"}
+                )
                 await websocket.close()
                 return
         elif provider == "perplexity":
             api_key = os.getenv("PERPLEXITY_API_KEY")
             if not api_key:
-                await websocket.send_json({"type": "error", "content": "PERPLEXITY_API_KEY not configured"})
+                await websocket.send_json(
+                    {"type": "error", "content": "PERPLEXITY_API_KEY not configured"}
+                )
                 await websocket.close()
                 return
         elif provider == "ollama":
-            api_key = "ollama" # No key needed, but passing string to avoid validation errors downstream
+            api_key = "ollama"  # No key needed, but passing string to avoid validation errors downstream
 
         # Initialize Agent with Universal Client
         # Note: We must use the INTERNAL Docker URLs here
@@ -1023,7 +1281,7 @@ async def deep_research_websocket(websocket: WebSocket):
             model=model,
             vector_service_url=EMBEDDING_SERVICE_URL,
             graph_service_url=GRAPH_SERVICE_URL,
-            enable_reranking=True
+            enable_reranking=True,
         )
 
         # Define synchronous callback to run in thread
@@ -1032,11 +1290,11 @@ async def deep_research_websocket(websocket: WebSocket):
             # But making it thread-safe is tricky.
             # Simplified: formatting the message and putting it in a queue, or just printing?
             # Ideally we want to send to websocket.
-            
+
             # Since this runs in a thread, we need to schedule the send on the loop
-            loop = asyncio.new_event_loop() 
-            # Wait, creating a new loop is risky. 
-            # Better approach: The callback is run in the thread. 
+            loop = asyncio.new_event_loop()
+            # Wait, creating a new loop is risky.
+            # Better approach: The callback is run in the thread.
             # We can use asyncio.run_coroutine_threadsafe if we have reference to the loop.
             pass
 
@@ -1044,11 +1302,7 @@ async def deep_research_websocket(websocket: WebSocket):
         loop = asyncio.get_running_loop()
 
         def sync_callback(msg, details=None):
-            payload = {
-                "type": "log", 
-                "message": msg, 
-                "details": details
-            }
+            payload = {"type": "log", "message": msg, "details": details}
             # Schedule sending the message on the main loop
             asyncio.run_coroutine_threadsafe(websocket.send_json(payload), loop)
 
@@ -1057,16 +1311,13 @@ async def deep_research_websocket(websocket: WebSocket):
             return rag.query(query, status_callback=sync_callback)
 
         await websocket.send_json({"type": "status", "content": "Agent started"})
-        
+
         # Execute in thread
         result = await asyncio.get_running_loop().run_in_executor(executor, run_agent)
-        
+
         # Send final result
-        await websocket.send_json({
-            "type": "result",
-            "data": result
-        })
-        
+        await websocket.send_json({"type": "result", "data": result})
+
         await websocket.close()
 
     except WebSocketDisconnect:
@@ -1078,6 +1329,7 @@ async def deep_research_websocket(websocket: WebSocket):
             await websocket.close(code=1011)
         except:
             pass
+
 
 if __name__ == "__main__":
     uvicorn.run("api_gateway:app", host="0.0.0.0", port=3000, reload=True)

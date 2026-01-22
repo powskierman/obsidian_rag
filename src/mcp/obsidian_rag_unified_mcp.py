@@ -980,36 +980,53 @@ async def get_vault_statistics(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=f"❌ Stats error: {str(e)}")]
 
 async def query_knowledge_graph(arguments: dict) -> list[TextContent]:
-    """Query knowledge graph"""
+    """Query knowledge graph (tries LightRAG service first, falls back to local graph)"""
     query = arguments.get("query", "")
     max_entities = arguments.get("max_entities", 20)
 
     if not query:
         return [TextContent(type="text", text="❌ Query is required")]
 
+    # 1. Try LightRAG (Docker Service)
+    # Check if we should prefer local graph via env var
+    prefer_local = os.getenv("MCP_GRAPH_PROVIDER", "").lower() == "local"
+    
+    if not prefer_local:
+        try:
+            # Check health or just try query
+            response = requests.post(
+                f"{GRAPH_SERVICE_URL}/query",
+                json={"query": query, "mode": "hybrid"},
+                headers=_service_headers(),
+                timeout=30  # Give LightRAG time to think
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                answer = result.get("response", "")
+                if answer:
+                    return [TextContent(type="text", text=f"🧠 **(LightRAG)** {answer}")]
+        except Exception as e:
+            logger.warning(f"LightRAG query failed, falling back to local graph: {e}")
+
+    # 2. Fallback to Local NetworkX Graph
     if not GRAPH_AVAILABLE:
         return [TextContent(
             type="text",
-            text="❌ Knowledge graph not available. Make sure networkx is installed."
+            text="❌ Knowledge graph not available. LightRAG failed and networkx is not installed."
         )]
     
     if not load_graph():
         return [TextContent(
             type="text",
             text="❌ Could not load knowledge graph. Make sure:\n"
-                 "1. KNOWLEDGE_GRAPH_PATH points to a valid .pkl file\n"
-                 "2. Or knowledge_graph_full.pkl exists in graph_data/"
+                 "1. LightRAG service is running OR\n"
+                 "2. KNOWLEDGE_GRAPH_PATH points to a valid .pkl file"
         )]
     
     try:
-        # if not os.environ.get("OPENAI_API_KEY"):
-        #     return [TextContent(
-        #         type="text",
-        #         text="❌ OPENAI_API_KEY not configured for graph queries."
-        #     )]
-
         answer = querier.query_graph(query, max_entities=max_entities)
-        return [TextContent(type="text", text=answer)]
+        return [TextContent(type="text", text=f"🕸️ **(Local Graph)** {answer}")]
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Graph query error: {str(e)}")]
 

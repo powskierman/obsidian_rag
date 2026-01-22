@@ -40,7 +40,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - KIMI_MODEL=openai/gpt-4o-mini
+      - KIMI_MODEL=${KIMI_MODEL:-anthropic/claude-3.5-haiku}
       - LIGHTRAG_DIR=${LIGHTRAG_DIR:-/app/lightrag_db}
       - OLLAMA_HOST=http://host.docker.internal:11434
       - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
@@ -71,7 +71,7 @@ services:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - GRAPH_PATH=${GRAPH_PATH:-/app/graph_data/knowledge_graph_full.pkl}
-      - KIMI_MODEL=openai/gpt-4o-mini
+      - KIMI_MODEL=${KIMI_MODEL:-anthropic/claude-3.5-haiku}
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}

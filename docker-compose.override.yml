@@ -1,26 +1,25 @@
 services:
-  # Redirect data to local home folder (OUTSIDE of iCloud)
-  # This prevents SQLite corruption and sync collisions
+  # Configuration for using iCloud-synced data
+  # The Mac Mini indexes directly into these folders.
+  # The MacBook reads directly from these folders.
+  # WARNING: Do not index from multiple machines simultaneousy to avoid corruption.
 
   embedding-service:
     volumes:
       - ./src:/app/src:ro
-      - /Users/michel/obsidian_rag_local_data/chroma_db:/app/chroma_db
+      - ${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/chroma_db:/app/chroma_db
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
-    environment:
-      - CHROMA_COLLECTION=obsidian_vault_sota
-
-  lightrag-service:
-    volumes:
-      - /Users/michel/obsidian_rag_local_data/lightrag_db:/app/lightrag_db
-      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
-    environment:
-      - LIGHTRAG_DIR=/app/lightrag_db
 
   graph-service:
     volumes:
       - ./src:/app/src:ro
-      - /Users/michel/obsidian_rag_local_data/graph_data:/app/graph_data
+      - ${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/graph_data:/app/graph_data
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
+
+  # LightRAG
+  # Default uses internal volume. We override to use the synced folder.
+  lightrag-service:
+    volumes:
+      - ${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/lightrag_db:/app/lightrag_db
     environment:
-      - GRAPH_PATH=/app/graph_data/knowledge_graph_sota.pkl
+      - LIGHTRAG_DIR=/app/lightrag_db

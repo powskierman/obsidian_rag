@@ -67,6 +67,7 @@ htmlcov/
 data/vault_processing/
 venv/
 venv_*/
+data/export_stage/
 
 # Cleanup - temporary and backup files
 *\ 2

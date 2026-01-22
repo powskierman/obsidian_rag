@@ -9,8 +9,9 @@ import asyncio
 
 pytest.importorskip("mcp")
 
+# Insert PROJECT_ROOT to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-from obsidian_rag_unified_mcp import (
+from src.mcp.obsidian_rag_unified_mcp import (
     app,
     search_vault,
     get_vault_statistics,
@@ -206,7 +207,7 @@ class TestKnowledgeGraphQueries:
     @pytest.mark.asyncio
     async def test_query_graph_not_available(self):
         """Test graph query when graph is not available"""
-        with patch('obsidian_rag_unified_mcp.load_graph', return_value=False):
+        with patch('src.mcp.obsidian_rag_unified_mcp.load_graph', return_value=False):
             result = await query_knowledge_graph({
                 'query': 'What treats lymphoma?'
             })
@@ -218,7 +219,7 @@ class TestKnowledgeGraphQueries:
     @pytest.mark.asyncio
     async def test_query_graph_missing_query(self):
         """Test graph query with missing query"""
-        with patch('obsidian_rag_unified_mcp.load_graph', return_value=True):
+        with patch('src.mcp.obsidian_rag_unified_mcp.load_graph', return_value=True):
             result = await query_knowledge_graph({})
 
             assert len(result) == 1
@@ -228,7 +229,7 @@ class TestKnowledgeGraphQueries:
     @pytest.mark.asyncio
     async def test_get_entity_info_missing_name(self):
         """Test entity info with missing name"""
-        with patch('obsidian_rag_unified_mcp.load_graph', return_value=True):
+        with patch('src.mcp.obsidian_rag_unified_mcp.load_graph', return_value=True):
             result = await get_entity_info({})
 
             assert len(result) == 1
@@ -238,7 +239,7 @@ class TestKnowledgeGraphQueries:
     @pytest.mark.asyncio
     async def test_find_entity_path_missing_params(self):
         """Test find path with missing parameters"""
-        with patch('obsidian_rag_unified_mcp.load_graph', return_value=True):
+        with patch('src.mcp.obsidian_rag_unified_mcp.load_graph', return_value=True):
             result = await find_entity_path({
                 'source': 'A'
                 # Missing 'target'
@@ -251,7 +252,7 @@ class TestKnowledgeGraphQueries:
     @pytest.mark.asyncio
     async def test_search_entities_missing_term(self):
         """Test search entities with missing term"""
-        with patch('obsidian_rag_unified_mcp.load_graph', return_value=True):
+        with patch('src.mcp.obsidian_rag_unified_mcp.load_graph', return_value=True):
             result = await search_entities({})
 
             assert len(result) == 1
@@ -272,7 +273,7 @@ class TestMCPToolCalls:
 
     @pytest.mark.integration
     @pytest.mark.asyncio
-    @patch('obsidian_rag_unified_mcp.search_vault')
+    @patch('src.mcp.obsidian_rag_unified_mcp.search_vault')
     async def test_call_search_tool_aliases(self, mock_search):
         """Test that search tool aliases work"""
         mock_search.return_value = [MagicMock(text='result')]
@@ -284,7 +285,7 @@ class TestMCPToolCalls:
 
     @pytest.mark.integration
     @pytest.mark.asyncio
-    @patch('obsidian_rag_unified_mcp.get_vault_statistics')
+    @patch('src.mcp.obsidian_rag_unified_mcp.get_vault_statistics')
     async def test_call_stats_tool_aliases(self, mock_stats):
         """Test that stats tool aliases work"""
         mock_stats.return_value = [MagicMock(text='stats')]
@@ -297,7 +298,7 @@ class TestMCPToolCalls:
     @pytest.mark.asyncio
     async def test_call_tool_with_exception(self):
         """Test tool call with exception"""
-        with patch('obsidian_rag_unified_mcp.search_vault', side_effect=Exception('Test error')):
+        with patch('src.mcp.obsidian_rag_unified_mcp.search_vault', side_effect=Exception('Test error')):
             result = await app.call_tool('obsidian_semantic_search', {'query': 'test'})
 
             assert len(result) == 1
@@ -317,7 +318,7 @@ class TestMCPServerConfiguration:
     async def test_graph_lazy_loading(self):
         """Test that graph is lazy-loaded"""
         # Graph should not be loaded until first use
-        from obsidian_rag_unified_mcp import graph_loaded, querier
+        from src.mcp.obsidian_rag_unified_mcp import graph_loaded, querier
 
         # Initially should be False
         assert graph_loaded is False or querier is None
@@ -330,7 +331,7 @@ class TestMCPServerConfiguration:
 
         # Reimport to pick up env vars
         import importlib
-        import obsidian_rag_unified_mcp
+        from src.mcp import obsidian_rag_unified_mcp
         importlib.reload(obsidian_rag_unified_mcp)
 
         assert obsidian_rag_unified_mcp.EMBEDDING_URL == 'http://custom:9000'
