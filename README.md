@@ -39,10 +39,15 @@ The script will:
 
 ### 3. Query the Graph
 
-**Web UI (Recommended):**
+**Web Interface (Modern):**
 ```bash
-docker-compose up -d
-# Open http://localhost:8501
+./Scripts/start_obsidian_rag.sh
+# Open http://localhost:3000 (WebApp)
+```
+
+**Legacy UI:**
+```bash
+# Open http://localhost:8501 (Streamlit)
 ```
 
 **CLI:**
@@ -54,6 +59,15 @@ python src/indexing/build_knowledge_graph.py
 **MCP (Claude Desktop/Cursor):**
 - Configure `src/mcp/knowledge_graph_mcp.py` in your MCP settings
 - Ask Claude: "Query my knowledge graph: What treatments are mentioned?"
+
+## Multi-Machine Sync (Mac Mini ↔ MacBook)
+
+To avoid iCloud corruption, use the Snapshot Sync workflow:
+1.  **Index** on Mac Mini: `./Scripts/run_indexing.sh`
+2.  **Push** from Mini: `./Scripts/sync/push.sh`
+3.  **Pull** to MacBook: `./Scripts/sync/pull.sh`
+
+Detailed guide: `Scripts/INDEXING_SCRIPTS_GUIDE.md`
 
 ## Project Structure
 

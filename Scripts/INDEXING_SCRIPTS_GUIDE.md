@@ -117,7 +117,7 @@ If you see "Naive" mode instead of "Hybrid":
     ```bash
     docker logs obsidian-lightrag
     ```
-    If you see "Refusing result because it starts with 'not found'", it means retrieval failed.
+    Verify that incoming queries show `Requested mode: 'hybrid'` and `Effective mode: 'hybrid'`.
 
 ### "Database Locked" Errors?
 *   Should NOT happen with this new architecture.
