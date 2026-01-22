@@ -31,10 +31,11 @@ docker-compose up -d
 
 echo ""
 echo "✅ Services Started!"
+echo "🌐 WebApp:    http://localhost:3000"
 echo "📊 Embedding: http://localhost:8000"
 echo "🕸️  Graph:     http://localhost:8002"
 echo "🧠 LightRAG:  http://localhost:8001"
-echo "💻 UI:        http://localhost:8501"
+echo "🧪 Streamlit: http://localhost:8501"
 echo ""
 echo "📝 Logs:"
 echo "   docker-compose logs -f"

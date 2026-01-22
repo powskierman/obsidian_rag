@@ -153,6 +153,30 @@ services:
       - embedding-service
       - graph-service
 
+  # Next.js WebApp
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: ../config/docker/Dockerfile.webapp
+    container_name: obsidian-webapp
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./webapp:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      # Client-side (Browser) request URL - hits host port 4000
+      - NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000
+      # Server-side request URL (if used) - hits internal docker service
+      # - GATEWAY_URL=http://api-gateway:3000
+    restart: unless-stopped
+    networks:
+      - rag-network
+    depends_on:
+      - api-gateway
+
 networks:
   rag-network:
     driver: bridge
