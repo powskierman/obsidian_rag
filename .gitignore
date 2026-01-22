@@ -76,6 +76,7 @@ data/export_stage/
 feedback_db/
 .gemini_clipboard_*
 pip_version.txt
+Scripts/archive_old_v2/
 
 # Documentation drafts and archives
 Documentation/Archive/
