@@ -7,6 +7,7 @@ Handles semantic search, indexing, and advanced retrieval features
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import chromadb
+import torch
 from sentence_transformers import SentenceTransformer, CrossEncoder
 import os
 from datetime import datetime
@@ -71,15 +72,17 @@ def _require_api_key():
         return jsonify({"error": "Unauthorized"}), 401
 
 # Initialize models
-print("Loading embedding model...")
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+device = 'mps' if torch.backends.mps.is_available() else 'cpu'
+print(f"Loading embedding model (Nomic v1.5) on {device}...")
+embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True, device=device)
 print("Loading cross-encoder for re-ranking...")
 cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
 # Initialize ChromaDB
 COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "obsidian_vault")
-print(f"Initializing ChromaDB (Collection: {COLLECTION_NAME})...")
-chroma_client = chromadb.PersistentClient(path="./chroma_db")
+DB_PATH = os.getenv("CHROMA_DB_PATH", "./chroma_db")
+print(f"Initializing ChromaDB (Collection: {COLLECTION_NAME}) at {DB_PATH}...")
+chroma_client = chromadb.PersistentClient(path=DB_PATH)
 collection = chroma_client.get_or_create_collection(
     name=COLLECTION_NAME,
     metadata={"hnsw:space": "cosine"}
@@ -105,9 +108,11 @@ def _admin_token_valid() -> bool:
     provided = request.headers.get("X-Admin-Token")
     return provided == expected_token
 
-def get_embedding(text):
-    """Generate embedding for text"""
-    return embedding_model.encode(text).tolist()
+def get_embedding(text, is_query=False):
+    """Generate embedding for text with Nomic specific prefixes"""
+    # Nomic v1.5 requires specific prefixes for asymmetric retrieval tasks
+    prefix = "search_query: " if is_query else "search_document: "
+    return embedding_model.encode(prefix + text).tolist()
 
 TOKEN_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9/._-]{1,}")
 STOP_WORDS = {
@@ -378,7 +383,7 @@ def query_documents():
         for q in query_variations:
             if not q:
                 continue
-            q_embedding = get_embedding(q)
+            q_embedding = get_embedding(q, is_query=True)
 
             where_clause = None
             if filters:

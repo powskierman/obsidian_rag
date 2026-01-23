@@ -240,7 +240,7 @@ def extract_metadata(content):
 
     return metadata, body.strip()
 
-def smart_chunk_document(content, max_size=1000, overlap=200):
+def smart_chunk_document(content, max_size=4000, overlap=500):
     """Split content into overlapping chunks with smart boundaries (like old working version)"""
     if not content or len(content.strip()) < 50:
         return []

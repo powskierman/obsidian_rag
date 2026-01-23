@@ -314,13 +314,33 @@ Guidelines:
         if filepath is None: filepath = str(GRAPH_DATA_DIR / "knowledge_graph.pkl")
         with open(filepath, 'rb') as f:
             data = pickle.load(f)
-            self.graph = data['graph']
-            # Safely update stats ensuring all keys exist (handling backwards compatibility)
-            loaded_stats = data.get('stats', {})
-            if isinstance(loaded_stats, dict):
-                self.extraction_stats.update(loaded_stats)
-            # self.extraction_stats already initialized with defaults in __init__
-            self.processed_chunks = set(data.get('processed_chunks', []))
+            
+            if isinstance(data, dict) and 'graph' in data:
+                # Loaded a dictionary wrapper
+                self.graph = data['graph']
+                
+                # Safely update stats ensuring all keys exist (handling backwards compatibility)
+                loaded_stats = data.get('stats', {})
+                if isinstance(loaded_stats, dict):
+                    self.extraction_stats.update(loaded_stats)
+                
+                self.processed_chunks = set(data.get('processed_chunks', []))
+            
+            elif isinstance(data, (nx.Graph, nx.DiGraph, nx.MultiDiGraph, nx.MultiGraph)):
+                # Loaded a raw NetworkX graph object
+                self.graph = data
+                # Can't recover stats/processed_chunks from raw graph unless stored in graph attributes
+                logger.info("Loaded raw NetworkX graph object (no metadata stats available)")
+            
+            else:
+                logger.warning(f"Unknown graph file format: {type(data)}")
+                # Try to cast to graph if possible, or raise error?
+                # For now assume it might be a DiGraph if it walks like a duck
+                if hasattr(data, 'nodes') and hasattr(data, 'edges'):
+                     self.graph = data
+                else:
+                     raise ValueError(f"Invalid graph file format: {type(data)}")
+
             self.entity_cache = {name.lower(): name for name in self.graph.nodes()}
 
 
