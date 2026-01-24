@@ -17,6 +17,7 @@ services:
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - EMBED_MODEL=${EMBED_MODEL:-all-MiniLM-L6-v2}
       - OBSIDIAN_VAULT_PATH=/app/vault
+    command: python src/services/embedding_service.py
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
@@ -104,6 +105,8 @@ services:
       - "4000:3000"
     volumes:
       - ./src:/app/src:ro
+
+    command: python src/services/api_gateway.py
     environment:
       - PYTHONUNBUFFERED=1
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000

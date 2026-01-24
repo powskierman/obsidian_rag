@@ -432,6 +432,8 @@ class GraphQuerier:
             
             # Check for exact word match in query
             # \b matches word boundary. escape(node_lower) handles special chars.
+            # Check for exact word match in query
+            # \b matches word boundary. escape(node_lower) handles special chars.
             if re.search(r'\b' + re.escape(node_lower) + r'\b', query_lower):
                 entities_in_query.append(node)
                 continue # Found exact match, move to next node
@@ -439,9 +441,17 @@ class GraphQuerier:
             # Fallback: Relaxed matching for technical terms (length > 3)
             # This catches "Nextion" in "NextionDisplay" or "esp32" in "esp32-c3" logic
             # IF the query explicitly contains the term as a word 
-            if len(node_lower) > 3 and node_lower in query_lower:
-                 # Verify it's not a common word substring (e.g. "ion" in "Nextion")
-                 # Check if the node string appears in the query surrounded by boundaries OR if query parts appear in node
+            if len(node_lower) > 3:
+                 # Check Bidirectional Containment for robust matching
+                 # Case A: Query term inside Node Name? (e.g. Query="lymphoma", Node="Lymphoma Treatment")
+                 if query_lower in node_lower:
+                     # Verify it's not a tiny substring (e.g. "is" in "Paris")
+                     # We know query_lower > 3 chars potentially, let's check
+                     if len(query_lower) > 3: 
+                         entities_in_query.append(node)
+                         continue
+                 
+                 # Case B: Node Name inside Query? (e.g. Query="tell me about ESP32-S3", Node="ESP32")
                  if node_lower in query_lower:
                      entities_in_query.append(node)
 
@@ -452,8 +462,26 @@ class GraphQuerier:
         # Get neighborhood for entities
         graph_context = [self.get_entity_neighborhood(e) for e in entities_in_query[:max_entities]]
         
-        # Fallback to centrality if no entities found
-        # Fallback to centrality if no entities found AND query is empty/summary-like
+        # Fallback 1: Token-based Search if exact node matching failed
+        if not graph_context:
+            logger.info("No direct entity matches. Attempting Token-based Search in Graph Nodes...")
+            # Extract significant tokens from query
+            query_tokens = [t for t in re.split(r"\W+", query_lower) if len(t) > 3 and t not in stopwords]
+            
+            fallback_nodes = []
+            for token in query_tokens:
+                # Find nodes containing this token
+                matches = [n for n in all_nodes if token in n.lower()]
+                fallback_nodes.extend(matches[:5]) # Take top 5 containing this token
+                
+            # Deduplicate
+            fallback_nodes = list(set(fallback_nodes))
+            
+            if fallback_nodes:
+                 logger.info(f"Fallback found {len(fallback_nodes)} nodes (e.g. {fallback_nodes[:3]})")
+                 graph_context = [self.get_entity_neighborhood(n) for n in fallback_nodes[:10]]
+
+        # Fallback 2: Centrality (Only for extremely generic/empty queries)
         if not graph_context:
             # ONLY fallback if the query is literally "summary" or empty.
             # ABSOLUTELY NEVER fallback for specific technical queries.
@@ -469,7 +497,9 @@ class GraphQuerier:
                 # If we didn't find "nextion" in the graph, DO NOT show "Xcode".
                 # Just return empty context so the Vector search can take over.
                 logger.info(f"No specific graph entities found for: '{user_query}'. Returning empty graph context.")
-                return "I couldn't find specific entities in the knowledge graph. Relying on document search.", []
+                # Returning empty tuple allows the caller (api_gateway/service) to decide on fallback, 
+                # but returning a polite string + empty list is safer for now.
+                return "I searched the knowledge graph but didn't find specific matching entities. I will rely on the document search results below.", []
 
 
 

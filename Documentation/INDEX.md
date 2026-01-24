@@ -20,6 +20,9 @@ This index lists current, supported docs. Historical plans and fixes are in `Doc
 - Documentation/architecture/DEEP_THINKING_FLOW.md
 - Documentation/DUAL_GRAPH_ARCHITECTURE.md
 
+## Project Governance
+- Documentation/PROJECT_CONSTITUTION.md
+
 ## Search Modes and API
 - Documentation/API_GATEWAY_QUICKSTART.md
 - Documentation/UNIFIED_API_IMPLEMENTATION.md

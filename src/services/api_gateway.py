@@ -349,8 +349,23 @@ async def unified_search(request: SearchRequest):
     if mode == "vector":
         async with httpx.AsyncClient() as client:
             try:
-                # Embedding service expects keys: query, n_results
-                payload = {"query": request.query, "n_results": request.n_results}
+                # Parse tag:value syntax
+                query = request.query
+                tag_matches = re.findall(r'tag:([a-zA-Z0-9_\-]+)', query, re.IGNORECASE)
+                print(f"DEBUG: Query='{query}', Matches={tag_matches}, MatchRegex=tag:([a-zA-Z0-9_\-]+)")
+                filters = {}
+                
+                if tag_matches:
+                    filters['tags'] = tag_matches
+                    query = re.sub(r'tag:[a-zA-Z0-9_\-]+', '', query, flags=re.IGNORECASE).strip()
+                    print(f"🔍 Gateway Parsed tags: {tag_matches}, Cleaned Query: '{query}'")
+
+                # Embedding service expects keys: query, n_results, filters
+                payload = {
+                    "query": query, 
+                    "n_results": request.n_results,
+                    "filters": filters
+                }
                 response = await client.post(
                     f"{EMBEDDING_SERVICE_URL}/query",
                     json=payload,
@@ -435,6 +450,15 @@ async def unified_query(request: UnifiedQueryRequest):
     print(
         f"🎯 API Gateway received relevance_threshold: {effective_relevance_threshold}%"
     )
+
+    print(f"DEBUG: Raw Query Input: '{request.query}'") # NEW DEBUG
+    # Parse tag:value syntax
+    tag_matches = re.findall(r'tag:([a-zA-Z0-9_\-]+)', request.query, re.IGNORECASE)
+    filters = {}
+    if tag_matches:
+        filters['tags'] = tag_matches
+        request.query = re.sub(r'tag:[a-zA-Z0-9_\-]+', '', request.query, flags=re.IGNORECASE).strip()
+        print(f"DEBUG: Parsed tags (UnifiedQuery): {tag_matches}, Cleaned Query: '{request.query}'")
 
     # ===== CASCADING RETRIEVAL MODE =====
     if mode == "cascading":
@@ -654,6 +678,7 @@ async def unified_query(request: UnifiedQueryRequest):
                     "query": request.query,
                     "n_results": request.max_results,
                     "relevance_threshold": effective_relevance_threshold,
+                    "filters": filters
                 }
                 response = await _post_json(
                     client,

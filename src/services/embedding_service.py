@@ -386,36 +386,74 @@ def query_documents():
             q_embedding = get_embedding(q, is_query=True)
 
             where_clause = None
+            
+            # Special handling for Tags (Python-side filtering due to filtering limitations)
+            required_tags = []
+            if filters and 'tags' in filters:
+                required_tags = filters.pop('tags')
+                if isinstance(required_tags, str):
+                    required_tags = [required_tags]
+            
+            print(f"DEBUG: Filters received: {filters}, Required Tags: {required_tags}")
+            
             if filters:
                 # Preserve advanced filters (e.g., $or/$and) as-is
                 if any(key.startswith("$") for key in filters.keys()):
                     where_clause = filters
                 else:
-                    # Build where clause from simple filters
+                    # Build where clause from remaining simple filters
                     conditions = []
                     for key, value in filters.items():
                         if isinstance(value, dict) and "$contains" in value:
-                            # Handle list-based contains (e.g., tags)
-                            conditions.append({key: {"$contains": value["$contains"]}})
+                             conditions.append({key: {"$contains": value["$contains"]}})
                         elif isinstance(value, list):
-                            # Handle OR for multiple values if list provided
                             if len(value) > 1:
                                 conditions.append({key: {"$in": value}})
                             elif len(value) == 1:
                                 conditions.append({key: value[0]})
                         else:
-                            # Default to exact match
                             conditions.append({key: value})
                     
                     if conditions:
                         where_clause = {"$and": conditions} if len(conditions) > 1 else conditions[0]
 
+            # Fetch extra candidates if we need to filter by tags
+            candidate_multiplier = 5 if required_tags else 2
+            
             try:
                 results = collection.query(
                     query_embeddings=[q_embedding],
-                    n_results=n_results * 2,  # Get extra for deduplication
+                    n_results=n_results * candidate_multiplier, 
                     where=where_clause
                 )
+                
+                # Apply Tag Filtering if needed
+                if required_tags:
+                    filtered_docs = []
+                    filtered_metas = []
+                    filtered_dists = []
+                    
+                    # Iterate through the first batch (since query is single)
+                    docs = results['documents'][0]
+                    metas = results['metadatas'][0]
+                    dists = results['distances'][0]
+                    
+                    for doc, meta, dist in zip(docs, metas, dists):
+                        doc_tags = str(meta.get('tags', '')).lower()
+                        print(f"DEBUG: Processing doc {meta.get('filename')} tags='{doc_tags}' Checking {required_tags}")
+                        # Check IF ALL required tags are present as substrings
+                        if all(req_tag.lower() in doc_tags for req_tag in required_tags):
+                            filtered_docs.append(doc)
+                            filtered_metas.append(meta)
+                            filtered_dists.append(dist)
+                            
+                    # Reconstruct results structure
+                    results = {
+                        'documents': [filtered_docs],
+                        'metadatas': [filtered_metas],
+                        'distances': [filtered_dists]
+                    }
+
                 all_results.append(results)
             except Exception as e:
                 query_errors.append(f"{e}")
