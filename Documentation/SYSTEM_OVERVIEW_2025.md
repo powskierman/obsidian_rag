@@ -7,7 +7,7 @@ This system combines vector search, a note graph, and an entity graph behind a s
 - **Embedding service** (port 8000): ChromaDB vector search for vault content.
 - **LightRAG service** (port 8001): entity-centric graph for semantic queries.
 - **Graph service** (port 8002): NetworkX note graph reasoning and hybrid retrieval.
-- **API gateway** (port 4000): unified `/api/v1/search` entry point and health checks.
+- **API gateway** (port 4000): unified `/api/v1/query` entry point and health checks.
 - **Streamlit UI** (port 8501): interactive UI wired to the gateway.
 
 ## Search Modes
@@ -31,7 +31,7 @@ Optional flags:
 ## Entry Points
 
 - Start services: `docker compose up -d`
-- Unified API: `POST http://localhost:4000/api/v1/search`
+- Unified API: `POST http://localhost:4000/api/v1/query`
 - Graph service (direct): `POST http://localhost:8002/query`
 
 ## Related Docs

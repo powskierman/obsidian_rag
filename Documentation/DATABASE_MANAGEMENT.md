@@ -19,15 +19,16 @@ This repo keeps generated data out of Git. These directories are expected to be 
 docker compose up -d
 
 # Index your vault (choose the script that matches your graph mode)
-./Scripts/index_with_lightrag.sh "$OBSIDIAN_VAULT_PATH"
+# Index your vault (Unified script)
+./Scripts/run_indexing.sh
 ```
 
 If you use a different indexing path, pick the relevant script from `Scripts/`.
 
-Force a full LightRAG rebuild:
+Force a full rebuild:
 
 ```bash
-./Scripts/index_with_lightrag.sh --force "$OBSIDIAN_VAULT_PATH"
+./Scripts/run_indexing.sh
 ```
 
 ## Reindex Embeddings (Clear + Rebuild)
@@ -57,6 +58,28 @@ export EMBEDDING_CLEAR_TOKEN="your-token"
 
 python src/indexing/index_vault.py /path/to/vault \
   --url http://localhost:8000 \
-  --refresh \
   --clear-token "$EMBEDDING_CLEAR_TOKEN"
 ```
+
+## Troubleshooting
+
+### ChromaDB Corruption Fix
+**Symptoms:** embedding service fails to start or queries crash.
+
+**Fix:**
+1. Stop services:
+   ```bash
+   docker compose down
+   ```
+2. Backup and remove the DB:
+   ```bash
+   mv chroma_db chroma_db_backup_$(date +%Y%m%d)
+   ```
+3. Restart services:
+   ```bash
+   docker compose up -d
+   ```
+4. Reindex:
+   ```bash
+   ./Scripts/run_indexing.sh
+   ```

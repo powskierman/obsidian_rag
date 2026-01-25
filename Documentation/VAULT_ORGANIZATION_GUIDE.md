@@ -13,10 +13,9 @@ This guide focuses on keeping your vault structured for reliable retrieval and g
 
 1. Normalize new notes using the template:
    - `Documentation/Notes/Templates/New Note Template.md`
-2. Apply tags and MoC structure as needed using scripts in `Scripts/`:
-   - `apply_tags.py`, `apply_moc_template.py`, `identify_mocs.py`
+2. **Apply tags and MoC structure manually** (scripts deprecated).
 3. Reindex when you add or reorganize large sets of notes:
-   - `./Scripts/index_with_lightrag.sh`
+   - `./Scripts/run_indexing.sh`
 
 ## Troubleshooting
 

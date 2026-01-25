@@ -8,7 +8,7 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 
 ## Key Endpoints
 
-- `POST /api/v1/search`
+- `POST /api/v1/query`
 - `POST /api/v1/search/stream`
 - `GET /api/v1/health`
 - `GET /api/v1/stats`

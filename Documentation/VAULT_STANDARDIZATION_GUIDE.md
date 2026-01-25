@@ -13,12 +13,11 @@ Standardization improves retrieval, linking, and graph quality.
 
 1. Apply the note template:
    - `Documentation/Notes/Templates/New Note Template.md`
-2. Run tagging and MoC helpers as needed:
-   - `Scripts/apply_tags.py`
-   - `Scripts/identify_mocs.py`
-   - `Scripts/apply_moc_template.py`
+2. **Manual Tagging & MoCs**:
+   - Add explicit tags (e.g. `#topic/subtopic`) to frontmatter.
+   - Link related notes to their parent Map of Content (MoC).
 3. Reindex after large changes:
-   - `./Scripts/index_with_lightrag.sh`
+   - `./Scripts/run_indexing.sh`
 
 ## Related Docs
 

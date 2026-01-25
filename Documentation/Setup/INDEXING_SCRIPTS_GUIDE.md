@@ -1,33 +1,164 @@
-# Indexing Scripts Guide
+# Indexing & Data Sync Guide
 
-Use these scripts in `Scripts/` to build or rebuild indexes.
+## Overview
 
-## Common Choices
+We have migrated to a **Snapshot Sync Architecture** to avoid iCloud database corruption.
+- **Mac Mini (Indexer)**: Indexes data locally, then pushes a snapshot to iCloud.
+- **MacBook (Consumer)**: Pulls the snapshot from iCloud to local storage for querying.
+- **Safe & Fast**: Databases run on local SSDs. iCloud is only used for transfer.
 
-- `index_with_lightrag.sh`: build the LightRAG entity graph.
-- `index_with_graphrag.sh`: run GraphRAG indexing (if configured).
-- `index_with_kimi.sh`: index using Kimi/OpenRouter.
-- `build_knowledge_graph.sh`: build the NetworkX graph.
+---
 
-## When to Run
+## 🚀 Unified Procedures
 
-- After large vault changes or folder reorganizations.
-- After cloning to a new machine.
+### 1. Indexing (Run on Mac Mini)
 
-Pick the script that matches your desired graph mode. If unsure, start with `index_with_lightrag.sh`.
+**Script:** `Scripts/run_indexing.sh`
 
-## LightRAG indexing notes
+This unified script performs a complete re-index of your vault into all three databases:
+1.  **LightRAG** (Entity Graph) - Port 8001
+2.  **NetworkX** (Note Graph) - Port 8002
+3.  **ChromaDB** (Vector Search) - Port 8000
 
-`index_with_lightrag.sh` now accepts `--force` to reindex everything:
-
+**Usage:**
 ```bash
-./Scripts/index_with_lightrag.sh --force "$OBSIDIAN_VAULT_PATH"
+# Full Re-Index
+./Scripts/run_indexing.sh
+```
+*   You will be prompted to confirm a full re-index (deletes old data).
+*   **Time:** ~30-60 mins for 2k notes.
+*   **Cost:** ~$1.00 (Kimi/OpenRouter).
+
+---
+
+### 2. Export Data (Run on Mac Mini)
+
+**Script:** `Scripts/sync/push.sh`
+
+After indexing is complete, push the fresh data to the iCloud staging area.
+This creates a stable snapshot in `~/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/data/export_stage`.
+
+**Usage:**
+```bash
+./Scripts/sync/push.sh
 ```
 
-LightRAG indexing prepends note context to each document so title searches are reliable:
-- filename + title
-- headings (first 12)
-- frontmatter tags + inline `#tags`
-- frontmatter aliases
+---
 
-If you change any of the above behavior, reindex LightRAG to apply it.
+### 3. Import Data (Run on MacBook)
+
+**Script:** `Scripts/sync/pull.sh`
+
+To update your MacBook with the latest SOTA data from the Mini, run the pull script.
+This stops your local services, pulls the data from iCloud to your local SSD (`~/obsidian_rag_local_data`), and restarts services.
+
+**Usage:**
+```bash
+./Scripts/sync/pull.sh
+```
+
+---
+
+### 1a. Targeted Indexing (Advanced)
+
+If you only need to update **one** specific index without running the full pipeline:
+
+#### **Vector Only (ChromaDB)**
+*   **Use when:** You added new notes and just want them searchable.
+*   **Command:**
+    ```bash
+    python src/indexing/index_vault.py
+    ```
+    *   *Note:* Checks file hashes and only updates changed notes.
+
+#### **NetworkX Graph Only**
+*   **Use when:** You want to refresh wiki-links without re-embedding text.
+*   **Command:**
+    ```bash
+    python src/indexing/build_knowledge_graph.py
+    ```
+    *   *Note:* Rebuilds the `.pkl` graph file from scratch (fast).
+
+#### **LightRAG Only (Entities)**
+*   **Use when:** You want to extract entities/relations for "Deep Thinking".
+*   **Command:**
+    ```bash
+    curl -X POST http://localhost:8001/index-vault \
+         -H "Content-Type: application/json" \
+         -d '{"vault_path": "/app/vault", "force": false}'
+    ```
+    *   *Note:* Set `"force": true` to wipe the graph and start over (expensive).
+
+---
+
+### 4. Daily Usage (Run on Both)
+
+**Script:** `Scripts/start_obsidian_rag.sh`
+
+To start the system for querying/browsing.
+
+**Usage:**
+```bash
+# Start Docker Services
+./Scripts/start_obsidian_rag.sh
+
+# Stop Services
+./Scripts/stop_obsidian_rag.sh
+```
+
+---
+
+## Architecture Diagram
+
+```mermaid
+graph LR
+    subgraph Mini["Mac Mini (Indexer)"]
+        direction TB
+        SSD_Mini[("Local SSD<br>~/obsidian_rag_local_data")]
+        Index(["1. run_indexing.sh"]) --> SSD_Mini
+        Push(["2. sync/push.sh"])
+    end
+
+    subgraph Cloud["iCloud Drive (Transfer Bus)"]
+        Export[("data/export_stage")]
+    end
+
+    subgraph Mac["MacBook (Consumer)"]
+        direction TB
+        Pull(["3. sync/pull.sh"])
+        SSD_Mac[("Local SSD<br>~/obsidian_rag_local_data")]
+        Query(["4. start_obsidian_rag.sh"])
+    end
+
+    SSD_Mini --> Push
+    Push -->|Push Snapshot| Export
+    Export -->|Pull Snapshot| Pull
+    Pull --> SSD_Mac
+    SSD_Mac --> Query
+```
+
+---
+
+## Troubleshooting
+
+### "Naive" Results on MacBook?
+If you see "Naive" mode instead of "Hybrid":
+1.  **Check Sync**: Did you run `pull.sh` recently?
+2.  **Check Ollama**: Ensure Ollama is running (`ollama serve`). The embedding model (`nomic-embed-text`) must be available for vectors to work.
+3.  **Check Logs**:
+    ```bash
+    docker logs obsidian-lightrag
+    ```
+    Verify that incoming queries show `Requested mode: 'hybrid'` and `Effective mode: 'hybrid'`.
+
+### "Database Locked" Errors?
+*   Should NOT happen with this new architecture.
+*   If it does, ensure you are NOT trying to index on the MacBook or access the `data/export_stage` directly from Docker. Always use the local copies.
+
+### Scripts Missing?
+*   Old/Legacy scripts have been archived to `Scripts/archive_old_v2`.
+*   Only use the validated scripts listed above.
+
+---
+
+**Last Updated:** January 22, 2026

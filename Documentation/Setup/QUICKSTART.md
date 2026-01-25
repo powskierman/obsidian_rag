@@ -27,9 +27,9 @@ curl -s http://localhost:4000/api/v1/health
 ## 4) Try a Query
 
 ```bash
-curl -s -X POST http://localhost:4000/api/v1/search \
+curl -s -X POST http://localhost:4000/api/v1/query \
   -H "Content-Type: application/json" \
-  -d '{"query":"nextion esp32","mode":"hybrid","n_results":5}'
+  -d '{"query":"nextion esp32","mode":"hybrid","max_results":5}'
 ```
 
 ## 5) Indexing (if empty results)
@@ -37,13 +37,13 @@ curl -s -X POST http://localhost:4000/api/v1/search \
 Run the appropriate script from `Scripts/`:
 
 ```bash
-./Scripts/index_with_lightrag.sh "$OBSIDIAN_VAULT_PATH"
+./Scripts/run_indexing.sh
 ```
 
-To force a full LightRAG rebuild:
+To force a full rebuild:
 
 ```bash
-./Scripts/index_with_lightrag.sh --force "$OBSIDIAN_VAULT_PATH"
+./Scripts/run_indexing.sh
 ```
 
 See `Documentation/Setup/INDEXING_SCRIPTS_GUIDE.md` for options.
