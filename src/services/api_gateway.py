@@ -433,17 +433,35 @@ async def unified_query(request: UnifiedQueryRequest):
     """
     mode = request.mode.lower()
 
-    # Normalize mode aliases
-    mode_aliases = {"networkx": "notes", "lightrag": "entities"}
+    # Normalize mode aliases (keep backward compatibility)
+    mode_aliases = {"graph": "notes", "networkx": "notes", "lightrag": "entities"}
     mode = mode_aliases.get(mode, mode)
+    supported_modes = {
+        "vector",
+        "notes",
+        "entities",
+        "notes+vector",
+        "entities+vector",
+        "dual-graph",
+        "hybrid",
+        "cascading",
+    }
+    if mode not in supported_modes:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported mode '{request.mode}'. "
+                "Use one of: vector, notes, entities, notes+vector, "
+                "entities+vector, dual-graph, hybrid, cascading. "
+                "For deep research, use WebSocket /api/v1/deep-research."
+            ),
+        )
     print(f"DEBUG: Unified query incoming mode: {mode}")
     effective_relevance_threshold = request.relevance_threshold
     if effective_relevance_threshold == 0 and request.distance_threshold is not None:
         import math
 
-        effective_relevance_threshold = 100 / (
-            1 + math.exp(request.distance_threshold / 2)
-        )
+        effective_relevance_threshold = max(0.0, (1.0 - (request.distance_threshold / 2.0)) * 100.0)
         effective_relevance_threshold = max(
             0.0, min(100.0, effective_relevance_threshold)
         )
@@ -501,7 +519,8 @@ async def unified_query(request: UnifiedQueryRequest):
                 dists = vector_data.get("distances", [[]])[0]
                 for doc, meta, dist in zip(docs, metas, dists):
                     try:
-                        relevance = max(0.0, min(100.0, 100 / (1 + math.exp(dist / 2))))
+                        # Map 0->100%, 1->50%, 2->0%
+                        relevance = max(0.0, (1.0 - (dist / 2.0)) * 100.0)
                     except Exception:
                         relevance = 50.0
                     doc_text = doc if isinstance(doc, str) else ""

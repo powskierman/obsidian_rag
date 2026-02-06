@@ -13,17 +13,17 @@ We have migrated to a **Snapshot Sync Architecture** to avoid iCloud database co
 
 ### 1. Indexing (Run on Mac Mini)
 
-**Script:** `Scripts/run_indexing.sh`
+**Script:** `Scripts/indexing/run_indexing.sh`
 
 This unified script performs a complete re-index of your vault into all three databases:
-1.  **LightRAG** (Entity Graph) - Port 8001
-2.  **NetworkX** (Note Graph) - Port 8002
-3.  **ChromaDB** (Vector Search) - Port 8000
+1.  **ChromaDB** (Vector Search) - Port 8000
+2.  **Kimi Graph** (Note Graph) - Port 8002
+3.  **LightRAG** (Entity Graph) - Port 8001
 
 **Usage:**
 ```bash
 # Full Re-Index
-./Scripts/run_indexing.sh
+./Scripts/indexing/run_indexing.sh
 ```
 *   You will be prompted to confirm a full re-index (deletes old data).
 *   **Time:** ~30-60 mins for 2k notes.
@@ -59,82 +59,99 @@ This stops your local services, pulls the data from iCloud to your local SSD (`~
 
 ---
 
-### 1a. Targeted Indexing (Advanced)
+### 1a. Targeted Indexing (Individual Updates)
 
 If you only need to update **one** specific index without running the full pipeline:
 
 #### **Vector Only (ChromaDB)**
-*   **Use when:** You added new notes and just want them searchable.
+*   **Use when:** You added new notes and want them searchable immediately.
 *   **Command:**
     ```bash
-    python src/indexing/index_vault.py
+    ./Scripts/indexing/update_vector_db.sh
+    # Use --refresh to clear and re-index updated files
     ```
-    *   *Note:* Checks file hashes and only updates changed notes.
 
 #### **NetworkX Graph Only**
 *   **Use when:** You want to refresh wiki-links without re-embedding text.
 *   **Command:**
     ```bash
-    python src/indexing/build_knowledge_graph.py
+    ./Scripts/indexing/update_knowledge_graph.sh
     ```
-    *   *Note:* Rebuilds the `.pkl` graph file from scratch (fast).
+    *   **Note:** This runs a fast structural scan (seconds). It rebuilds the graph structure in memory, so it always yields a fresh state. There is no need for complex append logic.
 
 #### **LightRAG Only (Entities)**
 *   **Use when:** You want to extract entities/relations for "Deep Thinking".
 *   **Command:**
     ```bash
-    curl -X POST http://localhost:8001/index-vault \
-         -H "Content-Type: application/json" \
-         -d '{"vault_path": "/app/vault", "force": false}'
+    ./Scripts/indexing/index_with_lightrag.sh
     ```
-    *   *Note:* Set `"force": true` to wipe the graph and start over (expensive).
+    *   **Note:** Incremental by default (checks file timestamps). Use `--force` to rebuild from scratch.
+
+---
+
+### 1b. Verify Index Freshness
+
+To check if your Knowledge Graph is up-to-date with your vault's latest changes:
+
+**Script:** `Scripts/debug/check_graph_status.py`
+
+**Usage:**
+```bash
+./Scripts/debug/check_graph_status.py
+```
+*   **Status ✅:** Graph is newer than the latest note modification.
+*   **Status ⚠️:** Graph is stale (lists the time difference). Re-run `./Scripts/indexing/update_knowledge_graph.sh`.
 
 ---
 
 ### 4. Daily Usage (Run on Both)
 
-**Script:** `Scripts/start_obsidian_rag.sh`
+**Script:** `Scripts/setup/start_obsidian_rag.sh`
 
 To start the system for querying/browsing.
 
 **Usage:**
 ```bash
 # Start Docker Services
-./Scripts/start_obsidian_rag.sh
+./Scripts/setup/start_obsidian_rag.sh
 
 # Stop Services
-./Scripts/stop_obsidian_rag.sh
+./Scripts/setup/stop_obsidian_rag.sh
 ```
 
 ---
 
+## <div style="page-break-after:always"></div>
+
 ## Architecture Diagram
 
 ```mermaid
-graph LR
-    subgraph Mini["Mac Mini (Indexer)"]
-        direction TB
-        SSD_Mini[("Local SSD<br>~/obsidian_rag_local_data")]
-        Index(["1. run_indexing.sh"]) --> SSD_Mini
-        Push(["2. sync/push.sh"])
+flowchart TD
+    subgraph Mini [Mac Mini Indexer]
+        Vault[("Obsidian Vault")]
+        
+        subgraph Indexers [Unified Indexing Process]
+            direction TB
+            Script(["run_indexing.sh"])
+            Vector["Vector Index (ChromaDB)<br>Port 8000"]
+            Graph["Knowledge Graph (Kimi)<br>Port 8002"]
+            LR["LightRAG (Entities)<br>Port 8001"]
+        end
+        
+        Script --> Vector & Graph & LR
+        Vector & Graph & LR --> LocalData[("Local DataDir<br>~/obsidian_rag_local_data")]
+        LocalData --> PushScript(["sync/push.sh"])
     end
 
-    subgraph Cloud["iCloud Drive (Transfer Bus)"]
-        Export[("data/export_stage")]
+    subgraph Cloud [iCloud Drive]
+        PushScript -->|Snapshot Sync| CloudStore[("data/export_stage")]
     end
 
-    subgraph Mac["MacBook (Consumer)"]
-        direction TB
-        Pull(["3. sync/pull.sh"])
-        SSD_Mac[("Local SSD<br>~/obsidian_rag_local_data")]
-        Query(["4. start_obsidian_rag.sh"])
+    subgraph MB [MacBook Consumer]
+        CloudStore -->|Pull Snapshot| PullScript(["sync/pull.sh"])
+        PullScript --> MBLocal[("Local DataDir<br>~/obsidian_rag_local_data")]
+        MBLocal --> UI["Obsidian RAG UI<br>Port 8501"]
     end
-
-    SSD_Mini --> Push
-    Push -->|Push Snapshot| Export
-    Export -->|Pull Snapshot| Pull
-    Pull --> SSD_Mac
-    SSD_Mac --> Query
 ```
 
 ---
@@ -155,10 +172,6 @@ If you see "Naive" mode instead of "Hybrid":
 *   Should NOT happen with this new architecture.
 *   If it does, ensure you are NOT trying to index on the MacBook or access the `data/export_stage` directly from Docker. Always use the local copies.
 
-### Scripts Missing?
-*   Old/Legacy scripts have been archived to `Scripts/archive_old_v2`.
-*   Only use the validated scripts listed above.
-
 ---
 
-**Last Updated:** January 22, 2026
+**Last Updated:** January 26, 2026

@@ -77,7 +77,7 @@ class CascadingRetriever:
 
         # Remove overly aggressive stopword filtering for technical terms
         # Keep core English stopwords but allow technical terms like "ESPHome"
-        self.vector_thresholds = [75, 60]
+        self.vector_thresholds = [60, 40]
 
     def _service_headers(self) -> Dict[str, str]:
         api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
@@ -146,7 +146,7 @@ class CascadingRetriever:
                             json={
                                 "query": query,
                                 "n_results": 5,
-                                "reranking": True,
+                                "reranking": False,
                                 "deduplicate": True,
                                 "relevance_threshold": threshold,
                             },
@@ -164,9 +164,8 @@ class CascadingRetriever:
                         dists = vec_data.get("distances", [[]])[0]
                         for doc, meta, dist in zip(docs, metas, dists):
                             try:
-                                relevance = max(
-                                    0.0, min(100.0, 100 / (1 + math.exp(dist / 2)))
-                                )
+                                # Map 0->100%, 1->50%, 2->0%
+                                relevance = max(0.0, (1.0 - (dist / 2.0)) * 100.0)
                             except Exception:
                                 relevance = 50.0
                             anchors.append(
@@ -242,7 +241,7 @@ class CascadingRetriever:
                         vec_payload = {
                             "query": candidate,
                             "n_results": max_results,
-                            "reranking": True,
+                            "reranking": False,
                             "deduplicate": True,
                             "relevance_threshold": threshold,
                         }

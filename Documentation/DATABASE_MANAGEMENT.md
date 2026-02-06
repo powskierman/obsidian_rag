@@ -20,7 +20,7 @@ docker compose up -d
 
 # Index your vault (choose the script that matches your graph mode)
 # Index your vault (Unified script)
-./Scripts/run_indexing.sh
+./Scripts/indexing/run_indexing.sh
 ```
 
 If you use a different indexing path, pick the relevant script from `Scripts/`.
@@ -28,7 +28,7 @@ If you use a different indexing path, pick the relevant script from `Scripts/`.
 Force a full rebuild:
 
 ```bash
-./Scripts/run_indexing.sh
+./Scripts/indexing/run_indexing.sh
 ```
 
 ## Reindex Embeddings (Clear + Rebuild)
@@ -81,5 +81,5 @@ python src/indexing/index_vault.py /path/to/vault \
    ```
 4. Reindex:
    ```bash
-   ./Scripts/run_indexing.sh
+   ./Scripts/indexing/run_indexing.sh
    ```

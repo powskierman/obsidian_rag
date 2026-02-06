@@ -20,8 +20,8 @@ and deep research workflows.
 - Developers maintaining local indexing and search services.
 
 ## User Stories
-- As a user, I want a single API to run vector, graph, hybrid, dual-graph, cascading,
-  and deep-thinking searches so I do not need to choose backends manually.
+- As a user, I want a single API to run vector, notes, entities, dual-source modes, and
+  hybrid retrieval so I do not need to choose backends manually.
 - As a user, I want streaming responses for long-running queries so I can see
   progress and partial answers.
 - As a maintainer, I want incremental indexing by default so day-to-day edits do
@@ -39,7 +39,7 @@ and deep research workflows.
   - `GET /api/v1/stats`
   - WebSocket deep research at `ws://localhost:4000/api/v1/deep-research`.
 - The gateway shall support search modes:
-  - `vector`, `graph`, `hybrid`, `dual-graph`, `cascading`, `deep-thinking`.
+  - `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`.
 - The system shall support incremental indexing for vector and graph data stores.
 - The system shall support explicit full reindexing of vector, NetworkX, and LightRAG
   stores when requested.

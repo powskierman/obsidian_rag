@@ -42,11 +42,11 @@ Add or update the `obsidian-rag-unified` block:
       "command": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python",
       "args": [
         "-u",
-        "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/obsidian_rag_unified_mcp.py"
+        "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py"
       ],
       "env": {
         "EMBEDDING_SERVICE_URL": "http://localhost:8000",
-        "KNOWLEDGE_GRAPH_PATH": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/graph_data/knowledge_graph_full.pkl",
+        "KNOWLEDGE_GRAPH_PATH": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/data/graph_data/knowledge_graph_full.pkl",
         "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
       }
     }
@@ -84,9 +84,9 @@ ChatGPT connectors require a public HTTPS `/mcp` endpoint. Run the server in HTT
 
 2. Start the HTTP MCP server:
    ```bash
-   /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
-     /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/obsidian_rag_unified_mcp.py \
-     --transport http --host 127.0.0.1 --port 8811 --path /mcp
+/Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
+  /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py \
+  --transport http --host 127.0.0.1 --port 8811 --path /mcp
    ```
 
 3. Expose it with ngrok:
@@ -122,9 +122,9 @@ If the connector UI only offers OAuth, enable OAuth mode and restart the server 
 
 3. Start the server:
    ```bash
-   /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
-     /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/obsidian_rag_unified_mcp.py \
-     --transport http --host 127.0.0.1 --port 8811 --path /mcp
+/Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
+  /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py \
+  --transport http --host 127.0.0.1 --port 8811 --path /mcp
    ```
 
 4. In ChatGPT: Settings → Connectors → Create
@@ -165,7 +165,7 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 
 2. **Test Server Manually:**
    ```bash
-   python obsidian_rag_unified_mcp.py
+   python src/mcp/obsidian_rag_unified_mcp.py
    # Should start without errors
    ```
 
@@ -193,7 +193,7 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 
 1. **Check Graph File:**
    ```bash
-   ls -lh graph_data/knowledge_graph_full.pkl
+   ls -lh data/graph_data/knowledge_graph_full.pkl
    ```
 
 2. **Set KNOWLEDGE_GRAPH_PATH:**

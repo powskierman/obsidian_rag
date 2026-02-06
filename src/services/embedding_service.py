@@ -15,6 +15,7 @@ import time
 import numpy as np
 from pathlib import Path
 import re
+import math
 
 # Fix for tokenizers parallelism/deadlock issues in Docker
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -239,6 +240,20 @@ def deduplicate_sources(results):
         'distances': [unique_dist]
     }
 
+
+def _distance_to_relevance(dist: float) -> float:
+    """
+    Convert distance/logit-style score to a 0-100 relevance percentage.
+    Must match frontend mapping in webapp/src/lib/api.ts.
+    """
+    try:
+        value = float(dist)
+    except (TypeError, ValueError):
+        return 0.0
+
+    relevance = 100.0 / (1.0 + math.exp(value / 2.0))
+    return max(0.0, min(100.0, relevance))
+
 @app.route('/health', methods=['GET'])
 def health():
     """Health check endpoint with stats"""
@@ -360,7 +375,12 @@ def query_documents():
         
         # NEW: Accept relevance_threshold (0-100) instead of distance_threshold
         # For backward compatibility, check both parameters
-        relevance_threshold = data.get('relevance_threshold', data.get('distance_threshold', 0))
+        relevance_threshold_raw = data.get('relevance_threshold', data.get('distance_threshold', 0))
+        try:
+            relevance_threshold = float(relevance_threshold_raw)
+        except (TypeError, ValueError):
+            relevance_threshold = 0.0
+        relevance_threshold = max(0.0, min(100.0, relevance_threshold))
         print(f"🔍 Embedding Service received relevance_threshold: {relevance_threshold}%")
 
         if not query:
@@ -500,10 +520,7 @@ def query_documents():
         if use_dedup:
             merged_results = deduplicate_sources(merged_results)
 
-        # Apply RELEVANCE threshold filtering (convert distance to relevance %)
-        # Use same formula as frontend: 100 / (1 + exp(distance / 2))
-        import math
-        
+        # Apply relevance threshold filtering with the same mapping used in the frontend.
         filtered_docs = []
         filtered_meta = []
         filtered_dist = []
@@ -514,8 +531,7 @@ def query_documents():
             merged_results['metadatas'][0],
             merged_results['distances'][0]
         ):
-            # Calculate relevance percentage from distance
-            relevance = max(0, min(100, 100 / (1 + math.exp(dist / 2))))
+            relevance = _distance_to_relevance(dist)
             
             # Filter by relevance threshold
             if relevance >= relevance_threshold:

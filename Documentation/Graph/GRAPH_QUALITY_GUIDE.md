@@ -33,4 +33,3 @@ This guide covers the levers that most affect NetworkX graph quality.
 
 - `Documentation/Graph/IMPROVED_GRAPH_BUILDER_GUIDE.md`
 - `Documentation/Graph/GRAPH_DATA_FLOW.md`
-- `Documentation/Archive/reports/BUILD_STATISTICS.md`

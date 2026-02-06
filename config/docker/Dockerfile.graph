@@ -19,7 +19,8 @@ RUN pip install --no-cache-dir \
     anthropic \
     mem0ai \
     pypdf \
-    cryptography
+    cryptography \
+    PyYAML
 
 # Copy service files
 COPY src/services/kimi_graph_builder.py /app/

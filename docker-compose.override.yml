@@ -19,6 +19,7 @@ services:
   # LightRAG
   # Default uses internal volume. We override to use the synced folder.
   lightrag-service:
+    command: ["gunicorn", "-w", "1", "-k", "gthread", "--threads", "2", "-b", "0.0.0.0:8001", "lightrag_service:app"]
     volumes:
       - ${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/lightrag_db:/app/lightrag_db
     environment:

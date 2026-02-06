@@ -9,6 +9,7 @@ export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(sources.length <= 3);
   const vaultName = 'Michel';
   const vaultRoot = '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel';
+  const hasUnsafeScheme = (value: string) => /^(javascript|data|vbscript):/i.test(value.trim());
 
   if (!sources || sources.length === 0) {
     return null;
@@ -17,6 +18,9 @@ export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
   const buildSourceLink = (source: Source) => {
     const filepath = source.filepath?.trim();
     if (filepath) {
+      if (hasUnsafeScheme(filepath)) {
+        return null;
+      }
       const looksAbsolute = filepath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(filepath);
       if (looksAbsolute) {
         if (filepath.startsWith(vaultRoot)) {
@@ -30,6 +34,9 @@ export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
     }
     const filename = source.filename?.trim();
     if (filename) {
+      if (hasUnsafeScheme(filename)) {
+        return null;
+      }
       return `obsidian://search?vault=${encodeURIComponent(vaultName)}&query=${encodeURIComponent(filename)}`;
     }
     return null;

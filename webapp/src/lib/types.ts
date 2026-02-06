@@ -47,6 +47,7 @@ export interface WebSearchResult {
 }
 
 export interface SettingsState {
+  settingsVersion?: number;
   model: string;
   sources: number;
   temperature: number;
@@ -93,6 +94,7 @@ export interface AppState {
 }
 
 export const defaultSettings: SettingsState = {
+  settingsVersion: 2,
   model: 'llama3.2:latest',
   sources: 10,
   temperature: 0.3,

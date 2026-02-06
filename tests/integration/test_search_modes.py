@@ -253,7 +253,25 @@ def test_cascading_mode_uses_retriever(monkeypatch):
 
 
 @pytest.mark.integration
+def test_invalid_mode_returns_400():
+    client = TestClient(api_gateway.app)
+    payload = {
+        "query": "nextion esp32",
+        "mode": "not-a-mode",
+        "max_results": 5,
+    }
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else None
+
+    response = client.post("/api/v1/query", json=payload, headers=headers)
+
+    assert response.status_code == 400
+    assert "Unsupported mode" in response.json()["detail"]
+
+
+@pytest.mark.integration
 @pytest.mark.parametrize("alias,expected_mode,expected_url", [
+    ("graph", "notes", f"{api_gateway.GRAPH_SERVICE_URL}/query"),
     ("networkx", "notes", f"{api_gateway.GRAPH_SERVICE_URL}/query"),
     ("lightrag", "entities", f"{api_gateway.LIGHTRAG_SERVICE_URL}/query"),
 ])

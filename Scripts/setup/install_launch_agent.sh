@@ -6,10 +6,12 @@ PLIST_NAME="${LABEL}.plist"
 LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
 PLIST_PATH="$LAUNCH_AGENTS_DIR/$PLIST_NAME"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-START_SCRIPT="$SCRIPT_DIR/start_all_services.sh"
+START_SCRIPT="$SCRIPT_DIR/start_obsidian_rag.sh"
+LOG_DIR="$SCRIPT_DIR/logs"
 
 # Ensure LaunchAgents directory exists
 mkdir -p "$LAUNCH_AGENTS_DIR"
+mkdir -p "$LOG_DIR"
 
 # Create the plist content
 cat <<EOF > "$PLIST_PATH"
@@ -26,9 +28,9 @@ cat <<EOF > "$PLIST_PATH"
     <key>RunAtLoad</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>$SCRIPT_DIR/logs/launch_agent.log</string>
+    <string>$LOG_DIR/launch_agent.log</string>
     <key>StandardErrorPath</key>
-    <string>$SCRIPT_DIR/logs/launch_agent.error.log</string>
+    <string>$LOG_DIR/launch_agent.error.log</string>
     <key>WorkingDirectory</key>
     <string>$SCRIPT_DIR/..</string>
     <key>EnvironmentVariables</key>

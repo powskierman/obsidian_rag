@@ -17,10 +17,13 @@ RUN git clone https://github.com/HKUDS/LightRAG.git && \
 # Install additional dependencies
 RUN pip install --no-cache-dir \
     flask \
+    gunicorn \
     requests \
     ollama \
     openai \
-    pypdf
+    pypdf \
+    nest_asyncio \
+    cryptography
 
 # Copy application files
 COPY src/integrations/lightrag_service.py ./lightrag_service.py
@@ -36,6 +39,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8001/health || exit 1
 
 # Run the service
-CMD ["python", "lightrag_service.py"]
-
+CMD ["gunicorn", "-w", "2", "-k", "gthread", "--threads", "2", "-b", "0.0.0.0:8001", "lightrag_service:app"]
 

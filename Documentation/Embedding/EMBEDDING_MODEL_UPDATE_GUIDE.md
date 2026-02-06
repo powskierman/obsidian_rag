@@ -13,5 +13,5 @@ To change the embedding model used by the embedding service:
    ```
 3. Reindex your vault:
    ```bash
-   ./Scripts/index_with_lightrag.sh
+   ./Scripts/indexing/index_with_lightrag.sh
    ```

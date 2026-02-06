@@ -40,9 +40,9 @@ docker compose up -d graph-service
 ## Quick Check
 
 ```bash
-curl -X POST http://localhost:8002/query \
+curl -X POST http://localhost:4000/api/v1/query \
   -H "Content-Type: application/json" \
-  -d '{"query":"nextion and esp32","mode":"graph"}'
+  -d '{"query":"nextion and esp32","mode":"notes"}'
 ```
 
 Expected: Nextion/ESP32 notes rise; AI/agent/system notes are suppressed.

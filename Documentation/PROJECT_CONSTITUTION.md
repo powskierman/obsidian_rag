@@ -13,7 +13,7 @@ personal knowledge work, fast retrieval, and repeatable indexing across machines
 ## Scope
 In scope:
 - Local services: embedding, graph, LightRAG, API gateway, and Streamlit UI.
-- Search modes: vector, graph, hybrid, dual-graph, cascading, and deep-thinking.
+- Search modes: vector, notes, entities, notes+vector, entities+vector, dual-graph, hybrid, and cascading.
 - Indexing workflows for vault content and graph rebuilding.
 - MCP integration and Docker-based deployment.
 
@@ -36,10 +36,11 @@ Primary data stores (local-only, rebuildable):
 
 ## Public Interfaces
 - `POST /api/v1/search`
-- `POST /api/v1/search/stream` (SSE)
+- `POST /api/v1/query`
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
 - WebSocket deep research: `ws://localhost:4000/api/v1/deep-research`
+- Compatibility alias: `graph` is accepted and mapped to `notes`.
 
 ## Data and Indexing Principles
 - Incremental indexing is the default; full rebuilds are explicit.
@@ -47,7 +48,7 @@ Primary data stores (local-only, rebuildable):
 - Vault standardization (naming, links, templates) improves retrieval quality.
 
 ## Quality and Performance Targets
-- Mode audit script: `python Scripts/audit_search_modes.py`.
+- Mode audit script: `python Scripts/debug/audit_search_modes.py`.
 - Pass criteria: status=PASS and non-zero sources where applicable.
 - Latency targets:
   - Vector: < 1s

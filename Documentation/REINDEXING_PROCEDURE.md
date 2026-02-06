@@ -148,5 +148,5 @@ cp -a "$RAG_DATA/chroma_db" "$RAG_DATA/chroma_db_$(date +%Y%m%d_%H%M%S)"
 ## 7) What each database powers
 
 - Vector DB (ChromaDB): vector mode and hybrid pipelines.
-- NetworkX graph (graph_data): Deep Thinking and graph modes.
-- LightRAG (lightrag_db): entity graph modes and cascading retrieval.
+- NetworkX graph (graph_data): Deep Thinking and notes-mode retrieval.
+- LightRAG (lightrag_db): entities-mode retrieval and cascading retrieval.

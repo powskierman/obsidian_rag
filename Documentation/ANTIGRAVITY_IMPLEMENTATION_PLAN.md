@@ -53,7 +53,7 @@ The file will act as a "pick-up" queue for agents.
 *   **Path:** `.agent/skills/obsidian-index-maintenance/`
 *   **Goal:** Synchronize the local Obsidian vault with vector and graph stores.
 *   **Key Files:**
-    *   `SKILL.md`: Instructions to use `src/indexing/index_vault.py` and `./Scripts/index_with_lightrag.sh`.
+    *   `SKILL.md`: Instructions to use `src/indexing/index_vault.py` and `./Scripts/indexing/index_with_lightrag.sh`.
     *   **Constraint:** Always validate frontmatter metadata. Require `EMBEDDING_CLEAR_TOKEN` for destructive ops.
 
 ### Skill 2: `rag-eval-runner`
@@ -97,7 +97,7 @@ Antigravity's shell access will be prioritized for these "safe" commands:
     *   `docker compose build`
     *   `docker compose up` (non-destructive starts)
 *   **Vault Ops:**
-    *   `bash ./Scripts/index_with_lightrag.sh`
+    *   `bash ./Scripts/indexing/index_with_lightrag.sh`
 
 ### 4.2 Security Constraints
 *   **CI Arbiter:** Agents can open PRs/branches; CI pipelines (GitHub Actions) are the final validity check.

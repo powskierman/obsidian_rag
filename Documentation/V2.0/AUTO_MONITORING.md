@@ -4,10 +4,10 @@ This project already includes a LaunchAgent installer. The watcher can now be st
 
 ## Recommended Setup (macOS)
 1) Install the LaunchAgent (starts services on login):
-   - `Scripts/install_launch_agent.sh`
+   - `Scripts/setup/install_launch_agent.sh`
 
-2) Ensure the watcher starts with the services:
-   - `Scripts/start_all_services.sh` now invokes `Scripts/start_watcher.sh`.
+2) Ensure the launch script points to the setup entrypoint:
+   - `Scripts/setup/start_obsidian_rag.sh`
 
 ## Environment Notes
 - The watcher uses `WATCHER_CHOICE` to pick scan mode (default: 3 = incremental scan then watch).
@@ -18,6 +18,4 @@ If using LaunchAgent, you can set environment variables via:
 - `launchctl setenv WATCHER_CHOICE 3`
 
 ## Logs
-- Startup log: `Scripts/logs/startup.log`
-- Watcher log: `Scripts/logs/watcher.log`
-- Watcher errors: `Scripts/logs/watcher.error.log`
+- LaunchAgent logs are written under `Scripts/setup/logs/` at runtime.

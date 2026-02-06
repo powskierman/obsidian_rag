@@ -49,7 +49,7 @@ Endpoint: `ws://localhost:4000/api/v1/deep-research`
    - `{"status": "complete"}`
 
 ## 3. Audit Procedures
-Run `python Scripts/audit_search_modes.py` to verify all modes.
+Run `python Scripts/debug/audit_search_modes.py` to verify all modes.
 - **Pass Criteria**: `status=PASS` AND `source_count > 0` (for non-chat modes).
 - **Latency Targets**: 
     - Vector: < 1s

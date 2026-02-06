@@ -1,22 +1,24 @@
 """
-Kimi-Powered Knowledge Graph Builder for Obsidian Vault
+Kimi-Powered Knowledge Graph Builder for Obsidian Vault (Refactored)
 
-This service uses Kimi K2 via OpenRouter to extract entities and relationships from your
-Obsidian vault chunks, building a queryable knowledge graph.
+This service builds a structural NetworkX graph from an Obsidian vault,
+modeling Notes, Blocks, Tags, and Folders as typed nodes.
+It replaces the previous LLM-based extraction with a deterministic file-system scan,
+while keeping the LLM-based Query/Agent layer.
 """
 
 import json
 import os
 import re
 import time
-import hashlib
 import logging
 import pickle
-from typing import List, Dict, Any, Optional, Union, Set
-from openai import OpenAI
 import networkx as nx
+from src.indexing.frontmatter import extract_frontmatter
+from typing import List, Dict, Any, Optional, Union, Set, Tuple
 from pathlib import Path
 from datetime import datetime
+import yaml
 
 # Configure logging
 if not logging.getLogger().handlers:
@@ -33,268 +35,229 @@ try:
 except OSError:
     pass
 
-
 class GraphBuilder:
-    """Build knowledge graph using Kimi's extraction capabilities via OpenRouter"""
+    """Build structural knowledge graph from Obsidian vault"""
     
-    def __init__(self, api_key: Optional[str] = None, model: str = None, max_retries: int = 3):
-        # Use OPENROUTER_API_KEY + KIMI_MODEL env vars
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
-        if not self.api_key:
-            raise RuntimeError("OPENROUTER_API_KEY not set")
-        
-        self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=self.api_key,
-        )
-        self.model = model or os.environ.get("KIMI_MODEL", "moonshotai/kimi-k2-0905")
-        self.max_retries = max_retries
-
+    def __init__(self, api_key: Optional[str] = None):
+        # API key is kept for compatibility but not used in structural build
         self.graph = nx.MultiDiGraph()
-        self.entity_cache = {}
-        self.extraction_stats = {
-            'chunks_processed': 0,
-            'entities_extracted': 0,
-            'relationships_extracted': 0,
-            'errors': 0,
-            'retries': 0,
-            'successful_retries': 0,
+        self.processed_files = set()
+        self.stats = {
+            'notes': 0,
+            'tags': 0,
+            'folders': 0,
+            'edges': 0,
+            'errors': 0
         }
-        self.failed_chunks = []
-        self.processed_chunks: Set[str] = set()
 
-    def add_entity(self, name: str, entity_type: str = "unknown", **properties):
-        """Add a single entity to the graph"""
-        props = properties.pop('properties', {})
-        all_props = {**props, **properties}
+    def _sanitize_content(self, content: str) -> str:
+        """Strip Obsidian specific syntax artifacts"""
+        if not content: return ""
+        # Remove comments
+        content = re.sub(r'%%.*?%%', '', content, flags=re.DOTALL)
+        # Remove block refs
+        content = re.sub(r'\s\^[a-zA-Z0-9-]+$', '', content, flags=re.MULTILINE)
+        return content
 
-        if self.graph.has_node(name):
-            existing = self.graph.nodes[name]
-            for key, value in all_props.items():
-                existing[key] = value
-        else:
-            self.graph.add_node(name, entity_type=entity_type, **all_props)
-            self.entity_cache[name.lower()] = name
-
-    def add_relationship(self, source: str, target: str, relationship_type: str = "relates_to", **properties):
-        """Add a single relationship to the graph"""
-        if not self.graph.has_node(source):
-            self.add_entity(source)
-        if not self.graph.has_node(target):
-            self.add_entity(target)
-
-        self.graph.add_edge(source, target, relationship_type=relationship_type, **properties)
-
-    def clean_entity_name(self, name: str) -> str:
-        """Clean entity name"""
-        cleaned = name.strip()
-        cleaned = re.sub(r'\s+', ' ', cleaned)
-        return cleaned
-
-    def merge_graph(self, other_graph: nx.MultiDiGraph):
-        """Merge another graph into this one"""
-        for node, data in other_graph.nodes(data=True):
-            if self.graph.has_node(node):
-                existing = self.graph.nodes[node]
-                for key, value in data.items():
-                    if key not in existing:
-                        existing[key] = value
-            else:
-                self.graph.add_node(node, **data)
-                self.entity_cache[node.lower()] = node
-
-        for source, target, data in other_graph.edges(data=True):
-            self.graph.add_edge(source, target, **data)
-
-    def _get_chunk_hash(self, chunk_text: str, metadata: Dict) -> str:
-        """Generate a unique hash for a chunk"""
-        chunk_id = f"{metadata.get('filename', '')}:{metadata.get('chunk_id', '')}:{chunk_text[:100]}"
-        return hashlib.md5(chunk_id.encode()).hexdigest()
-
-    def extract_graph_from_chunk(self, chunk_text: str, metadata: Dict, retry_count: int = 0) -> Dict[str, Any]:
-        """Use Kimi to extract entities and relationships from a single chunk"""
-        if len(chunk_text.strip()) < 50:
-            return {'entities': [], 'relationships': []}
+    def build_structure(self, vault_path: str):
+        """
+        Scan the vault and build the graph.
         
-        prompt = f"""Analyze this text from a personal knowledge base and extract:
+        Node types:
+          ("note", file_path)
+          ("tag", tag_name)
+          ("folder", folder_path)
+          ("block", block_id) [Optional, basic support]
+        
+        Edge types:
+          LINK: note -> note (Wikilinks)
+          TAGGED_AS: note -> tag
+          IN_FOLDER: note -> folder
+          INHERITS_FOLDER: folder -> parent_folder
+        """
+        vault_root = Path(vault_path)
+        if not vault_root.exists():
+            raise FileNotFoundError(f"Vault path not found: {vault_path}")
 
-1. **Entities**: Important concepts, people, places, treatments, technologies, projects, etc.
-2. **Relationships**: How these entities relate to each other.
-3. **Timeline**: Specific dates or sequences of events.
-4. **Importance**: Rate the clinical or central relevance of entities (1-10).
+        logger.info(f"Scanning vault at {vault_path}...")
+        
+        # 1. Walk files and create Note/Folder nodes
+        for root, dirs, files in os.walk(vault_path):
+            rel_root = os.path.relpath(root, vault_path)
+            if rel_root == ".":
+                rel_root = ""
+                
+            # Create folder node (unless root)
+            if rel_root:
+                self._add_folder_node(rel_root)
+                # Link to parent folder
+                parent_folder = os.path.dirname(rel_root)
+                if parent_folder:
+                    self._add_folder_node(parent_folder)
+                    self.graph.add_edge(
+                        ("folder", parent_folder), 
+                        ("folder", rel_root), 
+                        kind="INHERITS_FOLDER"
+                    )
+                    self.stats['edges'] += 1
 
-Text to analyze (may include File/Tags context headers):
-<text>
-{chunk_text[:8000]}
-</text>
-
-Metadata:
-- Source: {metadata.get('filename', 'Unknown')}
-- Date: {metadata.get('date', 'Unknown')}
-
-Extract entities and relationships in JSON format. IMPORTANT: Return ONLY valid JSON, no markdown, no explanations:
-
-{{
-  "entities": [
-    {{
-      "name": "Entity Name",
-      "type": "person|treatment|concept|technology|event|project|location|medication|condition",
-      "properties": {{
-        "description": "Brief description",
-        "domain": "medical|technical|personal|general",
-        "importance": 10,
-        "category": "treatment|symptom|metric|other"
-      }}
-    }}
-  ],
-  "relationships": [
-    {{
-      "source": "Entity1 Name",
-      "target": "Entity2 Name", 
-      "type": "treats|causes|uses|creates|relates_to|part_of|used_in|leads_to|happened_on|followed_by",
-      "properties": {{
-        "description": "How they relate",
-        "strength": "strong|medium|weak",
-        "temporal": "2023-01-15|before|after|during|null",
-        "sequence_id": 1
-      }}
-    }}
-  ]
-}}
-
-Guidelines:
-- **Context**: Use the "File:" and "Tags:" lines at the start of the text to identify the domain and main topics.
-- **Importance Scoring**: Rate entities 1-10. 10 = Critical medical diagnosis/treatment or core project. 1 = Minor detail.
-- **Temporal Tracking**: If a relationship has a specific date or order, capture it in "temporal".
-- Extract 5-15 important entities per chunk.
-- For medical content: strictly identify treatments, conditions, medications, dosages.
-- Return ONLY the JSON object, no markdown code blocks, no explanations"""
-
-        for attempt in range(self.max_retries):
-            try:
-                max_tokens = 6000 if retry_count > 0 else 4096
-                temperature = 0.1 if retry_count > 0 else 0.3
+            for filename in files:
+                if filename.startswith("."): continue
                 
-                response = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    response_format={"type": "json_object"} if "kimi" in self.model.lower() else None
-                )
+                file_path = os.path.join(root, filename)
+                rel_path = os.path.join(rel_root, filename)
                 
-                response_text = response.choices[0].message.content.strip()
-                graph_data = self._parse_json_response(response_text, metadata, attempt)
-                
-                if 'entities' not in graph_data: graph_data['entities'] = []
-                if 'relationships' not in graph_data: graph_data['relationships'] = []
-                
-                # Add source metadata
-                for entity in graph_data.get('entities', []):
-                    if 'properties' not in entity or not isinstance(entity['properties'], dict): 
-                        entity['properties'] = {}
-                    
-                    if 'sources' not in entity['properties']: 
-                        entity['properties']['sources'] = []
-                        
-                    entity['properties']['sources'].append({
-                        'filename': metadata.get('filename', 'Unknown'),
-                        'chunk_id': metadata.get('chunk_id', 'Unknown')
-                    })
-                
-                for rel in graph_data.get('relationships', []):
-                    if 'properties' not in rel or not isinstance(rel['properties'], dict): 
-                        rel['properties'] = {}
-                    
-                    if 'sources' not in rel['properties']: 
-                        rel['properties']['sources'] = []
-                        
-                    rel['properties']['sources'].append({
-                        'filename': metadata.get('filename', 'Unknown'),
-                        'chunk_id': metadata.get('chunk_id', 'Unknown')
-                    })
-                
-                self.extraction_stats['chunks_processed'] += 1
-                if retry_count > 0: self.extraction_stats['successful_retries'] += 1
-                self.extraction_stats['entities_extracted'] += len(graph_data.get('entities', []))
-                self.extraction_stats['relationships_extracted'] += len(graph_data.get('relationships', []))
-                
-                return graph_data
-                
-            except Exception as e:
-                error_msg = str(e)
-                if (attempt + 1) >= self.max_retries:
-                    self.extraction_stats['errors'] += 1
-                    logger.error(f"Error extracting from chunk: {error_msg[:100]}")
-                    self.failed_chunks.append({
-                        'text': chunk_text,
-                        'metadata': metadata,
-                        'error': error_msg,
-                        'attempts': retry_count + self.max_retries
-                    })
-                    return {'entities': [], 'relationships': []}
+                if filename.lower().endswith(".md"):
+                    self._process_markdown_file(file_path, rel_path, rel_root)
+                elif filename.lower().endswith(".pdf"):
+                    self._process_pdf_file(file_path, rel_path, rel_root)
                 else:
-                    self.extraction_stats['retries'] += 1
-                    wait_time = (2 ** attempt) * 1
-                    time.sleep(wait_time)
-                    continue
-    
-    def _parse_json_response(self, response_text: str, metadata: Dict, attempt: int = 0) -> Dict[str, Any]:
-        """Robustly parse JSON response"""
-        if response_text.startswith('```'):
-            parts = response_text.split('```')
-            for part in parts:
-                part = part.strip()
-                if part.startswith('json'): part = part[4:].strip()
-                if part.startswith('{'):
-                    response_text = part
-                    break
+                    # Optional: Add non-md files as generic file nodes or attachment nodes
+                    pass
+
+        logger.info(f"Graph build complete: {self.graph.number_of_nodes()} nodes, {self.graph.number_of_edges()} edges")
+
+    def _add_folder_node(self, folder_path: str):
+        node_id = ("folder", folder_path)
+        if not self.graph.has_node(node_id):
+            self.graph.add_node(node_id, name=os.path.basename(folder_path), path=folder_path)
+            self.stats['folders'] += 1
+
+    def _process_pdf_file(self, full_path: str, rel_path: str, folder_path: str):
+        """Process PDF file as a graph node"""
         try:
-            return json.loads(response_text)
-        except json.JSONDecodeError:
-            json_match = re.search(r'\{[\s\S]*\}', response_text, re.MULTILINE | re.DOTALL)
-            if json_match:
-                try: return json.loads(json_match.group())
-                except: pass
-        return {'entities': [], 'relationships': []}
-
-    def add_to_graph(self, graph_data: Dict[str, Any]):
-        """Add extracted entities and relationships to the graph"""
-        for entity in graph_data.get('entities', []):
-            if 'name' not in entity: continue
-            entity_name = entity['name']
-            entity_type = entity.get('type', 'unknown')
-            entity_props = entity.get('properties', {})
+            node_id = ("pdf", rel_path)
+            stat_info = os.stat(full_path)
             
-            if self.graph.has_node(entity_name):
-                existing = self.graph.nodes[entity_name]
-                existing['sources'] = existing.get('sources', []) + entity_props.get('sources', [])
-                for key, value in entity_props.items():
-                    if key != 'sources' and key not in existing:
-                        existing[key] = value
-            else:
-                self.graph.add_node(entity_name, entity_type=entity_type, **entity_props)
-                self.entity_cache[entity_name.lower()] = entity_name
-        
-        for rel in graph_data.get('relationships', []):
-            if 'source' not in rel or 'target' not in rel: continue
-            source_norm = self.entity_cache.get(rel['source'].lower(), rel['source'])
-            target_norm = self.entity_cache.get(rel['target'].lower(), rel['target'])
-            if self.graph.has_node(source_norm) and self.graph.has_node(target_norm):
-                self.graph.add_edge(source_norm, target_norm, relationship_type=rel.get('type', 'relates_to'), **rel.get('properties', {}))
+            attrs = {
+                "title": Path(rel_path).stem.replace('_', ' ').title(), # Better title from filename
+                "path": rel_path,
+                "mtime": stat_info.st_mtime,
+                "ctime": stat_info.st_ctime,
+                "tags": ["#pdf"], # Explicit tag for graph queries
+                "type": "pdf"
+            }
+            self.graph.add_node(node_id, **attrs)
+            # We track stats in a generic way or add specific counter? 
+            # Let's count as 'notes' for general volume or new key?
+            # reusing 'notes' might be confusing. Let's add 'pdfs' to stats check or just ignore.
+            
+            # Edge: IN_FOLDER
+            if folder_path:
+                self._add_folder_node(folder_path)
+                self.graph.add_edge(node_id, ("folder", folder_path), kind="IN_FOLDER")
+                self.stats['edges'] += 1
+                
+        except Exception as e:
+            logger.error(f"Error processing PDF {rel_path}: {e}")
+            self.stats['errors'] += 1
 
-    def build_graph_from_chunks(self, chunks: List[Dict], batch_size: int = 10, skip_processed: bool = True):
-        """Build graph from multiple chunks"""
-        total = len(chunks)
-        for i, chunk in enumerate(chunks):
-            chunk_hash = self._get_chunk_hash(chunk['text'], chunk['metadata'])
-            if skip_processed and chunk_hash in self.processed_chunks: continue
-            graph_data = self.extract_graph_from_chunk(chunk['text'], chunk['metadata'])
-            self.add_to_graph(graph_data)
-            self.processed_chunks.add(chunk_hash)
-            if (i + 1) % batch_size == 0:
-                self.save_graph(str(GRAPH_DATA_DIR / f"graph_checkpoint_{i+1}.pkl"))
-        logger.info(f"Graph: {self.graph.number_of_nodes()} nodes, {self.graph.number_of_edges()} edges")
+    def _process_markdown_file(self, full_path: str, rel_path: str, folder_path: str):
+        try:
+            with open(full_path, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read()
+            
+            # Parse Frontmatter
+            metadata, body = self._parse_frontmatter(content)
+            body = self._sanitize_content(body)
+            
+            # Create Note Node
+            node_id = ("note", rel_path)
+            stat_info = os.stat(full_path)
+            
+            attrs = {
+                "title": metadata.get("title", Path(rel_path).stem),
+                "path": rel_path,
+                "mtime": stat_info.st_mtime,
+                "ctime": stat_info.st_ctime,
+                "tags": metadata.get("tags", []),
+                "aliases": metadata.get("aliases", []),
+                "frontmatter": metadata
+            }
+            self.graph.add_node(node_id, **attrs)
+            self.stats['notes'] += 1
+            
+            # Edge: IN_FOLDER
+            if folder_path:
+                self._add_folder_node(folder_path)
+                self.graph.add_edge(node_id, ("folder", folder_path), kind="IN_FOLDER")
+                self.stats['edges'] += 1
+            
+            # Process Tags (Frontmatter)
+            labels = attrs["tags"]
+            if isinstance(labels, list):
+                for tag in labels:
+                    self._add_tag_edge(node_id, tag)
+            elif isinstance(labels, str):
+                 for tag in labels.split(","):
+                    self._add_tag_edge(node_id, tag.strip())
+
+            # Process Body: Wikilinks and Inline Tags
+            self._scan_links_and_tags(node_id, body)
+            
+        except Exception as e:
+            logger.error(f"Error processing file {rel_path}: {e}")
+            self.stats['errors'] += 1
+
+    def _parse_frontmatter(self, content: str) -> Tuple[Dict, str]:
+        """Wrapper for shared frontmatter utility"""
+        return extract_frontmatter(content)
+
+    def _add_tag_edge(self, source_node, tag_name: str):
+        if not tag_name: return
+        # Normalize tag
+        tag_name = tag_name if tag_name.startswith("#") else f"#{tag_name}"
+        tag_node = ("tag", tag_name)
+        
+        if not self.graph.has_node(tag_node):
+            self.graph.add_node(tag_node, name=tag_name)
+            self.stats['tags'] += 1
+            
+        self.graph.add_edge(source_node, tag_node, kind="TAGGED_AS")
+        self.stats['edges'] += 1
+
+    def _scan_links_and_tags(self, source_node: tuple, text: str):
+        # Regex for standard Wikilinks [[target]] or [[target|alias]]
+        link_pattern = re.compile(r"\[\[([^\]\|]+)(\|[^\]]+)?\]\]")
+        tag_pattern = re.compile(r"(?<=[\s^])#([a-zA-Z0-9_\-/]+)")
+        
+        # Find Links
+        for match in link_pattern.finditer(text):
+            target_raw = match.group(1)
+            target_id = self._resolve_link(target_raw)
+            if target_id:
+                self.graph.add_edge(source_node, target_id, kind="LINK", raw_target=target_raw)
+                self.stats['edges'] += 1
+
+        # Find Tags
+        for match in tag_pattern.finditer(text):
+            tag_name = match.group(1)
+            self._add_tag_edge(source_node, tag_name)
+
+    def _resolve_link(self, target_raw: str) -> Optional[Tuple[str, str]]:
+        cleaned = target_raw.split('#')[0].strip()
+        if not cleaned: return None
+        
+        # If it has an extension, keep it. If not, assume .md
+        # This allows linking to [[Scan.pdf]] as ("note", "Scan.pdf") or ("pdf", "Scan.pdf")?
+        # IMPORTANT: Our Node Types distinguish ("note", path) vs ("pdf", path).
+        # We need to guess the type OR use a generic ("file", path) reference?
+        # But we built the graph with specific types.
+        # If we return ("note", "Scan.pdf"), it won't match the ("pdf", "Scan.pdf") node we created!
+        
+        ext = os.path.splitext(cleaned)[1].lower()
+        if ext == '.pdf':
+            return ("pdf", cleaned)
+        elif not ext:
+             cleaned += ".md"
+             return ("note", cleaned)
+        else:
+             # Other extensions? Treat as note or generic file? 
+             # For now fallback to 'note' ID but with original extension if present?
+             # Or force md? Obsidian usually omits extension for MD.
+             pass
+             
+        return ("note", cleaned)
 
     def save_graph(self, filepath: str = None):
         """Save graph to disk"""
@@ -304,8 +267,7 @@ Guidelines:
         with open(filepath, 'wb') as f:
             pickle.dump({
                 'graph': self.graph,
-                'stats': self.extraction_stats,
-                'processed_chunks': list(self.processed_chunks),
+                'stats': self.stats,
                 'timestamp': datetime.now().isoformat()
             }, f)
 
@@ -314,224 +276,265 @@ Guidelines:
         if filepath is None: filepath = str(GRAPH_DATA_DIR / "knowledge_graph.pkl")
         with open(filepath, 'rb') as f:
             data = pickle.load(f)
-            
             if isinstance(data, dict) and 'graph' in data:
-                # Loaded a dictionary wrapper
                 self.graph = data['graph']
-                
-                # Safely update stats ensuring all keys exist (handling backwards compatibility)
-                loaded_stats = data.get('stats', {})
-                if isinstance(loaded_stats, dict):
-                    self.extraction_stats.update(loaded_stats)
-                
-                self.processed_chunks = set(data.get('processed_chunks', []))
-            
-            elif isinstance(data, (nx.Graph, nx.DiGraph, nx.MultiDiGraph, nx.MultiGraph)):
-                # Loaded a raw NetworkX graph object
+                self.stats = data.get('stats', {})
+            elif isinstance(data, (nx.MultiDiGraph, nx.DiGraph)):
                 self.graph = data
-                # Can't recover stats/processed_chunks from raw graph unless stored in graph attributes
-                logger.info("Loaded raw NetworkX graph object (no metadata stats available)")
-            
             else:
-                logger.warning(f"Unknown graph file format: {type(data)}")
-                # Try to cast to graph if possible, or raise error?
-                # For now assume it might be a DiGraph if it walks like a duck
-                if hasattr(data, 'nodes') and hasattr(data, 'edges'):
-                     self.graph = data
-                else:
-                     raise ValueError(f"Invalid graph file format: {type(data)}")
-
-            self.entity_cache = {name.lower(): name for name in self.graph.nodes()}
-
+                raise ValueError(f"Unknown graph file format: {type(data)}")
 
 class GraphQuerier:
-    """Query the knowledge graph using Kimi/OpenRouter reasoning"""
+    """Query the knowledge graph (LLM-enabled)"""
     
-    def __init__(self, graph_builder: GraphBuilder, api_key: Optional[str] = None, model: str = None):
+    def __init__(self, graph_builder: GraphBuilder, api_key: Optional[str] = None):
         self.graph = graph_builder.graph
         self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
-        self.client = OpenAI(
-            base_url="https://openrouter.ai/api/v1",
-            api_key=self.api_key,
-        )
-        self.model = model or os.environ.get("KIMI_MODEL", "moonshotai/kimi-k2-0905")
-    
-    def find_paths(self, source: str, target: str, max_depth: int = 3) -> List[List[str]]:
-        """Find paths between two entities"""
-        source = source.strip().strip('"\'')
-        target = target.strip().strip('"\'')
-        def find_best_match(name):
-            name_lower = name.lower()
-            matches = [n for n in self.graph.nodes() if name_lower in n.lower() or n.lower() in name_lower]
-            return max(matches, key=lambda n: self.graph.degree(n)) if matches else None
-        s_ent = find_best_match(source) if source not in self.graph else source
-        t_ent = find_best_match(target) if target not in self.graph else target
-        if not s_ent or not t_ent: return []
         try:
-            paths = list(nx.all_simple_paths(self.graph.to_undirected(), s_ent, t_ent, cutoff=max_depth))
-            return paths[:10]
-        except: return []
-
-    def get_entity_neighborhood(self, entity: str, depth: int = 1) -> Dict[str, Any]:
-        """Get entities connected to this entity"""
-        entity = entity.strip().strip('"\'')
-        # Strict matching: Prefer exact match, then strict start/containment
-        if self.graph.has_node(entity):
-             matches = [entity]
-        else:
-             # Only match if it's a significant substring, not just "a" in "Apple"
-             # Avoid "or" matching "Tensorflow"
-             matches = [n for n in self.graph.nodes() if (entity.lower() == n.lower())]
-             
-             if not matches and len(entity) > 3:
-                 matches = [n for n in self.graph.nodes() if entity.lower() in n.lower()]
-
-        if not matches: return {'entity': entity, 'found': False}
-        entity = max(matches, key=lambda n: self.graph.degree(n))
-        neighbors = {'entity': entity, 'found': True, 'properties': dict(self.graph.nodes[entity]), 'outgoing': [], 'incoming': []}
-        for _, t, d in self.graph.out_edges(entity, data=True):
-            neighbors['outgoing'].append({'target': t, 'relationship': d.get('relationship_type', 'related_to'), 'properties': d})
-        for s, _, d in self.graph.in_edges(entity, data=True):
-            neighbors['incoming'].append({'source': s, 'relationship': d.get('relationship_type', 'related_to'), 'properties': d})
-        return neighbors
-    
-    def query_with_llm(self, user_query: str, max_entities: int = 20, additional_context: str = "", custom_system_prompt: str = "") -> tuple[str, list[dict]]:
-        """
-        Query the knowledge graph using the LLM with optional additional context.
-        Returns: (answer_text, context_nodes)
-        """
-        # Improved entity extraction with word boundaries
-        import re
-        query_lower = user_query.lower()
-        entities_in_query = []
-
-        # Filter out stopword/low-signal entities that pollute matching (e.g., "and")
-        stopwords = {
-            "and", "or", "the", "a", "an", "in", "on", "with", "for", "to", "of",
-            "from", "by", "is", "are", "was", "were", "be", "been", "it", "this",
-            "that", "these", "those", "as", "at", "via", "etc"
-        }
-
-        def is_noise_entity(name: str) -> bool:
-            name_lower = name.lower().strip()
-            if len(name_lower) <= 2 or name_lower.isdigit():
-                return True
-            if name_lower in stopwords:
-                return True
-            tokens = [t for t in re.split(r"\W+", name_lower) if t]
-            return bool(tokens) and all(t in stopwords for t in tokens)
-        
-        # Sort nodes by length (longest first) to match "Machine Learning" before "Learning"
-        all_nodes = sorted(list(self.graph.nodes()), key=len, reverse=True)
-        
-        for node in all_nodes:
-            node_lower = node.lower()
-            # Skip short/noise nodes (single chars or 2 chars)
-            if len(node_lower) <= 2 or is_noise_entity(node_lower):
-                continue 
+            from openai import OpenAI
+            self.client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=self.api_key,
+            )
+        except ImportError:
+            self.client = None
             
-            # Check for exact word match in query
-            # \b matches word boundary. escape(node_lower) handles special chars.
-            # Check for exact word match in query
-            # \b matches word boundary. escape(node_lower) handles special chars.
-            if re.search(r'\b' + re.escape(node_lower) + r'\b', query_lower):
-                entities_in_query.append(node)
-                continue # Found exact match, move to next node
+        self.model = os.environ.get("KIMI_MODEL", "moonshotai/kimi-k2-0905")
+        self._build_index()
 
-            # Fallback: Relaxed matching for technical terms (length > 3)
-            # This catches "Nextion" in "NextionDisplay" or "esp32" in "esp32-c3" logic
-            # IF the query explicitly contains the term as a word 
-            if len(node_lower) > 3:
-                 # Check Bidirectional Containment for robust matching
-                 # Case A: Query term inside Node Name? (e.g. Query="lymphoma", Node="Lymphoma Treatment")
-                 if query_lower in node_lower:
-                     # Verify it's not a tiny substring (e.g. "is" in "Paris")
-                     # We know query_lower > 3 chars potentially, let's check
-                     if len(query_lower) > 3: 
-                         entities_in_query.append(node)
-                         continue
-                 
-                 # Case B: Node Name inside Query? (e.g. Query="tell me about ESP32-S3", Node="ESP32")
-                 if node_lower in query_lower:
-                     entities_in_query.append(node)
-
-
-        logger.info(f"=== GRAPH BUILDER DEBUG ===")
-        logger.info(f"Entities found in query: {entities_in_query[:10]}")
-        
-        # Get neighborhood for entities
-        graph_context = [self.get_entity_neighborhood(e) for e in entities_in_query[:max_entities]]
-        
-        # Fallback 1: Token-based Search if exact node matching failed
-        if not graph_context:
-            logger.info("No direct entity matches. Attempting Token-based Search in Graph Nodes...")
-            # Extract significant tokens from query
-            query_tokens = [t for t in re.split(r"\W+", query_lower) if len(t) > 3 and t not in stopwords]
-            
-            fallback_nodes = []
-            for token in query_tokens:
-                # Find nodes containing this token
-                matches = [n for n in all_nodes if token in n.lower()]
-                fallback_nodes.extend(matches[:5]) # Take top 5 containing this token
-                
-            # Deduplicate
-            fallback_nodes = list(set(fallback_nodes))
-            
-            if fallback_nodes:
-                 logger.info(f"Fallback found {len(fallback_nodes)} nodes (e.g. {fallback_nodes[:3]})")
-                 graph_context = [self.get_entity_neighborhood(n) for n in fallback_nodes[:10]]
-
-        # Fallback 2: Centrality (Only for extremely generic/empty queries)
-        if not graph_context:
-            # ONLY fallback if the query is literally "summary" or empty.
-            # ABSOLUTELY NEVER fallback for specific technical queries.
-            # This is the root cause of the "Xcode" / "iOS" spam.
-            is_generic_summary = user_query.strip().lower() in ["summary", "overview", "graph", "nodes", "concepts"]
-            
-            if is_generic_summary:
-                centrality = nx.degree_centrality(self.graph)
-                top_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)[:10]
-                logger.info(f"Summary query detected, using top centrality nodes: {[node for node, _ in top_nodes]}")
-                graph_context = [self.get_entity_neighborhood(node) for node, _ in top_nodes]
+    def _build_index(self):
+        """Build mapping from string names to Nodes"""
+        self.index = {}
+        for node in self.graph.nodes(data=True):
+            nid, attrs = node
+            if isinstance(nid, tuple):
+                 kind, val = nid
+                 keys = [val]
+                 if kind == "note":
+                     keys.append(Path(val).stem)
+                     if attrs.get('aliases'):
+                         keys.extend(attrs['aliases'])
+                 elif kind == "tag":
+                     keys.append(val.lstrip("#"))
+                 elif kind == "folder":
+                     keys.append(Path(val).name)
+                 elif kind == "pdf":
+                     keys.append(Path(val).name)
             else:
-                # If we didn't find "nextion" in the graph, DO NOT show "Xcode".
-                # Just return empty context so the Vector search can take over.
-                logger.info(f"No specific graph entities found for: '{user_query}'. Returning empty graph context.")
-                # Returning empty tuple allows the caller (api_gateway/service) to decide on fallback, 
-                # but returning a polite string + empty list is safer for now.
-                return "I searched the knowledge graph but didn't find specific matching entities. I will rely on the document search results below.", []
+                keys = [str(nid)]
+                
+            for k in keys:
+                k_lower = str(k).lower()
+                if k_lower not in self.index:
+                    self.index[k_lower] = []
+                self.index[k_lower].append(nid)
 
+    def _hydrate_node_props(self, node_id, data: Dict) -> Dict:
+        """Inject derived properties (like sources) for backward compatibility"""
+        if 'sources' not in data:
+            data['sources'] = []
+            if isinstance(node_id, tuple):
+                kind, val = node_id
+                if kind == 'note' or kind == 'pdf':
+                    data['sources'].append({'filename': val, 'filepath': val})
+                elif kind == 'tag' or kind == 'folder':
+                     # Find associated notes (limit 10)
+                     count = 0
+                     for u, v, d in self.graph.in_edges(node_id, data=True):
+                         if isinstance(u, tuple) and u[0] == 'note':
+                             data['sources'].append({'filename': u[1], 'filepath': u[1]})
+                             count += 1
+                             if count >= 10: break
+        return data
 
-
-        context_text = "\n---\n".join([f"Entity: {c['entity']}\nRelationships: " +
-            ", ".join([f"{c['entity']} --[{r['relationship']}]--> {r['target']}" for r in c['outgoing']]) for c in graph_context])
-
-        logger.info(f"Graph context (first 500 chars): {context_text[:500]}")
-        logger.info(f"Using custom system prompt: {bool(custom_system_prompt)}")
-
-        # Build prompt with optional custom system prompt
-        if custom_system_prompt:
-            prompt_parts = [custom_system_prompt]
-        else:
-            prompt_parts = ["You are analyzing a personal knowledge graph. Answer the user's question based on the graph structure and relationships."]
-
-        if additional_context:
-            prompt_parts.append(f"\nAdditional Context from Vector Search:\n<vector_context>\n{additional_context}\n</vector_context>")
-
-        prompt_parts.append(f"\nKnowledge Graph Context:\n<graph>\n{context_text}\n</graph>")
-        prompt_parts.append(f"\nUser Question: {user_query}")
-        prompt_parts.append("\nProvide a comprehensive answer cite specific entities when relevant.")
-
-        prompt = "\n".join(prompt_parts)
-
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=3000
-        )
+    def get_entity_neighborhood(self, entity_query: str, depth: int = 1) -> Dict[str, Any]:
+        """Get neighborhood for an entity"""
+        entity_query = str(entity_query).strip().strip('"\'')
+        nodes = self.index.get(entity_query.lower())
+        if not nodes:
+            nodes = [n for k, n_list in self.index.items() if entity_query.lower() in k for n in n_list]
+            
+        if not nodes:
+            return {'entity': entity_query, 'found': False}
+            
+        node_id = nodes[0]
+        data = self.graph.nodes[node_id].copy()
+        data = self._hydrate_node_props(node_id, data)
         
-        return response.choices[0].message.content, graph_context
+        display_name = data.get('title', str(node_id[1] if isinstance(node_id, tuple) else node_id))
+        
+        result = {
+            'entity': display_name,
+            'type': node_id[0] if isinstance(node_id, tuple) else 'unknown',
+            'found': True,
+            'properties': data,
+            'outgoing': [],
+            'incoming': []
+        }
+        
+        # Outgoing
+        for u, v, d in self.graph.out_edges(node_id, data=True):
+            target_data = self.graph.nodes[v].copy()
+            target_data = self._hydrate_node_props(v, target_data)
+            target_name = target_data.get('title', str(v[1] if isinstance(v, tuple) else v))
+            result['outgoing'].append({
+                'target': target_name,
+                'target_id': str(v),
+                'relationship': d.get('kind', 'related'),
+                'properties': d
+            })
+            
+        # Incoming
+        for u, v, d in self.graph.in_edges(node_id, data=True):
+            source_data = self.graph.nodes[u].copy()
+            source_data = self._hydrate_node_props(u, source_data)
+            source_name = source_data.get('title', str(u[1] if isinstance(u, tuple) else u))
+            result['incoming'].append({
+                'source': source_name,
+                'source_id': str(u),
+                'relationship': d.get('kind', 'related'),
+                'properties': d
+            })
+            
+        return result
+
+    def find_paths(self, source: str, target: str, max_depth: int = 3) -> List[List[str]]:
+        s_nodes = self.index.get(source.lower())
+        t_nodes = self.index.get(target.lower())
+        if not s_nodes or not t_nodes: return []
+        s, t = s_nodes[0], t_nodes[0]
+        try:
+            paths = []
+            for path in nx.all_simple_paths(self.graph, s, t, cutoff=max_depth):
+                str_path = []
+                for n in path:
+                    if isinstance(n, tuple):
+                         str_path.append(n[1])
+                    else:
+                         str_path.append(str(n))
+                paths.append(str_path)
+            return paths[:10]
+        except:
+             return []
 
     def get_graph_stats(self) -> Dict[str, Any]:
         """Get graph statistics"""
-        return {'total_nodes': self.graph.number_of_nodes(), 'total_edges': self.graph.number_of_edges()}
+        stats = {
+            'nodes': self.graph.number_of_nodes(),
+            'edges': self.graph.number_of_edges(),
+            'node_types': {}
+        }
+        
+        for node in self.graph.nodes():
+            if isinstance(node, tuple):
+                kind = node[0]
+                stats['node_types'][kind] = stats['node_types'].get(kind, 0) + 1
+        
+        return stats
+
+    def query_with_llm(self, user_query: str, max_entities: int = 20, additional_context: str = "", custom_system_prompt: str = "") -> Tuple[str, List[Dict]]:
+        """Query the structural graph using LLM"""
+        query_lower = user_query.lower()
+        found_nodes = []
+        known_names = sorted(list(self.index.keys()), key=len, reverse=True)
+        hits = 0
+        for name in known_names:
+            if len(name) < 3: continue
+            if re.search(r'\b' + re.escape(name) + r'\b', query_lower):
+                found_nodes.extend(self.index[name])
+                hits += 1
+                if hits >= max_entities: break
+        found_nodes = list(set(found_nodes))
+        
+        context_lines = []
+        context_nodes_meta = []
+        
+        for node in found_nodes:
+            data = self.graph.nodes[node].copy()
+            data = self._hydrate_node_props(node, data)
+            
+            node_name = data.get('title', str(node[1]))
+            node_type = node[0] if isinstance(node, tuple) else "unknown"
+            
+            context_nodes_meta.append({'entity': node_name, 'properties': data})
+            
+            context_lines.append(f"[{node_type.upper()}] {node_name}")
+            if 'tags' in data and data['tags']:
+                context_lines.append(f"  Tags: {data['tags']}")
+            
+            outs = []
+            for u, v, d in self.graph.out_edges(node, data=True):
+                target_name = self.graph.nodes[v].get('title', v[1])
+                outs.append(f"--({d.get('kind')})-> {target_name}")
+            if outs:
+                context_lines.append("  " + "\n  ".join(outs[:5]))
+            
+            ins = []
+            for u, v, d in self.graph.in_edges(node, data=True):
+                source_name = self.graph.nodes[u].get('title', u[1])
+                ins.append(f"<-({d.get('kind')})-- {source_name}")
+            if ins:
+                context_lines.append("  " + "\n  ".join(ins[:5]))
+            context_lines.append("")
+
+        graph_context = "\n".join(context_lines)
+        if not graph_context:
+            graph_context = "No direct graph matches found for query terms."
+
+        if not self.client:
+             return "LLM Client not initialized.", context_nodes_meta
+
+        prompt = f"""You are analyzing a structural Knowledge Graph of a personal Obsidian vault.
+        
+User Query: {user_query}
+
+Graph Context:
+{graph_context}
+
+{additional_context}
+
+Task: Answer the user's question explicitly citing the files/notes and relationships found in the graph.
+"""
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": custom_system_prompt or "You are a helpful knowledge graph assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=2000,
+                temperature=0.3
+            )
+            return response.choices[0].message.content, context_nodes_meta
+        except Exception as e:
+            return f"Error querying LLM: {e}", context_nodes_meta
+
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Build Obsidian Knowledge Graph")
+    parser.add_argument("--vault", default="/app/vault", help="Path to Obsidian vault")
+    parser.add_argument("--output", default="/app/graph_data/knowledge_graph.pkl", help="Output path")
+    
+    args = parser.parse_args()
+    
+    print(f"🚀 Starting Kimi Graph Builder...")
+    print(f"📂 Vault: {args.vault}")
+    
+    try:
+        builder = GraphBuilder()
+        builder.build_structure(args.vault)
+        builder.save_graph(args.output)
+        
+        print("\n✅ Graph build complete!")
+        print(f"   Notes: {builder.stats['notes']}")
+        print(f"   Tags: {builder.stats['tags']}")
+        print(f"   Folders: {builder.stats['folders']}")
+        print(f"   Edges: {builder.stats['edges']}")
+        print(f"   Errors: {builder.stats['errors']}")
+        
+    except Exception as e:
+        print(f"\n❌ Graph build failed: {e}")
+        import traceback
+        traceback.print_exc()
+        exit(1)

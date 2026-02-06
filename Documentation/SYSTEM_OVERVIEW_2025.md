@@ -13,14 +13,18 @@ This system combines vector search, a note graph, and an entity graph behind a s
 ## Search Modes
 
 - **vector**: semantic similarity search (fast retrieval).
-- **graph**: graph reasoning over note relationships.
+- **notes**: note-graph reasoning over wiki-link relationships.
+- **entities**: LightRAG entity-graph reasoning.
 - **hybrid**: graph answer + vector sources.
 - **dual-graph**: combines LightRAG and NetworkX via the gateway.
+- **cascading**: staged retrieval (notes -> entities -> vectors).
+
+Compatibility: legacy `graph` requests are still accepted and mapped to `notes`.
 
 Optional flags:
 - `web_search`: Tavily augmentation (requires API key).
 - `llm_knowledge`: add general LLM background section.
-- `streaming`: SSE endpoints for streaming results.
+- Deep research streaming uses WebSocket: `ws://localhost:4000/api/v1/deep-research`.
 
 ## Data Stores
 

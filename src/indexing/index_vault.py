@@ -146,12 +146,20 @@ def extract_pdf_text(filepath: Path) -> str:
 
     return "\n\n".join(pages_text).strip()
 
+def clean_pdf_text(text: str) -> str:
+    """Clean common PDF extraction artifacts."""
+    # Remove repetitive page numbers (e.g., "Page 1 of 10")
+    text = re.sub(r'\bPage \d+ of \d+\b', '', text)
+    text = re.sub(r'^\s*\d+\s*$', '', text, flags=re.MULTILINE) # Standalone numbers
+    return text.strip()
+
 
 def read_file_content(filepath: Path) -> tuple[str, dict]:
     """Read file content with basic metadata based on file type."""
     suffix = filepath.suffix.lower()
     if suffix == ".pdf":
         content = extract_pdf_text(filepath)
+        content = clean_pdf_text(content)
         return content, {"filetype": "pdf"}
 
     content = None
@@ -168,77 +176,9 @@ def read_file_content(filepath: Path) -> tuple[str, dict]:
 
     return content, {"filetype": "markdown"}
 
-def sanitize_content(content: str) -> str:
-    """Normalize and sanitize raw file content before parsing."""
-    if not content:
-        return ""
-    content = content.replace("\ufeff", "")
-    content = content.replace("\r\n", "\n").replace("\r", "\n")
-    content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", content)
-    
-    # Remove Obsidian comments %% ... %%
-    content = re.sub(r'%%.*?%%', '', content, flags=re.DOTALL)
-    
-    # Remove block references ^blockid at end of lines
-    content = re.sub(r'\s\^[a-zA-Z0-9-]+$', '', content, flags=re.MULTILINE)
-    
-    return content
+from src.indexing.frontmatter import extract_frontmatter, sanitize_content
 
-def _normalize_metadata_value(value):
-    if value is None:
-        return None
-    if isinstance(value, (str, int, float, bool)):
-        return value
-    if isinstance(value, list):
-        return ", ".join(str(item) for item in value if item is not None)
-    return str(value)
-
-def extract_metadata(content):
-    """Extract YAML frontmatter metadata with validation."""
-    metadata = {}
-    if not content.startswith('---'):
-        return metadata, content
-
-    lines = content.splitlines()
-    if not lines or lines[0].strip() != '---':
-        return metadata, content
-
-    end_idx = None
-    for i in range(1, len(lines)):
-        if lines[i].strip() == '---':
-            end_idx = i
-            break
-
-    if end_idx is None:
-        return metadata, content
-
-    frontmatter_text = "\n".join(lines[1:end_idx])
-    body = "\n".join(lines[end_idx + 1:])
-
-    parsed = None
-    try:
-        import yaml
-        parsed = yaml.safe_load(frontmatter_text) if frontmatter_text.strip() else {}
-    except Exception:
-        parsed = None
-
-    if isinstance(parsed, dict):
-        for key, value in parsed.items():
-            norm_value = _normalize_metadata_value(value)
-            if norm_value is None or key is None:
-                continue
-            metadata[str(key).strip()] = norm_value
-    else:
-        for line in frontmatter_text.split('\n'):
-            line = line.strip()
-            if ':' in line and not line.startswith('#'):
-                key, value = line.split(':', 1)
-                key = key.strip()
-                value = value.strip().strip('"\'')
-                if key and value:
-                    metadata[key] = value
-
-    return metadata, body.strip()
+# REMOVED: extract_metadata, sanitize_content, _normalize_metadata_value (imported now)
 
 def smart_chunk_document(content, max_size=4000, overlap=500):
     """Split content into overlapping chunks with smart boundaries (like old working version)"""
@@ -323,7 +263,7 @@ def process_file(
         # Extract metadata
         metadata = {}
         if filepath.suffix.lower() == ".md":
-            metadata, content = extract_metadata(content)
+            metadata, content = extract_frontmatter(content)
 
         for key, value in base_metadata.items():
             if key == "read_error":
@@ -422,12 +362,20 @@ def process_file(
             context_str = "[" + "] [".join(context_parts) + "]"
             anchored_text = f"{context_str}\n{chunk_text}"
 
+            # Prepare metadata for ChromaDB (no lists allowed)
+            safe_metadata = {}
+            for k, v in metadata.items():
+                if isinstance(v, list):
+                    safe_metadata[k] = ", ".join(str(x) for x in v)
+                else:
+                    safe_metadata[k] = v
+
             # Prepare request
             payload = {
                 'id': chunk_id,
                 'text': anchored_text,
                 'metadata': {
-                    **metadata,
+                    **safe_metadata,
                     'chunk_id': i,
                     'total_chunks': len(chunks),
                     'chunk_length': len(chunk_text)
