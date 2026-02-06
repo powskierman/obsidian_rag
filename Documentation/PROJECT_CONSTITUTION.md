@@ -1,83 +1,112 @@
-# Project Constitution: Obsidian RAG
+# Obsidian RAG Constitution
+
+This document is mirrored in:
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/PROJECT_CONSTITUTION.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/.specify/memory/constitution.md`
+
+Both files must remain aligned.
 
 ## Purpose
-Obsidian RAG provides a local-first retrieval system for an Obsidian vault, combining
-vector search and graph reasoning behind a single API gateway. It is optimized for
-personal knowledge work, fast retrieval, and repeatable indexing across machines.
+Obsidian RAG is a local-first retrieval system for a personal Obsidian vault. It combines vector search and graph reasoning behind a unified API gateway, with repeatable indexing workflows and strong privacy defaults.
 
 ## Primary Users and Use Cases
-- Knowledge workers querying a personal Obsidian vault.
-- Hybrid retrieval: direct semantic matches plus graph reasoning.
-- Deep research flows that need multi-step reasoning and streaming updates.
+- Knowledge workers querying private vault content.
+- Hybrid retrieval: semantic vectors plus graph reasoning.
+- Deep research flows with streaming updates and multi-step reasoning.
 
 ## Scope
 In scope:
-- Local services: embedding, graph, LightRAG, API gateway, and Streamlit UI.
-- Search modes: vector, notes, entities, notes+vector, entities+vector, dual-graph, hybrid, and cascading.
-- Indexing workflows for vault content and graph rebuilding.
-- MCP integration and Docker-based deployment.
+- Local services: embedding, NetworkX graph, LightRAG graph, API gateway, Streamlit UI, and WebApp.
+- Search modes: `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`, and deep-research WebSocket.
+- Incremental indexing and explicit rebuild workflows.
+- MCP integration and Docker-based local deployment.
 
 Out of scope:
+- Multi-tenant or centralized hosted deployments.
 - Tracking generated databases in Git.
-- Centralized hosted or multi-tenant deployment (local-first is the default).
 
-## System Architecture (Authoritative)
-Core services and ports:
-- Embedding service (ChromaDB) on port 8000.
-- LightRAG service on port 8001.
-- NetworkX graph service on port 8002.
-- API gateway on port 4000.
-- Streamlit UI on port 8501.
+## Core Principles
+### I. Local-First and Personal
+Generated databases are local-only and may contain private data. They must not be committed to version control.
 
-Primary data stores (local-only, rebuildable):
-- `chroma_db/` for vector embeddings.
-- `lightrag_db/` for entity graph data.
-- `data/graph_data/` for NetworkX snapshots.
+### II. Authoritative Architecture
+Service boundaries and ports are fixed:
+- Embedding (ChromaDB): `8000`
+- LightRAG: `8001`
+- NetworkX Graph: `8002`
+- API Gateway: `4000`
+- Streamlit UI: `8501`
 
-## Public Interfaces
+Features must respect these boundaries and route client traffic through the gateway public interfaces.
+
+### III. Independent Indexing
+Incremental indexing is the default. Graph and vector indexes must be rebuildable independently. Full rebuilds are explicit operations, not side effects.
+
+### IV. Spec-Driven Development
+Work is driven by Spec Kit artifacts (spec, plan, tasks). Documentation updates are required for new or changed workflows/APIs.
+
+### V. Quality and Performance Gates
+Changes must satisfy functional and performance gates defined in this constitution before being considered done.
+
+## Public Interfaces (API Gateway)
 - `POST /api/v1/search`
+- `POST /api/v1/search/stream` (SSE `text/event-stream`)
 - `POST /api/v1/query`
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
-- WebSocket deep research: `ws://localhost:4000/api/v1/deep-research`
-- Compatibility alias: `graph` is accepted and mapped to `notes`.
+- `ws://localhost:4000/api/v1/deep-research`
+
+Compatibility aliases:
+- `graph` -> `notes`
+- `networkx` -> `notes`
+- `lightrag` -> `entities`
+
+Internal-only compatibility endpoint:
+- `POST http://localhost:8002/query_stream` is internal and deprecated for direct client traffic. Clients should use `POST /api/v1/search/stream`.
 
 ## Data and Indexing Principles
-- Incremental indexing is the default; full rebuilds are explicit.
-- Graph and vector indexes can be rebuilt independently when needed.
-- Vault standardization (naming, links, templates) improves retrieval quality.
+- Primary stores:
+  - `chroma_db/`
+  - `lightrag_db/`
+  - `data/graph_data/`
+- Indexing defaults to incremental refresh.
+- Vault standardization (naming, links, metadata, templates) is part of retrieval quality.
 
 ## Quality and Performance Targets
-- Mode audit script: `python Scripts/debug/audit_search_modes.py`.
-- Pass criteria: status=PASS and non-zero sources where applicable.
+Authoritative audit script:
+- `python Scripts/debug/audit_search_modes.py`
+
+Pass criteria:
+- Status must be `PASS`.
+- Non-chat retrieval modes must return non-zero sources.
 - Latency targets:
-  - Vector: < 1s
-  - Graph: < 5s
-  - Hybrid: < 8s
-  - Deep Thinking: < 120s
+  - Vector: `< 1s`
+  - Graph (`notes`, `entities`): `< 5s`
+  - Hybrid/combined (`notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`): `< 8s`
+  - Deep Thinking: `< 120s`
 
 ## Security and Privacy
-- API keys are loaded from `.env` (e.g., OpenRouter, Gemini, Tavily).
-- Destructive embedding clears require `EMBEDDING_CLEAR_TOKEN`.
-- Generated databases are local-only because they may contain private content.
+- API keys are sourced from environment variables (`.env`).
+- Destructive embedding operations require `EMBEDDING_CLEAR_TOKEN`.
+- Logging and telemetry must avoid exposing private vault content.
 
-## Development Workflow (Spec Kit)
-- Use Spec Kit artifacts to drive work: specs, plans, and tasks.
-- Implement via the API gateway and service boundaries described above.
-- Update Documentation/INDEX.md when adding or replacing documentation.
+## Development Workflow and Definition of Done
+Required for completion:
+- Relevant tests and health/smoke checks pass.
+- Search modes remain functional for the changed path.
+- Documentation and public interface references are updated.
+- Indexing and data-storage rules remain constitution-compliant.
 
-## Definition of Done for Changes
-- Relevant health checks or smoke tests pass.
-- Search modes remain functional for the affected path.
-- Documentation is updated for new workflows or APIs.
-- Indexing and data storage rules remain consistent with this constitution.
+## Governance
+This constitution supersedes ad-hoc practices. Changes must update both mirrored constitution files in the same change set.
 
 ## Canonical References
-- `Documentation/SYSTEM_OVERVIEW_2025.md`
-- `Documentation/INDEX.md`
-- `Documentation/API_GATEWAY_QUICKSTART.md`
-- `Documentation/UNIFIED_API_IMPLEMENTATION.md`
-- `Documentation/INDEXING_STRATEGY.md`
-- `Documentation/REINDEXING_PROCEDURE.md`
-- `Documentation/DATABASE_MANAGEMENT.md`
-- `Documentation/DEEP_THINKING_PROTOCOL.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/SYSTEM_OVERVIEW_2025.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/UNIFIED_API_IMPLEMENTATION.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/INDEXING_STRATEGY.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/DEEP_THINKING_PROTOCOL.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/STREAMING_IMPLEMENTATION.md`
+
+**Version**: 2.1.0  
+**Ratified**: 2025-01-01  
+**Last Amended**: 2026-02-06

@@ -9,7 +9,8 @@ import networkx as nx
 import tempfile
 import pickle
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Legacy Claude graph builder lives under Archive.
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "Archive"))
 from claude_graph_builder import GraphBuilder, ClaudeGraphQuerier
 
 

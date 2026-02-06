@@ -9,7 +9,7 @@ import re
 import time
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 from concurrent.futures import ThreadPoolExecutor
@@ -238,6 +238,18 @@ class SearchRequest(BaseModel):
     deduplicate: bool = True
 
 
+class SearchStreamRequest(BaseModel):
+    query: str
+    mode: str = "hybrid"  # vector, notes, graph, hybrid
+    n_results: int = 10
+    max_results: Optional[int] = None
+    llm_provider: str = "kimi"
+    model: Optional[str] = None
+    temperature: float = 0.0
+    system_prompt: Optional[str] = None
+    stream: bool = True
+
+
 @app.get("/api/v1/health")
 async def health_check():
     """Aggregated health check with stats"""
@@ -397,6 +409,83 @@ async def unified_search(request: SearchRequest):
                 raise HTTPException(
                     status_code=503, detail=f"Graph service unreachable: {str(e)}"
                 )
+
+
+@app.post("/api/v1/search/stream")
+async def unified_search_stream(request: SearchStreamRequest):
+    """
+    Stream search responses over SSE through the API gateway.
+    Proxies to graph-service `/query_stream` (internal endpoint).
+    """
+    mode = request.mode.lower()
+    mode_aliases = {"notes": "graph", "graph": "graph", "networkx": "graph"}
+    stream_mode = mode_aliases.get(mode, mode)
+    if stream_mode not in {"vector", "graph", "hybrid"}:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported stream mode '{request.mode}'. "
+                "Use one of: vector, notes, graph, hybrid."
+            ),
+        )
+
+    n_results = request.max_results if request.max_results is not None else request.n_results
+    payload = {
+        "query": request.query,
+        "mode": stream_mode,
+        "llm_provider": request.llm_provider,
+        "model": request.model,
+        "temperature": request.temperature,
+        "system_prompt": request.system_prompt,
+        "n_results": n_results,
+        "stream": bool(request.stream),
+    }
+
+    async def _proxy_stream():
+        try:
+            async with httpx.AsyncClient(timeout=None) as client:
+                async with client.stream(
+                    "POST",
+                    f"{GRAPH_SERVICE_URL}/query_stream",
+                    json=payload,
+                    headers={
+                        **_auth_headers(),
+                        "Accept": "text/event-stream",
+                        "Cache-Control": "no-cache",
+                    },
+                ) as response:
+                    if response.status_code >= 400:
+                        raw_body = await response.aread()
+                        error_text = raw_body.decode("utf-8", errors="replace")[:500]
+                        error_event = {
+                            "type": "error",
+                            "message": f"Upstream stream failed ({response.status_code}): {error_text}",
+                        }
+                        yield f"data: {json.dumps(error_event)}\n\n"
+                        return
+
+                    async for chunk in response.aiter_text():
+                        if chunk:
+                            yield chunk
+        except httpx.RequestError as e:
+            error_event = {
+                "type": "error",
+                "message": f"Graph streaming service unreachable: {str(e)}",
+            }
+            yield f"data: {json.dumps(error_event)}\n\n"
+        except Exception as e:
+            error_event = {"type": "error", "message": f"Streaming proxy error: {str(e)}"}
+            yield f"data: {json.dumps(error_event)}\n\n"
+
+    return StreamingResponse(
+        _proxy_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 class UnifiedQueryRequest(BaseModel):

@@ -10,6 +10,7 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 
 - `POST /api/v1/query`
 - `POST /api/v1/search`
+- `POST /api/v1/search/stream` (SSE streaming proxy)
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
 
@@ -28,6 +29,11 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 ```
 
 The gateway proxies to the embedding service, graph service, and LightRAG service based on mode.
+
+Streaming behavior:
+- `POST /api/v1/search/stream` returns `text/event-stream` SSE chunks.
+- Streaming currently supports `vector`, `notes`/`graph`, and `hybrid` modes.
+- The underlying Graph Service endpoint (`POST /query_stream`) is internal-only/deprecated for direct client traffic.
 
 Compatibility aliases:
 - `graph` -> `notes`

@@ -1,191 +1,319 @@
 #!/usr/bin/env python3
-import requests
-import json
+"""
+Audit search-mode quality/performance gates against the API gateway.
+
+Pass criteria:
+- HTTP/WS call succeeds
+- non-zero sources for REST retrieval modes
+- latency within constitutional targets
+"""
+
 import asyncio
-import websockets
+import json
 import os
 import time
-from typing import Dict, Any
+from typing import Any, Dict
+
+import requests
+import websockets
 
 # Configurations
-GATEWAY_URL = "http://localhost:4000"
-WS_GATEWAY_URL = "ws://localhost:4000"
-OUTPUT_FILE = "Documentation/SEARCH_MODE_AUDIT.md"
+GATEWAY_URL = os.getenv("AUDIT_GATEWAY_URL", "http://localhost:4000")
+WS_GATEWAY_URL = GATEWAY_URL.replace("http://", "ws://").replace("https://", "wss://")
+OUTPUT_FILE = os.getenv("AUDIT_OUTPUT_FILE", "Documentation/SEARCH_MODE_AUDIT.md")
+TEST_QUERY = os.getenv("AUDIT_QUERY", "What is the treatment for DLBCL?")
+DEEP_PROVIDER = os.getenv("AUDIT_DEEP_PROVIDER", "ollama")
 
-# Modes to test defined in user request + api.ts
 MODES = [
     "vector",
-    "notes", 
+    "notes",
     "entities",
     "notes+vector",
     "entities+vector",
-    "dual-graph", 
+    "dual-graph",
     "hybrid",
-    "cascading"
+    "cascading",
 ]
 
-TEST_QUERY = "What is the treatment for DLBCL?"  # A known medical query from existing tests
+LATENCY_TARGETS = {
+    "vector": 1.0,
+    "notes": 5.0,
+    "entities": 5.0,
+    "notes+vector": 8.0,
+    "entities+vector": 8.0,
+    "dual-graph": 8.0,
+    "hybrid": 8.0,
+    "cascading": 8.0,
+    "deep-thinking": 120.0,
+}
+
+
+def _request_headers() -> Dict[str, str]:
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    if not api_key:
+        return {}
+    return {"X-API-Key": api_key}
+
+
+def _extract_answer_text(mode: str, data: Dict[str, Any]) -> str:
+    if mode == "vector":
+        return "Found snippets" if _count_vector_sources(data.get("results", data)) > 0 else ""
+
+    top_level = data.get("answer") or data.get("result")
+    if isinstance(top_level, str) and top_level.strip():
+        return top_level
+
+    inner = data.get("results")
+    if isinstance(inner, dict):
+        nested = inner.get("answer") or inner.get("result")
+        if isinstance(nested, str) and nested.strip():
+            return nested
+
+    for key in ("notes", "entities"):
+        branch = data.get(key, {})
+        branch_data = branch.get("data") if isinstance(branch, dict) else None
+        if isinstance(branch_data, dict):
+            nested = branch_data.get("answer") or branch_data.get("result")
+            if isinstance(nested, str) and nested.strip():
+                return nested
+    return ""
+
+
+def _count_vector_sources(payload: Any) -> int:
+    if not isinstance(payload, dict):
+        return 0
+    docs = payload.get("documents")
+    if not isinstance(docs, list) or not docs:
+        return 0
+    first_batch = docs[0]
+    if not isinstance(first_batch, list):
+        return 0
+    return len(first_batch)
+
+
+def _count_source_list(payload: Any) -> int:
+    if not isinstance(payload, dict):
+        return 0
+    sources = payload.get("sources")
+    return len(sources) if isinstance(sources, list) else 0
+
+
+def _extract_source_count(mode: str, data: Dict[str, Any]) -> int:
+    if mode == "vector":
+        return _count_vector_sources(data.get("results", data))
+
+    if mode in {"notes", "entities", "cascading"}:
+        return max(
+            _count_source_list(data),
+            _count_source_list(data.get("results")),
+            _count_vector_sources(data.get("results", {})),
+        )
+
+    # Multi-branch modes (notes+vector/entities+vector/dual-graph/hybrid)
+    source_count = 0
+    for key in ("notes", "entities", "vector"):
+        branch = data.get(key, {})
+        if not isinstance(branch, dict):
+            continue
+        branch_data = branch.get("data")
+        if not isinstance(branch_data, dict):
+            continue
+        source_count += _count_source_list(branch_data)
+        source_count += _count_vector_sources(branch_data)
+    return source_count
+
 
 def test_rest_mode(mode: str) -> Dict[str, Any]:
-    """Test a REST API mode via the Gateway."""
+    """Test a REST API mode via the gateway with quality/perf gates."""
     url = f"{GATEWAY_URL}/api/v1/query"
     payload = {
         "query": TEST_QUERY,
         "mode": mode,
-        "n_results": 3,
-        "llm_provider": "ollama", # Use Ollama to avoid burning paid tokens
-        "temperature": 0.0
+        "max_results": 3,
+        "llm_provider": "ollama",
+        "temperature": 0.0,
     }
-    
+
     start_time = time.time()
     try:
-        response = requests.post(url, json=payload, timeout=60)
+        response = requests.post(
+            url,
+            json=payload,
+            headers=_request_headers(),
+            timeout=max(30.0, LATENCY_TARGETS.get(mode, 8.0) + 10.0),
+        )
         duration = time.time() - start_time
-        
-        if response.status_code == 200:
+
+        if response.status_code != 200:
+            return {
+                "status": "FAIL",
+                "duration": f"{duration:.2f}s",
+                "latency_target": f"{LATENCY_TARGETS.get(mode, 0):.2f}s",
+                "answer_len": 0,
+                "source_count": 0,
+                "details": f"HTTP {response.status_code}: {response.text[:120]}",
+            }
+
+        try:
             data = response.json()
-            # Try to extract answer length and source count based on varied response structures
-            answer = ""
-            sources = []
-            
-            # Handle Gateway V1 Nested Wrapper (e.g. data['results']['documents'])
-            if 'results' in data:
-                inner = data['results']
-                if 'documents' in inner and inner['documents']:
-                    # Vector mode raw return
-                    sources = inner['documents'][0]
-                    answer = "Found snippets" # Dummy answer for vector mode
-                elif 'answer' in inner:
-                     answer = inner['answer']
-                elif 'result' in inner:
-                     answer = inner['result']
-                
-                # If sources are in inner
-                if 'sources' in inner:
-                    sources = inner['sources']
-            
-            # Hybrid/Unified flattened structure
-            if not answer:
-                if 'answer' in data:
-                    answer = data['answer']
-                elif 'result' in data:
-                    answer = data['result']
-            
-            if not sources and 'sources' in data:
-                sources = data['sources']
-            
-            # Nested structures (e.g. notes.data.answer)
-            if not answer and 'notes' in data and data['notes']['data']:
-                 answer = data['notes']['data'].get('answer', '')
-            
+        except ValueError as exc:
             return {
-                "status": "PASS",
+                "status": "FAIL",
                 "duration": f"{duration:.2f}s",
-                "answer_len": len(answer),
-                "source_count": len(sources),
-                "details": "OK"
+                "latency_target": f"{LATENCY_TARGETS.get(mode, 0):.2f}s",
+                "answer_len": 0,
+                "source_count": 0,
+                "details": f"Non-JSON response: {exc}",
             }
-        else:
-            return {
-                "status": "FAIL", 
-                "duration": f"{duration:.2f}s",
-                "details": f"HTTP {response.status_code}: {response.text[:100]}"
-            }
+
+        source_count = _extract_source_count(mode, data)
+        answer = _extract_answer_text(mode, data)
+        latency_target = LATENCY_TARGETS.get(mode, 8.0)
+        gate_failures = []
+
+        if source_count <= 0:
+            gate_failures.append("source_count=0")
+        if duration > latency_target:
+            gate_failures.append(
+                f"latency_exceeded ({duration:.2f}s > {latency_target:.2f}s)"
+            )
+
+        return {
+            "status": "PASS" if not gate_failures else "FAIL",
+            "duration": f"{duration:.2f}s",
+            "latency_target": f"{latency_target:.2f}s",
+            "answer_len": len(answer),
+            "source_count": source_count,
+            "details": "OK" if not gate_failures else "; ".join(gate_failures),
+        }
     except Exception as e:
         return {
             "status": "ERROR",
             "duration": f"{time.time() - start_time:.2f}s",
-            "details": str(e)
+            "latency_target": f"{LATENCY_TARGETS.get(mode, 0):.2f}s",
+            "answer_len": 0,
+            "source_count": 0,
+            "details": str(e),
         }
 
+
 async def test_deep_thinking() -> Dict[str, Any]:
-    """Test the Deep Thinking WebSocket endpoint."""
+    """Test the Deep Thinking WebSocket endpoint against latency/stream gates."""
     uri = f"{WS_GATEWAY_URL}/api/v1/deep-research"
     payload = {
         "query": TEST_QUERY,
-        "mode": "deep-thinking",
-        "parameters": {
-            "max_depth": 1
-        }
+        "provider": DEEP_PROVIDER,
     }
-    
+
     start_time = time.time()
+    headers = _request_headers() or None
+    final_received = False
+    chunks_received = 0
+
     try:
-        async with websockets.connect(uri) as websocket:
+        async with websockets.connect(uri, extra_headers=headers) as websocket:
             await websocket.send(json.dumps(payload))
-            
-            msgs_received = 0
-            final_answer_received = False
-            
-            # Listen for up to 30 seconds
-            try:
-                while True:
-                    msg = await asyncio.wait_for(websocket.recv(), timeout=30.0)
-                    msgs_received += 1
-                    data = json.loads(msg)
-                    
-                    if data.get("type") == "answer" or data.get("status") == "complete":
-                        final_answer_received = True
-                        break
-                    if data.get("type") == "error":
-                        return {
-                            "status": "FAIL",
-                            "duration": f"{time.time() - start_time:.2f}s", 
-                            "details": f"WS Error: {data.get('message')}"
-                        }
-            except asyncio.TimeoutError:
-                pass # Timeout is okay if we got some chunks, but better if we finish
-                
-            return {
-                "status": "PASS" if msgs_received > 0 else "FAIL",
-                "duration": f"{time.time() - start_time:.2f}s",
-                "answer_len": "Streamed", 
-                "source_count": "N/A",
-                "details": f"Received {msgs_received} chunks. Final Answer: {final_answer_received}"
-            }
-            
+
+            timeout_budget = LATENCY_TARGETS["deep-thinking"]
+            while True:
+                remaining = timeout_budget - (time.time() - start_time)
+                if remaining <= 0:
+                    break
+                try:
+                    message = await asyncio.wait_for(websocket.recv(), timeout=remaining)
+                except asyncio.TimeoutError:
+                    break
+
+                chunks_received += 1
+                data = json.loads(message)
+
+                if data.get("type") == "error":
+                    return {
+                        "status": "FAIL",
+                        "duration": f"{time.time() - start_time:.2f}s",
+                        "latency_target": f"{LATENCY_TARGETS['deep-thinking']:.2f}s",
+                        "answer_len": 0,
+                        "source_count": "N/A",
+                        "details": f"WS Error: {data.get('content') or data.get('message')}",
+                    }
+
+                if data.get("type") in {"answer", "result"} or data.get("status") == "complete":
+                    final_received = True
+                    break
+
+        duration = time.time() - start_time
+        gate_failures = []
+        if chunks_received <= 0:
+            gate_failures.append("no_stream_chunks")
+        if not final_received:
+            gate_failures.append("no_final_answer")
+        if duration > LATENCY_TARGETS["deep-thinking"]:
+            gate_failures.append(
+                f"latency_exceeded ({duration:.2f}s > {LATENCY_TARGETS['deep-thinking']:.2f}s)"
+            )
+
+        return {
+            "status": "PASS" if not gate_failures else "FAIL",
+            "duration": f"{duration:.2f}s",
+            "latency_target": f"{LATENCY_TARGETS['deep-thinking']:.2f}s",
+            "answer_len": "Streamed",
+            "source_count": "N/A",
+            "details": (
+                f"Received {chunks_received} chunks"
+                if not gate_failures
+                else "; ".join(gate_failures)
+            ),
+        }
     except Exception as e:
         return {
             "status": "ERROR",
             "duration": f"{time.time() - start_time:.2f}s",
-            "details": str(e)
+            "latency_target": f"{LATENCY_TARGETS['deep-thinking']:.2f}s",
+            "answer_len": 0,
+            "source_count": "N/A",
+            "details": str(e),
         }
+
 
 def run_audit():
     print(f"Starting Search Mode Audit against {GATEWAY_URL}...")
     print(f"Test Query: {TEST_QUERY}\n")
-    
+
     results = {}
-    
-    # 1. Test REST Modes
+
     for mode in MODES:
         print(f"Testing mode: {mode}...", end="", flush=True)
         res = test_rest_mode(mode)
         results[mode] = res
         print(f" {res['status']}")
-        
-    # 2. Test Deep Thinking (Async)
-    print(f"Testing mode: deep-thinking...", end="", flush=True)
+
+    print("Testing mode: deep-thinking...", end="", flush=True)
     dt_res = asyncio.run(test_deep_thinking())
     results["deep-thinking"] = dt_res
     print(f" {dt_res['status']}")
-    
-    # 3. Generate Report
+
     generate_report(results)
 
+
 def generate_report(results: Dict[str, Any]):
-    with open(OUTPUT_FILE, "w") as f:
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write("# Search Mode Audit Report\n\n")
         f.write(f"**Date:** {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"**Gateway:** `{GATEWAY_URL}`\n")
         f.write(f"**Query used:** `{TEST_QUERY}`\n\n")
-        
-        f.write("| Mode | Status | Duration | Answer Len | Sources | Details |\n")
-        f.write("| :--- | :--- | :--- | :--- | :--- | :--- |\n")
-        
+
+        f.write("| Mode | Status | Duration | Target | Answer Len | Sources | Details |\n")
+        f.write("| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n")
+
         for mode, res in results.items():
-            f.write(f"| **{mode}** | {res['status']} | {res.get('duration','-')} | {res.get('answer_len','-')} | {res.get('source_count','-')} | {res.get('details','')} |\n")
-            
+            f.write(
+                f"| **{mode}** | {res['status']} | {res.get('duration', '-')} | "
+                f"{res.get('latency_target', '-')} | {res.get('answer_len', '-')} | "
+                f"{res.get('source_count', '-')} | {res.get('details', '')} |\n"
+            )
+
     print(f"\nReport saved to {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     run_audit()

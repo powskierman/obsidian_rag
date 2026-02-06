@@ -178,7 +178,21 @@ def read_file_content(filepath: Path) -> tuple[str, dict]:
 
 from src.indexing.frontmatter import extract_frontmatter, sanitize_content
 
-# REMOVED: extract_metadata, sanitize_content, _normalize_metadata_value (imported now)
+def extract_metadata(content: str) -> tuple[dict, str]:
+    """
+    Backward-compatible metadata extraction for legacy callers/tests.
+
+    Uses shared frontmatter parser and normalizes list values to comma-separated
+    strings to match historical `index_vault.extract_metadata` behavior.
+    """
+    metadata, body = extract_frontmatter(content)
+    normalized = {}
+    for key, value in metadata.items():
+        if isinstance(value, list):
+            normalized[key] = ", ".join(str(item) for item in value)
+        else:
+            normalized[key] = value
+    return normalized, body
 
 def smart_chunk_document(content, max_size=4000, overlap=500):
     """Split content into overlapping chunks with smart boundaries (like old working version)"""

@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "Scripts"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "Scripts" / "archive_old_v2"))
 from generate_tags import (
     detect_content_type,
     analyze_content_for_tags,
