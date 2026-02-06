@@ -17,7 +17,7 @@ We have migrated to a **Snapshot Sync Architecture** to avoid iCloud database co
 
 This unified script performs a complete re-index of your vault into all three databases:
 1.  **ChromaDB** (Vector Search) - Port 8000
-2.  **Kimi Graph** (Note Graph) - Port 8002
+2.  **NetworkX Graph** (Note Graph) - Port 8002
 3.  **LightRAG** (Entity Graph) - Port 8001
 
 **Usage:**
@@ -27,7 +27,7 @@ This unified script performs a complete re-index of your vault into all three da
 ```
 *   You will be prompted to confirm a full re-index (deletes old data).
 *   **Time:** ~30-60 mins for 2k notes.
-*   **Cost:** ~$1.00 (Kimi/OpenRouter).
+*   **Cost:** ~$1.00 (OpenRouter LLM).
 
 ---
 
@@ -134,7 +134,7 @@ flowchart TD
             direction TB
             Script(["run_indexing.sh"])
             Vector["Vector Index (ChromaDB)<br>Port 8000"]
-            Graph["Knowledge Graph (Kimi)<br>Port 8002"]
+            Graph["Knowledge Graph (NetworkX)<br>Port 8002"]
             LR["LightRAG (Entities)<br>Port 8001"]
         end
         

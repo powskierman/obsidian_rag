@@ -30,7 +30,7 @@ The script `src/indexing/index_vault.py` is designed for safety and speed.
 ## 2. Graph Indexing (NetworkX/LightRAG)
 The Graph is built from the Index or Raw Files.
 *   If Vector Index changes, the Graph might need updates to point to correct chunks.
-*   **However**, `kimi_graph_builder.py` usually runs as a batch process.
+*   **However**, `networkx_graph_builder.py` usually runs as a batch process.
 
 ### SOP: Updating the Graph
 If significant structure changes (new MOCs):

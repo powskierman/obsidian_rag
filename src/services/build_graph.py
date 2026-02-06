@@ -1,7 +1,7 @@
 import os
 import logging
 import argparse
-from kimi_graph_builder import GraphBuilder
+from networkx_graph_builder import GraphBuilder
 
 # Configure logging
 logging.basicConfig(

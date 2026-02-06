@@ -63,7 +63,7 @@ services:
     networks:
       - rag-network
 
-  # Reasoning Graph Service (Kimi)
+  # Reasoning Graph Service (NetworkX)
   graph-service:
     build:
       context: .
@@ -75,7 +75,7 @@ services:
       - ./src:/app/src:ro
       - ./data/graph_data:/app/graph_data
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
-      - ./src/services/kimi_graph_builder.py:/app/kimi_graph_builder.py:ro
+      - ./src/services/networkx_graph_builder.py:/app/networkx_graph_builder.py:ro
       - ./src/services/graph_query_service.py:/app/graph_query_service.py:ro
     environment:
       - PYTHONUNBUFFERED=1

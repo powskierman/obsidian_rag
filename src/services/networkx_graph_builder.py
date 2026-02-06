@@ -1,5 +1,5 @@
 """
-Kimi-Powered Knowledge Graph Builder for Obsidian Vault (Refactored)
+NetworkX Knowledge Graph Builder for Obsidian Vault (Refactored)
 
 This service builds a structural NetworkX graph from an Obsidian vault,
 modeling Notes, Blocks, Tags, and Folders as typed nodes.
@@ -518,7 +518,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    print(f"🚀 Starting Kimi Graph Builder...")
+    print(f"🚀 Starting NetworkX Graph Builder...")
     print(f"📂 Vault: {args.vault}")
     
     try:

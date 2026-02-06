@@ -69,7 +69,7 @@ Antigravity Skills are modular "capability packs" that allow agents to perform c
   2.  `docker compose up -d graph-service`
   3.  Verify: `curl http://localhost:4000/api/v1/health`
 - **Example in `obsidian_rag`**:
-  - *Scenario*: Updated `kimi_graph_builder.py`.
+  - *Scenario*: Updated `networkx_graph_builder.py`.
   - *Action*: Rebuild and restart the container to load the new logic.
 
 #### 6. Obsidian Index Maintenance

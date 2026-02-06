@@ -9,7 +9,7 @@ import os
 import re
 import requests
 import json
-from kimi_graph_builder import GraphBuilder, GraphQuerier
+from networkx_graph_builder import GraphBuilder, GraphQuerier
 import logging
 from openai import OpenAI
 import threading

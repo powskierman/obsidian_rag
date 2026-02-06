@@ -1,5 +1,5 @@
 #!/bin/bash
-# Update Knowledge Graph (NetworkX/Kimi) Only
+# Update Knowledge Graph (NetworkX) Only
 # Usage: ./update_knowledge_graph.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,7 +15,10 @@ if ! docker ps | grep -q obsidian-graph-service; then
     exit 1
 fi
 
-docker exec -it obsidian-graph-service python /app/src/services/kimi_graph_builder.py --output /app/graph_data/knowledge_graph_full.pkl
+if ! docker exec -it obsidian-graph-service python /app/src/services/networkx_graph_builder.py --output /app/graph_data/knowledge_graph_full.pkl; then
+    echo "❌ Error: NetworkX graph rebuild failed."
+    exit 1
+fi
 
 # Sync container volume output to local graph_data for the verifier
 if [ -f "$REPO_ROOT/data/graph_data/knowledge_graph_full.pkl" ]; then
@@ -25,3 +28,18 @@ else
     echo "❌ Error: Expected graph file not found at $REPO_ROOT/data/graph_data/knowledge_graph_full.pkl"
     exit 1
 fi
+
+echo "🔄 Restarting graph-service to load updated graph..."
+if docker compose version >/dev/null 2>&1; then
+    if ! (cd "$REPO_ROOT" && docker compose restart graph-service); then
+        echo "❌ Error: Failed to restart graph-service."
+        exit 1
+    fi
+else
+    if ! (cd "$REPO_ROOT" && docker-compose restart graph-service); then
+        echo "❌ Error: Failed to restart graph-service."
+        exit 1
+    fi
+fi
+
+echo "✅ Knowledge graph rebuilt and graph-service restarted."

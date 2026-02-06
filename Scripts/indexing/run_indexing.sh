@@ -1,6 +1,6 @@
 #!/bin/bash
 # Unified Indexing Script for Obsidian RAG
-# Runs all indexing processes: LightRAG, Kimi Graph, and ChromaDB
+# Runs all indexing processes: LightRAG, NetworkX Graph, and ChromaDB
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -20,7 +20,7 @@ echo "╚═══════════════════════�
 echo ""
 echo "This script will index your Obsidian vault into:"
 echo "  1. Vector DB (Chroma)      - Semantic Search"
-echo "  2. Knowledge Graph (Kimi)  - Structural/NetworkX"
+echo "  2. Knowledge Graph (NetworkX) - Structural Note Graph"
 echo "  3. LightRAG (Entities)     - Deep Thinking"
 echo ""
 
@@ -59,9 +59,9 @@ fi
 PYTHONPATH="$REPO_ROOT" "$PYTHON_CMD" "$REPO_ROOT/src/indexing/index_vault.py" --refresh $CLEAR_FLAG || echo "⚠️ Vector indexing warning"
 
 echo ""
-echo "🔹 Step 2/3: Indexing Knowledge Graph (Kimi/NetworkX)..."
-# Kimi Graph runs inside the container
-docker exec -it obsidian-graph-service python /app/src/services/kimi_graph_builder.py || echo "⚠️ Kimi Graph indexing warning"
+echo "🔹 Step 2/3: Indexing Knowledge Graph (NetworkX)..."
+# NetworkX graph builder runs inside the container
+docker exec -it obsidian-graph-service python /app/src/services/networkx_graph_builder.py || echo "⚠️ NetworkX graph indexing warning"
 
 echo ""
 echo "🔹 Step 3/3: Indexing LightRAG (Entities)..."
