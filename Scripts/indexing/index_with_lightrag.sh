@@ -39,6 +39,8 @@ echo ""
 FORCE_REINDEX=false
 DEFAULT_VAULT_PATH="/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel"
 VAULT_PATH="${OBSIDIAN_VAULT_PATH:-$DEFAULT_VAULT_PATH}"
+LIGHTRAG_INCLUDE_EXTENSIONS="${LIGHTRAG_INCLUDE_EXTENSIONS:-.md}"
+LIGHTRAG_EXCLUDE_EXTENSIONS="${LIGHTRAG_EXCLUDE_EXTENSIONS:-.pdf}"
 
 for arg in "$@"; do
     case "$arg" in
@@ -56,6 +58,8 @@ for arg in "$@"; do
 done
 
 echo "📂 Vault path: $VAULT_PATH"
+echo "🧩 Include extensions: $LIGHTRAG_INCLUDE_EXTENSIONS"
+echo "🚫 Exclude extensions: $LIGHTRAG_EXCLUDE_EXTENSIONS"
 echo ""
 echo "🔄 Starting indexing process..."
 echo "   (This may take several minutes for large vaults)"
@@ -84,20 +88,48 @@ if command -v docker > /dev/null 2>&1; then
 fi
 
 # Send indexing request
-FORCE_FLAG=""
 if [ "$FORCE_REINDEX" = true ]; then
-    FORCE_FLAG=", \"force\": true"
     echo "⚠️  Force reindex enabled"
     echo ""
 fi
 
+PAYLOAD="$(python3 - "$VAULT_PATH_FOR_REQUEST" "$FORCE_REINDEX" "$LIGHTRAG_INCLUDE_EXTENSIONS" "$LIGHTRAG_EXCLUDE_EXTENSIONS" <<'PY'
+import json
+import sys
+
+vault_path = sys.argv[1]
+force = sys.argv[2].lower() == "true"
+include_raw = sys.argv[3]
+exclude_raw = sys.argv[4]
+
+def split_exts(raw: str):
+    values = []
+    for token in raw.split(","):
+        token = token.strip().lower()
+        if not token:
+            continue
+        if not token.startswith("."):
+            token = f".{token}"
+        values.append(token)
+    return values
+
+payload = {
+    "vault_path": vault_path,
+    "force": force,
+    "include_extensions": split_exts(include_raw),
+    "exclude_extensions": split_exts(exclude_raw),
+}
+print(json.dumps(payload))
+PY
+)"
+
 RESPONSE=$(curl -s -X POST http://localhost:8001/index-vault \
     -H "Content-Type: application/json" \
-    -d "{\"vault_path\": \"$VAULT_PATH_FOR_REQUEST\"$FORCE_FLAG}")
+    -d "$PAYLOAD")
 
 # Check response
 if echo "$RESPONSE" | grep -q '"status":"success"'; then
-    FILES=$(echo "$RESPONSE" | grep -o '"files_indexed":[0-9]*' | cut -d':' -f2)
+    FILES=$(echo "$RESPONSE" | grep -o '"newly_indexed":[0-9]*' | cut -d':' -f2)
     echo ""
     echo "✅ Indexing complete!"
     echo "   Files indexed: $FILES"

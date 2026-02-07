@@ -92,6 +92,9 @@ If you only need to update **one** specific index without running the full pipel
     ./Scripts/indexing/index_with_lightrag.sh
     ```
     *   **Note:** Incremental by default (checks file timestamps). Use `--force` to rebuild from scratch.
+    *   **Default policy:** Markdown-only indexing (`.md`). PDFs are excluded unless you explicitly opt in.
+        * Opt-in for PDFs (if ever needed):
+          `LIGHTRAG_SUPPORTED_EXTENSIONS=.md,.pdf ./Scripts/indexing/index_with_lightrag.sh`
 
 ---
 
@@ -177,6 +180,26 @@ If you see "Naive" mode instead of "Hybrid":
 ### "Database Locked" Errors?
 *   Should NOT happen with this new architecture.
 *   If it does, ensure you are NOT trying to index on the MacBook or access the `data/export_stage` directly from Docker. Always use the local copies.
+
+### Huge LightRAG Chunk Counts (PDF Backlog Remnants)
+If logs show very large extraction runs (for example `Chunk 44 of 4866`) after switching to markdown-only indexing, you likely still have queued PDF jobs from an earlier run.
+
+1. Stop and recreate LightRAG service:
+```bash
+docker compose stop lightrag-service
+docker compose rm -f lightrag-service
+docker compose up -d --build lightrag-service
+```
+
+2. Dry-run queued PDF cleanup:
+```bash
+python3 Scripts/indexing/clear_lightrag_pdf_queue.py
+```
+
+3. Apply queued PDF cleanup (no full DB reset):
+```bash
+python3 Scripts/indexing/clear_lightrag_pdf_queue.py --apply
+```
 
 ### Verify Centralized Paths
 ```bash

@@ -81,7 +81,23 @@ index_progress = {
 }
 index_progress_lock = threading.Lock()
 
-SUPPORTED_EXTENSIONS = {".md", ".pdf"}
+def _parse_supported_extensions_env(raw_value: str) -> set[str]:
+    """Parse LIGHTRAG_SUPPORTED_EXTENSIONS env var into normalized extensions."""
+    exts: set[str] = set()
+    for token in (raw_value or "").split(","):
+        token = token.strip().lower()
+        if not token:
+            continue
+        if not token.startswith("."):
+            token = f".{token}"
+        exts.add(token)
+    # Safe default: markdown-only indexing unless explicitly expanded.
+    return exts or {".md"}
+
+
+SUPPORTED_EXTENSIONS = _parse_supported_extensions_env(
+    os.getenv("LIGHTRAG_SUPPORTED_EXTENSIONS", ".md")
+)
 INLINE_TAG_PATTERN = re.compile(r"(?<!\\w)#([A-Za-z0-9][A-Za-z0-9/_-]*)")
 
 # LightRAG Constants
