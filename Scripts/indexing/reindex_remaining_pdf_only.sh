@@ -4,7 +4,8 @@ set -euo pipefail
 LIGHTRAG_URL="${LIGHTRAG_URL:-http://localhost:8001}"
 VAULT_PATH="${VAULT_PATH:-$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel}"
 VAULT_PATH_IN_CONTAINER="${VAULT_PATH_IN_CONTAINER:-/app/vault}"
-DB_PATH="${DB_PATH:-$HOME/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/ data/graph_data/lightrag_db}"
+DATA_ROOT="${OBSIDIAN_RAG_DATA_DIR:-$HOME/obsidian_rag_local_data}"
+DB_PATH="${DB_PATH:-$DATA_ROOT/lightrag_db}"
 INDEX_FILE="$DB_PATH/indexed_files.txt"
 DRY_RUN="${DRY_RUN:-0}"
 THROTTLE_SECONDS="${THROTTLE_SECONDS:-3}"
@@ -113,6 +114,8 @@ for line in "${FOLDERS[@]}"; do
     -d "$(python - "$target_request" "$MAX_FILES_PER_CALL" <<'PY'
 import json,sys
 payload = {"vault_path": sys.argv[1], "force": False}
+payload["include_extensions"] = [".pdf"]
+payload["exclude_extensions"] = [".md"]
 try:
     max_files = int(sys.argv[2])
 except Exception:

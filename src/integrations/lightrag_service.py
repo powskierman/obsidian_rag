@@ -178,6 +178,33 @@ def _extract_inline_tags(content: str) -> list[str]:
             tags.append(match.group(1))
     return _dedupe_keep_order(tags)
 
+
+def _normalize_extensions(raw_value) -> set[str] | None:
+    """Normalize extension filters from API payload.
+
+    Accepts:
+    - list/tuple/set, e.g. [".md", "pdf"]
+    - comma-separated string, e.g. ".md,.pdf"
+    Returns None when unset/empty.
+    """
+    if raw_value is None:
+        return None
+
+    if isinstance(raw_value, str):
+        tokens = [t.strip() for t in raw_value.split(",") if t.strip()]
+    elif isinstance(raw_value, (list, tuple, set)):
+        tokens = [str(t).strip() for t in raw_value if str(t).strip()]
+    else:
+        return None
+
+    normalized: set[str] = set()
+    for token in tokens:
+        ext = token.lower()
+        if not ext.startswith("."):
+            ext = f".{ext}"
+        normalized.add(ext)
+    return normalized or None
+
 def _build_index_text(
     file_path: Path,
     content: str,
@@ -939,7 +966,12 @@ def query_graph():
 
 @app.route('/index-vault', methods=['POST'])
 def index_vault():
-    """Index all markdown and PDF files from a vault directory (INCREMENTAL with mtime)"""
+    """Index vault files from a directory (INCREMENTAL with mtime).
+
+    Optional payload fields:
+    - include_extensions: [".md"] or ".md,.pdf"
+    - exclude_extensions: [".pdf"] or ".pdf"
+    """
     try:
         with index_progress_lock:
             index_progress.update({
@@ -958,6 +990,19 @@ def index_vault():
         vault_path = data.get('vault_path', './vault')
         force_reindex = data.get('force', False)
         max_files = data.get('max_files', 0) # 0 means unlimited
+        include_extensions = _normalize_extensions(data.get("include_extensions"))
+        exclude_extensions = _normalize_extensions(data.get("exclude_extensions")) or set()
+
+        if include_extensions is None:
+            effective_extensions = set(SUPPORTED_EXTENSIONS)
+        else:
+            effective_extensions = include_extensions & SUPPORTED_EXTENSIONS
+        effective_extensions -= exclude_extensions
+        if not effective_extensions:
+            return jsonify({
+                "error": "No valid extensions to index",
+                "supported_extensions": sorted(SUPPORTED_EXTENSIONS),
+            }), 400
 
         Path(WORKING_DIR).mkdir(parents=True, exist_ok=True)
         
@@ -992,9 +1037,13 @@ def index_vault():
         # Scan for files
         all_files = [
             path for path in vault_dir.rglob("*")
-            if path.is_file() and path.suffix.lower() in SUPPORTED_EXTENSIONS
+            if path.is_file() and path.suffix.lower() in effective_extensions
         ]
-        logger.info(f"Found {len(all_files)} total markdown/PDF files in vault")
+        logger.info(
+            "Found %s total files in vault (extensions=%s)",
+            len(all_files),
+            sorted(effective_extensions),
+        )
         with index_progress_lock:
             index_progress["total_files"] = len(all_files)
 
@@ -1072,7 +1121,8 @@ def index_vault():
                 "status": "success",
                 "message": "Index is up to date",
                 "total_files": len(all_files),
-                "newly_indexed": 0
+                "newly_indexed": 0,
+                "extensions": sorted(effective_extensions),
             }), 200
 
         # Insert into LightRAG in batches to prevent stalling and improve progress visibility
@@ -1126,7 +1176,8 @@ def index_vault():
             "status": "success",
             "total_files": len(all_files),
             "newly_indexed": len(notes_to_index),
-            "vault_path": vault_path
+            "vault_path": vault_path,
+            "extensions": sorted(effective_extensions),
         }), 200
 
     except Exception as e:
