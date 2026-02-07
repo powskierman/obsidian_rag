@@ -41,6 +41,8 @@ DEFAULT_VAULT_PATH="/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Do
 VAULT_PATH="${OBSIDIAN_VAULT_PATH:-$DEFAULT_VAULT_PATH}"
 LIGHTRAG_INCLUDE_EXTENSIONS="${LIGHTRAG_INCLUDE_EXTENSIONS:-.md}"
 LIGHTRAG_EXCLUDE_EXTENSIONS="${LIGHTRAG_EXCLUDE_EXTENSIONS:-.pdf}"
+LIGHTRAG_EXCLUDE_PATHS="${LIGHTRAG_EXCLUDE_PATHS:-${LIGHTRAG_EXCLUDE_PATH_PATTERNS:-}}"
+LIGHTRAG_BYPASS_REINDEX_GUARD="${LIGHTRAG_BYPASS_REINDEX_GUARD:-0}"
 
 for arg in "$@"; do
     case "$arg" in
@@ -60,6 +62,8 @@ done
 echo "📂 Vault path: $VAULT_PATH"
 echo "🧩 Include extensions: $LIGHTRAG_INCLUDE_EXTENSIONS"
 echo "🚫 Exclude extensions: $LIGHTRAG_EXCLUDE_EXTENSIONS"
+echo "🚫 Exclude paths: ${LIGHTRAG_EXCLUDE_PATHS:-<none>}"
+echo "🛡️  Bypass reindex guard: $LIGHTRAG_BYPASS_REINDEX_GUARD"
 echo ""
 echo "🔄 Starting indexing process..."
 echo "   (This may take several minutes for large vaults)"
@@ -93,7 +97,7 @@ if [ "$FORCE_REINDEX" = true ]; then
     echo ""
 fi
 
-PAYLOAD="$(python3 - "$VAULT_PATH_FOR_REQUEST" "$FORCE_REINDEX" "$LIGHTRAG_INCLUDE_EXTENSIONS" "$LIGHTRAG_EXCLUDE_EXTENSIONS" <<'PY'
+PAYLOAD="$(python3 - "$VAULT_PATH_FOR_REQUEST" "$FORCE_REINDEX" "$LIGHTRAG_INCLUDE_EXTENSIONS" "$LIGHTRAG_EXCLUDE_EXTENSIONS" "$LIGHTRAG_EXCLUDE_PATHS" "$LIGHTRAG_BYPASS_REINDEX_GUARD" <<'PY'
 import json
 import sys
 
@@ -101,6 +105,8 @@ vault_path = sys.argv[1]
 force = sys.argv[2].lower() == "true"
 include_raw = sys.argv[3]
 exclude_raw = sys.argv[4]
+exclude_paths_raw = sys.argv[5]
+bypass_guard = sys.argv[6] in {"1", "true", "TRUE", "yes", "YES"}
 
 def split_exts(raw: str):
     values = []
@@ -113,11 +119,16 @@ def split_exts(raw: str):
         values.append(token)
     return values
 
+def split_paths(raw: str):
+    return [token.strip() for token in raw.split(",") if token.strip()]
+
 payload = {
     "vault_path": vault_path,
     "force": force,
     "include_extensions": split_exts(include_raw),
     "exclude_extensions": split_exts(exclude_raw),
+    "exclude_paths": split_paths(exclude_paths_raw),
+    "bypass_reindex_guard": bypass_guard,
 }
 print(json.dumps(payload))
 PY

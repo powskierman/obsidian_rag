@@ -9,6 +9,8 @@ import json
 import asyncio
 import re
 import time
+import hashlib
+import fnmatch
 import threading
 from pathlib import Path
 from flask import Flask, request, jsonify
@@ -54,6 +56,8 @@ LIGHTRAG_BATCH_TIMEOUT = float(os.getenv("LIGHTRAG_BATCH_TIMEOUT", "600"))
 LIGHTRAG_CHUNK_TOKENS = int(os.getenv("LIGHTRAG_CHUNK_TOKENS", "128"))
 LIGHTRAG_CHUNK_OVERLAP = int(os.getenv("LIGHTRAG_CHUNK_OVERLAP", "32"))
 LIGHTRAG_MAX_DOC_CHARS = int(os.getenv("LIGHTRAG_MAX_DOC_CHARS", "0"))
+LIGHTRAG_REINDEX_GUARD_MAX_RATIO = float(os.getenv("LIGHTRAG_REINDEX_GUARD_MAX_RATIO", "0.35"))
+LIGHTRAG_REINDEX_GUARD_MIN_FILES = int(os.getenv("LIGHTRAG_REINDEX_GUARD_MIN_FILES", "200"))
 LLM_MAX_TOKENS = os.getenv("LLM_MAX_TOKENS")
 LLM_TEMPERATURE = os.getenv("LLM_TEMPERATURE")
 
@@ -98,6 +102,7 @@ def _parse_supported_extensions_env(raw_value: str) -> set[str]:
 SUPPORTED_EXTENSIONS = _parse_supported_extensions_env(
     os.getenv("LIGHTRAG_SUPPORTED_EXTENSIONS", ".md")
 )
+EXCLUDE_PATH_PATTERNS = []
 INLINE_TAG_PATTERN = re.compile(r"(?<!\\w)#([A-Za-z0-9][A-Za-z0-9/_-]*)")
 
 # LightRAG Constants
@@ -220,6 +225,96 @@ def _normalize_extensions(raw_value) -> set[str] | None:
             ext = f".{ext}"
         normalized.add(ext)
     return normalized or None
+
+
+def _normalize_path_patterns(raw_value) -> list[str] | None:
+    """Normalize exclude path patterns from env or API payload.
+
+    Accepts:
+    - list/tuple/set, e.g. ["SPECIFICATION.md", "Books/Books/*.md"]
+    - comma-separated string
+    Returns None when unset/empty.
+    """
+    if raw_value is None:
+        return None
+
+    if isinstance(raw_value, str):
+        tokens = [t.strip() for t in raw_value.split(",") if t.strip()]
+    elif isinstance(raw_value, (list, tuple, set)):
+        tokens = [str(t).strip() for t in raw_value if str(t).strip()]
+    else:
+        return None
+
+    normalized: list[str] = []
+    for token in tokens:
+        pattern = token.replace("\\", "/").strip()
+        if not pattern:
+            continue
+        if pattern.startswith("/app/vault/"):
+            pattern = pattern[len("/app/vault/") :]
+        elif not pattern.startswith("/"):
+            pattern = pattern.lstrip("./")
+        if pattern:
+            normalized.append(pattern)
+    return normalized or None
+
+
+def _parse_exclude_path_patterns_env(raw_value: str) -> list[str]:
+    return _normalize_path_patterns(raw_value) or []
+
+
+EXCLUDE_PATH_PATTERNS = _parse_exclude_path_patterns_env(
+    os.getenv("LIGHTRAG_EXCLUDE_PATH_PATTERNS", "")
+)
+
+
+def _is_excluded_path(file_path: Path, vault_root: Path, patterns: list[str]) -> bool:
+    if not patterns:
+        return False
+
+    abs_path = file_path.as_posix()
+    try:
+        rel_path = file_path.relative_to(vault_root).as_posix()
+    except ValueError:
+        rel_path = abs_path
+    basename = file_path.name
+
+    for pattern in patterns:
+        if pattern.startswith("/"):
+            if fnmatch.fnmatch(abs_path, pattern):
+                return True
+            continue
+        if fnmatch.fnmatch(rel_path, pattern):
+            return True
+        if "/" not in pattern and fnmatch.fnmatch(basename, pattern):
+            return True
+    return False
+
+
+def _canonical_index_key(file_path: Path, vault_root: Path) -> str:
+    """Return stable vault-relative key for indexed_files tracking."""
+    try:
+        return file_path.relative_to(vault_root).as_posix()
+    except Exception:
+        pass
+
+    raw = str(file_path).replace("\\", "/").strip()
+    if not raw:
+        return ""
+
+    # Recover relative segment when key came from a different absolute root
+    marker = f"/{vault_root.name}/"
+    raw_lower = raw.lower()
+    marker_lower = marker.lower()
+    idx = raw_lower.rfind(marker_lower)
+    if idx != -1:
+        return raw[idx + len(marker):].lstrip("/")
+
+    raw = raw.lstrip("./")
+    prefix = f"{vault_root.name}/"
+    if raw.startswith(prefix):
+        raw = raw[len(prefix):]
+    return raw.lstrip("/")
 
 def _build_index_text(
     file_path: Path,
@@ -987,6 +1082,7 @@ def index_vault():
     Optional payload fields:
     - include_extensions: [".md"] or ".md,.pdf"
     - exclude_extensions: [".pdf"] or ".pdf"
+    - exclude_paths: ["SPECIFICATION.md", "Books/Books/*.md"] or comma-separated string
     """
     try:
         with index_progress_lock:
@@ -1004,10 +1100,13 @@ def index_vault():
 
         data = request.json or {}
         vault_path = data.get('vault_path', './vault')
-        force_reindex = data.get('force', False)
+        force_reindex = bool(data.get('force', False))
+        bypass_reindex_guard = bool(data.get("bypass_reindex_guard", False))
         max_files = data.get('max_files', 0) # 0 means unlimited
         include_extensions = _normalize_extensions(data.get("include_extensions"))
         exclude_extensions = _normalize_extensions(data.get("exclude_extensions")) or set()
+        request_exclude_paths = _normalize_path_patterns(data.get("exclude_paths")) or []
+        effective_exclude_paths = _dedupe_keep_order(EXCLUDE_PATH_PATTERNS + request_exclude_paths)
 
         if include_extensions is None:
             effective_extensions = set(SUPPORTED_EXTENSIONS)
@@ -1025,12 +1124,18 @@ def index_vault():
         vault_dir = Path(vault_path)
         if not vault_dir.exists():
             return jsonify({"error": f"Vault path not found: {vault_path}"}), 400
+        # Keep index keys stable even when indexing a subfolder of /app/vault.
+        # This prevents key drift that can trigger accidental large reindex runs.
+        vault_posix = vault_dir.as_posix()
+        key_root = Path("/app/vault") if (
+            vault_posix == "/app/vault" or vault_posix.startswith("/app/vault/")
+        ) else vault_dir
 
-        # Load indexed files tracking: path|mtime
+        # Load indexed files tracking: canonical_relative_path|mtime
         indexed_files_path = Path(WORKING_DIR) / "indexed_files.txt"
-        
-        # Map: file_path -> last_mtime
-        indexed_files_state = {}
+
+        # Map: canonical_relative_path -> last_mtime
+        indexed_files_state: dict[str, float] = {}
 
         if indexed_files_path.exists() and not force_reindex:
             try:
@@ -1041,38 +1146,71 @@ def index_vault():
                         if "|" in line:
                             parts = line.split("|")
                             if len(parts) >= 2:
-                                indexed_files_state[parts[0]] = float(parts[1])
+                                raw_path = parts[0]
+                                mtime = float(parts[1])
+                                key = _canonical_index_key(Path(raw_path), key_root)
+                                if key:
+                                    previous = indexed_files_state.get(key)
+                                    if previous is None or mtime > previous:
+                                        indexed_files_state[key] = mtime
                         else:
                             # Backward compatibility: treat as old entry with mtime=0 to force reindex if real file is newer
-                            indexed_files_state[line] = 0.0
+                            key = _canonical_index_key(Path(line), key_root)
+                            if key:
+                                indexed_files_state.setdefault(key, 0.0)
                 logger.info(f"Found {len(indexed_files_state)} tracked files in index history")
             except Exception as e:
                 logger.warning(f"Error reading indexed_files.txt: {e}. Starting fresh.")
                 indexed_files_state = {}
+
+        # Normalize key format on disk early (before any long indexing run) so restored DBs
+        # do not keep drifting between absolute/relative formats.
+        if indexed_files_state and not force_reindex:
+            try:
+                with open(indexed_files_path, 'w', encoding='utf-8') as f:
+                    for path, mtime in sorted(indexed_files_state.items()):
+                        f.write(f"{path}|{mtime}\n")
+            except Exception as e:
+                logger.warning(f"Failed to normalize indexed_files.txt keys: {e}")
 
         # Scan for files
         all_files = [
             path for path in vault_dir.rglob("*")
             if path.is_file() and path.suffix.lower() in effective_extensions
         ]
+        excluded_path_count = 0
+        if effective_exclude_paths:
+            filtered_files = []
+            for path in all_files:
+                if _is_excluded_path(path, vault_dir, effective_exclude_paths):
+                    excluded_path_count += 1
+                    continue
+                filtered_files.append(path)
+            all_files = filtered_files
+
         logger.info(
-            "Found %s total files in vault (extensions=%s)",
+            "Found %s total files in vault (extensions=%s, path_excluded=%s)",
             len(all_files),
             sorted(effective_extensions),
+            excluded_path_count,
         )
         with index_progress_lock:
             index_progress["total_files"] = len(all_files)
 
         # Determine what needs indexing
         notes_to_index = []
+        notes_ids = []
+        notes_file_paths = []
         new_state_entries = []
+        tracked_keys_found = 0
 
         count = 0
         for vault_file in all_files:
             if max_files > 0 and count >= max_files:
                 break
                 
-            abs_path = str(vault_file)
+            abs_path = vault_file.as_posix()
+            index_key = _canonical_index_key(vault_file, key_root)
             try:
                 current_mtime = vault_file.stat().st_mtime
             except FileNotFoundError:
@@ -1080,7 +1218,9 @@ def index_vault():
 
             # Check if needs update
             # Reindex if: force=True, or not in state, or current_mtime > stored_mtime
-            stored_mtime = indexed_files_state.get(abs_path)
+            stored_mtime = indexed_files_state.get(index_key)
+            if stored_mtime is not None:
+                tracked_keys_found += 1
             
             if force_reindex or stored_mtime is None or current_mtime > stored_mtime:
                 try:
@@ -1114,8 +1254,11 @@ def index_vault():
                     content = content.strip()
                     if content:
                         content = _truncate_for_extraction(content)
+                        doc_id = f"doc-{hashlib.md5(content.encode('utf-8')).hexdigest()}"
                         notes_to_index.append(content)
-                        new_state_entries.append((abs_path, current_mtime))
+                        notes_ids.append(doc_id)
+                        notes_file_paths.append(abs_path)
+                        new_state_entries.append((index_key, current_mtime))
                         count += 1
                 except Exception as e:
                     logger.warning(f"Failed to process {vault_file}: {e}")
@@ -1126,6 +1269,40 @@ def index_vault():
         logger.info(f"determined {len(notes_to_index)} files need indexing/re-indexing")
         with index_progress_lock:
             index_progress["to_index"] = len(notes_to_index)
+
+        if (
+            not force_reindex
+            and not bypass_reindex_guard
+            and len(all_files) >= LIGHTRAG_REINDEX_GUARD_MIN_FILES
+            and indexed_files_state
+        ):
+            reindex_ratio = len(notes_to_index) / max(1, len(all_files))
+            if reindex_ratio > LIGHTRAG_REINDEX_GUARD_MAX_RATIO:
+                message = (
+                    "Reindex guard triggered: too many files scheduled for incremental indexing. "
+                    f"to_index={len(notes_to_index)} total_files={len(all_files)} "
+                    f"ratio={reindex_ratio:.3f} guard={LIGHTRAG_REINDEX_GUARD_MAX_RATIO:.3f}. "
+                    "This usually indicates key mismatch after restore; use force=true for full reindex "
+                    "or bypass_reindex_guard=true if intentional."
+                )
+                logger.error(message)
+                with index_progress_lock:
+                    index_progress.update({
+                        "status": "error",
+                        "error": message,
+                        "finished_at": datetime.datetime.now().isoformat(),
+                    })
+                return jsonify({
+                    "error": message,
+                    "stop_reason": "reindex_guard",
+                    "tracked_files": len(indexed_files_state),
+                    "tracked_keys_found": tracked_keys_found,
+                    "total_files": len(all_files),
+                    "to_index": len(notes_to_index),
+                    "extensions": sorted(effective_extensions),
+                    "excluded_by_path": excluded_path_count,
+                    "exclude_paths": effective_exclude_paths,
+                }), 409
 
         if not notes_to_index:
             with index_progress_lock:
@@ -1138,7 +1315,11 @@ def index_vault():
                 "message": "Index is up to date",
                 "total_files": len(all_files),
                 "newly_indexed": 0,
+                "tracked_files": len(indexed_files_state),
+                "tracked_keys_found": tracked_keys_found,
                 "extensions": sorted(effective_extensions),
+                "excluded_by_path": excluded_path_count,
+                "exclude_paths": effective_exclude_paths,
             }), 200
 
         # Insert into LightRAG in batches to prevent stalling and improve progress visibility
@@ -1155,13 +1336,18 @@ def index_vault():
             
             for i in range(0, total, BATCH_SIZE):
                 batch = notes_to_index[i : i + BATCH_SIZE]
+                batch_ids = notes_ids[i : i + BATCH_SIZE]
+                batch_file_paths = notes_file_paths[i : i + BATCH_SIZE]
                 with index_progress_lock:
                     index_progress["status"] = "running"
                     index_progress["current_batch"] = (i // BATCH_SIZE) + 1
                 logger.info(f"STARTING BATCH {i+1} to {min(i+BATCH_SIZE, total)} of {total} documents")
                 try:
                      # Use wait_for to enforce a hard timeout per batch (e.g. 5 minutes)
-                    await asyncio.wait_for(rag.ainsert(batch), timeout=LIGHTRAG_BATCH_TIMEOUT)
+                    await asyncio.wait_for(
+                        rag.ainsert(batch, ids=batch_ids, file_paths=batch_file_paths),
+                        timeout=LIGHTRAG_BATCH_TIMEOUT,
+                    )
                     with index_progress_lock:
                         index_progress["indexed"] += len(batch)
                     logger.info(f"COMPLETED BATCH {i+1} to {min(i+BATCH_SIZE, total)}")
@@ -1179,7 +1365,7 @@ def index_vault():
             
         # Write back full state
         with open(indexed_files_path, 'w', encoding='utf-8') as f:
-            for path, mtime in indexed_files_state.items():
+            for path, mtime in sorted(indexed_files_state.items()):
                 f.write(f"{path}|{mtime}\n")
 
         with index_progress_lock:
@@ -1192,8 +1378,12 @@ def index_vault():
             "status": "success",
             "total_files": len(all_files),
             "newly_indexed": len(notes_to_index),
+            "tracked_files": len(indexed_files_state),
+            "tracked_keys_found": tracked_keys_found,
             "vault_path": vault_path,
             "extensions": sorted(effective_extensions),
+            "excluded_by_path": excluded_path_count,
+            "exclude_paths": effective_exclude_paths,
         }), 200
 
     except Exception as e:

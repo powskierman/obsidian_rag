@@ -2,6 +2,8 @@
 set -euo pipefail
 
 LIGHTRAG_URL="${LIGHTRAG_URL:-http://localhost:8001}"
+LIGHTRAG_EXCLUDE_PATHS="${LIGHTRAG_EXCLUDE_PATHS:-${LIGHTRAG_EXCLUDE_PATH_PATTERNS:-}}"
+LIGHTRAG_BYPASS_REINDEX_GUARD="${LIGHTRAG_BYPASS_REINDEX_GUARD:-0}"
 VAULT_PATH="${VAULT_PATH:-$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel}"
 VAULT_PATH_IN_CONTAINER="${VAULT_PATH_IN_CONTAINER:-/app/vault}"
 DATA_ROOT="${OBSIDIAN_RAG_DATA_DIR:-$HOME/obsidian_rag_local_data}"
@@ -187,13 +189,17 @@ for line in "${FOLDERS[@]}"; do
     continue
   fi
 
-  payload="$(python - "$target_request" <<'PY'
+  payload="$(python - "$target_request" "$LIGHTRAG_EXCLUDE_PATHS" "$LIGHTRAG_BYPASS_REINDEX_GUARD" <<'PY'
 import json,sys
+exclude_paths = [token.strip() for token in sys.argv[2].split(",") if token.strip()]
+bypass_guard = (sys.argv[3] if len(sys.argv) > 3 else "0") in {"1", "true", "TRUE", "yes", "YES"}
 print(json.dumps({
   "vault_path": sys.argv[1],
   "force": False,
   "include_extensions": [".md"],
-  "exclude_extensions": [".pdf"]
+  "exclude_extensions": [".pdf"],
+  "exclude_paths": exclude_paths,
+  "bypass_reindex_guard": bypass_guard
 }))
 PY
 )"

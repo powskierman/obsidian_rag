@@ -95,6 +95,14 @@ If you only need to update **one** specific index without running the full pipel
     *   **Default policy:** Markdown-only indexing (`.md`). PDFs are excluded unless you explicitly opt in.
         * Opt-in for PDFs (if ever needed):
           `LIGHTRAG_SUPPORTED_EXTENSIONS=.md,.pdf ./Scripts/indexing/index_with_lightrag.sh`
+    *   **Exclude heavy files (recommended):** set
+        `LIGHTRAG_EXCLUDE_PATH_PATTERNS` in `.env` as comma-separated glob patterns
+        (for example: `SPECIFICATION.md,PLAN.md,Books/Books/*.md`).
+    *   **Restore safety guard (recommended):** incremental indexing is blocked if too many
+        files are unexpectedly scheduled after a restore.
+        Tune with `LIGHTRAG_REINDEX_GUARD_MAX_RATIO` and `LIGHTRAG_REINDEX_GUARD_MIN_FILES`.
+        To intentionally bypass for a one-off run:
+        `LIGHTRAG_BYPASS_REINDEX_GUARD=1 ./Scripts/indexing/index_with_lightrag.sh`
 
 ---
 
