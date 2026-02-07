@@ -134,6 +134,7 @@ EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:800
 GRAPH_SERVICE_URL = os.getenv("GRAPH_SERVICE_URL", "http://localhost:8002")
 LIGHTRAG_SERVICE_URL = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8001")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+LIGHTRAG_QUERY_TIMEOUT = float(os.getenv("LIGHTRAG_QUERY_TIMEOUT", "12"))
 
 # Reliability controls
 REQUEST_RETRIES = int(os.getenv("RAG_REQUEST_RETRIES", "2"))
@@ -902,7 +903,7 @@ async def unified_query(request: UnifiedQueryRequest):
                     client,
                     f"{LIGHTRAG_SERVICE_URL}/query",
                     payload,
-                    timeout=60.0,
+                    timeout=LIGHTRAG_QUERY_TIMEOUT,
                     service="lightrag",
                 )
                 if response.status_code != 200:
@@ -1070,7 +1071,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                         },
-                        timeout=60.0,
+                        timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
                     ),
                     _post_json(
@@ -1152,7 +1153,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                         },
-                        timeout=60.0,
+                        timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
                     ),
                 ]
@@ -1227,7 +1228,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                         },
-                        timeout=90.0,
+                        timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
                     ),
                     _post_json(

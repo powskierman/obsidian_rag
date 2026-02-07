@@ -181,9 +181,29 @@ export const api = {
       } else {
         // Other single-source modes (notes, entities)
         const result = data.results || data;
+        let sources: SearchResult[] = result.sources || [];
+        let answer = result.answer || result.result || 'No results found';
+
+        // Handle vector-fallback payloads returned under `results` for entities mode.
+        if ((!sources || sources.length === 0) && result.documents && result.documents[0]) {
+          sources = result.documents[0].map((doc: string, i: number) => {
+            const dist = result.distances?.[0]?.[i];
+            const relevance = dist !== undefined
+              ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
+              : 50;
+            return {
+              filename: result.metadatas?.[0]?.[i]?.filename || 'unknown',
+              filepath: result.metadatas?.[0]?.[i]?.filepath || 'unknown',
+              relevance,
+              snippet: doc
+            };
+          });
+          answer = `Found ${sources.length} matching snippets in your vault.`;
+        }
+
         return {
-          answer: result.answer || result.result || 'No results found',
-          sources: result.sources || []
+          answer,
+          sources
         };
       }
     } catch (error) {

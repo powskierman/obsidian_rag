@@ -28,8 +28,13 @@ if not logging.getLogger().handlers:
     )
 logger = logging.getLogger(__name__)
 
-# Graph data directory
-GRAPH_DATA_DIR = Path("graph_data")
+# Graph data directory (centralized if OBSIDIAN_RAG_DATA_DIR is set)
+_data_dir_env = os.getenv("OBSIDIAN_RAG_DATA_DIR", "").strip()
+GRAPH_DATA_DIR = (
+    Path(_data_dir_env) / "graph_data"
+    if _data_dir_env
+    else Path("graph_data")
+)
 try:
     GRAPH_DATA_DIR.mkdir(exist_ok=True)
 except OSError:
@@ -514,7 +519,11 @@ if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description="Build Obsidian Knowledge Graph")
     parser.add_argument("--vault", default="/app/vault", help="Path to Obsidian vault")
-    parser.add_argument("--output", default="/app/graph_data/knowledge_graph.pkl", help="Output path")
+    parser.add_argument(
+        "--output",
+        default=str(GRAPH_DATA_DIR / "knowledge_graph_full.pkl"),
+        help="Output path",
+    )
     
     args = parser.parse_args()
     

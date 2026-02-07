@@ -4,6 +4,13 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+if [ -f "$REPO_ROOT/.env" ]; then
+    set -a
+    source "$REPO_ROOT/.env"
+    set +a
+fi
+DATA_ROOT="${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}"
+GRAPH_FILE="$DATA_ROOT/graph_data/knowledge_graph_full.pkl"
 
 echo "🔹 Rebuilding Knowledge Graph (NetworkX)..."
 echo "   (This is a fast structural scan of your vault)"
@@ -20,12 +27,9 @@ if ! docker exec -it obsidian-graph-service python /app/src/services/networkx_gr
     exit 1
 fi
 
-# Sync container volume output to local graph_data for the verifier
-if [ -f "$REPO_ROOT/data/graph_data/knowledge_graph_full.pkl" ]; then
-    mkdir -p "$REPO_ROOT/graph_data"
-    cp "$REPO_ROOT/data/graph_data/knowledge_graph_full.pkl" "$REPO_ROOT/graph_data/knowledge_graph_full.pkl"
-else
-    echo "❌ Error: Expected graph file not found at $REPO_ROOT/data/graph_data/knowledge_graph_full.pkl"
+# Validate centralized output location
+if [ ! -f "$GRAPH_FILE" ]; then
+    echo "❌ Error: Expected graph file not found at $GRAPH_FILE"
     exit 1
 fi
 

@@ -1,7 +1,17 @@
 # Obsidian RAG Implementation Document
 
-**Date:** 2026-01-29  
+**Date:** 2026-02-06  
 **Objective:** Extend Obsidian with reliable retrieval + synthesis across multiple related notes, producing accurate, note-grounded answers with sources.
+
+## 0) Constitution Alignment Requirements (Authoritative)
+- Respect fixed service boundaries and ports: ChromaDB `8000`, LightRAG `8001`, NetworkX `8002`, API Gateway `4000`, Streamlit `8501`.
+- Route client traffic through API Gateway public interfaces (`/api/v1/search`, `/api/v1/search/stream`, `/api/v1/query`, `/api/v1/health`, `/api/v1/stats`, deep-research WebSocket).
+- Treat `POST http://localhost:8002/query_stream` as internal-only and deprecated for direct client use.
+- Preserve supported search modes: `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`, and deep-research.
+- Keep indexing incremental by default; graph and vector rebuilds must remain explicit and independently executable.
+- Enforce local-first privacy: generated data stores stay local and out of Git; logs must not expose private vault content.
+- Follow Spec-Driven Development artifacts (spec, plan, tasks) and update docs for workflow/API changes.
+- Definition of done must include passing `python Scripts/debug/audit_search_modes.py` with constitutional latency and source-count gates.
 
 ## 1) Current State (Observed)
 **Retrieval**
@@ -39,8 +49,9 @@
 ## 3) Target Behavior
 1. **Notes-only synthesis** by default for Obsidian queries.  
 2. **Consistent citations** that tie claims back to note titles/chunks.  
-3. **Fast local/hybrid retrieval** with bounded latency.  
-4. **Complete graph extraction** or explicit disablement if not viable.  
+3. **All supported search modes remain functional** with non-zero sources for non-chat retrieval paths.  
+4. **Constitutional latency gates are met** (vector <1s, graph modes <5s, combined modes <8s, deep thinking <120s).  
+5. **Complete graph extraction** or explicit disablement if not viable.  
 
 ## 4) Implementation Plan
 
@@ -61,6 +72,7 @@
 **Verification**
 - Query set: `1st pet scan`, `Yescarta`, `Initial Diagnosis Scan`, `Home Assistant`.
 - Expected: Answers mention correct note titles and only include facts present in notes.
+- Ensure non-chat retrieval modes return non-zero sources.
 
 ### Phase A2 — Data Extraction & Indexing Review (New)
 **Goal:** Ensure extraction produces complete, high-quality chunks and metadata.
@@ -136,7 +148,7 @@
 **Goal:** Prevent user-visible stalls.
 
 1) **Time‑boxed LLM usage**
-   - Keep `RAG_QUERY_TIMEOUT` at 20–30s for full synthesis.
+   - Keep `RAG_QUERY_TIMEOUT` within constitutional targets per mode.
    - For interactive UI, provide “fast” mode with shorter timeouts.
 
 2) **Warmup**
@@ -147,18 +159,23 @@
 
 **Verification**
 - Re-run smoke tests with timeouts.
-- Ensure query endpoints respond within the configured window.
+- Ensure query endpoints meet constitutional ceilings:
+  - Vector: `< 1s`
+  - Graph (`notes`, `entities`): `< 5s`
+  - Hybrid/combined (`notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`): `< 8s`
+  - Deep Thinking: `< 120s`
 
 ## 5) Concrete File-Level Changes (Proposed)
 **Services**
 - `src/integrations/lightrag_service.py`
   - Add `notes_only` guardrail and citation enforcement.
-  - Log retrieved chunks in debug mode.
+  - Log only safe metadata (source IDs/counts/scores), not raw private note content.
   - Optional `min_chunks` config for hybrid/local.
 
 **Config**
 - `.env`
-  - `RAG_QUERY_TIMEOUT=30`
+  - `RAG_QUERY_TIMEOUT=8` (default combined-mode ceiling)
+  - `RAG_DEEP_THINKING_TIMEOUT=120` (deep thinking ceiling)
   - `RAG_NOTES_ONLY=true`
   - `RAG_MIN_CHUNKS=2`
 
@@ -166,11 +183,18 @@
 - Update runbooks: `Documentation/SOTA_TUNING_GUIDE.md` and `Documentation/Setup/TESTING.md`
 
 ## 6) Acceptance Criteria
-1. **Grounded answers**: At least 4/5 test queries cite correct note titles.
-2. **No generic answers**: If insufficient evidence, returns “Not found in notes.”
-3. **Latency**: Local/hybrid < 10s for typical queries.
-4. **Graph health**: Node/edge counts > 1k (or graph explicitly disabled).
-5. **NetworkX integration**: Hybrid answers include at least 2 graph‑derived cross‑note links when available.
+1. **Constitutional audit pass**: `python Scripts/debug/audit_search_modes.py` reports `PASS`.
+2. **Source coverage**: Non-chat retrieval modes return non-zero sources (`vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`).
+3. **Latency targets**:
+   - Vector `< 1s`
+   - Graph (`notes`, `entities`) `< 5s`
+   - Hybrid/combined (`notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`) `< 8s`
+   - Deep Thinking `< 120s`
+4. **Grounded answers**: At least 4/5 test queries cite correct note titles and return “Not found in notes” for insufficient evidence.
+5. **Gateway compliance**: Client-facing flows use API Gateway public endpoints; internal `/query_stream` is not used directly by clients.
+6. **Indexing compliance**: Incremental indexing remains default; explicit graph/vector rebuild workflows remain available independently.
+7. **Privacy/data compliance**: Generated stores (`${OBSIDIAN_RAG_DATA_DIR}/chroma_db`, `${OBSIDIAN_RAG_DATA_DIR}/lightrag_db`, `${OBSIDIAN_RAG_DATA_DIR}/graph_data`) remain local and are not committed.
+8. **Definition-of-done checks**: Relevant tests and health/smoke checks pass, and docs/public interface references are updated for changed workflows.
 
 ## 7) Risks / Mitigations
 - **LLM slow / timeouts** → introduce fast mode + strict fallback.
@@ -178,6 +202,6 @@
 - **Over‑strict notes‑only** → add “allow_general_knowledge” toggle for research mode.
 
 ## 8) Next Steps (Immediate)
-1. Add `notes_only` + `min_chunks` enforcement to LightRAG.
-2. Rebuild indexing to ensure non‑trivial graph.
-3. Run structured retrieval eval and document results.
+1. Add `notes_only` + `min_chunks` enforcement to LightRAG with privacy-safe logging only.
+2. Rebuild indexing to ensure non-trivial graph while preserving independent rebuild semantics.
+3. Run `python Scripts/debug/audit_search_modes.py` and record constitutional gate results.

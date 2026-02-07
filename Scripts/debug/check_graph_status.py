@@ -12,7 +12,8 @@ from datetime import datetime
 
 # Paths
 REPO_ROOT = Path(__file__).resolve().parents[2]
-GRAPH_PATH = REPO_ROOT / "data" / "graph_data" / "knowledge_graph_full.pkl"
+DATA_ROOT = Path(os.getenv("OBSIDIAN_RAG_DATA_DIR", "/Users/michel/obsidian_rag_local_data")).expanduser()
+GRAPH_PATH = Path(os.getenv("GRAPH_PATH", str(DATA_ROOT / "graph_data" / "knowledge_graph_full.pkl")))
 # Try to find vault path dynamically or fallback to hardcoded
 VAULT_PATH = Path(os.getenv("OBSIDIAN_VAULT_PATH", ""))
 if not VAULT_PATH.exists():

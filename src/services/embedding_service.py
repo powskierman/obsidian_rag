@@ -81,7 +81,10 @@ cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 
 # Initialize ChromaDB
 COLLECTION_NAME = os.getenv("CHROMA_COLLECTION", "obsidian_vault")
-DB_PATH = os.getenv("CHROMA_DB_PATH", "./chroma_db")
+DB_PATH = os.getenv("CHROMA_DB_PATH", "").strip()
+if not DB_PATH:
+    data_dir = os.getenv("OBSIDIAN_RAG_DATA_DIR", "").strip()
+    DB_PATH = str(Path(data_dir) / "chroma_db") if data_dir else "./chroma_db"
 print(f"Initializing ChromaDB (Collection: {COLLECTION_NAME}) at {DB_PATH}...")
 chroma_client = chromadb.PersistentClient(path=DB_PATH)
 collection = chroma_client.get_or_create_collection(

@@ -7,6 +7,12 @@ We have migrated to a **Snapshot Sync Architecture** to avoid iCloud database co
 - **MacBook (Consumer)**: Pulls the snapshot from iCloud to local storage for querying.
 - **Safe & Fast**: Databases run on local SSDs. iCloud is only used for transfer.
 
+Canonical datastore root (from `.env`):
+- `OBSIDIAN_RAG_DATA_DIR=/Users/michel/obsidian_rag_local_data`
+- Vector DB: `${OBSIDIAN_RAG_DATA_DIR}/chroma_db`
+- NetworkX DB: `${OBSIDIAN_RAG_DATA_DIR}/graph_data`
+- LightRAG DB: `${OBSIDIAN_RAG_DATA_DIR}/lightrag_db`
+
 ---
 
 ## 🚀 Unified Procedures
@@ -50,7 +56,7 @@ This creates a stable snapshot in `~/Library/Mobile Documents/com~apple~CloudDoc
 **Script:** `Scripts/sync/pull.sh`
 
 To update your MacBook with the latest SOTA data from the Mini, run the pull script.
-This stops your local services, pulls the data from iCloud to your local SSD (`~/obsidian_rag_local_data`), and restarts services.
+This stops your local services, pulls the data from iCloud to your local SSD (`$OBSIDIAN_RAG_DATA_DIR`), and restarts services.
 
 **Usage:**
 ```bash
@@ -172,6 +178,18 @@ If you see "Naive" mode instead of "Hybrid":
 *   Should NOT happen with this new architecture.
 *   If it does, ensure you are NOT trying to index on the MacBook or access the `data/export_stage` directly from Docker. Always use the local copies.
 
+### Verify Centralized Paths
+```bash
+docker compose exec -T embedding-service printenv CHROMA_DB_PATH
+docker compose exec -T graph-service printenv GRAPH_PATH
+docker compose exec -T lightrag-service printenv LIGHTRAG_DIR
+```
+Expected container paths:
+- `/app/chroma_db`
+- `/app/graph_data/knowledge_graph_full.pkl`
+- `/app/lightrag_db`
+All of them should map to host folders under `$OBSIDIAN_RAG_DATA_DIR`.
+
 ---
 
-**Last Updated:** January 26, 2026
+**Last Updated:** February 7, 2026

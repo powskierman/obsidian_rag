@@ -66,9 +66,9 @@ Internal-only compatibility endpoint:
 
 ## Data and Indexing Principles
 - Primary stores:
-  - `chroma_db/`
-  - `lightrag_db/`
-  - `data/graph_data/`
+  - `${OBSIDIAN_RAG_DATA_DIR}/chroma_db`
+  - `${OBSIDIAN_RAG_DATA_DIR}/lightrag_db`
+  - `${OBSIDIAN_RAG_DATA_DIR}/graph_data`
 - Indexing defaults to incremental refresh.
 - Vault standardization (naming, links, metadata, templates) is part of retrieval quality.
 

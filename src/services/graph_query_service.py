@@ -662,9 +662,15 @@ def initialize_graph(graph_path: str = None):
     try:
         builder = GraphBuilder(api_key=api_key)
         
-        # If no path provided, try default locations
+        # If no explicit path provided, resolve from env with centralized data-dir fallback.
         if graph_path is None:
-            graph_path = os.environ.get('GRAPH_PATH', '/app/graph_data/knowledge_graph_full.pkl')
+            graph_path = os.environ.get('GRAPH_PATH')
+            if not graph_path:
+                data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
+                if data_dir:
+                    graph_path = str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl')
+                else:
+                    graph_path = '/app/graph_data/knowledge_graph_full.pkl'
         
         # Try multiple possible locations
         possible_paths = [
@@ -674,6 +680,13 @@ def initialize_graph(graph_path: str = None):
             '/app/knowledge_graph_full.pkl',
             '/app/knowledge_graph_test.pkl'
         ]
+        data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
+        if data_dir:
+            possible_paths.extend([
+                str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl'),
+                str(Path(data_dir) / 'graph_data' / 'knowledge_graph_test.pkl'),
+                str(Path(data_dir) / 'knowledge_graph_full.pkl'),
+            ])
         
         graph_file = None
         for path in possible_paths:

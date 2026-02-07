@@ -234,14 +234,63 @@ def _choose_query_mode(query_text: str, requested_mode: str) -> str:
         return "global"
 
     # If the query contains specific Capitalized Entities (likely note titles) -> Local
-    # We look for Capitalized Words that are not at the start of the sentence
-    # (Simplified: just check for capitalized words > 3 chars that aren't typical stopwords)
-    # This is rough, but effective for things like "What is Yescarta?"
+    # Ignore common sentence starters so "Find lymphoma treatments..." does not get
+    # misrouted to local mode just because "Find" is capitalized.
     if requested_mode == "hybrid":
-        # Check for specific capitalized content indicators
-        if re.search(r'\b[A-Z][a-zA-Z0-9-]{2,}\b', query_text):
-             # If it looks like a specific entity query, lean local
-            logger.info("Query contains potential entities -> Mode: local")
+        sentence_starters = {
+            "a",
+            "an",
+            "can",
+            "compare",
+            "describe",
+            "do",
+            "does",
+            "explain",
+            "find",
+            "give",
+            "how",
+            "is",
+            "list",
+            "show",
+            "summarize",
+            "tell",
+            "the",
+            "what",
+            "when",
+            "where",
+            "which",
+            "who",
+            "why",
+        }
+        first_word_match = re.search(r"\b[A-Za-z][A-Za-z0-9-]*\b", query_text)
+        first_word = first_word_match.group(0).lower() if first_word_match else ""
+        candidate_entities = []
+        for token in re.findall(r"\b[A-Z][a-zA-Z0-9-]{2,}\b", query_text):
+            lower_token = token.lower()
+            if lower_token == first_word and lower_token in sentence_starters:
+                continue
+            if lower_token in sentence_starters:
+                continue
+            candidate_entities.append(token)
+
+        if candidate_entities:
+            # Keep hybrid when user explicitly asks to search their notes.
+            if "in my notes" in lower_query:
+                logger.info("Keeping hybrid mode for explicit in-notes query")
+                return requested_mode
+
+            # Only force local for short, entity-focused prompts.
+            if len(tokens) > 4:
+                logger.info(
+                    "Keeping hybrid mode for longer query despite entities (%s)",
+                    ", ".join(candidate_entities[:3]),
+                )
+                return requested_mode
+
+            logger.info(
+                "Query contains potential entities (%s) -> Mode: local",
+                ", ".join(candidate_entities[:3]),
+            )
             return "local"
 
     return requested_mode

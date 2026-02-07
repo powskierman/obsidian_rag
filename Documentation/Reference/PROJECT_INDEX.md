@@ -82,9 +82,9 @@ obsidian_rag/
 *   API Keys (Anthropic/OpenAI/Gemini for reasoning)
 
 ### Databases (Local - Not Tracked)
-*   `chroma_db/`: Vector Store
-*   `data/graph_data/`: NetworkX Graph
-*   `lightrag_db/`: Entity Graph
+*   `${OBSIDIAN_RAG_DATA_DIR}/chroma_db`: Vector Store
+*   `${OBSIDIAN_RAG_DATA_DIR}/graph_data`: NetworkX Graph
+*   `${OBSIDIAN_RAG_DATA_DIR}/lightrag_db`: Entity Graph
 
 ---
 

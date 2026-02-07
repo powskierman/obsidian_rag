@@ -52,6 +52,13 @@ def load_graph():
         # Get graph file path
         graph_path = os.environ.get("KNOWLEDGE_GRAPH_PATH")
         if not graph_path:
+            data_dir = os.environ.get("OBSIDIAN_RAG_DATA_DIR", "").strip()
+            if data_dir:
+                candidate = Path(data_dir) / "graph_data" / "knowledge_graph_full.pkl"
+                if candidate.exists():
+                    graph_path = str(candidate)
+        
+        if not graph_path:
             # Try default locations (check graph_data directory first)
             default_paths = [
                 "graph_data/knowledge_graph_full.pkl",
@@ -325,4 +332,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

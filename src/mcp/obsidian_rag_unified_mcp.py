@@ -462,6 +462,11 @@ def _resolve_graph_path():
     graph_path = os.environ.get("KNOWLEDGE_GRAPH_PATH")
     if graph_path:
         return Path(graph_path)
+    data_dir = os.environ.get("OBSIDIAN_RAG_DATA_DIR", "").strip()
+    if data_dir:
+        data_path = Path(data_dir) / "graph_data" / "knowledge_graph_full.pkl"
+        if data_path.exists():
+            return data_path
 
     script_dir = Path(__file__).parent.absolute()
     default_paths = [

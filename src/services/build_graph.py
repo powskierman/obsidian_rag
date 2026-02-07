@@ -16,9 +16,16 @@ if not os.path.exists(VAULT_PATH):
     # Try finding vault relative to this script or use env var
     VAULT_PATH = os.environ.get("VAULT_PATH", "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/vault_data") # Default fallback
 
-GRAPH_PATH = "/app/graph_data/knowledge_graph_full.pkl"
+GRAPH_PATH = os.environ.get("GRAPH_PATH", "").strip()
+if not GRAPH_PATH:
+    data_dir = os.environ.get("OBSIDIAN_RAG_DATA_DIR", "").strip()
+    if data_dir:
+        GRAPH_PATH = os.path.join(data_dir, "graph_data", "knowledge_graph_full.pkl")
+    else:
+        GRAPH_PATH = "/app/graph_data/knowledge_graph_full.pkl"
+
 if not os.path.exists(os.path.dirname(GRAPH_PATH)):
-    # Fallback for local
+    # Fallback for local runs without centralized data directory configured
     GRAPH_PATH = "graph_data/knowledge_graph_full.pkl"
 
 def process_vault():
