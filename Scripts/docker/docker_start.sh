@@ -7,6 +7,19 @@ echo ""
 # Check if Docker is running
 if ! docker info > /dev/null 2>&1; then
     echo "⚠️ Docker is not running!"
+    if command -v open > /dev/null 2>&1; then
+        echo "▶️  Attempting to start Docker Desktop..."
+        open -a Docker >/dev/null 2>&1 || true
+        for _ in {1..60}; do
+            if docker info > /dev/null 2>&1; then
+                break
+            fi
+            sleep 2
+        done
+    fi
+fi
+
+if ! docker info > /dev/null 2>&1; then
     echo ""
     echo "Please start Docker Desktop first:"
     echo "  1. Open Docker Desktop application"

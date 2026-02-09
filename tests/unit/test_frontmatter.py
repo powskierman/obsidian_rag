@@ -5,8 +5,8 @@ import pytest
 import sys
 from pathlib import Path
 
-# Import the parse_frontmatter functions from different modules
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "Scripts"))
+# Import the parse_frontmatter functions from legacy tag scripts (archived path).
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "Scripts" / "archive_old_v2"))
 from generate_tags import parse_frontmatter as parse_frontmatter_tags
 from apply_tags import parse_frontmatter as parse_frontmatter_apply
 

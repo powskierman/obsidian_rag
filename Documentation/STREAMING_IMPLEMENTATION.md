@@ -1,17 +1,17 @@
 # Streaming Implementation
 
-Streaming is supported via Server-Sent Events (SSE) in both the API gateway and the graph service.
+Streaming uses WebSocket for Deep Thinking and SSE for HTTP search streaming.
 
 ## API Gateway
 
 - **Reasoning**: `ws://localhost:4000/api/v1/deep-research`
-- **Standard Search**: Streaming is currently supported via the graph service direct endpoint for debugging, or the Deep Thinking WebSocket for agentic workflows.
-- *Note: The unified HTTP streaming endpoint is planned for v2.*
+- **Standard Search**: `POST /api/v1/query` for regular JSON responses
+- **HTTP Streaming**: `POST /api/v1/search/stream` for SSE (`text/event-stream`)
 
-## Graph Service (Direct)
+## Graph Service (Internal)
 
-- Endpoint: `POST http://localhost:8002/query_stream`
-- Accepts the same payload as `/query`, plus `stream: true`.
-- Streams LLM output (native streaming where supported; chunked fallback otherwise).
+- Internal endpoint: `POST http://localhost:8002/query_stream`
+- This is deprecated for direct client use and is now behind the gateway stream proxy.
+- Existing direct callers should migrate to `POST /api/v1/search/stream`.
 
-Use the gateway endpoint for normal client use; use graph service streaming when you need direct control.
+Use gateway endpoints for all client traffic.

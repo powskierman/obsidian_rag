@@ -9,7 +9,7 @@ import re
 import time
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 from concurrent.futures import ThreadPoolExecutor
@@ -134,6 +134,7 @@ EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:800
 GRAPH_SERVICE_URL = os.getenv("GRAPH_SERVICE_URL", "http://localhost:8002")
 LIGHTRAG_SERVICE_URL = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8001")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
+LIGHTRAG_QUERY_TIMEOUT = float(os.getenv("LIGHTRAG_QUERY_TIMEOUT", "12"))
 
 # Reliability controls
 REQUEST_RETRIES = int(os.getenv("RAG_REQUEST_RETRIES", "2"))
@@ -236,6 +237,18 @@ class SearchRequest(BaseModel):
     llm_knowledge: bool = False
     reranking: bool = True
     deduplicate: bool = True
+
+
+class SearchStreamRequest(BaseModel):
+    query: str
+    mode: str = "hybrid"  # vector, notes, graph, hybrid
+    n_results: int = 10
+    max_results: Optional[int] = None
+    llm_provider: str = "kimi"
+    model: Optional[str] = None
+    temperature: float = 0.0
+    system_prompt: Optional[str] = None
+    stream: bool = True
 
 
 @app.get("/api/v1/health")
@@ -399,6 +412,83 @@ async def unified_search(request: SearchRequest):
                 )
 
 
+@app.post("/api/v1/search/stream")
+async def unified_search_stream(request: SearchStreamRequest):
+    """
+    Stream search responses over SSE through the API gateway.
+    Proxies to graph-service `/query_stream` (internal endpoint).
+    """
+    mode = request.mode.lower()
+    mode_aliases = {"notes": "graph", "graph": "graph", "networkx": "graph"}
+    stream_mode = mode_aliases.get(mode, mode)
+    if stream_mode not in {"vector", "graph", "hybrid"}:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported stream mode '{request.mode}'. "
+                "Use one of: vector, notes, graph, hybrid."
+            ),
+        )
+
+    n_results = request.max_results if request.max_results is not None else request.n_results
+    payload = {
+        "query": request.query,
+        "mode": stream_mode,
+        "llm_provider": request.llm_provider,
+        "model": request.model,
+        "temperature": request.temperature,
+        "system_prompt": request.system_prompt,
+        "n_results": n_results,
+        "stream": bool(request.stream),
+    }
+
+    async def _proxy_stream():
+        try:
+            async with httpx.AsyncClient(timeout=None) as client:
+                async with client.stream(
+                    "POST",
+                    f"{GRAPH_SERVICE_URL}/query_stream",
+                    json=payload,
+                    headers={
+                        **_auth_headers(),
+                        "Accept": "text/event-stream",
+                        "Cache-Control": "no-cache",
+                    },
+                ) as response:
+                    if response.status_code >= 400:
+                        raw_body = await response.aread()
+                        error_text = raw_body.decode("utf-8", errors="replace")[:500]
+                        error_event = {
+                            "type": "error",
+                            "message": f"Upstream stream failed ({response.status_code}): {error_text}",
+                        }
+                        yield f"data: {json.dumps(error_event)}\n\n"
+                        return
+
+                    async for chunk in response.aiter_text():
+                        if chunk:
+                            yield chunk
+        except httpx.RequestError as e:
+            error_event = {
+                "type": "error",
+                "message": f"Graph streaming service unreachable: {str(e)}",
+            }
+            yield f"data: {json.dumps(error_event)}\n\n"
+        except Exception as e:
+            error_event = {"type": "error", "message": f"Streaming proxy error: {str(e)}"}
+            yield f"data: {json.dumps(error_event)}\n\n"
+
+    return StreamingResponse(
+        _proxy_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
 class UnifiedQueryRequest(BaseModel):
     query: str
     mode: str = "hybrid"  # networkx, lightrag, hybrid
@@ -433,17 +523,35 @@ async def unified_query(request: UnifiedQueryRequest):
     """
     mode = request.mode.lower()
 
-    # Normalize mode aliases
-    mode_aliases = {"networkx": "notes", "lightrag": "entities"}
+    # Normalize mode aliases (keep backward compatibility)
+    mode_aliases = {"graph": "notes", "networkx": "notes", "lightrag": "entities"}
     mode = mode_aliases.get(mode, mode)
+    supported_modes = {
+        "vector",
+        "notes",
+        "entities",
+        "notes+vector",
+        "entities+vector",
+        "dual-graph",
+        "hybrid",
+        "cascading",
+    }
+    if mode not in supported_modes:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Unsupported mode '{request.mode}'. "
+                "Use one of: vector, notes, entities, notes+vector, "
+                "entities+vector, dual-graph, hybrid, cascading. "
+                "For deep research, use WebSocket /api/v1/deep-research."
+            ),
+        )
     print(f"DEBUG: Unified query incoming mode: {mode}")
     effective_relevance_threshold = request.relevance_threshold
     if effective_relevance_threshold == 0 and request.distance_threshold is not None:
         import math
 
-        effective_relevance_threshold = 100 / (
-            1 + math.exp(request.distance_threshold / 2)
-        )
+        effective_relevance_threshold = max(0.0, (1.0 - (request.distance_threshold / 2.0)) * 100.0)
         effective_relevance_threshold = max(
             0.0, min(100.0, effective_relevance_threshold)
         )
@@ -501,7 +609,8 @@ async def unified_query(request: UnifiedQueryRequest):
                 dists = vector_data.get("distances", [[]])[0]
                 for doc, meta, dist in zip(docs, metas, dists):
                     try:
-                        relevance = max(0.0, min(100.0, 100 / (1 + math.exp(dist / 2))))
+                        # Map 0->100%, 1->50%, 2->0%
+                        relevance = max(0.0, (1.0 - (dist / 2.0)) * 100.0)
                     except Exception:
                         relevance = 50.0
                     doc_text = doc if isinstance(doc, str) else ""
@@ -794,7 +903,7 @@ async def unified_query(request: UnifiedQueryRequest):
                     client,
                     f"{LIGHTRAG_SERVICE_URL}/query",
                     payload,
-                    timeout=60.0,
+                    timeout=LIGHTRAG_QUERY_TIMEOUT,
                     service="lightrag",
                 )
                 if response.status_code != 200:
@@ -962,7 +1071,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                         },
-                        timeout=60.0,
+                        timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
                     ),
                     _post_json(
@@ -1044,7 +1153,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                         },
-                        timeout=60.0,
+                        timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
                     ),
                 ]
@@ -1119,7 +1228,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                         },
-                        timeout=90.0,
+                        timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
                     ),
                     _post_json(

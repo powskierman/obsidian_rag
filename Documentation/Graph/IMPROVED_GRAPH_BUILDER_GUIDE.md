@@ -7,7 +7,7 @@ This covers the NetworkX graph build process and how to retry failures.
 ### Option A: Docker helper (OpenRouter)
 
 ```bash
-./Scripts/build_knowledge_graph.sh
+./Scripts/indexing/update_knowledge_graph.sh
 ```
 
 Requires `OPENROUTER_API_KEY` in `.env`.
@@ -15,7 +15,7 @@ Requires `OPENROUTER_API_KEY` in `.env`.
 ### Option B: Local script
 
 ```bash
-python src/indexing/build_knowledge_graph.py
+python src/services/build_graph.py
 ```
 
 Follow the prompts to run a full build or resume from a checkpoint.

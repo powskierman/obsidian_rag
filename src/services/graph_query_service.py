@@ -9,7 +9,7 @@ import os
 import re
 import requests
 import json
-from kimi_graph_builder import GraphBuilder, GraphQuerier
+from networkx_graph_builder import GraphBuilder, GraphQuerier
 import logging
 from openai import OpenAI
 import threading
@@ -128,10 +128,10 @@ def extract_entities_from_graph(graph_text: str) -> list:
 
 def relevance_from_distance(dist: float) -> float:
     """Convert distance score to relevance percentage (0-100)."""
-    import math
+    # Map 0->100%, 1->50%, 2->0%
     try:
-        relevance = 100 / (1 + math.exp(dist / 2))
-        return max(0.0, min(100.0, relevance))
+        relevance = max(0.0, (1.0 - (dist / 2.0)) * 100.0)
+        return relevance
     except Exception:
         return 50.0
 
@@ -214,6 +214,35 @@ def count_term_matches(terms: set[str], text: str) -> int:
     text_lower = text.lower()
     text_norm = normalize_text(text_lower)
     return sum(1 for term in terms if term_in_text(term, text_lower, text_norm))
+
+
+def parse_query_tags(query: str) -> tuple[str, dict]:
+    """
+    Parse 'tag:value' or 'tag:"value"' syntax from query.
+    Returns (cleaned_query, filters_dict)
+    """
+    if not query:
+        return "", {}
+        
+    tag_pattern = re.compile(r'\btag:(?:"([^"]+)"|([a-zA-Z0-9_-]+))', re.IGNORECASE)
+    
+    tags = []
+    def replace_func(match):
+        # Group 1 is quoted, Group 2 is simple
+        val = match.group(1) or match.group(2)
+        tags.append(val.lower())
+        return ""
+        
+    cleaned = tag_pattern.sub(replace_func, query)
+    
+    # Clean up extra spaces
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    
+    filters = {}
+    if tags:
+        filters['tags'] = tags
+        
+    return cleaned, filters
 
 
 def generate_hyde_text(user_query: str, llm_provider: str, model: str) -> str:
@@ -633,9 +662,15 @@ def initialize_graph(graph_path: str = None):
     try:
         builder = GraphBuilder(api_key=api_key)
         
-        # If no path provided, try default locations
+        # If no explicit path provided, resolve from env with centralized data-dir fallback.
         if graph_path is None:
-            graph_path = os.environ.get('GRAPH_PATH', '/app/graph_data/knowledge_graph_full.pkl')
+            graph_path = os.environ.get('GRAPH_PATH')
+            if not graph_path:
+                data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
+                if data_dir:
+                    graph_path = str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl')
+                else:
+                    graph_path = '/app/graph_data/knowledge_graph_full.pkl'
         
         # Try multiple possible locations
         possible_paths = [
@@ -645,6 +680,13 @@ def initialize_graph(graph_path: str = None):
             '/app/knowledge_graph_full.pkl',
             '/app/knowledge_graph_test.pkl'
         ]
+        data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
+        if data_dir:
+            possible_paths.extend([
+                str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl'),
+                str(Path(data_dir) / 'graph_data' / 'knowledge_graph_test.pkl'),
+                str(Path(data_dir) / 'knowledge_graph_full.pkl'),
+            ])
         
         graph_file = None
         for path in possible_paths:
@@ -711,6 +753,13 @@ def query_graph():
         llm_knowledge_enabled = data.get('llm_knowledge', False)
         conversation_history = data.get('conversation_history', [])
 
+        # Parse tags from query
+        clean_query, tag_filters = parse_query_tags(user_query)
+        logger.info(f"Parsed query: '{clean_query}', filters: {tag_filters}")
+        
+        # Use cleaning query for vector search, but pass filters
+        current_query_text = clean_query if clean_query.strip() else user_query
+
         logger.info(
             "Query request: mode=%s provider=%s model=%s n_results=%s web_search=%s llm_knowledge=%s",
             mode,
@@ -721,13 +770,17 @@ def query_graph():
             llm_knowledge_enabled,
         )
 
-        if not user_query:
-            return jsonify({'error': 'Query is required'}), 400
+        if not current_query_text:
+             # If query was ONLY tags, we still might want to search but the embedding service handles empty string poorly usually
+             # But here we fallback to user_query if clean_query is empty, which is fine (means no tags or only tags)
+             if not user_query:
+                return jsonify({'error': 'Query is required'}), 400
+             current_query_text = user_query
 
         # Set default models based on provider
         if not model:
             model_defaults = {
-                'ollama': 'llama3.2',
+                'ollama': os.getenv('OLLAMA_MODEL') or os.getenv('LLM_MODEL') or 'llama3.2',
                 'claude': 'claude-sonnet-4-5-20250929',
                 'gemini': 'gemini-3-pro-preview',
                 'gpt-oss': 'gpt-4',
@@ -745,11 +798,12 @@ def query_graph():
                 vector_response = requests.post(
                     f'{EMBEDDING_SERVICE_URL}/query',
                     json={
-                        'query': user_query,
+                        'query': current_query_text,
                         'n_results': n_results,
                         'reranking': True,
                         'deduplicate': True,
-                        'relevance_threshold': 75  # Filter out noise < 75%
+                        'relevance_threshold': 40,  # Filter out noise < 40%
+                        'filters': tag_filters if tag_filters else None
                     },
                     timeout=60,
                     headers=_service_headers()
@@ -1072,7 +1126,7 @@ def query_graph():
                             'n_results': n_results,
                             'reranking': True,
                             'deduplicate': True,
-                            'relevance_threshold': 75  # Filter out noise < 75%
+                            'relevance_threshold': 40,  # Filter out noise < 75%
                         },
                         timeout=60,
                         headers=_service_headers()

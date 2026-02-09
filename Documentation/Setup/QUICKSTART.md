@@ -37,13 +37,13 @@ curl -s -X POST http://localhost:4000/api/v1/query \
 Run the appropriate script from `Scripts/`:
 
 ```bash
-./Scripts/run_indexing.sh
+./Scripts/indexing/run_indexing.sh
 ```
 
 To force a full rebuild:
 
 ```bash
-./Scripts/run_indexing.sh
+./Scripts/indexing/run_indexing.sh
 ```
 
 See `Documentation/Setup/INDEXING_SCRIPTS_GUIDE.md` for options.

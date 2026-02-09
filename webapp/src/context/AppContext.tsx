@@ -18,6 +18,55 @@ interface AppContextType extends AppState {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
+const CURRENT_SETTINGS_VERSION = 2;
+
+const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
+
+const normalizeSettings = (raw: unknown): SettingsState => {
+  const parsed = (raw && typeof raw === 'object') ? raw as Record<string, unknown> : {};
+  const next: SettingsState = {
+    ...defaultSettings,
+    ...parsed,
+  } as SettingsState;
+  const rawSettingsVersion = Number(parsed.settingsVersion);
+  const normalizedSettingsVersion = Number.isFinite(rawSettingsVersion) ? rawSettingsVersion : 0;
+  const needsV2Reset = normalizedSettingsVersion < CURRENT_SETTINGS_VERSION;
+
+  // Migration safety: old distanceThreshold values can map too aggressively.
+  // Reset to 0% so users never get silently over-restrictive filtering.
+  if (
+    needsV2Reset &&
+    (
+      ('distanceThreshold' in parsed && !('relevanceThreshold' in parsed)) ||
+      Number(next.relevanceThreshold) > 0
+    )
+  ) {
+    console.warn('🔄 Settings migration v2 applied. Resetting relevanceThreshold to 0% to avoid restrictive filtering.');
+    next.relevanceThreshold = 0;
+  }
+
+  const relevance = Number(next.relevanceThreshold);
+  next.relevanceThreshold = Number.isFinite(relevance)
+    ? clamp(Math.round(relevance), 0, 100)
+    : defaultSettings.relevanceThreshold;
+
+  const sources = Number(next.sources);
+  next.sources = Number.isFinite(sources)
+    ? clamp(Math.round(sources), 1, 50)
+    : defaultSettings.sources;
+
+  const temperature = Number(next.temperature);
+  next.temperature = Number.isFinite(temperature)
+    ? clamp(temperature, 0, 1)
+    : defaultSettings.temperature;
+
+  next.showSources = Boolean(next.showSources);
+  next.enhancedSearch = Boolean(next.enhancedSearch);
+  next.deepThinking = Boolean(next.deepThinking);
+  next.settingsVersion = CURRENT_SETTINGS_VERSION;
+
+  return next;
+};
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [searchMode, setSearchModeState] = useState<SearchMode>('hybrid');
@@ -32,6 +81,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   // Load from localStorage on mount
   useEffect(() => {
+    const previousOnError = window.onerror;
+    const isExtensionContextError = (value: unknown): boolean =>
+      typeof value === 'string' && value.includes('Extension context invalidated');
+
+    // Prevent third-party extension reload noise from surfacing as uncaught app errors.
+    window.onerror = (message, source, lineno, colno, error) => {
+      if (isExtensionContextError(message) || isExtensionContextError(error?.message)) {
+        return true;
+      }
+      if (typeof previousOnError === 'function') {
+        return previousOnError(message, source, lineno, colno, error);
+      }
+      return false;
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason as { message?: unknown } | string | undefined;
+      const reasonMessage =
+        typeof reason === 'string'
+          ? reason
+          : typeof reason?.message === 'string'
+            ? reason.message
+            : '';
+      if (isExtensionContextError(reasonMessage)) {
+        event.preventDefault();
+      }
+    };
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
     const savedSettings = localStorage.getItem('obsidian-rag-settings');
     const savedHistory = localStorage.getItem('obsidian-rag-chat-history');
     const savedSearchMode = localStorage.getItem('obsidian-rag-search-mode');
@@ -42,19 +120,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-
-        // MIGRATION: Convert old distanceThreshold to new relevanceThreshold
-        if ('distanceThreshold' in parsed && !('relevanceThreshold' in parsed)) {
-          console.log('🔄 Migrating old distanceThreshold to relevanceThreshold');
-          const legacy = Number(parsed.distanceThreshold);
-          const legacyValue = Number.isFinite(legacy) ? legacy : 0;
-          const mapped = Math.round(100 / (1 + Math.exp(legacyValue / 2)));
-          parsed.relevanceThreshold = Math.max(0, Math.min(100, mapped));
-          delete parsed.distanceThreshold;
-        }
-
-        setSettings(parsed);
-        parsedSettings = parsed;
+        const normalized = normalizeSettings(parsed);
+        setSettings(normalized);
+        parsedSettings = normalized;
       } catch (e) {
         console.error('Failed to load settings:', e);
       }
@@ -85,6 +153,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (savedPrompt) {
       setSystemPrompt(savedPrompt);
     }
+
+    return () => {
+      window.onerror = previousOnError;
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
   }, []);
 
   // Save to localStorage when settings change
@@ -109,7 +182,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [systemPrompt]);
 
   const updateSettings = (newSettings: Partial<SettingsState>) => {
-    const updated = { ...settings, ...newSettings };
+    const updated = { ...settings, ...newSettings, settingsVersion: CURRENT_SETTINGS_VERSION };
     if (updated.deepThinking) {
       updated.enhancedSearch = false;
     }

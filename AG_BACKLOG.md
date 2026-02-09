@@ -29,5 +29,12 @@ This file serves as the primary task queue for Antigravity agents. Each item inc
 | :--- | :--- | :--- | :--- | :--- |
 | **TODO** | Visualize Graph Nodes | `webapp/src/components/Graph/` | No backend API changes | `webapp` builds; Force Graph renders mock data correctly. |
 
+## 6. Antigravity Upgrades (Everything Claude Code Integration)
+| Status | Task | Context / Paths | Constraints | Acceptance Criteria |
+| :--- | :--- | :--- | :--- | :--- |
+| **DONE** | Port Eval-Driven Design Skill | `.agent/skills/eval-driven-design/` | Use `skills/eval-harness` as base | Skill exists; Can define/check/report evals; Docs created. |
+| **DONE** | Port Implementation Planner | `.agent/skills/implementation-planner/` | Use `agents/planner.md` as base | Skill exists; Produces `implementation_plan.md` in correct format. |
+| **DONE** | Create Review Workflow | `.agent/workflows/review-changes.md` | Use `agents/code-reviewer.md` | Workflow runs analysis on diffs and provides feedback. |
+
 ---
 *Agents: When picking a task, mark Status as IN_PROGRESS. When finished, mark as DONE and link the PR or Commit hash.*

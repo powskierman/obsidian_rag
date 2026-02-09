@@ -17,7 +17,7 @@ Standardization improves retrieval, linking, and graph quality.
    - Add explicit tags (e.g. `#topic/subtopic`) to frontmatter.
    - Link related notes to their parent Map of Content (MoC).
 3. Reindex after large changes:
-   - `./Scripts/run_indexing.sh`
+   - `./Scripts/indexing/run_indexing.sh`
 
 ## Related Docs
 

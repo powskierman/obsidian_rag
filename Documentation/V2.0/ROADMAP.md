@@ -14,7 +14,7 @@ Goal: reduce capture + indexing friction while improving trust and provenance fo
 - Define confidence threshold and routing rules.
 
 Deliverable
-- `Documentation/V2.0/SCHEMA.md` with frontmatter fields, routing rules, and thresholds.
+- A schema doc in `Documentation/V2.0/` with frontmatter fields, routing rules, and thresholds.
 
 ## Phase 1: Frictionless Capture + Safe Routing
 - Add a lightweight “Inbox” capture path (CLI or simple local endpoint).

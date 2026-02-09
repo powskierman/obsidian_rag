@@ -68,7 +68,6 @@ git push origin main --force
 - `lightrag_db_backup_*/`
 - `graphrag_claude_db/`
 - `graphrag_db/`
-- `Documentation/Archive/old_databases/`
 
 ## Recommendation
 **Use Option 1 (Fresh Start)** if:

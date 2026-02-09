@@ -187,7 +187,11 @@ export default function Home() {
                 const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' ? settings.model : '';
 
                 // Unified Search Call
-                console.log('📡 Sending query with relevanceThreshold:', settings.relevanceThreshold);
+                console.log('📡 Sending query settings:', {
+                    mode: backendMode,
+                    sources: settings.sources,
+                    relevanceThreshold: settings.relevanceThreshold
+                });
                 const result = await api.unifiedSearch(
                     userMsg,
                     backendMode as any,

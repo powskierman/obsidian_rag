@@ -1,6 +1,6 @@
 # Graph Search Improvements
 
-This note summarizes the current graph-source ranking safeguards in `src/services/graph_query_service.py` and related filters in `src/services/kimi_graph_builder.py`.
+This note summarizes the current graph-source ranking safeguards in `src/services/graph_query_service.py` and related filters in `src/services/networkx_graph_builder.py`.
 
 ## Problem
 
@@ -8,7 +8,7 @@ Graph-only queries were surfacing unrelated sources due to low-signal terms and 
 
 ## Current Behavior (Condensed)
 
-1. **Entity noise filtering** (`kimi_graph_builder.py`)
+1. **Entity noise filtering** (`networkx_graph_builder.py`)
    - Stopwords, dates, and numeric artifacts are excluded before matching.
 
 2. **Query-term gating with normalization** (`graph_query_service.py`)
@@ -40,9 +40,9 @@ docker compose up -d graph-service
 ## Quick Check
 
 ```bash
-curl -X POST http://localhost:8002/query \
+curl -X POST http://localhost:4000/api/v1/query \
   -H "Content-Type: application/json" \
-  -d '{"query":"nextion and esp32","mode":"graph"}'
+  -d '{"query":"nextion and esp32","mode":"notes"}'
 ```
 
 Expected: Nextion/ESP32 notes rise; AI/agent/system notes are suppressed.

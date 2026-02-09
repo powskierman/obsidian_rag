@@ -1,54 +1,112 @@
-<!--
-Sync Impact Report:
-- Version Change: Template -> 2.0.0
-- Modified Principles:
-  - [PRINCIPLE_1] -> I. Local-First & Personal (Derived from Purpose/Scope)
-  - [PRINCIPLE_2] -> II. Authoritative Architecture (Derived from System Architecture)
-  - [PRINCIPLE_3] -> III. Independent Indexing (Derived from Data Principles)
-  - [PRINCIPLE_4] -> IV. Spec-Driven Development (Derived from Development Workflow)
-  - [PRINCIPLE_5] -> V. Quality & Performance Gates (Derived from Targets)
-- Added Sections:
-  - Security & Privacy
-  - Public Interfaces
-- Templates Checked:
-  - .specify/templates/plan-template.md (Compatible)
-  - .specify/templates/spec-template.md (Compatible)
-  - .specify/templates/tasks-template.md (Compatible)
--->
-
 # Obsidian RAG Constitution
 
-## Core Principles
+This document is mirrored in:
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/PROJECT_CONSTITUTION.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/.specify/memory/constitution.md`
 
-### I. Local-First & Personal
-Obsidian RAG is a local-first retrieval system optimized for personal knowledge work. Generated databases (vector, graph) are local-only and must not be tracked in version control as they may contain private content. No centralized hosted or multi-tenant deployment is supported; the system is designed to run on the user's machine.
+Both files must remain aligned.
+
+## Purpose
+Obsidian RAG is a local-first retrieval system for a personal Obsidian vault. It combines vector search and graph reasoning behind a unified API gateway, with repeatable indexing workflows and strong privacy defaults.
+
+## Primary Users and Use Cases
+- Knowledge workers querying private vault content.
+- Hybrid retrieval: semantic vectors plus graph reasoning.
+- Deep research flows with streaming updates and multi-step reasoning.
+
+## Scope
+In scope:
+- Local services: embedding, NetworkX graph, LightRAG graph, API gateway, Streamlit UI, and WebApp.
+- Search modes: `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`, and deep-research WebSocket.
+- Incremental indexing and explicit rebuild workflows.
+- MCP integration and Docker-based local deployment.
+
+Out of scope:
+- Multi-tenant or centralized hosted deployments.
+- Tracking generated databases in Git.
+
+## Core Principles
+### I. Local-First and Personal
+Generated databases are local-only and may contain private data. They must not be committed to version control.
 
 ### II. Authoritative Architecture
-The system architecture defines rigid service boundaries and ports that must be respected: Embedding (ChromaDB) on 8000, LightRAG on 8001, NetworkX Graph on 8002, API Gateway on 4000, and Streamlit UI on 8501. All feature implementations must align with this topology and communicate via the API Gateway.
+Service boundaries and ports are fixed:
+- Embedding (ChromaDB): `8000`
+- LightRAG: `8001`
+- NetworkX Graph: `8002`
+- API Gateway: `4000`
+- Streamlit UI: `8501`
+
+Features must respect these boundaries and route client traffic through the gateway public interfaces.
 
 ### III. Independent Indexing
-Incremental indexing is the default workflow. Graph and vector indexes must be capable of independent rebuilding. Vault standardization (naming, links, templates) is enforced to ensure retrieval quality. Full rebuilds are explicit operations, not side effects.
+Incremental indexing is the default. Graph and vector indexes must be rebuildable independently. Full rebuilds are explicit operations, not side effects.
 
 ### IV. Spec-Driven Development
-All development work is driven by Spec Kit artifacts: specifications, implementation plans, and task lists. Implementation must proceed via the defined API gateway and service boundaries. Documentation updates (tracked in `Documentation/INDEX.md`) are mandatory for new workflows or APIs.
+Work is driven by Spec Kit artifacts (spec, plan, tasks). Documentation updates are required for new or changed workflows/APIs.
 
-### V. Quality & Performance Gates
-Changes must pass the mode audit script (`python Scripts/audit_search_modes.py`) with non-zero sources where applicable. Latency targets are strictly enforced: Vector < 1s, Graph < 5s, Hybrid < 8s, and Deep Thinking < 120s.
+### V. Quality and Performance Gates
+Changes must satisfy functional and performance gates defined in this constitution before being considered done.
 
-## Security & Privacy
+## Public Interfaces (API Gateway)
+- `POST /api/v1/search`
+- `POST /api/v1/search/stream` (SSE `text/event-stream`)
+- `POST /api/v1/query`
+- `GET /api/v1/health`
+- `GET /api/v1/stats`
+- `ws://localhost:4000/api/v1/deep-research`
 
-API keys (e.g., OpenRouter, Gemini, Tavily) must be loaded from environment variables (`.env`). Destructive operations, such as clearing embeddings, require a specific token (`EMBEDDING_CLEAR_TOKEN`). Privacy is paramount; no private vault content should be exposed inadvertently through logging or external transmissions.
+Compatibility aliases:
+- `graph` -> `notes`
+- `networkx` -> `notes`
+- `lightrag` -> `entities`
 
-## Public Interfaces
+Internal-only compatibility endpoint:
+- `POST http://localhost:8002/query_stream` is internal and deprecated for direct client traffic. Clients should use `POST /api/v1/search/stream`.
 
-The system exposes a defined set of public interfaces via the API Gateway:
-- `POST /api/v1/search`: Standard retrieval.
-- `POST /api/v1/search/stream`: Server-Sent Events for streaming responses.
-- `GET /api/v1/health` & `GET /api/v1/stats`: System monitoring.
-- `ws://localhost:4000/api/v1/deep-research`: WebSocket for deep research flows.
+## Data and Indexing Principles
+- Primary stores:
+  - `chroma_db/`
+  - `lightrag_db/`
+  - `data/graph_data/`
+- Indexing defaults to incremental refresh.
+- Vault standardization (naming, links, metadata, templates) is part of retrieval quality.
+
+## Quality and Performance Targets
+Authoritative audit script:
+- `python Scripts/debug/audit_search_modes.py`
+
+Pass criteria:
+- Status must be `PASS`.
+- Non-chat retrieval modes must return non-zero sources.
+- Latency targets:
+  - Vector: `< 1s`
+  - Graph (`notes`, `entities`): `< 5s`
+  - Hybrid/combined (`notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`): `< 8s`
+  - Deep Thinking: `< 120s`
+
+## Security and Privacy
+- API keys are sourced from environment variables (`.env`).
+- Destructive embedding operations require `EMBEDDING_CLEAR_TOKEN`.
+- Logging and telemetry must avoid exposing private vault content.
+
+## Development Workflow and Definition of Done
+Required for completion:
+- Relevant tests and health/smoke checks pass.
+- Search modes remain functional for the changed path.
+- Documentation and public interface references are updated.
+- Indexing and data-storage rules remain constitution-compliant.
 
 ## Governance
+This constitution supersedes ad-hoc practices. Changes must update both mirrored constitution files in the same change set.
 
-This constitution supersedes ad-hoc practices. Amendments must be documented in this file and reflected in `Documentation/PROJECT_CONSTITUTION.md`. Compliance is verified via PR reviews and the execution of the `audit_search_modes.py` script. New features must pass the Definition of Done: health checks pass, search modes functional, documentation updated, and indexing rules consistent.
+## Canonical References
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/SYSTEM_OVERVIEW_2025.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/UNIFIED_API_IMPLEMENTATION.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/INDEXING_STRATEGY.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/DEEP_THINKING_PROTOCOL.md`
+- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/STREAMING_IMPLEMENTATION.md`
 
-**Version**: 2.0.0 | **Ratified**: 2025-01-01 | **Last Amended**: 2026-01-24
+**Version**: 2.1.0  
+**Ratified**: 2025-01-01  
+**Last Amended**: 2026-02-06

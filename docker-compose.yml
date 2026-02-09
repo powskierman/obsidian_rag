@@ -9,14 +9,16 @@ services:
       - "8000:8000"
     volumes:
       - ./src:/app/src:ro
-      - ./chroma_db:/app/chroma_db:rw,cached
+      - "${OBSIDIAN_RAG_DATA_DIR}/chroma_db:/app/chroma_db:rw,cached"
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
       - CHROMA_COLLECTION=${CHROMA_COLLECTION:-obsidian_vault}
+      - CHROMA_DB_PATH=/app/chroma_db
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - EMBED_MODEL=${EMBED_MODEL:-all-MiniLM-L6-v2}
       - OBSIDIAN_VAULT_PATH=/app/vault
+      - EMBEDDING_CLEAR_TOKEN=${EMBEDDING_CLEAR_TOKEN:-}
     command: python src/services/embedding_service.py
     restart: unless-stopped
     healthcheck:
@@ -36,15 +38,59 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      - lightrag_storage:/app/lightrag_db
+      - "${OBSIDIAN_RAG_DATA_DIR}/lightrag_db:/app/lightrag_db"
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - KIMI_MODEL=${KIMI_MODEL:-anthropic/claude-3.5-haiku}
       - LIGHTRAG_DIR=${LIGHTRAG_DIR:-/app/lightrag_db}
+      - LLM_MODEL=${LLM_MODEL:-qwen2.5:7b-instruct}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - LLM_MODEL_PATH=${LLM_MODEL_PATH:-}
       - OLLAMA_HOST=http://host.docker.internal:11434
-      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}
+      - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
+      - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
+      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:1234/v1}
+      - MLX_API_KEY=${MLX_API_KEY:-mlx}
+      - MLX_MODEL=${MLX_MODEL:-}
+      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text:latest}
+      - RAG_QUERY_TIMEOUT=${RAG_QUERY_TIMEOUT:-10}
+      - EMBED_ASYNC=${EMBED_ASYNC:-1}
+      - LLM_ASYNC=${LLM_ASYNC:-1}
+      - MAX_ASYNC=${MAX_ASYNC:-1}
+      - MAX_PARALLEL_INSERT=${MAX_PARALLEL_INSERT:-1}
+      - LLM_TIMEOUT=${LLM_TIMEOUT:-240}
+      - TIMEOUT=${TIMEOUT:-240}
+      - ENABLE_LLM_CACHE=${ENABLE_LLM_CACHE:-true}
+      - ENABLE_LLM_CACHE_FOR_EXTRACT=${ENABLE_LLM_CACHE_FOR_EXTRACT:-true}
+      - LIGHTRAG_BATCH_SIZE=${LIGHTRAG_BATCH_SIZE:-5}
+      - LIGHTRAG_BATCH_TIMEOUT=${LIGHTRAG_BATCH_TIMEOUT:-300}
+      - LIGHTRAG_CHUNK_TOKENS=${LIGHTRAG_CHUNK_TOKENS:-900}
+      - LIGHTRAG_CHUNK_OVERLAP=${LIGHTRAG_CHUNK_OVERLAP:-120}
+      - CHUNK_SIZE=${CHUNK_SIZE:-900}
+      - CHUNK_OVERLAP_SIZE=${CHUNK_OVERLAP_SIZE:-120}
+      - LIGHTRAG_DOC_TIMEOUT=${LIGHTRAG_DOC_TIMEOUT:-600}
+      - LIGHTRAG_DOC_RETRY_ATTEMPTS=${LIGHTRAG_DOC_RETRY_ATTEMPTS:-1}
+      - LIGHTRAG_HEARTBEAT_INTERVAL=${LIGHTRAG_HEARTBEAT_INTERVAL:-5}
+      - LIGHTRAG_HEARTBEAT_STALL_SECONDS=${LIGHTRAG_HEARTBEAT_STALL_SECONDS:-60}
+      - LIGHTRAG_DOC_EXECUTION_MODE=${LIGHTRAG_DOC_EXECUTION_MODE:-inprocess}
+      - MAX_GLEANING=${MAX_GLEANING:-2}
+      - ENTITY_EXTRACT_CHUNK_RETRY_ATTEMPTS=${ENTITY_EXTRACT_CHUNK_RETRY_ATTEMPTS:-2}
+      - ENTITY_EXTRACT_CHUNK_RETRY_BACKOFF_SECONDS=${ENTITY_EXTRACT_CHUNK_RETRY_BACKOFF_SECONDS:-2.0}
+      - ENTITY_EXTRACT_SKIP_FAILED_CHUNKS=${ENTITY_EXTRACT_SKIP_FAILED_CHUNKS:-true}
+      - ENABLE_MARKDOWN_PREPROCESSING=${ENABLE_MARKDOWN_PREPROCESSING:-true}
+      - OLLAMA_LLM_NUM_CTX=${OLLAMA_LLM_NUM_CTX:-32768}
+      - OLLAMA_LLM_NUM_PREDICT=${OLLAMA_LLM_NUM_PREDICT:-2048}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-240}
+      - LIGHTRAG_INDEX_TEXT_MODE=${LIGHTRAG_INDEX_TEXT_MODE:-raw}
+      - LLM_MAX_TOKENS=${LLM_MAX_TOKENS:-2048}
+      - LLM_TEMPERATURE=${LLM_TEMPERATURE:-0}
+      - LIGHTRAG_SUPPORTED_EXTENSIONS=${LIGHTRAG_SUPPORTED_EXTENSIONS:-.md}
+      - LIGHTRAG_MAX_DOC_CHARS=${LIGHTRAG_MAX_DOC_CHARS:-120000}
+      - LIGHTRAG_EXCLUDE_PATH_PATTERNS=${LIGHTRAG_EXCLUDE_PATH_PATTERNS:-}
+      - LIGHTRAG_REINDEX_GUARD_MAX_RATIO=${LIGHTRAG_REINDEX_GUARD_MAX_RATIO:-0.35}
+      - LIGHTRAG_REINDEX_GUARD_MIN_FILES=${LIGHTRAG_REINDEX_GUARD_MIN_FILES:-200}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
@@ -56,7 +102,7 @@ services:
     networks:
       - rag-network
 
-  # Reasoning Graph Service (Kimi)
+  # Reasoning Graph Service (NetworkX)
   graph-service:
     build:
       context: .
@@ -66,12 +112,14 @@ services:
       - "8002:8002"
     volumes:
       - ./src:/app/src:ro
-      - ./data/graph_data:/app/graph_data
+      - "${OBSIDIAN_RAG_DATA_DIR}/graph_data:/app/graph_data"
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
+      - ./src/services/networkx_graph_builder.py:/app/networkx_graph_builder.py:ro
+      - ./src/services/graph_query_service.py:/app/graph_query_service.py:ro
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - GRAPH_PATH=${GRAPH_PATH:-/app/graph_data/knowledge_graph_full.pkl}
+      - GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
       - KIMI_MODEL=${KIMI_MODEL:-anthropic/claude-3.5-haiku}
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
@@ -81,6 +129,7 @@ services:
       - OPENAI_TIMEOUT=${OPENAI_TIMEOUT:-60}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - LLM_MODEL=${LLM_MODEL:-qwen3:latest}
       - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -187,4 +236,3 @@ networks:
 volumes:
   chroma_db:
   graph_storage:
-  lightrag_storage:

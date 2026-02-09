@@ -2,9 +2,9 @@
 
 This repo keeps generated data out of Git. These directories are expected to be local-only and rebuildable:
 
-- `chroma_db/`: vector embeddings (embedding service).
-- `lightrag_db/`: LightRAG entity graph data.
-- `data/graph_data/`: NetworkX graph snapshots.
+- `${OBSIDIAN_RAG_DATA_DIR}/chroma_db`: vector embeddings (embedding service).
+- `${OBSIDIAN_RAG_DATA_DIR}/lightrag_db`: LightRAG entity graph data.
+- `${OBSIDIAN_RAG_DATA_DIR}/graph_data`: NetworkX graph snapshots.
 
 ## Why They Are Not Tracked
 
@@ -20,7 +20,7 @@ docker compose up -d
 
 # Index your vault (choose the script that matches your graph mode)
 # Index your vault (Unified script)
-./Scripts/run_indexing.sh
+./Scripts/indexing/run_indexing.sh
 ```
 
 If you use a different indexing path, pick the relevant script from `Scripts/`.
@@ -28,7 +28,7 @@ If you use a different indexing path, pick the relevant script from `Scripts/`.
 Force a full rebuild:
 
 ```bash
-./Scripts/run_indexing.sh
+./Scripts/indexing/run_indexing.sh
 ```
 
 ## Reindex Embeddings (Clear + Rebuild)
@@ -73,7 +73,7 @@ python src/indexing/index_vault.py /path/to/vault \
    ```
 2. Backup and remove the DB:
    ```bash
-   mv chroma_db chroma_db_backup_$(date +%Y%m%d)
+   mv "$OBSIDIAN_RAG_DATA_DIR/chroma_db" "$OBSIDIAN_RAG_DATA_DIR/chroma_db_backup_$(date +%Y%m%d)"
    ```
 3. Restart services:
    ```bash
@@ -81,5 +81,5 @@ python src/indexing/index_vault.py /path/to/vault \
    ```
 4. Reindex:
    ```bash
-   ./Scripts/run_indexing.sh
+   ./Scripts/indexing/run_indexing.sh
    ```
