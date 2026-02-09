@@ -7,7 +7,12 @@ LIGHTRAG_BYPASS_REINDEX_GUARD="${LIGHTRAG_BYPASS_REINDEX_GUARD:-0}"
 VAULT_PATH="${VAULT_PATH:-$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel}"
 VAULT_PATH_IN_CONTAINER="${VAULT_PATH_IN_CONTAINER:-/app/vault}"
 DATA_ROOT="${OBSIDIAN_RAG_DATA_DIR:-$HOME/obsidian_rag_local_data}"
-DB_PATH="${DB_PATH:-$DATA_ROOT/lightrag_db}"
+LIGHTRAG_DIR_CONTAINER="${LIGHTRAG_DIR_CONTAINER:-${LIGHTRAG_DIR:-/app/lightrag_db}}"
+DB_SUFFIX=""
+if [[ "$LIGHTRAG_DIR_CONTAINER" == /app/lightrag_db/* ]]; then
+  DB_SUFFIX="${LIGHTRAG_DIR_CONTAINER#/app/lightrag_db}"
+fi
+DB_PATH="${DB_PATH:-$DATA_ROOT/lightrag_db$DB_SUFFIX}"
 INDEX_FILE="$DB_PATH/indexed_files.txt"
 DRY_RUN="${DRY_RUN:-0}"
 SCAN_ONLY="${SCAN_ONLY:-0}"
@@ -17,6 +22,10 @@ HEALTH_RETRIES="${HEALTH_RETRIES:-60}"
 HEALTH_SLEEP_SECONDS="${HEALTH_SLEEP_SECONDS:-2}"
 REQUEST_RETRIES="${REQUEST_RETRIES:-8}"
 REQUEST_SLEEP_SECONDS="${REQUEST_SLEEP_SECONDS:-3}"
+INCLUDE_LIST_FILE="${INCLUDE_LIST_FILE:-}"
+INCLUDE_LIST_MODE="${INCLUDE_LIST_MODE:-only}" # only|missing
+FORCE_REINDEX="${FORCE_REINDEX:-0}"
+INDEX_AS_SINGLE_BATCH="${INDEX_AS_SINGLE_BATCH:-0}"
 
 echo "LightRAG: $LIGHTRAG_URL"
 echo "Vault:    $VAULT_PATH"
@@ -25,6 +34,11 @@ echo "DB:       $DB_PATH"
 echo "Dry run:  $DRY_RUN"
 echo "Scan only:$SCAN_ONLY"
 echo "Confirm:  $CONFIRM_INDEXING"
+echo "Force:    $FORCE_REINDEX"
+echo "Single-batch mode: $INDEX_AS_SINGLE_BATCH"
+if [ -n "$INCLUDE_LIST_FILE" ]; then
+  echo "Include file: $INCLUDE_LIST_FILE (mode=$INCLUDE_LIST_MODE)"
+fi
 echo
 
 wait_for_lightrag() {
@@ -96,6 +110,12 @@ for ln in idx.read_text(encoding="utf-8", errors="ignore").splitlines():
     p = ln.split("|", 1)[0]
     if p.startswith("/app/vault/"):
         indexed.add(p[len("/app/vault/"):])
+    elif p.startswith("app/vault/"):
+        indexed.add(p[len("app/vault/"):])
+    elif not p.startswith("/"):
+        if p.startswith("./"):
+            p = p[2:]
+        indexed.add(p)
 
 current = set(
     str(p.relative_to(vault))
@@ -134,17 +154,54 @@ done < "$tmp_missing_md"
 
 rm -f "$tmp_folders" "$tmp_missing_md"
 
-if [ "${#FOLDERS[@]}" -eq 0 ]; then
-  echo "No missing markdown files found. Nothing to reindex."
+TARGET_MD=()
+if [ -n "$INCLUDE_LIST_FILE" ]; then
+  if [ ! -f "$INCLUDE_LIST_FILE" ]; then
+    echo "ERROR: include list file not found: $INCLUDE_LIST_FILE"
+    exit 2
+  fi
+  INCLUDE_MD=()
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    [ -z "$line" ] && continue
+    case "$line" in
+      \#*) continue ;;
+    esac
+    INCLUDE_MD+=("$line")
+  done < "$INCLUDE_LIST_FILE"
+
+  if [ "${#INCLUDE_MD[@]}" -eq 0 ]; then
+    echo "ERROR: include list is empty: $INCLUDE_LIST_FILE"
+    exit 2
+  fi
+
+  if [ "$INCLUDE_LIST_MODE" = "missing" ]; then
+    for rel_path in "${INCLUDE_MD[@]}"; do
+      for miss in "${MISSING_MD[@]}"; do
+        if [ "$rel_path" = "$miss" ]; then
+          TARGET_MD+=("$rel_path")
+          break
+        fi
+      done
+    done
+  else
+    TARGET_MD=("${INCLUDE_MD[@]}")
+  fi
+else
+  TARGET_MD=("${MISSING_MD[@]}")
+fi
+
+if [ "${#TARGET_MD[@]}" -eq 0 ]; then
+  echo "No target markdown files to process."
   exit 0
 fi
 
-echo "Missing markdown files: ${#MISSING_MD[@]}"
-if [ "${#MISSING_MD[@]}" -le "$LIST_LIMIT" ]; then
-  printf '%s\n' "${MISSING_MD[@]}"
+echo "Target markdown files: ${#TARGET_MD[@]}"
+if [ "${#TARGET_MD[@]}" -le "$LIST_LIMIT" ]; then
+  printf '%s\n' "${TARGET_MD[@]}"
 else
-  printf '%s\n' "${MISSING_MD[@]:0:$LIST_LIMIT}"
-  echo "... truncated list (${#MISSING_MD[@]} total, showing first $LIST_LIMIT)"
+  printf '%s\n' "${TARGET_MD[@]:0:$LIST_LIMIT}"
+  echo "... truncated list (${#TARGET_MD[@]} total, showing first $LIST_LIMIT)"
 fi
 echo
 
@@ -171,65 +228,120 @@ if [ "$CONFIRM_INDEXING" = "1" ]; then
   fi
 fi
 
-for line in "${FOLDERS[@]}"; do
-  count="${line%%$'\t'*}"
-  folder="${line#*$'\t'}"
-
-  if [ "$folder" = "." ]; then
-    target_local="$VAULT_PATH"
-    target_request="$VAULT_PATH_IN_CONTAINER"
-  else
-    target_local="$VAULT_PATH/$folder"
-    target_request="$VAULT_PATH_IN_CONTAINER/$folder"
-  fi
-
-  echo ">>> Reindexing MD folder [$count missing-md] $target_local"
-
-  if [ "$DRY_RUN" = "1" ]; then
-    continue
-  fi
-
-  payload="$(python - "$target_request" "$LIGHTRAG_EXCLUDE_PATHS" "$LIGHTRAG_BYPASS_REINDEX_GUARD" <<'PY'
+if [ "$INDEX_AS_SINGLE_BATCH" = "1" ]; then
+  echo ">>> Reindexing in single request (files=${#TARGET_MD[@]})"
+  tmp_include_paths="$(mktemp)"
+  printf '%s\n' "${TARGET_MD[@]}" > "$tmp_include_paths"
+  payload="$(python - "$VAULT_PATH_IN_CONTAINER" "$LIGHTRAG_EXCLUDE_PATHS" "$LIGHTRAG_BYPASS_REINDEX_GUARD" "$FORCE_REINDEX" "$tmp_include_paths" <<'PY'
 import json,sys
 exclude_paths = [token.strip() for token in sys.argv[2].split(",") if token.strip()]
 bypass_guard = (sys.argv[3] if len(sys.argv) > 3 else "0") in {"1", "true", "TRUE", "yes", "YES"}
+force_reindex = (sys.argv[4] if len(sys.argv) > 4 else "0") in {"1", "true", "TRUE", "yes", "YES"}
+include_file = sys.argv[5]
+with open(include_file, "r", encoding="utf-8") as f:
+    include_paths = [ln.strip() for ln in f.readlines() if ln.strip()]
 print(json.dumps({
   "vault_path": sys.argv[1],
-  "force": False,
+  "force": force_reindex,
   "include_extensions": [".md"],
   "exclude_extensions": [".pdf"],
   "exclude_paths": exclude_paths,
+  "include_paths": include_paths,
   "bypass_reindex_guard": bypass_guard
 }))
 PY
 )"
+  rm -f "$tmp_include_paths"
 
   attempt=1
   while true; do
     http_code="$(curl -sS -o /tmp/reindex_remaining_md_only_resp.json -w "%{http_code}" -X POST "$LIGHTRAG_URL/index-vault" \
       -H "Content-Type: application/json" \
       -d "$payload")"
+    if [ "$http_code" -lt 400 ]; then
+      cat /tmp/reindex_remaining_md_only_resp.json
+      echo
+      echo "Done."
+      echo "Verify: Scripts/list_remaining_missing_files.sh"
+      exit 0
+    fi
+    echo "WARN: single-batch attempt $attempt failed (HTTP $http_code)"
+    cat /tmp/reindex_remaining_md_only_resp.json || true
+    if [ "$attempt" -ge "$REQUEST_RETRIES" ]; then
+      echo "ERROR: single-batch indexing failed after $REQUEST_RETRIES attempts."
+      exit 1
+    fi
+    attempt=$((attempt + 1))
+    sleep "$REQUEST_SLEEP_SECONDS"
+  done
+fi
+
+failures=0
+processed=0
+for rel_path in "${TARGET_MD[@]}"; do
+  processed=$((processed + 1))
+  target_local="$VAULT_PATH/$rel_path"
+  echo ">>> Reindexing MD file [$processed/${#TARGET_MD[@]}] $target_local"
+
+  if [ "$DRY_RUN" = "1" ]; then
+    continue
+  fi
+
+  payload="$(python - "$VAULT_PATH_IN_CONTAINER" "$LIGHTRAG_EXCLUDE_PATHS" "$LIGHTRAG_BYPASS_REINDEX_GUARD" "$rel_path" "$FORCE_REINDEX" <<'PY'
+import json,sys
+exclude_paths = [token.strip() for token in sys.argv[2].split(",") if token.strip()]
+bypass_guard = (sys.argv[3] if len(sys.argv) > 3 else "0") in {"1", "true", "TRUE", "yes", "YES"}
+rel_path = sys.argv[4]
+force_reindex = (sys.argv[5] if len(sys.argv) > 5 else "0") in {"1", "true", "TRUE", "yes", "YES"}
+print(json.dumps({
+  "vault_path": sys.argv[1],
+  "force": force_reindex,
+  "include_extensions": [".md"],
+  "exclude_extensions": [".pdf"],
+  "exclude_paths": exclude_paths,
+  "include_paths": [rel_path],
+  "bypass_reindex_guard": bypass_guard
+}))
+PY
+)"
+
+  attempt=1
+  success=0
+  while true; do
+    http_code="$(curl -sS -o /tmp/reindex_remaining_md_only_resp.json -w "%{http_code}" -X POST "$LIGHTRAG_URL/index-vault" \
+      -H "Content-Type: application/json" \
+      -d "$payload")"
 
     if [ "$http_code" -lt 400 ]; then
+      success=1
       break
     fi
 
     if rg -q "LightRAG initializing" /tmp/reindex_remaining_md_only_resp.json && [ "$attempt" -lt "$REQUEST_RETRIES" ]; then
-      echo "LightRAG initializing; retrying $attempt/$REQUEST_RETRIES for $target_request..."
+      echo "LightRAG initializing; retrying $attempt/$REQUEST_RETRIES for $rel_path..."
       sleep "$REQUEST_SLEEP_SECONDS"
       attempt=$((attempt + 1))
       continue
     fi
 
-    echo "Request failed for: $target_request"
-    cat /tmp/reindex_remaining_md_only_resp.json
-    echo
-    exit 1
+    break
   done
 
-  cat /tmp/reindex_remaining_md_only_resp.json
-  echo
+  if [ "$success" -eq 1 ]; then
+    cat /tmp/reindex_remaining_md_only_resp.json
+    echo
+  else
+    echo "Request failed for: $rel_path"
+    cat /tmp/reindex_remaining_md_only_resp.json
+    echo
+    failures=$((failures + 1))
+  fi
 done
+
+if [ "$failures" -gt 0 ]; then
+  echo "Completed with failures: $failures"
+  exit 1
+fi
 
 echo "Done."
 echo "Verify: Scripts/list_remaining_missing_files.sh"

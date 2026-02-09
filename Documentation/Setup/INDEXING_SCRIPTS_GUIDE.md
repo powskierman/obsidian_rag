@@ -104,6 +104,26 @@ If you only need to update **one** specific index without running the full pipel
         To intentionally bypass for a one-off run:
         `LIGHTRAG_BYPASS_REINDEX_GUARD=1 ./Scripts/indexing/index_with_lightrag.sh`
 
+#### **LightRAG Throughput Test (Local MLX, 5-note subset)**
+*   **Use when:** You want to benchmark indexing speed with a local OpenAI-compatible MLX server.
+*   **Prereqs:**
+    * `LLM_PROVIDER=mlx` in `.env`
+    * `MLX_BASE_URL` points to your local server (for example `http://host.docker.internal:8003/v1`)
+    * `MLX_MODEL` matches your served model id
+*   **Subset list:** `Scripts/indexing/subsets/mlx_throughput_5_notes.txt`
+*   **Command:**
+    ```bash
+    INCLUDE_LIST_FILE=Scripts/indexing/subsets/mlx_throughput_5_notes.txt \
+    INCLUDE_LIST_MODE=only \
+    FORCE_REINDEX=1 \
+    CONFIRM_INDEXING=0 \
+    ./Scripts/indexing/reindex_remaining_md_only.sh
+    ```
+*   **Notes:**
+    * This mode indexes only files in the include list (not the full missing set).
+    * To index only include-list files that are currently missing, use `INCLUDE_LIST_MODE=missing`.
+    * Set `FORCE_REINDEX=1` for repeatable throughput tests on the same notes.
+
 ---
 
 ### 1b. Verify Index Freshness

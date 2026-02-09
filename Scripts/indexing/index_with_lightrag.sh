@@ -43,6 +43,9 @@ LIGHTRAG_INCLUDE_EXTENSIONS="${LIGHTRAG_INCLUDE_EXTENSIONS:-.md}"
 LIGHTRAG_EXCLUDE_EXTENSIONS="${LIGHTRAG_EXCLUDE_EXTENSIONS:-.pdf}"
 LIGHTRAG_EXCLUDE_PATHS="${LIGHTRAG_EXCLUDE_PATHS:-${LIGHTRAG_EXCLUDE_PATH_PATTERNS:-}}"
 LIGHTRAG_BYPASS_REINDEX_GUARD="${LIGHTRAG_BYPASS_REINDEX_GUARD:-0}"
+EXPECTED_LLM_PROVIDER="${LLM_PROVIDER:-ollama}"
+EXPECTED_LLM_MODEL="${LLM_MODEL:-qwen2.5:7b-instruct}"
+EXPECTED_DOC_EXECUTION_MODE="${LIGHTRAG_DOC_EXECUTION_MODE:-inprocess}"
 
 for arg in "$@"; do
     case "$arg" in
@@ -64,6 +67,8 @@ echo "🧩 Include extensions: $LIGHTRAG_INCLUDE_EXTENSIONS"
 echo "🚫 Exclude extensions: $LIGHTRAG_EXCLUDE_EXTENSIONS"
 echo "🚫 Exclude paths: ${LIGHTRAG_EXCLUDE_PATHS:-<none>}"
 echo "🛡️  Bypass reindex guard: $LIGHTRAG_BYPASS_REINDEX_GUARD"
+echo "🧠 Expected LLM provider/model: $EXPECTED_LLM_PROVIDER / $EXPECTED_LLM_MODEL"
+echo "⚙️  Expected doc execution mode: $EXPECTED_DOC_EXECUTION_MODE"
 echo ""
 echo "🔄 Starting indexing process..."
 echo "   (This may take several minutes for large vaults)"
@@ -88,6 +93,103 @@ if command -v docker > /dev/null 2>&1; then
             done
         fi
         VAULT_PATH_FOR_REQUEST="/app/vault"
+    fi
+fi
+
+# Verify runtime provider/model to prevent accidental cross-machine drift.
+HEALTH_JSON="$(curl -s http://localhost:8001/health)"
+RUNTIME_INFO="$(python3 - "$HEALTH_JSON" <<'PY'
+import json
+import sys
+
+runtime = {"provider": "", "model": "", "doc_execution_mode": ""}
+try:
+    payload = json.loads(sys.argv[1])
+    runtime["provider"] = str(payload.get("llm_provider", "")).strip()
+    runtime["model"] = str(payload.get("llm_model", "")).strip()
+    runtime["doc_execution_mode"] = str(payload.get("doc_execution_mode", "")).strip()
+except Exception:
+    pass
+print(f'{runtime["provider"]}|{runtime["model"]}|{runtime["doc_execution_mode"]}')
+PY
+)"
+RUNTIME_PROVIDER="${RUNTIME_INFO%%|*}"
+RUNTIME_REST="${RUNTIME_INFO#*|}"
+RUNTIME_MODEL="${RUNTIME_REST%%|*}"
+RUNTIME_DOC_EXECUTION_MODE="${RUNTIME_INFO##*|}"
+
+if [ "$RUNTIME_PROVIDER" != "$EXPECTED_LLM_PROVIDER" ] || [ "$RUNTIME_MODEL" != "$EXPECTED_LLM_MODEL" ] || [ "$RUNTIME_DOC_EXECUTION_MODE" != "$EXPECTED_DOC_EXECUTION_MODE" ]; then
+    echo "⚠️  LightRAG runtime mismatch detected."
+    echo "   Runtime provider/model: ${RUNTIME_PROVIDER:-<unknown>} / ${RUNTIME_MODEL:-<unknown>}"
+    echo "   Runtime doc execution mode: ${RUNTIME_DOC_EXECUTION_MODE:-<unknown>}"
+    echo "   Rebuilding and recreating lightrag-service with current source + .env settings..."
+    (cd "$PROJECT_ROOT" && docker compose up -d --build --force-recreate lightrag-service)
+    for _ in {1..30}; do
+        if curl -s http://localhost:8001/health > /dev/null 2>&1; then
+            break
+        fi
+        sleep 2
+    done
+    HEALTH_JSON="$(curl -s http://localhost:8001/health)"
+    RUNTIME_INFO="$(python3 - "$HEALTH_JSON" <<'PY'
+import json
+import sys
+
+runtime = {"provider": "", "model": "", "doc_execution_mode": ""}
+try:
+    payload = json.loads(sys.argv[1])
+    runtime["provider"] = str(payload.get("llm_provider", "")).strip()
+    runtime["model"] = str(payload.get("llm_model", "")).strip()
+    runtime["doc_execution_mode"] = str(payload.get("doc_execution_mode", "")).strip()
+except Exception:
+    pass
+print(f'{runtime["provider"]}|{runtime["model"]}|{runtime["doc_execution_mode"]}')
+PY
+)"
+    RUNTIME_PROVIDER="${RUNTIME_INFO%%|*}"
+    RUNTIME_REST="${RUNTIME_INFO#*|}"
+    RUNTIME_MODEL="${RUNTIME_REST%%|*}"
+    RUNTIME_DOC_EXECUTION_MODE="${RUNTIME_INFO##*|}"
+fi
+
+if [ "$RUNTIME_PROVIDER" != "$EXPECTED_LLM_PROVIDER" ] || [ "$RUNTIME_MODEL" != "$EXPECTED_LLM_MODEL" ] || [ "$RUNTIME_DOC_EXECUTION_MODE" != "$EXPECTED_DOC_EXECUTION_MODE" ]; then
+    echo "❌ LightRAG runtime still mismatched after recreate."
+    echo "   Runtime provider/model: ${RUNTIME_PROVIDER:-<unknown>} / ${RUNTIME_MODEL:-<unknown>}"
+    echo "   Runtime doc execution mode: ${RUNTIME_DOC_EXECUTION_MODE:-<unknown>}"
+    echo "   Expected provider/model: $EXPECTED_LLM_PROVIDER / $EXPECTED_LLM_MODEL"
+    echo "   Expected doc execution mode: $EXPECTED_DOC_EXECUTION_MODE"
+    exit 1
+fi
+
+if [ "$EXPECTED_LLM_PROVIDER" = "ollama" ] && command -v docker >/dev/null 2>&1; then
+    if docker ps --format '{{.Names}}' | grep -q '^obsidian-lightrag$'; then
+        MODEL_CHECK_OUTPUT="$(
+            docker exec obsidian-lightrag sh -lc "python - <<'PY'
+import json
+import urllib.request
+
+model = '${EXPECTED_LLM_MODEL}'
+try:
+    with urllib.request.urlopen('http://host.docker.internal:11434/api/tags', timeout=5) as resp:
+        data = json.loads(resp.read().decode('utf-8'))
+    models = {entry.get('name', '') for entry in data.get('models', [])}
+    if model in models:
+        print('ok')
+    else:
+        print('missing')
+except Exception as exc:
+    print(f'error:{exc}')
+PY"
+        )"
+        if [ "$MODEL_CHECK_OUTPUT" = "missing" ]; then
+            echo "❌ Ollama model '$EXPECTED_LLM_MODEL' is not available."
+            echo "   Pull it with: ollama pull $EXPECTED_LLM_MODEL"
+            exit 1
+        fi
+        if echo "$MODEL_CHECK_OUTPUT" | grep -q '^error:'; then
+            echo "❌ Failed to validate Ollama model availability: $MODEL_CHECK_OUTPUT"
+            exit 1
+        fi
     fi
 fi
 
@@ -139,7 +241,7 @@ RESPONSE=$(curl -s -X POST http://localhost:8001/index-vault \
     -d "$PAYLOAD")
 
 # Check response
-if echo "$RESPONSE" | grep -q '"status":"success"'; then
+if echo "$RESPONSE" | grep -Eq '"status":"(success|partial_success)"'; then
     FILES=$(echo "$RESPONSE" | grep -o '"newly_indexed":[0-9]*' | cut -d':' -f2)
     echo ""
     echo "✅ Indexing complete!"

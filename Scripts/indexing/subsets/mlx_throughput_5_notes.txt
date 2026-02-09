@@ -1,0 +1,7 @@
+# 5-note subset for local MLX indexing throughput tests (vault-relative paths)
+# Chosen from files absent in LightRAG doc_status to avoid duplicate short-circuiting.
+Tech/Electronics/Hardware/Nordic/Zephyr MoC.md
+Tech/Networking/NH Network MoC.md
+Recipes/Drinks/Carbonated Water Recipes.md
+Medical/Lymphoma/Prednizone.md
+Tech/Meta Quest/Quest MoC.md
