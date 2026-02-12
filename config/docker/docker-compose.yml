@@ -35,7 +35,9 @@ services:
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
-      - KIMI_MODEL=google/gemini-2.0-flash-exp
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openrouter}
+      - KIMI_MODEL=${KIMI_MODEL:-mistralai/mistral-small-3.2-24b-instruct}
       - LIGHTRAG_DIR=/app/lightrag_db
       - OLLAMA_HOST=http://host.docker.internal:11434
       - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text}

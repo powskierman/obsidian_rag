@@ -18,6 +18,7 @@ Use this as the entry point for active project documentation.
 - Unified API details: `./UNIFIED_API_IMPLEMENTATION.md`
 - Search modes: `./Features/SEARCH_MODES_GUIDE.md`
 - Indexing scripts: `./Setup/INDEXING_SCRIPTS_GUIDE.md`
+- Canonical partial LightRAG indexing: `./Setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
 - Reindexing procedure: `./REINDEXING_PROCEDURE.md`
 - Database management: `./DATABASE_MANAGEMENT.md`
 - MCP setup: `./MCP/MCP_SETUP_INSTRUCTIONS.md`
@@ -35,6 +36,7 @@ Use this as the entry point for active project documentation.
 ./Scripts/indexing/update_vector_db.sh --refresh
 ./Scripts/indexing/update_knowledge_graph.sh
 ./Scripts/indexing/index_with_lightrag.sh
+./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once
 ```
 
 ## API Endpoints

@@ -7,6 +7,8 @@ This directory contains utility scripts for managing the Obsidian RAG system.
 ### `indexing/`
 Scripts related to updating and maintaining the search index (VectorDB and Knowledge Graph).
 - `index_with_lightrag.sh`: Main entry point for full indexing.
+- `partial_index_lightrag.sh`: Canonical gap-only markdown partial indexing (batch mode + logs).
+- `run_lightrag_partial_index.py`: Engine behind partial indexing workflow.
 - `update_vector_db.sh`: Helper for vector-only updates.
 - `update_knowledge_graph.sh`: Helper for graph-only updates.
 
@@ -40,10 +42,6 @@ Miscellaneous utilities.
 ### `maintenance/`
 Cleanup and maintenance tasks.
 - `clean.sh`: Removes temporary files and caches.
-
-### `archive/`
-Deprecated or unused scripts.
-- Contains legacy deployment scripts and old GUI helpers (`capture_gui`).
 
 ## Usage
 Most scripts should be run from the project root:

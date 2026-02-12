@@ -43,10 +43,10 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
-      - KIMI_MODEL=${KIMI_MODEL:-anthropic/claude-3.5-haiku}
+      - KIMI_MODEL=${KIMI_MODEL:-mistralai/mistral-small-3.2-24b-instruct}
       - LIGHTRAG_DIR=${LIGHTRAG_DIR:-/app/lightrag_db}
       - LLM_MODEL=${LLM_MODEL:-qwen2.5:7b-instruct}
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openrouter}
       - LLM_MODEL_PATH=${LLM_MODEL_PATH:-}
       - OLLAMA_HOST=http://host.docker.internal:11434
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}

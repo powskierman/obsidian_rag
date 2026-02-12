@@ -7,6 +7,7 @@ This index lists active documentation only.
 - `./Setup/TESTING.md`
 - `./Setup/COST_DECISION_GUIDE.md`
 - `./Setup/INDEXING_SCRIPTS_GUIDE.md`
+- `./Setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
 - `./Setup/API_KEY_VALIDATION_GUIDE.md`
 - `./Setup/MAC_MINI_QUICK_START.md`
 - `./Setup/MAC_MINI_NETWORKING_FIX.md`

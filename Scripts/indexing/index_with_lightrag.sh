@@ -44,7 +44,20 @@ LIGHTRAG_EXCLUDE_EXTENSIONS="${LIGHTRAG_EXCLUDE_EXTENSIONS:-.pdf}"
 LIGHTRAG_EXCLUDE_PATHS="${LIGHTRAG_EXCLUDE_PATHS:-${LIGHTRAG_EXCLUDE_PATH_PATTERNS:-}}"
 LIGHTRAG_BYPASS_REINDEX_GUARD="${LIGHTRAG_BYPASS_REINDEX_GUARD:-0}"
 EXPECTED_LLM_PROVIDER="${LLM_PROVIDER:-ollama}"
-EXPECTED_LLM_MODEL="${LLM_MODEL:-qwen2.5:7b-instruct}"
+case "$EXPECTED_LLM_PROVIDER" in
+    openrouter)
+        EXPECTED_LLM_MODEL="${KIMI_MODEL:-moonshotai/kimi-k2-0905}"
+        ;;
+    lmstudio)
+        EXPECTED_LLM_MODEL="${LLM_MODEL_PATH:-${LLM_MODEL:-qwen2.5:7b-instruct}}"
+        ;;
+    mlx)
+        EXPECTED_LLM_MODEL="${MLX_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-qwen2.5:7b-instruct}}}"
+        ;;
+    *)
+        EXPECTED_LLM_MODEL="${LLM_MODEL:-qwen2.5:7b-instruct}"
+        ;;
+esac
 EXPECTED_DOC_EXECUTION_MODE="${LIGHTRAG_DOC_EXECUTION_MODE:-inprocess}"
 
 for arg in "$@"; do

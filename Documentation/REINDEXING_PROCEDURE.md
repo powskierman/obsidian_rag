@@ -109,6 +109,19 @@ export LIGHTRAG_COSINE_THRESHOLD=0.03
 export LIGHTRAG_COSINE_BETTER_THAN_THRESHOLD=0.03
 ```
 
+### Recommended for routine updates (partial only)
+
+For future day-to-day indexing, use the canonical partial gap-index command instead
+of full reindexing:
+
+```bash
+./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once
+```
+
+This flow computes missing markdown files, indexes in small batches, and writes
+resumable logs and a run summary. See:
+`Documentation/Setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
+
 ## 5) Monitoring
 
 Vector:

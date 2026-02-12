@@ -104,6 +104,19 @@ If you only need to update **one** specific index without running the full pipel
         To intentionally bypass for a one-off run:
         `LIGHTRAG_BYPASS_REINDEX_GUARD=1 ./Scripts/indexing/index_with_lightrag.sh`
 
+#### **LightRAG Partial Gap Indexing (Recommended for daily/incremental runs)**
+*   **Use when:** You want future-friendly partial indexing without full reindex churn.
+*   **Canonical command:**
+    ```bash
+    ./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once
+    ```
+*   **What this command does:**
+    *   Computes true missing markdown files (`vault - indexed_files.txt`) while excluding structural paths.
+    *   Indexes missing notes in controlled batches.
+    *   Writes JSONL batch logs and a final summary to `/tmp`.
+    *   Retries failed docs once.
+*   **Reference guide:** `Documentation/Setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
+
 #### **LightRAG Throughput Test (Local MLX, 5-note subset)**
 *   **Use when:** You want to benchmark indexing speed with a local OpenAI-compatible MLX server.
 *   **Prereqs:**
