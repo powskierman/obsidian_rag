@@ -1,42 +1,78 @@
 #!/usr/bin/env python3
 """
-Run vector (embedding-service) and LightRAG retrieval tests and print a report.
-Outputs Markdown to stdout. Set OUT_PATH to save to a file.
+Parity benchmark: compare NetworkX (`notes`) and LightRAG (`entities`) response quality.
+
+Scoring dimensions:
+- reference_precision
+- answer_depth
+- hallucination_rate
+- latency
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
+import statistics
 import time
+import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Tuple
 
-EMBEDDING_URL = os.getenv("EMBEDDING_URL", "http://localhost:8000")
-LIGHTRAG_URL = os.getenv("LIGHTRAG_URL", "http://localhost:8001")
+GATEWAY_URL = os.getenv("GATEWAY_URL", "http://localhost:4000")
+QUERY_ENDPOINT = f"{GATEWAY_URL.rstrip('/')}/api/v1/query"
+REQUEST_TIMEOUT_SECONDS = float(os.getenv("RETRIEVAL_EVAL_TIMEOUT", "180"))
+MAX_RESULTS = int(os.getenv("RETRIEVAL_EVAL_MAX_RESULTS", "12"))
 
-VECTOR_TESTS = [
-    "Initial Diagnosis Scan PET/CT retroperitoneal mass SUV 28.9 right humerus deauville 5",
-    "1st pet scan",
-    "Yescarta",
-    "Double-hit Lymphoma",
-    "Obsidian RAG architecture and query modes",
-    "Home Assistant",
+PARITY_PRECISION_DELTA = float(os.getenv("PARITY_PRECISION_DELTA", "0.20"))
+PARITY_DEPTH_DELTA = float(os.getenv("PARITY_DEPTH_DELTA", "1.0"))
+FAIL_ON_PARITY_REGRESSION = os.getenv("FAIL_ON_PARITY_REGRESSION", "false").lower() in {
+    "1",
+    "true",
+    "yes",
+}
+
+BENCHMARK_QUERIES: List[Tuple[str, str]] = [
+    ("clinical", "lymphoma and yescarta"),
+    ("clinical", "yescarta and side-effects"),
+    ("cooking", "baking and pizza"),
+    ("technical", "obsidian rag architecture and query modes"),
+    ("technical", "networkx graph relationships and backlinks"),
+    ("technical", "docker compose api gateway lightrag timeout"),
 ]
 
-LIGHTRAG_TESTS: List[Tuple[str, str]] = [
-    ("local", "Initial Diagnosis Scan PET/CT retroperitoneal mass SUV 28.9 right humerus deauville 5"),
-    ("local", "Scan - Cancer FISH - 17_Dec_2024"),
-    ("hybrid", "1st pet scan"),
-    ("hybrid", "sequence of lymphoma treatments"),
-    ("local", "Yescarta"),
-    ("hybrid", "Obsidian RAG architecture and query modes"),
-]
+_STOP_TERMS = {
+    "and",
+    "or",
+    "the",
+    "a",
+    "an",
+    "to",
+    "of",
+    "in",
+    "on",
+    "for",
+    "with",
+    "from",
+    "about",
+    "what",
+    "which",
+    "who",
+    "when",
+    "where",
+    "why",
+    "how",
+}
 
 
-def _post_json(url: str, payload: Dict[str, Any], timeout: int = 90) -> Tuple[Dict[str, Any], float]:
-    data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+def _post_query(payload: Dict[str, Any], timeout: float) -> Tuple[Dict[str, Any], float]:
+    headers = {"Content-Type": "application/json"}
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    if api_key:
+        headers["X-API-Key"] = api_key
+    request_data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(QUERY_ENDPOINT, data=request_data, headers=headers)
     start = time.time()
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         elapsed = time.time() - start
@@ -44,85 +80,258 @@ def _post_json(url: str, payload: Dict[str, Any], timeout: int = 90) -> Tuple[Di
         return json.loads(body), elapsed
 
 
-def _extract_vector_summary(resp: Dict[str, Any]) -> Dict[str, Any]:
-    docs = resp.get("documents", [[]])
-    metas = resp.get("metadatas", [[]])
-    distances = resp.get("distances", [[]])
-    top_docs = docs[0] if isinstance(docs, list) and docs else []
-    top_metas = metas[0] if isinstance(metas, list) and metas else []
-    top_dist = distances[0] if isinstance(distances, list) and distances else []
+def _normalize_title(value: str) -> str:
+    text = str(value or "").strip().strip("\"'`")
+    text = re.sub(r"\.md$", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+    return re.sub(r"\s+", " ", text)
 
-    titles = []
-    for meta in top_metas:
-        if not isinstance(meta, dict):
+
+def _extract_claimed_titles(answer: str) -> List[str]:
+    if not isinstance(answer, str):
+        return []
+    titles: List[str] = []
+    for quoted in re.findall(r"\"([^\"]{2,140})\"", answer):
+        norm = _normalize_title(quoted)
+        if norm:
+            titles.append(norm)
+    for line_value in re.findall(r"(?im)^\s*(?:note|notes|context)\s+used\s*:\s*([^\n]+)$", answer):
+        for part in re.split(r",|;|\band\b", line_value, flags=re.IGNORECASE):
+            norm = _normalize_title(part)
+            if norm:
+                titles.append(norm)
+    return sorted(set(titles))
+
+
+def _query_terms(query: str) -> List[str]:
+    return sorted(
+        set(
+            term.lower()
+            for term in re.findall(r"[A-Za-z0-9][A-Za-z0-9/_-]{1,}", query)
+            if len(term) > 2 and term.lower() not in _STOP_TERMS
+        )
+    )
+
+
+def _extract_answer_and_sources(payload: Dict[str, Any]) -> Tuple[str, List[Dict[str, Any]]]:
+    answer = (
+        payload.get("answer")
+        or payload.get("result")
+        or payload.get("results", {}).get("answer")
+        or payload.get("results", {}).get("result")
+        or ""
+    )
+    if not isinstance(answer, str):
+        answer = str(answer)
+
+    if isinstance(payload.get("sources"), list):
+        return answer, payload.get("sources", [])
+
+    results = payload.get("results", {})
+    if isinstance(results, dict) and isinstance(results.get("sources"), list):
+        return answer, results.get("sources", [])
+
+    return answer, []
+
+
+def _reference_precision(query: str, sources: List[Dict[str, Any]]) -> float:
+    if not sources:
+        return 0.0
+    terms = _query_terms(query)
+    if not terms:
+        return 0.0
+
+    matched = 0
+    for source in sources:
+        if not isinstance(source, dict):
             continue
-        title = meta.get("title") or meta.get("note_title") or meta.get("filename") or meta.get("source")
-        if title:
-            titles.append(title)
+        hay = " ".join(
+            [
+                str(source.get("filename", "")),
+                str(source.get("filepath", "")),
+                str(source.get("snippet", "")),
+            ]
+        ).lower()
+        if any(term in hay for term in terms):
+            matched += 1
+    return matched / max(1, len(sources))
 
-    return {
-        "n_results": len(top_docs),
-        "top_titles": titles[:5],
-        "top_distances": top_dist[:5],
+
+def _answer_depth(answer: str, sources: List[Dict[str, Any]]) -> float:
+    text = str(answer or "")
+    lower = text.lower()
+    score = 0.0
+
+    if len(text) >= 220:
+        score += 1.0
+    if text.count("\n- ") >= 3:
+        score += 1.0
+    section_markers = [
+        "summary",
+        "direct connections",
+        "indirect connections",
+        "supporting notes",
+        "unknowns / gaps",
+    ]
+    if any(marker in lower for marker in section_markers):
+        score += 1.0
+    if len(sources) >= 3:
+        score += 1.0
+    if "references:" in lower:
+        score += 1.0
+    return score
+
+
+def _hallucination_rate(answer: str, sources: List[Dict[str, Any]]) -> float:
+    claimed = _extract_claimed_titles(answer)
+    if not claimed:
+        return 0.0
+
+    grounded = {
+        _normalize_title(source.get("filename") or source.get("title") or "")
+        for source in sources
+        if isinstance(source, dict)
     }
+    grounded = {g for g in grounded if g}
+    if not grounded:
+        return 1.0
+
+    ungrounded = [title for title in claimed if title not in grounded]
+    return len(ungrounded) / max(1, len(claimed))
 
 
-def _extract_lightrag_summary(resp: Dict[str, Any]) -> Dict[str, Any]:
-    result = resp.get("result", "")
-    mode = resp.get("mode", "")
-    latency = resp.get("latency")
-    return {
-        "mode": mode,
-        "latency": latency,
-        "not_found": isinstance(result, str) and result.strip() == "Not found in notes.",
-        "snippet": (result[:200] + "...") if isinstance(result, str) and len(result) > 200 else result,
-    }
+def _p95(values: List[float]) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    idx = max(0, min(len(ordered) - 1, int(round(0.95 * (len(ordered) - 1)))))
+    return ordered[idx]
 
 
 def main() -> int:
-    report_lines = []
-    report_lines.append("# Retrieval Evaluation Report")
+    records: List[Dict[str, Any]] = []
+    report_lines: List[str] = []
+    report_lines.append("# Search Mode Parity Evaluation")
     report_lines.append("")
-    report_lines.append(f"- Embedding service: `{EMBEDDING_URL}`")
-    report_lines.append(f"- LightRAG service: `{LIGHTRAG_URL}`")
+    report_lines.append(f"- Gateway: `{QUERY_ENDPOINT}`")
+    report_lines.append(f"- Queries: {len(BENCHMARK_QUERIES)}")
+    report_lines.append(f"- Timeout: {REQUEST_TIMEOUT_SECONDS:.0f}s")
     report_lines.append("")
+    report_lines.append("## Query-Level Scores")
+    report_lines.append("")
+    report_lines.append("| Query | Domain | Mode | Latency(s) | Precision | Depth(0-5) | Hallucination | Sources |")
+    report_lines.append("|---|---|---:|---:|---:|---:|---:|---:|")
 
-    # Vector tests
-    report_lines.append("## Vector Retrieval (Embedding Service)")
-    for query in VECTOR_TESTS:
-        payload = {
-            "query": query,
-            "n_results": 5,
-            "reranking": True,
-            "deduplicate": True,
+    for domain, query in BENCHMARK_QUERIES:
+        for mode in ("notes", "entities"):
+            payload = {
+                "query": query,
+                "mode": mode,
+                "max_results": MAX_RESULTS,
+                "llm_provider": "openrouter",
+            }
+            try:
+                response, elapsed = _post_query(payload, timeout=REQUEST_TIMEOUT_SECONDS)
+                answer, sources = _extract_answer_and_sources(response)
+                precision = _reference_precision(query, sources)
+                depth = _answer_depth(answer, sources)
+                hallucination = _hallucination_rate(answer, sources)
+                records.append(
+                    {
+                        "query": query,
+                        "domain": domain,
+                        "mode": mode,
+                        "latency": elapsed,
+                        "precision": precision,
+                        "depth": depth,
+                        "hallucination": hallucination,
+                        "sources_count": len(sources),
+                    }
+                )
+                report_lines.append(
+                    f"| {query} | {domain} | {mode} | {elapsed:.2f} | {precision:.2f} | {depth:.2f} | {hallucination:.2f} | {len(sources)} |"
+                )
+            except urllib.error.HTTPError as exc:
+                report_lines.append(
+                    f"| {query} | {domain} | {mode} | ERR | ERR | ERR | ERR | 0 |"
+                )
+                records.append(
+                    {
+                        "query": query,
+                        "domain": domain,
+                        "mode": mode,
+                        "error": f"HTTP {exc.code}",
+                        "latency": REQUEST_TIMEOUT_SECONDS,
+                        "precision": 0.0,
+                        "depth": 0.0,
+                        "hallucination": 1.0,
+                        "sources_count": 0,
+                    }
+                )
+            except Exception as exc:  # pragma: no cover - runtime safeguard
+                report_lines.append(
+                    f"| {query} | {domain} | {mode} | ERR | ERR | ERR | ERR | 0 |"
+                )
+                records.append(
+                    {
+                        "query": query,
+                        "domain": domain,
+                        "mode": mode,
+                        "error": str(exc),
+                        "latency": REQUEST_TIMEOUT_SECONDS,
+                        "precision": 0.0,
+                        "depth": 0.0,
+                        "hallucination": 1.0,
+                        "sources_count": 0,
+                    }
+                )
+
+    report_lines.append("")
+    report_lines.append("## Aggregate Scores")
+    report_lines.append("")
+    report_lines.append("| Mode | Avg Precision | Avg Depth | Avg Hallucination | P95 Latency(s) | Avg Sources |")
+    report_lines.append("|---|---:|---:|---:|---:|---:|")
+
+    aggregates: Dict[str, Dict[str, float]] = {}
+    for mode in ("notes", "entities"):
+        rows = [r for r in records if r.get("mode") == mode]
+        precision_values = [float(r.get("precision", 0.0)) for r in rows]
+        depth_values = [float(r.get("depth", 0.0)) for r in rows]
+        halluc_values = [float(r.get("hallucination", 1.0)) for r in rows]
+        latency_values = [float(r.get("latency", REQUEST_TIMEOUT_SECONDS)) for r in rows]
+        source_values = [float(r.get("sources_count", 0.0)) for r in rows]
+        aggregates[mode] = {
+            "precision": statistics.mean(precision_values) if precision_values else 0.0,
+            "depth": statistics.mean(depth_values) if depth_values else 0.0,
+            "hallucination": statistics.mean(halluc_values) if halluc_values else 1.0,
+            "latency_p95": _p95(latency_values),
+            "sources": statistics.mean(source_values) if source_values else 0.0,
         }
-        try:
-            resp, elapsed = _post_json(f"{EMBEDDING_URL}/query", payload, timeout=60)
-            summary = _extract_vector_summary(resp)
-            report_lines.append(f"### Query: `{query}`")
-            report_lines.append(f"- Latency: {elapsed:.2f}s")
-            report_lines.append(f"- Results: {summary['n_results']}")
-            report_lines.append(f"- Top titles: {summary['top_titles']}")
-            report_lines.append(f"- Top distances: {summary['top_distances']}")
-        except Exception as exc:
-            report_lines.append(f"### Query: `{query}`")
-            report_lines.append(f"- Error: {exc}")
+        report_lines.append(
+            f"| {mode} | {aggregates[mode]['precision']:.2f} | {aggregates[mode]['depth']:.2f} | {aggregates[mode]['hallucination']:.2f} | {aggregates[mode]['latency_p95']:.2f} | {aggregates[mode]['sources']:.2f} |"
+        )
 
     report_lines.append("")
-    report_lines.append("## LightRAG Retrieval")
-    for mode, query in LIGHTRAG_TESTS:
-        payload = {"query": query, "mode": mode}
-        try:
-            resp, elapsed = _post_json(f"{LIGHTRAG_URL}/query", payload, timeout=120)
-            summary = _extract_lightrag_summary(resp)
-            report_lines.append(f"### Query: `{query}` ({mode})")
-            report_lines.append(f"- Latency: {elapsed:.2f}s")
-            report_lines.append(f"- Mode: {summary['mode']}")
-            report_lines.append(f"- Not found: {summary['not_found']}")
-            report_lines.append(f"- Snippet: {summary['snippet']}")
-        except Exception as exc:
-            report_lines.append(f"### Query: `{query}` ({mode})")
-            report_lines.append(f"- Error: {exc}")
+    report_lines.append("## Parity Checks")
+    report_lines.append("")
+    notes_precision = aggregates.get("notes", {}).get("precision", 0.0)
+    entities_precision = aggregates.get("entities", {}).get("precision", 0.0)
+    notes_depth = aggregates.get("notes", {}).get("depth", 0.0)
+    entities_depth = aggregates.get("entities", {}).get("depth", 0.0)
+
+    precision_delta = notes_precision - entities_precision
+    depth_delta = notes_depth - entities_depth
+    precision_ok = precision_delta <= PARITY_PRECISION_DELTA
+    depth_ok = depth_delta <= PARITY_DEPTH_DELTA
+    parity_ok = precision_ok and depth_ok
+
+    report_lines.append(
+        f"- Precision parity: {'PASS' if precision_ok else 'FAIL'} (notes-entities={precision_delta:.2f}, allowed={PARITY_PRECISION_DELTA:.2f})"
+    )
+    report_lines.append(
+        f"- Depth parity: {'PASS' if depth_ok else 'FAIL'} (notes-entities={depth_delta:.2f}, allowed={PARITY_DEPTH_DELTA:.2f})"
+    )
+    report_lines.append(f"- Overall parity: {'PASS' if parity_ok else 'FAIL'}")
 
     report = "\n".join(report_lines) + "\n"
     out_path = os.getenv("OUT_PATH")
@@ -130,6 +339,9 @@ def main() -> int:
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(report)
     print(report)
+
+    if FAIL_ON_PARITY_REGRESSION and not parity_ok:
+        return 1
     return 0
 
 

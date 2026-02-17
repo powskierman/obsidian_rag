@@ -75,13 +75,121 @@ def _filter_result_sources(result: Any, threshold: float) -> Any:
 def _lightrag_result_text(result: Any) -> str:
     if not isinstance(result, dict):
         return ""
-    text = result.get("result") or result.get("answer") or ""
-    return text if isinstance(text, str) else ""
+    text = result.get("result")
+    if isinstance(text, str):
+        return text
+    answer = result.get("answer")
+    return answer if isinstance(answer, str) else ""
+
+
+def _sanitize_lightrag_answer_text(text: str) -> str:
+    """Defensive cleanup for stale/older LightRAG synthesis responses."""
+    if not isinstance(text, str):
+        return ""
+    cleaned = text.strip()
+    if not cleaned:
+        return cleaned
+
+    summary_match = re.search(r"(?im)^\s*summary\s*:?\s*$", cleaned)
+    if summary_match and summary_match.start() > 0:
+        cleaned = cleaned[summary_match.start():].lstrip()
+
+    filtered: List[str] = []
+    for line in cleaned.splitlines():
+        low = line.strip().lower()
+        if re.match(r"^i(?:'ll| will)\s+(?:search|look|analy[sz]e)\b", low):
+            continue
+        if "based on limited retrieved context" in low:
+            continue
+        if "consultation with a healthcare professional" in low:
+            continue
+        filtered.append(line)
+    return "\n".join(filtered).strip()
 
 
 def _lightrag_result_empty(result: Any) -> bool:
+    if not isinstance(result, dict):
+        return True
+
+    raw_result = result.get("result")
+    if isinstance(raw_result, list):
+        return len(raw_result) == 0
+    if isinstance(raw_result, dict):
+        return len(raw_result) == 0
+
+    sources = result.get("sources")
+    if isinstance(sources, list) and len(sources) > 0:
+        return False
+    raw_data = result.get("raw_data")
+    if isinstance(raw_data, dict):
+        chunks = raw_data.get("chunks")
+        if isinstance(chunks, list) and len(chunks) > 0:
+            return False
+
     text = _lightrag_result_text(result).strip().lower()
     return not text or text.startswith("not found in notes")
+
+
+def _extract_lightrag_answer_and_sources(result: Any) -> tuple[str, List[Dict[str, Any]]]:
+    if not isinstance(result, dict):
+        return "No results found", []
+
+    raw_result = result.get("result")
+    answer = _sanitize_lightrag_answer_text(_lightrag_result_text(result))
+    if not answer:
+        if isinstance(raw_result, list):
+            answer = f"Found {len(raw_result)} matching notes in LightRAG."
+        elif isinstance(raw_result, dict):
+            answer = "LightRAG returned structured results."
+        else:
+            answer = "No results found"
+
+    sources = result.get("sources")
+    if isinstance(sources, list):
+        return answer, sources
+
+    raw_data = result.get("raw_data")
+    if isinstance(raw_data, dict):
+        raw_sources: List[Dict[str, Any]] = []
+        for chunk in raw_data.get("chunks", []) if isinstance(raw_data.get("chunks", []), list) else []:
+            if not isinstance(chunk, dict):
+                continue
+            filepath = str(chunk.get("file_path", "")).strip()
+            filename = filepath.rsplit("/", 1)[-1] if filepath else "Unknown"
+            snippet = str(chunk.get("content", "")).strip()
+            raw_sources.append(
+                {
+                    "filename": filename.rsplit(".", 1)[0] if filename else "Unknown",
+                    "filepath": filepath,
+                    # Raw LightRAG chunks are already retrieval-selected; keep a neutral
+                    # baseline relevance so threshold filtering does not drop all evidence.
+                    "relevance": 50.0,
+                    "snippet": snippet[:400] + ("..." if len(snippet) > 400 else ""),
+                }
+            )
+        if raw_sources:
+            return answer, raw_sources
+
+    # Local-mode LightRAG responses can return a list in `result`; map to source rows.
+    normalized_sources: List[Dict[str, Any]] = []
+    if isinstance(raw_result, list):
+        for item in raw_result:
+            if not isinstance(item, dict):
+                continue
+            try:
+                relevance = float(item.get("score", 0))
+            except (TypeError, ValueError):
+                relevance = 0.0
+            normalized_sources.append(
+                {
+                    "filename": item.get("title", "Unknown"),
+                    "filepath": item.get("filepath", ""),
+                    "relevance": relevance,
+                    "snippet": item.get("excerpt", ""),
+                }
+            )
+
+    return answer, normalized_sources
 
 
 def _parse_allowed_origins() -> List[str]:
@@ -134,7 +242,7 @@ EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:800
 GRAPH_SERVICE_URL = os.getenv("GRAPH_SERVICE_URL", "http://localhost:8002")
 LIGHTRAG_SERVICE_URL = os.getenv("LIGHTRAG_SERVICE_URL", "http://localhost:8001")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
-LIGHTRAG_QUERY_TIMEOUT = float(os.getenv("LIGHTRAG_QUERY_TIMEOUT", "12"))
+LIGHTRAG_QUERY_TIMEOUT = float(os.getenv("LIGHTRAG_QUERY_TIMEOUT", "60"))
 
 # Reliability controls
 REQUEST_RETRIES = int(os.getenv("RAG_REQUEST_RETRIES", "2"))
@@ -229,7 +337,7 @@ class SearchRequest(BaseModel):
     query: str
     mode: str = "hybrid"  # vector, graph, hybrid
     n_results: int = 10
-    llm_provider: str = "kimi"
+    llm_provider: str = "ollama"
     model: Optional[str] = None
     temperature: float = 0.0
     system_prompt: Optional[str] = None
@@ -244,7 +352,7 @@ class SearchStreamRequest(BaseModel):
     mode: str = "hybrid"  # vector, notes, graph, hybrid
     n_results: int = 10
     max_results: Optional[int] = None
-    llm_provider: str = "kimi"
+    llm_provider: str = "ollama"
     model: Optional[str] = None
     temperature: float = 0.0
     system_prompt: Optional[str] = None
@@ -364,13 +472,13 @@ async def unified_search(request: SearchRequest):
             try:
                 # Parse tag:value syntax
                 query = request.query
-                tag_matches = re.findall(r'tag:([a-zA-Z0-9_\-]+)', query, re.IGNORECASE)
-                print(f"DEBUG: Query='{query}', Matches={tag_matches}, MatchRegex=tag:([a-zA-Z0-9_\-]+)")
+                tag_matches = re.findall(r'tag:([a-zA-Z0-9_-]+)', query, re.IGNORECASE)
+                print(f"DEBUG: Query='{query}', Matches={tag_matches}, MatchRegex=tag:([a-zA-Z0-9_-]+)")
                 filters = {}
                 
                 if tag_matches:
                     filters['tags'] = tag_matches
-                    query = re.sub(r'tag:[a-zA-Z0-9_\-]+', '', query, flags=re.IGNORECASE).strip()
+                    query = re.sub(r'tag:[a-zA-Z0-9_-]+', '', query, flags=re.IGNORECASE).strip()
                     print(f"🔍 Gateway Parsed tags: {tag_matches}, Cleaned Query: '{query}'")
 
                 # Embedding service expects keys: query, n_results, filters
@@ -501,6 +609,9 @@ class UnifiedQueryRequest(BaseModel):
     system_prompt: Optional[str] = None
     web_search: bool = False
     llm_knowledge: bool = False
+    entities_mode: Optional[str] = None  # naive, local, global, hybrid
+    force_mode: bool = False
+    require_llm: bool = False
 
 
 @app.post("/api/v1/query")
@@ -567,6 +678,10 @@ async def unified_query(request: UnifiedQueryRequest):
         filters['tags'] = tag_matches
         request.query = re.sub(r'tag:[a-zA-Z0-9_\-]+', '', request.query, flags=re.IGNORECASE).strip()
         print(f"DEBUG: Parsed tags (UnifiedQuery): {tag_matches}, Cleaned Query: '{request.query}'")
+
+    entities_mode = (request.entities_mode or "hybrid").strip().lower()
+    if entities_mode not in {"naive", "local", "global", "hybrid"}:
+        entities_mode = "hybrid"
 
     # ===== CASCADING RETRIEVAL MODE =====
     if mode == "cascading":
@@ -891,13 +1006,17 @@ async def unified_query(request: UnifiedQueryRequest):
             try:
                 payload = {
                     "query": request.query,
-                    "mode": "hybrid",
+                    "mode": entities_mode,
+                    "force_mode": request.force_mode,
+                    "require_llm": request.require_llm,
+                    "max_results": request.max_results,
                     "llm_provider": request.llm_provider,
                     "model": request.model,
                     "temperature": request.temperature,
                     "web_search": request.web_search,
                     "llm_knowledge": request.llm_knowledge,
                     "system_prompt": request.system_prompt,
+                    "filters": filters,
                 }
                 response = await _post_json(
                     client,
@@ -938,15 +1057,16 @@ async def unified_query(request: UnifiedQueryRequest):
                             },
                         }
 
-                # Extract answer and sources from LightRAG response
-                answer = (
-                    result.get("result") or result.get("answer") or "No results found"
+                # Normalize answer/sources while preserving the raw LightRAG payload.
+                answer, sources = _extract_lightrag_answer_and_sources(result)
+                sources = _apply_relevance_filter(
+                    sources, effective_relevance_threshold
                 )
-                sources = result.get("sources", [])
 
                 return {
                     "query": request.query,
                     "mode": "entities",
+                    "results": result,
                     "answer": answer,
                     "sources": sources,
                     "metadata": {
@@ -1063,13 +1183,17 @@ async def unified_query(request: UnifiedQueryRequest):
                         f"{LIGHTRAG_SERVICE_URL}/query",
                         {
                             "query": request.query,
-                            "mode": "hybrid",
+                            "mode": entities_mode,
+                            "force_mode": request.force_mode,
+                            "require_llm": request.require_llm,
+                            "max_results": request.max_results,
                             "llm_provider": request.llm_provider,
                             "model": request.model,
                             "temperature": request.temperature,
                             "web_search": request.web_search,
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
+                            "filters": filters,
                         },
                         timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
@@ -1145,13 +1269,17 @@ async def unified_query(request: UnifiedQueryRequest):
                         f"{LIGHTRAG_SERVICE_URL}/query",
                         {
                             "query": request.query,
-                            "mode": "hybrid",
+                            "mode": entities_mode,
+                            "force_mode": request.force_mode,
+                            "require_llm": request.require_llm,
+                            "max_results": request.max_results,
                             "llm_provider": request.llm_provider,
                             "model": request.model,
                             "temperature": request.temperature,
                             "web_search": request.web_search,
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
+                            "filters": filters,
                         },
                         timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
@@ -1220,13 +1348,17 @@ async def unified_query(request: UnifiedQueryRequest):
                         f"{LIGHTRAG_SERVICE_URL}/query",
                         {
                             "query": request.query,
-                            "mode": "hybrid",
+                            "mode": entities_mode,
+                            "force_mode": request.force_mode,
+                            "require_llm": request.require_llm,
+                            "max_results": request.max_results,
                             "llm_provider": request.llm_provider,
                             "model": request.model,
                             "temperature": request.temperature,
                             "web_search": request.web_search,
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
+                            "filters": filters,
                         },
                         timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",

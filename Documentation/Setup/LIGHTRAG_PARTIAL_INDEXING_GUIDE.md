@@ -9,7 +9,7 @@ This guide defines a single, repeatable path for gap-only markdown indexing.
 Run this from repo root (`obsidian_rag`):
 
 ```bash
-./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once
+./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once --purge-deleted
 ```
 
 What it does:
@@ -17,6 +17,7 @@ What it does:
 - Indexes in batches (default 5, adjustable).
 - Writes JSONL batch logs and a final summary under `/tmp`.
 - Retries failed docs once (optional flag already shown above).
+- Optionally purges stale indexed docs whose source note files no longer exist (`--purge-deleted`).
 
 ## Defaults used by the script
 - Service URL: `http://localhost:8001`
@@ -34,7 +35,7 @@ curl -sS http://localhost:8001/health | python -m json.tool
 
 2. Run gap-only partial indexing.
 ```bash
-./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once
+./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once --purge-deleted
 ```
 
 3. Check summary and failed list paths printed at the end.
@@ -59,6 +60,12 @@ Limit run size (smoke test):
 
 ```bash
 ./Scripts/indexing/partial_index_lightrag.sh --max-files 20 --batch-size 5
+```
+
+Preview stale indexed docs without deleting:
+
+```bash
+./Scripts/indexing/partial_index_lightrag.sh --purge-deleted --purge-dry-run --list-only
 ```
 
 ## Monitoring

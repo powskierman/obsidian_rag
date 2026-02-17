@@ -9,6 +9,7 @@ import json
 import asyncio
 import re
 import time
+import contextvars
 import hashlib
 import fnmatch
 import threading
@@ -42,6 +43,12 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    raw = os.getenv(name, "1" if default else "0")
+    return str(raw).strip().lower() in {"1", "true", "yes", "on"}
+
+
 # Configuration
 WORKING_DIR = os.getenv("LIGHTRAG_DIR", "./lightrag_db")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
@@ -49,14 +56,21 @@ LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:32b")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
 EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-KIMI_MODEL = os.getenv("KIMI_MODEL", "moonshotai/kimi-k2-0905")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+LIGHTRAG_MODEL = (
+    os.getenv("LIGHTRAG_MODEL")
+    or os.getenv("KIMI_MODEL")
+    or "moonshotai/kimi-k2-0905"
+)
 LMSTUDIO_BASE_URL = os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1")
 LMSTUDIO_API_KEY = os.getenv("LMSTUDIO_API_KEY", "lmstudio")
 MLX_BASE_URL = os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")
 MLX_API_KEY = os.getenv("MLX_API_KEY", "mlx")
 MLX_MODEL = os.getenv("MLX_MODEL")
 LLM_MODEL_PATH = os.getenv("LLM_MODEL_PATH")
-QUERY_TIMEOUT_SECONDS = int(os.getenv("RAG_QUERY_TIMEOUT", "10"))
+QUERY_TIMEOUT_SECONDS = int(os.getenv("RAG_QUERY_TIMEOUT", "120"))
 INIT_WAIT_SECONDS = int(os.getenv("RAG_INIT_WAIT", "15"))
 EMBED_ASYNC = int(os.getenv("EMBED_ASYNC", "4"))
 LLM_ASYNC = int(os.getenv("LLM_ASYNC", "4"))
@@ -82,11 +96,50 @@ LIGHTRAG_INDEX_MODE = os.getenv("LIGHTRAG_INDEX_MODE", "sync").strip().lower()  
 LIGHTRAG_INDEX_INTERNAL_BASE_URL = os.getenv("LIGHTRAG_INDEX_INTERNAL_BASE_URL", "http://127.0.0.1:8001").rstrip("/")
 LIGHTRAG_INDEX_JOB_HTTP_TIMEOUT = float(os.getenv("LIGHTRAG_INDEX_JOB_HTTP_TIMEOUT", "86400"))
 LIGHTRAG_STALE_PROCESSING_SECONDS = int(os.getenv("LIGHTRAG_STALE_PROCESSING_SECONDS", "600"))
-LIGHTRAG_REQUIRE_RELATIONS = os.getenv("LIGHTRAG_REQUIRE_RELATIONS", "0").strip().lower() in {"1", "true", "yes", "on"}
+LIGHTRAG_REQUIRE_RELATIONS = _env_flag("LIGHTRAG_REQUIRE_RELATIONS", False)
 LIGHTRAG_MIN_RELATIONS_PER_DOC = max(0, int(os.getenv("LIGHTRAG_MIN_RELATIONS_PER_DOC", "1")))
+LIGHTRAG_QUERY_TOP_K = max(1, int(os.getenv("LIGHTRAG_QUERY_TOP_K", "30")))
+LIGHTRAG_QUERY_CHUNK_TOP_K = max(1, int(os.getenv("LIGHTRAG_QUERY_CHUNK_TOP_K", "30")))
+LIGHTRAG_QUERY_MAX_TOTAL_TOKENS = max(1000, int(os.getenv("LIGHTRAG_QUERY_MAX_TOTAL_TOKENS", "16000")))
+LIGHTRAG_NAIVE_TOP_K = max(1, int(os.getenv("LIGHTRAG_NAIVE_TOP_K", "20")))
+LIGHTRAG_NAIVE_CHUNK_TOP_K = max(1, int(os.getenv("LIGHTRAG_NAIVE_CHUNK_TOP_K", "20")))
+LIGHTRAG_NAIVE_MAX_TOTAL_TOKENS = max(1000, int(os.getenv("LIGHTRAG_NAIVE_MAX_TOTAL_TOKENS", "16000")))
+LIGHTRAG_LOCAL_TOP_K = max(1, int(os.getenv("LIGHTRAG_LOCAL_TOP_K", "40")))
+LIGHTRAG_LOCAL_CHUNK_TOP_K = max(1, int(os.getenv("LIGHTRAG_LOCAL_CHUNK_TOP_K", "30")))
+LIGHTRAG_LOCAL_MAX_TOTAL_TOKENS = max(1000, int(os.getenv("LIGHTRAG_LOCAL_MAX_TOTAL_TOKENS", "16000")))
+LIGHTRAG_DISABLE_QUERY_CACHE = _env_flag("LIGHTRAG_DISABLE_QUERY_CACHE", False)
+LIGHTRAG_PURGE_QUERY_CACHE_ON_INDEX = _env_flag("LIGHTRAG_PURGE_QUERY_CACHE_ON_INDEX", True)
+LIGHTRAG_PURGE_QUERY_CACHE_ON_PURGE = _env_flag("LIGHTRAG_PURGE_QUERY_CACHE_ON_PURGE", True)
+LIGHTRAG_STRICT_GROUNDING = _env_flag("LIGHTRAG_STRICT_GROUNDING", True)
+LIGHTRAG_NOISE_FILTER = _env_flag("LIGHTRAG_NOISE_FILTER", True)
+LIGHTRAG_RERANK = _env_flag("LIGHTRAG_RERANK", True)
+LIGHTRAG_QUERY_ENABLE_RERANK = _env_flag("LIGHTRAG_QUERY_ENABLE_RERANK", False)
+LIGHTRAG_MIN_SYNTHESIS_CHARS = max(0, int(os.getenv("LIGHTRAG_MIN_SYNTHESIS_CHARS", "220")))
+LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS = _env_flag("LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS", True)
+LIGHTRAG_SYNTHESIS_SOURCE_COUNT = max(2, int(os.getenv("LIGHTRAG_SYNTHESIS_SOURCE_COUNT", "6")))
+LIGHTRAG_SYNTHESIS_SNIPPET_CHARS = max(300, int(os.getenv("LIGHTRAG_SYNTHESIS_SNIPPET_CHARS", "900")))
+LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS = max(10.0, float(os.getenv("LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS", "60")))
 LLM_MAX_TOKENS = os.getenv("LLM_MAX_TOKENS")
 LLM_TEMPERATURE = os.getenv("LLM_TEMPERATURE")
+QUERY_LLM_PROVIDER = os.getenv("QUERY_LLM_PROVIDER", LLM_PROVIDER).strip().lower()
+QUERY_LLM_MODEL = os.getenv("QUERY_LLM_MODEL", "").strip()
+QUERY_LLM_MAX_TOKENS = os.getenv("QUERY_LLM_MAX_TOKENS", LLM_MAX_TOKENS)
+QUERY_LLM_TEMPERATURE = os.getenv("QUERY_LLM_TEMPERATURE", LLM_TEMPERATURE)
+QUERY_OPENROUTER_API_KEY = os.getenv("QUERY_OPENROUTER_API_KEY", OPENROUTER_API_KEY or "")
+QUERY_OPENAI_API_KEY = os.getenv("QUERY_OPENAI_API_KEY", OPENAI_API_KEY or "")
+QUERY_OPENAI_BASE_URL = os.getenv("QUERY_OPENAI_BASE_URL", OPENAI_BASE_URL)
+QUERY_OPENAI_MODEL = os.getenv("QUERY_OPENAI_MODEL", OPENAI_MODEL)
+QUERY_LMSTUDIO_BASE_URL = os.getenv("QUERY_LMSTUDIO_BASE_URL", LMSTUDIO_BASE_URL)
+QUERY_LMSTUDIO_API_KEY = os.getenv("QUERY_LMSTUDIO_API_KEY", LMSTUDIO_API_KEY)
+QUERY_MLX_BASE_URL = os.getenv("QUERY_MLX_BASE_URL", MLX_BASE_URL)
+QUERY_MLX_API_KEY = os.getenv("QUERY_MLX_API_KEY", MLX_API_KEY)
 LIGHTRAG_INDEX_TEXT_MODE = os.getenv("LIGHTRAG_INDEX_TEXT_MODE", "enriched").strip().lower()
+
+# Request-scoped query overrides (per /query call).
+REQUEST_QUERY_LLM_PROVIDER = contextvars.ContextVar("REQUEST_QUERY_LLM_PROVIDER", default="")
+REQUEST_QUERY_LLM_MODEL = contextvars.ContextVar("REQUEST_QUERY_LLM_MODEL", default="")
+REQUEST_QUERY_TEMPERATURE = contextvars.ContextVar("REQUEST_QUERY_TEMPERATURE", default="")
+REQUEST_QUERY_SYSTEM_PROMPT = contextvars.ContextVar("REQUEST_QUERY_SYSTEM_PROMPT", default="")
 
 if LIGHTRAG_INDEX_TEXT_MODE not in {"enriched", "raw"}:
     logger.warning(
@@ -113,6 +166,7 @@ init_started = False
 init_error = None
 storages_ready = False
 _chunks_cache = {"mtime": None, "data": None}
+_lexical_index_cache = {"mtime": None, "entries": None, "inverted": None}
 index_progress = {
     "status": "idle",
     "total_files": 0,
@@ -178,6 +232,95 @@ def _append_jsonl(path: Path, payload: dict) -> None:
     line = json.dumps(payload, ensure_ascii=False)
     with open(path, "a", encoding="utf-8") as f:
         f.write(line + "\n")
+
+
+def _llm_cache_file_path() -> Path:
+    return Path(WORKING_DIR) / "kv_store_llm_response_cache.json"
+
+
+def _purge_llm_cache_entries(scopes: set[str], dry_run: bool = False) -> dict:
+    normalized_scopes = {str(scope).strip().lower() for scope in scopes if str(scope).strip()}
+    valid_scopes = normalized_scopes & {"query", "keywords"}
+    if not valid_scopes:
+        valid_scopes = {"query", "keywords"}
+
+    cache_path = _llm_cache_file_path()
+    if not cache_path.exists():
+        return {
+            "cache_file": cache_path.as_posix(),
+            "exists": False,
+            "removed_total": 0,
+            "removed_by_scope": {"query": 0, "keywords": 0},
+            "remaining": 0,
+            "dry_run": dry_run,
+        }
+
+    try:
+        raw_payload = json.loads(cache_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return {
+            "cache_file": cache_path.as_posix(),
+            "exists": True,
+            "error": f"invalid_json:{exc}",
+            "removed_total": 0,
+            "removed_by_scope": {"query": 0, "keywords": 0},
+            "remaining": 0,
+            "dry_run": dry_run,
+        }
+
+    if not isinstance(raw_payload, dict):
+        return {
+            "cache_file": cache_path.as_posix(),
+            "exists": True,
+            "error": "invalid_format",
+            "removed_total": 0,
+            "removed_by_scope": {"query": 0, "keywords": 0},
+            "remaining": 0,
+            "dry_run": dry_run,
+        }
+
+    has_data_wrapper = isinstance(raw_payload.get("data"), dict)
+    cache_entries = raw_payload.get("data") if has_data_wrapper else raw_payload
+    if not isinstance(cache_entries, dict):
+        return {
+            "cache_file": cache_path.as_posix(),
+            "exists": True,
+            "error": "invalid_entries",
+            "removed_total": 0,
+            "removed_by_scope": {"query": 0, "keywords": 0},
+            "remaining": 0,
+            "dry_run": dry_run,
+        }
+
+    removed_by_scope = {"query": 0, "keywords": 0}
+    removed_total = 0
+    for key in list(cache_entries.keys()):
+        key_l = str(key).lower()
+        matched_scope = None
+        if "query" in valid_scopes and ":query:" in key_l:
+            matched_scope = "query"
+        elif "keywords" in valid_scopes and ":keywords:" in key_l:
+            matched_scope = "keywords"
+        if matched_scope is None:
+            continue
+        removed_total += 1
+        removed_by_scope[matched_scope] += 1
+        if not dry_run:
+            cache_entries.pop(key, None)
+
+    if not dry_run and removed_total > 0:
+        if has_data_wrapper:
+            raw_payload["data"] = cache_entries
+        _write_json_atomic(cache_path, raw_payload)
+
+    return {
+        "cache_file": cache_path.as_posix(),
+        "exists": True,
+        "removed_total": removed_total,
+        "removed_by_scope": removed_by_scope,
+        "remaining": len(cache_entries) if isinstance(cache_entries, dict) else 0,
+        "dry_run": dry_run,
+    }
 
 
 def _load_json_dict(path: Path) -> dict:
@@ -721,6 +864,132 @@ SUPPORTED_EXTENSIONS = _parse_supported_extensions_env(
 EXCLUDE_PATH_PATTERNS = []
 INLINE_TAG_PATTERN = re.compile(r"(?<!\\w)#([A-Za-z0-9][A-Za-z0-9/_-]*)")
 
+QUERY_STOP_TERMS = {
+    "and",
+    "or",
+    "the",
+    "a",
+    "an",
+    "to",
+    "of",
+    "in",
+    "on",
+    "for",
+    "with",
+    "from",
+    "about",
+    "what",
+    "which",
+    "who",
+    "when",
+    "where",
+    "why",
+    "how",
+}
+
+TEMPLATE_NOISE_MARKERS = (
+    "## overview this moc connects",
+    "### main idea - -",
+    "### references -",
+    "## status & notes",
+    "last reviewed:",
+    "smart connections insights",
+    "questions / ideas for further exploration",
+)
+
+# Generic workflow/indexing intent hints. Keep this domain-neutral for heterogeneous vaults.
+AUTOMATION_QUERY_HINTS = (
+    "automation",
+    "workflow",
+    "pipeline",
+    "index",
+    "indexing",
+    "reindex",
+    "ingest",
+    "ingestion",
+    "sync",
+    "scheduler",
+    "service",
+    "deployment",
+    "telegram",
+    "bot",
+)
+
+META_NOISE_MARKERS = (
+    "graph-cleanup checklist",
+    "what i used from your vault graph",
+    "sources (",
+    "relationships found:",
+    "implementation summary",
+    "execution complete",
+    "smart connections insights",
+    "questions / ideas for further exploration",
+)
+
+META_SOURCE_HINTS = (
+    "tagging system",
+    "relationship types",
+    "ontology",
+    "taxonomy",
+    "schema",
+    "template",
+    "implementation",
+    "setup",
+    "guide",
+    "runbook",
+    "playbook",
+    "log",
+    "checklist",
+)
+
+GENERIC_QUERY_TERMS = {
+    "effect",
+    "effects",
+    "side",
+    "treatment",
+    "treatments",
+    "therapy",
+    "therapies",
+    "disease",
+    "diseases",
+    "note",
+    "notes",
+    "graph",
+    "system",
+    "implementation",
+    "status",
+    "phase",
+    "report",
+    "types",
+    "relationship",
+    "relationships",
+}
+
+MEDICAL_SCOPE_MARKERS = (
+    "lymphoma",
+    "dlbcl",
+    "hgbcl",
+    "yescarta",
+    "car-t",
+    "cart",
+    "axi-cel",
+    "r-chop",
+    "deauville",
+    "pet",
+    "ct",
+    "oncology",
+)
+
+MEDICAL_SCOPE_OVERRIDE_HINTS = (
+    "tech/",
+    "recipes/",
+    "books/",
+    "math/",
+    "photography/",
+    "all notes",
+    "entire vault",
+)
+
 # LightRAG Constants
 COSINE_THRESHOLD = 0.6
 COSINE_BETTER_THAN_THRESHOLD = 0.5
@@ -758,6 +1027,7 @@ def extract_pdf_text(pdf_path: Path) -> str:
     return text
 
 from src.indexing.frontmatter import extract_frontmatter, sanitize_content, _dedupe_keep_order
+from src.indexing.canonical_metadata import build_canonical_metadata
 
 
 def _truncate_for_extraction(content: str) -> str:
@@ -782,10 +1052,10 @@ def _reset_corrupt_lightrag_storage(working_dir: str) -> None:
     except Exception as e:
         logger.warning(f"Failed to reset LightRAG storage: {e}")
 
-def _split_frontmatter(content: str) -> tuple[list[str], list[str], str]:
+def _split_frontmatter(content: str) -> tuple[dict, list[str], list[str], str]:
     """Compatibility wrapper using shared utility"""
     metadata, body = extract_frontmatter(content)
-    return metadata.get("tags", []), metadata.get("aliases", []), body
+    return metadata, metadata.get("tags", []), metadata.get("aliases", []), body
 
 def _extract_headings(content: str, max_headings: int = 12) -> list[str]:
     headings = []
@@ -1109,6 +1379,81 @@ def _atomic_write_indexed_files_state(indexed_files_path: Path, state: dict[str,
     os.replace(tmp_path, indexed_files_path)
 
 
+def _resolve_status_file_candidate(raw_path: str, vault_dir: Path, key_root: Path) -> tuple[Path, str]:
+    """Resolve a doc_status file path to a host-visible candidate path and canonical key."""
+    normalized = str(raw_path).replace("\\", "/").strip()
+    if not normalized:
+        return vault_dir, ""
+
+    if normalized.startswith("/app/vault/"):
+        rel = normalized[len("/app/vault/") :].lstrip("/")
+        rel = _strip_dot_slash_prefix(rel)
+        return vault_dir / rel, rel
+
+    if normalized.startswith("./"):
+        rel = _strip_dot_slash_prefix(normalized).lstrip("/")
+        return vault_dir / rel, rel
+
+    if not normalized.startswith("/"):
+        rel = normalized.lstrip("/")
+        return vault_dir / rel, rel
+
+    absolute_candidate = Path(normalized)
+    if absolute_candidate.exists():
+        try:
+            return absolute_candidate, absolute_candidate.relative_to(vault_dir).as_posix()
+        except Exception:
+            return absolute_candidate, _canonical_index_key(absolute_candidate, key_root)
+
+    canonical = _canonical_index_key(Path(normalized), key_root)
+    if canonical:
+        return vault_dir / canonical, canonical
+    return absolute_candidate, ""
+
+
+def _collect_stale_indexed_docs(vault_dir: Path, key_root: Path) -> list[dict]:
+    """Return indexed doc_status entries whose backing file no longer exists."""
+    status_data = _load_kv_store_data(Path(WORKING_DIR) / "kv_store_doc_status.json")
+    if not status_data:
+        return []
+
+    indexed_like_statuses = {"processed", "processed_with_warnings", "preprocessed"}
+    stale_docs: list[dict] = []
+
+    for doc_id, value in status_data.items():
+        if not isinstance(doc_id, str) or not doc_id.startswith("doc-"):
+            continue
+        if not isinstance(value, dict):
+            continue
+
+        status = str(value.get("status", "")).strip().lower()
+        if status not in indexed_like_statuses:
+            continue
+
+        file_path = str(value.get("file_path", "")).strip()
+        if not file_path:
+            continue
+
+        candidate_path, canonical_key = _resolve_status_file_candidate(
+            file_path, vault_dir, key_root
+        )
+        if candidate_path.is_file():
+            continue
+
+        stale_docs.append(
+            {
+                "doc_id": doc_id,
+                "file_path": file_path,
+                "canonical_key": canonical_key,
+                "resolved_candidate": candidate_path.as_posix(),
+                "status": status,
+            }
+        )
+
+    stale_docs.sort(key=lambda item: (item.get("file_path", ""), item.get("doc_id", "")))
+    return stale_docs
+
+
 def _probe_openai_compatible_models(base_url: str, api_key: str, timeout_seconds: float) -> tuple[bool, str]:
     base = (base_url or "").rstrip("/")
     if not base:
@@ -1234,6 +1579,7 @@ def _build_index_text(
     headings: list[str],
     tags: list[str],
     aliases: list[str],
+    canonical_meta: dict | None = None,
     vault_root: Path = None
 ) -> str:
     content = content.strip()
@@ -1265,6 +1611,25 @@ def _build_index_text(
         prefix_lines.append("Tags: " + ", ".join(tags))
     if aliases:
         prefix_lines.append("Aliases: " + ", ".join(aliases))
+    if canonical_meta:
+        canonical_id = str(canonical_meta.get("canonical_id", "")).strip()
+        entity_type = str(canonical_meta.get("entity_type", "")).strip()
+        timeline_date = str(canonical_meta.get("timeline_date", "")).strip()
+        treatment_phase = str(canonical_meta.get("treatment_phase", "")).strip()
+        aliases_normalized = canonical_meta.get("aliases_normalized", [])
+        tags_normalized = canonical_meta.get("tags_normalized", [])
+        if canonical_id:
+            prefix_lines.append("CanonicalID: " + canonical_id)
+        if entity_type:
+            prefix_lines.append("EntityType: " + entity_type)
+        if timeline_date:
+            prefix_lines.append("TimelineDate: " + timeline_date)
+        if treatment_phase:
+            prefix_lines.append("TreatmentPhase: " + treatment_phase)
+        if isinstance(aliases_normalized, list) and aliases_normalized:
+            prefix_lines.append("AliasesNormalized: " + ", ".join(aliases_normalized))
+        if isinstance(tags_normalized, list) and tags_normalized:
+            prefix_lines.append("TagsNormalized: " + ", ".join(tags_normalized))
     prefix = "\n".join(prefix_lines)
     return f"{prefix}\n\n{content}"
 
@@ -1349,43 +1714,36 @@ def _is_not_found_result(result_text: str) -> bool:
     if not result_text:
         return True
     text = result_text.strip().lower()
-    
-    # Reject standard failure patterns
-    rejection_phrases = [
-        "not found in notes",
-        "i am sorry", 
-        "i'm sorry",
-        "does not contain information",
-        "no information found",
-        "no relevant information",
-        "no entities found"
+
+    # Reject only clear all-failure responses, not mixed-content answers.
+    hard_fail_patterns = [
+        r"^\s*[-*•]?\s*not found in notes\.?\s*$",
+        r"^\s*i(?:\s+am|'m)\s+sorry\b.{0,220}$",
+        r"^\s*(?:there is|there's)\s+no\s+(?:relevant\s+)?information\b.{0,220}$",
+        r"^\s*no\s+(?:relevant\s+)?information\s+(?:found|available)\b.{0,220}$",
+        r"^\s*no entities found\b.{0,220}$",
+        r"^\s*does not contain information\b.{0,220}$",
     ]
-    
-    if any(phrase in text for phrase in rejection_phrases):
-        logger.info(f"Refusing result because it matches rejection phrase: {text[:100]}...")
+
+    if any(re.match(pattern, text, re.IGNORECASE | re.DOTALL) for pattern in hard_fail_patterns):
+        logger.info(f"Refusing result because it matches hard-fail pattern: {text[:100]}...")
         return True
 
-    # Reject placeholders/speculation to prevent hallucinations
-    speculation_markers = [
-        "likely",
-        "probably",
-        "maybe",
-        "might",
-        "unknown",
-        "institution name",
-        "or specific regimen",
+    # Reject only unresolved template placeholders, not all bracketed text.
+    placeholder_patterns = [
+        r"\[(?:insert|placeholder|todo|tbd|unknown)\b[^\]]*\]",
+        r"\[(?:institution name|specific regimen)[^\]]*\]",
     ]
-    if any(marker in text for marker in speculation_markers):
-        logger.info(f"Refusing result because it contains speculation: {text[:100]}...")
-        return True
-    if re.search(r"\[[^\]]+\]", text):
-        logger.info(f"Refusing result because it contains placeholders: {text[:100]}...")
+    if any(re.search(pattern, text, re.IGNORECASE) for pattern in placeholder_patterns):
+        logger.info(f"Refusing result because it contains unresolved placeholders: {text[:100]}...")
         return True
         
     return False
 
 
-def _extract_note_title_and_excerpt(content: str, max_chars: int = 400) -> tuple[str, str]:
+def _extract_note_title_and_excerpt(
+    content: str, max_chars: int = 900, fallback_filepath: str | None = None
+) -> tuple[str, str]:
     title = ""
     filename = ""
     note_id = ""
@@ -1403,6 +1761,10 @@ def _extract_note_title_and_excerpt(content: str, max_chars: int = 400) -> tuple
             title = filename.rsplit(".", 1)[0]
         elif note_id:
             title = note_id.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+        elif fallback_filepath:
+            fp = str(fallback_filepath).replace("\\", "/").strip()
+            if fp:
+                title = fp.rsplit("/", 1)[-1].rsplit(".", 1)[0]
     excerpt = content.strip().replace("\n", " ")
     if len(excerpt) > max_chars:
         excerpt = excerpt[:max_chars] + "..."
@@ -1430,65 +1792,1622 @@ def _load_chunks_cache():
         return None
 
 
-def _local_extractive_search(query_text: str, max_hits: int = 3) -> list[dict]:
-    """Return top matching chunks without LLM generation."""
-    terms = [t.lower() for t in re.findall(r"[A-Za-z0-9][A-Za-z0-9/._-]{1,}", query_text) if len(t) > 2]
-    if not terms:
-        return []
-
+def _load_lexical_index_cache():
     data = _load_chunks_cache()
     if not data:
-        return []
+        return None, None
 
-    scored = []
-    for _, entry in data.items():
-        if not isinstance(entry, dict):
+    mtime = _chunks_cache.get("mtime")
+    cached_entries = _lexical_index_cache.get("entries")
+    cached_inverted = _lexical_index_cache.get("inverted")
+    if (
+        cached_entries is not None
+        and cached_inverted is not None
+        and _lexical_index_cache.get("mtime") == mtime
+    ):
+        return cached_entries, cached_inverted
+
+    entries: list[dict] = []
+    inverted: dict[str, set[int]] = {}
+    for raw in data.values():
+        if not isinstance(raw, dict):
             continue
-        content = entry.get("content", "")
+        content = str(raw.get("content", "") or "")
         if not content:
             continue
-        hay = content.lower()
-        title, excerpt = _extract_note_title_and_excerpt(content)
-        title_lower = (title or "").lower()
-        title_score = sum(1 for t in terms if t in title_lower)
-        body_score = sum(1 for t in terms if t in hay)
-        score = body_score + (title_score * 3)
-        if score:
-            scored.append((score, title, excerpt))
+        filepath = _normalize_file_path(raw.get("file_path", ""))
+        title, excerpt = _extract_note_title_and_excerpt(
+            content, fallback_filepath=filepath
+        )
+        title = title or _title_from_filepath(filepath)
+        entry = {
+            "content": content,
+            "filepath": filepath,
+            "title": title,
+            "title_lower": str(title or "").lower(),
+            "excerpt": excerpt,
+            "hay": content.lower(),
+        }
+        idx = len(entries)
+        entries.append(entry)
 
-    scored.sort(key=lambda x: x[0], reverse=True)
-    results = []
-    for score, title, excerpt in scored[:max_hits]:
-        results.append({
-            "title": title or "Unknown",
-            "score": score,
-            "excerpt": excerpt
-        })
-    return results
+        # Cap index payload for memory: title/path + first 6k chars.
+        index_text = _normalize_for_match(f"{title} {filepath} {content[:6000]}")
+        for token in set(re.findall(r"[a-z0-9]{3,}", index_text)):
+            if token in QUERY_STOP_TERMS:
+                continue
+            inverted.setdefault(token, set()).add(idx)
+
+    _lexical_index_cache["mtime"] = mtime
+    _lexical_index_cache["entries"] = entries
+    _lexical_index_cache["inverted"] = inverted
+    return entries, inverted
+
+
+def _candidate_entry_indices(
+    *,
+    terms: list[str],
+    strong_terms: list[str],
+    inverted: dict[str, set[int]] | None,
+    total_entries: int,
+) -> list[int]:
+    if not inverted:
+        return list(range(total_entries))
+    candidates: set[int] = set()
+    for term in list(terms) + list(strong_terms):
+        normalized_term = _normalize_for_match(term)
+        if not normalized_term:
+            continue
+        token_variants = {normalized_term}
+        token_variants.update(
+            part for part in re.split(r"[-_/\\.\\s]+", normalized_term) if len(part) >= 3
+        )
+        for variant in token_variants:
+            candidates.update(inverted.get(variant, set()))
+    if not candidates:
+        return list(range(total_entries))
+    return sorted(candidates)
+
+
+def _normalize_file_path(file_path: str) -> str:
+    path = str(file_path or "").replace("\\", "/").strip()
+    if path.startswith("/app/vault/"):
+        path = path[len("/app/vault/") :]
+    return path.lstrip("/")
+
+
+def _sanitize_retrieval_query(query_text: str) -> str:
+    text = str(query_text or "").strip()
+    if not text:
+        return ""
+
+    quoted_analyze = re.search(r'(?is)\banalyze\s*:\s*["“](.+?)["”]', text)
+    if quoted_analyze:
+        cleaned = quoted_analyze.group(1).strip()
+        if cleaned:
+            return cleaned
+
+    inline_analyze = re.search(r"(?is)\banalyze\s*:\s*([^\n\r]+)", text)
+    if inline_analyze:
+        candidate = inline_analyze.group(1).strip().strip("\"'`")
+        if candidate:
+            text = candidate
+
+    section_start = re.search(
+        r"(?im)^\s*(requirements?|output format|citation rule|method|scope constraints?)\s*:",
+        text,
+    )
+    if section_start:
+        text = text[: section_start.start()].strip()
+
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _should_apply_medical_scope_bias(query_text: str) -> bool:
+    normalized = _normalize_for_match(query_text)
+    if not normalized:
+        return False
+    marker_hits = sum(1 for marker in MEDICAL_SCOPE_MARKERS if marker in normalized)
+    if marker_hits < 1:
+        return False
+    if any(hint in normalized for hint in MEDICAL_SCOPE_OVERRIDE_HINTS):
+        return False
+    return True
+
+
+def _requested_sections_from_query(query_text: str) -> list[str]:
+    normalized = _normalize_for_match(query_text)
+    if not normalized:
+        return []
+
+    section_map = [
+        ("summary", "Summary"),
+        ("direct connections", "Direct Connections"),
+        ("indirect connections", "Indirect Connections"),
+        ("supporting notes", "Supporting Notes"),
+        ("timeline", "Timeline"),
+        ("contradictions", "Contradictions / Uncertainty"),
+        ("uncertainty", "Contradictions / Uncertainty"),
+        ("unknowns", "Unknowns / Gaps"),
+        ("missing data", "Unknowns / Missing Data"),
+        ("next best questions", "Next Best Questions"),
+        ("follow up questions", "Next Best Questions"),
+        ("sources", "Sources"),
+    ]
+    requested: list[str] = []
+    for marker, section in section_map:
+        if marker in normalized and section not in requested:
+            requested.append(section)
+    return requested
+
+
+def _normalize_query_filters(raw_filters: dict | None) -> dict:
+    if not isinstance(raw_filters, dict):
+        return {}
+    normalized: dict = {}
+    raw_tags = raw_filters.get("tags")
+    tags: list[str] = []
+    if isinstance(raw_tags, str):
+        tags = [raw_tags]
+    elif isinstance(raw_tags, list):
+        tags = [str(tag) for tag in raw_tags if str(tag).strip()]
+    normalized_tags = []
+    for tag in tags:
+        clean = str(tag).strip().lower()
+        if not clean:
+            continue
+        if not clean.startswith("#"):
+            clean = f"#{clean}"
+        normalized_tags.append(clean)
+    if normalized_tags:
+        normalized["tags"] = sorted(set(normalized_tags))
+    raw_prefixes = raw_filters.get("path_prefixes")
+    prefixes: list[str] = []
+    if isinstance(raw_prefixes, str):
+        prefixes = [raw_prefixes]
+    elif isinstance(raw_prefixes, list):
+        prefixes = [str(prefix) for prefix in raw_prefixes if str(prefix).strip()]
+    normalized_prefixes = []
+    for prefix in prefixes:
+        clean = _normalize_file_path(prefix).strip()
+        if clean:
+            normalized_prefixes.append(clean.rstrip("/") + "/")
+    if normalized_prefixes:
+        normalized["path_prefixes"] = sorted(set(normalized_prefixes))
+    return normalized
+
+
+def _extract_tags_from_text(text: str) -> set[str]:
+    tags: set[str] = set()
+    raw = str(text or "")
+    if not raw:
+        return tags
+    for line in raw.splitlines():
+        if line.lower().startswith("tags:"):
+            for part in line.split(":", 1)[1].split(","):
+                tag = part.strip().lower()
+                if not tag:
+                    continue
+                if not tag.startswith("#"):
+                    tag = f"#{tag}"
+                tags.add(tag)
+    for match in re.findall(r"(?<!\w)#([A-Za-z0-9][A-Za-z0-9/_-]*)", raw):
+        clean = match.strip().lower()
+        if clean:
+            tags.add(f"#{clean}")
+    return tags
+
+
+def _source_matches_filters(
+    *,
+    snippet: str,
+    filepath: str,
+    filters: dict,
+) -> bool:
+    if not filters:
+        return True
+    tags_filter = filters.get("tags", [])
+    if tags_filter:
+        source_tags = _extract_tags_from_text(snippet)
+        if not source_tags:
+            source_tags = _extract_tags_from_text(filepath)
+        if not any(tag in source_tags for tag in tags_filter):
+            return False
+    path_prefixes = filters.get("path_prefixes", [])
+    if path_prefixes:
+        normalized_path = _normalize_file_path(filepath).lower()
+        if not any(
+            normalized_path.startswith(str(prefix).lower()) for prefix in path_prefixes
+        ):
+            return False
+    return True
+
+
+def _filter_sources_by_filters(sources: list[dict], filters: dict) -> list[dict]:
+    if not filters:
+        return sources
+    output: list[dict] = []
+    for source in sources or []:
+        if not isinstance(source, dict):
+            continue
+        if _source_matches_filters(
+            snippet=str(source.get("snippet", "")),
+            filepath=_normalize_file_path(source.get("filepath", "")),
+            filters=filters,
+        ):
+            output.append(source)
+    return output
+
+
+def _title_from_filepath(file_path: str) -> str:
+    path = _normalize_file_path(file_path)
+    if not path:
+        return "Unknown"
+    return path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+
+
+def _query_terms(query_text: str) -> list[str]:
+    terms: set[str] = set()
+    for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9/._-]{1,}", query_text):
+        normalized = token.lower().strip("._-/")
+        if len(normalized) <= 2 or normalized in QUERY_STOP_TERMS:
+            continue
+        terms.add(normalized)
+        # Expand compound tokens like side-effects -> side, effects.
+        for part in re.split(r"[-_/\.]+", normalized):
+            if len(part) > 2 and part not in QUERY_STOP_TERMS:
+                terms.add(part)
+    return sorted(terms)
+
+
+def _query_phrases(query_text: str, max_phrases: int = 8) -> list[str]:
+    raw_tokens = [
+        t.lower().strip("._-/")
+        for t in re.findall(r"[A-Za-z0-9][A-Za-z0-9/._-]{1,}", query_text or "")
+    ]
+    tokens = [t for t in raw_tokens if len(t) > 2 and t not in QUERY_STOP_TERMS]
+    if len(tokens) < 2:
+        return []
+
+    phrases: list[str] = []
+    for n in (2, 3):
+        if len(tokens) < n:
+            continue
+        for i in range(0, len(tokens) - n + 1):
+            phrase = " ".join(tokens[i : i + n]).strip()
+            if phrase:
+                phrases.append(phrase)
+    deduped = []
+    seen = set()
+    for phrase in phrases:
+        if phrase in seen:
+            continue
+        seen.add(phrase)
+        deduped.append(phrase)
+        if len(deduped) >= max_phrases:
+            break
+    return deduped
+
+
+def _query_strong_terms(query_text: str) -> list[str]:
+    strong: set[str] = set()
+    for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9/._-]{1,}", query_text):
+        normalized = token.lower().strip("._-/")
+        if (
+            len(normalized) < 5
+            or normalized in QUERY_STOP_TERMS
+            or normalized in GENERIC_QUERY_TERMS
+        ):
+            continue
+        strong.add(normalized)
+    return sorted(strong)
+
+
+def _query_targets_automation(query_text: str) -> bool:
+    lower = _normalize_for_match(str(query_text or ""))
+    if not lower:
+        return False
+    return any(hint in lower for hint in AUTOMATION_QUERY_HINTS)
+
+
+def _is_noise_payload(text: str) -> bool:
+    lower = _normalize_for_match(str(text or ""))
+    if not lower:
+        return False
+    return any(marker in lower for marker in META_NOISE_MARKERS)
+
+
+def _normalize_for_match(text: str) -> str:
+    normalized = re.sub(r"[^a-z0-9]+", " ", str(text or "").lower())
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+def _template_noise_penalty(title: str, snippet: str) -> float:
+    hay = _normalize_for_match(f"{title} {snippet}")
+    if not hay:
+        return 0.0
+    hits = sum(1 for marker in TEMPLATE_NOISE_MARKERS if marker in hay)
+    hits += sum(1 for marker in META_NOISE_MARKERS if marker in hay)
+    # Scale 0..1
+    return min(1.0, hits / 4.0)
+
+
+def _meta_source_penalty(query_terms: list[str], title: str, file_path: str, snippet: str) -> float:
+    query_norm = _normalize_for_match(" ".join(query_terms))
+    # If user explicitly asks for taxonomy/system content, do not penalize.
+    if any(hint in query_norm for hint in META_SOURCE_HINTS):
+        return 0.0
+
+    target = _normalize_for_match(f"{title} {file_path} {snippet}")
+    if not target:
+        return 0.0
+    hits = sum(1 for hint in META_SOURCE_HINTS if hint in target)
+    return min(1.0, hits / 3.0)
+
+
+def _term_matches_hay(term: str, hay: str, hay_normalized: str) -> bool:
+    if not term:
+        return False
+    t = term.lower().strip()
+    if not t:
+        return False
+    if t in hay:
+        return True
+    t_norm = _normalize_for_match(t)
+    if t_norm and t_norm in hay_normalized:
+        return True
+    parts = [p for p in re.split(r"[-_/\.]+", t) if p]
+    if len(parts) > 1:
+        return all(part in hay_normalized for part in parts)
+    return False
+
+
+def _matches_any_terms(terms: list[str], hay: str) -> bool:
+    if not terms:
+        return True
+    hay_lower = str(hay or "").lower()
+    hay_norm = _normalize_for_match(hay_lower)
+    return any(_term_matches_hay(term, hay_lower, hay_norm) for term in terms)
+
+
+def _score_source_features(
+    query_text: str,
+    query_terms: list[str],
+    title: str,
+    file_path: str,
+    snippet: str,
+    *,
+    source_type: str = "chunk",
+) -> dict:
+    if not query_terms:
+        return {
+            "score": 0,
+            "coverage": 0,
+            "term_coverage": 0.0,
+            "phrase_hits": 0,
+            "template_penalty": 0.0,
+            "meta_penalty": 0.0,
+            "type_weight": 1.0,
+        }
+
+    title_lower = str(title or "").lower()
+    path_lower = str(file_path or "").lower()
+    snippet_lower = str(snippet or "").lower()
+    hay = f"{title_lower} {path_lower} {snippet_lower}"
+    hay_normalized = _normalize_for_match(hay)
+
+    matched_terms = [term for term in query_terms if _term_matches_hay(term, hay, hay_normalized)]
+    coverage = len(matched_terms)
+    term_coverage = coverage / max(1, len(query_terms))
+
+    title_norm = _normalize_for_match(title_lower)
+    path_norm = _normalize_for_match(path_lower)
+    snippet_norm = _normalize_for_match(snippet_lower)
+    title_score = sum(
+        1 for term in query_terms if _term_matches_hay(term, title_lower, title_norm)
+    )
+    path_score = sum(
+        1 for term in query_terms if _term_matches_hay(term, path_lower, path_norm)
+    )
+    body_score = sum(
+        1 for term in query_terms if _term_matches_hay(term, snippet_lower, snippet_norm)
+    )
+
+    phrases = _query_phrases(query_text)
+    phrase_hits = sum(1 for phrase in phrases if phrase in hay_normalized)
+
+    # Prefer direct evidence chunks/extractive snippets over abstract entity summaries.
+    type_weight = 1.0
+    if source_type == "entity":
+        type_weight = 0.84
+    elif source_type == "extractive":
+        type_weight = 1.08
+
+    # Penalize templated/meta notes without hardcoding domain terms.
+    template_penalty = _template_noise_penalty(title_lower, snippet_lower)
+    meta_penalty = _meta_source_penalty(query_terms, title_lower, path_lower, snippet_lower)
+
+    lexical = (coverage * 7) + (title_score * 4) + (path_score * 2) + body_score
+    cohesion_bonus = (phrase_hits * 9) + (6 if title_score > 0 and body_score > 0 else 0)
+    structural_bonus = 3 if len(snippet or "") >= 220 else 0
+    score = int(
+        max(
+            0.0,
+            ((lexical + cohesion_bonus + structural_bonus) * type_weight)
+            - (template_penalty * 10)
+            - (meta_penalty * 8),
+        )
+    )
+
+    return {
+        "score": score,
+        "coverage": coverage,
+        "term_coverage": round(term_coverage, 4),
+        "phrase_hits": phrase_hits,
+        "template_penalty": round(template_penalty, 4),
+        "meta_penalty": round(meta_penalty, 4),
+        "type_weight": round(type_weight, 4),
+    }
+
+
+def _score_source_match(
+    query_terms: list[str], title: str, file_path: str, snippet: str
+) -> tuple[int, int]:
+    features = _score_source_features(
+        " ".join(query_terms),
+        query_terms,
+        title,
+        file_path,
+        snippet,
+        source_type="chunk",
+    )
+    return int(features.get("score", 0)), int(features.get("coverage", 0))
+
+
+def _token_set_for_source(source: dict) -> set[str]:
+    text = " ".join(
+        [
+            str(source.get("filename") or source.get("title") or ""),
+            str(source.get("filepath", "")),
+            str(source.get("snippet", "")),
+        ]
+    )
+    return set(
+        term
+        for term in re.findall(r"[a-z0-9]{3,}", _normalize_for_match(text))
+        if term not in QUERY_STOP_TERMS
+    )
+
+
+def _source_similarity(a: dict, b: dict) -> float:
+    a_tokens = _token_set_for_source(a)
+    b_tokens = _token_set_for_source(b)
+    if not a_tokens or not b_tokens:
+        return 0.0
+    inter = len(a_tokens & b_tokens)
+    union = len(a_tokens | b_tokens)
+    if union == 0:
+        return 0.0
+    return inter / union
+
+
+def _mmr_diversify_sources(
+    sources: list[dict], max_sources: int, lambda_weight: float = 0.78
+) -> list[dict]:
+    if not sources:
+        return []
+    if len(sources) <= 2:
+        return sources[:max_sources]
+
+    pool = list(sources)
+    selected: list[dict] = []
+    while pool and len(selected) < max_sources:
+        best_idx = 0
+        best_value = float("-inf")
+        for idx, candidate in enumerate(pool):
+            relevance = float(candidate.get("relevance", 0) or 0) / 100.0
+            max_sim = 0.0
+            if selected:
+                max_sim = max(_source_similarity(candidate, chosen) for chosen in selected)
+            mmr_value = (lambda_weight * relevance) - ((1.0 - lambda_weight) * max_sim)
+            if mmr_value > best_value:
+                best_value = mmr_value
+                best_idx = idx
+        selected.append(pool.pop(best_idx))
+    return selected
+
+
+def _sources_evidence_sufficient(query_text: str, sources: list[dict]) -> bool:
+    if not sources:
+        return False
+    top = sources[: min(4, len(sources))]
+    if len(top) < 2:
+        return False
+
+    avg_relevance = sum(float(s.get("relevance", 0) or 0) for s in top) / len(top)
+    avg_term_cov = sum(float(s.get("term_coverage", 0) or 0) for s in top) / len(top)
+    avg_template_penalty = sum(float(s.get("template_penalty", 0) or 0) for s in top) / len(top)
+    avg_meta_penalty = sum(float(s.get("meta_penalty", 0) or 0) for s in top) / len(top)
+    total_phrase_hits = sum(int(s.get("phrase_hits", 0) or 0) for s in top)
+
+    # Generic sufficiency thresholds: enough lexical fit, low template noise, and some phrase cohesion.
+    if avg_relevance < 18:
+        return False
+    if avg_term_cov < 0.28:
+        return False
+    if avg_template_penalty > 0.7:
+        return False
+    if avg_meta_penalty > 0.75:
+        return False
+
+    query_phrases = _query_phrases(query_text)
+    if query_phrases and total_phrase_hits == 0 and avg_term_cov < 0.45:
+        return False
+    return True
+
+
+def _relevance_from_score(score: int, query_terms: list[str]) -> float:
+    if score <= 0:
+        return 0.0
+    max_score = max(12, len(query_terms) * 12)
+    relevance = min(100.0, (score / max_score) * 100.0)
+    return round(relevance, 2)
+
+
+def _structured_sources_from_raw_data(
+    raw_payload: dict,
+    query_text: str,
+    max_sources: int = 12,
+    filters: dict | None = None,
+) -> list[dict]:
+    if not isinstance(raw_payload, dict):
+        return []
+
+    data_section = raw_payload.get("data", {})
+    if not isinstance(data_section, dict):
+        return []
+
+    query_terms = _query_terms(query_text)
+    strong_terms = _query_strong_terms(query_text)
+    min_coverage = 2 if len(query_terms) >= 2 else 1
+    apply_noise_filter = LIGHTRAG_NOISE_FILTER and not _query_targets_automation(query_text)
+    normalized_filters = _normalize_query_filters(filters)
+
+    references_by_id: dict[str, str] = {}
+    for ref in data_section.get("references", []) if isinstance(data_section.get("references", []), list) else []:
+        if not isinstance(ref, dict):
+            continue
+        ref_id = str(ref.get("reference_id", "")).strip()
+        file_path = _normalize_file_path(str(ref.get("file_path", "")))
+        if ref_id and file_path:
+            references_by_id[ref_id] = file_path
+
+    candidates: list[dict] = []
+    chunks = data_section.get("chunks", [])
+    if isinstance(chunks, list):
+        for chunk in chunks:
+            if not isinstance(chunk, dict):
+                continue
+            file_path = _normalize_file_path(chunk.get("file_path", ""))
+            ref_id = str(chunk.get("reference_id", "")).strip()
+            if not file_path and ref_id:
+                file_path = references_by_id.get(ref_id, "")
+            content = str(chunk.get("content", ""))
+            title, excerpt = _extract_note_title_and_excerpt(content, fallback_filepath=file_path)
+            title = title or _title_from_filepath(file_path)
+            excerpt = excerpt or content.strip()
+            if apply_noise_filter and (_is_noise_payload(title) or _is_noise_payload(excerpt) or _is_noise_payload(file_path)):
+                continue
+            if normalized_filters and not _source_matches_filters(
+                snippet=content,
+                filepath=file_path,
+                filters=normalized_filters,
+            ):
+                continue
+            features = _score_source_features(
+                query_text,
+                query_terms,
+                title,
+                file_path,
+                excerpt,
+                source_type="chunk",
+            )
+            score = int(features.get("score", 0))
+            coverage = int(features.get("coverage", 0))
+            strong_match = _matches_any_terms(strong_terms, f"{title} {file_path} {excerpt}")
+            candidates.append(
+                {
+                    "filename": title or "Unknown",
+                    "title": title or "Unknown",
+                    "filepath": file_path,
+                    "snippet": excerpt[:LIGHTRAG_SYNTHESIS_SNIPPET_CHARS]
+                    + ("..." if len(excerpt) > LIGHTRAG_SYNTHESIS_SNIPPET_CHARS else ""),
+                    "source_type": "chunk",
+                    "score": score,
+                    "coverage": coverage,
+                    "strong_match": strong_match,
+                    "term_coverage": float(features.get("term_coverage", 0.0)),
+                    "phrase_hits": int(features.get("phrase_hits", 0)),
+                    "template_penalty": float(features.get("template_penalty", 0.0)),
+                    "meta_penalty": float(features.get("meta_penalty", 0.0)),
+                }
+            )
+
+    # If chunk coverage is sparse, supplement with entity/relationship evidence.
+    if not candidates:
+        for entity in data_section.get("entities", []) if isinstance(data_section.get("entities", []), list) else []:
+            if not isinstance(entity, dict):
+                continue
+            file_path = _normalize_file_path(entity.get("file_path", ""))
+            if not file_path:
+                continue
+            title = _title_from_filepath(file_path)
+            snippet = str(entity.get("description", "")).strip()
+            if apply_noise_filter and (_is_noise_payload(title) or _is_noise_payload(snippet) or _is_noise_payload(file_path)):
+                continue
+            if normalized_filters and not _source_matches_filters(
+                snippet=snippet,
+                filepath=file_path,
+                filters=normalized_filters,
+            ):
+                continue
+            features = _score_source_features(
+                query_text,
+                query_terms,
+                title,
+                file_path,
+                snippet,
+                source_type="entity",
+            )
+            score = int(features.get("score", 0))
+            coverage = int(features.get("coverage", 0))
+            strong_match = _matches_any_terms(strong_terms, f"{title} {file_path} {snippet}")
+            candidates.append(
+                {
+                    "filename": title or "Unknown",
+                    "title": title or "Unknown",
+                    "filepath": file_path,
+                    "snippet": snippet[:LIGHTRAG_SYNTHESIS_SNIPPET_CHARS]
+                    + ("..." if len(snippet) > LIGHTRAG_SYNTHESIS_SNIPPET_CHARS else ""),
+                    "source_type": "entity",
+                    "score": score,
+                    "coverage": coverage,
+                    "strong_match": strong_match,
+                    "term_coverage": float(features.get("term_coverage", 0.0)),
+                    "phrase_hits": int(features.get("phrase_hits", 0)),
+                    "template_penalty": float(features.get("template_penalty", 0.0)),
+                    "meta_penalty": float(features.get("meta_penalty", 0.0)),
+                }
+            )
+
+    deduped: dict[str, dict] = {}
+    for candidate in candidates:
+        key = f"{_normalize_title_token(candidate.get('filename', ''))}|{_normalize_file_path(candidate.get('filepath', ''))}"
+        existing = deduped.get(key)
+        if existing is None or candidate.get("score", 0) > existing.get("score", 0):
+            deduped[key] = candidate
+
+    ranked = list(deduped.values())
+    if strong_terms:
+        strong_filtered = [row for row in ranked if bool(row.get("strong_match", False))]
+        if strong_filtered:
+            ranked = strong_filtered
+    if query_terms:
+        coverage_filtered = [row for row in ranked if int(row.get("coverage", 0)) >= min_coverage]
+        # If retrieval is too sparse, relax from strict multi-term coverage to at least one term.
+        if len(coverage_filtered) < 3 and len(query_terms) >= 2:
+            coverage_filtered = [row for row in ranked if int(row.get("coverage", 0)) >= 1]
+        ranked = coverage_filtered
+    if LIGHTRAG_RERANK:
+        ranked.sort(
+            key=lambda row: (
+                row.get("score", 0),
+                row.get("coverage", 0),
+                row.get("phrase_hits", 0),
+                -float(row.get("template_penalty", 0.0)),
+                -float(row.get("meta_penalty", 0.0)),
+                row.get("filename", ""),
+            ),
+            reverse=True,
+        )
+
+    output: list[dict] = []
+    for row in ranked[:max_sources]:
+        relevance = _relevance_from_score(int(row.get("score", 0)), query_terms)
+        output.append(
+            {
+                "filename": row.get("filename", "Unknown"),
+                "title": row.get("title", row.get("filename", "Unknown")),
+                "filepath": row.get("filepath", ""),
+                "relevance": relevance,
+                "snippet": row.get("snippet", ""),
+                "source_type": row.get("source_type", "chunk"),
+                "term_coverage": row.get("term_coverage", 0.0),
+                "phrase_hits": row.get("phrase_hits", 0),
+                "template_penalty": row.get("template_penalty", 0.0),
+                "meta_penalty": row.get("meta_penalty", 0.0),
+            }
+        )
+    return output
+
+
+def _local_extractive_scan(query_text: str, filters: dict | None = None) -> dict:
+    """Single-pass lexical scan used to derive strict/relaxed extractive fallbacks."""
+    terms = _query_terms(query_text)
+    strong_terms = _query_strong_terms(query_text)
+    default_min_coverage = 2 if len(terms) >= 2 else 1
+    if not terms:
+        return {
+            "terms": [],
+            "strong_terms": [],
+            "default_min_coverage": default_min_coverage,
+            "scanned_entries": 0,
+            "scored": [],
+        }
+
+    apply_noise_filter = LIGHTRAG_NOISE_FILTER and not _query_targets_automation(query_text)
+    normalized_filters = _normalize_query_filters(filters)
+
+    entries, inverted = _load_lexical_index_cache()
+    if not entries:
+        return {
+            "terms": terms,
+            "strong_terms": strong_terms,
+            "default_min_coverage": default_min_coverage,
+            "scanned_entries": 0,
+            "scored": [],
+        }
+
+    candidate_indices = _candidate_entry_indices(
+        terms=terms,
+        strong_terms=strong_terms,
+        inverted=inverted,
+        total_entries=len(entries),
+    )
+    scanned_entries = len(candidate_indices)
+    scored: list[dict] = []
+    for idx in candidate_indices:
+        entry = entries[idx]
+        content = str(entry.get("content", "") or "")
+        if not content:
+            continue
+        hay = str(entry.get("hay", "") or content.lower())
+        if apply_noise_filter and _is_noise_payload(hay):
+            continue
+        title = str(entry.get("title", "") or "")
+        excerpt = str(entry.get("excerpt", "") or "")
+        filepath = _normalize_file_path(entry.get("filepath", ""))
+        if normalized_filters and not _source_matches_filters(
+            snippet=content,
+            filepath=filepath,
+            filters=normalized_filters,
+        ):
+            continue
+        if apply_noise_filter and (_is_noise_payload(title) or _is_noise_payload(filepath)):
+            continue
+
+        features = _score_source_features(
+            query_text,
+            terms,
+            title,
+            filepath,
+            hay,
+            source_type="extractive",
+        )
+        score = int(features.get("score", 0))
+        if score <= 0:
+            continue
+        strong_match = (
+            _matches_any_terms(strong_terms, f"{title} {filepath} {hay}")
+            if strong_terms
+            else True
+        )
+        scored.append(
+            {
+                "score": score,
+                "coverage": int(features.get("coverage", 0)),
+                "phrase_hits": int(features.get("phrase_hits", 0)),
+                "template_penalty": float(features.get("template_penalty", 0.0)),
+                "meta_penalty": float(features.get("meta_penalty", 0.0)),
+                "term_coverage": float(features.get("term_coverage", 0.0)),
+                "strong_match": strong_match,
+                "title": title or "Unknown",
+                "filepath": filepath,
+                "excerpt": excerpt,
+            }
+        )
+
+    scored.sort(
+        key=lambda row: (
+            int(row.get("score", 0)),
+            int(row.get("coverage", 0)),
+            int(row.get("phrase_hits", 0)),
+            -float(row.get("template_penalty", 0.0)),
+            -float(row.get("meta_penalty", 0.0)),
+        ),
+        reverse=True,
+    )
+    return {
+        "terms": terms,
+        "strong_terms": strong_terms,
+        "default_min_coverage": default_min_coverage,
+        "scanned_entries": scanned_entries,
+        "scored": scored,
+    }
+
+
+def _select_extractive_hits_from_scan(
+    scan_payload: dict,
+    *,
+    max_hits: int = 3,
+    min_coverage_override: int | None = None,
+) -> list[dict]:
+    if not isinstance(scan_payload, dict):
+        return []
+    scored = scan_payload.get("scored", [])
+    if not isinstance(scored, list) or not scored:
+        return []
+    min_coverage = (
+        min_coverage_override
+        if isinstance(min_coverage_override, int) and min_coverage_override > 0
+        else int(scan_payload.get("default_min_coverage", 1) or 1)
+    )
+    strong_terms = scan_payload.get("strong_terms", [])
+
+    output: list[dict] = []
+    for row in scored:
+        if not isinstance(row, dict):
+            continue
+        if int(row.get("coverage", 0)) < min_coverage:
+            continue
+        if strong_terms and not bool(row.get("strong_match", False)):
+            continue
+        output.append(
+            {
+                "title": str(row.get("title", "") or "Unknown"),
+                "filepath": _normalize_file_path(row.get("filepath", "")),
+                "score": int(row.get("score", 0)),
+                "coverage": int(row.get("coverage", 0)),
+                "phrase_hits": int(row.get("phrase_hits", 0)),
+                "template_penalty": float(row.get("template_penalty", 0.0)),
+                "meta_penalty": float(row.get("meta_penalty", 0.0)),
+                "term_coverage": float(row.get("term_coverage", 0.0)),
+                "excerpt": str(row.get("excerpt", "") or ""),
+            }
+        )
+        if len(output) >= max(1, int(max_hits or 1)):
+            break
+    return output
+
+
+def _local_extractive_search(
+    query_text: str,
+    max_hits: int = 3,
+    min_coverage_override: int | None = None,
+    filters: dict | None = None,
+) -> list[dict]:
+    """Return top matching chunks without LLM generation."""
+    scan_payload = _local_extractive_scan(query_text, filters=filters)
+    return _select_extractive_hits_from_scan(
+        scan_payload,
+        max_hits=max_hits,
+        min_coverage_override=min_coverage_override,
+    )
+
+
+def _extractive_source_from_hit(hit: dict) -> dict:
+    return {
+        "filename": hit.get("title", "Unknown"),
+        "title": hit.get("title", "Unknown"),
+        "filepath": hit.get("filepath", ""),
+        "relevance": float(hit.get("score", 0) or 0),
+        "snippet": hit.get("excerpt", ""),
+        "source_type": "extractive",
+        "term_coverage": float(hit.get("term_coverage", 0.0) or 0.0),
+        "phrase_hits": int(hit.get("phrase_hits", 0) or 0),
+        "template_penalty": float(hit.get("template_penalty", 0.0) or 0.0),
+        "meta_penalty": float(hit.get("meta_penalty", 0.0) or 0.0),
+    }
+
+
+def _merge_extractive_hits_into_sources(sources: list[dict], hits: list[dict]) -> int:
+    if not hits:
+        return 0
+    existing_keys = {
+        f"{_normalize_title_token(src.get('filename') or src.get('title') or '')}|{_normalize_file_path(src.get('filepath', ''))}"
+        for src in sources
+        if isinstance(src, dict)
+    }
+    added = 0
+    for hit in hits:
+        if not isinstance(hit, dict):
+            continue
+        key = f"{_normalize_title_token(hit.get('title', ''))}|{_normalize_file_path(hit.get('filepath', ''))}"
+        if key in existing_keys:
+            continue
+        existing_keys.add(key)
+        sources.append(_extractive_source_from_hit(hit))
+        added += 1
+    return added
+
+
+def _build_extractive_fallback_plan(
+    query_text: str,
+    *,
+    strict_limit: int,
+    relaxed_limit: int,
+    gate_limit: int,
+    filters: dict | None = None,
+) -> dict:
+    """Build strict/relaxed/gate fallback hits from a single lexical scan."""
+    scan_payload = _local_extractive_scan(query_text, filters=filters)
+    strict_hits = _select_extractive_hits_from_scan(
+        scan_payload,
+        max_hits=max(1, int(strict_limit or 1)),
+    )
+    relaxed_hits = _select_extractive_hits_from_scan(
+        scan_payload,
+        max_hits=max(1, int(relaxed_limit or 1)),
+        min_coverage_override=1,
+    )
+    gate_hits = _select_extractive_hits_from_scan(
+        scan_payload,
+        max_hits=max(1, int(gate_limit or 1)),
+        min_coverage_override=1,
+    )
+    return {
+        "strict_hits": strict_hits,
+        "relaxed_hits": relaxed_hits,
+        "gate_hits": gate_hits,
+        "scan_count": 1,
+        "scanned_entries": int(scan_payload.get("scanned_entries", 0)),
+        "candidate_count": len(scan_payload.get("scored", [])),
+    }
+
+
+def _format_extractive_hits(query_text: str, hits: list[dict]) -> str:
+    if not hits:
+        return "Not found in notes."
+    lines = [f"- Extractive matches for: {query_text}"]
+    for hit in hits:
+        filepath = _normalize_file_path(hit.get("filepath", ""))
+        title = str(hit.get("title", "")).strip()
+        if not title or title.lower() == "unknown":
+            title = _title_from_filepath(filepath)
+        title = title or "Unknown"
+        excerpt = str(hit.get("excerpt", "")).strip()
+        score = hit.get("score", 0)
+        if excerpt:
+            lines.append(f"- {title} (score: {score}): {excerpt}")
+        else:
+            lines.append(f"- {title} (score: {score})")
+    return "\n".join(lines)
+
+
+def _format_structured_sources(query_text: str, sources: list[dict], max_hits: int = 6) -> str:
+    if not sources:
+        return "Not found in notes."
+    lines = [f"- Extractive matches for: {query_text}"]
+    for source in sources[:max_hits]:
+        filepath = _normalize_file_path(source.get("filepath", ""))
+        title = str(source.get("filename") or source.get("title") or "").strip()
+        if not title or title.lower() == "unknown":
+            title = _title_from_filepath(filepath)
+        title = title or "Unknown"
+        snippet = str(source.get("snippet", "")).strip()
+        score = int(round(float(source.get("relevance", 0) or 0)))
+        if snippet:
+            lines.append(f"- {title} (score: {score}): {snippet}")
+        else:
+            lines.append(f"- {title} (score: {score})")
+    return "\n".join(lines)
+
+
+def _structured_summary_from_raw_data(query_text: str, raw_payload: dict, sources: list[dict]) -> str:
+    if not isinstance(raw_payload, dict):
+        return _format_structured_sources(query_text, sources, max_hits=6)
+    data_section = raw_payload.get("data", {})
+    if not isinstance(data_section, dict):
+        return _format_structured_sources(query_text, sources, max_hits=6)
+
+    entities = data_section.get("entities", []) if isinstance(data_section.get("entities", []), list) else []
+    relationships = (
+        data_section.get("relationships", [])
+        if isinstance(data_section.get("relationships", []), list)
+        else []
+    )
+
+    direct_connections: list[str] = []
+    for relation in relationships[:6]:
+        if not isinstance(relation, dict):
+            continue
+        src = str(relation.get("src_id", "")).strip()
+        tgt = str(relation.get("tgt_id", "")).strip()
+        if not src or not tgt:
+            continue
+        direct_connections.append(f"- {src} -> {tgt}")
+
+    indirect_entities: list[str] = []
+    for entity in entities[:8]:
+        if not isinstance(entity, dict):
+            continue
+        name = str(entity.get("entity_name", "")).strip()
+        if not name:
+            continue
+        indirect_entities.append(f"- {name}")
+
+    lines: list[str] = []
+    lines.append("Summary")
+    lines.append(
+        f"- Retrieved {len(sources)} supporting notes for query: \"{query_text}\"."
+    )
+    lines.append("")
+    lines.append("Direct Connections")
+    if direct_connections:
+        lines.extend(direct_connections)
+    else:
+        lines.append("- Not explicitly stated in retrieved relations.")
+    lines.append("")
+    lines.append("Indirect Connections")
+    if indirect_entities:
+        lines.extend(indirect_entities)
+    else:
+        lines.append("- Not explicitly stated in retrieved entities.")
+    lines.append("")
+    lines.append("Supporting Notes")
+    for source in sources[:6]:
+        title = str(source.get("filename") or source.get("title") or "Unknown").strip()
+        snippet = str(source.get("snippet", "")).strip()
+        lines.append(f"- {title}: {snippet[:200]}")
+    lines.append("")
+    lines.append("Unknowns / Gaps")
+    lines.append("- Any detail not listed above was not found in the retrieved notes.")
+    return "\n".join(lines)
+
+
+def _is_section_heading(line: str) -> bool:
+    stripped = str(line or "").strip()
+    if not stripped:
+        return False
+    if stripped.startswith("#"):
+        return True
+    if stripped.startswith(("-", "*", "•")):
+        return False
+    return bool(re.match(r"^[A-Za-z][A-Za-z0-9 /&_()\-]{2,}:?$", stripped))
+
+
+def _heading_key(line: str) -> str:
+    stripped = str(line or "").strip()
+    stripped = re.sub(r"^#{1,6}\s*", "", stripped)
+    stripped = stripped.rstrip(":").strip().lower()
+    stripped = re.sub(r"\s+", " ", stripped)
+    return stripped
+
+
+def _unknown_bullet_is_supported(bullet_text: str, evidence_text: str) -> bool:
+    text = str(bullet_text or "").strip().lower()
+    if not text or "not listed above" in text:
+        return False
+    tokens = [
+        token
+        for token in re.findall(r"[a-z0-9][a-z0-9/_-]{2,}", text)
+        if token not in QUERY_STOP_TERMS
+    ]
+    if not tokens:
+        return False
+    matches = 0
+    for token in tokens:
+        if token in evidence_text:
+            matches += 1
+    required = max(2, int(round(len(tokens) * 0.6)))
+    return matches >= required
+
+
+def _validate_unknowns_section(answer_text: str, sources: list[dict]) -> str:
+    if not isinstance(answer_text, str) or not answer_text.strip():
+        return answer_text
+    if not isinstance(sources, list) or not sources:
+        return answer_text
+
+    evidence_blob = " ".join(
+        str(part or "")
+        for src in sources
+        if isinstance(src, dict)
+        for part in (
+            src.get("filename"),
+            src.get("title"),
+            src.get("filepath"),
+            src.get("snippet"),
+        )
+    )
+    evidence_text = _normalize_for_match(evidence_blob)
+    if not evidence_text:
+        return answer_text
+
+    unknown_keys = {"unknowns / gaps", "unknowns", "gaps"}
+    output_lines: list[str] = []
+    lines = answer_text.splitlines()
+    in_unknowns = False
+    kept_unknown_bullets = 0
+
+    for line in lines:
+        if _is_section_heading(line):
+            key = _heading_key(line)
+            if in_unknowns and key not in unknown_keys and kept_unknown_bullets == 0:
+                output_lines.append("- None identified from retrieved notes.")
+                kept_unknown_bullets = 1
+            in_unknowns = key in unknown_keys
+            if not in_unknowns:
+                kept_unknown_bullets = 0
+            output_lines.append(line)
+            continue
+
+        if in_unknowns and str(line).strip().startswith(("-", "*", "•")):
+            bullet = re.sub(r"^\s*[-*•]\s*", "", str(line).strip())
+            if _unknown_bullet_is_supported(bullet, evidence_text):
+                continue
+            kept_unknown_bullets += 1
+            output_lines.append(line)
+            continue
+
+        output_lines.append(line)
+
+    if in_unknowns and kept_unknown_bullets == 0:
+        output_lines.append("- None identified from retrieved notes.")
+
+    return "\n".join(output_lines).strip()
+
+
+def _strip_standalone_not_found_lines(text: str) -> str:
+    """Remove standalone 'Not found in notes' lines when answer has other content."""
+    if not isinstance(text, str):
+        return text
+    lines = text.splitlines()
+    if len(lines) <= 1:
+        return text
+
+    def _is_not_found_line(line: str) -> bool:
+        return bool(
+            re.match(r"^\s*[-*•]?\s*not found in notes\.?\s*$", line.strip(), re.IGNORECASE)
+        )
+
+    if not any(_is_not_found_line(line) for line in lines):
+        return text
+
+    non_empty_non_not_found = [
+        line for line in lines if line.strip() and not _is_not_found_line(line)
+    ]
+    if not non_empty_non_not_found:
+        return text
+
+    cleaned = [line for line in lines if not _is_not_found_line(line)]
+    return "\n".join(cleaned).strip()
+
+
+def _sanitize_synthesis_preamble(text: str) -> str:
+    """Remove model narration/disclaimer lines that add no grounded evidence."""
+    if not isinstance(text, str):
+        return text
+    cleaned = text.strip()
+    if not cleaned:
+        return cleaned
+
+    # If the answer has a structured section, drop any preamble before it.
+    summary_match = re.search(r"(?im)^\s*summary\s*:?\s*$", cleaned)
+    if summary_match and summary_match.start() > 0:
+        cleaned = cleaned[summary_match.start():].lstrip()
+
+    lines: list[str] = []
+    for line in cleaned.splitlines():
+        line_stripped = line.strip()
+        low = line_stripped.lower()
+        if re.match(r"^i(?:'ll| will)\s+(?:search|look|analy[sz]e)\b", low):
+            continue
+        if "based on limited retrieved context" in low:
+            continue
+        if "consultation with a healthcare professional" in low:
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
+
+
+def _extract_structural_metadata(snippet: str, filepath: str) -> dict:
+    text = str(snippet or "")
+    path = _normalize_file_path(filepath)
+    folder = ""
+    if "/" in path:
+        folder = path.rsplit("/", 1)[0]
+
+    tags: list[str] = []
+    for match in re.findall(r"(?<!\w)#([A-Za-z0-9][A-Za-z0-9/_-]*)", text):
+        tag = match.strip().lower()
+        if tag:
+            tags.append(f"#{tag}")
+    backlinks: list[str] = []
+    for match in re.findall(r"\[\[([^\]]+)\]\]", text):
+        note = match.split("|", 1)[0].strip()
+        if note:
+            backlinks.append(note)
+
+    # Keep this compact and deterministic for prompt context.
+    dedup_tags = list(dict.fromkeys(tags))[:8]
+    dedup_backlinks = list(dict.fromkeys(backlinks))[:8]
+    return {
+        "folder": folder,
+        "tags": dedup_tags,
+        "backlinks": dedup_backlinks,
+    }
+
+
+def _prepare_synthesis_sources(sources: list[dict], max_sources: int) -> list[dict]:
+    rows: list[dict] = []
+    for source in sources or []:
+        if not isinstance(source, dict):
+            continue
+        title = str(source.get("filename") or source.get("title") or "").strip()
+        filepath = _normalize_file_path(source.get("filepath", ""))
+        if not title or title.lower() == "unknown":
+            title = _title_from_filepath(filepath)
+        if not title:
+            continue
+        snippet = str(source.get("snippet", "")).strip()
+        rows.append(
+            {
+                "title": title,
+                "filepath": filepath,
+                "relevance": float(source.get("relevance", 0) or 0),
+                "term_coverage": float(source.get("term_coverage", 0) or 0),
+                "snippet": snippet[:LIGHTRAG_SYNTHESIS_SNIPPET_CHARS],
+            }
+        )
+
+    rows.sort(
+        key=lambda r: (
+            r.get("relevance", 0.0),
+            r.get("term_coverage", 0.0),
+            len(str(r.get("snippet", ""))),
+        ),
+        reverse=True,
+    )
+    return rows[: max(2, max_sources)]
+
+
+def _build_synthesis_evidence_bundle(query_text: str, sources: list[dict]) -> str:
+    selected = _prepare_synthesis_sources(
+        sources, max_sources=LIGHTRAG_SYNTHESIS_SOURCE_COUNT
+    )
+    if not selected:
+        return ""
+
+    lines: list[str] = [f"Query: {query_text}", "", "Evidence Blocks (ordered):"]
+    for idx, src in enumerate(selected, 1):
+        meta = _extract_structural_metadata(src.get("snippet", ""), src.get("filepath", ""))
+        tags_text = ", ".join(meta.get("tags", [])) if meta.get("tags") else "none"
+        backlinks_text = ", ".join(meta.get("backlinks", [])) if meta.get("backlinks") else "none"
+        folder_text = meta.get("folder") or "none"
+        excerpt = str(src.get("snippet", "")).strip() or "(no excerpt)"
+        lines.extend(
+            [
+                f"[{idx}] title: {src.get('title')}",
+                f"    path: {src.get('filepath') or 'unknown'}",
+                f"    folder: {folder_text}",
+                f"    tags: {tags_text}",
+                f"    backlinks: {backlinks_text}",
+                f"    relevance: {round(float(src.get('relevance', 0) or 0), 2)}",
+                "    excerpt:",
+                f"    {excerpt}",
+                "",
+            ]
+        )
+    return "\n".join(lines).strip()
+
+
+def _synthesis_system_prompt() -> str:
+    return """You are an assistant integrated with Michel's Obsidian Knowledge Base.
+Use only the provided evidence blocks. Do not use outside knowledge.
+Do not add preambles or safety disclaimers.
+Never invent note names or claims not present in evidence."""
+
+
+async def _two_pass_synthesis_async(
+    query_text: str,
+    sources: list[dict],
+    draft_answer: str,
+    requested_sections: list[str] | None = None,
+) -> str:
+    evidence = _build_synthesis_evidence_bundle(query_text, sources)
+    if not evidence:
+        return ""
+
+    model_func = get_query_model_func()
+    analysis_prompt = f"""Task: Analyze retrieved notes and derive an internal answer plan.
+
+Return these sections exactly:
+Core References
+Direct Facts
+Indirect Links
+Gaps
+
+Rules:
+- Ground everything in evidence.
+- Reference source IDs like [1], [2] in bullets.
+- No preamble.
+
+{evidence}
+"""
+
+    analysis = await model_func(
+        analysis_prompt,
+        system_prompt=_synthesis_system_prompt(),
+        history_messages=[],
+        temperature=0,
+    )
+    if not isinstance(analysis, str) or not analysis.strip() or analysis.strip().lower().startswith("error:"):
+        return ""
+
+    default_sections = [
+        "Summary",
+        "Direct Connections",
+        "Indirect Connections",
+        "Supporting Notes",
+        "Unknowns / Gaps",
+    ]
+    section_order = [section for section in (requested_sections or []) if section]
+    if not section_order:
+        section_order = default_sections
+    if "Summary" not in section_order:
+        section_order = ["Summary"] + section_order
+    ordered_section_text = "\n".join(section_order)
+
+    final_prompt = f"""Task: Compose the final narrative answer for the user.
+
+Use this exact section order:
+{ordered_section_text}
+
+Rules:
+- Start directly with "Summary".
+- Use only evidence and analysis below.
+- Keep claims concrete and specific.
+- In "Supporting Notes", include note titles and one grounded point per bullet.
+- No preamble, no disclaimer text, no invented citations.
+
+Analysis:
+{analysis.strip()}
+
+Evidence:
+{evidence}
+
+Optional draft answer:
+{str(draft_answer or "").strip()}
+"""
+
+    final_answer = await model_func(
+        final_prompt,
+        system_prompt=_synthesis_system_prompt(),
+        history_messages=[],
+        temperature=0,
+    )
+    if not isinstance(final_answer, str):
+        return ""
+    cleaned = _sanitize_synthesis_preamble(final_answer)
+    return cleaned.strip()
+
+
+def _run_two_pass_synthesis(
+    query_text: str,
+    sources: list[dict],
+    draft_answer: str,
+    requested_sections: list[str] | None = None,
+) -> str:
+    async def _runner():
+        timeout = min(QUERY_TIMEOUT_SECONDS, LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS)
+        return await asyncio.wait_for(
+            _two_pass_synthesis_async(
+                query_text,
+                sources,
+                draft_answer,
+                requested_sections=requested_sections,
+            ),
+            timeout=timeout,
+        )
+
+    try:
+        return asyncio.run(_runner())
+    except Exception as exc:
+        logger.warning(f"Two-pass synthesis failed: {exc}")
+        return ""
+
+
+def _normalize_title_token(value: str) -> str:
+    text = str(value or "").strip().strip("\"'`")
+    if text.lower().endswith(".md"):
+        text = text[:-3]
+    text = re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+    return re.sub(r"\s+", " ", text)
+
+
+def _extract_claimed_note_titles(answer_text: str) -> set[str]:
+    if not isinstance(answer_text, str):
+        return set()
+    titles: set[str] = set()
+
+    for quoted in re.findall(r"\"([^\"]{2,140})\"", answer_text):
+        normalized = _normalize_title_token(quoted)
+        if normalized and normalized not in {"not found in notes", "context used"}:
+            titles.add(normalized)
+
+    for match in re.findall(
+        r"(?im)^\s*(?:note|notes|context)\s+used\s*:\s*([^\n]+)$",
+        answer_text,
+    ):
+        raw = match.strip().strip("[]")
+        parts = re.split(r",|;|\band\b", raw, flags=re.IGNORECASE)
+        for part in parts:
+            cleaned = part.strip().strip("\"'`")
+            if not cleaned:
+                continue
+            normalized = _normalize_title_token(cleaned)
+            if normalized and normalized not in {"not found in notes", "context used"}:
+                titles.add(normalized)
+
+    for match in re.findall(r"(?i)\(note\s+name\s*:\s*([^)]+)\)", answer_text):
+        normalized = _normalize_title_token(match)
+        if normalized and normalized not in {"not found in notes", "context used"}:
+            titles.add(normalized)
+
+    # Catch synthetic placeholders like "Note12345" often produced by weak synthesis.
+    for synthetic in re.findall(r"(?i)\bnote\s*\d{2,}\b", answer_text):
+        normalized = _normalize_title_token(synthetic)
+        if normalized and normalized not in {"note", "not found in notes"}:
+            titles.add(normalized)
+
+    return titles
+
+
+def _has_ungrounded_citations(answer_text: str, hits: list[dict]) -> bool:
+    claimed_titles = _extract_claimed_note_titles(answer_text)
+    if not claimed_titles:
+        return False
+
+    grounded_titles = set()
+    for hit in hits or []:
+        raw_title = str(hit.get("title") or hit.get("filename") or "").strip()
+        if not raw_title or raw_title.lower() == "unknown":
+            raw_title = _title_from_filepath(str(hit.get("filepath", "")))
+        if not raw_title or raw_title.lower() == "unknown":
+            continue
+        grounded_titles.add(_normalize_title_token(raw_title))
+    grounded_titles = {title for title in grounded_titles if title}
+    if not grounded_titles:
+        return True
+
+    ungrounded = claimed_titles - grounded_titles
+    return len(ungrounded) > 0
+
+
+def _reference_titles_from_hits(hits: list[dict], max_refs: int = 5) -> list[str]:
+    refs: list[str] = []
+    seen: set[str] = set()
+    for hit in hits or []:
+        raw_title = str(hit.get("title") or hit.get("filename") or "").strip()
+        if not raw_title or raw_title.lower() == "unknown":
+            raw_title = _title_from_filepath(str(hit.get("filepath", "")))
+        if not raw_title or raw_title.lower() == "unknown":
+            continue
+        key = _normalize_title_token(raw_title)
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        refs.append(raw_title)
+        if len(refs) >= max_refs:
+            break
+    return refs
+
+
+def _append_references_block(answer_text: str, references: list[str]) -> str:
+    if not isinstance(answer_text, str) or not references:
+        return answer_text
+    body = answer_text.strip()
+
+    # Replace trailing citation-style sections with canonical references.
+    body = re.sub(
+        r"(?is)\n\s*(?:references?|sources?|notes?\s+used|context\s+used)\s*:\s*.*$",
+        "",
+        body,
+    ).strip()
+
+    lines = [body, "", "References:"]
+    lines.extend(f"- {title}" for title in references)
+    return "\n".join(lines).strip()
+
+
+def _normalize_and_rank_sources(
+    sources: list[dict], max_sources: int = 8, query_text: str = ""
+) -> list[dict]:
+    deduped: dict[str, dict] = {}
+    strong_terms = _query_strong_terms(query_text)
+    for source in sources or []:
+        if not isinstance(source, dict):
+            continue
+        filepath = _normalize_file_path(source.get("filepath", ""))
+        filename = str(source.get("filename") or source.get("title") or "").strip()
+        if not filename or filename.lower() == "unknown":
+            filename = _title_from_filepath(filepath)
+        filename = filename or "Unknown"
+        normalized_title = _normalize_title_token(filename)
+        normalized_path = _normalize_title_token(filepath)
+
+        key = f"{_normalize_title_token(filename)}|{filepath}"
+        existing = deduped.get(key)
+        current_score = float(source.get("relevance", 0) or 0)
+        if existing is None or current_score > float(existing.get("relevance", 0) or 0):
+            normalized = dict(source)
+            normalized["filename"] = filename
+            normalized["title"] = str(source.get("title") or filename).strip() or filename
+            normalized["filepath"] = filepath
+            normalized["relevance"] = current_score
+            normalized["term_coverage"] = float(source.get("term_coverage", 0.0) or 0.0)
+            normalized["phrase_hits"] = int(source.get("phrase_hits", 0) or 0)
+            normalized["template_penalty"] = float(source.get("template_penalty", 0.0) or 0.0)
+            normalized["meta_penalty"] = float(source.get("meta_penalty", 0.0) or 0.0)
+            normalized["strong_hits"] = sum(
+                1
+                for term in strong_terms
+                if term and (term in normalized_title or term in normalized_path)
+            )
+            deduped[key] = normalized
+
+    ranked = sorted(
+        deduped.values(),
+        key=lambda s: (
+            int(s.get("strong_hits", 0) or 0),
+            float(s.get("relevance", 0) or 0),
+            -float(s.get("meta_penalty", 0.0) or 0.0),
+            len(str(s.get("snippet", ""))),
+        ),
+        reverse=True,
+    )
+    if strong_terms:
+        strong_ranked = [row for row in ranked if int(row.get("strong_hits", 0) or 0) > 0]
+        if len(strong_ranked) >= 3:
+            ranked = strong_ranked
+    ranked = _mmr_diversify_sources(ranked, max_sources=max_sources, lambda_weight=0.78)
+    return ranked[:max_sources]
 
 
 # Default system prompt for Michel's Obsidian Knowledge Base
 DEFAULT_SYSTEM_PROMPT = """You are an assistant integrated with Michel's Obsidian Knowledge Base.
 
-Your job is to answer ONLY from the retrieved context. Do not use outside knowledge.
+Answer ONLY from retrieved context (chunks/entities/relationships). Do not use outside knowledge.
 
 STRICT REQUIREMENTS:
-1) If the retrieved context does NOT explicitly contain the answer, respond exactly: "Not found in notes."
-2) Do not guess, infer dates, or add background details not present in the retrieved context.
-3) Quote or paraphrase ONLY what is in the retrieved context and name the note(s) you used.
-4) If multiple notes conflict, state the conflict and cite each note.
+1) If there is zero relevant evidence, respond exactly: "Not found in notes."
+2) If evidence is partial, report only what exists and mark missing details as unknown.
+3) Do not guess dates, clinical claims, or technical facts not present in retrieved notes.
+4) Do not invent note names, references, or citations.
+5) Ignore workflow/indexing/meta logs unless the query explicitly asks about automation or system operations.
+6) If notes conflict, explicitly state the conflict and name both notes.
 
-When generating your answer:
-- Use the provided chunks/entities/relations as the sole source of truth.
-- Keep the response concise and factual.
-- For medical topics, keep a neutral, supportive tone without adding new medical claims.
+RESPONSE CONTRACT:
+- Use these sections in order when evidence exists:
+  Summary
+  Direct Connections
+  Indirect Connections
+  Supporting Notes
+  Unknowns / Gaps
+- Start directly with "Summary" (no preamble like "I'll search...").
+- Keep each section concise and grounded in retrieved evidence.
+- For medical topics, keep neutral language and avoid treatment advice not in notes.
+- Do not add generic safety/disclaimer paragraphs unless explicitly requested.
+- If no explicit relationship is present, say "Not explicitly stated in retrieved notes."
 
-Return a structured answer (bullet points preferred)."""
+Output in plain text with bullet points."""
 
 
 def get_effective_llm_model():
     if LLM_PROVIDER == "openrouter":
-        return KIMI_MODEL or "openrouter"
+        return LIGHTRAG_MODEL or "openrouter"
     if LLM_PROVIDER == "lmstudio":
         return LLM_MODEL_PATH or LLM_MODEL
     if LLM_PROVIDER == "mlx":
@@ -1504,6 +3423,252 @@ def get_effective_llm_provider():
     if LLM_PROVIDER == "mlx":
         return "mlx"
     return "ollama"
+
+
+def get_effective_query_llm_provider() -> str:
+    request_provider = str(REQUEST_QUERY_LLM_PROVIDER.get() or "").strip().lower()
+    provider = request_provider or (QUERY_LLM_PROVIDER or LLM_PROVIDER or "ollama").strip().lower()
+    if provider in {"openrouter", "lmstudio", "mlx", "ollama", "openai", "chatgpt"}:
+        return provider
+    return get_effective_llm_provider()
+
+
+def get_effective_query_llm_model() -> str:
+    provider = get_effective_query_llm_provider()
+    request_model = str(REQUEST_QUERY_LLM_MODEL.get() or "").strip()
+    if request_model:
+        return request_model
+    if QUERY_LLM_MODEL:
+        return QUERY_LLM_MODEL
+    if provider == "openrouter":
+        return LIGHTRAG_MODEL or "openrouter/auto"
+    if provider == "lmstudio":
+        return LLM_MODEL_PATH or LLM_MODEL
+    if provider == "mlx":
+        return MLX_MODEL or LLM_MODEL_PATH or LLM_MODEL
+    if provider in {"openai", "chatgpt"}:
+        return QUERY_OPENAI_MODEL or OPENAI_MODEL or "gpt-4o-mini"
+    return LLM_MODEL
+
+
+def get_effective_query_temperature() -> str:
+    request_temp = str(REQUEST_QUERY_TEMPERATURE.get() or "").strip()
+    if request_temp:
+        return request_temp
+    return str(QUERY_LLM_TEMPERATURE or "").strip()
+
+
+def get_effective_query_system_prompt() -> str:
+    request_prompt = str(REQUEST_QUERY_SYSTEM_PROMPT.get() or "").strip()
+    if request_prompt:
+        return request_prompt
+    return DEFAULT_SYSTEM_PROMPT
+
+
+def _filter_generation_kwargs(raw_kwargs: dict, *, keyword_extraction: bool = False) -> dict:
+    allowed = {"temperature", "max_tokens", "top_p", "response_format"}
+    filtered = {k: v for k, v in (raw_kwargs or {}).items() if k in allowed}
+    if keyword_extraction:
+        filtered["response_format"] = {"type": "json_object"}
+
+    # Apply query-model defaults when not explicitly provided.
+    if "max_tokens" not in filtered and QUERY_LLM_MAX_TOKENS:
+        try:
+            filtered["max_tokens"] = int(QUERY_LLM_MAX_TOKENS)
+        except (TypeError, ValueError):
+            pass
+    effective_temp = get_effective_query_temperature()
+    if "temperature" not in filtered and effective_temp:
+        try:
+            filtered["temperature"] = float(effective_temp)
+        except (TypeError, ValueError):
+            pass
+    return filtered
+
+
+async def _openai_compatible_complete(
+    *,
+    base_url: str,
+    api_key: str,
+    model_name: str,
+    prompt: str,
+    system_prompt: str | None = None,
+    history_messages: list | None = None,
+    keyword_extraction: bool = False,
+    timeout_seconds: float = 120.0,
+    extra_kwargs: dict | None = None,
+) -> str:
+    client = AsyncOpenAI(base_url=base_url, api_key=api_key)
+    messages = []
+    effective_system_prompt = system_prompt or get_effective_query_system_prompt()
+    if effective_system_prompt:
+        messages.append({"role": "system", "content": effective_system_prompt})
+    if history_messages:
+        messages.extend(history_messages)
+    messages.append({"role": "user", "content": prompt})
+    filtered_kwargs = _filter_generation_kwargs(
+        extra_kwargs or {}, keyword_extraction=keyword_extraction
+    )
+
+    try:
+        response = await asyncio.wait_for(
+            client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                **filtered_kwargs,
+            ),
+            timeout=timeout_seconds,
+        )
+        return response.choices[0].message.content or ""
+    except asyncio.TimeoutError:
+        logger.error("Query LLM API timed out")
+        return "Error: Timeout waiting for LLM response"
+    except Exception as e:
+        logger.error(f"Query LLM API error: {e}")
+        return f"Error: {str(e)}"
+
+
+async def query_openrouter_model_complete(
+    prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    api_key = QUERY_OPENROUTER_API_KEY or OPENROUTER_API_KEY
+    if not api_key:
+        logger.error("QUERY_OPENROUTER_API_KEY/OPENROUTER_API_KEY not set")
+        return "Error: QUERY_OPENROUTER_API_KEY/OPENROUTER_API_KEY not set"
+    keyword_extraction = bool(kwargs.pop("keyword_extraction", False))
+    kwargs.pop("hashing_kv", None)
+    return await _openai_compatible_complete(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+        model_name=get_effective_query_llm_model(),
+        prompt=prompt,
+        system_prompt=system_prompt,
+        history_messages=history_messages,
+        keyword_extraction=keyword_extraction,
+        extra_kwargs=kwargs,
+    )
+
+
+async def query_openai_model_complete(
+    prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    api_key = QUERY_OPENAI_API_KEY or OPENAI_API_KEY
+    if not api_key:
+        logger.error("QUERY_OPENAI_API_KEY/OPENAI_API_KEY not set")
+        return "Error: QUERY_OPENAI_API_KEY/OPENAI_API_KEY not set"
+    keyword_extraction = bool(kwargs.pop("keyword_extraction", False))
+    kwargs.pop("hashing_kv", None)
+    return await _openai_compatible_complete(
+        base_url=QUERY_OPENAI_BASE_URL,
+        api_key=api_key,
+        model_name=get_effective_query_llm_model(),
+        prompt=prompt,
+        system_prompt=system_prompt,
+        history_messages=history_messages,
+        keyword_extraction=keyword_extraction,
+        extra_kwargs=kwargs,
+    )
+
+
+async def query_lmstudio_model_complete(
+    prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    keyword_extraction = bool(kwargs.pop("keyword_extraction", False))
+    kwargs.pop("hashing_kv", None)
+    return await _openai_compatible_complete(
+        base_url=QUERY_LMSTUDIO_BASE_URL,
+        api_key=QUERY_LMSTUDIO_API_KEY,
+        model_name=get_effective_query_llm_model(),
+        prompt=prompt,
+        system_prompt=system_prompt,
+        history_messages=history_messages,
+        keyword_extraction=keyword_extraction,
+        extra_kwargs=kwargs,
+    )
+
+
+async def query_mlx_model_complete(
+    prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    keyword_extraction = bool(kwargs.pop("keyword_extraction", False))
+    kwargs.pop("hashing_kv", None)
+    return await _openai_compatible_complete(
+        base_url=QUERY_MLX_BASE_URL,
+        api_key=QUERY_MLX_API_KEY,
+        model_name=get_effective_query_llm_model(),
+        prompt=prompt,
+        system_prompt=system_prompt,
+        history_messages=history_messages,
+        keyword_extraction=keyword_extraction,
+        extra_kwargs=kwargs,
+    )
+
+
+async def query_ollama_model_complete(
+    prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    keyword_extraction = bool(kwargs.pop("keyword_extraction", False))
+    kwargs.pop("hashing_kv", None)
+    kwargs.pop("max_tokens", None)  # ollama-python does not accept max_tokens in chat kwargs
+    kwargs.pop("response_format", None)
+    model_name = get_effective_query_llm_model()
+    timeout = 120.0
+    try:
+        import ollama as ollama_pkg
+    except Exception as e:
+        logger.error(f"Failed to import ollama client for query model: {e}")
+        return f"Error: {str(e)}"
+
+    messages = []
+    effective_system_prompt = system_prompt or get_effective_query_system_prompt()
+    if effective_system_prompt:
+        messages.append({"role": "system", "content": effective_system_prompt})
+    if history_messages:
+        messages.extend(history_messages)
+    messages.append({"role": "user", "content": prompt})
+
+    options = {}
+    effective_temp = get_effective_query_temperature()
+    if effective_temp:
+        try:
+            options["temperature"] = float(effective_temp)
+        except (TypeError, ValueError):
+            pass
+
+    chat_kwargs = {"model": model_name, "messages": messages}
+    if keyword_extraction:
+        chat_kwargs["format"] = "json"
+    if options:
+        chat_kwargs["options"] = options
+
+    client = ollama_pkg.AsyncClient(host=OLLAMA_HOST, timeout=timeout)
+    try:
+        response = await asyncio.wait_for(client.chat(**chat_kwargs), timeout=timeout)
+        return response.get("message", {}).get("content", "")
+    except asyncio.TimeoutError:
+        logger.error("Query Ollama API timed out")
+        return "Error: Timeout waiting for LLM response"
+    except Exception as e:
+        logger.error(f"Query Ollama API error: {e}")
+        return f"Error: {str(e)}"
+    finally:
+        try:
+            await client._client.aclose()
+        except Exception:
+            pass
+
+
+def get_query_model_func():
+    provider = get_effective_query_llm_provider()
+    if provider == "openrouter":
+        return query_openrouter_model_complete
+    if provider in {"openai", "chatgpt"}:
+        return query_openai_model_complete
+    if provider == "lmstudio":
+        return query_lmstudio_model_complete
+    if provider == "mlx":
+        return query_mlx_model_complete
+    return query_ollama_model_complete
 
 
 async def openrouter_model_complete(
@@ -1533,7 +3698,7 @@ async def openrouter_model_complete(
         f.write(f"Using DEFAULT_SYSTEM_PROMPT: {effective_system_prompt == DEFAULT_SYSTEM_PROMPT}\n")
         f.write(f"Effective system prompt:\n{effective_system_prompt}\n")
         f.write(f"User prompt (first 200 chars): {prompt[:200]}\n")
-        f.write(f"Model: {KIMI_MODEL}\n")
+        f.write(f"Model: {LIGHTRAG_MODEL}\n")
         f.write(f"{'='*80}\n")
 
     messages = []
@@ -1553,7 +3718,7 @@ async def openrouter_model_complete(
         # Add timeout to OpenRouter calls to prevent hanging
         response = await asyncio.wait_for(
             client.chat.completions.create(
-                model=KIMI_MODEL,
+                model=LIGHTRAG_MODEL,
                 messages=messages,
                 **filtered_kwargs
             ),
@@ -1693,7 +3858,7 @@ async def initialize_rag():
             
             if LLM_PROVIDER == "openrouter":
                 rag_llm_func = openrouter_model_complete
-                rag_llm_model = KIMI_MODEL
+                rag_llm_model = LIGHTRAG_MODEL
             elif LLM_PROVIDER == "lmstudio":
                 rag_llm_func = lmstudio_model_complete
                 rag_llm_model = LLM_MODEL_PATH or LLM_MODEL
@@ -1836,6 +4001,11 @@ def health():
         "service": "lightrag",
         "llm_model": get_effective_llm_model(),
         "llm_provider": get_effective_llm_provider(),
+        "query_llm_model": get_effective_query_llm_model(),
+        "query_llm_provider": get_effective_query_llm_provider(),
+        "two_pass_synthesis": LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS,
+        "synthesis_source_count": LIGHTRAG_SYNTHESIS_SOURCE_COUNT,
+        "synthesis_snippet_chars": LIGHTRAG_SYNTHESIS_SNIPPET_CHARS,
         "ollama_host": OLLAMA_HOST,
         "embed_model": EMBED_MODEL,
         "llm_async": LLM_ASYNC,
@@ -1943,46 +4113,107 @@ def insert_documents():
         return jsonify({"error": str(e)}), 500
 
 
-async def _do_query_async(query_text, mode):
+async def _do_query_async(query_text, mode, max_results: int | None = None):
     """Helper async method for querying"""
     rag = get_rag()
     await _ensure_storages_ready(rag)
-    
+    query_model_func = get_query_model_func()
+    query_system_prompt = get_effective_query_system_prompt()
+    requested_top_k = 0
+    try:
+        requested_top_k = int(max_results or 0)
+    except (TypeError, ValueError):
+        requested_top_k = 0
+
+    cache_store = getattr(rag, "llm_response_cache", None)
+    cache_global_config = getattr(cache_store, "global_config", None)
+    original_cache_enabled = None
+    if (
+        LIGHTRAG_DISABLE_QUERY_CACHE
+        and isinstance(cache_global_config, dict)
+        and "enable_llm_cache" in cache_global_config
+    ):
+        original_cache_enabled = bool(cache_global_config.get("enable_llm_cache", True))
+        cache_global_config["enable_llm_cache"] = False
+
     if mode in ['global', 'hybrid']:
+        top_k = max(LIGHTRAG_QUERY_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_QUERY_TOP_K
+        chunk_top_k = max(LIGHTRAG_QUERY_CHUNK_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_QUERY_CHUNK_TOP_K
         param = QueryParam(
             mode=mode,
-            chunk_top_k=10,
-            top_k=15,
-            max_total_tokens=6000,
-            enable_rerank=False
+            chunk_top_k=chunk_top_k,
+            top_k=top_k,
+            max_total_tokens=LIGHTRAG_QUERY_MAX_TOTAL_TOKENS,
+            model_func=query_model_func,
+            enable_rerank=LIGHTRAG_QUERY_ENABLE_RERANK
         )
     elif mode == 'naive':
+         top_k = max(LIGHTRAG_NAIVE_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_NAIVE_TOP_K
+         chunk_top_k = max(LIGHTRAG_NAIVE_CHUNK_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_NAIVE_CHUNK_TOP_K
          param = QueryParam(
             mode=mode,
-            chunk_top_k=20,
-            top_k=20,
-            max_total_tokens=16000, # Limit naive cost
-            enable_rerank=False
+            chunk_top_k=chunk_top_k,
+            top_k=top_k,
+            max_total_tokens=LIGHTRAG_NAIVE_MAX_TOTAL_TOKENS, # Limit naive cost
+            model_func=query_model_func,
+            enable_rerank=LIGHTRAG_QUERY_ENABLE_RERANK
         )
     else:
         # Local: use vector chunks for better note-text grounding
+        top_k = max(LIGHTRAG_LOCAL_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_LOCAL_TOP_K
+        chunk_top_k = max(LIGHTRAG_LOCAL_CHUNK_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_LOCAL_CHUNK_TOP_K
         param = QueryParam(
             mode="naive",
-            chunk_top_k=30,
-            top_k=40,
-            max_total_tokens=16000,
-            enable_rerank=False
+            chunk_top_k=chunk_top_k,
+            top_k=top_k,
+            max_total_tokens=LIGHTRAG_LOCAL_MAX_TOTAL_TOKENS,
+            model_func=query_model_func,
+            enable_rerank=LIGHTRAG_QUERY_ENABLE_RERANK
         )
 
-    # Use LightRAG's in-library response path with a stronger system prompt
-    result = await rag.aquery(query_text, param=param, system_prompt=DEFAULT_SYSTEM_PROMPT)
-    return result
+    try:
+        if hasattr(rag, "aquery_llm"):
+            result = await rag.aquery_llm(
+                query_text, param=param, system_prompt=query_system_prompt
+            )
+            return result if isinstance(result, dict) else {"llm_response": {"content": str(result)}}
 
-def _run_query_with_timeout(query_text: str, mode: str):
+        # Backward compatibility: LightRAG without aquery_llm support.
+        result = await rag.aquery(
+            query_text, param=param, system_prompt=query_system_prompt
+        )
+        if isinstance(result, str):
+            return {"llm_response": {"content": result, "is_streaming": False}}
+        return {"llm_response": {"content": str(result), "is_streaming": False}}
+    finally:
+        if original_cache_enabled is not None and isinstance(cache_global_config, dict):
+            cache_global_config["enable_llm_cache"] = original_cache_enabled
+
+def _run_query_with_timeout(query_text: str, mode: str, max_results: int | None = None):
     """Run async query with a hard timeout to avoid blocking the server."""
     async def _runner():
-        return await asyncio.wait_for(_do_query_async(query_text, mode), timeout=QUERY_TIMEOUT_SECONDS)
+        return await asyncio.wait_for(
+            _do_query_async(query_text, mode, max_results=max_results),
+            timeout=QUERY_TIMEOUT_SECONDS,
+        )
     return asyncio.run(_runner())
+
+
+def _extract_query_answer(payload: dict | str) -> str:
+    if isinstance(payload, str):
+        return payload
+    if not isinstance(payload, dict):
+        return ""
+    llm_response = payload.get("llm_response", {})
+    if isinstance(llm_response, dict):
+        content = llm_response.get("content")
+        if isinstance(content, str):
+            return content
+    for key in ("answer", "result", "message"):
+        value = payload.get(key)
+        if isinstance(value, str):
+            return value
+    return ""
 
 
 
@@ -1990,15 +4221,34 @@ def _run_query_with_timeout(query_text: str, mode: str):
 @app.route('/query', methods=['POST'])
 def query_graph():
     """Query the knowledge graph using LightRAG"""
+    provider_token = model_token = temp_token = system_prompt_token = None
     try:
         data = request.json
         query_text = data.get('query')
         mode = data.get('mode', 'hybrid')  # naive, local, global, or hybrid
         force_mode = bool(data.get('force_mode', False))
         require_llm = bool(data.get('require_llm', False))
+        llm_provider_override = str(data.get("llm_provider", "") or "").strip().lower()
+        model_override = str(data.get("model", "") or "").strip()
+        temperature_override = data.get("temperature")
+        system_prompt_override = str(data.get("system_prompt", "") or "").strip()
+        filters = _normalize_query_filters(data.get("filters"))
+        max_results_raw = data.get("max_results", data.get("n_results", 0))
+        try:
+            max_results = int(max_results_raw or 0)
+        except (TypeError, ValueError):
+            max_results = 0
         
         if not query_text:
             return jsonify({"error": "No query provided"}), 400
+
+        retrieval_query = _sanitize_retrieval_query(query_text) or str(query_text).strip()
+        requested_sections = _requested_sections_from_query(query_text)
+        if (
+            _should_apply_medical_scope_bias(retrieval_query)
+            and "path_prefixes" not in filters
+        ):
+            filters["path_prefixes"] = ["medical/lymphoma/"]
         
         # Validate mode
         valid_modes = ['naive', 'local', 'global', 'hybrid']
@@ -2007,64 +4257,356 @@ def query_graph():
         
         logging.info(f"Incoming query: '{query_text}' | Requested mode: '{mode}'")
         if not force_mode:
-            mode = _choose_query_mode(query_text, mode)
+            mode = _choose_query_mode(retrieval_query, mode)
         logging.info(f"Effective mode after heuristic: '{mode}'")
+        if retrieval_query != query_text:
+            logger.info("Using sanitized retrieval query: %s", retrieval_query)
+
+        if llm_provider_override:
+            provider_token = REQUEST_QUERY_LLM_PROVIDER.set(llm_provider_override)
+        if model_override:
+            model_token = REQUEST_QUERY_LLM_MODEL.set(model_override)
+        if temperature_override is not None and str(temperature_override).strip() != "":
+            temp_token = REQUEST_QUERY_TEMPERATURE.set(str(temperature_override).strip())
+        if system_prompt_override:
+            system_prompt_token = REQUEST_QUERY_SYSTEM_PROMPT.set(system_prompt_override)
         
         start_time = time.time()
         llm_used = False
         fallback_used = False
+        fallback_reason = ""
+        fallback_reasons: list[str] = []
+        extractive_scan_count = 0
+        extractive_scanned_entries = 0
+        extractive_candidate_count = 0
+        extractive_plan_cache: dict | None = None
+        sources: list[dict] = []
+        raw_payload: dict = {}
+        answer = ""
+        strict_fallback_limit = max(6, max_results) if max_results > 0 else 6
+        relaxed_fallback_limit = max(8, max_results) if max_results > 0 else 8
+        gate_fallback_limit = max(12, max_results) if max_results > 0 else 12
+        rank_limit = max(8, max_results) if max_results > 0 else 8
+        post_gate_rank_limit = max(10, max_results) if max_results > 0 else 10
+
+        def _mark_fallback(reason: str) -> None:
+            nonlocal fallback_used, fallback_reason
+            fallback_used = True
+            clean_reason = str(reason or "").strip()
+            if not clean_reason:
+                return
+            if clean_reason not in fallback_reasons:
+                fallback_reasons.append(clean_reason)
+            if not fallback_reason:
+                fallback_reason = clean_reason
+
+        def _get_extractive_plan() -> dict:
+            nonlocal extractive_plan_cache
+            nonlocal extractive_scan_count
+            nonlocal extractive_scanned_entries
+            nonlocal extractive_candidate_count
+            if extractive_plan_cache is None:
+                extractive_plan_cache = _build_extractive_fallback_plan(
+                    retrieval_query,
+                    strict_limit=strict_fallback_limit,
+                    relaxed_limit=relaxed_fallback_limit,
+                    gate_limit=gate_fallback_limit,
+                    filters=filters,
+                )
+                extractive_scan_count += int(extractive_plan_cache.get("scan_count", 0) or 0)
+                extractive_scanned_entries += int(
+                    extractive_plan_cache.get("scanned_entries", 0) or 0
+                )
+                extractive_candidate_count = int(
+                    extractive_plan_cache.get("candidate_count", 0) or 0
+                )
+            return extractive_plan_cache
 
         # Local mode: return extractive chunks without LLM
         if mode == "local":
-            fallback_used = True
             if require_llm:
                 return jsonify({"error": "require_llm=true is incompatible with mode=local", "llm_used": False, "fallback_used": True}), 400
-            hits = _local_extractive_search(query_text, max_hits=3)
-            result = hits if hits else "Not found in notes."
+            _mark_fallback("local_mode_extractive")
+            hits = _get_extractive_plan().get("strict_hits", [])
+            sources = [
+                _extractive_source_from_hit(hit) for hit in hits if isinstance(hit, dict)
+            ]
+            answer = _format_extractive_hits(retrieval_query, hits) if hits else "Not found in notes."
         else:
             # Run async query with timeout; fall back to extractive sources on timeout/failure unless require_llm is set
             try:
-                result = _run_query_with_timeout(query_text, mode)
+                raw_payload = _run_query_with_timeout(
+                    retrieval_query, mode, max_results=max_results or None
+                )
                 llm_used = True
+                answer = _extract_query_answer(raw_payload)
+                max_sources = max(20, max_results) if max_results > 0 else 20
+                sources = _structured_sources_from_raw_data(
+                    raw_payload,
+                    retrieval_query,
+                    max_sources=max_sources,
+                    filters=filters,
+                )
             except asyncio.TimeoutError:
                 if require_llm:
                     return jsonify({"error": f"LLM timeout after {QUERY_TIMEOUT_SECONDS}s", "llm_used": False, "fallback_used": True}), 504
                 logger.warning(f"Query timed out after {QUERY_TIMEOUT_SECONDS}s; returning sources-only fallback.")
-                fallback_used = True
-                hits = _local_extractive_search(query_text, max_hits=3)
-                result = hits if hits else "Not found in notes."
+                _mark_fallback("llm_timeout")
             except Exception as e:
                 if require_llm:
                     status = 503 if "initializing" in str(e).lower() else 502
                     return jsonify({"error": f"LLM error: {e}", "llm_used": False, "fallback_used": True}), status
                 logger.error(f"Async query failed: {e}")
-                fallback_used = True
-                hits = _local_extractive_search(query_text, max_hits=3)
-                result = hits if hits else "Not found in notes."
+                _mark_fallback("llm_error")
 
-        if isinstance(result, str) and _is_not_found_result(result):
-            result = "Not found in notes."
+        if mode != "local":
+            primary_confident = bool(sources) and _sources_evidence_sufficient(
+                retrieval_query, sources
+            )
+            should_merge_fallback = (not sources) or (not primary_confident)
+            if should_merge_fallback:
+                added = _merge_extractive_hits_into_sources(
+                    sources, _get_extractive_plan().get("strict_hits", [])
+                )
+                if added > 0 or not sources:
+                    _mark_fallback("primary_evidence_weak_or_empty")
+
+            if should_merge_fallback and len(sources) < 3:
+                added = _merge_extractive_hits_into_sources(
+                    sources, _get_extractive_plan().get("relaxed_hits", [])
+                )
+                if added > 0:
+                    _mark_fallback("sparse_sources_relaxed_merge")
+
+        sources = _normalize_and_rank_sources(
+            sources, max_sources=rank_limit, query_text=retrieval_query
+        )
+        sources = _filter_sources_by_filters(sources, filters)
+
+        if mode != "local" and sources and not _sources_evidence_sufficient(retrieval_query, sources):
+            added = _merge_extractive_hits_into_sources(
+                sources, _get_extractive_plan().get("gate_hits", [])
+            )
+            if added > 0:
+                _mark_fallback("post_rank_evidence_weak")
+            sources = _normalize_and_rank_sources(
+                sources, max_sources=post_gate_rank_limit, query_text=retrieval_query
+            )
+            sources = _filter_sources_by_filters(sources, filters)
+
+        if isinstance(answer, str):
+            answer = _strip_standalone_not_found_lines(answer)
+            answer = _sanitize_synthesis_preamble(answer)
+
+        if not str(answer).strip() and sources:
+            _mark_fallback("empty_answer_structured_summary")
+            answer = _structured_summary_from_raw_data(retrieval_query, raw_payload, sources)
+
+        if isinstance(answer, str) and len(answer.strip()) < LIGHTRAG_MIN_SYNTHESIS_CHARS and sources:
+            _mark_fallback("short_answer_structured_summary")
+            answer = _structured_summary_from_raw_data(retrieval_query, raw_payload, sources)
+
+        if (
+            mode != "local"
+            and LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS
+            and sources
+            and not _is_not_found_result(str(answer))
+        ):
+            two_pass_answer = _run_two_pass_synthesis(
+                retrieval_query,
+                sources,
+                str(answer),
+                requested_sections=requested_sections,
+            )
+            if two_pass_answer:
+                answer = two_pass_answer
+                llm_used = True
+
+        if LIGHTRAG_STRICT_GROUNDING and isinstance(answer, str) and _has_ungrounded_citations(answer, sources):
+            logger.info("Ungrounded note citations detected; using grounded source fallback.")
+            _mark_fallback("ungrounded_citations")
+            answer = _format_structured_sources(retrieval_query, sources, max_hits=6)
+
+        if isinstance(answer, str) and _is_not_found_result(answer):
+            if sources:
+                _mark_fallback("llm_not_found_with_sources")
+                answer = _format_structured_sources(retrieval_query, sources, max_hits=6)
+            else:
+                answer = "Not found in notes."
+
+        if isinstance(answer, str) and sources:
+            answer = _validate_unknowns_section(answer, sources)
+
+        if isinstance(answer, str) and mode != "local":
+            reference_titles = _reference_titles_from_hits(sources, max_refs=8)
+            answer = _append_references_block(answer, reference_titles)
+
+        result = answer if isinstance(answer, str) else str(answer)
             
         # Log query performance
         elapsed = time.time() - start_time
-        logger.info(f"QUERY_STATS: Mode={mode} | Latency={elapsed:.2f}s | ResultLen={len(str(result))}")
+        logger.info(
+            "QUERY_STATS: Mode=%s | Latency=%.2fs | ResultLen=%s | Fallback=%s | "
+            "FallbackReason=%s | ExtractiveScans=%s | ExtractiveEntries=%s",
+            mode,
+            elapsed,
+            len(str(result)),
+            fallback_used,
+            fallback_reason or "none",
+            extractive_scan_count,
+            extractive_scanned_entries,
+        )
         
         return jsonify({
             "query": query_text,
             "mode": mode,
             "result": result,
+            "answer": result,
+            "sources": sources,
+            "metadata": raw_payload.get("metadata", {}) if isinstance(raw_payload, dict) else {},
+            "raw_data": raw_payload.get("data", {}) if isinstance(raw_payload, dict) else {},
             "latency": elapsed,
             "llm_used": llm_used,
-            "fallback_used": fallback_used
+            "fallback_used": fallback_used,
+            "fallback_reason": fallback_reason or None,
+            "fallback_reasons": fallback_reasons,
+            "extractive_scan_count": extractive_scan_count,
+            "extractive_scanned_entries": extractive_scanned_entries,
+            "extractive_candidate_count": extractive_candidate_count,
         }), 200
     
     except Exception as e:
         logger.error(f"Query error: {e}")
         return jsonify({"error": str(e)}), 500
+    finally:
+        if provider_token is not None:
+            REQUEST_QUERY_LLM_PROVIDER.reset(provider_token)
+        if model_token is not None:
+            REQUEST_QUERY_LLM_MODEL.reset(model_token)
+        if temp_token is not None:
+            REQUEST_QUERY_TEMPERATURE.reset(temp_token)
+        if system_prompt_token is not None:
+            REQUEST_QUERY_SYSTEM_PROMPT.reset(system_prompt_token)
 
+
+@app.route('/purge-deleted-notes', methods=['POST'])
+def purge_deleted_notes():
+    """Delete indexed LightRAG docs whose source note no longer exists on disk."""
+    try:
+        data = request.json or {}
+        vault_path = data.get('vault_path', './vault')
+        dry_run = bool(data.get('dry_run', False))
+        max_delete_raw = data.get('max_delete', 0)
+        try:
+            max_delete = int(max_delete_raw)
+        except (TypeError, ValueError):
+            return jsonify({"error": f"Invalid max_delete value: {max_delete_raw}"}), 400
+        if max_delete < 0:
+            return jsonify({"error": "max_delete must be >= 0"}), 400
+
+        with index_job_lock:
+            current_job = active_index_job_id
+        if current_job:
+            return jsonify(
+                {
+                    "error": "Cannot purge while an index job is active",
+                    "active_job_id": current_job,
+                }
+            ), 409
+
+        vault_dir = Path(vault_path)
+        if not vault_dir.exists():
+            return jsonify({"error": f"Vault path not found: {vault_path}"}), 400
+
+        vault_posix = vault_dir.as_posix()
+        key_root = Path("/app/vault") if (
+            vault_posix == "/app/vault" or vault_posix.startswith("/app/vault/")
+        ) else vault_dir
+
+        stale_docs = _collect_stale_indexed_docs(vault_dir, key_root)
+        scanned = len(stale_docs)
+        if max_delete > 0:
+            stale_docs = stale_docs[:max_delete]
+
+        if dry_run:
+            return jsonify(
+                {
+                    "status": "dry_run",
+                    "vault_path": vault_path,
+                    "stale_candidates_total": scanned,
+                    "stale_candidates_selected": len(stale_docs),
+                    "candidates": stale_docs[:200],
+                }
+            ), 200
+
+        if not stale_docs:
+            return jsonify(
+                {
+                    "status": "success",
+                    "message": "No stale indexed notes found",
+                    "vault_path": vault_path,
+                    "stale_candidates_total": scanned,
+                    "deleted_docs": 0,
+                    "failed_docs": 0,
+                    "indexed_rows_removed": 0,
+                }
+            ), 200
+
+        async def _run_purge():
+            rag = get_rag()
+            await _ensure_storages_ready(rag)
+            await initialize_pipeline_status()
+
+            deleted: list[dict] = []
+            failed: list[dict] = []
+            for item in stale_docs:
+                doc_id = item["doc_id"]
+                try:
+                    await rag.adelete_by_doc_id(doc_id)
+                    deleted.append(item)
+                except Exception as exc:
+                    failed.append(
+                        {
+                            **item,
+                            "error": str(exc)[:500],
+                        }
+                    )
+            return deleted, failed
+
+        deleted_docs, failed_docs = asyncio.run(_run_purge())
+
+        cache_purge_stats = {}
+        if LIGHTRAG_PURGE_QUERY_CACHE_ON_PURGE and deleted_docs:
+            cache_purge_stats = _purge_llm_cache_entries({"query", "keywords"}, dry_run=False)
+
+        indexed_rows_removed = 0
+        indexed_files_path = Path(WORKING_DIR) / "indexed_files.txt"
+        if indexed_files_path.exists() and deleted_docs:
+            indexed_state, _ = _load_indexed_files_state(indexed_files_path, key_root)
+            for item in deleted_docs:
+                key = str(item.get("canonical_key", "")).strip()
+                if key and key in indexed_state:
+                    indexed_state.pop(key, None)
+                    indexed_rows_removed += 1
+            _atomic_write_indexed_files_state(indexed_files_path, indexed_state)
+
+        status_code = 200 if not failed_docs else 207
+        return jsonify(
+            {
+                "status": "success" if not failed_docs else "partial_success",
+                "vault_path": vault_path,
+                "stale_candidates_total": scanned,
+                "stale_candidates_selected": len(stale_docs),
+                "deleted_docs": len(deleted_docs),
+                "failed_docs": len(failed_docs),
+                "indexed_rows_removed": indexed_rows_removed,
+                "failed": failed_docs[:100],
+                "query_cache_purge": cache_purge_stats,
+            }
+        ), status_code
 
     except Exception as e:
-        logger.error(f"Query error: {e}")
+        logger.error(f"Purge deleted notes error: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -2294,9 +4836,22 @@ def index_vault():
                         # PDFs don't have frontmatter, so we construct synthetic structure
                         # Use file path for folder structure
                         tags = ["#pdf"]
+                        canonical_meta = build_canonical_metadata(
+                            file_path=vault_file,
+                            metadata={},
+                            text=raw_text,
+                            tags=tags,
+                            aliases=[],
+                        )
                         # Build index text
                         content = _build_index_text(
-                            vault_file, raw_text, [], tags, [], vault_root=vault_dir
+                            vault_file,
+                            raw_text,
+                            [],
+                            tags,
+                            [],
+                            canonical_meta=canonical_meta,
+                            vault_root=vault_dir,
                         )
                     else:
                         try:
@@ -2310,13 +4865,26 @@ def index_vault():
                             # Control-parity mode: keep source markdown as-is for LightRAG preprocessing.
                             content = raw_content
                         else:
-                            tags, aliases, body = _split_frontmatter(raw_content)
+                            frontmatter, tags, aliases, body = _split_frontmatter(raw_content)
                             body = sanitize_content(body) # Clean Obsidian artifacts
                             inline_tags = _extract_inline_tags(body)
                             tags = _dedupe_keep_order(tags + inline_tags)
                             headings = _extract_headings(body)
+                            canonical_meta = build_canonical_metadata(
+                                file_path=vault_file,
+                                metadata=frontmatter,
+                                text=body,
+                                tags=tags,
+                                aliases=aliases,
+                            )
                             content = _build_index_text(
-                                vault_file, body, headings, tags, aliases, vault_root=vault_dir
+                                vault_file,
+                                body,
+                                headings,
+                                tags,
+                                aliases,
+                                canonical_meta=canonical_meta,
+                                vault_root=vault_dir,
                             )
 
                     content = content.strip()
@@ -2600,6 +5168,9 @@ def index_vault():
         )
 
         response_status = "success" if not failed_docs else "partial_success"
+        cache_purge_stats = {}
+        if LIGHTRAG_PURGE_QUERY_CACHE_ON_INDEX and successful_state_entries:
+            cache_purge_stats = _purge_llm_cache_entries({"query", "keywords"}, dry_run=False)
 
         return jsonify({
             "status": response_status,
@@ -2620,6 +5191,7 @@ def index_vault():
             "exclude_paths": effective_exclude_paths,
             "failed_docs": failed_docs[:50],
             "warning_docs": warning_docs[:50],
+            "query_cache_purge": cache_purge_stats,
         }), 200
 
     except Exception as e:
@@ -2638,6 +5210,36 @@ def index_vault():
                 event_type="failed",
                 message="Index-vault failed during execution",
             )
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/llm-cache/purge', methods=['POST'])
+def purge_llm_cache():
+    """Purge LightRAG LLM cache entries for query/keywords to avoid stale synthesis."""
+    try:
+        data = request.json or {}
+        scopes_raw = data.get("scopes", ["query", "keywords"])
+        dry_run = bool(data.get("dry_run", False))
+
+        if isinstance(scopes_raw, str):
+            scopes = {s.strip().lower() for s in scopes_raw.split(",") if s.strip()}
+        elif isinstance(scopes_raw, (list, tuple, set)):
+            scopes = {str(s).strip().lower() for s in scopes_raw if str(s).strip()}
+        else:
+            return jsonify({"error": "scopes must be a string or list"}), 400
+
+        invalid = sorted(scope for scope in scopes if scope not in {"query", "keywords"})
+        if invalid:
+            return jsonify({"error": f"Invalid scopes: {invalid}. Allowed: query, keywords"}), 400
+
+        stats = _purge_llm_cache_entries(scopes or {"query", "keywords"}, dry_run=dry_run)
+        return jsonify({
+            "status": "dry_run" if dry_run else "success",
+            **stats,
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"LLM cache purge error: {e}")
         return jsonify({"error": str(e)}), 500
 
 
@@ -2722,6 +5324,7 @@ Endpoints:
   GET  /stats         - Database statistics
   POST /insert        - Insert documents
   POST /query         - Query knowledge graph
+  POST /purge-deleted-notes - Delete stale indexed docs whose source files are missing
   POST /index-vault   - Index Obsidian vault
   GET  /index-jobs    - List index jobs
   GET  /index-jobs/<id> - Get index job status

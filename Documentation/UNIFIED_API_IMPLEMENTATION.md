@@ -30,6 +30,10 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 
 The gateway proxies to the embedding service, graph service, and LightRAG service based on mode.
 
+Provider note:
+- `kimi` is an OpenRouter-backed provider label.
+- OpenRouter model choice should be passed via `model` (request) or env defaults (`GRAPH_MODEL`, `LIGHTRAG_MODEL`).
+
 Streaming behavior:
 - `POST /api/v1/search/stream` returns `text/event-stream` SSE chunks.
 - Streaming currently supports `vector`, `notes`/`graph`, and `hybrid` modes.

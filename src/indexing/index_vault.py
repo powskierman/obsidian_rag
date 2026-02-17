@@ -177,6 +177,7 @@ def read_file_content(filepath: Path) -> tuple[str, dict]:
     return content, {"filetype": "markdown"}
 
 from src.indexing.frontmatter import extract_frontmatter, sanitize_content
+from src.indexing.canonical_metadata import build_canonical_metadata
 
 def extract_metadata(content: str) -> tuple[dict, str]:
     """
@@ -283,6 +284,20 @@ def process_file(
             if key == "read_error":
                 continue
             metadata.setdefault(key, value)
+
+        canonical_meta = build_canonical_metadata(
+            file_path=filepath,
+            metadata=metadata,
+            text=content,
+            tags=metadata.get("tags"),
+            aliases=metadata.get("aliases"),
+        )
+        metadata["canonical_id"] = canonical_meta.get("canonical_id", "")
+        metadata["aliases_normalized"] = canonical_meta.get("aliases_normalized", [])
+        metadata["tags_normalized"] = canonical_meta.get("tags_normalized", [])
+        metadata["entity_type"] = canonical_meta.get("entity_type", "note")
+        metadata["timeline_date"] = canonical_meta.get("timeline_date", "")
+        metadata["treatment_phase"] = canonical_meta.get("treatment_phase", "unspecified")
         
         # Add filepath to metadata (build relative path if possible)
         try:
@@ -362,6 +377,18 @@ def process_file(
                 modified_date = modified_date.split('T')[0]
             
             context_parts = [f"Source: {source_filename}", f"Date: {modified_date}"]
+            canonical_id = metadata.get("canonical_id")
+            if canonical_id:
+                context_parts.append(f"Canonical ID: {canonical_id}")
+            entity_type = metadata.get("entity_type")
+            if entity_type:
+                context_parts.append(f"Entity Type: {entity_type}")
+            timeline_date = metadata.get("timeline_date")
+            if timeline_date:
+                context_parts.append(f"Timeline Date: {timeline_date}")
+            treatment_phase = metadata.get("treatment_phase")
+            if treatment_phase and treatment_phase != "unspecified":
+                context_parts.append(f"Treatment Phase: {treatment_phase}")
             
             # Add Tags if present
             tags = metadata.get('tags')

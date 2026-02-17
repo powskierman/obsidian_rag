@@ -150,6 +150,106 @@ def test_entities_mode_routes_to_lightrag(monkeypatch):
 
 
 @pytest.mark.integration
+def test_entities_mode_passes_explicit_entities_mode_and_tag_filters(monkeypatch):
+    routes = _default_responses()
+    calls = _client_with_routes(monkeypatch, routes)
+    client = TestClient(api_gateway.app)
+
+    payload = {
+        "query": "tag:lymphoma treatment history",
+        "mode": "entities",
+        "entities_mode": "local",
+        "max_results": 7,
+        "llm_provider": "openrouter",
+        "model": "openrouter/auto",
+        "temperature": 0.0,
+        "force_mode": True,
+        "require_llm": False,
+    }
+    api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
+    headers = {"X-API-Key": api_key} if api_key else None
+
+    response = client.post("/api/v1/query", json=payload, headers=headers)
+
+    assert response.status_code == 200
+    assert len(calls) == 1
+    assert calls[0]["url"] == f"{api_gateway.LIGHTRAG_SERVICE_URL}/query"
+    assert calls[0]["json"]["mode"] == "local"
+    assert calls[0]["json"]["max_results"] == 7
+    assert calls[0]["json"]["filters"] == {"tags": ["lymphoma"]}
+    assert calls[0]["json"]["query"] == "treatment history"
+    assert calls[0]["json"]["force_mode"] is True
+
+
+@pytest.mark.integration
+def test_entities_mode_keeps_structured_lightrag_result_without_vector_fallback(monkeypatch):
+    structured_lightrag_result = {
+        "mode": "local",
+        "result": [
+            {"title": "Nextion ESP32", "score": 42, "excerpt": "panel wiring notes"}
+        ],
+    }
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(
+            {"documents": [["unexpected vector fallback"]]}
+        ),
+        f"{api_gateway.LIGHTRAG_SERVICE_URL}/query": lambda _json: FakeResponse(
+            structured_lightrag_result
+        ),
+    }
+    calls = _client_with_routes(monkeypatch, routes)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "entities")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["mode"] == "entities"
+    assert data["results"] == structured_lightrag_result
+    assert data["answer"] == "Found 1 matching notes in LightRAG."
+    assert data["sources"][0]["filename"] == "Nextion ESP32"
+    assert len(calls) == 1
+    assert calls[0]["url"] == f"{api_gateway.LIGHTRAG_SERVICE_URL}/query"
+
+
+@pytest.mark.integration
+def test_entities_mode_uses_lightrag_raw_data_chunks_as_sources(monkeypatch):
+    lightrag_result = {
+        "mode": "hybrid",
+        "answer": "",
+        "raw_data": {
+            "chunks": [
+                {
+                    "file_path": "Recipes/media/Pizza Dough.md",
+                    "content": "Making the poolish and final dough with long cold ferment.",
+                }
+            ]
+        },
+    }
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(
+            {"documents": [["unexpected fallback"]]}
+        ),
+        f"{api_gateway.LIGHTRAG_SERVICE_URL}/query": lambda _json: FakeResponse(
+            lightrag_result
+        ),
+    }
+    calls = _client_with_routes(monkeypatch, routes)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "entities")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["mode"] == "entities"
+    assert data["results"] == lightrag_result
+    assert len(data["sources"]) == 1
+    assert data["sources"][0]["filepath"] == "Recipes/media/Pizza Dough.md"
+    assert len(calls) == 1
+    assert calls[0]["url"] == f"{api_gateway.LIGHTRAG_SERVICE_URL}/query"
+
+
+@pytest.mark.integration
 def test_notes_vector_dual_mode(monkeypatch):
     routes = _default_responses()
     calls = _client_with_routes(monkeypatch, routes)

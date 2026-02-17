@@ -26,6 +26,8 @@ curl -s -X POST http://localhost:4000/api/v1/query \
 - `web_search`: boolean (requires Tavily API key)
 - `llm_knowledge`: boolean (adds a general knowledge section)
 
+Note: `kimi` is treated as an OpenRouter provider choice. Use `model` to pick a specific OpenRouter model.
+
 Compatibility note: `graph` is still accepted as an alias for `notes`.
 
 For full request/response details, see `Documentation/UNIFIED_API_IMPLEMENTATION.md`.

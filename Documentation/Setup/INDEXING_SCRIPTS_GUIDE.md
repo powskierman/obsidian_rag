@@ -108,10 +108,11 @@ If you only need to update **one** specific index without running the full pipel
 *   **Use when:** You want future-friendly partial indexing without full reindex churn.
 *   **Canonical command:**
     ```bash
-    ./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once
+    ./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once --purge-deleted
     ```
 *   **What this command does:**
     *   Computes true missing markdown files (`vault - indexed_files.txt`) while excluding structural paths.
+    *   Purges stale indexed docs whose source notes no longer exist (`--purge-deleted`).
     *   Indexes missing notes in controlled batches.
     *   Writes JSONL batch logs and a final summary to `/tmp`.
     *   Retries failed docs once.

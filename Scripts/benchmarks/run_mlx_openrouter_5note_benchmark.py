@@ -30,7 +30,9 @@ import requests
 DEFAULT_VAULT = Path("/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel")
 DEFAULT_IMAGE = "obsidian_rag-lightrag-service"
 DEFAULT_MLX_MODEL = os.getenv("MLX_MODEL", "mlx-community/Mistral-22B-v0.2-4bit")
-DEFAULT_OPENROUTER_MODEL = os.getenv("KIMI_MODEL", "openai/gpt-5-mini")
+DEFAULT_OPENROUTER_MODEL = os.getenv(
+    "LIGHTRAG_MODEL", os.getenv("KIMI_MODEL", "openai/gpt-5-mini")
+)
 DEFAULT_OPENROUTER_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
 
@@ -174,7 +176,7 @@ def run_provider(
     elif provider == "openrouter":
         env_flags += [
             "-e",
-            f"KIMI_MODEL={openrouter_model}",
+            f"LIGHTRAG_MODEL={openrouter_model}",
             "-e",
             f"OPENROUTER_API_KEY={openrouter_key}",
             "-e",
@@ -358,4 +360,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

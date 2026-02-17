@@ -125,6 +125,31 @@ def warm_service(service_url: str, request_timeout: int) -> None:
     request_json("POST", f"{service_url}/query", payload=payload, timeout=request_timeout)
 
 
+def purge_deleted_notes(
+    service_url: str,
+    vault_path_in_container: str,
+    request_timeout: int,
+    *,
+    dry_run: bool,
+    max_delete: int,
+) -> dict[str, Any]:
+    payload = {
+        "vault_path": vault_path_in_container,
+        "dry_run": dry_run,
+        "max_delete": max_delete,
+    }
+    code, parsed, raw = request_json(
+        "POST", f"{service_url}/purge-deleted-notes", payload=payload, timeout=request_timeout
+    )
+    if not isinstance(parsed, dict):
+        parsed = {
+            "status": "error",
+            "error": f"HTTP {code}; non-JSON response: {raw[:220]}",
+        }
+    parsed["http_code"] = code
+    return parsed
+
+
 def load_indexed_md(indexed_file: Path) -> set[str]:
     indexed: set[str] = set()
     if not indexed_file.exists():
@@ -242,6 +267,9 @@ def main() -> int:
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--retry-failed-once", action="store_true")
     parser.add_argument("--max-files", type=int, default=0, help="Limit number of target files (0 = all)")
+    parser.add_argument("--purge-deleted", action="store_true", help="Purge stale indexed docs whose note files no longer exist")
+    parser.add_argument("--purge-dry-run", action="store_true", help="Preview stale indexed docs without deleting")
+    parser.add_argument("--purge-max-delete", type=int, default=0, help="Limit deletions during purge (0 = all)")
     parser.add_argument(
         "--exclude-path-patterns",
         default=os.getenv("LIGHTRAG_EXCLUDE_PATH_PATTERNS", DEFAULT_EXCLUDE_PATTERNS),
@@ -308,12 +336,15 @@ def main() -> int:
             print(f"... ({len(targets) - len(preview)} more)")
 
     if args.list_only:
-        print("list_only=1 (no indexing performed)")
-        return 0
+        print("list_only=1")
+        if not args.purge_deleted:
+            print("no indexing performed")
+            return 0
 
     if not targets:
         print("No target markdown files to index.")
-        return 0
+        if not args.purge_deleted:
+            return 0
 
     print("Waiting for LightRAG health...")
     health = wait_for_health(args.service_url, timeout_sec=args.health_timeout, poll_sec=args.health_poll_seconds, request_timeout=min(30, args.request_timeout))
@@ -331,6 +362,29 @@ def main() -> int:
     )
 
     warm_service(args.service_url, request_timeout=min(60, args.request_timeout))
+
+    if args.purge_deleted:
+        purge_info = purge_deleted_notes(
+            service_url=args.service_url,
+            vault_path_in_container=args.vault_path_in_container,
+            request_timeout=args.request_timeout,
+            dry_run=args.purge_dry_run,
+            max_delete=max(0, int(args.purge_max_delete)),
+        )
+        print("purge_deleted_notes=" + json.dumps(purge_info, ensure_ascii=False))
+        if int(purge_info.get("http_code", 0)) >= 400:
+            print("ERROR: purge-deleted-notes failed", file=sys.stderr)
+            return 1
+        if args.purge_dry_run:
+            print("purge_deleted_notes_dry_run=1")
+
+    if args.list_only:
+        print("list-only run complete (no indexing batches executed)")
+        return 0
+
+    if not targets:
+        print("No target markdown files to index after purge step.")
+        return 0
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     jsonl_log = log_dir / f"lightrag_partial_batches_{ts}.jsonl"

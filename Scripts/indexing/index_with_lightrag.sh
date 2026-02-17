@@ -46,7 +46,7 @@ LIGHTRAG_BYPASS_REINDEX_GUARD="${LIGHTRAG_BYPASS_REINDEX_GUARD:-0}"
 EXPECTED_LLM_PROVIDER="${LLM_PROVIDER:-ollama}"
 case "$EXPECTED_LLM_PROVIDER" in
     openrouter)
-        EXPECTED_LLM_MODEL="${KIMI_MODEL:-moonshotai/kimi-k2-0905}"
+        EXPECTED_LLM_MODEL="${LIGHTRAG_MODEL:-${KIMI_MODEL:-openrouter/auto}}"
         ;;
     lmstudio)
         EXPECTED_LLM_MODEL="${LLM_MODEL_PATH:-${LLM_MODEL:-qwen2.5:7b-instruct}}"

@@ -15,6 +15,7 @@ import logging
 import pickle
 import networkx as nx
 from src.indexing.frontmatter import extract_frontmatter
+from src.indexing.canonical_metadata import build_canonical_metadata, slugify_text
 from typing import List, Dict, Any, Optional, Union, Set, Tuple
 from pathlib import Path
 from datetime import datetime
@@ -47,6 +48,8 @@ class GraphBuilder:
         # API key is kept for compatibility but not used in structural build
         self.graph = nx.MultiDiGraph()
         self.processed_files = set()
+        self._canonical_nodes: Dict[str, List[tuple]] = {}
+        self._skip_same_as_ids = {"index", "readme", "notes", "summary", "overview"}
         self.stats = {
             'notes': 0,
             'tags': 0,
@@ -85,6 +88,7 @@ class GraphBuilder:
             raise FileNotFoundError(f"Vault path not found: {vault_path}")
 
         logger.info(f"Scanning vault at {vault_path}...")
+        self._canonical_nodes = {}
         
         # 1. Walk files and create Note/Folder nodes
         for root, dirs, files in os.walk(vault_path):
@@ -121,6 +125,46 @@ class GraphBuilder:
                     pass
 
         logger.info(f"Graph build complete: {self.graph.number_of_nodes()} nodes, {self.graph.number_of_edges()} edges")
+        self._add_same_as_edges()
+
+    def _register_canonical_node(self, canonical_id: str, node_id: tuple) -> None:
+        cid = slugify_text(canonical_id)
+        if not cid or cid in self._skip_same_as_ids:
+            return
+        self._canonical_nodes.setdefault(cid, []).append(node_id)
+
+    def _add_same_as_edges(self) -> None:
+        same_as_edges = 0
+        for canonical_id, nodes in self._canonical_nodes.items():
+            unique_nodes = sorted(set(nodes), key=lambda node: str(node))
+            if len(unique_nodes) < 2:
+                continue
+
+            canonical_node = min(
+                unique_nodes,
+                key=lambda node: (
+                    len(str(node[1])) if isinstance(node, tuple) else len(str(node)),
+                    str(node),
+                ),
+            )
+            canonical_path = canonical_node[1] if isinstance(canonical_node, tuple) else str(canonical_node)
+            canonical_node_data = self.graph.nodes[canonical_node]
+            canonical_node_data["canonical_id"] = canonical_id
+            canonical_node_data["is_canonical"] = True
+            canonical_node_data["canonical_target"] = canonical_path
+
+            for node_id in unique_nodes:
+                node_data = self.graph.nodes[node_id]
+                node_data["canonical_id"] = canonical_id
+                node_data["canonical_target"] = canonical_path
+                if node_id == canonical_node:
+                    continue
+                self.graph.add_edge(node_id, canonical_node, kind="SAME_AS", reason="canonical_id_match")
+                same_as_edges += 1
+                self.stats["edges"] += 1
+
+        if same_as_edges:
+            logger.info("Linked %s duplicate nodes using SAME_AS", same_as_edges)
 
     def _add_folder_node(self, folder_path: str):
         node_id = ("folder", folder_path)
@@ -142,7 +186,24 @@ class GraphBuilder:
                 "tags": ["#pdf"], # Explicit tag for graph queries
                 "type": "pdf"
             }
+            canonical_meta = build_canonical_metadata(
+                file_path=Path(rel_path),
+                metadata={},
+                text="",
+                tags=attrs.get("tags", []),
+                aliases=[],
+            )
+            attrs.update(
+                {
+                    "canonical_id": canonical_meta.get("canonical_id", ""),
+                    "aliases_normalized": canonical_meta.get("aliases_normalized", []),
+                    "entity_type": canonical_meta.get("entity_type", "pdf_document"),
+                    "timeline_date": canonical_meta.get("timeline_date", ""),
+                    "treatment_phase": canonical_meta.get("treatment_phase", "unspecified"),
+                }
+            )
             self.graph.add_node(node_id, **attrs)
+            self._register_canonical_node(attrs.get("canonical_id", ""), node_id)
             # We track stats in a generic way or add specific counter? 
             # Let's count as 'notes' for general volume or new key?
             # reusing 'notes' might be confusing. Let's add 'pdfs' to stats check or just ignore.
@@ -179,7 +240,24 @@ class GraphBuilder:
                 "aliases": metadata.get("aliases", []),
                 "frontmatter": metadata
             }
+            canonical_meta = build_canonical_metadata(
+                file_path=Path(rel_path),
+                metadata=metadata,
+                text=body,
+                tags=attrs.get("tags", []),
+                aliases=attrs.get("aliases", []),
+            )
+            attrs.update(
+                {
+                    "canonical_id": canonical_meta.get("canonical_id", ""),
+                    "aliases_normalized": canonical_meta.get("aliases_normalized", []),
+                    "entity_type": canonical_meta.get("entity_type", "note"),
+                    "timeline_date": canonical_meta.get("timeline_date", ""),
+                    "treatment_phase": canonical_meta.get("treatment_phase", "unspecified"),
+                }
+            )
             self.graph.add_node(node_id, **attrs)
+            self._register_canonical_node(attrs.get("canonical_id", ""), node_id)
             self.stats['notes'] += 1
             
             # Edge: IN_FOLDER
@@ -294,24 +372,53 @@ class GraphQuerier:
     
     def __init__(self, graph_builder: GraphBuilder, api_key: Optional[str] = None):
         self.graph = graph_builder.graph
-        self.api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
+        self.api_key = (
+            api_key
+            or os.environ.get("GRAPH_LLM_API_KEY")
+            or os.environ.get("OPENROUTER_API_KEY")
+        )
+        self.base_url = os.environ.get(
+            "GRAPH_LLM_BASE_URL", "https://openrouter.ai/api/v1"
+        )
         try:
             from openai import OpenAI
             self.client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
+                base_url=self.base_url,
                 api_key=self.api_key,
             )
         except ImportError:
             self.client = None
             
-        self.model = os.environ.get("KIMI_MODEL", "moonshotai/kimi-k2-0905")
+        self.model = (
+            os.environ.get("GRAPH_MODEL")
+            or os.environ.get("OPENROUTER_MODEL")
+            or os.environ.get("LIGHTRAG_MODEL")
+            or os.environ.get("KIMI_MODEL")
+            or "openrouter/auto"
+        )
         self._build_index()
+
+    def _canonical_node_for(self, node_id: tuple | str):
+        if not isinstance(node_id, tuple):
+            return node_id
+        node_data = self.graph.nodes[node_id] if self.graph.has_node(node_id) else {}
+        canonical_target = str(node_data.get("canonical_target", "")).strip()
+        if not canonical_target:
+            return node_id
+        kind = node_id[0]
+        canonical_node = (kind, canonical_target)
+        if self.graph.has_node(canonical_node):
+            return canonical_node
+        return node_id
 
     def _build_index(self):
         """Build mapping from string names to Nodes"""
         self.index = {}
+        self._canonical_lookup = {}
         for node in self.graph.nodes(data=True):
             nid, attrs = node
+            canonical_nid = self._canonical_node_for(nid)
+            self._canonical_lookup[nid] = canonical_nid
             if isinstance(nid, tuple):
                  kind, val = nid
                  keys = [val]
@@ -319,12 +426,18 @@ class GraphQuerier:
                      keys.append(Path(val).stem)
                      if attrs.get('aliases'):
                          keys.extend(attrs['aliases'])
+                     if attrs.get('aliases_normalized'):
+                         keys.extend(attrs['aliases_normalized'])
+                     if attrs.get('canonical_id'):
+                         keys.append(attrs['canonical_id'])
                  elif kind == "tag":
                      keys.append(val.lstrip("#"))
                  elif kind == "folder":
                      keys.append(Path(val).name)
                  elif kind == "pdf":
                      keys.append(Path(val).name)
+                     if attrs.get('canonical_id'):
+                         keys.append(attrs['canonical_id'])
             else:
                 keys = [str(nid)]
                 
@@ -332,7 +445,8 @@ class GraphQuerier:
                 k_lower = str(k).lower()
                 if k_lower not in self.index:
                     self.index[k_lower] = []
-                self.index[k_lower].append(nid)
+                if canonical_nid not in self.index[k_lower]:
+                    self.index[k_lower].append(canonical_nid)
 
     def _hydrate_node_props(self, node_id, data: Dict) -> Dict:
         """Inject derived properties (like sources) for backward compatibility"""
@@ -362,7 +476,7 @@ class GraphQuerier:
         if not nodes:
             return {'entity': entity_query, 'found': False}
             
-        node_id = nodes[0]
+        node_id = self._canonical_node_for(nodes[0])
         data = self.graph.nodes[node_id].copy()
         data = self._hydrate_node_props(node_id, data)
         
@@ -449,6 +563,7 @@ class GraphQuerier:
                 found_nodes.extend(self.index[name])
                 hits += 1
                 if hits >= max_entities: break
+        found_nodes = [self._canonical_node_for(node) for node in found_nodes]
         found_nodes = list(set(found_nodes))
         
         context_lines = []

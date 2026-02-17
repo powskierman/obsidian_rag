@@ -163,3 +163,15 @@ cp -a "$RAG_DATA/chroma_db" "$RAG_DATA/chroma_db_$(date +%Y%m%d_%H%M%S)"
 - Vector DB (ChromaDB): vector mode and hybrid pipelines.
 - NetworkX graph (graph_data): Deep Thinking and notes-mode retrieval.
 - LightRAG (lightrag_db): entities-mode retrieval and cascading retrieval.
+
+## 8) LLM knobs by component
+
+- Vector DB: no generative LLM setting. Uses embedding + reranker models.
+- NetworkX graph defaults:
+  - `GRAPH_MODEL` (preferred), fallback `OPENROUTER_MODEL`.
+  - Optional endpoint override: `GRAPH_LLM_BASE_URL` + `GRAPH_LLM_API_KEY`.
+  - Query API can override with request fields: `llm_provider`, `model`.
+- LightRAG defaults:
+  - `LIGHTRAG_MODEL` for OpenRouter model selection (preferred).
+  - `QUERY_LLM_MODEL` for query-time synthesis override.
+  - Backward compatibility: `KIMI_MODEL` is still accepted as a fallback.

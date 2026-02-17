@@ -106,7 +106,7 @@ def _build_llm_completion(
     llm_model: str,
     *,
     openrouter_api_key: str | None,
-    kimi_model: str | None,
+    lightrag_model: str | None,
     lmstudio_base_url: str,
     lmstudio_api_key: str,
     mlx_base_url: str,
@@ -132,7 +132,7 @@ def _build_llm_completion(
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed_kwargs}
         response = await asyncio.wait_for(
             client.chat.completions.create(
-                model=kimi_model or llm_model,
+                model=lightrag_model or llm_model,
                 messages=messages,
                 **filtered_kwargs,
             ),
@@ -187,7 +187,7 @@ def _build_llm_completion(
         return response.choices[0].message.content
 
     if provider == "openrouter":
-        return _openrouter_complete, kimi_model or llm_model
+        return _openrouter_complete, lightrag_model or llm_model
     if provider == "lmstudio":
         return _lmstudio_complete, llm_model
     if provider == "mlx":
@@ -247,7 +247,7 @@ async def _index_one(payload: dict) -> dict:
         llm_provider,
         llm_model,
         openrouter_api_key=os.getenv("OPENROUTER_API_KEY"),
-        kimi_model=os.getenv("KIMI_MODEL"),
+        lightrag_model=(os.getenv("LIGHTRAG_MODEL") or os.getenv("KIMI_MODEL")),
         lmstudio_base_url=os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1"),
         lmstudio_api_key=os.getenv("LMSTUDIO_API_KEY", "lmstudio"),
         mlx_base_url=os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1"),

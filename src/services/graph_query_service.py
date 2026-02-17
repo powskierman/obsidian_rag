@@ -110,6 +110,34 @@ graph_loaded = False
 
 # Environment variables for vector service
 EMBEDDING_SERVICE_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://embedding-service:8000")
+
+
+def _default_openrouter_model() -> str:
+    return (
+        os.getenv("GRAPH_MODEL")
+        or os.getenv("OPENROUTER_MODEL")
+        or os.getenv("LIGHTRAG_MODEL")
+        or os.getenv("KIMI_MODEL")
+        or "openrouter/auto"
+    )
+
+
+def _default_model_for_provider(provider: str, streaming: bool = False) -> str:
+    if provider == "ollama":
+        if streaming:
+            return os.getenv("OLLAMA_MODEL", "llama2")
+        return os.getenv("OLLAMA_MODEL") or os.getenv("LLM_MODEL") or "llama3.2"
+    if provider == "claude":
+        return "claude-sonnet-4-5-20250929"
+    if provider == "gemini":
+        return "gemini-3-pro-preview"
+    if provider == "gpt-oss":
+        return "gpt-4"
+    if provider in {"kimi", "openrouter"}:
+        return _default_openrouter_model()
+    if provider == "chatgpt":
+        return os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    return "llama2" if streaming else "llama3.2"
 def extract_entities_from_graph(graph_text: str) -> list:
     """Extract key entities from graph response text."""
     # Extract capitalized phrases (likely entities)
@@ -779,16 +807,7 @@ def query_graph():
 
         # Set default models based on provider
         if not model:
-            model_defaults = {
-                'ollama': os.getenv('OLLAMA_MODEL') or os.getenv('LLM_MODEL') or 'llama3.2',
-                'claude': 'claude-sonnet-4-5-20250929',
-                'gemini': 'gemini-3-pro-preview',
-                'gpt-oss': 'gpt-4',
-                'kimi': 'moonshotai/kimi-k2-0905',
-                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto'),
-                'chatgpt': os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
-            }
-            model = model_defaults.get(llm_provider, 'llama3.2')
+            model = _default_model_for_provider(llm_provider, streaming=False)
 
         # Handle vector mode: Vector search + LLM synthesis
         if mode == 'vector':
@@ -1288,9 +1307,12 @@ Provide only the search terms separated by spaces, no explanation or formatting.
                             base_url="https://openrouter.ai/api/v1",
                             api_key=os.environ.get("OPENROUTER_API_KEY")
                         )
+                        web_search_model = os.getenv(
+                            "GRAPH_WEB_SEARCH_MODEL", _default_openrouter_model()
+                        )
 
                         terms_response = client.chat.completions.create(
-                            model="moonshotai/kimi-k2-0905",
+                            model=web_search_model,
                             messages=[{"role": "user", "content": search_terms_prompt}],
                             max_tokens=100
                         )
@@ -1423,16 +1445,7 @@ def query_stream():
 
         # Set default models
         if not model:
-            model_defaults = {
-                'ollama': 'llama2',
-                'claude': 'claude-sonnet-4-5-20250929',
-                'gemini': 'gemini-3-pro-preview',
-                'gpt-oss': 'gpt-4',
-                'kimi': 'moonshotai/kimi-k2-0905',
-                'openrouter': os.getenv('OPENROUTER_MODEL', 'openrouter/auto'),
-                'chatgpt': os.getenv('OPENAI_MODEL', 'gpt-4o-mini')
-            }
-            model = model_defaults.get(llm_provider, 'llama2')
+            model = _default_model_for_provider(llm_provider, streaming=True)
 
         def generate_stream():
             """Generator function for streaming response"""
