@@ -34,7 +34,12 @@ def normalize_filters_fn():
         for node in module_ast.body
         if isinstance(node, ast.FunctionDef) and node.name == "_normalize_query_filters"
     )
-    fn_module = ast.Module(body=[fn_node], type_ignores=[])
+    helper_node = next(
+        node
+        for node in module_ast.body
+        if isinstance(node, ast.FunctionDef) and node.name == "_normalize_file_path"
+    )
+    fn_module = ast.Module(body=[helper_node, fn_node], type_ignores=[])
     ast.fix_missing_locations(fn_module)
     namespace = {}
     exec(compile(fn_module, str(source_path), "exec"), namespace)
@@ -66,3 +71,18 @@ def test_normalize_filters_normalizes_tags(normalize_filters_fn):
 @pytest.mark.unit
 def test_normalize_filters_handles_non_dict(normalize_filters_fn):
     assert normalize_filters_fn(None) == {}
+
+
+@pytest.mark.unit
+def test_normalize_filters_supports_exclude_prefixes_and_strict_scope(normalize_filters_fn):
+    assert normalize_filters_fn(
+        {
+            "path_prefixes": ["Medical/Lymphoma"],
+            "exclude_path_prefixes": ["Tech/AI"],
+            "strict_scope": True,
+        }
+    ) == {
+        "path_prefixes": ["Medical/Lymphoma/"],
+        "exclude_path_prefixes": ["Tech/AI/"],
+        "strict_scope": True,
+    }

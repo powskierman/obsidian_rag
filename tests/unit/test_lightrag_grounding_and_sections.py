@@ -6,6 +6,7 @@ from pathlib import Path
 import types
 
 import pytest
+from src.integrations.intent_scope import infer_intent_scope, infer_scope_prefixes_from_sources
 
 
 @pytest.fixture
@@ -22,33 +23,17 @@ def lightrag_helpers():
         "_extract_claimed_note_titles",
         "_has_ungrounded_citations",
         "_requested_sections_from_query",
-        "_should_apply_medical_scope_bias",
     }
     fn_nodes = [
         node for node in module_ast.body if isinstance(node, ast.FunctionDef) and node.name in needed
     ]
     test_module = ast.Module(body=fn_nodes, type_ignores=[])
     ast.fix_missing_locations(test_module)
-    namespace = {
-        "re": __import__("re"),
-        "MEDICAL_SCOPE_MARKERS": (
-            "lymphoma",
-            "dlbcl",
-            "yescarta",
-            "car-t",
-            "r-chop",
-        ),
-        "MEDICAL_SCOPE_OVERRIDE_HINTS": (
-            "tech/",
-            "all notes",
-            "entire vault",
-        ),
-    }
+    namespace = {"re": __import__("re")}
     exec(compile(test_module, str(source_path), "exec"), namespace)
     return types.SimpleNamespace(
         has_ungrounded=namespace["_has_ungrounded_citations"],
         requested_sections=namespace["_requested_sections_from_query"],
-        should_bias=namespace["_should_apply_medical_scope_bias"],
     )
 
 
@@ -79,6 +64,20 @@ def test_requested_sections_parses_explicit_contract(lightrag_helpers):
 
 
 @pytest.mark.unit
-def test_medical_scope_bias_applies_only_for_medical_intent(lightrag_helpers):
-    assert lightrag_helpers.should_bias("history of lymphoma treatment and yescarta") is True
-    assert lightrag_helpers.should_bias("history of lymphoma treatment across all notes") is False
+def test_infer_intent_scope_disables_autoscope_for_global_queries():
+    scope = infer_intent_scope("Compare this topic across all notes in my vault")
+    assert scope["has_global_scope"] is True
+    assert scope["autoscope_enabled"] is False
+
+
+@pytest.mark.unit
+def test_infer_scope_prefixes_from_sources_is_domain_agnostic():
+    sources = [
+        {"filepath": "Projects/RAG/Plan.md"},
+        {"filepath": "Projects/RAG/Execution.md"},
+        {"filepath": "Projects/RAG/Checklist.md"},
+        {"filepath": "Projects/RAG/Results.md"},
+        {"filepath": "Tech/Notes/Linux.md"},
+    ]
+    inferred = infer_scope_prefixes_from_sources(sources)
+    assert inferred == ["Projects/RAG/"]

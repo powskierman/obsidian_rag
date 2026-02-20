@@ -178,6 +178,12 @@ export const api = {
           answer: sources.length > 0 ? `Found ${sources.length} matching snippets in your vault.` : 'No results found',
           sources: sources
         };
+      } else if (mode === 'cascading') {
+        return {
+          answer: data.answer || 'No results found',
+          sources: data.sources || [],
+          extracted_entities: data.results?.entities || []
+        };
       } else {
         // Other single-source modes (notes, entities)
         const result = data.results || data;

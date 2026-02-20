@@ -398,7 +398,12 @@ def query_documents():
                 break
         
         # Expand query for better recall
-        query_variations = expand_query(clean_query)
+        expand_query_flag = data.get('expand_query', True)
+        if expand_query_flag:
+            query_variations = expand_query(clean_query)
+        else:
+            print(f"⏩ Skipping query expansion for: {clean_query[:50]}...")
+            query_variations = [clean_query]
 
         # Search with expanded queries
         all_results = []
@@ -410,7 +415,7 @@ def query_documents():
 
             where_clause = None
             
-            # Special handling for Tags (Python-side filtering due to filtering limitations)
+            # Process Tag Filters directly in ChromaDB
             required_tags = []
             if filters and 'tags' in filters:
                 required_tags = filters.pop('tags')
@@ -419,29 +424,34 @@ def query_documents():
             
             print(f"DEBUG: Filters received: {filters}, Required Tags: {required_tags}")
             
-            if filters:
+            if filters or required_tags:
                 # Preserve advanced filters (e.g., $or/$and) as-is
-                if any(key.startswith("$") for key in filters.keys()):
+                if filters and any(key.startswith("$") for key in filters.keys()):
                     where_clause = filters
                 else:
-                    # Build where clause from remaining simple filters
+                    # Build where clause from simple filters and required tags
                     conditions = []
-                    for key, value in filters.items():
-                        if isinstance(value, dict) and "$contains" in value:
-                             conditions.append({key: {"$contains": value["$contains"]}})
-                        elif isinstance(value, list):
-                            if len(value) > 1:
-                                conditions.append({key: {"$in": value}})
-                            elif len(value) == 1:
-                                conditions.append({key: value[0]})
-                        else:
-                            conditions.append({key: value})
+                    if filters:
+                        for key, value in filters.items():
+                            if isinstance(value, dict) and "$contains" in value:
+                                 conditions.append({key: {"$contains": value["$contains"]}})
+                            elif isinstance(value, list):
+                                if len(value) > 1:
+                                    conditions.append({key: {"$in": value}})
+                                elif len(value) == 1:
+                                    conditions.append({key: value[0]})
+                            else:
+                                conditions.append({key: value})
+                    
+                    # Add tag conditions using native ChromaDB $contains
+                    if required_tags:
+                        for req_tag in required_tags:
+                            conditions.append({"tags": {"$contains": req_tag}})
                     
                     if conditions:
                         where_clause = {"$and": conditions} if len(conditions) > 1 else conditions[0]
 
-            # Fetch extra candidates if we need to filter by tags
-            candidate_multiplier = 5 if required_tags else 2
+            candidate_multiplier = 2
             
             try:
                 results = collection.query(
@@ -450,33 +460,6 @@ def query_documents():
                     where=where_clause
                 )
                 
-                # Apply Tag Filtering if needed
-                if required_tags:
-                    filtered_docs = []
-                    filtered_metas = []
-                    filtered_dists = []
-                    
-                    # Iterate through the first batch (since query is single)
-                    docs = results['documents'][0]
-                    metas = results['metadatas'][0]
-                    dists = results['distances'][0]
-                    
-                    for doc, meta, dist in zip(docs, metas, dists):
-                        doc_tags = str(meta.get('tags', '')).lower()
-                        print(f"DEBUG: Processing doc {meta.get('filename')} tags='{doc_tags}' Checking {required_tags}")
-                        # Check IF ALL required tags are present as substrings
-                        if all(req_tag.lower() in doc_tags for req_tag in required_tags):
-                            filtered_docs.append(doc)
-                            filtered_metas.append(meta)
-                            filtered_dists.append(dist)
-                            
-                    # Reconstruct results structure
-                    results = {
-                        'documents': [filtered_docs],
-                        'metadatas': [filtered_metas],
-                        'distances': [filtered_dists]
-                    }
-
                 all_results.append(results)
             except Exception as e:
                 query_errors.append(f"{e}")
@@ -509,8 +492,15 @@ def query_documents():
                 unique_meta.append(meta)
                 unique_dist.append(dist)
 
-        # Re-rank if enabled
+        # Pre-reranking cutoff: limit candidates to bound Cross-Encoder latency
         if use_reranking and len(unique_docs) > 1:
+            # Sort by Chroma cosine distance (lower is better) and take top 30
+            cutoff = 30
+            combined = sorted(zip(unique_docs, unique_dist, unique_meta), key=lambda x: x[1])
+            unique_docs = [x[0] for x in combined[:cutoff]]
+            unique_dist = [x[1] for x in combined[:cutoff]]
+            unique_meta = [x[2] for x in combined[:cutoff]]
+
             unique_docs, unique_dist, unique_meta = rerank_results(clean_query, unique_docs, unique_dist, unique_meta)
 
         # Deduplicate sources if enabled

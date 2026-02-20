@@ -102,169 +102,133 @@ class CascadingRetriever:
         docs = vector_data.get("documents", [[]])[0]
         return bool(docs)
 
-    async def retrieve(self, query: str, max_results: int = 10) -> Dict[str, Any]:
+    async def retrieve(self, query: str, max_results: int = 10, entities: Optional[List[str]] = None, mem0_context: str = "") -> Dict[str, Any]:
+        """
+        Orchestrates the 5-stage retrieval pipeline using asyncio.gather for parallelization.
+        """
+        stages = {}
         async with httpx.AsyncClient() as client:
-            # Stage 1: Note Discovery (NetworkX)
-            # We search for notes that *title match* or have high vector similarity to the query
-            logger.info(f"Stage 1: Note Discovery for '{query}'")
-
-            # Using the graph service's hybrid search but emphasizing note titles/anchors
-            # We assume the graph service has a mode or we can just filter its results
+            # --- STAGE 1, 2, 3: Anchor + Expand in parallel ---
+            logger.info(f"Cascading Stage 1-3: Parallel execution of Anchor/Expand queries for '{query}'")
+            
             notes_payload = {
                 "query": query,
                 "mode": "graph",
                 "n_results": 5,
                 "max_entities": 15,
                 "llm_provider": self.llm_provider,
+                "entities": entities,
+                "mem0_context": mem0_context,
             }
-            try:
-                notes_resp = await client.post(
-                    f"{self.graph_url}/query",
-                    json=notes_payload,
-                    timeout=30.0,
-                    headers=self._service_headers(),
-                )
-                notes_data = notes_resp.json() if notes_resp.status_code == 200 else {}
-            except Exception as e:
-                logger.error(f"Stage 1 fail: {e}")
-                notes_data = {}
+            fallback_threshold = min(self.vector_thresholds) if self.vector_thresholds else 0.0
+            vec_payload = {
+                "query": query,
+                "n_results": 5,
+                "reranking": False,
+                "deduplicate": True,
+                "relevance_threshold": fallback_threshold,
+                "entities": entities,
+                "mem0_context": mem0_context,
+            }
+            lr_payload = {"query": query, "mode": "hybrid"}
+            
+            tasks = [
+                client.post(f"{self.graph_url}/query", json=notes_payload, timeout=30.0, headers=self._service_headers()),
+                client.post(f"{self.embed_url}/query", json=vec_payload, timeout=30.0, headers=self._service_headers()),
+                client.post(f"{self.lightrag_url}/query", json=lr_payload, timeout=60.0, headers=self._service_headers())
+            ]
+            responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-            # Stage 2: Entity Extraction
-            # Extract potential entities from the *titles* and *summaries* of found notes
-            # Simple heuristic: CamelCase, Uppercase words, or words matching known Tech/Medical patterns
+            notes_resp = responses[0] if not isinstance(responses[0], Exception) else None
+            vec_resp = responses[1] if not isinstance(responses[1], Exception) else None
+            lr_resp = responses[2] if not isinstance(responses[2], Exception) else None
+
+            # Process Notes (Graph)
+            notes_data = notes_resp.json() if notes_resp and notes_resp.status_code == 200 else {}
             anchors = []
             if isinstance(notes_data, dict):
                 anchors = notes_data.get("sources", []) or []
 
-            # Fallback: if graph mode yields no anchors, use vector search to seed anchors
-            if not anchors:
-                try:
-                    vec_data = {}
-                    for threshold in self.vector_thresholds:
-                        vec_resp = await client.post(
-                            f"{self.embed_url}/query",
-                            json={
-                                "query": query,
-                                "n_results": 5,
-                                "reranking": False,
-                                "deduplicate": True,
-                                "relevance_threshold": threshold,
-                            },
-                            timeout=30.0,
-                            headers=self._service_headers(),
-                        )
-                        vec_data = (
-                            vec_resp.json() if vec_resp.status_code == 200 else {}
-                        )
-                        if self._vector_has_docs(vec_data):
-                            break
-                    if self._vector_has_docs(vec_data):
-                        docs = vec_data.get("documents", [[]])[0]
-                        metas = vec_data.get("metadatas", [[]])[0]
-                        dists = vec_data.get("distances", [[]])[0]
-                        for doc, meta, dist in zip(docs, metas, dists):
-                            try:
-                                # Map 0->100%, 1->50%, 2->0%
-                                relevance = max(0.0, (1.0 - (dist / 2.0)) * 100.0)
-                            except Exception:
-                                relevance = 50.0
-                            anchors.append(
-                                {
-                                    "filename": meta.get("filename", "unknown"),
-                                    "filepath": meta.get("filepath", "unknown"),
-                                    "relevance": relevance,
-                                    "snippet": (doc[:300] + "...")
-                                    if len(doc) > 300
-                                    else doc,
-                                }
-                            )
-                except Exception as e:
-                    logger.error(f"Stage 1 fallback fail: {e}")
+            # Fallback to Base Vector if no Graph Anchors
+            if not anchors and vec_resp and vec_resp.status_code == 200:
+                vec_data = vec_resp.json()
+                if self._vector_has_docs(vec_data):
+                    docs = vec_data.get("documents", [[]])[0]
+                    metas = vec_data.get("metadatas", [[]])[0]
+                    dists = vec_data.get("distances", [[]])[0]
+                    for doc, meta, dist in zip(docs, metas, dists):
+                        try:
+                            relevance = max(0.0, (1.0 - (dist / 2.0)) * 100.0)
+                        except Exception:
+                            relevance = 50.0
+                        anchors.append({
+                            "filename": meta.get("filename", "unknown"),
+                            "filepath": meta.get("filepath", "unknown"),
+                            "relevance": relevance,
+                            "snippet": (doc[:300] + "...") if len(doc) > 300 else doc,
+                        })
 
+            # Stage 2: Entity Extraction from Anchors
             extracted_entities = set()
             if anchors:
                 extracted_entities = self._extract_from_sources(anchors)
             if not extracted_entities:
                 extracted_entities = self._extract_terms(query)
 
-            # Stage 3: Semantic Expansion (LightRAG)
-            # Use the extracted entities to find related concepts in LightRAG
+            # Process Semantic Expansion (LightRAG)
             expanded_context = {}
             expansion_terms = set()
             expansion_query = query
-            try:
-                expansion_query = " ".join(sorted(extracted_entities)) or query
-                logger.info(f"Stage 3: Expanding on '{expansion_query}'")
-                lr_payload = {"query": expansion_query, "mode": "hybrid"}
-                lr_resp = await client.post(
-                    f"{self.lightrag_url}/query",
-                    json=lr_payload,
-                    timeout=60.0,
-                    headers=self._service_headers(),
-                )
-                if lr_resp.status_code == 200:
-                    expanded_context = lr_resp.json()
-                    expanded_text = ""
-                    if isinstance(expanded_context, dict):
-                        expanded_text = (
-                            expanded_context.get("result")
-                            or expanded_context.get("answer")
-                            or ""
-                        )
-                    expansion_terms = self._extract_terms(expanded_text)
-            except Exception as e:
-                logger.error(f"Stage 3 fail: {e}")
+            if lr_resp and lr_resp.status_code == 200:
+                expanded_context = lr_resp.json()
+                expanded_text = ""
+                if isinstance(expanded_context, dict):
+                    expanded_text = expanded_context.get("result") or expanded_context.get("answer") or ""
+                expansion_terms = self._extract_terms(expanded_text)
 
-            # Stage 4: Context-Aware Vector Search
-            # Enhance query with findings
-            # For simplicity, we just do a robust vector search now, maybe with the expanded terms
+            # Stage 3: Context-Aware Vector Search
             combined_terms = []
             for term in list(extracted_entities | expansion_terms):
                 if term not in combined_terms:
                     combined_terms.append(term)
             combined_terms = combined_terms[:12]
-            enhanced_query = (
-                query if not combined_terms else f"{query} " + " ".join(combined_terms)
-            )
+            enhanced_query = query if not combined_terms else f"{query} " + " ".join(combined_terms)
 
-            logger.info(
-                f"Stage 4: Vector Search with raw query, fallback to enhanced query if needed"
-            )
+            logger.info(f"Stage 3: Vector Search with raw query, fallback to enhanced query if needed")
+            vector_chunks = {}
+            vector_query = None
             try:
-                vector_chunks = {}
-                vector_query = None
                 query_candidates = [query]
                 if enhanced_query != query:
                     query_candidates.append(enhanced_query)
                 for candidate in query_candidates:
                     for threshold in self.vector_thresholds:
-                        vec_payload = {
+                        vec_payload_final = {
                             "query": candidate,
                             "n_results": max_results,
                             "reranking": False,
                             "deduplicate": True,
                             "relevance_threshold": threshold,
+                            "expand_query": candidate == query,
                         }
-                        vec_resp = await client.post(
+                        vec_resp_final = await client.post(
                             f"{self.embed_url}/query",
-                            json=vec_payload,
+                            json=vec_payload_final,
                             timeout=30.0,
                             headers=self._service_headers(),
                         )
-                        vector_chunks = (
-                            vec_resp.json() if vec_resp.status_code == 200 else {}
-                        )
+                        vector_chunks = vec_resp_final.json() if vec_resp_final.status_code == 200 else {}
                         if self._vector_has_docs(vector_chunks):
                             vector_query = candidate
                             break
                     if vector_query:
                         break
             except Exception as e:
-                logger.error(f"Stage 4 fail: {e}")
+                logger.error(f"Stage 3 vector fail: {e}")
                 vector_chunks = {}
                 vector_query = None
 
-            # Stage 5: Synthesis package
+            # Stage 4: Synthesis package
             return {
                 "query": query,
                 "stages": {

@@ -780,6 +780,8 @@ def query_graph():
         web_search_enabled = data.get('web_search', False)
         llm_knowledge_enabled = data.get('llm_knowledge', False)
         conversation_history = data.get('conversation_history', [])
+        provided_entities = data.get('entities', None)
+        provided_mem0_context = data.get('mem0_context', None)
 
         # Parse tags from query
         clean_query, tag_filters = parse_query_tags(user_query)
@@ -1145,7 +1147,8 @@ def query_graph():
                             'n_results': n_results,
                             'reranking': True,
                             'deduplicate': True,
-                            'relevance_threshold': 40,  # Filter out noise < 75%
+                            'relevance_threshold': 40,  # Filter out noise < 40%
+                            'expand_query': False,
                         },
                         timeout=60,
                         headers=_service_headers()
@@ -1547,8 +1550,8 @@ def query_stream():
                     # Get graph answer
                     graph_answer, _ = querier.query_with_llm(user_query, max_entities=20)
 
-                    # Extract entities and do vector search
-                    entities = extract_entities_from_graph(graph_answer)
+                    # Use provided entities or fallback to extracting from graph
+                    entities = provided_entities if provided_entities is not None else extract_entities_from_graph(graph_answer)
                     enhanced_query = f"{user_query} {' '.join(entities)}"
 
                     vector_response = requests.post(
@@ -1557,7 +1560,8 @@ def query_stream():
                             'query': enhanced_query,
                             'n_results': n_results,
                             'reranking': True,
-                            'deduplicate': True
+                            'deduplicate': True,
+                            'expand_query': False
                         },
                         timeout=60,
                         headers=_service_headers()

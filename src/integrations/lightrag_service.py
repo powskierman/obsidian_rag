@@ -965,31 +965,6 @@ GENERIC_QUERY_TERMS = {
     "relationships",
 }
 
-MEDICAL_SCOPE_MARKERS = (
-    "lymphoma",
-    "dlbcl",
-    "hgbcl",
-    "yescarta",
-    "car-t",
-    "cart",
-    "axi-cel",
-    "r-chop",
-    "deauville",
-    "pet",
-    "ct",
-    "oncology",
-)
-
-MEDICAL_SCOPE_OVERRIDE_HINTS = (
-    "tech/",
-    "recipes/",
-    "books/",
-    "math/",
-    "photography/",
-    "all notes",
-    "entire vault",
-)
-
 # LightRAG Constants
 COSINE_THRESHOLD = 0.6
 COSINE_BETTER_THAN_THRESHOLD = 0.5
@@ -1028,6 +1003,16 @@ def extract_pdf_text(pdf_path: Path) -> str:
 
 from src.indexing.frontmatter import extract_frontmatter, sanitize_content, _dedupe_keep_order
 from src.indexing.canonical_metadata import build_canonical_metadata
+from src.integrations.intent_scope import (
+    infer_intent_scope,
+    infer_scope_prefixes_from_sources,
+    apply_scope_prefixes_to_filters,
+    gate_sources_by_scope,
+    source_matches_scope_prefixes,
+    scope_alignment_ratio,
+    extract_constraint_filters,
+    merge_constraint_filters,
+)
 
 
 def _truncate_for_extraction(content: str) -> str:
@@ -1904,18 +1889,6 @@ def _sanitize_retrieval_query(query_text: str) -> str:
     return text
 
 
-def _should_apply_medical_scope_bias(query_text: str) -> bool:
-    normalized = _normalize_for_match(query_text)
-    if not normalized:
-        return False
-    marker_hits = sum(1 for marker in MEDICAL_SCOPE_MARKERS if marker in normalized)
-    if marker_hits < 1:
-        return False
-    if any(hint in normalized for hint in MEDICAL_SCOPE_OVERRIDE_HINTS):
-        return False
-    return True
-
-
 def _requested_sections_from_query(query_text: str) -> list[str]:
     normalized = _normalize_for_match(query_text)
     if not normalized:
@@ -1975,6 +1948,23 @@ def _normalize_query_filters(raw_filters: dict | None) -> dict:
             normalized_prefixes.append(clean.rstrip("/") + "/")
     if normalized_prefixes:
         normalized["path_prefixes"] = sorted(set(normalized_prefixes))
+    raw_exclude_prefixes = raw_filters.get("exclude_path_prefixes")
+    exclude_prefixes: list[str] = []
+    if isinstance(raw_exclude_prefixes, str):
+        exclude_prefixes = [raw_exclude_prefixes]
+    elif isinstance(raw_exclude_prefixes, list):
+        exclude_prefixes = [
+            str(prefix) for prefix in raw_exclude_prefixes if str(prefix).strip()
+        ]
+    normalized_exclude_prefixes = []
+    for prefix in exclude_prefixes:
+        clean = _normalize_file_path(prefix).strip()
+        if clean:
+            normalized_exclude_prefixes.append(clean.rstrip("/") + "/")
+    if normalized_exclude_prefixes:
+        normalized["exclude_path_prefixes"] = sorted(set(normalized_exclude_prefixes))
+    if bool(raw_filters.get("strict_scope", False)):
+        normalized["strict_scope"] = True
     return normalized
 
 
@@ -2019,6 +2009,14 @@ def _source_matches_filters(
         normalized_path = _normalize_file_path(filepath).lower()
         if not any(
             normalized_path.startswith(str(prefix).lower()) for prefix in path_prefixes
+        ):
+            return False
+    exclude_path_prefixes = filters.get("exclude_path_prefixes", [])
+    if exclude_path_prefixes:
+        normalized_path = _normalize_file_path(filepath).lower()
+        if any(
+            normalized_path.startswith(str(prefix).lower())
+            for prefix in exclude_path_prefixes
         ):
             return False
     return True
@@ -2318,7 +2316,11 @@ def _mmr_diversify_sources(
     return selected
 
 
-def _sources_evidence_sufficient(query_text: str, sources: list[dict]) -> bool:
+def _sources_evidence_sufficient(
+    query_text: str,
+    sources: list[dict],
+    scope_prefixes: list[str] | None = None,
+) -> bool:
     if not sources:
         return False
     top = sources[: min(4, len(sources))]
@@ -2344,6 +2346,10 @@ def _sources_evidence_sufficient(query_text: str, sources: list[dict]) -> bool:
     query_phrases = _query_phrases(query_text)
     if query_phrases and total_phrase_hits == 0 and avg_term_cov < 0.45:
         return False
+    if scope_prefixes:
+        alignment = scope_alignment_ratio(top, scope_prefixes)
+        if alignment < 0.5:
+            return False
     return True
 
 
@@ -2353,6 +2359,21 @@ def _relevance_from_score(score: int, query_terms: list[str]) -> float:
     max_score = max(12, len(query_terms) * 12)
     relevance = min(100.0, (score / max_score) * 100.0)
     return round(relevance, 2)
+
+
+def _normalize_relevance_value(value: float, query_terms_len: int = 0) -> float:
+    try:
+        raw = float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
+    if raw <= 0:
+        return 0.0
+    if raw <= 100.0:
+        return round(raw, 2)
+    # Compress unbounded lexical scores to stable 0-100.
+    scale = max(120.0, float(query_terms_len or 0) * 18.0)
+    compressed = (raw / (raw + scale)) * 100.0
+    return round(min(100.0, max(0.0, compressed)), 2)
 
 
 def _structured_sources_from_raw_data(
@@ -2885,6 +2906,280 @@ def _heading_key(line: str) -> str:
     return stripped
 
 
+def _canonical_section_name(value: str) -> str:
+    key = _heading_key(value)
+    mapping = {
+        "summary": "Summary",
+        "direct connections": "Direct Connections",
+        "indirect connections": "Indirect Connections",
+        "supporting notes": "Supporting Notes",
+        "timeline": "Timeline",
+        "contradictions / uncertainty": "Contradictions / Uncertainty",
+        "contradictions": "Contradictions / Uncertainty",
+        "uncertainty": "Contradictions / Uncertainty",
+        "unknowns / gaps": "Unknowns / Gaps",
+        "unknowns / missing data": "Unknowns / Missing Data",
+        "unknowns": "Unknowns / Gaps",
+        "missing data": "Unknowns / Missing Data",
+        "next best questions": "Next Best Questions",
+        "sources": "Sources",
+        "sources table": "Sources Table",
+        "references": "References",
+    }
+    return mapping.get(key, str(value or "").strip())
+
+
+def _required_sections_from_query(
+    query_text: str, fallback_sections: list[str] | None = None
+) -> list[str]:
+    sections: list[str] = []
+    in_output_block = False
+    for raw_line in str(query_text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            if in_output_block and sections:
+                break
+            continue
+        if re.search(r"(?i)output format\s*(?:\(strict\))?\s*:", line):
+            in_output_block = True
+            continue
+        if not in_output_block:
+            continue
+        bullet_match = re.match(r"^\s*[-*•]\s*(.+)$", line)
+        if not bullet_match:
+            if sections:
+                break
+            continue
+        candidate = re.sub(r"\(.*?\)", "", bullet_match.group(1)).strip()
+        candidate = candidate.rstrip(":").strip()
+        if not candidate:
+            continue
+        canonical = _canonical_section_name(candidate)
+        if canonical and canonical not in sections:
+            sections.append(canonical)
+
+    if sections:
+        return sections
+
+    fallback = [str(section).strip() for section in (fallback_sections or []) if str(section).strip()]
+    if fallback:
+        return [_canonical_section_name(section) for section in fallback]
+    return [
+        "Summary",
+        "Direct Connections",
+        "Indirect Connections",
+        "Supporting Notes",
+        "Unknowns / Gaps",
+    ]
+
+
+def _query_requires_strict_contract(query_text: str) -> bool:
+    normalized = _normalize_for_match(query_text)
+    return (
+        "output format strict" in normalized
+        or "citation rules" in normalized
+        or "citation rule" in normalized
+        or "every non trivial claim" in normalized
+    )
+
+
+def _query_requires_strict_citations(query_text: str) -> bool:
+    normalized = _normalize_for_match(query_text)
+    return (
+        "citation rules" in normalized
+        or "citation rule" in normalized
+        or "source " in normalized
+        or "[source:" in str(query_text or "").lower()
+    )
+
+
+def _answer_has_required_sections(answer_text: str, required_sections: list[str]) -> bool:
+    if not required_sections:
+        return True
+    present = {
+        _canonical_section_name(line)
+        for line in str(answer_text or "").splitlines()
+        if _is_section_heading(line)
+    }
+    required = {_canonical_section_name(section) for section in required_sections}
+    return required.issubset(present)
+
+
+def _answer_has_sufficient_citations(answer_text: str, min_ratio: float = 0.8) -> bool:
+    if not isinstance(answer_text, str) or not answer_text.strip():
+        return False
+    current_section = ""
+    claim_bullets = 0
+    cited_bullets = 0
+    for raw_line in answer_text.splitlines():
+        line = str(raw_line or "").strip()
+        if not line:
+            continue
+        if _is_section_heading(line):
+            current_section = _canonical_section_name(line)
+            continue
+        if not line.startswith(("-", "*", "•")):
+            continue
+        if current_section in {"References", "Sources", "Sources Table"}:
+            continue
+        bullet = re.sub(r"^\s*[-*•]\s*", "", line).strip()
+        if len(bullet) < 8:
+            continue
+        claim_bullets += 1
+        if re.search(r"\[source:\s*[^\]]+\]", bullet, re.IGNORECASE):
+            cited_bullets += 1
+    if claim_bullets == 0:
+        return True
+    return (cited_bullets / max(1, claim_bullets)) >= min_ratio
+
+
+def _extract_timeline_rows(sources: list[dict], max_rows: int = 6) -> list[tuple[str, str, str]]:
+    rows: list[tuple[str, str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for src in sources[: max_rows * 2]:
+        if not isinstance(src, dict):
+            continue
+        title = str(src.get("title") or src.get("filename") or "Unknown").strip()
+        snippet = str(src.get("snippet", "") or "")
+        date = ""
+        iso_match = re.search(r"\b(20\d{2}-\d{2}-\d{2})\b", snippet)
+        if iso_match:
+            date = iso_match.group(1)
+        else:
+            month_match = re.search(
+                r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+20\d{2}\b",
+                snippet.lower(),
+            )
+            if month_match:
+                date = month_match.group(0).title()
+        if not date:
+            continue
+        point = snippet.split(". ", 1)[0].strip()
+        if not point:
+            point = f"Timeline evidence in {title}"
+        key = (date, title)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append((date, point, title))
+        if len(rows) >= max_rows:
+            break
+    rows.sort(key=lambda row: row[0])
+    return rows
+
+
+def _confidence_from_relevance(value: float) -> str:
+    rel = float(value or 0)
+    if rel >= 70:
+        return "High"
+    if rel >= 40:
+        return "Med"
+    return "Low"
+
+
+def _deterministic_contract_answer(
+    query_text: str,
+    sources: list[dict],
+    required_sections: list[str],
+) -> str:
+    sections = required_sections or ["Summary", "Supporting Notes", "Unknowns / Gaps"]
+    top_sources = [src for src in sources if isinstance(src, dict)][:8]
+    lines: list[str] = []
+
+    for section in sections:
+        canonical = _canonical_section_name(section)
+        lines.append(canonical)
+        if canonical == "Summary":
+            if not top_sources:
+                lines.append("- Not found in notes. [source: Not found in notes]")
+            else:
+                for src in top_sources[:6]:
+                    title = str(src.get("title") or src.get("filename") or "Unknown").strip()
+                    snippet = str(src.get("snippet", "") or "").strip()
+                    point = snippet.split(". ", 1)[0].strip() or f"Evidence found in {title}"
+                    lines.append(f"- {point} [source: {title}]")
+        elif canonical == "Direct Connections":
+            if top_sources:
+                for src in top_sources[:4]:
+                    title = str(src.get("title") or src.get("filename") or "Unknown").strip()
+                    lines.append(
+                        f"- {title} --supports--> query focus [source: {title}]"
+                    )
+            else:
+                lines.append("- Not found in notes. [source: Not found in notes]")
+        elif canonical == "Indirect Connections":
+            if len(top_sources) >= 2:
+                first = str(top_sources[0].get("title") or top_sources[0].get("filename") or "Unknown").strip()
+                second = str(top_sources[1].get("title") or top_sources[1].get("filename") or "Unknown").strip()
+                lines.append(
+                    f"- {first} -> related evidence -> {second} [source: {first}; source: {second}]"
+                )
+            else:
+                lines.append("- Not enough linked evidence. [source: Not found in notes]")
+        elif canonical == "Timeline":
+            rows = _extract_timeline_rows(top_sources)
+            if rows:
+                for date, point, title in rows:
+                    lines.append(f"- {date}: {point} [source: {title}]")
+            else:
+                lines.append("- date not found for key events. [source: Not found in notes]")
+        elif canonical == "Contradictions / Uncertainty":
+            lines.append("- Potential interpretation differences may exist across notes. [source: Not found in notes]")
+        elif canonical in {"Unknowns / Gaps", "Unknowns / Missing Data"}:
+            lines.append("- Missing explicit event dates or outcome details in retrieved notes. [source: Not found in notes]")
+        elif canonical == "Next Best Questions":
+            terms = _query_terms(query_text)[:5]
+            if not terms:
+                terms = ["timeline", "treatment", "response", "scan", "follow-up"]
+            for term in terms:
+                lines.append(f"- What explicit note evidence clarifies {term}?")
+        elif canonical in {"Sources Table", "Sources"}:
+            lines.append("| claim | source note | confidence |")
+            lines.append("|---|---|---|")
+            if top_sources:
+                for src in top_sources[:6]:
+                    title = str(src.get("title") or src.get("filename") or "Unknown").strip()
+                    snippet = str(src.get("snippet", "") or "").strip()
+                    claim = snippet.split(". ", 1)[0].strip() or f"Evidence found in {title}"
+                    confidence = _confidence_from_relevance(float(src.get("relevance", 0) or 0))
+                    lines.append(f"| {claim} | {title} | {confidence} |")
+            else:
+                lines.append("| Not found in notes | Not found in notes | Low |")
+        elif canonical == "Supporting Notes":
+            if top_sources:
+                for src in top_sources[:6]:
+                    title = str(src.get("title") or src.get("filename") or "Unknown").strip()
+                    snippet = str(src.get("snippet", "") or "").strip()
+                    point = snippet.split(". ", 1)[0].strip() or f"Evidence found in {title}"
+                    lines.append(f"- {title}: {point} [source: {title}]")
+            else:
+                lines.append("- Not found in notes. [source: Not found in notes]")
+        else:
+            lines.append("- Not found in notes. [source: Not found in notes]")
+        lines.append("")
+    return "\n".join(lines).strip()
+
+
+def _enforce_response_contract(
+    *,
+    query_text: str,
+    answer_text: str,
+    sources: list[dict],
+    required_sections: list[str],
+    require_citations: bool,
+) -> tuple[str, bool]:
+    if not _query_requires_strict_contract(query_text):
+        return answer_text, False
+    sections_ok = _answer_has_required_sections(answer_text, required_sections)
+    citations_ok = (
+        _answer_has_sufficient_citations(answer_text) if require_citations else True
+    )
+    if sections_ok and citations_ok:
+        return answer_text, False
+    rewritten = _deterministic_contract_answer(query_text, sources, required_sections)
+    return rewritten, True
+
+
 def _unknown_bullet_is_supported(bullet_text: str, evidence_text: str) -> bool:
     text = str(bullet_text or "").strip().lower()
     if not text or "not listed above" in text:
@@ -3323,10 +3618,20 @@ def _append_references_block(answer_text: str, references: list[str]) -> str:
 
 
 def _normalize_and_rank_sources(
-    sources: list[dict], max_sources: int = 8, query_text: str = ""
+    sources: list[dict],
+    max_sources: int = 8,
+    query_text: str = "",
+    intent_scope: dict | None = None,
 ) -> list[dict]:
     deduped: dict[str, dict] = {}
     strong_terms = _query_strong_terms(query_text)
+    query_terms_len = len(_query_terms(query_text))
+    scope_prefixes = (
+        list((intent_scope or {}).get("effective_scope_prefixes", []))
+        if isinstance(intent_scope, dict)
+        else []
+    )
+    allow_meta_sources = bool((intent_scope or {}).get("allow_meta_sources", False))
     for source in sources or []:
         if not isinstance(source, dict):
             continue
@@ -3340,7 +3645,9 @@ def _normalize_and_rank_sources(
 
         key = f"{_normalize_title_token(filename)}|{filepath}"
         existing = deduped.get(key)
-        current_score = float(source.get("relevance", 0) or 0)
+        current_score = _normalize_relevance_value(
+            float(source.get("relevance", 0) or 0), query_terms_len=query_terms_len
+        )
         if existing is None or current_score > float(existing.get("relevance", 0) or 0):
             normalized = dict(source)
             normalized["filename"] = filename
@@ -3351,6 +3658,15 @@ def _normalize_and_rank_sources(
             normalized["phrase_hits"] = int(source.get("phrase_hits", 0) or 0)
             normalized["template_penalty"] = float(source.get("template_penalty", 0.0) or 0.0)
             normalized["meta_penalty"] = float(source.get("meta_penalty", 0.0) or 0.0)
+            scope_match = source_matches_scope_prefixes(filepath, scope_prefixes)
+            normalized["scope_mismatch"] = 0 if scope_match else 1
+            scope_penalty = 0.0 if scope_match else 12.0
+            meta_penalty_boost = 0.0
+            if not allow_meta_sources:
+                meta_penalty_boost = float(normalized["meta_penalty"]) * 5.0
+            normalized["adjusted_relevance"] = max(
+                0.0, current_score - scope_penalty - meta_penalty_boost
+            )
             normalized["strong_hits"] = sum(
                 1
                 for term in strong_terms
@@ -3362,7 +3678,8 @@ def _normalize_and_rank_sources(
         deduped.values(),
         key=lambda s: (
             int(s.get("strong_hits", 0) or 0),
-            float(s.get("relevance", 0) or 0),
+            float(s.get("adjusted_relevance", s.get("relevance", 0)) or 0),
+            -int(s.get("scope_mismatch", 0) or 0),
             -float(s.get("meta_penalty", 0.0) or 0.0),
             len(str(s.get("snippet", ""))),
         ),
@@ -3372,6 +3689,9 @@ def _normalize_and_rank_sources(
         strong_ranked = [row for row in ranked if int(row.get("strong_hits", 0) or 0) > 0]
         if len(strong_ranked) >= 3:
             ranked = strong_ranked
+    ranked = gate_sources_by_scope(
+        ranked, scope_prefixes, min_in_scope=3, preserve_out_of_scope=1
+    )
     ranked = _mmr_diversify_sources(ranked, max_sources=max_sources, lambda_weight=0.78)
     return ranked[:max_sources]
 
@@ -4242,13 +4562,27 @@ def query_graph():
         if not query_text:
             return jsonify({"error": "No query provided"}), 400
 
+        constraint_filters = extract_constraint_filters(query_text)
+        filters = _normalize_query_filters(
+            merge_constraint_filters(filters, constraint_filters)
+        )
         retrieval_query = _sanitize_retrieval_query(query_text) or str(query_text).strip()
         requested_sections = _requested_sections_from_query(query_text)
-        if (
-            _should_apply_medical_scope_bias(retrieval_query)
-            and "path_prefixes" not in filters
-        ):
-            filters["path_prefixes"] = ["medical/lymphoma/"]
+        required_sections = _required_sections_from_query(
+            query_text, fallback_sections=requested_sections
+        )
+        strict_contract_required = _query_requires_strict_contract(query_text)
+        strict_citations_required = _query_requires_strict_citations(query_text)
+        intent_scope = infer_intent_scope(query_text, filters=filters)
+        if bool(filters.get("strict_scope", False)):
+            intent_scope["autoscope_enabled"] = False
+        effective_scope_prefixes = list(intent_scope.get("filter_scope_prefixes", []))
+        if not effective_scope_prefixes:
+            query_scope_prefixes = list(intent_scope.get("query_scope_prefixes", []))
+            if query_scope_prefixes:
+                effective_scope_prefixes = query_scope_prefixes
+                filters = apply_scope_prefixes_to_filters(filters, effective_scope_prefixes)
+        intent_scope["effective_scope_prefixes"] = list(effective_scope_prefixes)
         
         # Validate mode
         valid_modes = ['naive', 'local', 'global', 'hybrid']
@@ -4261,6 +4595,13 @@ def query_graph():
         logging.info(f"Effective mode after heuristic: '{mode}'")
         if retrieval_query != query_text:
             logger.info("Using sanitized retrieval query: %s", retrieval_query)
+        if constraint_filters:
+            logger.info("Constraint-derived filters applied: %s", constraint_filters)
+        if effective_scope_prefixes:
+            logger.info(
+                "Intent scope prefixes (query/filter): %s",
+                ", ".join(effective_scope_prefixes),
+            )
 
         if llm_provider_override:
             provider_token = REQUEST_QUERY_LLM_PROVIDER.set(llm_provider_override)
@@ -4280,6 +4621,7 @@ def query_graph():
         extractive_scanned_entries = 0
         extractive_candidate_count = 0
         extractive_plan_cache: dict | None = None
+        fallback_filters = dict(filters)
         sources: list[dict] = []
         raw_payload: dict = {}
         answer = ""
@@ -4300,6 +4642,25 @@ def query_graph():
             if not fallback_reason:
                 fallback_reason = clean_reason
 
+        def _set_effective_scope_prefixes(prefixes: list[str], reason: str) -> None:
+            nonlocal effective_scope_prefixes
+            nonlocal fallback_filters
+            nonlocal extractive_plan_cache
+            clean_prefixes = [str(prefix).strip() for prefix in prefixes if str(prefix).strip()]
+            if clean_prefixes == effective_scope_prefixes:
+                return
+            effective_scope_prefixes = clean_prefixes
+            intent_scope["effective_scope_prefixes"] = list(effective_scope_prefixes)
+            fallback_filters = apply_scope_prefixes_to_filters(
+                filters, effective_scope_prefixes
+            )
+            extractive_plan_cache = None
+            logger.info(
+                "Intent scope updated (%s): %s",
+                reason,
+                ", ".join(effective_scope_prefixes) if effective_scope_prefixes else "<none>",
+            )
+
         def _get_extractive_plan() -> dict:
             nonlocal extractive_plan_cache
             nonlocal extractive_scan_count
@@ -4311,7 +4672,7 @@ def query_graph():
                     strict_limit=strict_fallback_limit,
                     relaxed_limit=relaxed_fallback_limit,
                     gate_limit=gate_fallback_limit,
-                    filters=filters,
+                    filters=fallback_filters,
                 )
                 extractive_scan_count += int(extractive_plan_cache.get("scan_count", 0) or 0)
                 extractive_scanned_entries += int(
@@ -4359,9 +4720,23 @@ def query_graph():
                 logger.error(f"Async query failed: {e}")
                 _mark_fallback("llm_error")
 
+        if (
+            mode != "local"
+            and not effective_scope_prefixes
+            and bool(intent_scope.get("autoscope_enabled", False))
+            and sources
+        ):
+            inferred_scope = infer_scope_prefixes_from_sources(sources)
+            if inferred_scope:
+                _set_effective_scope_prefixes(
+                    inferred_scope, "retrieved_source_distribution"
+                )
+
         if mode != "local":
             primary_confident = bool(sources) and _sources_evidence_sufficient(
-                retrieval_query, sources
+                retrieval_query,
+                sources,
+                scope_prefixes=effective_scope_prefixes,
             )
             should_merge_fallback = (not sources) or (not primary_confident)
             if should_merge_fallback:
@@ -4379,18 +4754,32 @@ def query_graph():
                     _mark_fallback("sparse_sources_relaxed_merge")
 
         sources = _normalize_and_rank_sources(
-            sources, max_sources=rank_limit, query_text=retrieval_query
+            sources,
+            max_sources=rank_limit,
+            query_text=retrieval_query,
+            intent_scope=intent_scope,
         )
         sources = _filter_sources_by_filters(sources, filters)
 
-        if mode != "local" and sources and not _sources_evidence_sufficient(retrieval_query, sources):
+        if (
+            mode != "local"
+            and sources
+            and not _sources_evidence_sufficient(
+                retrieval_query,
+                sources,
+                scope_prefixes=effective_scope_prefixes,
+            )
+        ):
             added = _merge_extractive_hits_into_sources(
                 sources, _get_extractive_plan().get("gate_hits", [])
             )
             if added > 0:
                 _mark_fallback("post_rank_evidence_weak")
             sources = _normalize_and_rank_sources(
-                sources, max_sources=post_gate_rank_limit, query_text=retrieval_query
+                sources,
+                max_sources=post_gate_rank_limit,
+                query_text=retrieval_query,
+                intent_scope=intent_scope,
             )
             sources = _filter_sources_by_filters(sources, filters)
 
@@ -4416,7 +4805,7 @@ def query_graph():
                 retrieval_query,
                 sources,
                 str(answer),
-                requested_sections=requested_sections,
+                requested_sections=required_sections,
             )
             if two_pass_answer:
                 answer = two_pass_answer
@@ -4437,7 +4826,19 @@ def query_graph():
         if isinstance(answer, str) and sources:
             answer = _validate_unknowns_section(answer, sources)
 
-        if isinstance(answer, str) and mode != "local":
+        if isinstance(answer, str):
+            contract_answer, rewritten = _enforce_response_contract(
+                query_text=query_text,
+                answer_text=answer,
+                sources=sources,
+                required_sections=required_sections,
+                require_citations=strict_citations_required,
+            )
+            if rewritten:
+                _mark_fallback("contract_rewrite")
+            answer = contract_answer
+
+        if isinstance(answer, str) and mode != "local" and not strict_contract_required:
             reference_titles = _reference_titles_from_hits(sources, max_refs=8)
             answer = _append_references_block(answer, reference_titles)
 
@@ -4473,6 +4874,14 @@ def query_graph():
             "extractive_scan_count": extractive_scan_count,
             "extractive_scanned_entries": extractive_scanned_entries,
             "extractive_candidate_count": extractive_candidate_count,
+            "effective_scope_prefixes": effective_scope_prefixes,
+            "intent_scope": {
+                "meta_intent": bool(intent_scope.get("meta_intent", False)),
+                "has_global_scope": bool(intent_scope.get("has_global_scope", False)),
+                "autoscope_enabled": bool(intent_scope.get("autoscope_enabled", False)),
+            },
+            "strict_contract_required": strict_contract_required,
+            "required_sections": required_sections,
         }), 200
     
     except Exception as e:

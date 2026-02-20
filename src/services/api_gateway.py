@@ -502,10 +502,16 @@ async def unified_search(request: SearchRequest):
 
     # 2. Graph / Hybrid -> Graph Service
     else:
+        extracted_entities, mem0_context = _extract_query_context(
+            request.query, 
+            include_memory=request.llm_knowledge
+        )
         async with httpx.AsyncClient() as client:
             try:
                 # Graph service expects robust payload
                 payload = request.model_dump()
+                payload["entities"] = extracted_entities
+                payload["mem0_context"] = mem0_context
                 response = await client.post(
                     f"{GRAPH_SERVICE_URL}/query",
                     json=payload,
@@ -539,6 +545,12 @@ async def unified_search_stream(request: SearchStreamRequest):
         )
 
     n_results = request.max_results if request.max_results is not None else request.n_results
+    
+    extracted_entities, mem0_context = _extract_query_context(
+        request.query, 
+        include_memory=request.llm_knowledge
+    )
+
     payload = {
         "query": request.query,
         "mode": stream_mode,
@@ -548,6 +560,8 @@ async def unified_search_stream(request: SearchStreamRequest):
         "system_prompt": request.system_prompt,
         "n_results": n_results,
         "stream": bool(request.stream),
+        "entities": extracted_entities,
+        "mem0_context": mem0_context,
     }
 
     async def _proxy_stream():
@@ -582,10 +596,6 @@ async def unified_search_stream(request: SearchStreamRequest):
                 "message": f"Graph streaming service unreachable: {str(e)}",
             }
             yield f"data: {json.dumps(error_event)}\n\n"
-        except Exception as e:
-            error_event = {"type": "error", "message": f"Streaming proxy error: {str(e)}"}
-            yield f"data: {json.dumps(error_event)}\n\n"
-
     return StreamingResponse(
         _proxy_stream(),
         media_type="text/event-stream",
@@ -596,6 +606,94 @@ async def unified_search_stream(request: SearchStreamRequest):
         },
     )
 
+def _extract_query_context(query: str, include_memory: bool = False) -> tuple[List[str], str]:
+    """Centralized entity extraction and memory synthesis for downstream services."""
+    entities = []
+    # Fast heuristic entity extraction (avoids slow LLM latency per query)
+    stopwords = {"the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "with", "by", "from", "of", "about", "as", "is", "are", "was", "were", "be", "been", "that", "this", "these", "those", "it", "they", "them", "what", "which", "who", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "can", "will", "just", "should", "now"}
+    
+    tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", query)
+    seen = set()
+    for t in tokens:
+        tl = t.lower()
+        if tl not in stopwords and not tl.isdigit() and tl not in seen:
+            seen.add(tl)
+            entities.append(t)
+            
+    mem0_context = ""
+    if include_memory:
+        try:
+            from src.utils.memory_manager import get_memory_manager
+            mm = get_memory_manager()
+            mem0_context = mm.search_memory(query, limit=5)
+        except Exception as e:
+            print(f"Warning: Failed to fetch mem0 context: {e}")
+            
+    return entities, mem0_context
+
+
+async def _synthesize_cascading_answer(
+    query: str,
+    sources: List[Dict[str, Any]],
+    llm_provider: str,
+    model: str,
+    system_prompt: str = None
+) -> str:
+    """Takes vector snippets and synthesizes an answer using the requested LLM provider."""
+    if not sources:
+        return "No results found"
+    
+    # Format context
+    context_text = "\n\n".join([
+        f"Snippet {i+1} from {s.get('filename', 'Unknown')}:\n{s.get('snippet', '')}"
+        for i, s in enumerate(sources[:15])
+    ])
+    
+    sys_prompt = system_prompt or "You are a helpful AI assistant. Synthesize a concise answer to the user's query based ONLY on the provided vault context. If the context does not contain the answer, say so."
+    prompt = f"Context:\n{context_text}\n\nQuery: {query}\n\nAnswer:"
+    
+    ollama_host = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
+    openrouter_key = os.getenv("OPENROUTER_API_KEY", "")
+
+    try:
+        if llm_provider == "ollama":
+            payload = {
+                "model": model or "qwen2.5:7b-instruct",
+                "messages": [
+                    {"role": "system", "content": sys_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                "stream": False
+            }
+            async with httpx.AsyncClient() as c:
+                resp = await c.post(f"{OLLAMA_HOST}/api/chat", json=payload, timeout=60.0)
+                if resp.status_code == 200:
+                    return resp.json().get("message", {}).get("content", "")
+        
+        else:
+            # Default to OpenRouter for any non-ollama provider
+            if not OPENROUTER_API_KEY:
+                return f"Found {len(sources)} matching snippets in your vault. (LLM synthesis skipped: OPENROUTER_API_KEY missing)"
+                
+            payload = {
+                "model": model or "anthropic/claude-3.5-haiku",
+                "messages": [
+                    {"role": "system", "content": sys_prompt},
+                    {"role": "user", "content": prompt}
+                ]
+            }
+            headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
+            async with httpx.AsyncClient() as c:
+                resp = await c.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=60.0)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if "choices" in data and len(data["choices"]) > 0:
+                        return data["choices"][0]["message"]["content"]
+                    
+    except Exception as e:
+        print(f"Error in cascading fallback synthesis: {e}")
+        
+    return f"Found {len(sources)} matching snippets in your vault."
 
 class UnifiedQueryRequest(BaseModel):
     query: str
@@ -683,6 +781,14 @@ async def unified_query(request: UnifiedQueryRequest):
     if entities_mode not in {"naive", "local", "global", "hybrid"}:
         entities_mode = "hybrid"
 
+    # Gateway centralized Context & Entity Extraction
+    extracted_entities, mem0_context = _extract_query_context(
+        request.query, 
+        include_memory=request.llm_knowledge
+    )
+    if mem0_context:
+        print(f"🧠 Mem0 context loaded: {len(mem0_context)} chars")
+
     # ===== CASCADING RETRIEVAL MODE =====
     if mode == "cascading":
         try:
@@ -699,7 +805,10 @@ async def unified_query(request: UnifiedQueryRequest):
             )
 
             result = await retriever.retrieve(
-                request.query, max_results=request.max_results
+                request.query, 
+                max_results=request.max_results,
+                entities=extracted_entities,
+                mem0_context=mem0_context
             )
 
             answer = ""
@@ -858,10 +967,12 @@ async def unified_query(request: UnifiedQueryRequest):
                 answer = result.get("answer", "") or ""
 
             if not answer:
-                answer = (
-                    f"Found {len(sources)} matching snippets in your vault."
-                    if sources
-                    else "No results found"
+                answer = await _synthesize_cascading_answer(
+                    request.query,
+                    sources,
+                    request.llm_provider,
+                    request.model,
+                    request.system_prompt
                 )
 
             if isinstance(result, dict):
@@ -945,6 +1056,8 @@ async def unified_query(request: UnifiedQueryRequest):
                     "web_search": request.web_search,
                     "llm_knowledge": request.llm_knowledge,
                     "system_prompt": request.system_prompt,
+                    "entities": extracted_entities,
+                    "mem0_context": mem0_context,
                 }
                 response = await _post_json(
                     client,
@@ -1017,6 +1130,8 @@ async def unified_query(request: UnifiedQueryRequest):
                     "llm_knowledge": request.llm_knowledge,
                     "system_prompt": request.system_prompt,
                     "filters": filters,
+                    "entities": extracted_entities,
+                    "mem0_context": mem0_context,
                 }
                 response = await _post_json(
                     client,
@@ -1119,13 +1234,15 @@ async def unified_query(request: UnifiedQueryRequest):
                             "query": request.query,
                             "mode": "hybrid",
                             "n_results": request.max_results,
-                            "use_vector": True,
+                            "use_vector": False,
                             "llm_provider": request.llm_provider,
                             "model": request.model,
                             "temperature": request.temperature,
                             "web_search": request.web_search,
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
+                            "entities": extracted_entities,
+                            "mem0_context": mem0_context,
                         },
                         timeout=120.0,
                         service="graph",
@@ -1194,6 +1311,8 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                             "filters": filters,
+                            "entities": extracted_entities,
+                            "mem0_context": mem0_context,
                         },
                         timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
@@ -1253,13 +1372,15 @@ async def unified_query(request: UnifiedQueryRequest):
                             "query": request.query,
                             "mode": "hybrid",
                             "n_results": request.max_results,
-                            "use_vector": True,
+                            "use_vector": False,
                             "llm_provider": request.llm_provider,
                             "model": request.model,
                             "temperature": request.temperature,
                             "web_search": request.web_search,
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
+                            "entities": extracted_entities,
+                            "mem0_context": mem0_context,
                         },
                         timeout=120.0,
                         service="graph",
@@ -1280,6 +1401,8 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                             "filters": filters,
+                            "entities": extracted_entities,
+                            "mem0_context": mem0_context,
                         },
                         timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
@@ -1332,13 +1455,15 @@ async def unified_query(request: UnifiedQueryRequest):
                             "query": request.query,
                             "mode": "hybrid",
                             "n_results": request.max_results,
-                            "use_vector": True,
+                            "use_vector": False,
                             "llm_provider": request.llm_provider,
                             "model": request.model,
                             "temperature": request.temperature,
                             "web_search": request.web_search,
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
+                            "entities": extracted_entities,
+                            "mem0_context": mem0_context,
                         },
                         timeout=90.0,
                         service="graph",
@@ -1359,6 +1484,8 @@ async def unified_query(request: UnifiedQueryRequest):
                             "llm_knowledge": request.llm_knowledge,
                             "system_prompt": request.system_prompt,
                             "filters": filters,
+                            "entities": extracted_entities,
+                            "mem0_context": mem0_context,
                         },
                         timeout=LIGHTRAG_QUERY_TIMEOUT,
                         service="lightrag",
