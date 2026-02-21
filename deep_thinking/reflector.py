@@ -17,8 +17,8 @@ class ReflectionAgent:
         doc_text = ""
         for i, doc in enumerate(documents[:5]): # Limit to top 5 to save tokens
             doc_text += f"--- Document {i+1} ---\n"
-            doc_text += f"Source: {doc.get('source', 'Unknown')}\n"
-            doc_text += f"Content: {doc.get('content', '')[:500]}...\n\n" # Truncate content
+            # Allow up to 100,000 chars per doc to support full file expansion
+            doc_text += f"Content: {doc.get('content', '')[:100000]}\n\n"
 
         prompt = f"""
         Research Step: "{step['sub_question']}"
@@ -47,7 +47,8 @@ class ReflectionAgent:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=500,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
         )
         
         try:

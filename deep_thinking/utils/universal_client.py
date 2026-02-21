@@ -37,27 +37,28 @@ class UniversalClient:
 
     def create(self, model: str, messages: List[Dict[str, str]], 
                max_tokens: int = 4000, temperature: float = 0.7, 
-               system: str = "") -> UniversalMessage:
+               system: str = "", response_format: Optional[Dict[str, Any]] = None) -> UniversalMessage:
         """
         Unified create method matching Anthropic's signature.
         """
         if self.provider == "claude":
-            return self._create_claude(model, messages, max_tokens, temperature, system)
+            return self._create_claude(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "gemini":
-            return self._create_gemini(model, messages, max_tokens, temperature, system)
+            return self._create_gemini(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "openrouter":
-            return self._create_openrouter(model, messages, max_tokens, temperature, system)
+            return self._create_openrouter(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider in ("chatgpt", "openai"):
-            return self._create_openai(model, messages, max_tokens, temperature, system)
+            return self._create_openai(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "ollama":
-            return self._create_ollama(model, messages, max_tokens, temperature, system)
+            return self._create_ollama(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "perplexity":
-            return self._create_perplexity(model, messages, max_tokens, temperature, system)
+            return self._create_perplexity(model, messages, max_tokens, temperature, system, response_format)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
     def _create_perplexity(self, model: str, messages: List[Dict[str, str]], 
-                           max_tokens: int, temperature: float, system: str):
+                           max_tokens: int, temperature: float, system: str,
+                           response_format: Optional[Dict[str, Any]] = None):
         api_key = self.api_key or os.getenv("PERPLEXITY_API_KEY")
         if not api_key:
             raise ValueError("PERPLEXITY_API_KEY not configured")
@@ -116,7 +117,8 @@ class UniversalClient:
             raise e
 
     def _create_claude(self, model: str, messages: List[Dict[str, str]], 
-                       max_tokens: int, temperature: float, system: str):
+                       max_tokens: int, temperature: float, system: str,
+                       response_format: Optional[Dict[str, Any]] = None):
         if not self.anthropic:
              raise ValueError("Anthropic client not initialized")
              
@@ -133,7 +135,8 @@ class UniversalClient:
         )
 
     def _create_gemini(self, model: str, messages: List[Dict[str, str]], 
-                       max_tokens: int, temperature: float, system: str):
+                       max_tokens: int, temperature: float, system: str,
+                       response_format: Optional[Dict[str, Any]] = None):
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY not configured")
 
@@ -172,6 +175,9 @@ class UniversalClient:
                 "maxOutputTokens": output_tokens
             }
         }
+        
+        if response_format and response_format.get("type") == "json_object":
+            payload["generationConfig"]["responseMimeType"] = "application/json"
 
         try:
             response = requests.post(
@@ -208,7 +214,8 @@ class UniversalClient:
             raise e
 
     def _create_openrouter(self, model: str, messages: List[Dict[str, str]],
-                           max_tokens: int, temperature: float, system: str):
+                           max_tokens: int, temperature: float, system: str,
+                           response_format: Optional[Dict[str, Any]] = None):
         api_key = self.api_key or os.getenv("OPENROUTER_API_KEY")
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY not configured")
@@ -226,6 +233,9 @@ class UniversalClient:
             "max_tokens": max_tokens,
             "temperature": temperature
         }
+        
+        if response_format:
+            payload["response_format"] = response_format
 
         # Add identifying headers for better OpenRouter citizenship & stability
         headers = {
@@ -278,7 +288,8 @@ class UniversalClient:
                 raise e
 
     def _create_openai(self, model: str, messages: List[Dict[str, str]],
-                       max_tokens: int, temperature: float, system: str):
+                       max_tokens: int, temperature: float, system: str,
+                       response_format: Optional[Dict[str, Any]] = None):
         api_key = self.api_key or os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OPENAI_API_KEY not configured")
@@ -306,6 +317,9 @@ class UniversalClient:
         }
         if not restrict_temperature:
             payload["temperature"] = temperature
+
+        if response_format:
+            payload["response_format"] = response_format
 
         try:
             response = requests.post(
@@ -358,7 +372,8 @@ class UniversalClient:
             logger.error(f"OpenAI request failed: {e}")
             raise e
     def _create_ollama(self, model: str, messages: List[Dict[str, str]],
-                       max_tokens: int, temperature: float, system: str):
+                       max_tokens: int, temperature: float, system: str,
+                       response_format: Optional[Dict[str, Any]] = None):
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
         if "host.docker.internal" in ollama_host:
              # If running outside docker but env var is set for docker, try localhost fallback
@@ -395,6 +410,9 @@ class UniversalClient:
                 "num_predict": max_tokens
             }
         }
+        
+        if response_format and response_format.get("type") == "json_object":
+            payload["format"] = "json"
 
         try:
             # Ensure host has protocol

@@ -69,8 +69,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
             for i, item in enumerate(raw_buffer):
                 source = item.get("source", "Unknown")
                 # Context buffer has full text, usually truncated naturally by retrieval or reasonable limit
-                # We typically allow more here than the standard loop
-                content = item.get("content", "")[:2000] 
+                content = item.get("content", "")[:100000]
                 
                 if "http" in source and not "localhost" in source:
                     web_docs += f"[{i+1}] WEB: {source}\nContent: {content}\n\n"
@@ -81,11 +80,16 @@ Finally, provide your answer in a structured, easy-to-read format."""
         else:
             for i, doc in enumerate(state['retrieved_documents']):
                 source = doc.get('source', 'Unknown')
-                content = doc.get('content', '')[:500] # Increased from 300
+                content = doc.get('content', '')[:100000] # Use full content
                 
-                # Collect images from web results
-                if 'images' in doc and doc['images']:
-                    image_urls.extend(doc['images'])
+                # Collect images from web results safely
+                images = doc.get('images')
+                if images and isinstance(images, list):
+                    for img in images:
+                        if isinstance(img, str) and img.startswith('http'):
+                            image_urls.append(img)
+                        elif isinstance(img, dict) and img.get('url'):
+                            image_urls.append(img['url'])
                 
                 if doc.get('type') == 'web':
                     web_docs += f"[{i+1}] WEB: {source}\nContent: {content}...\n\n"
@@ -152,7 +156,8 @@ Finally, provide your answer in a structured, easy-to-read format."""
             model=self.model,
             max_tokens=max_tokens,
             system=system_prompt,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
         )
         
         if hasattr(response.content[0], 'text'):

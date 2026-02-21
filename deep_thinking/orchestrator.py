@@ -8,7 +8,9 @@ from .supervisor import RetrievalSupervisor
 from .reflector import ReflectionAgent
 from .policy import PolicyAgent
 from .synthesizer import FinalAnswerGenerator
+from .synthesizer import FinalAnswerGenerator
 from .utils.universal_client import UniversalClient
+import concurrent.futures
 try:
     from src.utils.memory_manager import get_memory_manager
 except ImportError:
@@ -189,36 +191,40 @@ class DeepThinkingRAG:
                 # Plan exhausted, check policy
                 pass
             else:
-                current_step = state["plan"][state["current_step_index"]]
-                update_status(f"👣 Step {current_step['step_number']}: {current_step['sub_question']}")
+                steps_to_run = state["plan"][state["current_step_index"]:]
                 
-                # Execute retrieval
-                documents = self.supervisor.execute_step(
-                    current_step,
-                    state,
-                    trace_callback=update_status
-                )
-                state["retrieved_documents"].extend(documents)
-                update_status(f"   Found {len(documents)} documents.")
+                # Execute step and reflection
+                def run_and_reflect(step):
+                    update_status(f"👣 Step {step['step_number']}: {step['sub_question']}")
+                    docs = self.supervisor.execute_step(step, state, trace_callback=update_status)
+                    update_status(f"   Found {len(docs)} documents for Step {step['step_number']}.")
+                    past_step = self.reflector.reflect(step, docs, state)
+                    update_status(f"   Insight for Step {step['step_number']}: {past_step['key_findings']}")
+                    return step, docs, past_step
+
+                # Use ThreadPoolExecutor to run independent planned steps in parallel
+                with concurrent.futures.ThreadPoolExecutor(max_workers=len(steps_to_run)) as executor:
+                    futures = [executor.submit(run_and_reflect, step) for step in steps_to_run]
+                    results = [f.result() for f in futures] # keep order
+
+                for step, docs, past_step in results:
+                    state["retrieved_documents"].extend(docs)
+                    
+                    for doc in docs[:3]:
+                        state["raw_context_buffer"].append({
+                            "source": doc.get("source", "Unknown"),
+                            "content": doc.get("content", ""),
+                            "step": step["step_number"]
+                        })
+                        
+                    state["past_steps"].append(past_step)
+                    state["accumulated_context"] += f"\n\nStep {step['step_number']}: {past_step['key_findings']}"
+                    
+                    # Cap context to prevent token bloat
+                    if len(state["accumulated_context"]) > 12000:
+                        state["accumulated_context"] = "... [earlier steps truncated] ..." + state["accumulated_context"][-12000:]
                 
-                # Update Raw Context Buffer (Keep top 3 docs per step full text)
-                for doc in documents[:3]:
-                    state["raw_context_buffer"].append({
-                        "source": doc.get("source", "Unknown"),
-                        "content": doc.get("content", ""),
-                        "step": current_step["step_number"]
-                    })
-                
-                # Reflect on findings
-                past_step = self.reflector.reflect(current_step, documents, state)
-                state["past_steps"].append(past_step)
-                update_status(f"   Insight: {past_step['key_findings']}")
-                
-                # Update accumulated context
-                state["accumulated_context"] += f"\n\nStep {current_step['step_number']}: {past_step['key_findings']}"
-                
-                # Move to next step
-                state["current_step_index"] += 1
+                state["current_step_index"] += len(steps_to_run)
             
             # Check if we should continue
             # Plan complete or empty - ask policy if we have enough

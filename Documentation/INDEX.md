@@ -11,12 +11,14 @@ This index lists active documentation only.
 - `./Setup/API_KEY_VALIDATION_GUIDE.md`
 - `./Setup/MAC_MINI_QUICK_START.md`
 - `./Setup/MAC_MINI_NETWORKING_FIX.md`
+- `./OPENCLAW_OBSIDIAN_IMPLEMENTATION_TASK_LIST.md`
 
 ## Architecture and Governance
 - `./SYSTEM_OVERVIEW_2025.md`
 - `./architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md`
 - `./architecture/STREAMLIT_ARCHITECTURE.md`
 - `./architecture/DEEP_THINKING_FLOW.md`
+- `./architecture/OPENCLAW_OBSIDIAN_FRONTEND_ARCHITECTURE.md`
 - `./DUAL_GRAPH_ARCHITECTURE.md`
 - `./PROJECT_CONSTITUTION.md`
 - `./spec.md`

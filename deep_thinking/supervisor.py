@@ -1,6 +1,7 @@
 import requests
 from typing import List, Dict, Any
 import time
+import concurrent.futures
 from .state import Step, RAGState
 try:
     from .reranker import Reranker
@@ -110,20 +111,26 @@ class RetrievalSupervisor:
                         results = filtered_results
                 trace(f"{debug_prefix} vector retry output", summarize(results))
             
-        elif strategy == "graph":
-            # Use 'local' mode for specific entity questions
-            results = self._query_graph(query, mode="local", trace_callback=trace)
+        elif strategy.startswith("graph"):
+            # Use 'local' mode for specific entity questions, 'global' for summaries
+            mode = "global" if strategy == "graph-global" else "local"
+            results = self._query_graph(query, mode=mode, trace_callback=trace)
             trace(f"{debug_prefix} graph output", summarize(results))
             
         elif strategy == "hybrid":
-            # True Hybrid: Combine Graph and Vector results
+            # True Hybrid: Combine Graph and Vector results in parallel
             n_results = 60 if self.enable_reranking else 25
             trace(
                 f"{debug_prefix} hybrid query",
                 {"query": query, "filters": filters or None, "n_results": n_results}
             )
-            vec_results = self._query_vector(query, filters, n_results=n_results, trace_callback=trace)
-            graph_results = self._query_graph(query, mode="hybrid", trace_callback=trace)
+            
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                vec_future = executor.submit(self._query_vector, query, filters, n_results, trace)
+                graph_future = executor.submit(self._query_graph, query, "hybrid", trace)
+                
+                vec_results = vec_future.result()
+                graph_results = graph_future.result()
 
             if step.get("target_folders") and vec_results:
                 filtered_vec = self._filter_results_by_target_folders(vec_results, step["target_folders"])

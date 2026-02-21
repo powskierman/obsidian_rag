@@ -33,7 +33,8 @@ class PolicyAgent:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=300,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
         )
         
         try:

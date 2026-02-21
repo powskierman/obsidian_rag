@@ -41,7 +41,7 @@ class PlannerAgent:
         
         Create a research plan with 2-5 steps. For each step:
         1. Write a clear sub-question
-        2. Choose search strategy: "vector" (concepts), "graph" (entities/relationships), "web" (external/recent info), or "hybrid"
+        2. Choose search strategy: "vector" (concepts), "graph-local" (specific entities/relationships), "graph-global" (high-level themes/summaries), "web" (external/recent info), or "hybrid"
         3. List 3-5 keywords
         4. Suggest target folders if relevant (e.g. "Medical/", "Tech/")
         5. Explain why this step is needed
@@ -91,7 +91,8 @@ class PlannerAgent:
             model=self.model,
             max_tokens=2000,
             system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}]
+            messages=[{"role": "user", "content": user_prompt}],
+            response_format={"type": "json_object"}
         )
         
         try:
@@ -145,7 +146,7 @@ class PlannerAgent:
         
         Return ONLY a JSON array of new steps. Each step must have:
         - sub_question: string (Specific query for web search)
-        - search_strategy: "vector" | "graph" | "hybrid" | "web"
+        - search_strategy: "vector" | "graph-local" | "graph-global" | "hybrid" | "web"
         - keywords: array of strings (The specific terms extracted)
         - target_folders: array of strings
         - reasoning: string
@@ -154,7 +155,8 @@ class PlannerAgent:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=1000,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
         )
         
         try:
