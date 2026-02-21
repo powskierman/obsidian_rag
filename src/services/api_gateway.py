@@ -734,13 +734,13 @@ async def _synthesize_cascading_answer(
                 "stream": False
             }
             async with httpx.AsyncClient() as c:
-                resp = await c.post(f"{OLLAMA_HOST}/api/chat", json=payload, timeout=60.0)
+                resp = await c.post(f"{ollama_host}/api/chat", json=payload, timeout=60.0)
                 if resp.status_code == 200:
                     return resp.json().get("message", {}).get("content", "")
         
         else:
             # Default to OpenRouter for any non-ollama provider
-            if not OPENROUTER_API_KEY:
+            if not openrouter_key:
                 return f"Found {len(sources)} matching snippets in your vault. (LLM synthesis skipped: OPENROUTER_API_KEY missing)"
                 
             payload = {
@@ -750,7 +750,7 @@ async def _synthesize_cascading_answer(
                     {"role": "user", "content": prompt}
                 ]
             }
-            headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
+            headers = {"Authorization": f"Bearer {openrouter_key}"}
             async with httpx.AsyncClient() as c:
                 resp = await c.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload, timeout=60.0)
                 if resp.status_code == 200:
