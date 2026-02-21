@@ -7,14 +7,15 @@ interface PromptModalProps {
     onSave: (prompt: string) => void;
 }
 
-const DEFAULT_PROMPT = `You are a Deep Thinking AI assistant for an Obsidian Knowledge Base.
-Your goal is to answer questions by analyzing the provided Vault Context and using Graph Reasoning.
+const DEFAULT_PROMPT = `You are an assistant integrated with Michel's Obsidian Knowledge Base.
 
-Context:
-{context}
+Answer ONLY from retrieved context (chunks/entities/relationships). Do not use outside knowledge.
 
-Question:
-{question}`;
+Context from vault:
+{context_data}
+
+User question:
+{query}`;
 
 export default function PromptModal({ isOpen, onClose, currentPrompt, onSave }: PromptModalProps) {
     const [prompt, setPrompt] = useState(currentPrompt || DEFAULT_PROMPT);
@@ -43,8 +44,9 @@ export default function PromptModal({ isOpen, onClose, currentPrompt, onSave }: 
                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-sm text-blue-200">
                         <p className="font-medium mb-1">Tips:</p>
                         <ul className="list-disc list-inside space-y-1 opacity-80">
-                            <li>Use <code>{'{'}context{'}'}</code> for retrieved notes/graph data</li>
-                            <li>Use <code>{'{'}question{'}'}</code> for the user&apos;s query</li>
+                            <li>Use <code>{'{'}context_data{'}'}</code> or <code>{'{'}content_data{'}'}</code> for retrieved notes/graph data</li>
+                            <li>Use <code>{'{'}query{'}'}</code> for the user&apos;s query</li>
+                            <li>Use <code>{'{'}memory_context{'}'}</code> for Mem0 context when enabled</li>
                         </ul>
                     </div>
 

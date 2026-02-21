@@ -27,6 +27,24 @@ export interface GraphResponse {
   query: string;
 }
 
+const normalizeSource = (source: any): SearchResult => {
+  const filepath = source?.filepath || source?.file_path || 'unknown';
+  const filename = source?.filename || (typeof filepath === 'string' ? filepath.split('/').pop() : 'unknown') || 'unknown';
+  const rawRelevance = source?.relevance;
+  const relevance = Number.isFinite(rawRelevance)
+    ? Number(rawRelevance)
+    : Number.isFinite(Number(rawRelevance))
+      ? Number(rawRelevance)
+      : 50;
+  const snippet = source?.snippet || source?.content || '';
+  return {
+    filename,
+    filepath,
+    relevance,
+    snippet,
+  };
+};
+
 export const api = {
   unifiedSearch: async (
     query: string,
@@ -181,14 +199,16 @@ export const api = {
       } else if (mode === 'cascading') {
         return {
           answer: data.answer || 'No results found',
-          sources: data.sources || [],
+          sources: (data.sources || []).map(normalizeSource),
           extracted_entities: data.results?.entities || []
         };
       } else {
         // Other single-source modes (notes, entities)
         const result = data.results || data;
-        let sources: SearchResult[] = result.sources || [];
-        let answer = result.answer || result.result || 'No results found';
+        const topSources = Array.isArray(data.sources) ? data.sources : [];
+        const nestedSources = Array.isArray(result.sources) ? result.sources : [];
+        let sources: SearchResult[] = (topSources.length > 0 ? topSources : nestedSources).map(normalizeSource);
+        let answer = data.answer || result.answer || result.result || data.result || 'No results found';
 
         // Handle vector-fallback payloads returned under `results` for entities mode.
         if ((!sources || sources.length === 0) && result.documents && result.documents[0]) {

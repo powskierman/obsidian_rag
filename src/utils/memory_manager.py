@@ -16,9 +16,14 @@ class MemoryManager:
         # Configuration for mem0
         # We point it to the same ChromaDB instance if possible, or a local path
         # For simplicity and isolation, we'll use a local subdirectory
+        vector_provider = os.getenv("MEM0_VECTOR_PROVIDER", "chroma").strip().lower()
+        # Backward compatibility: older config used "chromadb", mem0 expects "chroma".
+        if vector_provider == "chromadb":
+            vector_provider = "chroma"
+
         config = {
             "vector_store": {
-                "provider": "chromadb",
+                "provider": vector_provider,
                 "config": {
                     "path": "./memory_db",
                     "collection_name": "user_memories",
@@ -64,9 +69,39 @@ class MemoryManager:
             results = self.memory.search(query, user_id=self.user_id, limit=limit)
             if not results:
                 return ""
-            
-            # Format results into a concise string for LLM context
-            facts = [r['text'] for r in results]
+
+            # mem0 response shape varies by version/provider:
+            # - list[dict] with "text"
+            # - dict with "results"/"memories"/"data" arrays
+            if isinstance(results, dict):
+                for key in ("results", "memories", "data"):
+                    value = results.get(key)
+                    if isinstance(value, list):
+                        results = value
+                        break
+                else:
+                    results = []
+            elif not isinstance(results, list):
+                results = []
+
+            facts = []
+            for entry in results:
+                if isinstance(entry, dict):
+                    text = (
+                        entry.get("text")
+                        or entry.get("memory")
+                        or entry.get("content")
+                        or ""
+                    )
+                elif isinstance(entry, str):
+                    text = entry
+                else:
+                    text = str(entry) if entry is not None else ""
+                text = str(text).strip()
+                if text:
+                    facts.append(text)
+            if not facts:
+                return ""
             return "\n".join([f"- {fact}" for fact in facts])
         except Exception as e:
             logger.error(f"Error searching memory: {e}")

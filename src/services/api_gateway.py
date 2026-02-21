@@ -7,6 +7,7 @@ import uvicorn
 import math
 import re
 import time
+import sys
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
@@ -107,6 +108,32 @@ def _sanitize_lightrag_answer_text(text: str) -> str:
     return "\n".join(filtered).strip()
 
 
+_SYSTEM_PROMPT_PLACEHOLDER_RE = re.compile(r"(?<!{){([A-Za-z_][A-Za-z0-9_]*)}(?!})")
+_SYSTEM_PROMPT_ALLOWED_PLACEHOLDERS = {
+    "context_data",
+    "content_data",
+    "query",
+    "question",
+    "response_type",
+    "user_prompt",
+    "context",
+    "vault_context",
+    "memory_context",
+    "mem0_context",
+}
+
+
+def _invalid_system_prompt_placeholders(system_prompt: Optional[str]) -> List[str]:
+    if not system_prompt:
+        return []
+    placeholders = {
+        match.group(1) for match in _SYSTEM_PROMPT_PLACEHOLDER_RE.finditer(system_prompt)
+    }
+    return sorted(
+        token for token in placeholders if token not in _SYSTEM_PROMPT_ALLOWED_PLACEHOLDERS
+    )
+
+
 def _lightrag_result_empty(result: Any) -> bool:
     if not isinstance(result, dict):
         return True
@@ -146,7 +173,39 @@ def _extract_lightrag_answer_and_sources(result: Any) -> tuple[str, List[Dict[st
 
     sources = result.get("sources")
     if isinstance(sources, list):
-        return answer, sources
+        normalized_sources: List[Dict[str, Any]] = []
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            filepath = str(
+                source.get("filepath")
+                or source.get("file_path")
+                or ""
+            ).strip()
+            filename = str(source.get("filename") or "").strip()
+            if not filename and filepath:
+                filename = filepath.rsplit("/", 1)[-1]
+            if not filename:
+                filename = "Unknown"
+            try:
+                relevance = float(source.get("relevance", 50.0))
+            except (TypeError, ValueError):
+                relevance = 50.0
+            snippet = str(
+                source.get("snippet")
+                or source.get("content")
+                or ""
+            ).strip()
+            normalized_sources.append(
+                {
+                    "filename": filename.rsplit(".", 1)[0] if filename else "Unknown",
+                    "filepath": filepath,
+                    "relevance": relevance,
+                    "snippet": snippet[:400] + ("..." if len(snippet) > 400 else ""),
+                }
+            )
+        if normalized_sources:
+            return answer, normalized_sources
 
     raw_data = result.get("raw_data")
     if isinstance(raw_data, dict):
@@ -623,7 +682,16 @@ def _extract_query_context(query: str, include_memory: bool = False) -> tuple[Li
     mem0_context = ""
     if include_memory:
         try:
-            from src.utils.memory_manager import get_memory_manager
+            try:
+                from utils.memory_manager import get_memory_manager
+            except ImportError:
+                try:
+                    from src.utils.memory_manager import get_memory_manager
+                except ImportError:
+                    src_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                    if src_root not in sys.path:
+                        sys.path.append(src_root)
+                    from utils.memory_manager import get_memory_manager
             mm = get_memory_manager()
             mem0_context = mm.search_memory(query, limit=5)
         except Exception as e:
@@ -755,6 +823,24 @@ async def unified_query(request: UnifiedQueryRequest):
                 "For deep research, use WebSocket /api/v1/deep-research."
             ),
         )
+
+    if request.system_prompt and mode in {
+        "entities",
+        "entities+vector",
+        "dual-graph",
+        "hybrid",
+        "cascading",
+    }:
+        invalid_placeholders = _invalid_system_prompt_placeholders(request.system_prompt)
+        if invalid_placeholders:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "Invalid system_prompt placeholders",
+                    "invalid_placeholders": invalid_placeholders,
+                    "allowed_placeholders": sorted(_SYSTEM_PROMPT_ALLOWED_PLACEHOLDERS),
+                },
+            )
     print(f"DEBUG: Unified query incoming mode: {mode}")
     effective_relevance_threshold = request.relevance_threshold
     if effective_relevance_threshold == 0 and request.distance_threshold is not None:
@@ -1083,6 +1169,18 @@ async def unified_query(request: UnifiedQueryRequest):
                     },
                 }
             except Exception as e:
+                if isinstance(e, httpx.HTTPStatusError):
+                    status = e.response.status_code if e.response is not None else 500
+                    if status == 400 and request.system_prompt:
+                        try:
+                            detail_payload = e.response.json() if e.response is not None else {}
+                        except Exception:
+                            detail_payload = {"error": e.response.text if e.response is not None else str(e)}
+                        if isinstance(detail_payload, dict) and (
+                            detail_payload.get("error") == "Invalid system_prompt placeholders"
+                            or "invalid_placeholders" in detail_payload
+                        ):
+                            raise HTTPException(status_code=400, detail=detail_payload)
                 if ENABLE_FALLBACKS:
                     try:
                         fallback_payload = {

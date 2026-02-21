@@ -6,7 +6,7 @@ interface SourcesDisplayProps {
 }
 
 export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
-  const [isExpanded, setIsExpanded] = useState(sources.length <= 3);
+  const [isExpanded, setIsExpanded] = useState(true);
   const vaultName = 'Michel';
   const vaultRoot = '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel';
   const hasUnsafeScheme = (value: string) => /^(javascript|data|vbscript):/i.test(value.trim());
@@ -40,6 +40,12 @@ export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
       return `obsidian://search?vault=${encodeURIComponent(vaultName)}&query=${encodeURIComponent(filename)}`;
     }
     return null;
+  };
+
+  const safeFilename = (source: Source) => {
+    if (source.filename?.trim()) return source.filename.trim();
+    if (source.filepath?.trim()) return source.filepath.split('/').pop() || 'Unknown';
+    return 'Unknown';
   };
 
   return (
@@ -81,13 +87,13 @@ export default function SourcesDisplay({ sources }: SourcesDisplayProps) {
                         className="text-[#0A84FF] hover:text-[#6AB7FF] underline underline-offset-2"
                         title="Open in Obsidian"
                       >
-                        {source.filename}
+                        {safeFilename(source)}
                       </a>
                     );
                   })()}
                 </div>
                 <span className="text-[#0A84FF] font-mono text-xs">
-                  {source.relevance.toFixed(0)}%
+                  {(Number.isFinite(source.relevance) ? source.relevance : 50).toFixed(0)}%
                 </span>
               </div>
               {source.filepath && (

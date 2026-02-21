@@ -9,6 +9,10 @@ import os
 from typing import Any, AsyncIterator, overload, Literal
 from collections import Counter, defaultdict
 
+class SafeDict(dict):
+    def __missing__(self, key):
+        return '{' + key + '}'
+
 from lightrag.exceptions import (
     PipelineCancelledException,
     ChunkTokenLimitExceededError,
@@ -3271,10 +3275,17 @@ async def kg_query(
 
     # Build system prompt
     sys_prompt_temp = system_prompt if system_prompt else PROMPTS["rag_response"]
-    sys_prompt = sys_prompt_temp.format(
-        response_type=response_type,
-        user_prompt=user_prompt,
-        context_data=context_result.context,
+    sys_prompt = sys_prompt_temp.format_map(
+        SafeDict(
+            response_type=response_type,
+            user_prompt=user_prompt,
+            context_data=context_result.context,
+            content_data=context_result.context,
+            context=context_result.context,
+            vault_context=context_result.context,
+            query=query,
+            question=query,
+        )
     )
 
     user_query = query
@@ -4083,10 +4094,17 @@ async def _build_context_str(
     kg_context_tokens = len(tokenizer.encode(pre_kg_context))
 
     # Calculate preliminary system prompt tokens
-    pre_sys_prompt = sys_prompt_template.format(
-        context_data="",  # Empty for overhead calculation
-        response_type=response_type,
-        user_prompt=user_prompt,
+    pre_sys_prompt = sys_prompt_template.format_map(
+        SafeDict(
+            context_data="",  # Empty for overhead calculation
+            content_data="",
+            context="",
+            vault_context="",
+            response_type=response_type,
+            user_prompt=user_prompt,
+            query=query,
+            question=query,
+        )
     )
     sys_prompt_tokens = len(tokenizer.encode(pre_sys_prompt))
 
@@ -4981,10 +4999,17 @@ async def naive_query(
     )
 
     # Create a preliminary system prompt with empty content_data to calculate overhead
-    pre_sys_prompt = sys_prompt_template.format(
-        response_type=response_type,
-        user_prompt=user_prompt,
-        content_data="",  # Empty for overhead calculation
+    pre_sys_prompt = sys_prompt_template.format_map(
+        SafeDict(
+            response_type=response_type,
+            user_prompt=user_prompt,
+            content_data="",  # Empty for overhead calculation
+            context_data="",
+            context="",
+            vault_context="",
+            query=query,
+            question=query,
+        )
     )
 
     # Calculate available tokens for chunks
@@ -5065,10 +5090,17 @@ async def naive_query(
     if query_param.only_need_context and not query_param.only_need_prompt:
         return QueryResult(content=context_content, raw_data=raw_data)
 
-    sys_prompt = sys_prompt_template.format(
-        response_type=query_param.response_type,
-        user_prompt=user_prompt,
-        content_data=context_content,
+    sys_prompt = sys_prompt_template.format_map(
+        SafeDict(
+            response_type=query_param.response_type,
+            user_prompt=user_prompt,
+            content_data=context_content,
+            context_data=context_content,
+            context=context_content,
+            vault_context=context_content,
+            query=query,
+            question=query,
+        )
     )
 
     user_query = query
