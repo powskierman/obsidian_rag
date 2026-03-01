@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { getKnowledgeGraphServiceState, getServiceTone, getVectorServiceState } from '../lib/serviceStatus';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -30,6 +31,9 @@ export default function SettingsModal({ isOpen, onClose, currentModel, onModelCh
     };
 
     if (!isOpen) return null;
+
+    const vectorTone = getServiceTone(getVectorServiceState(stats?.documents ?? 0));
+    const graphTone = getServiceTone(getKnowledgeGraphServiceState(stats?.graph ?? null));
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
@@ -102,21 +106,18 @@ export default function SettingsModal({ isOpen, onClose, currentModel, onModelCh
                         <div className="bg-black/20 rounded-xl p-4 space-y-3 border border-[#2C2C2E]">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-white/60 flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${vectorTone.dotClass}`}></div>
                                     Vector DB Chunks
                                 </span>
-                                <span className="text-white font-mono font-medium">{stats?.documents ?? '0'} chunks</span>
+                                <span className={`font-mono font-medium ${vectorTone.textClass}`}>{stats?.documents ?? '0'} chunks</span>
                             </div>
 
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-white/60 flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${graphTone.dotClass}`}></div>
                                     Graph Entities
                                 </span>
-                                <span className="text-white font-mono font-medium">
-                                    {stats?.graph ? 'Online' : 'Offline'}
-                                    {/* Placeholder for specific entity count if available in future */}
-                                </span>
+                                <span className={`font-mono font-medium ${graphTone.textClass}`}>{graphTone.label}</span>
                             </div>
 
                              <div className="flex items-center justify-between text-sm">

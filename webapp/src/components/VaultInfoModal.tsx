@@ -1,4 +1,5 @@
 import { useApp } from '../context/AppContext';
+import { getServiceTone } from '../lib/serviceStatus';
 
 interface VaultInfoModalProps {
     isOpen: boolean;
@@ -7,6 +8,9 @@ interface VaultInfoModalProps {
 
 export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps) {
     const { services } = useApp();
+    const vectorTone = getServiceTone(services.vectorDB.status);
+    const lightragTone = getServiceTone(services.lightrag?.status || 'offline');
+    const knowledgeGraphTone = getServiceTone(services.knowledgeGraph.status);
 
     if (!isOpen) return null;
 
@@ -65,8 +69,8 @@ export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps)
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-white/60">Status:</span>
-                                <span className={`${services.vectorDB.chunks > 0 ? 'text-green-500' : 'text-red-500'} font-medium`}>
-                                    {services.vectorDB.chunks > 0 ? '● Online' : '● Offline'}
+                                <span className={`${vectorTone.textClass} font-medium`}>
+                                    {`● ${vectorTone.label}`}
                                 </span>
                             </div>
                         </div>
@@ -80,8 +84,8 @@ export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps)
                         </div>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                                <span className="text-white/60">Indexed Notes:</span>
-                                <span className="text-purple-400 font-semibold">~2,000</span>
+                                <span className="text-white/60">Graph Nodes:</span>
+                                <span className="text-purple-400 font-semibold">{services.lightrag?.nodes ? services.lightrag.nodes.toLocaleString() : '~2,000'}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-white/60">Graph Type:</span>
@@ -89,7 +93,7 @@ export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps)
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-white/60">Status:</span>
-                                <span className="text-green-500 font-medium">● Online</span>
+                                <span className={`${lightragTone.textClass} font-medium`}>{`● ${lightragTone.label}`}</span>
                             </div>
                         </div>
                     </div>
@@ -115,8 +119,8 @@ export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps)
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-white/60">Status:</span>
-                                <span className={`${services.knowledgeGraph.entities > 0 ? 'text-green-500' : 'text-red-500'} font-medium`}>
-                                    {services.knowledgeGraph.entities > 0 ? '● Online' : '● Offline'}
+                                <span className={`${knowledgeGraphTone.textClass} font-medium`}>
+                                    {`● ${knowledgeGraphTone.label}`}
                                 </span>
                             </div>
                         </div>

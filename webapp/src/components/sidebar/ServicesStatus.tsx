@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { api } from '../../lib/api';
+import {
+  getKnowledgeGraphServiceState,
+  getServiceTone,
+  getVectorServiceState,
+} from '../../lib/serviceStatus';
 
 export default function ServicesStatus() {
   const { services, updateServices } = useApp();
@@ -11,17 +16,21 @@ export default function ServicesStatus() {
     try {
       // Get vector DB stats
       const stats = await api.getStats();
+      const vectorStatus = getVectorServiceState(stats.documents);
+      const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
 
       // Get Ollama models
       const ollamaModels = await api.getOllamaModels();
 
       updateServices({
         vectorDB: {
-          available: stats.documents > 0,
+          available: vectorStatus === 'online',
+          status: vectorStatus,
           chunks: stats.documents,
         },
         knowledgeGraph: {
-          available: stats.graph !== null && stats.graph.graph_loaded === true,
+          available: knowledgeGraphStatus === 'online',
+          status: knowledgeGraphStatus,
           entities: stats.graph?.nodes || 0,
           relationships: stats.graph?.edges || 0,
         },
@@ -32,6 +41,19 @@ export default function ServicesStatus() {
       });
     } catch (error) {
       console.error('Failed to check services:', error);
+      updateServices({
+        vectorDB: {
+          available: false,
+          status: 'offline',
+          chunks: 0,
+        },
+        knowledgeGraph: {
+          available: false,
+          status: 'offline',
+          entities: 0,
+          relationships: 0,
+        },
+      });
     } finally {
       setIsRefreshing(false);
     }
@@ -40,6 +62,9 @@ export default function ServicesStatus() {
   useEffect(() => {
     checkServices();
   }, []);
+
+  const vectorTone = getServiceTone(services.vectorDB.status);
+  const graphTone = getServiceTone(services.knowledgeGraph.status);
 
   return (
     <div className="space-y-3">
@@ -65,7 +90,7 @@ export default function ServicesStatus() {
           <span className="text-white/60 flex items-center gap-2">
             <div
               className={`w-1.5 h-1.5 rounded-full ${
-                services.vectorDB.available ? 'bg-green-500' : 'bg-red-500'
+                vectorTone.dotClass
               }`}
             ></div>
             Vector DB
@@ -80,13 +105,13 @@ export default function ServicesStatus() {
           <span className="text-white/60 flex items-center gap-2">
             <div
               className={`w-1.5 h-1.5 rounded-full ${
-                services.knowledgeGraph.available ? 'bg-green-500' : 'bg-red-500'
+                graphTone.dotClass
               }`}
             ></div>
             Graph Service
           </span>
           <span className="text-white font-mono font-medium">
-            {services.knowledgeGraph.available ? 'Online' : 'Offline'}
+            {graphTone.label}
           </span>
         </div>
 

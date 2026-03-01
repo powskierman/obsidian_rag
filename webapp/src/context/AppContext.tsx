@@ -3,6 +3,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AppState, SearchMode, LLMProvider, SettingsState, ServicesStatus, Message, ChatHistoryItem, defaultSettings, defaultServices } from '../lib/types';
 import { api } from '../lib/api';
+import {
+  getKnowledgeGraphServiceState,
+  getLightRAGServiceState,
+  getVectorServiceState,
+} from '../lib/serviceStatus';
 
 interface AppContextType extends AppState {
   setSearchMode: (mode: SearchMode) => void;
@@ -19,6 +24,7 @@ interface AppContextType extends AppState {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 const CURRENT_SETTINGS_VERSION = 2;
+const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'mlx'];
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
@@ -147,7 +153,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     if (savedProvider) {
-      setLLMProvider(savedProvider as LLMProvider);
+      const normalizedProvider = savedProvider === 'perplexity'
+        ? 'mlx'
+        : VALID_LLM_PROVIDERS.includes(savedProvider as LLMProvider)
+          ? savedProvider as LLMProvider
+          : 'ollama';
+      setLLMProvider(normalizedProvider);
     }
 
     if (savedPrompt) {
@@ -212,16 +223,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
       try {
         const stats = await api.getStats();
         const ollamaModels = await api.getOllamaModels();
+        const vectorStatus = getVectorServiceState(stats.documents);
+        const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
+        const lightragStatus = getLightRAGServiceState(stats.lightrag);
 
         updateServices({
           vectorDB: {
-            available: stats.documents > 0,
+            available: vectorStatus === 'online',
+            status: vectorStatus,
             chunks: stats.documents,
           },
           knowledgeGraph: {
-            available: stats.graph !== null && (stats.graph.nodes > 0 || stats.graph.graph_loaded === true),
+            available: knowledgeGraphStatus === 'online',
+            status: knowledgeGraphStatus,
             entities: stats.graph?.nodes || 0,
             relationships: stats.graph?.edges || 0,
+          },
+          lightrag: {
+            available: lightragStatus === 'online',
+            status: lightragStatus,
+            nodes: stats.lightrag?.nodes || 0,
+            edges: stats.lightrag?.edges || 0,
+            indexed_notes: stats.lightrag?.indexed_notes || 0,
           },
           ollama: {
             available: ollamaModels.length > 0,
@@ -230,6 +253,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
         });
       } catch (error) {
         console.error('Failed to check services on mount:', error);
+        updateServices({
+          vectorDB: {
+            available: false,
+            status: 'offline',
+            chunks: 0,
+          },
+          knowledgeGraph: {
+            available: false,
+            status: 'offline',
+            entities: 0,
+            relationships: 0,
+          },
+          lightrag: {
+            available: false,
+            status: 'offline',
+            nodes: 0,
+            edges: 0,
+            indexed_notes: 0,
+          },
+          ollama: {
+            available: false,
+            models: [],
+          },
+        });
       }
     };
 

@@ -12,6 +12,11 @@
    curl -s http://localhost:8000/stats
    ```
 
+   Interpretation:
+   - `documents > 0`: vector service is `Online`
+   - `documents = 0`: vector service is `Empty` and reachable
+   - request failure / no response: vector service is `Offline`
+
 3. Minimal vector query:
    ```bash
    curl -s -X POST http://localhost:8000/query \
@@ -21,8 +26,9 @@
 
 ## Common Causes
 
-- **No results**: embedding database not built or path not mounted.
-- **Graph mode empty**: graph not built or graph path misconfigured.
+- **No results / UI shows Empty**: the service is reachable but the database is unpopulated, or the wrong data path is mounted.
+- **Graph mode empty**: graph file is reachable but not built, or graph path is misconfigured.
+- **UI shows Offline**: the service itself is unreachable from the webapp or gateway.
 - **Stale code**: containers not rebuilt after code changes.
 
 ## Fixes

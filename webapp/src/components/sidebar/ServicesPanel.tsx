@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { api } from '../../lib/api';
+import {
+  getKnowledgeGraphServiceState,
+  getServiceTone,
+  getVectorServiceState,
+} from '../../lib/serviceStatus';
 
 interface ServicesPanelProps {
   onClose: () => void;
@@ -15,14 +20,18 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
     try {
       const stats = await api.getStats();
       const ollamaModels = await api.getOllamaModels();
+      const vectorStatus = getVectorServiceState(stats.documents);
+      const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
 
       updateServices({
         vectorDB: {
-          available: stats.documents > 0,
+          available: vectorStatus === 'online',
+          status: vectorStatus,
           chunks: stats.documents,
         },
         knowledgeGraph: {
-          available: stats.graph !== null && stats.graph.graph_loaded === true,
+          available: knowledgeGraphStatus === 'online',
+          status: knowledgeGraphStatus,
           entities: stats.graph?.nodes || 0,
           relationships: stats.graph?.edges || 0,
         },
@@ -33,6 +42,19 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
       });
     } catch (error) {
       console.error('Failed to check services:', error);
+      updateServices({
+        vectorDB: {
+          available: false,
+          status: 'offline',
+          chunks: 0,
+        },
+        knowledgeGraph: {
+          available: false,
+          status: 'offline',
+          entities: 0,
+          relationships: 0,
+        },
+      });
     } finally {
       setIsRefreshing(false);
     }
@@ -41,6 +63,9 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
   useEffect(() => {
     checkServices();
   }, []);
+
+  const vectorTone = getServiceTone(services.vectorDB.status);
+  const graphTone = getServiceTone(services.knowledgeGraph.status);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
@@ -76,11 +101,11 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
           <div className="bg-black/20 rounded-xl p-4 border border-[#2C2C2E]">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${services.vectorDB.available ? 'bg-green-500' : 'bg-red-500'}`} />
+                <div className={`w-2 h-2 rounded-full ${vectorTone.dotClass}`} />
                 <span className="text-white font-medium">Vector DB</span>
               </div>
-              <span className={`text-xs px-2 py-1 rounded ${services.vectorDB.available ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                {services.vectorDB.available ? 'Online' : 'Offline'}
+              <span className={`text-xs px-2 py-1 rounded ${vectorTone.badgeClass}`}>
+                {vectorTone.label}
               </span>
             </div>
             <div className="text-2xl font-bold text-white font-mono">
@@ -94,14 +119,14 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
           <div className="bg-black/20 rounded-xl p-4 border border-[#2C2C2E]">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full ${services.knowledgeGraph.available ? 'bg-green-500' : 'bg-red-500'}`} />
+                <div className={`w-2 h-2 rounded-full ${graphTone.dotClass}`} />
                 <span className="text-white font-medium">Knowledge Graph</span>
               </div>
-              <span className={`text-xs px-2 py-1 rounded ${services.knowledgeGraph.available ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                {services.knowledgeGraph.available ? 'Online' : 'Offline'}
+              <span className={`text-xs px-2 py-1 rounded ${graphTone.badgeClass}`}>
+                {graphTone.label}
               </span>
             </div>
-            {services.knowledgeGraph.available ? (
+            {services.knowledgeGraph.status !== 'offline' ? (
               <div className="grid grid-cols-2 gap-3 mt-2">
                 <div>
                   <div className="text-xl font-bold text-white font-mono">

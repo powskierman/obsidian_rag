@@ -47,3 +47,16 @@ To force a full rebuild:
 ```
 
 See `Documentation/Setup/INDEXING_SCRIPTS_GUIDE.md` for options.
+
+## 6) UI Status Labels
+
+The webapp distinguishes service reachability from data population:
+
+- `Online`: the service is reachable and has non-zero indexed data.
+- `Empty`: the service is reachable but currently reports zero indexed documents or nodes.
+- `Offline`: the service could not be reached.
+
+Examples:
+
+- ChromaDB with `documents: 0` shows `Empty`, not `Offline`.
+- NetworkX with zero nodes on a reachable endpoint shows `Empty`.

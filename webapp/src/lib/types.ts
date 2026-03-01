@@ -1,4 +1,5 @@
 // Type definitions for Obsidian RAG webapp
+import { DataServiceState } from './serviceStatus';
 
 // Search modes matching backend API
 export type SearchMode =
@@ -16,7 +17,7 @@ export type SearchMode =
   | 'cascading'       // 5-Stage Waterfall
   | 'deep-thinking';  // Agentic reasoning mode
 
-export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'perplexity';
+export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'mlx';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -60,12 +61,21 @@ export interface SettingsState {
 export interface ServicesStatus {
   vectorDB: {
     available: boolean;
+    status: DataServiceState;
     chunks: number;
   };
   knowledgeGraph: {
     available: boolean;
+    status: DataServiceState;
     entities: number;
     relationships: number;
+  };
+  lightrag?: {
+    available: boolean;
+    status: DataServiceState;
+    nodes: number;
+    edges: number;
+    indexed_notes?: number;
   };
   ollama: {
     available: boolean;
@@ -107,10 +117,12 @@ export const defaultSettings: SettingsState = {
 export const defaultServices: ServicesStatus = {
   vectorDB: {
     available: false,
+    status: 'offline',
     chunks: 0,
   },
   knowledgeGraph: {
     available: false,
+    status: 'offline',
     entities: 0,
     relationships: 0,
   },
