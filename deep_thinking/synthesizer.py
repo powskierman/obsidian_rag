@@ -125,20 +125,21 @@ Finally, provide your answer in a structured, easy-to-read format."""
         Generate a comprehensive answer that:
         1. Directly addresses the original question
         2. Synthesizes findings from all research steps. You MUST INTEGRATE information from the Vault Documents if any are provided. Do not ignore the user's personal vault notes.
-        3. Cites vault sources using Obsidian link format: [[Folder/Note Name]]
-        4. Cites web sources using markdown links with the ACTUAL page title from the web results (NOT the word "Title"): [Actual Page Title](https://example.com)
+        3. Cites vault sources using Obsidian link format ONLY: [[Folder/Note Name]]. Do NOT output Vault links as URLs (e.g. no "http://...md").
+        4. Cites web sources using markdown links with the ACTUAL page title from the web results: [Actual Page Title](https://example.com).
         5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard definitions, methodologies, or external context found in the web results.
         6. If images are provided above, embed relevant ones using markdown format: ![Description](image_url)
            - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics
            - Place images in appropriate sections (e.g., under "Hardware Connection" or "Wiring Diagram")
         7. Acknowledges any gaps or uncertainties
         8. DO NOT INVENT CITATIONS. Only use the Exact Names of Vault Documents or URLs provided above. If no Web Search Results are provided, you MUST NOT output any URLs.
-        9. CRITICAL: If Vault Documents are provided in the prompt above, you MUST mention them and cite them in your response using the exact [[Document Name]] format.
+        9. CRITICAL: Never cite the section headers (e.g., do NOT output "[[Vault Documents]]" or "Web Source"). Cite the specific name of the source provided in the list (e.g. "[[Tech/ESP32/note.md]]").
+        10. If the Web Search Results section is empty, your "citations" array should ONLY contain Vault Document names. Do not hallucinate websites.
 
         Return ONLY a JSON object:
         {{
             "answer": "...",
-            "citations": ["[[Exact Document Name]]", "https://actual-url-from-web-results.com"],
+            "citations": ["[[Exact Document Name]]"],
             "confidence_score": 0.9,
             "confidence_justification": "Reasoning based closely on provided documents..."
         }}
@@ -321,6 +322,9 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 citations.append(match)
                 seen.add(match)
         for match in re.findall(r"https?://[^\s)>\"]+", raw):
+            # The AI might hallucinate a URL by prepending http:// to a Vault node. Filter out obvious fake URLs.
+            if match.endswith(".md") or match.endswith(".html"):
+                continue
             if match not in seen:
                 citations.append(match)
                 seen.add(match)
