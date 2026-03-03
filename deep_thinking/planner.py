@@ -16,24 +16,18 @@ class PlannerAgent:
         Your goal is to create a research plan that combines LOCAL vault data with EXTERNAL web context.
         
         Vault Contents:
-        - Medical notes (folders: Medical/Lymphoma/, Medical/Scans/, Medical/Treatments/)
-        - Technical projects (folders: Tech/ESP32/, Tech/HomeAssistant/)
-        - Personal logs (Daily Notes)
+        - Projects and Technical setups
+        - Personal journals, methodologies, and knowledge base files
         
         CRITICAL SEARCH STRATEGY RULES:
         1. Use "vector" or "hybrid" ONLY for searching the user's EXISTING notes and personal content
         2. Use "web" for:
-           - Official documentation (ESPHome docs, product specs, API references)
-           - Hardware specifications and datasheets
-           - Wiring diagrams and pin configurations  
-           - Latest software versions or updates
-           - Medical treatment guidelines or drug information
-           - Any "how-to" or tutorial content that isn't in the vault
-           - Product comparisons or reviews
-        
+           - Official documentation (API references, specs)
+           - External tutorials and how-to guides
+           - Real-world specifications or up-to-date guidelines
         3. If in doubt, prefer "web" over "vector" - it's better to get fresh, authoritative information
         4. For technical queries, at MINIMUM have 2 web search steps
-        5. For medical queries, ALWAYS include web search for treatment protocols/side effects
+        5. For specific deep dives, ALWAYS include web search to verify context.
         """
 
         user_prompt = f"""
@@ -43,14 +37,14 @@ class PlannerAgent:
         1. Write a clear sub-question
         2. Choose search strategy: "vector" (concepts), "graph-local" (specific entities/relationships), "graph-global" (high-level themes/summaries), "web" (external/recent info), or "hybrid"
         3. List 3-5 keywords
-        4. Suggest target folders if relevant (e.g. "Medical/", "Tech/")
+        4. Suggest target folders if relevant (e.g. "Tech/")
         5. Explain why this step is needed
         
         CRITICAL FOR VAULT SEARCHES:
         When creating "vector" or "hybrid" steps that search the user's vault, you MUST include the KEY ENTITIES from the original question in your sub-question.
         For example:
         - If the question mentions "Nextion display", your vault search should ask "What Nextion display projects exist in my vault?" NOT just "What ESP32 projects exist?"
-        - If the question mentions "R-CHOP", your vault search should ask "What are my R-CHOP treatment notes?" NOT just "What are my treatment notes?"
+        - If the question mentions "FastAPI", your vault search should ask "What are my FastAPI configurations?" NOT just "What are my configurations?"
         
         Return ONLY a JSON array of steps. Do not include markdown formatting.
         
@@ -66,23 +60,23 @@ class PlannerAgent:
           }}
         ]
 
-        Example 2 (Medical Journey - ENRICHMENT REQUIRED):
+        Example 2 (Complex Vault Synthesis):
         [
           {{
             "step_number": 1,
-            "sub_question": "Extract timeline from my lymphoma notes",
+            "sub_question": "What are my local Python scripts using Pandas?",
             "search_strategy": "vector",
-            "keywords": ["lymphoma", "timeline", "diagnosis"],
-            "target_folders": ["Medical/"],
-            "reasoning": "Building timeline from vault"
+            "keywords": ["pandas", "python", "script"],
+            "target_folders": ["Tech/"],
+            "reasoning": "Finding personal implementations"
           }},
           {{
             "step_number": 2,
-            "sub_question": "What are the standard treatments for Diffuse Large B-Cell Lymphoma?",
+            "sub_question": "What are the latest best practices for Pandas data wrangling?",
             "search_strategy": "web",
-            "keywords": ["DLBCL standard treatment", "R-CHOP side effects"],
+            "keywords": ["pandas best practices", "data wrangling patterns"],
             "target_folders": [],
-            "reasoning": "Enriching personal notes with standard medical context"
+            "reasoning": "Enriching personal scripts with modern industry standards"
           }}
         ]
         """

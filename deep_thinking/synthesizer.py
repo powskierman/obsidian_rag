@@ -44,17 +44,17 @@ class FinalAnswerGenerator:
 Your task is to answer questions by analyzing the retrieved materials and Michel's personal context.
 
 When generating your answer:
-1. Reference Michel's specific **medical timeline** (DLBCL, Yescarta, scans) when relevant.
-2. Incorporate insights from his **Obsidian notes**, citing which notes or sources you use.
-3. Maintain a **compassionate and supportive** tone for medical topics.
+1. Reference the user's specific context or timeline from their profile when relevant.
+2. Incorporate insights from their **Obsidian notes**, citing which notes or sources you use.
+3. Maintain an appropriate tone for the topic.
 4. Provide **technical depth** and precision for engineering and coding topics.
-5. Adapt to his **expert-level understanding** — avoid overexplaining known concepts.
+5. Adapt to their **expert-level understanding** — avoid overexplaining known concepts.
 6. Be **concise but thorough**, focusing on clarity and reasoning.
 7. Avoid redundant or generic phrasing.
 
 Finally, provide your answer in a structured, easy-to-read format."""
 
-    def generate(self, state: RAGState) -> Tuple[str, List[str]]:
+    def generate(self, state: RAGState) -> dict:
         """
         Synthesize final answer with Obsidian-style citations.
         """
@@ -72,9 +72,9 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 content = item.get("content", "")[:100000]
                 
                 if "http" in source and not "localhost" in source:
-                    web_docs += f"[{i+1}] WEB: {source}\nContent: {content}\n\n"
+                    web_docs += f"[{i+1}] {source}\nContent: {content}\n\n"
                 else:
-                    vault_docs += f"[{i+1}] VAULT: {source}\nContent: {content}\n\n"
+                    vault_docs += f"[{i+1}] {source}\nContent: {content}\n\n"
                     
         # Priority 2: Fallback to standard retrieved_documents (if buffer empty)
         else:
@@ -92,9 +92,15 @@ Finally, provide your answer in a structured, easy-to-read format."""
                             image_urls.append(img['url'])
                 
                 if doc.get('type') == 'web':
-                    web_docs += f"[{i+1}] WEB: {source}\nContent: {content}...\n\n"
+                    web_docs += f"[{i+1}] {source}\nContent: {content}...\n\n"
                 else:
-                    vault_docs += f"[{i+1}] VAULT: {source}\nContent: {content}...\n\n"
+                    vault_docs += f"[{i+1}] {source}\nContent: {content}...\n\n"
+
+        # DEEP THINKING DEBUG
+        print(f"DEBUG SYNTHESIZER: Vault Docs Length: {len(vault_docs)}")
+        print(f"DEBUG SYNTHESIZER: Web Docs Length: {len(web_docs)}")
+        print(f"DEBUG SYNTHESIZER: Number of Vault Docs listed: {vault_docs.count('Content:')}")
+        print(f"DEBUG SYNTHESIZER: Number of Web Docs listed: {web_docs.count('Content:')}")
 
         # Build image section for prompt
         images_section = ""
@@ -118,15 +124,16 @@ Finally, provide your answer in a structured, easy-to-read format."""
         
         Generate a comprehensive answer that:
         1. Directly addresses the original question
-        2. Synthesizes findings from all research steps
+        2. Synthesizes findings from all research steps. You MUST INTEGRATE information from the Vault Documents if any are provided. Do not ignore the user's personal vault notes.
         3. Cites vault sources using Obsidian link format: [[Folder/Note Name]]
         4. Cites web sources using markdown links with the ACTUAL page title from the web results (NOT the word "Title"): [Actual Page Title](https://example.com)
-        5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard medical definitions, treatments, or external context found in the web results, even if they are general.
+        5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard definitions, methodologies, or external context found in the web results.
         6. If images are provided above, embed relevant ones using markdown format: ![Description](image_url)
            - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics
            - Place images in appropriate sections (e.g., under "Hardware Connection" or "Wiring Diagram")
         7. Acknowledges any gaps or uncertainties
         8. DO NOT INVENT CITATIONS. Only use the Exact Names of Vault Documents or Web Search URLs provided above.
+        9. CRITICAL: If Vault Documents are provided in the prompt above, you MUST mention them and cite them in your response.
 
         Return ONLY a JSON object:
         {{
