@@ -5,15 +5,7 @@ import { DataServiceState } from './serviceStatus';
 export type SearchMode =
   // Single-source modes
   | 'vector'          // Pure vector similarity (ChromaDB)
-  | 'notes'           // Note-centric graph (NetworkX)
-  | 'entities'        // Entity-centric graph (LightRAG)
-  // Dual-source modes
-  | 'notes+vector'    // NetworkX + ChromaDB
-  | 'entities+vector' // LightRAG + ChromaDB
-  | 'dual-graph'      // NetworkX + LightRAG
-  // Ultimate hybrid
-  | 'hybrid'          // All three sources
-  // New experimental modes
+  // Agentic and pipeline modes
   | 'cascading'       // 5-Stage Waterfall
   | 'deep-thinking';  // Agentic reasoning mode
 

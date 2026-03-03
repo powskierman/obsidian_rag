@@ -10,7 +10,7 @@ Use this as the entry point for active project documentation.
    - Embedding service: `curl -s http://localhost:8000/health`
    - LightRAG service: `curl -s http://localhost:8001/health`
    - Graph service: `curl -s http://localhost:8002/health`
-4. Run a query with canonical mode names (`vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`)
+4. Run a query with canonical mode names (`vector`, `cascading`, `deep-research`)
 
 ## Core References
 - System overview: `./SYSTEM_OVERVIEW_2025.md`
@@ -42,7 +42,7 @@ Use this as the entry point for active project documentation.
 ## API Endpoints
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
-- `POST /api/v1/search`
+- `POST /api/v1/query`
 - `POST /api/v1/query`
 - WebSocket: `ws://localhost:4000/api/v1/deep-research`
 

@@ -58,119 +58,12 @@ const normalizeSource = (source: any): SearchResult => {
   };
 };
 
-const normalizeVectorSources = (
-  vectorData: any,
-  sourceType: SearchResult['sourceType'] = 'direct-excerpt'
-): SearchResult[] => {
-  if (!vectorData) return [];
 
-  if (Array.isArray(vectorData.sources) && vectorData.sources.length > 0) {
-    return vectorData.sources.map((source: any) => {
-      const normalized = normalizeSource(source);
-      return {
-        ...normalized,
-        sourceType: normalized.sourceType || sourceType,
-      };
-    });
-  }
-
-  if (vectorData.documents && vectorData.documents[0]) {
-    return vectorData.documents[0].map((doc: string, i: number) => {
-      const dist = vectorData.distances?.[0]?.[i];
-      const relevance = dist !== undefined
-        ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(Number(dist) / 2))))
-        : 50;
-
-      return {
-        filename: vectorData.metadatas?.[0]?.[i]?.filename || 'unknown',
-        filepath: vectorData.metadatas?.[0]?.[i]?.filepath || 'unknown',
-        relevance,
-        snippet: doc,
-        sourceType,
-      };
-    });
-  }
-
-  return [];
-};
-
-const normalizeTaggedSources = (
-  sources: any[],
-  sourceType: SearchResult['sourceType']
-): SearchResult[] => {
-  if (!Array.isArray(sources)) return [];
-  return sources.map((source: any) => {
-    const normalized = normalizeSource(source);
-    return {
-      ...normalized,
-      sourceType: normalized.sourceType || sourceType,
-    };
-  });
-};
-
-const isInsufficientAnswer = (answer: string | undefined): boolean => {
-  if (!answer || !answer.trim()) return true;
-  const cleaned = answer.trim().toLowerCase();
-  return [
-    'cannot provide the analysis',
-    'cannot answer',
-    'insufficient information',
-    'no relevant notes',
-    'no relevant relationships',
-    'no relevant notes or relationships',
-    'provided knowledge graph',
-    'would need:',
-    'i would need',
-    'placeholder',
-    '[unknown]',
-    'without properly labeled notes',
-    'if you can provide a clearer knowledge graph',
-  ].some((pattern) => cleaned.includes(pattern));
-};
-
-const buildCombinedAnswer = (
-  mode: string,
-  noteSources: SearchResult[],
-  entitySources: SearchResult[],
-  vectorSources: SearchResult[]
-): string => {
-  if (mode === 'notes+vector') {
-    if (noteSources.length > 0 && vectorSources.length > 0) {
-      return `Showing ${noteSources.length} linked-note context items and ${vectorSources.length} direct note excerpts below.`;
-    }
-    if (noteSources.length > 0) {
-      return `Showing ${noteSources.length} linked-note context items below.`;
-    }
-    if (vectorSources.length > 0) {
-      return `Showing ${vectorSources.length} direct note excerpts below.`;
-    }
-  }
-
-  if (mode === 'entities+vector') {
-    if (entitySources.length > 0 && vectorSources.length > 0) {
-      return `Showing ${entitySources.length} entity-context items and ${vectorSources.length} direct note excerpts below.`;
-    }
-    if (entitySources.length > 0) {
-      return `Showing ${entitySources.length} entity-context items below.`;
-    }
-    if (vectorSources.length > 0) {
-      return `Showing ${vectorSources.length} direct note excerpts below.`;
-    }
-  }
-
-  if (mode === 'dual-graph') {
-    if (noteSources.length > 0 && entitySources.length > 0) {
-      return `Showing ${noteSources.length} linked-note context items and ${entitySources.length} entity-context items below.`;
-    }
-  }
-
-  return 'No results found';
-};
 
 export const api = {
   unifiedSearch: async (
     query: string,
-    mode: 'vector' | 'notes' | 'entities' | 'notes+vector' | 'entities+vector' | 'dual-graph' | 'hybrid' | 'cascading' = 'hybrid',
+    mode: 'vector' | 'cascading' = 'cascading',
     n_results = 10,
     llm_provider = 'ollama',
     model = '',
@@ -222,92 +115,13 @@ export const api = {
 
       const data = await response.json();
 
-      // Transform the new API response to match the expected format
-      // Handle different response structures based on mode
-      if (mode === 'hybrid') {
-        const entitiesResult = data.entities?.data?.result || '';
-        const notesAnswer = data.notes?.data?.answer || '';
-        const notesSources = data.notes?.data?.sources || [];
-
-        // Flatten and format vector sources if available
-        let vectorSources: SearchResult[] = [];
-        const vectorData = data.vector?.data;
-        if (vectorData && vectorData.documents && vectorData.documents[0]) {
-          vectorSources = vectorData.documents[0].map((doc: string, i: number) => {
-            const dist = vectorData.distances[0][i];
-            // ChromaDB returns negative cosine distances (more negative = better match)
-            // Typical range: -10 (excellent) to +2 (poor)
-            // Use inverse exponential decay for better differentiation
-            const relevance = dist !== undefined
-              ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
-              : 50;
-
-            return {
-              filename: vectorData.metadatas[0][i]?.filename || 'unknown',
-              filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
-              relevance,
-              snippet: doc.substring(0, 300) + '...'
-            };
-          });
-        }
-
-        const allSources = [...notesSources, ...vectorSources];
-        const uniqueSources = allSources.filter((src, index, self) =>
-          index === self.findIndex((t) => (
-            t.filename === src.filename
-          ))
-        );
-
-        let answer = notesAnswer || entitiesResult;
-        if (!answer && vectorSources.length > 0) {
-          answer = `Knowledge graph search was inconclusive, but found ${vectorSources.length} relevant snippets via vector search.`;
-        } else if (!answer) {
-          answer = 'No results found';
-        }
-
-        return {
-          answer,
-          sources: uniqueSources,
-          extracted_entities: data.notes?.data?.extracted_entities || []
-        };
-      } else if (mode.includes('+') || mode === 'dual-graph') {
-        const noteSources = normalizeTaggedSources(data.notes?.data?.sources || [], 'linked-note');
-        const entitySources = normalizeTaggedSources(data.entities?.data?.sources || [], 'entity-context');
-        const vectorSources = normalizeVectorSources(data.vector?.data, 'direct-excerpt');
-        const topLevelSources = Array.isArray(data.sources)
-          ? data.sources.map((source: any) => normalizeSource(source))
-          : [];
-
-        let sources = topLevelSources.length > 0
-          ? topLevelSources
-          : [...noteSources, ...entitySources, ...vectorSources];
-
-        let answer = data.answer
-          || data.entities?.data?.result
-          || data.entities?.data?.answer
-          || data.notes?.data?.answer
-          || data.notes?.data?.result
-          || data.vector?.data?.answer
-          || data.vector?.data?.result
-          || 'No results found';
-
-        if (isInsufficientAnswer(answer) && sources.length > 0) {
-          answer = buildCombinedAnswer(mode, noteSources, entitySources, vectorSources);
-        }
-
-        return {
-          answer,
-          sources
-        };
-      } else if (mode === 'vector') {
+      if (mode === 'vector') {
         const vectorData = data.results || data;
         let sources: SearchResult[] = [];
 
         if (vectorData.documents && vectorData.documents[0]) {
           sources = vectorData.documents[0].map((doc: string, i: number) => {
             const dist = vectorData.distances[0][i];
-            // ChromaDB returns negative cosine distances (more negative = better match)
-            // Use inverse exponential decay for better differentiation
             const relevance = dist !== undefined
               ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
               : 50;
@@ -333,34 +147,9 @@ export const api = {
           retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent
         };
       } else {
-        // Other single-source modes (notes, entities)
-        const result = data.results || data;
-        const topSources = Array.isArray(data.sources) ? data.sources : [];
-        const nestedSources = Array.isArray(result.sources) ? result.sources : [];
-        let sources: SearchResult[] = (topSources.length > 0 ? topSources : nestedSources).map(normalizeSource);
-        let answer = data.answer || result.answer || result.result || data.result || 'No results found';
-
-        // Handle vector-fallback payloads returned under `results` for entities mode.
-        if ((!sources || sources.length === 0) && result.documents && result.documents[0]) {
-          sources = result.documents[0].map((doc: string, i: number) => {
-            const dist = result.distances?.[0]?.[i];
-            const relevance = dist !== undefined
-              ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
-              : 50;
-            return {
-              filename: result.metadatas?.[0]?.[i]?.filename || 'unknown',
-              filepath: result.metadatas?.[0]?.[i]?.filepath || 'unknown',
-              relevance,
-              snippet: doc
-            };
-          });
-          answer = `Found ${sources.length} matching snippets in your vault.`;
-        }
-
         return {
-          answer,
-          sources,
-          retrievalIntent: data.retrieval_intent || result.retrieval_intent
+          answer: 'Unsupported mode.',
+          sources: []
         };
       }
     } catch (error) {

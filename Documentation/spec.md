@@ -39,7 +39,7 @@ and deep research workflows.
   - `GET /api/v1/stats`
   - WebSocket deep research at `ws://localhost:4000/api/v1/deep-research`.
 - The gateway shall support search modes:
-  - `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`.
+  - `vector`, `cascading`, `deep-research`.
 - The system shall support incremental indexing for vector and graph data stores.
 - The system shall support explicit full reindexing of vector, NetworkX, and LightRAG
   stores when requested.

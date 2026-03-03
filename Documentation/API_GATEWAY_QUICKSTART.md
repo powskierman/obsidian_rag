@@ -20,7 +20,7 @@ curl -s -X POST http://localhost:4000/api/v1/query \
 ## Common Request Fields
 
 - `query` (required)
-- `mode`: `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`
+- `mode`: `vector`, `cascading`, `deep-research`
 - `max_results`: max sources (vector/hybrid)
 - `llm_provider`: `ollama`, `claude`, `gemini`, `gpt-oss`, `kimi`, `openrouter`, `chatgpt`, `perplexity`
 - `web_search`: boolean (requires Tavily API key)

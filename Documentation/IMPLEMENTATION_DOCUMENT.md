@@ -5,9 +5,9 @@
 
 ## 0) Constitution Alignment Requirements (Authoritative)
 - Respect fixed service boundaries and ports: ChromaDB `8000`, LightRAG `8001`, NetworkX `8002`, API Gateway `4000`, Streamlit `8501`.
-- Route client traffic through API Gateway public interfaces (`/api/v1/search`, `/api/v1/search/stream`, `/api/v1/query`, `/api/v1/health`, `/api/v1/stats`, deep-research WebSocket).
+- Route client traffic through API Gateway public interfaces (`/api/v1/query`, `/api/v1/query`, `/api/v1/query`, `/api/v1/health`, `/api/v1/stats`, deep-research WebSocket).
 - Treat `POST http://localhost:8002/query_stream` as internal-only and deprecated for direct client use.
-- Preserve supported search modes: `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`, and deep-research.
+- Preserve supported search modes: `vector`, `cascading`, `deep-research`, and deep-research.
 - Keep indexing incremental by default; graph and vector rebuilds must remain explicit and independently executable.
 - Enforce local-first privacy: generated data stores stay local and out of Git; logs must not expose private vault content.
 - Follow Spec-Driven Development artifacts (spec, plan, tasks) and update docs for workflow/API changes.
@@ -184,7 +184,7 @@
 
 ## 6) Acceptance Criteria
 1. **Constitutional audit pass**: `python Scripts/debug/audit_search_modes.py` reports `PASS`.
-2. **Source coverage**: Non-chat retrieval modes return non-zero sources (`vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`).
+2. **Source coverage**: Non-chat retrieval modes return non-zero sources (`vector`, `cascading`, `deep-research`).
 3. **Latency targets**:
    - Vector `< 1s`
    - Graph (`notes`, `entities`) `< 5s`

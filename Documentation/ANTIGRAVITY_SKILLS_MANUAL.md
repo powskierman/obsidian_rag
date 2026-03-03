@@ -54,7 +54,7 @@ Antigravity Skills are modular "capability packs" that allow agents to perform c
 - **How to Use**:
   1.  Ensure Docker is up: `docker compose ps`
   2.  Run `pytest tests/integration/`
-  3.  Run a manual `curl` to `localhost:4000/api/v1/search`.
+  3.  Run a manual `curl` to `localhost:4000/api/v1/query`.
 - **Example in `obsidian_rag`**:
   - *Scenario*: You changed the `GraphService` response format.
   - *Action*: Run integration tests to ensure the Frontend doesn't crash on the new JSON structure.

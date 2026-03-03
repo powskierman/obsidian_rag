@@ -9,8 +9,8 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 ## Key Endpoints
 
 - `POST /api/v1/query`
-- `POST /api/v1/search`
-- `POST /api/v1/search/stream` (SSE streaming proxy)
+- `POST /api/v1/query`
+- `POST /api/v1/query` (SSE streaming proxy)
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
 
@@ -19,7 +19,7 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 ```json
 {
   "query": "...",
-  "mode": "vector|notes|entities|notes+vector|entities+vector|dual-graph|hybrid|cascading",
+  "mode": "vector|cascading|deep-research",
   "max_results": 10,
   "llm_provider": "ollama|claude|gemini|gpt-oss|kimi|openrouter|chatgpt|perplexity",
   "relevance_threshold": 75,
@@ -35,7 +35,7 @@ Provider note:
 - OpenRouter model choice should be passed via `model` (request) or env defaults (`GRAPH_MODEL`, `LIGHTRAG_MODEL`).
 
 Streaming behavior:
-- `POST /api/v1/search/stream` returns `text/event-stream` SSE chunks.
+- `POST /api/v1/query` returns `text/event-stream` SSE chunks.
 - Streaming currently supports `vector`, `notes`/`graph`, and `hybrid` modes.
 - The underlying Graph Service endpoint (`POST /query_stream`) is internal-only/deprecated for direct client traffic.
 

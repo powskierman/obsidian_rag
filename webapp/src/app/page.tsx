@@ -181,7 +181,7 @@ export default function Home() {
 
             } else {
                 // Standard Unified Search (HTTP)
-                const backendMode = searchMode === 'deep-thinking' ? 'hybrid' : searchMode;
+                const backendMode = searchMode === 'deep-thinking' ? 'cascading' : searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
                 const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx' ? settings.model : '';
@@ -409,21 +409,9 @@ export default function Home() {
                                                             onChange={(e) => setSearchMode(e.target.value as any)}
                                                             className="bg-accent-gold text-black px-4 py-2 rounded-lg text-xs font-medium shadow-lg shadow-yellow-500/20 border-none focus:ring-2 focus:ring-yellow-500/50 cursor-pointer"
                                                         >
-                                                            <optgroup label="🎯 Single Source">
-                                                                <option value="vector">Vector (ChromaDB)</option>
-                                                                <option value="notes">Notes (NetworkX)</option>
-                                                                <option value="entities">Entities (LightRAG)</option>
-                                                            </optgroup>
-                                                            <optgroup label="🔗 Dual Source">
-                                                                <option value="notes+vector">Notes + Vector</option>
-                                                                <option value="entities+vector">Entities + Vector</option>
-                                                                <option value="dual-graph">Dual Graph</option>
-                                                            </optgroup>
-                                                            <optgroup label="⚡ Ultimate">
-                                                                <option value="hybrid">Hybrid (All 3)</option>
-                                                                <option value="cascading">Cascading (Waterfall)</option>
-                                                                <option value="deep-thinking">Deep Thinking (Agentic)</option>
-                                                            </optgroup>
+                                                            <option value="vector">Vector (ChromaDB)</option>
+                                                            <option value="cascading">Cascading (Waterfall)</option>
+                                                            <option value="deep-thinking">Deep Thinking (Agentic)</option>
                                                         </select>
                                                     </div>
                                                 </div>

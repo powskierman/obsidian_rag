@@ -8,25 +8,9 @@ interface SearchModePanelProps {
 
 const searchModeGroups = [
   {
-    title: 'Single Source',
+    title: 'Available Modes',
     modes: [
       { id: 'vector' as SearchMode, label: 'Vector', description: 'ChromaDB semantic search', icon: '🔍' },
-      { id: 'notes' as SearchMode, label: 'Notes', description: 'NetworkX note graph', icon: '🧩' },
-      { id: 'entities' as SearchMode, label: 'Entities', description: 'LightRAG entity graph', icon: '🧠' }
-    ]
-  },
-  {
-    title: 'Dual Source',
-    modes: [
-      { id: 'notes+vector' as SearchMode, label: 'Notes + Vector', description: 'NetworkX + ChromaDB', icon: '🔗' },
-      { id: 'entities+vector' as SearchMode, label: 'Entities + Vector', description: 'LightRAG + ChromaDB', icon: '🧬' },
-      { id: 'dual-graph' as SearchMode, label: 'Dual Graph', description: 'NetworkX + LightRAG', icon: '🧠' }
-    ]
-  },
-  {
-    title: 'Ultimate',
-    modes: [
-      { id: 'hybrid' as SearchMode, label: 'Hybrid', description: 'All three sources', icon: '⚡' },
       { id: 'cascading' as SearchMode, label: 'Cascading', description: 'Waterfall retrieval', icon: '🌊' },
       { id: 'deep-thinking' as SearchMode, label: 'Deep Thinking', description: 'Agentic reasoning', icon: '🧠' }
     ]
@@ -68,11 +52,10 @@ export default function SearchModePanel({ currentMode, onSelect, onClose }: Sear
               {group.modes.map((mode) => (
                 <label
                   key={mode.id}
-                  className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
-                    currentMode === mode.id
+                  className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${currentMode === mode.id
                       ? 'bg-[#0A84FF]/10 border-[#0A84FF]'
                       : 'bg-[#1C1C1E] border-[#2C2C2E] hover:border-white/20'
-                  }`}
+                    }`}
                 >
                   <input
                     type="radio"

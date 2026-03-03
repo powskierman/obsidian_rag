@@ -17,7 +17,7 @@ Obsidian RAG is a local-first retrieval system for a personal Obsidian vault. It
 ## Scope
 In scope:
 - Local services: embedding, NetworkX graph, LightRAG graph, API gateway, Streamlit UI, and WebApp.
-- Search modes: `vector`, `notes`, `entities`, `notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`, and deep-research WebSocket.
+- Search modes: `vector`, `cascading`, `deep-research`, and deep-research WebSocket.
 - Incremental indexing and explicit rebuild workflows.
 - MCP integration and Docker-based local deployment.
 
@@ -49,8 +49,8 @@ Work is driven by Spec Kit artifacts (spec, plan, tasks). Documentation updates 
 Changes must satisfy functional and performance gates defined in this constitution before being considered done.
 
 ## Public Interfaces (API Gateway)
-- `POST /api/v1/search`
-- `POST /api/v1/search/stream` (SSE `text/event-stream`)
+- `POST /api/v1/query`
+- `POST /api/v1/query` (SSE `text/event-stream`)
 - `POST /api/v1/query`
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
@@ -62,7 +62,7 @@ Compatibility aliases:
 - `lightrag` -> `entities`
 
 Internal-only compatibility endpoint:
-- `POST http://localhost:8002/query_stream` is internal and deprecated for direct client traffic. Clients should use `POST /api/v1/search/stream`.
+- `POST http://localhost:8002/query_stream` is internal and deprecated for direct client traffic. Clients should use `POST /api/v1/query`.
 
 ## Data and Indexing Principles
 - Primary stores:

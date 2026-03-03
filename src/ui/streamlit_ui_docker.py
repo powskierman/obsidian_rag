@@ -46,12 +46,12 @@ with st.sidebar:
     st.subheader("🔍 Search Mode")
     search_mode = st.radio(
         "Choose search method:",
-        ["vector", "graph", "hybrid"],
-        index=2,
+        ["vector", "cascading", "deep-research"],
+        index=1,
         help="""
         - **vector**: Fast semantic search 🔍
-        - **graph**: Knowledge graph reasoning 🧠
-        - **hybrid**: Graph-guided vector search 🔗
+        - **cascading**: Fast Vector + Graph reasoning 🌊
+        - **deep-research**: Autonomous Agent 🧠
         """
     )
     st.session_state.search_mode = search_mode
@@ -69,10 +69,6 @@ with st.sidebar:
     st.session_state.llm_provider = llm_choice.lower()
     
     year = 2024
-    
-    # Deep Thinking Toggle (Moved)
-    deep_thinking = st.checkbox("🧠 Deep Thinking", value=False, 
-                                help="Enable specific deep reasoning agent (overrides Search Mode)")
     
     enhanced_search = st.checkbox("Enhanced Search", value=False, 
                                    help="Add LLM Knowledge and Web Search sections to standard results")
@@ -134,10 +130,10 @@ with st.sidebar:
 st.title("💬 Chat with Your Knowledge Base")
 
 # Indicator
-if deep_thinking:
+if search_mode == "deep-research":
     st.caption("🚀 Mode: **Deep Thinking Agent** (WebSocket)")
 else:
-    mode_emoji = {'vector': '🔍', 'graph': '🧠', 'hybrid': '🔗'}
+    mode_emoji = {'vector': '🔍', 'cascading': '🌊'}
     st.caption(f"{mode_emoji.get(search_mode, '🔍')} Mode: **{search_mode}**")
 
 # Display chat history
@@ -222,7 +218,7 @@ if prompt := st.chat_input("Ask about your notes..."):
     with st.chat_message("assistant"):
         
         # Branch 1: Deep Thinking (WebSocket)
-        if deep_thinking:
+        if search_mode == "deep-research":
             st.markdown("🤔 **Deep Thinking Agent Active**")
             
             # Use an empty placeholder for dynamic status updates
@@ -276,7 +272,7 @@ if prompt := st.chat_input("Ask about your notes..."):
                     }
                     
                     response = requests.post(
-                        f"{API_GATEWAY_URL}/api/v1/search",
+                        f"{API_GATEWAY_URL}/api/v1/query",
                         json=payload,
                         timeout=180
                     )
