@@ -100,7 +100,18 @@ export default function Home() {
                                         };
                                     }
 
-                                    // Handle standard markdown-ish links [Note Name]
+                                    // Handle standard markdown links [Link Text](URL)
+                                    const mdLinkMatch = citStr.match(/\[(.*?)\]\((.*?)\)/);
+                                    if (mdLinkMatch) {
+                                        return {
+                                            filename: mdLinkMatch[1],
+                                            filepath: mdLinkMatch[2],
+                                            relevance: 90,
+                                            snippet: 'Retrieved during research'
+                                        };
+                                    }
+
+                                    // Handle bracketed text that isn't a full markdown link [Note Name]
                                     if (citStr.startsWith('[') && citStr.endsWith(']')) {
                                         const inner = citStr.substring(1, citStr.length - 1);
                                         return {
