@@ -9,7 +9,13 @@ import os
 import re
 import requests
 import json
-from networkx_graph_builder import GraphBuilder, GraphQuerier
+from networkx_graph_builder import (
+    GraphBuilder,
+    GraphQuerier,
+    graph_storage_stats,
+    is_structural_graph,
+    select_graph_path,
+)
 import logging
 from openai import OpenAI
 import threading
@@ -137,6 +143,8 @@ def _default_model_for_provider(provider: str, streaming: bool = False) -> str:
         return _default_openrouter_model()
     if provider == "chatgpt":
         return os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    if provider == "mlx":
+        return os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or os.getenv("LLM_MODEL") or "LiquidAI/LFM2-24B-A2B-MLX-4bit"
     return "llama2" if streaming else "llama3.2"
 def extract_entities_from_graph(graph_text: str) -> list:
     """Extract key entities from graph response text."""
@@ -449,6 +457,30 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
         response = client.chat.completions.create(timeout=request_timeout, **request_payload)
         return response.choices[0].message.content
 
+    elif provider == "mlx":
+        api_key = os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
+        base_url = os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")
+
+        if not model:
+            model = _default_model_for_provider("mlx", streaming=False)
+
+        client = OpenAI(
+            base_url=base_url,
+            api_key=api_key,
+        )
+
+        request_timeout = float(os.getenv("OPENAI_TIMEOUT", "60"))
+        response = client.chat.completions.create(
+            timeout=request_timeout,
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_query}
+            ],
+            temperature=temperature
+        )
+        return response.choices[0].message.content
+
     elif provider == "kimi":
         # Use OpenRouter for Kimi
         api_key = os.getenv("OPENROUTER_API_KEY")
@@ -559,6 +591,11 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
             if delta:
                 yield delta
     elif provider == "chatgpt":
+        response_text = call_llm(provider, model, system_prompt, user_query, temperature)
+        if response_text:
+            yield response_text
+
+    elif provider == "mlx":
         response_text = call_llm(provider, model, system_prompt, user_query, temperature)
         if response_text:
             yield response_text
@@ -693,40 +730,55 @@ def initialize_graph(graph_path: str = None):
         # If no explicit path provided, resolve from env with centralized data-dir fallback.
         if graph_path is None:
             graph_path = os.environ.get('GRAPH_PATH')
-            if not graph_path:
-                data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
-                if data_dir:
-                    graph_path = str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl')
-                else:
-                    graph_path = '/app/graph_data/knowledge_graph_full.pkl'
-        
-        # Try multiple possible locations
-        possible_paths = [
-            graph_path,
-            '/app/graph_data/knowledge_graph_full.pkl',
-            '/app/graph_data/knowledge_graph_test.pkl',
-            '/app/knowledge_graph_full.pkl',
-            '/app/knowledge_graph_test.pkl'
-        ]
+
+        possible_paths = []
+        if graph_path:
+            possible_paths.append(graph_path)
+
         data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
         if data_dir:
             possible_paths.extend([
+                str(Path(data_dir) / 'graph_data'),
                 str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl'),
+                str(Path(data_dir) / 'graph_data' / 'knowledge_graph.pkl'),
                 str(Path(data_dir) / 'graph_data' / 'knowledge_graph_test.pkl'),
                 str(Path(data_dir) / 'knowledge_graph_full.pkl'),
+                str(Path(data_dir) / 'knowledge_graph.pkl'),
             ])
-        
-        graph_file = None
-        for path in possible_paths:
-            if os.path.exists(path):
-                graph_file = path
-                break
-        
+
+        possible_paths.extend([
+            '/app/graph_data',
+            '/app/graph_data/knowledge_graph_full.pkl',
+            '/app/graph_data/knowledge_graph.pkl',
+            '/app/graph_data/knowledge_graph_test.pkl',
+            '/app/knowledge_graph_full.pkl',
+            '/app/knowledge_graph.pkl',
+            '/app/knowledge_graph_test.pkl',
+        ])
+
+        graph_file = select_graph_path(possible_paths)
+
         if graph_file:
-            builder.load_graph(graph_file)
+            builder.load_graph(str(graph_file))
+            stats = graph_storage_stats(builder.graph)
+            structural = is_structural_graph(builder.graph)
+            if not structural:
+                logger.warning(
+                    "Loaded legacy/non-structural graph from %s (tuple_nodes=%s, string_nodes=%s). "
+                    "Notes mode may be noisy until the graph is rebuilt.",
+                    graph_file,
+                    stats.get("tuple_nodes", 0),
+                    stats.get("string_nodes", 0),
+                )
             querier = GraphQuerier(builder, api_key=api_key)
             graph_loaded = True
-            logger.info(f"Graph loaded from {graph_file}: {builder.graph.number_of_nodes()} nodes, {builder.graph.number_of_edges()} edges")
+            logger.info(
+                "Graph loaded from %s: %s nodes, %s edges (structural=%s)",
+                graph_file,
+                builder.graph.number_of_nodes(),
+                builder.graph.number_of_edges(),
+                structural,
+            )
             return True
         else:
             logger.warning(f"Graph file not found. Tried: {possible_paths}")
@@ -924,7 +976,11 @@ def query_graph():
             graph_answer, context_nodes = querier.query_with_llm(
                 user_query,
                 max_entities=max_entities,
-                custom_system_prompt=custom_system_prompt
+                custom_system_prompt=custom_system_prompt,
+                llm_provider=llm_provider,
+                llm_model=model,
+                temperature=temperature,
+                llm_caller=call_llm,
             )
             logger.info(f"Graph Answer (first 500 chars): {graph_answer[:500]}")
 
@@ -968,6 +1024,14 @@ def query_graph():
             
             entities = list(normalized_map.values())
             logger.info(f"Extracted {len(entities)} verified graph entities for visualization (filtered from {len(raw_entities)})")
+            retrieval_debug = getattr(querier, "last_retrieval_debug", {}) or {}
+            path_source_files = {
+                str(node.get("path", "") or "")
+                for path in retrieval_debug.get("paths", [])
+                for node in path.get("nodes", [])
+                if str(node.get("kind", "") or "").lower() in {"note", "pdf"}
+                and str(node.get("path", "") or "").strip()
+            }
 
             # Build base response
             base_response = {
@@ -976,6 +1040,11 @@ def query_graph():
                 'mode': mode,
                 'extracted_entities': entities
             }
+            if retrieval_debug.get("intent") == "connection" and retrieval_debug.get("paths"):
+                base_response["paths"] = retrieval_debug.get("paths", [])
+                base_response["retrieval_intent"] = "connection"
+            elif retrieval_debug.get("intent"):
+                base_response["retrieval_intent"] = retrieval_debug.get("intent")
 
             # Pre-populate sources from graph context nodes as initial fallback
             query_terms = {t for t in re.split(r"\W+", user_query.lower()) if len(t) > 2}
@@ -1017,6 +1086,14 @@ def query_graph():
                     
                 node_props = node.get('properties', {})
                 entity_name = node.get('entity', '')
+                retrieval_score = float(node_props.get('retrieval_score', 0.0) or 0.0)
+                retrieval_depth = int(node_props.get('retrieval_depth', 9) or 9)
+                retrieval_path_hit = bool(node_props.get('retrieval_path_hit', False))
+                retrieval_seed_hits = int(node_props.get('retrieval_seed_hits', 0) or 0)
+                retrieval_intent = str(node_props.get('retrieval_intent', '') or '').strip().lower()
+                retrieval_node_kind = str(node_props.get('retrieval_node_kind', '') or '').strip().lower()
+                timeline_date = str(node_props.get('timeline_date', '') or '').strip()
+                node_path = str(node_props.get('path', '') or '').strip()
                 entity_text = f"{entity_name} {node_props.get('description', '')}".lower()
                 entity_text_norm = normalize_text(entity_text)
                 match_terms = [
@@ -1035,9 +1112,9 @@ def query_graph():
                             if count_term_matches(query_terms, fname) > 0:
                                 filename_match = True
                                 break
-                        if not filename_match:
+                        if not filename_match and not retrieval_path_hit and not (retrieval_intent == "timeline" and timeline_date):
                             continue
-                        match_strength = 1
+                        match_strength = 1 if (filename_match or retrieval_path_hit or timeline_date) else 0
                 # Our GraphBuilder adds 'sources' list to properties
                 node_sources = node_props.get('sources', [])
                 
@@ -1059,9 +1136,27 @@ def query_graph():
                     if fname not in seen_source_files:
                         seen_source_files.add(fname)
                         filename_match_count = count_term_matches(query_terms, fname_lower)
+                        direct_path_source = bool(
+                            retrieval_path_hit
+                            and retrieval_node_kind in {"note", "pdf"}
+                            and (
+                                (node_path and node_path == fname)
+                                or fname in path_source_files
+                            )
+                        )
                         if not is_summary_query and term_count >= 2:
                             if match_strength < 2 and filename_match_count < 2:
-                                if not (match_strength == 1 and filename_match_count >= 1 and term_count <= 3):
+                                allow_path_exception = retrieval_path_hit and retrieval_seed_hits >= 2
+                                allow_timeline_exception = (
+                                    retrieval_intent == "timeline"
+                                    and bool(timeline_date)
+                                    and filename_match_count >= 1
+                                )
+                                if not (
+                                    allow_path_exception
+                                    or allow_timeline_exception
+                                    or (match_strength == 1 and filename_match_count >= 1 and term_count <= 3)
+                                ):
                                     continue
                         
                         # Calculate dynamic relevance
@@ -1089,12 +1184,32 @@ def query_graph():
                         coverage = effective_match_strength / term_count_safe
                         base_rel = 55.0 + (coverage * 25.0)
                         entity_match_bonus = 5.0 if entity_match else 0.0
+                        graph_rank_bonus = min(retrieval_score * 0.45, 16.0)
+                        path_bonus = 8.0 if retrieval_path_hit else 0.0
+                        direct_path_bonus = 6.0 if direct_path_source else 0.0
+                        seed_bonus = min(max(retrieval_seed_hits - 1, 0) * 1.5, 4.5)
+                        depth_bonus = max(0.0, 4.0 - float(retrieval_depth))
+                        timeline_bonus = 4.0 if retrieval_intent == "timeline" and timeline_date else 0.0
                         relevance = min(
                             95.0,
-                            base_rel + (importance_val * 1.5) + keyword_boost + entity_match_bonus
+                            base_rel
+                            + (importance_val * 1.5)
+                            + keyword_boost
+                            + entity_match_bonus
+                            + graph_rank_bonus
+                            + path_bonus
+                            + direct_path_bonus
+                            + seed_bonus
+                            + depth_bonus
+                            + timeline_bonus
                         )
                         if coverage < 0.5:
-                            relevance = min(relevance, 78.0)
+                            if retrieval_intent == "connection" and retrieval_path_hit:
+                                relevance = max(relevance, 84.0 if direct_path_source else 80.0)
+                            elif retrieval_intent == "connection":
+                                relevance = min(relevance, 72.0)
+                            else:
+                                relevance = min(relevance, 78.0)
                         if hardware_query and any(marker in fname_lower for marker in ai_folder_markers):
                             relevance -= 12.0
                         if not query_has_moc and term_in_text("moc", fname_lower, fname_norm):
@@ -1106,26 +1221,61 @@ def query_graph():
                         if not query_has_integration and term_in_text("integration", fname_lower, fname_norm):
                             relevance -= 4.0
                         relevance = max(0.0, relevance)
+
+                        snippet_parts = []
+                        if retrieval_intent == "connection" and retrieval_path_hit:
+                            if direct_path_source:
+                                snippet_parts.append(
+                                    f"On explicit graph path. depth={retrieval_depth}, seed_hits={retrieval_seed_hits}."
+                                )
+                            else:
+                                snippet_parts.append(
+                                    f"Connected via explicit graph path through {node.get('entity', 'graph context')}."
+                                )
+                        elif retrieval_intent == "timeline" and timeline_date:
+                            snippet_parts.append(f"Timeline note dated {timeline_date}.")
+                        else:
+                            snippet_parts.append(f"Context: {node['entity']} mentioned.")
+
+                        description = str(node_props.get('description', '') or '').strip()
+                        if description:
+                            snippet_parts.append(description)
                         
                         graph_sources.append({
                             'filename': fname,
                             'filepath': fname,
                             'relevance': relevance,
-                            'snippet': f"Context: {node['entity']} mentioned. {node_props.get('description', '')}",
-                            'match_strength': effective_match_strength
+                            'snippet': " ".join(part for part in snippet_parts if part).strip(),
+                            'match_strength': effective_match_strength,
+                            'path_source': direct_path_source,
+                            'path_hit': retrieval_path_hit,
                         })
                         total_source_count += 1
                         current_node_sources += 1
             
             if graph_sources and not is_summary_query:
                 graph_sources.sort(
-                    key=lambda x: (x.get('match_strength', 0), x['relevance']),
+                    key=lambda x: (
+                        x.get('path_source', False),
+                        x.get('path_hit', False),
+                        x.get('match_strength', 0),
+                        x['relevance'],
+                    ),
                     reverse=True
                 )
+                if retrieval_debug.get("intent") == "connection":
+                    explicit_connection_sources = [
+                        source for source in graph_sources
+                        if source.get('path_hit', False)
+                    ]
+                    if explicit_connection_sources:
+                        graph_sources = explicit_connection_sources
                 graph_sources = graph_sources[:MAX_GRAPH_SOURCES]
 
             for source in graph_sources:
                 source.pop('match_strength', None)
+                source.pop('path_source', None)
+                source.pop('path_hit', None)
 
             base_response['sources'] = graph_sources
 
@@ -1529,7 +1679,14 @@ def query_stream():
 
                     # For graph mode, we can't stream the initial query result
                     # but we can send it in chunks
-                    graph_answer, _ = querier.query_with_llm(user_query, max_entities=20)
+                    graph_answer, _ = querier.query_with_llm(
+                        user_query,
+                        max_entities=20,
+                        llm_provider=llm_provider,
+                        llm_model=model,
+                        temperature=temperature,
+                        llm_caller=call_llm,
+                    )
 
                     yield f"data: {json.dumps({'type': 'start'})}\n\n"
 
@@ -1548,7 +1705,14 @@ def query_stream():
                         return
 
                     # Get graph answer
-                    graph_answer, _ = querier.query_with_llm(user_query, max_entities=20)
+                    graph_answer, _ = querier.query_with_llm(
+                        user_query,
+                        max_entities=20,
+                        llm_provider=llm_provider,
+                        llm_model=model,
+                        temperature=temperature,
+                        llm_caller=call_llm,
+                    )
 
                     # Use provided entities or fallback to extracting from graph
                     entities = provided_entities if provided_entities is not None else extract_entities_from_graph(graph_answer)

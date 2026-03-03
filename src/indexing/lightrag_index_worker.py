@@ -276,7 +276,7 @@ async def _index_one(payload: dict) -> dict:
         llm_model_name=llm_model_name,
         llm_model_kwargs=llm_kwargs,
         embedding_func=_build_embedding_func(
-            os.getenv("EMBED_MODEL", "nomic-embed-text"),
+            os.getenv("LIGHTRAG_EMBED_MODEL", os.getenv("EMBED_MODEL", "nomic-embed-text")),
             os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434"),
         ),
         cosine_threshold=0.6,

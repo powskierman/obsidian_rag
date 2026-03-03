@@ -23,6 +23,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   sources?: Source[];
+  retrievalIntent?: string;
   enhancedSearch?: EnhancedSearchData;
   queryId?: string;
   rating?: number;
@@ -34,6 +35,7 @@ export interface Source {
   filepath: string;
   relevance: number;
   snippet: string;
+  sourceType?: 'linked-note' | 'direct-excerpt' | 'entity-context';
 }
 
 export interface EnhancedSearchData {

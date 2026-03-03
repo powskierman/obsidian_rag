@@ -54,7 +54,7 @@ WORKING_DIR = os.getenv("LIGHTRAG_DIR", "./lightrag_db")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:32b")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
-EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
+EMBED_MODEL = os.getenv("LIGHTRAG_EMBED_MODEL", os.getenv("EMBED_MODEL", "nomic-embed-text"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
@@ -66,7 +66,7 @@ LIGHTRAG_MODEL = (
 )
 LMSTUDIO_BASE_URL = os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1")
 LMSTUDIO_API_KEY = os.getenv("LMSTUDIO_API_KEY", "lmstudio")
-MLX_BASE_URL = os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")
+MLX_BASE_URL = os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")
 MLX_API_KEY = os.getenv("MLX_API_KEY", "mlx")
 MLX_MODEL = os.getenv("MLX_MODEL")
 LLM_MODEL_PATH = os.getenv("LLM_MODEL_PATH")
@@ -167,6 +167,7 @@ init_error = None
 storages_ready = False
 _chunks_cache = {"mtime": None, "data": None}
 _lexical_index_cache = {"mtime": None, "entries": None, "inverted": None}
+_mlx_models_cache: dict[str, tuple[float, list[str]]] = {}
 index_progress = {
     "status": "idle",
     "total_files": 0,
@@ -942,6 +943,41 @@ META_SOURCE_HINTS = (
     "checklist",
 )
 
+META_TITLE_MARKERS = (
+    "moc",
+    "map of content",
+    "skills",
+    "skill",
+    "commands",
+    "command",
+    "checklist",
+    "template",
+    "playbook",
+    "runbook",
+    "implementation",
+    "execution complete",
+    "overview",
+    "guide",
+    "test",
+)
+
+PRIMARY_EVIDENCE_CUES = (
+    "findings",
+    "impression",
+    "assessment",
+    "compared to",
+    "comparison studies",
+    "interval development",
+    "increased",
+    "decreased",
+    "stable",
+    "resolved",
+    "measure",
+    "measures",
+    "result",
+    "results",
+)
+
 GENERIC_QUERY_TERMS = {
     "effect",
     "effects",
@@ -1457,6 +1493,68 @@ def _probe_openai_compatible_models(base_url: str, api_key: str, timeout_seconds
         return False, f"HTTP {e.code} from {models_url}"
     except Exception as e:
         return False, f"{type(e).__name__}: {e}"
+
+
+def _normalize_mlx_model_name(model_name: str) -> str:
+    lowered = (model_name or "").strip().lower()
+    lowered = re.sub(r"-(mlx-)?4bit$", "", lowered)
+    return re.sub(r"[^a-z0-9]+", "", lowered)
+
+
+def _list_mlx_models(base_url: str, api_key: str, force_refresh: bool = False) -> list[str]:
+    cache_key = (base_url or "").rstrip("/")
+    now = time.time()
+    cached = _mlx_models_cache.get(cache_key)
+    if cached and not force_refresh and (now - cached[0]) < 60:
+        return cached[1]
+
+    base = cache_key
+    models_url = f"{base}/models"
+    headers = {"Accept": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    req = urlrequest.Request(models_url, headers=headers, method="GET")
+    with urlrequest.urlopen(req, timeout=5) as resp:
+        payload = json.loads(resp.read().decode("utf-8"))
+
+    models = [
+        item.get("id", "").strip()
+        for item in payload.get("data", [])
+        if isinstance(item, dict) and item.get("id")
+    ]
+    _mlx_models_cache[cache_key] = (now, models)
+    return models
+
+
+def _resolve_mlx_model_name(requested_model: str | None, base_url: str, api_key: str) -> str:
+    preferred_model = (requested_model or "LiquidAI/LFM2-24B-A2B-MLX-4bit").strip()
+    try:
+        available_models = _list_mlx_models(base_url, api_key)
+    except Exception as exc:
+        logger.warning("Failed to list MLX models from %s: %s", base_url, exc)
+        return preferred_model
+
+    if not available_models:
+        return preferred_model
+    if preferred_model in available_models:
+        return preferred_model
+
+    preferred_normalized = _normalize_mlx_model_name(preferred_model)
+    for candidate in available_models:
+        if _normalize_mlx_model_name(candidate) == preferred_normalized:
+            logger.warning("Resolved MLX model alias '%s' -> '%s'", preferred_model, candidate)
+            return candidate
+
+    preferred_basename = preferred_model.split("/")[-1].lower()
+    for candidate in available_models:
+        candidate_basename = candidate.split("/")[-1].lower()
+        if preferred_basename in candidate_basename or candidate_basename in preferred_basename:
+            logger.warning("Falling back MLX model '%s' -> '%s'", preferred_model, candidate)
+            return candidate
+
+    fallback_model = available_models[0]
+    logger.warning("MLX model '%s' unavailable; using '%s'", preferred_model, fallback_model)
+    return fallback_model
 
 
 def _validate_indexing_provider_readiness() -> tuple[bool, str]:
@@ -1978,6 +2076,126 @@ def _title_from_filepath(file_path: str) -> str:
     return path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
 
 
+def _sanitize_synthesis_preamble(text: str) -> str:
+    cleaned = str(text or "").strip()
+    cleaned = re.sub(
+        r"(?is)^\s*(?:here(?:'s| is)\s+(?:a|the)\s+(?:answer|summary)|based on the retrieved notes[,:\s-]*|according to the retrieved notes[,:\s-]*)",
+        "",
+        cleaned,
+        count=1,
+    ).strip()
+    return cleaned
+
+
+def _clean_source_snippet_for_query(
+    snippet: str,
+    *,
+    query_text: str,
+    title: str,
+    file_path: str,
+) -> str:
+    raw = sanitize_content(str(snippet or ""))
+    if not raw:
+        return ""
+
+    metadata, body = extract_frontmatter(raw)
+    query_terms = _query_terms(query_text)
+    candidates: list[str] = []
+
+    summary = str(metadata.get("summary", "") or "").strip()
+    if summary:
+        candidates.append(summary)
+
+    metrics: list[str] = []
+    scan_type = str(metadata.get("scan_type", "") or "").strip()
+    if scan_type:
+        metrics.append(f"Scan type: {scan_type}")
+    milestone = str(metadata.get("milestone", "") or "").strip()
+    if milestone:
+        metrics.append(f"Milestone: {milestone}")
+    suv_max = metadata.get("suv_max")
+    if suv_max not in (None, ""):
+        metrics.append(f"SUV max: {suv_max}")
+    deauville = metadata.get("deauville")
+    if deauville not in (None, ""):
+        metrics.append(f"Deauville: {deauville}")
+    ldh = metadata.get("ldh")
+    if ldh not in (None, ""):
+        metrics.append(f"LDH: {ldh}")
+    if metrics:
+        candidates.append("; ".join(metrics))
+
+    in_code_block = False
+    for raw_line in body.splitlines():
+        line = str(raw_line or "").strip()
+        if not line:
+            continue
+        if line.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+        if line.startswith("![["):
+            continue
+
+        lower = line.lower()
+        if lower in {"main idea", "notes", "references"}:
+            continue
+        if lower.startswith(("tags:", "aliases:", "backlink:", "created:")):
+            continue
+        if "dataviewjs" in lower:
+            continue
+
+        line = re.sub(r"^#{1,6}\s*", "", line)
+        line = re.sub(r"^\s*[-*•]+\s*", "", line).strip()
+        line = re.sub(r"\s+", " ", line).strip()
+        if not line or line in {"-", "--", "---"}:
+            continue
+        if re.fullmatch(r"[=\-_*#\s.]{3,}", line):
+            continue
+        if re.fullmatch(r"[A-Z0-9 /:(),.%'-]{6,}", line) and len(line) < 120:
+            continue
+        if len(line) < 24:
+            continue
+        candidates.append(line)
+
+    if not candidates:
+        compact = re.sub(r"\s+", " ", raw).strip()
+        return compact[:LIGHTRAG_SYNTHESIS_SNIPPET_CHARS]
+
+    ranked: list[tuple[int, int, str]] = []
+    for candidate in candidates:
+        features = _score_source_features(
+            query_text,
+            query_terms,
+            title,
+            file_path,
+            candidate,
+            source_type="extractive",
+        )
+        ranked.append(
+            (
+                int(features.get("score", 0) or 0),
+                len(candidate),
+                candidate,
+            )
+        )
+
+    ranked.sort(key=lambda row: (row[0], row[1]), reverse=True)
+    selected: list[str] = []
+    seen: set[str] = set()
+    for _, _, candidate in ranked:
+        normalized = _normalize_for_match(candidate)
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        selected.append(candidate)
+        if len(selected) >= 2:
+            break
+
+    return " ".join(selected)[:LIGHTRAG_SYNTHESIS_SNIPPET_CHARS]
+
+
 def _query_terms(query_text: str) -> list[str]:
     terms: set[str] = set()
     for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9/._-]{1,}", query_text):
@@ -2077,6 +2295,48 @@ def _meta_source_penalty(query_terms: list[str], title: str, file_path: str, sni
     return min(1.0, hits / 3.0)
 
 
+def _source_class_penalty(title: str, file_path: str, snippet: str) -> float:
+    target = _normalize_for_match(f"{title} {file_path} {snippet}")
+    if not target:
+        return 0.0
+    hits = sum(1 for marker in META_TITLE_MARKERS if marker in target)
+    return min(1.0, hits / 3.0)
+
+
+def _source_specificity_bonus(title: str, file_path: str, snippet: str) -> float:
+    raw = str(snippet or "")
+    metadata, body = extract_frontmatter(raw)
+    bonus = 0.0
+
+    fact_keys = 0
+    for key, value in metadata.items():
+        lower_key = str(key or "").strip().lower()
+        if lower_key in {"tags", "tag", "aliases", "alias", "created", "backlink"}:
+            continue
+        if value in (None, "", [], {}):
+            continue
+        fact_keys += 1
+    bonus += min(4.0, fact_keys * 0.9)
+
+    numbers = re.findall(r"\b\d+(?:\.\d+)?\b", raw)
+    bonus += min(3.0, len(numbers) * 0.35)
+
+    body_norm = _normalize_for_match(body or raw)
+    cue_hits = sum(1 for cue in PRIMARY_EVIDENCE_CUES if cue in body_norm)
+    bonus += min(3.0, cue_hits * 0.8)
+
+    path = _normalize_file_path(file_path)
+    depth = path.count("/")
+    if depth >= 2:
+        bonus += 0.8
+
+    title_norm = _normalize_for_match(title)
+    if title_norm and not any(marker in title_norm for marker in META_TITLE_MARKERS):
+        bonus += 0.6
+
+    return min(8.0, bonus)
+
+
 def _term_matches_hay(term: str, hay: str, hay_normalized: str) -> bool:
     if not term:
         return False
@@ -2119,6 +2379,8 @@ def _score_source_features(
             "phrase_hits": 0,
             "template_penalty": 0.0,
             "meta_penalty": 0.0,
+            "class_penalty": 0.0,
+            "specificity_bonus": 0.0,
             "type_weight": 1.0,
         }
 
@@ -2158,6 +2420,8 @@ def _score_source_features(
     # Penalize templated/meta notes without hardcoding domain terms.
     template_penalty = _template_noise_penalty(title_lower, snippet_lower)
     meta_penalty = _meta_source_penalty(query_terms, title_lower, path_lower, snippet_lower)
+    class_penalty = _source_class_penalty(title_lower, path_lower, snippet_lower)
+    specificity_bonus = _source_specificity_bonus(title, file_path, snippet)
 
     lexical = (coverage * 7) + (title_score * 4) + (path_score * 2) + body_score
     cohesion_bonus = (phrase_hits * 9) + (6 if title_score > 0 and body_score > 0 else 0)
@@ -2165,9 +2429,10 @@ def _score_source_features(
     score = int(
         max(
             0.0,
-            ((lexical + cohesion_bonus + structural_bonus) * type_weight)
+            ((lexical + cohesion_bonus + structural_bonus + specificity_bonus) * type_weight)
             - (template_penalty * 10)
-            - (meta_penalty * 8),
+            - (meta_penalty * 8)
+            - (class_penalty * 10),
         )
     )
 
@@ -2178,6 +2443,8 @@ def _score_source_features(
         "phrase_hits": phrase_hits,
         "template_penalty": round(template_penalty, 4),
         "meta_penalty": round(meta_penalty, 4),
+        "class_penalty": round(class_penalty, 4),
+        "specificity_bonus": round(specificity_bonus, 4),
         "type_weight": round(type_weight, 4),
     }
 
@@ -2967,7 +3234,8 @@ def get_effective_llm_model():
     if LLM_PROVIDER == "lmstudio":
         return LLM_MODEL_PATH or LLM_MODEL
     if LLM_PROVIDER == "mlx":
-        return MLX_MODEL or LLM_MODEL_PATH or LLM_MODEL
+        requested = MLX_MODEL or LLM_MODEL_PATH or LLM_MODEL
+        return _resolve_mlx_model_name(requested, MLX_BASE_URL, MLX_API_KEY)
     return LLM_MODEL
 
 
@@ -2993,15 +3261,20 @@ def get_effective_query_llm_model() -> str:
     provider = get_effective_query_llm_provider()
     request_model = str(REQUEST_QUERY_LLM_MODEL.get() or "").strip()
     if request_model:
+        if provider == "mlx":
+            return _resolve_mlx_model_name(request_model, QUERY_MLX_BASE_URL, QUERY_MLX_API_KEY)
         return request_model
     if QUERY_LLM_MODEL:
+        if provider == "mlx":
+            return _resolve_mlx_model_name(QUERY_LLM_MODEL, QUERY_MLX_BASE_URL, QUERY_MLX_API_KEY)
         return QUERY_LLM_MODEL
     if provider == "openrouter":
         return LIGHTRAG_MODEL or "openrouter/auto"
     if provider == "lmstudio":
         return LLM_MODEL_PATH or LLM_MODEL
     if provider == "mlx":
-        return MLX_MODEL or LLM_MODEL_PATH or LLM_MODEL
+        requested = MLX_MODEL or LLM_MODEL_PATH or LLM_MODEL
+        return _resolve_mlx_model_name(requested, QUERY_MLX_BASE_URL, QUERY_MLX_API_KEY)
     if provider in {"openai", "chatgpt"}:
         return QUERY_OPENAI_MODEL or OPENAI_MODEL or "gpt-4o-mini"
     return LLM_MODEL
@@ -3212,6 +3485,37 @@ async def query_mlx_model_complete(
 async def query_ollama_model_complete(
     prompt, system_prompt=None, history_messages=[], **kwargs
 ) -> str:
+    provider = get_effective_query_llm_provider()
+    if provider != "ollama":
+        if provider == "openrouter":
+            return await query_openrouter_model_complete(
+                prompt,
+                system_prompt=system_prompt,
+                history_messages=history_messages,
+                **kwargs,
+            )
+        if provider in {"openai", "chatgpt"}:
+            return await query_openai_model_complete(
+                prompt,
+                system_prompt=system_prompt,
+                history_messages=history_messages,
+                **kwargs,
+            )
+        if provider == "lmstudio":
+            return await query_lmstudio_model_complete(
+                prompt,
+                system_prompt=system_prompt,
+                history_messages=history_messages,
+                **kwargs,
+            )
+        if provider == "mlx":
+            return await query_mlx_model_complete(
+                prompt,
+                system_prompt=system_prompt,
+                history_messages=history_messages,
+                **kwargs,
+            )
+
     keyword_extraction = bool(kwargs.pop("keyword_extraction", False))
     kwargs.pop("hashing_kv", None)
     kwargs.pop("max_tokens", None)  # ollama-python does not accept max_tokens in chat kwargs
@@ -3263,17 +3567,92 @@ async def query_ollama_model_complete(
             pass
 
 
-def get_query_model_func():
+async def query_model_complete(
+    prompt, system_prompt=None, history_messages=[], **kwargs
+) -> str:
+    """Dispatch query-time synthesis to the currently effective provider.
+
+    LightRAG can retain the function reference created during initialization,
+    so provider selection must happen at call time rather than bind time.
+    """
     provider = get_effective_query_llm_provider()
     if provider == "openrouter":
-        return query_openrouter_model_complete
+        return await query_openrouter_model_complete(
+            prompt,
+            system_prompt=system_prompt,
+            history_messages=history_messages,
+            **kwargs,
+        )
     if provider in {"openai", "chatgpt"}:
-        return query_openai_model_complete
+        return await query_openai_model_complete(
+            prompt,
+            system_prompt=system_prompt,
+            history_messages=history_messages,
+            **kwargs,
+        )
     if provider == "lmstudio":
-        return query_lmstudio_model_complete
+        return await query_lmstudio_model_complete(
+            prompt,
+            system_prompt=system_prompt,
+            history_messages=history_messages,
+            **kwargs,
+        )
     if provider == "mlx":
-        return query_mlx_model_complete
-    return query_ollama_model_complete
+        return await query_mlx_model_complete(
+            prompt,
+            system_prompt=system_prompt,
+            history_messages=history_messages,
+            **kwargs,
+        )
+    return await query_ollama_model_complete(
+        prompt,
+        system_prompt=system_prompt,
+        history_messages=history_messages,
+        **kwargs,
+    )
+
+
+def get_query_model_func():
+    return query_model_complete
+
+
+def build_bound_query_model_func():
+    """Capture the effective query settings so LightRAG internals can't drift to defaults."""
+    bound_provider = get_effective_query_llm_provider()
+    bound_model = get_effective_query_llm_model()
+    bound_temperature = get_effective_query_temperature()
+    bound_system_prompt = get_effective_query_system_prompt()
+
+    async def _bound_query_model_complete(
+        prompt, system_prompt=None, history_messages=[], **kwargs
+    ) -> str:
+        provider_token = REQUEST_QUERY_LLM_PROVIDER.set(bound_provider)
+        model_token = REQUEST_QUERY_LLM_MODEL.set(bound_model)
+        temp_token = None
+        system_prompt_token = None
+
+        if bound_temperature:
+            temp_token = REQUEST_QUERY_TEMPERATURE.set(bound_temperature)
+        if bound_system_prompt:
+            system_prompt_token = REQUEST_QUERY_SYSTEM_PROMPT.set(bound_system_prompt)
+
+        try:
+            return await query_model_complete(
+                prompt,
+                system_prompt=system_prompt,
+                history_messages=history_messages,
+                **kwargs,
+            )
+        finally:
+            REQUEST_QUERY_LLM_PROVIDER.reset(provider_token)
+            REQUEST_QUERY_LLM_MODEL.reset(model_token)
+            if temp_token is not None:
+                REQUEST_QUERY_TEMPERATURE.reset(temp_token)
+            if system_prompt_token is not None:
+                REQUEST_QUERY_SYSTEM_PROMPT.reset(system_prompt_token)
+
+    setattr(_bound_query_model_complete, "__name__", "bound_query_model_complete")
+    return _bound_query_model_complete, bound_model
 
 
 async def openrouter_model_complete(
@@ -3722,7 +4101,7 @@ async def _do_query_async(query_text, mode, max_results: int | None = None):
     """Helper async method for querying"""
     rag = get_rag()
     await _ensure_storages_ready(rag)
-    query_model_func = get_query_model_func()
+    query_model_func, bound_query_model_name = build_bound_query_model_func()
     query_system_prompt = get_effective_query_system_prompt()
     requested_top_k = 0
     try:
@@ -3777,6 +4156,11 @@ async def _do_query_async(query_text, mode, max_results: int | None = None):
         )
 
     try:
+        original_llm_model_func = getattr(rag, "llm_model_func", None)
+        original_llm_model_name = getattr(rag, "llm_model_name", None)
+        rag.llm_model_func = query_model_func
+        rag.llm_model_name = bound_query_model_name
+
         logger.info(f"[DEBUG] query_system_prompt before aquery: {query_system_prompt}")
         if hasattr(rag, "aquery_llm"):
             result = await rag.aquery_llm(
@@ -3792,6 +4176,10 @@ async def _do_query_async(query_text, mode, max_results: int | None = None):
             return {"llm_response": {"content": result, "is_streaming": False}}
         return {"llm_response": {"content": str(result), "is_streaming": False}}
     finally:
+        if 'original_llm_model_func' in locals():
+            rag.llm_model_func = original_llm_model_func
+        if 'original_llm_model_name' in locals():
+            rag.llm_model_name = original_llm_model_name
         if original_cache_enabled is not None and isinstance(cache_global_config, dict):
             cache_global_config["enable_llm_cache"] = original_cache_enabled
 
@@ -3820,6 +4208,243 @@ def _extract_query_answer(payload: dict | str) -> str:
         if isinstance(value, str):
             return value
     return ""
+
+
+def _extract_query_data_block(payload: dict | str) -> dict:
+    if not isinstance(payload, dict):
+        return {}
+    data_block = payload.get("data", {})
+    return data_block if isinstance(data_block, dict) else {}
+
+
+def _extract_query_sources(data_block: dict, query_text: str = "") -> list[dict]:
+    refs = data_block.get("references", [])
+    chunks = data_block.get("chunks", [])
+    query_terms = _query_terms(query_text)
+    scored_chunks_by_ref: dict[str, dict] = {}
+
+    if isinstance(chunks, list):
+        for chunk in chunks:
+            if not isinstance(chunk, dict):
+                continue
+            file_path = str(chunk.get("file_path", "") or "").strip()
+            if not file_path or file_path == "unknown_source":
+                continue
+            reference_id = str(chunk.get("reference_id", "") or file_path)
+            raw_snippet = str(chunk.get("content", "") or "").strip()
+            title = _title_from_filepath(file_path)
+            cleaned_snippet = _clean_source_snippet_for_query(
+                raw_snippet,
+                query_text=query_text,
+                title=title,
+                file_path=file_path,
+            )
+            features = _score_source_features(
+                query_text,
+                query_terms,
+                title,
+                file_path,
+                cleaned_snippet or raw_snippet,
+                source_type="extractive",
+            )
+            if LIGHTRAG_NOISE_FILTER and (
+                _is_noise_payload(f"{title} {file_path} {cleaned_snippet or raw_snippet}")
+                or float(features.get("meta_penalty", 0.0) or 0.0) >= 0.67
+                or float(features.get("template_penalty", 0.0) or 0.0) >= 0.75
+            ):
+                continue
+            score = int(features.get("score", 0) or 0)
+            candidate = {
+                "title": title,
+                "filename": title,
+                "filepath": _normalize_file_path(file_path),
+                "file_path": file_path,
+                "snippet": cleaned_snippet,
+                "relevance": _relevance_from_score(score, query_terms),
+                "term_coverage": float(features.get("term_coverage", 0.0) or 0.0),
+                "score": score,
+            }
+            current = scored_chunks_by_ref.get(reference_id)
+            if current is None or (
+                int(candidate.get("score", 0)) > int(current.get("score", 0))
+                or (
+                    int(candidate.get("score", 0)) == int(current.get("score", 0))
+                    and len(str(candidate.get("snippet", ""))) > len(str(current.get("snippet", "")))
+                )
+            ):
+                scored_chunks_by_ref[reference_id] = candidate
+
+    sources = []
+    if not isinstance(refs, list):
+        refs = []
+
+    for ref in refs:
+        if not isinstance(ref, dict):
+            continue
+        file_path = str(ref.get("file_path", "") or "").strip()
+        if file_path and file_path != "unknown_source":
+            reference_id = str(ref.get("reference_id", "") or file_path)
+            source = dict(scored_chunks_by_ref.get(reference_id, {}))
+            if not source:
+                title = _title_from_filepath(file_path)
+                source = {
+                    "title": title,
+                    "filename": title,
+                    "filepath": _normalize_file_path(file_path),
+                    "file_path": file_path,
+                    "snippet": "",
+                    "relevance": 0.0,
+                    "term_coverage": 0.0,
+                    "score": 0,
+                }
+            sources.append(source)
+
+    if not sources:
+        sources = list(scored_chunks_by_ref.values())
+
+    if not sources:
+        return []
+
+    diversified = _mmr_diversify_sources(
+        sorted(
+            sources,
+            key=lambda src: (
+                float(src.get("relevance", 0) or 0),
+                float(src.get("term_coverage", 0) or 0),
+                len(str(src.get("snippet", ""))),
+            ),
+            reverse=True,
+        ),
+        max_sources=max(4, min(len(sources), LIGHTRAG_SYNTHESIS_SOURCE_COUNT * 2)),
+    )
+    return diversified
+
+
+def _llm_answer_failed(answer: str) -> bool:
+    text = str(answer or "").strip().lower()
+    if not text:
+        return True
+    return (
+        text.startswith("error:")
+        or text.startswith("query failed:")
+        or "connection error" in text
+        or "timed out" in text
+    )
+
+
+def _answer_has_substantive_content(answer_text: str) -> bool:
+    substantive_lines = 0
+    generic_only_patterns = (
+        "not explicitly stated in retrieved notes",
+        "not found in notes",
+        "see supporting notes",
+    )
+
+    for raw_line in str(answer_text or "").splitlines():
+        line = str(raw_line or "").strip()
+        if not line:
+            continue
+        if _is_section_heading(line):
+            continue
+        if line.startswith(("-", "*", "•")):
+            line = re.sub(r"^\s*[-*•]\s*", "", line).strip()
+        if not line:
+            continue
+
+        canonical = _canonical_section_name(line.rstrip("."))
+        if canonical in {
+            "Summary",
+            "Direct Connections",
+            "Indirect Connections",
+            "Supporting Notes",
+            "Unknowns / Gaps",
+            "Unknowns / Missing Data",
+        }:
+            continue
+
+        normalized = _heading_key(line)
+        if any(pattern in normalized for pattern in generic_only_patterns):
+            continue
+        if len(line) < 24:
+            continue
+        substantive_lines += 1
+
+    return substantive_lines >= 2
+
+
+def _answer_needs_fallback(answer_text: str, retrieval_ok: bool) -> bool:
+    if _llm_answer_failed(answer_text):
+        return retrieval_ok
+
+    text = str(answer_text or "").strip()
+    if not text:
+        return retrieval_ok
+
+    listed_sections = 0
+    for raw_line in text.splitlines():
+        line = str(raw_line or "").strip()
+        if not line:
+            continue
+        bullet = re.sub(r"^\s*[-*•]\s*", "", line).strip().rstrip(".")
+        if _canonical_section_name(bullet) in {
+            "Summary",
+            "Direct Connections",
+            "Indirect Connections",
+            "Supporting Notes",
+            "Unknowns / Gaps",
+        }:
+            listed_sections += 1
+
+    if listed_sections >= 3 and not _answer_has_substantive_content(text):
+        return True
+
+    return retrieval_ok and not _answer_has_substantive_content(text)
+
+
+def _run_two_pass_synthesis(
+    query_text: str,
+    sources: list[dict],
+    draft_answer: str,
+    requested_sections: list[str] | None = None,
+) -> str:
+    async def _runner():
+        return await asyncio.wait_for(
+            _two_pass_synthesis_async(
+                query_text,
+                sources,
+                draft_answer,
+                requested_sections=requested_sections,
+            ),
+            timeout=min(LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS, 45.0),
+        )
+
+    return asyncio.run(_runner())
+
+
+def _retrieval_succeeded(data_block: dict, sources: list[dict]) -> bool:
+    if sources:
+        return True
+    for key in ("entities", "relationships", "chunks", "references"):
+        value = data_block.get(key)
+        if isinstance(value, list) and len(value) > 0:
+            return True
+    return False
+
+
+def _partial_success_answer(sources: list[dict], data_block: dict) -> str:
+    file_names = []
+    for source in sources[:3]:
+        file_path = str(source.get("file_path", "")).strip()
+        if file_path:
+            file_names.append(Path(file_path).name)
+    if file_names:
+        return f"Retrieved relevant notes, but answer synthesis failed. Top matches: {', '.join(file_names)}."
+
+    chunks = data_block.get("chunks", [])
+    if isinstance(chunks, list) and chunks:
+        return "Retrieved relevant graph context, but answer synthesis failed."
+
+    return "Relevant notes were retrieved, but answer synthesis failed."
 
 
 
@@ -3884,27 +4509,18 @@ def query_graph():
         raw_payload = {}
         answer = ""
         sources = []
+        data_block = {}
         try:
             raw_payload = _run_query_with_timeout(
                 query_text, mode, max_results=max_results or None
             )
             answer = _extract_query_answer(raw_payload)
-            if isinstance(raw_payload, dict):
-                data_block = raw_payload.get("data", {})
-                logger.info(f"[DEBUG] data_block type: {type(data_block)}, keys: {data_block.keys() if isinstance(data_block, dict) else 'none'}")
-                if isinstance(data_block, dict):
-                    # References are typically under "references" in LightRAG
-                    refs = data_block.get("references", [])
-                    logger.info(f"[DEBUG] refs type: {type(refs)}, len: {len(refs) if isinstance(refs, list) else 'N/A'}")
-                    if isinstance(refs, list):
-                        # The UI expects a list of dictionaries with at least a 'file_path' key.
-                        # LightRAG returns `{"reference_id": "1", "file_path": "..."}`
-                        sources = []
-                        for r in refs:
-                            fp = r.get("file_path")
-                            if fp and fp != "unknown_source":
-                                sources.append({"file_path": fp})
-                        logger.info(f"[DEBUG] Final sources mapped: {len(sources)}")
+            data_block = _extract_query_data_block(raw_payload)
+            logger.info(
+                f"[DEBUG] data_block type: {type(data_block)}, keys: {data_block.keys() if isinstance(data_block, dict) else 'none'}"
+            )
+            sources = _extract_query_sources(data_block, query_text)
+            logger.info(f"[DEBUG] Final sources mapped: {len(sources)}")
         except asyncio.TimeoutError:
             logger.error(f"Query timed out after {QUERY_TIMEOUT_SECONDS}s")
             return jsonify({"error": f"Query timeout after {QUERY_TIMEOUT_SECONDS}s"}), 504
@@ -3914,10 +4530,53 @@ def query_graph():
             return jsonify({"error": f"Query failed: {e}"}), 500
 
         result = answer if isinstance(answer, str) else str(answer)
+        retrieval_ok = _retrieval_succeeded(data_block, sources)
+        partial_success = retrieval_ok and _llm_answer_failed(result)
+        answer_fallback = None
         
         if result.startswith("Query failed:"):
             logger.error(f"Internal LightRAG query failure: {result}")
             return jsonify({"error": result}), 500
+
+        if partial_success:
+            logger.warning("LightRAG returning partial success due to LLM synthesis failure: %s", result)
+            result = _partial_success_answer(sources, data_block)
+            answer_fallback = "partial_success"
+        elif _answer_needs_fallback(result, retrieval_ok):
+            logger.warning("LightRAG answer lacked substantive grounded content; applying fallback synthesis")
+            refined = ""
+            if retrieval_ok and sources and LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS:
+                try:
+                    refined = _run_two_pass_synthesis(
+                        query_text,
+                        sources,
+                        result,
+                        requested_sections=[
+                            "Summary",
+                            "Direct Connections",
+                            "Indirect Connections",
+                            "Supporting Notes",
+                            "Unknowns / Gaps",
+                        ],
+                    )
+                except Exception as exc:
+                    logger.warning("Two-pass synthesis fallback failed: %s", exc)
+            if refined and not _answer_needs_fallback(refined, retrieval_ok=False):
+                result = refined
+                answer_fallback = "two_pass_synthesis"
+            else:
+                result = _deterministic_contract_answer(
+                    query_text,
+                    sources,
+                    [
+                        "Summary",
+                        "Direct Connections",
+                        "Indirect Connections",
+                        "Supporting Notes",
+                        "Unknowns / Gaps",
+                    ],
+                )
+                answer_fallback = "deterministic_contract"
             
         # Log query performance
         elapsed = time.time() - start_time
@@ -3934,10 +4593,16 @@ def query_graph():
             "result": result,
             "answer": result,
             "sources": sources,
-            "metadata": raw_payload.get("metadata", {}) if isinstance(raw_payload, dict) else {},
-            "raw_data": raw_payload.get("data", {}) if isinstance(raw_payload, dict) else {},
+            "metadata": {
+                **(raw_payload.get("metadata", {}) if isinstance(raw_payload, dict) and isinstance(raw_payload.get("metadata", {}), dict) else {}),
+                "status": "partial_success" if partial_success else "success",
+                "retrieval_succeeded": retrieval_ok,
+                "llm_error": answer if partial_success else None,
+                "answer_fallback": answer_fallback,
+            },
+            "raw_data": data_block,
             "latency": elapsed,
-            "llm_used": True,
+            "llm_used": (not partial_success) and answer_fallback != "deterministic_contract",
         }), 200
     
     except Exception as e:

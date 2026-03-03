@@ -37,6 +37,12 @@ const llmProviders = [
     cost: '$',
     requiresApiKey: true,
     apiKeyEnvVar: 'OPENAI_API_KEY'
+  },
+  {
+    id: 'mlx' as LLMProvider,
+    label: 'MLX Local',
+    cost: 'Free',
+    requiresApiKey: false
   }
 ];
 

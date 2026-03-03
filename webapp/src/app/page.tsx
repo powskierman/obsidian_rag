@@ -66,7 +66,7 @@ export default function Home() {
                     ws.send(JSON.stringify({
                         query: userMsg,
                         provider: llmProvider,
-                        model: (llmProvider === 'openrouter' || llmProvider === 'chatgpt') ? settings.model : undefined
+                        model: (llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx') ? settings.model : undefined
                     }));
                 };
 
@@ -184,7 +184,7 @@ export default function Home() {
                 const backendMode = searchMode === 'deep-thinking' ? 'hybrid' : searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
-                const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' ? settings.model : '';
+                const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx' ? settings.model : '';
 
                 // Unified Search Call
                 console.log('📡 Sending query settings:', {
@@ -288,6 +288,7 @@ export default function Home() {
                     role: 'assistant',
                     content: answer,
                     sources: settings.showSources ? sources : undefined,
+                    retrievalIntent: result.retrievalIntent,
                     queryId,
                     timestamp: new Date().toISOString(),
                 });
@@ -478,7 +479,10 @@ export default function Home() {
 
                                         {/* Sources Display */}
                                         {msg.role === 'assistant' && msg.sources && (
-                                            <SourcesDisplay sources={msg.sources} />
+                                            <SourcesDisplay
+                                                sources={msg.sources}
+                                                retrievalIntent={msg.retrievalIntent}
+                                            />
                                         )}
 
                                         {/* Rating Buttons */}

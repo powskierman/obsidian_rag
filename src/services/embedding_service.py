@@ -72,10 +72,29 @@ def _require_api_key():
     if not _api_key_valid():
         return jsonify({"error": "Unauthorized"}), 401
 
+
+def _normalize_embed_model_name(raw_name: str | None) -> str:
+    name = (raw_name or "").strip()
+    if not name:
+        return "nomic-ai/nomic-embed-text-v1.5"
+
+    lowered = name.lower()
+    if lowered.startswith("nomic-embed-text"):
+        return "nomic-ai/nomic-embed-text-v1.5"
+
+    if lowered.startswith("nomic-ai/nomic-embed-text-v1.5:"):
+        return "nomic-ai/nomic-embed-text-v1.5"
+
+    return name
+
 # Initialize models
 device = 'mps' if torch.backends.mps.is_available() else 'cpu'
-print(f"Loading embedding model (Nomic v1.5) on {device}...")
-embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True, device=device)
+raw_embed_model_name = os.getenv("EMBED_MODEL", "nomic-ai/nomic-embed-text-v1.5")
+embed_model_name = _normalize_embed_model_name(raw_embed_model_name)
+if embed_model_name != raw_embed_model_name:
+    print(f"Normalized EMBED_MODEL from {raw_embed_model_name} to {embed_model_name}")
+print(f"Loading embedding model ({embed_model_name}) on {device}...")
+embedding_model = SentenceTransformer(embed_model_name, trust_remote_code=True, device=device)
 print("Loading cross-encoder for re-ranking...")
 cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
 

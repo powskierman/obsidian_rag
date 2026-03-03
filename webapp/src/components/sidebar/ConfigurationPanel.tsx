@@ -34,7 +34,8 @@ export default function ConfigurationPanel() {
       'gemini': 'Gemini Pro',
       'claude': 'Claude API',
       'openrouter': 'OpenRouter',
-      'chatgpt': 'ChatGPT'
+      'chatgpt': 'ChatGPT',
+      'mlx': 'MLX Local'
     };
     return labels[llmProvider] || 'Ollama';
   };

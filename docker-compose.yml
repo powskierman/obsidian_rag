@@ -9,16 +9,17 @@ services:
       - "8000:8000"
     volumes:
       - ./src:/app/src:ro
-      - "${OBSIDIAN_RAG_DATA_DIR}/chroma_db:/app/chroma_db:rw,cached"
+      - ./chroma_db:/app/chroma_db:rw,cached
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
       - CHROMA_COLLECTION=${CHROMA_COLLECTION:-obsidian_vault}
       - CHROMA_DB_PATH=/app/chroma_db
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
-      - EMBED_MODEL=${EMBED_MODEL:-all-MiniLM-L6-v2}
+      - EMBED_MODEL=${EMBED_MODEL:-nomic-ai/nomic-embed-text-v1.5}
       - OBSIDIAN_VAULT_PATH=/app/vault
       - EMBEDDING_CLEAR_TOKEN=${EMBEDDING_CLEAR_TOKEN:-}
+      - HUGGINGFACE_LOCAL_EMBEDDINGS=true
     command: python src/services/embedding_service.py
     restart: unless-stopped
     healthcheck:
@@ -157,6 +158,9 @@ services:
       - OPENAI_TIMEOUT=${OPENAI_TIMEOUT:-60}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:8090/v1}
+      - MLX_API_KEY=${MLX_API_KEY:-mlx}
+      - MLX_MODEL=${MLX_MODEL:-LiquidAI/LFM2-24B-A2B-MLX-4bit}
       - LLM_MODEL=${LLM_MODEL:-qwen3:latest}
       - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
     extra_hosts:
@@ -241,7 +245,7 @@ services:
       dockerfile: ../config/docker/Dockerfile.webapp
     container_name: obsidian-webapp
     ports:
-      - "3000:3000"
+      - "3030:3000"
     volumes:
       - ./webapp:/app
       - /app/node_modules

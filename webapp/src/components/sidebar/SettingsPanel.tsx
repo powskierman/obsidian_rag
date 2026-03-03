@@ -61,6 +61,18 @@ export default function SettingsPanel() {
         </div>
       )}
 
+      {llmProvider === 'mlx' && (
+        <div className="space-y-2">
+          <label className="text-xs text-white/60">MLX Model</label>
+          <input
+            value={settings.model}
+            onChange={(e) => updateSettings({ model: e.target.value })}
+            placeholder="LiquidAI/LFM2-24B-A2B-MLX-4bit"
+            className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
+          />
+        </div>
+      )}
+
       {/* Sources Slider */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">

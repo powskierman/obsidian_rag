@@ -51,6 +51,8 @@ class UniversalClient:
             return self._create_openai(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "ollama":
             return self._create_ollama(model, messages, max_tokens, temperature, system, response_format)
+        elif self.provider == "mlx":
+            return self._create_mlx(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "perplexity":
             return self._create_perplexity(model, messages, max_tokens, temperature, system, response_format)
         else:
@@ -371,6 +373,66 @@ class UniversalClient:
         except Exception as e:
             logger.error(f"OpenAI request failed: {e}")
             raise e
+
+    def _create_mlx(self, model: str, messages: List[Dict[str, str]],
+                    max_tokens: int, temperature: float, system: str,
+                    response_format: Optional[Dict[str, Any]] = None):
+        base_url = os.getenv("QUERY_MLX_BASE_URL") or os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")
+        api_key = self.api_key or os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
+        if not model or "claude" in model.lower() or "gpt" in model.lower():
+            model = os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or "LiquidAI/LFM2-24B-A2B"
+
+        mlx_messages = list(messages)
+        if system:
+            mlx_messages = [{"role": "system", "content": system}] + mlx_messages
+
+        payload = {
+            "model": model,
+            "messages": mlx_messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+
+        if response_format:
+            payload["response_format"] = response_format
+
+        timeout = float(os.getenv("MLX_TIMEOUT", "300"))
+        try:
+            response = requests.post(
+                f"{base_url.rstrip('/')}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json=payload,
+                timeout=timeout
+            )
+
+            if response.status_code != 200:
+                error_msg = f"MLX API Error {response.status_code}: {response.text}"
+                logger.error(error_msg)
+                raise ValueError(error_msg)
+
+            data = response.json()
+            choices = data.get("choices", [])
+            if not choices:
+                raise ValueError("No choices returned from MLX")
+
+            message = choices[0].get("message", {})
+            content = message.get("content", "")
+            if isinstance(content, list):
+                parts = []
+                for part in content:
+                    if isinstance(part, dict) and "text" in part:
+                        parts.append(str(part["text"]))
+                    elif part is not None:
+                        parts.append(str(part))
+                content = "".join(parts)
+            return UniversalMessage(str(content))
+        except Exception as e:
+            logger.error(f"MLX request failed: {e}")
+            raise e
+
     def _create_ollama(self, model: str, messages: List[Dict[str, str]],
                        max_tokens: int, temperature: float, system: str,
                        response_format: Optional[Dict[str, Any]] = None):

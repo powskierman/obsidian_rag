@@ -126,13 +126,14 @@ Finally, provide your answer in a structured, easy-to-read format."""
            - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics
            - Place images in appropriate sections (e.g., under "Hardware Connection" or "Wiring Diagram")
         7. Acknowledges any gaps or uncertainties
-        
+        8. DO NOT INVENT CITATIONS. Only use the Exact Names of Vault Documents or Web Search URLs provided above.
+
         Return ONLY a JSON object:
         {{
             "answer": "...",
-            "citations": [["[[Medical/CAR-T/Treatment Log 2023-05-15]]", "https://example.com"],
+            "citations": ["[[Folder/Note Name]]", "https://example.com"],
             "confidence_score": 0.9,
-            "confidence_justification": "Detailed scan results found..."
+            "confidence_justification": "Reasoning based closely on provided documents..."
         }}
         """
 

@@ -33,7 +33,7 @@ def test_deep_research_provider_fallback(monkeypatch):
     headers = {"X-API-Key": api_key} if api_key else {}
 
     with client.websocket_connect("/api/v1/deep-research", headers=headers) as ws:
-        ws.send_json({"query": "test", "provider": "ollama"})
+        ws.send_json({"query": "test", "provider": "unknown_provider"})
 
         result = None
         log_messages = []

@@ -141,17 +141,28 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 ## Available Tools
 
 ### Vault Search
-- **`search_vault`** - Semantic search with 5-10 results, content snippets
+- **`obsidian_semantic_search`** - Semantic search with 1-10 results and snippets
+- **`search_vault_full`** - Semantic search + full note text (+ optional embedded PDF extraction)
+- **`obsidian_search_mode`** - Gateway mode tool supporting:
+  - `lightrag` (distinct LightRAG entities mode)
+  - `hybrid`
+  - `dual-graph`
+  - `cascading`
+  - `notes+vector`
+  - `entities+vector`
+  - `deep-research`
 
 ### Knowledge Graph
-- **`query_knowledge_graph`** - Ask questions about relationships
+- **`obsidian_graph_query`** - Ask graph questions (tries graph service first, then local graph fallback)
 - **`get_entity_info`** - Get entity details
 - **`find_entity_path`** - Find connections between entities
 - **`search_entities`** - Search for entities
 - **`get_graph_stats`** - Graph statistics
 
 ### Vault Stats
-- **`get_vault_stats`** - Vault statistics
+- **`obsidian_vault_stats`** - Vault statistics
+
+Compatibility aliases still accepted by the server: `search_vault`, `get_vault_stats`, `query_knowledge_graph`.
 
 ## Troubleshooting
 
@@ -171,7 +182,9 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 
 3. **Check Environment Variables:**
    - `EMBEDDING_SERVICE_URL` should point to running service
-   - `OPENAI_API_KEY` is required only for graph tools
+   - Graph service URL can be set with `CLAUDE_GRAPH_SERVICE_URL` or `GRAPH_SERVICE_URL`
+   - Gateway URL can be set with `MCP_GATEWAY_URL` (default: `http://localhost:4000`)
+   - `OPENAI_API_KEY` (or `GEMINI_API_KEY` with `MCP_GRAPH_PROVIDER=gemini`) is only needed for local graph synthesis
 
 ### Services Not Available
 
@@ -193,7 +206,7 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 
 1. **Check Graph File:**
    ```bash
-   ls -lh data/graph_data/knowledge_graph_full.pkl
+   ls -lh graph_data/knowledge_graph_full.pkl data/graph_data/knowledge_graph_full.pkl
    ```
 
 2. **Set KNOWLEDGE_GRAPH_PATH:**

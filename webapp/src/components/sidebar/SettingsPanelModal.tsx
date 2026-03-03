@@ -10,19 +10,16 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
   const { settings, updateSettings, llmProvider, setLLMProvider } = useApp();
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
-  const [envConfig, setEnvConfig] = useState<Record<string, string>>({});
   const enhancedDisabled = settings.deepThinking;
 
   useEffect(() => {
     const loadData = async () => {
       setIsLoadingModels(true);
       try {
-        const [models, config] = await Promise.all([
+        const [models] = await Promise.all([
           api.getOllamaModels(),
-          api.getEnvConfig()
         ]);
         setAvailableModels(models);
-        setEnvConfig(config.models);
       } catch (error) {
         console.error('Failed to load settings data:', error);
       } finally {
@@ -80,26 +77,11 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               LLM Provider
             </label>
             <div className="bg-[#2C2C2E] p-1 rounded-xl flex border border-[#3C3C3E]">
-              {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'perplexity'].map((provider) => (
+              {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'mlx'].map((provider) => (
                 <button
                   key={provider}
                   onClick={() => {
                     setLLMProvider(provider as any);
-                    // Reset model to default when switching providers to avoid stale IDs
-                    // Priority: 1. .env config, 2. Safe hardcoded fallback
-                    const defaults: Record<string, string> = {
-                      ollama: envConfig['ollama'] || availableModels[0] || 'mistral',
-                      openrouter: envConfig['openrouter'] || 'google/gemini-2.0-flash-exp:free',
-                      chatgpt: envConfig['chatgpt'] || 'gpt-4o',
-                      gemini: envConfig['gemini'] || 'gemini-1.5-pro',
-                      claude: envConfig['claude'] || 'claude-3-5-sonnet-latest',
-                      perplexity: envConfig['perplexity'] || 'llama-3.1-sonar-large-128k-online'
-                    };
-
-                    const newModel = defaults[provider] || '';
-                    if (newModel) {
-                      updateSettings({ ...settings, model: newModel });
-                    }
                   }}
                   className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${llmProvider === provider
                     ? 'bg-[#0A84FF] text-white shadow-lg'
@@ -177,19 +159,19 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             </div>
           )}
 
-          {llmProvider === 'perplexity' && (
+          {llmProvider === 'mlx' && (
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                Perplexity Model
+                MLX Model
               </label>
               <input
                 value={settings.model}
                 onChange={(e) => updateSettings({ ...settings, model: e.target.value })}
-                placeholder="llama-3.1-sonar-large-128k-online"
+                placeholder="LiquidAI/LFM2-24B-A2B-MLX-4bit"
                 className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
               />
               <p className="text-xs text-white/40 mt-1.5">
-                Use a Perplexity online model ID.
+                Use the model ID exposed by your local MLX server.
               </p>
             </div>
           )}

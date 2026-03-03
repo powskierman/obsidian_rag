@@ -1,7 +1,18 @@
-const GATEWAY_URL = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://127.0.0.1:4000';
-const WS_GATEWAY_URL = process.env.NEXT_PUBLIC_WS_GATEWAY_URL || 'ws://127.0.0.1:4000';
-const EMBEDDING_URL = process.env.NEXT_PUBLIC_EMBEDDING_URL || 'http://127.0.0.1:8000';
-const GRAPH_URL = process.env.NEXT_PUBLIC_GRAPH_URL || 'http://127.0.0.1:8002';
+const resolveUrl = (envVal: string | undefined, defaultPort: string, isWs = false) => {
+  if (envVal && !envVal.includes('localhost') && !envVal.includes('127.0.0.1')) {
+    return envVal;
+  }
+  if (typeof window !== 'undefined') {
+    const protocol = isWs ? (window.location.protocol === 'https:' ? 'wss:' : 'ws:') : window.location.protocol;
+    return `${protocol}//${window.location.hostname}:${defaultPort}`;
+  }
+  return envVal || (isWs ? `ws://127.0.0.1:${defaultPort}` : `http://127.0.0.1:${defaultPort}`);
+};
+
+const GATEWAY_URL = resolveUrl(process.env.NEXT_PUBLIC_GATEWAY_URL, '4000');
+const WS_GATEWAY_URL = resolveUrl(process.env.NEXT_PUBLIC_WS_GATEWAY_URL, '4000', true);
+const EMBEDDING_URL = resolveUrl(process.env.NEXT_PUBLIC_EMBEDDING_URL, '8000');
+const GRAPH_URL = resolveUrl(process.env.NEXT_PUBLIC_GRAPH_URL, '8002');
 
 const tryFetchJson = async (url: string): Promise<any | null> => {
   try {
@@ -20,6 +31,7 @@ export interface SearchResult {
   filepath: string;
   relevance: number;
   snippet: string;
+  sourceType?: 'linked-note' | 'direct-excerpt' | 'entity-context';
 }
 
 export interface GraphResponse {
@@ -42,7 +54,117 @@ const normalizeSource = (source: any): SearchResult => {
     filepath,
     relevance,
     snippet,
+    sourceType: source?.sourceType || source?.source_type,
   };
+};
+
+const normalizeVectorSources = (
+  vectorData: any,
+  sourceType: SearchResult['sourceType'] = 'direct-excerpt'
+): SearchResult[] => {
+  if (!vectorData) return [];
+
+  if (Array.isArray(vectorData.sources) && vectorData.sources.length > 0) {
+    return vectorData.sources.map((source: any) => {
+      const normalized = normalizeSource(source);
+      return {
+        ...normalized,
+        sourceType: normalized.sourceType || sourceType,
+      };
+    });
+  }
+
+  if (vectorData.documents && vectorData.documents[0]) {
+    return vectorData.documents[0].map((doc: string, i: number) => {
+      const dist = vectorData.distances?.[0]?.[i];
+      const relevance = dist !== undefined
+        ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(Number(dist) / 2))))
+        : 50;
+
+      return {
+        filename: vectorData.metadatas?.[0]?.[i]?.filename || 'unknown',
+        filepath: vectorData.metadatas?.[0]?.[i]?.filepath || 'unknown',
+        relevance,
+        snippet: doc,
+        sourceType,
+      };
+    });
+  }
+
+  return [];
+};
+
+const normalizeTaggedSources = (
+  sources: any[],
+  sourceType: SearchResult['sourceType']
+): SearchResult[] => {
+  if (!Array.isArray(sources)) return [];
+  return sources.map((source: any) => {
+    const normalized = normalizeSource(source);
+    return {
+      ...normalized,
+      sourceType: normalized.sourceType || sourceType,
+    };
+  });
+};
+
+const isInsufficientAnswer = (answer: string | undefined): boolean => {
+  if (!answer || !answer.trim()) return true;
+  const cleaned = answer.trim().toLowerCase();
+  return [
+    'cannot provide the analysis',
+    'cannot answer',
+    'insufficient information',
+    'no relevant notes',
+    'no relevant relationships',
+    'no relevant notes or relationships',
+    'provided knowledge graph',
+    'would need:',
+    'i would need',
+    'placeholder',
+    '[unknown]',
+    'without properly labeled notes',
+    'if you can provide a clearer knowledge graph',
+  ].some((pattern) => cleaned.includes(pattern));
+};
+
+const buildCombinedAnswer = (
+  mode: string,
+  noteSources: SearchResult[],
+  entitySources: SearchResult[],
+  vectorSources: SearchResult[]
+): string => {
+  if (mode === 'notes+vector') {
+    if (noteSources.length > 0 && vectorSources.length > 0) {
+      return `Showing ${noteSources.length} linked-note context items and ${vectorSources.length} direct note excerpts below.`;
+    }
+    if (noteSources.length > 0) {
+      return `Showing ${noteSources.length} linked-note context items below.`;
+    }
+    if (vectorSources.length > 0) {
+      return `Showing ${vectorSources.length} direct note excerpts below.`;
+    }
+  }
+
+  if (mode === 'entities+vector') {
+    if (entitySources.length > 0 && vectorSources.length > 0) {
+      return `Showing ${entitySources.length} entity-context items and ${vectorSources.length} direct note excerpts below.`;
+    }
+    if (entitySources.length > 0) {
+      return `Showing ${entitySources.length} entity-context items below.`;
+    }
+    if (vectorSources.length > 0) {
+      return `Showing ${vectorSources.length} direct note excerpts below.`;
+    }
+  }
+
+  if (mode === 'dual-graph') {
+    if (noteSources.length > 0 && entitySources.length > 0) {
+      return `Showing ${noteSources.length} linked-note context items and ${entitySources.length} entity-context items below.`;
+    }
+  }
+
+  return 'No results found';
 };
 
 export const api = {
@@ -60,6 +182,7 @@ export const api = {
     answer: string;
     sources?: SearchResult[];
     extracted_entities?: string[];
+    retrievalIntent?: string;
     llm_provider?: string;
     model?: string;
     web_search?: any;
@@ -148,23 +271,29 @@ export const api = {
           extracted_entities: data.notes?.data?.extracted_entities || []
         };
       } else if (mode.includes('+') || mode === 'dual-graph') {
-        // Dual-source modes: prefer entities (LightRAG) if available, otherwise notes (NetworkX)
-        let answer = 'No results found';
-        let sources = [];
+        const noteSources = normalizeTaggedSources(data.notes?.data?.sources || [], 'linked-note');
+        const entitySources = normalizeTaggedSources(data.entities?.data?.sources || [], 'entity-context');
+        const vectorSources = normalizeVectorSources(data.vector?.data, 'direct-excerpt');
+        const topLevelSources = Array.isArray(data.sources)
+          ? data.sources.map((source: any) => normalizeSource(source))
+          : [];
 
-        if (data.entities?.data) {
-          answer = data.entities.data.result || data.entities.data.answer || answer;
-        } else if (data.notes?.data) {
-          answer = data.notes.data.answer || data.notes.data.result || answer;
-        } else if (data.vector?.data) {
-          const vectorData = data.vector.data;
-          answer = vectorData.answer || vectorData.result || answer;
-          sources = vectorData.sources || [];
+        let sources = topLevelSources.length > 0
+          ? topLevelSources
+          : [...noteSources, ...entitySources, ...vectorSources];
+
+        let answer = data.answer
+          || data.entities?.data?.result
+          || data.entities?.data?.answer
+          || data.notes?.data?.answer
+          || data.notes?.data?.result
+          || data.vector?.data?.answer
+          || data.vector?.data?.result
+          || 'No results found';
+
+        if (isInsufficientAnswer(answer) && sources.length > 0) {
+          answer = buildCombinedAnswer(mode, noteSources, entitySources, vectorSources);
         }
-
-        // Collect sources from all available sources
-        if (data.notes?.data?.sources) sources = data.notes.data.sources;
-        if (data.vector?.data?.sources) sources = [...sources, ...data.vector.data.sources];
 
         return {
           answer,
@@ -200,7 +329,8 @@ export const api = {
         return {
           answer: data.answer || 'No results found',
           sources: (data.sources || []).map(normalizeSource),
-          extracted_entities: data.results?.entities || []
+          extracted_entities: data.results?.entities || [],
+          retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent
         };
       } else {
         // Other single-source modes (notes, entities)
@@ -229,7 +359,8 @@ export const api = {
 
         return {
           answer,
-          sources
+          sources,
+          retrievalIntent: data.retrieval_intent || result.retrieval_intent
         };
       }
     } catch (error) {
@@ -243,7 +374,8 @@ export const api = {
     if (gatewayData) {
       return {
         documents: gatewayData.documents || 0,
-        graph: gatewayData.graph || null
+        graph: gatewayData.graph || null,
+        lightrag: gatewayData.lightrag || null
       };
     }
 
@@ -261,7 +393,7 @@ export const api = {
       }
       : null;
 
-    return { documents, graph };
+    return { documents, graph, lightrag: null };
   },
 
   getOllamaModels: async (): Promise<string[]> => {
@@ -270,7 +402,8 @@ export const api = {
     // Keeping direct call for now as Gateway V1 might not have /tags proxy.
     // TODO: move to gateway /api/v1/models if implemented
     try {
-      const response = await fetch('http://localhost:11434/api/tags');
+      const OLLAMA_URL = process.env.NEXT_PUBLIC_OLLAMA_URL || 'http://localhost:11434';
+      const response = await fetch(`${OLLAMA_URL}/api/tags`);
       if (!response.ok) return [];
 
       const data = await response.json();
@@ -279,7 +412,8 @@ export const api = {
         .filter((m: any) => !m.name.includes('embed'))
         .map((m: any) => m.name);
     } catch (error) {
-      console.error('Failed to get Ollama models:', error);
+      // Avoid using console.error(error) to prevent Next.js from throwing dev overlays
+      console.log('Ollama is not running locally or unreachable. Returning empty model list.');
       return [];
     }
   },
@@ -291,12 +425,21 @@ export const api = {
     console.log("Feedback not yet implemented in V1 Gateway", feedback);
   },
 
-  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; perplexity: boolean }; models: Record<string, string> }> => {
+  checkApiKeys: async (): Promise<{ gemini: boolean; anthropic: boolean; openai: boolean }> => {
+    const config = await api.getEnvConfig();
+    return {
+      gemini: config.keys.gemini,
+      anthropic: config.keys.anthropic,
+      openai: config.keys.openai,
+    };
+  },
+
+  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; mlx: boolean }; models: Record<string, string> }> => {
     try {
       const response = await fetch('/api/env-config');
       if (!response.ok) {
         return {
-          keys: { gemini: false, anthropic: false, openai: false, perplexity: false },
+          keys: { gemini: false, anthropic: false, openai: false, mlx: false },
           models: {}
         };
       }
@@ -304,7 +447,7 @@ export const api = {
     } catch (error) {
       console.error('Failed to get env config:', error);
       return {
-        keys: { gemini: false, anthropic: false, openai: false, perplexity: false },
+        keys: { gemini: false, anthropic: false, openai: false, mlx: false },
         models: {}
       };
     }

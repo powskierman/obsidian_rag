@@ -25,6 +25,14 @@ interface AppContextType extends AppState {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 const CURRENT_SETTINGS_VERSION = 2;
 const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'mlx'];
+const DEFAULT_PROVIDER_MODELS: Record<LLMProvider, string> = {
+  ollama: 'mistral',
+  gemini: 'gemini-1.5-pro',
+  claude: 'claude-3-5-sonnet-latest',
+  openrouter: 'google/gemini-2.0-flash-exp:free',
+  chatgpt: 'gpt-4o',
+  mlx: 'LiquidAI/LFM2-24B-A2B-MLX-4bit',
+};
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
@@ -76,7 +84,7 @@ const normalizeSettings = (raw: unknown): SettingsState => {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [searchMode, setSearchModeState] = useState<SearchMode>('hybrid');
-  const [llmProvider, setLLMProvider] = useState<LLMProvider>('ollama');
+  const [llmProvider, setLLMProviderState] = useState<LLMProvider>('ollama');
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [services, setServices] = useState<ServicesStatus>(defaultServices);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -84,6 +92,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
   const [systemPrompt, setSystemPrompt] = useState('');
+  const [providerModelDefaults, setProviderModelDefaults] = useState<Record<LLMProvider, string>>(DEFAULT_PROVIDER_MODELS);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -165,6 +174,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSystemPrompt(savedPrompt);
     }
 
+    const loadEnvDefaults = async () => {
+      try {
+        const config = await api.getEnvConfig();
+        setProviderModelDefaults({
+          ollama: config.models.ollama || DEFAULT_PROVIDER_MODELS.ollama,
+          gemini: config.models.gemini || DEFAULT_PROVIDER_MODELS.gemini,
+          claude: config.models.claude || DEFAULT_PROVIDER_MODELS.claude,
+          openrouter: config.models.openrouter || DEFAULT_PROVIDER_MODELS.openrouter,
+          chatgpt: config.models.chatgpt || DEFAULT_PROVIDER_MODELS.chatgpt,
+          mlx: config.models.mlx || DEFAULT_PROVIDER_MODELS.mlx,
+        });
+      } catch (e) {
+        console.error('Failed to load provider model defaults:', e);
+      }
+    };
+    loadEnvDefaults();
+
     return () => {
       window.onerror = previousOnError;
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
@@ -192,6 +218,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('obsidian-rag-system-prompt', systemPrompt);
   }, [systemPrompt]);
 
+  useEffect(() => {
+    const staleMlxDefaults = new Set([
+      '',
+      'LiquidAI/LFM2-24B-A2B',
+    ]);
+    if (llmProvider === 'mlx' && staleMlxDefaults.has((settings.model || '').trim())) {
+      const repairedModel = providerModelDefaults.mlx || DEFAULT_PROVIDER_MODELS.mlx;
+      if (repairedModel && repairedModel !== settings.model) {
+        setSettings((prev) => ({ ...prev, model: repairedModel, settingsVersion: CURRENT_SETTINGS_VERSION }));
+      }
+    }
+  }, [llmProvider, providerModelDefaults, settings.model]);
+
   const updateSettings = (newSettings: Partial<SettingsState>) => {
     const updated = { ...settings, ...newSettings, settingsVersion: CURRENT_SETTINGS_VERSION };
     if (updated.deepThinking) {
@@ -208,6 +247,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } else {
       setSettings((prev) => ({ ...prev, deepThinking: false }));
     }
+  };
+
+  const setLLMProvider = (provider: LLMProvider) => {
+    setLLMProviderState(provider);
+    const defaultModel = providerModelDefaults[provider] || DEFAULT_PROVIDER_MODELS[provider] || '';
+    if (!defaultModel) return;
+    setSettings((prev) => ({ ...prev, model: defaultModel, settingsVersion: CURRENT_SETTINGS_VERSION }));
   };
 
   const updateServices = (newServices: Partial<ServicesStatus>) => {

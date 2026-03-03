@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 WORKING_DIR = os.getenv("GRAPHRAG_DIR", "./graphrag_db")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:14b")
-EMBED_MODEL = os.getenv("EMBED_MODEL", "nomic-embed-text")
+EMBED_MODEL = os.getenv("LIGHTRAG_EMBED_MODEL", os.getenv("EMBED_MODEL", "nomic-embed-text"))
 VAULT_PATH = os.getenv("VAULT_PATH", "/app/vault")
 SUPPORTED_EXTENSIONS = {".md", ".pdf"}
 
@@ -562,7 +562,6 @@ Starting server...
         verify_models()
 
     app.run(host='0.0.0.0', port=8002, debug=False)
-
 
 
 

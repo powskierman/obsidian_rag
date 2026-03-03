@@ -14,7 +14,10 @@ import re
 import secrets
 import sys
 import time
+from datetime import datetime
+from html import unescape
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse, urlunparse
 
 import requests
 try:
@@ -28,6 +31,24 @@ try:
     NETWORKX_AVAILABLE = True
 except ImportError:
     NETWORKX_AVAILABLE = False
+
+try:
+    import websockets
+    WEBSOCKETS_AVAILABLE = True
+except ImportError:
+    WEBSOCKETS_AVAILABLE = False
+
+try:
+    import yaml
+    YAML_AVAILABLE = True
+except ImportError:
+    YAML_AVAILABLE = False
+
+try:
+    from youtube_transcript_api import YouTubeTranscriptApi
+    YT_TRANSCRIPT_AVAILABLE = True
+except ImportError:
+    YT_TRANSCRIPT_AVAILABLE = False
 
 try:
     from dotenv import load_dotenv
@@ -54,16 +75,946 @@ logger = logging.getLogger(__name__)
 
 # Service URLs
 EMBEDDING_URL = os.getenv("EMBEDDING_SERVICE_URL", "http://localhost:8000")
-GRAPH_SERVICE_URL = os.getenv("CLAUDE_GRAPH_SERVICE_URL", "http://localhost:8002")
+GRAPH_SERVICE_URL = os.getenv("CLAUDE_GRAPH_SERVICE_URL") or os.getenv("GRAPH_SERVICE_URL", "http://localhost:8002")
+GATEWAY_URL = os.getenv("MCP_GATEWAY_URL") or os.getenv("API_GATEWAY_URL", "http://localhost:4000")
+GATEWAY_QUERY_TIMEOUT = float(os.getenv("MCP_GATEWAY_QUERY_TIMEOUT", "120"))
+DEEP_RESEARCH_TIMEOUT = float(os.getenv("MCP_DEEP_RESEARCH_TIMEOUT", "240"))
 MAX_NOTE_CHARS = int(os.getenv("MCP_MAX_NOTE_CHARS", "200000"))
 PDF_MAX_PAGES = int(os.getenv("MCP_PDF_MAX_PAGES", "25"))
 MAX_ATTACHMENTS_PER_NOTE = int(os.getenv("MCP_MAX_ATTACHMENTS_PER_NOTE", "3"))
+
+MODE_TOOL_SUPPORTED_MODES = {
+    "lightrag",
+    "entities",
+    "hybrid",
+    "dual-graph",
+    "cascading",
+    "notes+vector",
+    "entities+vector",
+    "deep-research",
+}
+MODE_PASSTHROUGH_FIELDS = [
+    "max_results",
+    "llm_provider",
+    "model",
+    "temperature",
+    "entities_mode",
+    "force_mode",
+    "require_llm",
+    "relevance_threshold",
+    "web_search",
+    "llm_knowledge",
+    "system_prompt",
+]
+CAPTURE_SUBDIR = os.getenv("MCP_CAPTURE_SUBDIR", "00_Inbox/_capture")
+CAPTURE_TEMPLATE_PATH = os.getenv(
+    "MCP_CAPTURE_TEMPLATE_PATH",
+    "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel/Templates/New Note Template.md",
+)
+TAG_SCAN_MAX_FILES = int(os.getenv("MCP_TAG_SCAN_MAX_FILES", "5000"))
+TAG_CACHE_TTL_SECONDS = int(os.getenv("MCP_TAG_CACHE_TTL_SECONDS", "300"))
+_TAG_CACHE = {"loaded_at": 0.0, "tags": set()}
+
+FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---\s*\n?", re.DOTALL)
+INLINE_TAG_PATTERN = re.compile(r"(?:^|\s)#([a-zA-Z0-9_/-]+)")
+SUMMARY_NOISE_PATTERN = re.compile(
+    r"(♪|♫|\[(?:music|applause)\]|\b(music|applause|laughter|intro|outro|subscribe|lyrics?)\b)",
+    flags=re.IGNORECASE,
+)
+MIN_MEANINGFUL_SENTENCE_CHARS = 40
+MAX_SUMMARY_BULLET_CHARS = 140
+MIN_SUMMARY_BULLETS = 2
+MEDICAL_QUERY_KEYWORDS = {
+    "medical",
+    "scan",
+    "pet",
+    "ct",
+    "mri",
+    "lymphoma",
+    "dlbcl",
+    "cancer",
+    "treatment",
+    "therapy",
+    "chemo",
+    "radiation",
+    "yescarta",
+    "symptom",
+    "diagnosis",
+}
+TIMELINE_QUERY_KEYWORDS = {
+    "timeline",
+    "history",
+    "when",
+    "date",
+    "dated",
+    "sequence",
+    "chronology",
+    "progression",
+    "before",
+    "after",
+    "month",
+    "year",
+    "first",
+    "latest",
+}
+TAG_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "do",
+    "each",
+    "for",
+    "from",
+    "if",
+    "in",
+    "into",
+    "is",
+    "it",
+    "make",
+    "new",
+    "not",
+    "of",
+    "on",
+    "or",
+    "out",
+    "that",
+    "the",
+    "this",
+    "to",
+    "with",
+}
+
+
+def _slugify(text: str, fallback: str = "capture") -> str:
+    lowered = (text or "").strip().lower()
+    lowered = re.sub(r"[^a-z0-9]+", "-", lowered).strip("-")
+    return lowered or fallback
+
+
+def _vault_relative_path(path: Path) -> str:
+    vault_root = _get_vault_root()
+    if vault_root is None:
+        return str(path)
+    try:
+        rel = path.resolve().relative_to(vault_root)
+        return str(rel).replace(os.sep, "/")
+    except Exception:
+        return str(path)
+
+
+def _get_capture_root() -> tuple[Path | None, str | None]:
+    vault_root = _get_vault_root()
+    if vault_root is None:
+        return None, "❌ OBSIDIAN_VAULT_PATH is not set"
+
+    capture_root = (vault_root / CAPTURE_SUBDIR).resolve()
+    try:
+        capture_root.relative_to(vault_root)
+    except ValueError:
+        return None, "❌ Capture directory must be inside OBSIDIAN_VAULT_PATH"
+    return capture_root, None
+
+
+def _ensure_capture_root() -> tuple[Path | None, str | None]:
+    capture_root, error = _get_capture_root()
+    if error:
+        return None, error
+    try:
+        capture_root.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        return None, f"❌ Failed to create capture directory: {str(e)}"
+    return capture_root, None
+
+
+def _is_path_within(base: Path, candidate: Path) -> bool:
+    try:
+        candidate.resolve().relative_to(base.resolve())
+        return True
+    except Exception:
+        return False
+
+
+def _resolve_capture_note_path(raw_path: str) -> tuple[Path | None, str | None]:
+    resolved, error = _resolve_vault_path(raw_path)
+    if error or resolved is None:
+        return None, error
+    capture_root, cap_error = _get_capture_root()
+    if cap_error or capture_root is None:
+        return None, cap_error
+    if not _is_path_within(capture_root, resolved):
+        return None, f"❌ Writes are restricted to '{CAPTURE_SUBDIR}'"
+    return resolved, None
+
+
+def _split_frontmatter(markdown: str) -> tuple[dict, str, bool]:
+    if not markdown:
+        return {}, "", False
+    match = FRONTMATTER_PATTERN.match(markdown)
+    if not match:
+        return {}, markdown, False
+    if not YAML_AVAILABLE:
+        return {}, markdown[match.end():], True
+    try:
+        parsed = yaml.safe_load(match.group(1)) or {}
+        if not isinstance(parsed, dict):
+            parsed = {}
+    except Exception:
+        parsed = {}
+    body = markdown[match.end():]
+    return parsed, body, True
+
+
+def _render_frontmatter(frontmatter: dict, body: str) -> str:
+    if not YAML_AVAILABLE:
+        return body
+    dumped = yaml.safe_dump(frontmatter, sort_keys=False, allow_unicode=False).strip()
+    clean_body = body.lstrip("\n")
+    if clean_body:
+        return f"---\n{dumped}\n---\n\n{clean_body}\n"
+    return f"---\n{dumped}\n---\n"
+
+
+def _normalize_tag(raw_tag: str) -> str | None:
+    tag = str(raw_tag or "").strip().lower()
+    if not tag:
+        return None
+    if tag.startswith("#"):
+        tag = tag[1:]
+    tag = re.sub(r"\s+", "-", tag)
+    tag = re.sub(r"[^a-z0-9_/-]", "", tag)
+    if not tag:
+        return None
+    return f"#{tag}"
+
+
+def _extract_tags_from_frontmatter(frontmatter: dict) -> set[str]:
+    if not isinstance(frontmatter, dict):
+        return set()
+    raw_tags = frontmatter.get("tags")
+    tags = set()
+    if isinstance(raw_tags, str):
+        raw_values = [item.strip() for item in raw_tags.split(",")]
+    elif isinstance(raw_tags, list):
+        raw_values = raw_tags
+    else:
+        raw_values = []
+    for item in raw_values:
+        normalized = _normalize_tag(str(item))
+        if normalized:
+            tags.add(normalized)
+    return tags
+
+
+def _extract_inline_tags(text: str) -> set[str]:
+    found = set()
+    for match in INLINE_TAG_PATTERN.findall(text or ""):
+        normalized = _normalize_tag(match)
+        if normalized:
+            found.add(normalized)
+    return found
+
+
+def _collect_existing_tags() -> set[str]:
+    now = time.time()
+    cached_at = float(_TAG_CACHE.get("loaded_at", 0.0))
+    cached_tags = _TAG_CACHE.get("tags", set())
+    if now - cached_at < TAG_CACHE_TTL_SECONDS and isinstance(cached_tags, set):
+        return set(cached_tags)
+
+    vault_root = _get_vault_root()
+    if vault_root is None:
+        return set()
+
+    tags: set[str] = set()
+    processed = 0
+    for note_path in vault_root.rglob("*.md"):
+        processed += 1
+        if processed > TAG_SCAN_MAX_FILES:
+            break
+        try:
+            text = note_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+        frontmatter, body, _ = _split_frontmatter(text)
+        tags.update(_extract_tags_from_frontmatter(frontmatter))
+        tags.update(_extract_inline_tags(body))
+
+    tags = {tag for tag in tags if _is_valid_existing_tag(tag)}
+    _TAG_CACHE["loaded_at"] = now
+    _TAG_CACHE["tags"] = set(tags)
+    return tags
+
+
+def _score_tags_for_note(note_text: str, existing_tags: set[str], max_tags: int) -> list[str]:
+    valid_existing_tags = {tag for tag in existing_tags if _is_valid_existing_tag(tag)}
+    if not valid_existing_tags:
+        return []
+
+    text_lower = (note_text or "").lower()
+    words = re.findall(r"[a-z0-9][a-z0-9_-]{1,}", text_lower)
+    word_counts: dict[str, int] = {}
+    for word in words:
+        word_counts[word] = word_counts.get(word, 0) + 1
+
+    scored: list[tuple[int, str]] = []
+    for tag in sorted(valid_existing_tags):
+        bare = tag.lstrip("#")
+        score = 0
+        if bare and bare in text_lower:
+            score += 3
+        for token in [p for p in re.split(r"[/_-]+", bare) if len(p) >= 2]:
+            score += word_counts.get(token, 0)
+        if score > 0:
+            scored.append((score, bare))
+
+    scored.sort(key=lambda item: (-item[0], len(item[1]), item[1]))
+    return [item[1] for item in scored[:max(1, max_tags)]]
+
+
+def _load_capture_template() -> str:
+    template_path = Path(CAPTURE_TEMPLATE_PATH).expanduser()
+    if template_path.exists():
+        try:
+            return template_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+    return (
+        "# {{title}}\n\n"
+        "- Date: {{date}}\n"
+        "- Source: {{source}}\n\n"
+        "## Summary\n{{summary}}\n\n"
+        "## Details\n{{content}}\n\n"
+        "## Tags\n{{tags}}\n"
+    )
+
+
+def _render_capture_note(template: str, values: dict[str, str]) -> str:
+    rendered = template
+    replaced_any = False
+    for key, value in values.items():
+        token = "{{" + key + "}}"
+        if token in rendered:
+            rendered = rendered.replace(token, value)
+            replaced_any = True
+
+    if replaced_any:
+        return rendered.rstrip() + "\n"
+
+    return (
+        f"{template.rstrip()}\n\n"
+        f"# {values.get('title', 'Capture')}\n\n"
+        f"- Date: {values.get('date', '')}\n"
+        f"- Source: {values.get('source', 'capture')}\n\n"
+        f"## Summary\n{values.get('summary', '')}\n\n"
+        f"## Details\n{values.get('content', '')}\n\n"
+        f"## Tags\n{values.get('tags', '')}\n"
+    )
+
+
+def _write_capture_note(title: str, content: str) -> tuple[Path | None, str | None]:
+    capture_root, error = _ensure_capture_root()
+    if error:
+        return None, error
+
+    timestamp = datetime.now().astimezone().strftime("%Y-%m-%d_%H-%M-%S")
+    slug = _slugify(title)
+    candidate = capture_root / f"{timestamp}_{slug}.md"
+    if candidate.exists():
+        candidate = capture_root / f"{timestamp}_{slug}_{secrets.token_hex(2)}.md"
+
+    resolved = candidate.resolve()
+    if not _is_path_within(capture_root, resolved):
+        return None, f"❌ Writes are restricted to '{CAPTURE_SUBDIR}'"
+
+    try:
+        resolved.write_text(content, encoding="utf-8")
+    except Exception as e:
+        return None, f"❌ Failed to write capture note: {str(e)}"
+    return resolved, None
+
+
+def _extract_text_from_html(html_text: str) -> str:
+    cleaned = re.sub(r"(?is)<(script|style).*?>.*?</\\1>", " ", html_text or "")
+    cleaned = re.sub(r"(?s)<[^>]+>", " ", cleaned)
+    cleaned = unescape(cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
+def _summarize_to_points(raw_text: str, max_points: int = 8) -> list[str]:
+    text = re.sub(r"\s+", " ", raw_text or "").strip()
+    if not text:
+        return []
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    points = []
+    for sentence in sentences:
+        trimmed = sentence.strip()
+        if len(trimmed) < 30:
+            continue
+        points.append(trimmed)
+        if len(points) >= max(1, max_points):
+            break
+    if not points:
+        points = [text[:220] + ("..." if len(text) > 220 else "")]
+    return points
+
+
+def _is_valid_existing_tag(tag: str) -> bool:
+    normalized = _normalize_tag(tag)
+    if not normalized:
+        return False
+    bare = normalized.lstrip("#")
+    if len(bare) < 3:
+        return False
+    if bare.isdigit():
+        return False
+    if bare in TAG_STOPWORDS:
+        return False
+    if not re.search(r"[a-z]", bare):
+        return False
+    return True
+
+
+def _sanitize_transcript_fragment(fragment: str) -> str:
+    text = fragment or ""
+    text = re.sub(r"\[[^\]]+\]", " ", text)
+    text = re.sub(r"\([^)]*\)", " ", text)
+    text = re.sub(r"\b\d{1,2}:\d{2}(?::\d{2})?\b", " ", text)
+    text = re.sub(r"\s+", " ", text).strip(" -")
+    return text
+
+
+def _looks_like_transcript_noise(text: str) -> bool:
+    if not text:
+        return True
+    if SUMMARY_NOISE_PATTERN.search(text):
+        return True
+
+    lowered = text.lower()
+    tokens = re.findall(r"[a-z0-9']+", lowered)
+    if len(tokens) < 5:
+        return True
+    if len(tokens) >= 10:
+        unique_ratio = len(set(tokens)) / float(len(tokens))
+        if unique_ratio < 0.6:
+            return True
+    if len(tokens) >= 16:
+        window = min(4, max(2, len(tokens) // 8))
+        if window >= 2:
+            first_chunk = " ".join(tokens[:window])
+            repeats = sum(
+                1
+                for idx in range(0, len(tokens) - window + 1)
+                if " ".join(tokens[idx:idx + window]) == first_chunk
+            )
+            if repeats >= 3:
+                return True
+    if re.search(r"\b(\w+)(?:\s+\1){3,}\b", lowered):
+        return True
+    return False
+
+
+def _compress_summary_point(text: str, max_chars: int = 180) -> str:
+    cleaned = re.sub(r"\s+", " ", text or "").strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+    shortened = cleaned[:max_chars].rsplit(" ", 1)[0].strip()
+    if not shortened:
+        shortened = cleaned[:max_chars].strip()
+    return shortened + "..."
+
+
+def _summarize_youtube_transcript_to_points(raw_text: str, max_points: int = 8) -> list[str]:
+    if not raw_text:
+        return []
+
+    fragments = re.split(r"[\r\n]+|(?<=[.!?])\s+", raw_text)
+    points: list[str] = []
+    seen: set[str] = set()
+
+    for fragment in fragments:
+        raw_fragment = (fragment or "").strip()
+        if _looks_like_transcript_noise(raw_fragment):
+            continue
+
+        cleaned = _sanitize_transcript_fragment(raw_fragment)
+        if len(cleaned) < MIN_MEANINGFUL_SENTENCE_CHARS:
+            continue
+        if _looks_like_transcript_noise(cleaned):
+            continue
+        compressed = _compress_summary_point(cleaned, max_chars=180)
+        signature = re.sub(r"[^a-z0-9]+", " ", compressed.lower()).strip()
+        if not signature or signature in seen:
+            continue
+        seen.add(signature)
+        points.append(compressed)
+        if len(points) >= max(1, max_points):
+            break
+
+    return points
+
+
+def _normalize_for_match(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (text or "").lower()).strip()
+
+
+def _truncate_without_ellipsis(text: str, max_chars: int) -> str:
+    cleaned = (text or "").strip()
+    if len(cleaned) <= max_chars:
+        return cleaned
+    shortened = cleaned[:max_chars].rsplit(" ", 1)[0].strip()
+    if not shortened:
+        shortened = cleaned[:max_chars].strip()
+    return shortened
+
+
+def _looks_like_run_on_fragment(text: str) -> bool:
+    tokens = re.findall(r"[a-z0-9']+", (text or "").lower())
+    if len(tokens) > 24:
+        return True
+    comma_count = (text or "").count(",")
+    if comma_count >= 3 and not re.search(r"[.!?]\s*$", text or ""):
+        return True
+    clause_breaks = len(re.findall(r"\b(and|then|because|so|which)\b", (text or "").lower()))
+    if clause_breaks >= 4:
+        return True
+    return False
+
+
+def _extract_json_object(text: str) -> dict | None:
+    candidate = (text or "").strip()
+    if not candidate:
+        return None
+    try:
+        parsed = json.loads(candidate)
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception:
+        pass
+
+    start = candidate.find("{")
+    end = candidate.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        return None
+    try:
+        parsed = json.loads(candidate[start:end + 1])
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception:
+        return None
+    return None
+
+
+def _health_status_icon(status: str) -> str:
+    lowered = (status or "").strip().lower()
+    if lowered in {"healthy", "ok", "up", "ready", "available"}:
+        return "✅"
+    if lowered in {"degraded", "warning", "warn", "partial"}:
+        return "⚠️"
+    if lowered in {"unhealthy", "down", "error", "failed", "offline"}:
+        return "❌"
+    return "ℹ️"
+
+
+def _format_health_metric_value(value: object) -> str | None:
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, int):
+        return f"{value:,}"
+    if isinstance(value, float):
+        if value.is_integer():
+            return f"{int(value):,}"
+        return f"{value:.2f}".rstrip("0").rstrip(".")
+    return None
+
+
+def _humanize_health_service_name(service_key: str) -> str:
+    lowered = (service_key or "").strip().lower()
+    aliases = {
+        "networkx": "NetworkX",
+        "lightrag": "LightRAG",
+        "embedding": "Embedding",
+        "graph": "Graph",
+    }
+    base = aliases.get(lowered)
+    if not base:
+        base = re.sub(r"[_-]+", " ", service_key or "").strip().title() or "Service"
+    if base.lower().endswith("service"):
+        return base
+    return f"{base} service"
+
+
+def _summarize_health_payload_to_points(payload: dict, max_points: int = 8) -> list[str]:
+    if not isinstance(payload, dict):
+        return []
+
+    data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
+    if not isinstance(data, dict):
+        return []
+
+    points: list[str] = []
+
+    gateway_status = data.get("gateway")
+    if isinstance(gateway_status, str) and gateway_status.strip():
+        cleaned_status = gateway_status.strip()
+        points.append(f"Gateway: {_health_status_icon(cleaned_status)} {cleaned_status.capitalize()}")
+
+    services = data.get("services")
+    if isinstance(services, dict):
+        metric_labels = [
+            ("count", "items"),
+            ("nodes", "nodes"),
+            ("edges", "edges"),
+            ("indexed_notes", "indexed notes"),
+        ]
+        for service_key, service_payload in services.items():
+            if not isinstance(service_payload, dict):
+                continue
+            status_value = str(service_payload.get("status") or "unknown").strip() or "unknown"
+            icon = _health_status_icon(status_value)
+            metrics: list[str] = []
+            for metric_key, metric_label in metric_labels:
+                formatted_metric = _format_health_metric_value(service_payload.get(metric_key))
+                if formatted_metric:
+                    metrics.append(f"{formatted_metric} {metric_label}")
+            metrics_suffix = f" ({'; '.join(metrics)})" if metrics else ""
+            points.append(
+                f"{_humanize_health_service_name(str(service_key))}: "
+                f"{icon} {status_value.capitalize()}{metrics_suffix}"
+            )
+
+    return points[:max(1, max_points)]
+
+
+def _rewrite_points_with_openai(points: list[str], max_points: int) -> tuple[list[str], str] | None:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None
+
+    model = os.getenv("MCP_YOUTUBE_SUMMARY_MODEL", os.getenv("OPENAI_MODEL", "gpt-4o-mini"))
+    prompt = (
+        "Rewrite these transcript-derived notes into concise summary bullets.\n"
+        "Constraints:\n"
+        "- Rewrite into plain-language tutorial steps.\n"
+        "- No direct quotes.\n"
+        "- No verbatim transcript fragments.\n"
+        "- One idea per bullet.\n"
+        f"- Return 2 to {max(2, max_points)} bullets.\n"
+        "- Each bullet <= 140 chars.\n"
+        "- Avoid filler, lyric, and stage-direction text.\n"
+        "Also provide a 2-4 sentence synthesized details paragraph.\n\n"
+        "Return strict JSON:\n"
+        '{"bullets":["..."],"details":"..."}\n\n'
+        "Input points:\n"
+        + "\n".join([f"- {point}" for point in points])
+    )
+
+    payload = {
+        "model": model,
+        "temperature": 0.2,
+        "response_format": {"type": "json_object"},
+        "messages": [
+            {
+                "role": "system",
+                "content": "You rewrite noisy transcripts into clean tutorial summaries."
+            },
+            {"role": "user", "content": prompt},
+        ],
+    }
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=45,
+        )
+        if response.status_code != 200:
+            return None
+        content = (
+            response.json()
+            .get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "")
+        )
+        parsed = _extract_json_object(content)
+        if not parsed:
+            return None
+        bullets = parsed.get("bullets")
+        details = str(parsed.get("details") or "").strip()
+        if not isinstance(bullets, list):
+            return None
+        clean_bullets = [str(item).strip() for item in bullets if str(item).strip()]
+        if not clean_bullets:
+            return None
+        return clean_bullets[:max(1, max_points)], details
+    except Exception:
+        return None
+
+
+def _rewrite_points_with_gemini(points: list[str], max_points: int) -> tuple[list[str], str] | None:
+    if not GENAI_AVAILABLE:
+        return None
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_key:
+        return None
+
+    model_name = os.getenv("MCP_YOUTUBE_SUMMARY_GEMINI_MODEL", os.getenv("GEMINI_MODEL", "gemini-1.5-flash"))
+    prompt = (
+        "Rewrite these transcript-derived notes into concise summary bullets.\n"
+        "Constraints:\n"
+        "- Rewrite into plain-language tutorial steps.\n"
+        "- No direct quotes.\n"
+        "- No verbatim transcript fragments.\n"
+        "- One idea per bullet.\n"
+        f"- Return 2 to {max(2, max_points)} bullets.\n"
+        "- Each bullet <= 140 chars.\n"
+        "- Avoid filler, lyric, and stage-direction text.\n"
+        "Also provide a 2-4 sentence synthesized details paragraph.\n\n"
+        "Return strict JSON:\n"
+        '{"bullets":["..."],"details":"..."}\n\n'
+        "Input points:\n"
+        + "\n".join([f"- {point}" for point in points])
+    )
+
+    try:
+        genai.configure(api_key=gemini_key)
+        model = genai.GenerativeModel(model_name)
+        response = model.generate_content(prompt)
+        text = str(getattr(response, "text", "") or "")
+        parsed = _extract_json_object(text)
+        if not parsed:
+            return None
+        bullets = parsed.get("bullets")
+        details = str(parsed.get("details") or "").strip()
+        if not isinstance(bullets, list):
+            return None
+        clean_bullets = [str(item).strip() for item in bullets if str(item).strip()]
+        if not clean_bullets:
+            return None
+        return clean_bullets[:max(1, max_points)], details
+    except Exception:
+        return None
+
+
+def _heuristic_rewrite_points(points: list[str], max_points: int) -> tuple[list[str], str]:
+    rewritten: list[str] = []
+    for point in points[:max(1, max_points)]:
+        sentence = re.sub(r"\s+", " ", point or "").strip()
+        sentence = re.sub(r'["“”]', "", sentence)
+        sentence = re.sub(r"^\W+", "", sentence)
+        sentence = sentence[0].upper() + sentence[1:] if sentence else sentence
+        sentence = _truncate_without_ellipsis(sentence, MAX_SUMMARY_BULLET_CHARS)
+        if sentence:
+            rewritten.append(sentence)
+
+    details = _synthesize_details_paragraph(rewritten)
+    return rewritten, details
+
+
+def _rewrite_points_abstractive(points: list[str], max_points: int) -> tuple[list[str], str]:
+    llm_result = _rewrite_points_with_openai(points, max_points=max_points)
+    if llm_result is None:
+        llm_result = _rewrite_points_with_gemini(points, max_points=max_points)
+    if llm_result is not None:
+        return llm_result
+    return _heuristic_rewrite_points(points, max_points=max_points)
+
+
+def _is_valid_summary_bullet(bullet: str, source_points: list[str]) -> bool:
+    cleaned = (bullet or "").strip()
+    if not cleaned:
+        return False
+    if len(cleaned) > MAX_SUMMARY_BULLET_CHARS:
+        return False
+    if "..." in cleaned:
+        return False
+    if "♪" in cleaned or "♫" in cleaned:
+        return False
+    if _looks_like_transcript_noise(cleaned):
+        return False
+    if _looks_like_run_on_fragment(cleaned):
+        return False
+
+    normalized_bullet = _normalize_for_match(cleaned)
+    if not normalized_bullet:
+        return False
+    for source in source_points:
+        normalized_source = _normalize_for_match(source)
+        if normalized_source and (
+            normalized_bullet == normalized_source
+            or normalized_bullet in normalized_source
+        ):
+            return False
+    return True
+
+
+def _quality_gate_summary_bullets(bullets: list[str], source_points: list[str], max_points: int) -> list[str]:
+    kept: list[str] = []
+    seen: set[str] = set()
+    for bullet in bullets:
+        cleaned = re.sub(r"^\s*[-*•]\s*", "", str(bullet or "")).strip()
+        cleaned = _truncate_without_ellipsis(cleaned, MAX_SUMMARY_BULLET_CHARS)
+        signature = _normalize_for_match(cleaned)
+        if not signature or signature in seen:
+            continue
+        if not _is_valid_summary_bullet(cleaned, source_points=source_points):
+            continue
+        seen.add(signature)
+        kept.append(cleaned)
+        if len(kept) >= max(1, max_points):
+            break
+    return kept
+
+
+def _synthesize_details_paragraph(bullets: list[str]) -> str:
+    if not bullets:
+        return ""
+    use = bullets[:4]
+    phrases = [re.sub(r"[.!?]\s*$", "", item).strip() for item in use if item.strip()]
+    if not phrases:
+        return ""
+
+    sentences: list[str] = []
+    if len(phrases) >= 1:
+        sentences.append(f"The walkthrough starts by {phrases[0][0].lower() + phrases[0][1:]}.")
+    if len(phrases) >= 2:
+        sentences.append(f"It then explains how to {phrases[1][0].lower() + phrases[1][1:]}.")
+    if len(phrases) >= 3:
+        sentences.append(f"Next, it highlights {phrases[2][0].lower() + phrases[2][1:]}.")
+    if len(phrases) >= 4:
+        sentences.append(f"Finally, it reinforces {phrases[3][0].lower() + phrases[3][1:]}.")
+
+    # Ensure 2-4 sentences.
+    if len(sentences) < 2 and len(phrases) >= 1:
+        sentences.append("These steps together provide a practical sequence to apply immediately.")
+    return " ".join(sentences[:4]).strip()
+
+
+def _quality_gate_details_paragraph(details: str, bullets: list[str]) -> str:
+    cleaned = re.sub(r"\s+", " ", (details or "").strip())
+    if not cleaned:
+        return ""
+    if "♪" in cleaned or "♫" in cleaned:
+        return ""
+    if "..." in cleaned:
+        return ""
+
+    sentences = [
+        segment.strip()
+        for segment in re.split(r"(?<=[.!?])\s+", cleaned)
+        if segment.strip()
+    ]
+    if len(sentences) < 2 or len(sentences) > 4:
+        return ""
+
+    bullet_block = " ".join([f"- {bullet}" for bullet in bullets]).strip()
+    if bullet_block and _normalize_for_match(cleaned) == _normalize_for_match(bullet_block):
+        return ""
+    return " ".join(sentences)
+
+
+def _extract_youtube_video_id(url: str) -> str | None:
+    parsed = urlparse(url)
+    host = (parsed.netloc or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+
+    if host == "youtu.be":
+        video_id = parsed.path.strip("/").split("/")[0]
+        return video_id or None
+
+    if host in {"youtube.com", "m.youtube.com"}:
+        if parsed.path == "/watch":
+            video_id = parse_qs(parsed.query).get("v", [None])[0]
+            return video_id
+        if parsed.path.startswith("/shorts/") or parsed.path.startswith("/embed/"):
+            parts = [p for p in parsed.path.split("/") if p]
+            if len(parts) >= 2:
+                return parts[1]
+    return None
+
+
+def _fetch_youtube_title(url: str) -> str:
+    try:
+        response = requests.get(
+            "https://www.youtube.com/oembed",
+            params={"url": url, "format": "json"},
+            timeout=15,
+        )
+        if response.status_code == 200:
+            payload = response.json()
+            title = payload.get("title")
+            if isinstance(title, str) and title.strip():
+                return title.strip()
+    except Exception:
+        pass
+    return "YouTube Capture"
+
+
+def _fetch_youtube_transcript(video_id: str) -> str:
+    if not YT_TRANSCRIPT_AVAILABLE:
+        raise RuntimeError("youtube_transcript_api is not installed")
+    chunks: list[str] = []
+    if hasattr(YouTubeTranscriptApi, "get_transcript"):
+        # Backward compatibility with older youtube_transcript_api releases.
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["en"])
+        for item in transcript:
+            if isinstance(item, dict):
+                text = str(item.get("text", "")).strip()
+            else:
+                text = str(getattr(item, "text", "")).strip()
+            if text:
+                chunks.append(text)
+    else:
+        # Newer releases expose an instance method `fetch`.
+        api = YouTubeTranscriptApi()
+        fetched = api.fetch(video_id, languages=["en"])
+        for item in fetched:
+            if isinstance(item, dict):
+                text = str(item.get("text", "")).strip()
+            else:
+                text = str(getattr(item, "text", "")).strip()
+            if text:
+                chunks.append(text)
+    text = " ".join(chunks).strip()
+    if not text:
+        raise RuntimeError("Transcript is empty")
+    return text
 
 def _service_headers() -> dict:
     api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
     if not api_key:
         return {}
     return {"X-API-Key": api_key}
+
+
+def _gateway_base_url() -> str:
+    return GATEWAY_URL.rstrip("/")
+
+
+def _gateway_query_url() -> str:
+    base = _gateway_base_url()
+    if base.endswith("/api/v1"):
+        return f"{base}/query"
+    return f"{base}/api/v1/query"
+
+
+def _gateway_deep_research_ws_url() -> str:
+    parsed = urlparse(_gateway_base_url())
+    scheme = "wss" if parsed.scheme in {"https", "wss"} else "ws"
+    path = parsed.path.rstrip("/")
+    if path.endswith("/api/v1"):
+        path = path[:-7]
+    ws_path = f"{path}/api/v1/deep-research"
+    return urlunparse((scheme, parsed.netloc, ws_path, "", "", ""))
 
 
 def _get_vault_root() -> Path | None:
@@ -236,61 +1187,78 @@ class GraphQuerier:
 
         self.timeout = float(os.environ.get("OPENAI_TIMEOUT", "60"))
 
+    def _node_label(self, node) -> str:
+        if isinstance(node, str):
+            return node
+        if isinstance(node, tuple):
+            if self.graph.has_node(node):
+                props = self.graph.nodes[node]
+                for key in ("title", "name", "path"):
+                    value = props.get(key)
+                    if isinstance(value, str) and value.strip():
+                        return value
+            if len(node) > 1:
+                return str(node[1])
+        return str(node)
+
+    def _resolve_entity_node(self, raw_name: str):
+        name = (raw_name or "").strip().strip('"\'')
+        if not name:
+            return None
+
+        if self.graph.has_node(name):
+            return name
+
+        name_lower = name.lower()
+        exact_matches = []
+        partial_matches = []
+        for node in self.graph.nodes():
+            node_lower = self._node_label(node).lower()
+            if node_lower == name_lower:
+                exact_matches.append(node)
+            elif name_lower in node_lower or node_lower in name_lower:
+                partial_matches.append(node)
+
+        matches = exact_matches or partial_matches
+        if not matches:
+            return None
+        return max(matches, key=lambda n: self.graph.degree(n))
+
     def find_paths(self, source: str, target: str, max_depth: int = 3):
-        source = source.strip().strip('"\'')
-        target = target.strip().strip('"\'')
-
-        def find_best_match(name: str):
-            name_lower = name.lower()
-            matches = [
-                n for n in self.graph.nodes()
-                if name_lower in n.lower() or n.lower() in name_lower
-            ]
-            if not matches:
-                return None
-            return max(matches, key=lambda n: self.graph.degree(n))
-
-        s_ent = source if self.graph.has_node(source) else find_best_match(source)
-        t_ent = target if self.graph.has_node(target) else find_best_match(target)
+        s_ent = self._resolve_entity_node(source)
+        t_ent = self._resolve_entity_node(target)
         if not s_ent or not t_ent:
             return []
         try:
             paths = list(nx.all_simple_paths(self.graph.to_undirected(), s_ent, t_ent, cutoff=max_depth))
-            return paths[:10]
+            return [[self._node_label(node) for node in path] for path in paths[:10]]
         except Exception:
             return []
 
     def get_entity_neighborhood(self, entity: str, depth: int = 1):
-        entity = entity.strip().strip('"\'')
-        if self.graph.has_node(entity):
-            matches = [entity]
-        else:
-            matches = [n for n in self.graph.nodes() if entity.lower() == n.lower()]
-            if not matches and len(entity) > 3:
-                matches = [n for n in self.graph.nodes() if entity.lower() in n.lower()]
-
-        if not matches:
+        entity = (entity or "").strip().strip('"\'')
+        entity_node = self._resolve_entity_node(entity)
+        if entity_node is None:
             return {"entity": entity, "found": False}
 
-        entity = max(matches, key=lambda n: self.graph.degree(n))
         neighbors = {
-            "entity": entity,
+            "entity": self._node_label(entity_node),
             "found": True,
-            "properties": dict(self.graph.nodes[entity]),
+            "properties": dict(self.graph.nodes[entity_node]),
             "outgoing": [],
             "incoming": []
         }
 
-        for _, t, d in self.graph.out_edges(entity, data=True):
+        for _, t, d in self.graph.out_edges(entity_node, data=True):
             neighbors["outgoing"].append({
-                "target": t,
-                "relationship": d.get("relationship_type", "related_to"),
+                "target": self._node_label(t),
+                "relationship": d.get("relationship_type") or d.get("kind") or "related_to",
                 "properties": d
             })
-        for s, _, d in self.graph.in_edges(entity, data=True):
+        for s, _, d in self.graph.in_edges(entity_node, data=True):
             neighbors["incoming"].append({
-                "source": s,
-                "relationship": d.get("relationship_type", "related_to"),
+                "source": self._node_label(s),
+                "relationship": d.get("relationship_type") or d.get("kind") or "related_to",
                 "properties": d
             })
         return neighbors
@@ -313,16 +1281,22 @@ class GraphQuerier:
             tokens = [t for t in re.split(r"\W+", name_lower) if t]
             return bool(tokens) and all(t in stopwords for t in tokens)
 
-        all_nodes = sorted(list(self.graph.nodes()), key=len, reverse=True)
+        all_nodes = sorted(list(self.graph.nodes()), key=lambda n: len(self._node_label(n)), reverse=True)
+        seen_entities = set()
         for node in all_nodes:
-            node_lower = node.lower()
+            node_label = self._node_label(node)
+            node_lower = node_label.lower()
             if len(node_lower) <= 2 or is_noise_entity(node_lower):
                 continue
             if re.search(r"\b" + re.escape(node_lower) + r"\b", query_lower):
-                entities_in_query.append(node)
+                if node_label not in seen_entities:
+                    entities_in_query.append(node_label)
+                    seen_entities.add(node_label)
                 continue
             if len(node_lower) > 3 and node_lower in query_lower:
-                entities_in_query.append(node)
+                if node_label not in seen_entities:
+                    entities_in_query.append(node_label)
+                    seen_entities.add(node_label)
 
         return entities_in_query[:max_entities]
 
@@ -440,7 +1414,7 @@ class GraphQuerier:
             is_connected = False
 
         top_entities = [
-            {"entity": node, "connections": degree}
+            {"entity": self._node_label(node), "connections": degree}
             for node, degree in graph.degree()
         ]
         top_entities.sort(key=lambda item: item["connections"], reverse=True)
@@ -505,7 +1479,10 @@ def load_graph():
             return False
 
         with open(graph_path, "rb") as handle:
-            graph = pickle.load(handle)
+            loaded = pickle.load(handle)
+
+        # Support both raw NetworkX pickles and wrapped payloads {"graph": <NetworkX graph>, ...}
+        graph = loaded.get("graph") if isinstance(loaded, dict) and "graph" in loaded else loaded
 
         if not isinstance(graph, nx.Graph):
             print("Graph file did not contain a valid NetworkX graph.", file=sys.stderr)
@@ -633,10 +1610,302 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["path"]
             }
+        ),
+        Tool(
+            name="obsidian_search_mode",
+            description=(
+                "Run gateway search modes. Supports LightRAG as a distinct mode plus "
+                "hybrid, dual-graph, cascading, notes+vector, entities+vector, and deep-research."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The user question/query to run."
+                    },
+                    "mode": {
+                        "type": "string",
+                        "description": (
+                            "Search mode. Use 'lightrag' for LightRAG entities mode. "
+                            "For deep thinking, use 'deep-research'."
+                        ),
+                        "enum": [
+                            "lightrag",
+                            "entities",
+                            "hybrid",
+                            "dual-graph",
+                            "cascading",
+                            "notes+vector",
+                            "entities+vector",
+                            "deep-research"
+                        ],
+                        "default": "hybrid"
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Max results for non-deep-research modes (default: 10)",
+                        "default": 10,
+                        "minimum": 1,
+                        "maximum": 50
+                    },
+                    "llm_provider": {
+                        "type": "string",
+                        "description": "LLM provider override (for gateway modes)."
+                    },
+                    "provider": {
+                        "type": "string",
+                        "description": "Deep-research provider override (claude/gemini/openrouter/chatgpt/ollama/perplexity)."
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Optional model override."
+                    },
+                    "temperature": {
+                        "type": "number",
+                        "description": "Optional temperature override."
+                    },
+                    "entities_mode": {
+                        "type": "string",
+                        "description": "Entities retrieval mode for LightRAG-backed requests (naive/local/global/hybrid)."
+                    },
+                    "force_mode": {
+                        "type": "boolean",
+                        "description": "Force entities mode even if gateway would auto-switch."
+                    },
+                    "require_llm": {
+                        "type": "boolean",
+                        "description": "Require LLM synthesis for entities requests."
+                    },
+                    "relevance_threshold": {
+                        "type": "number",
+                        "description": "Relevance threshold 0-100 for vector-backed retrieval."
+                    },
+                    "web_search": {
+                        "type": "boolean",
+                        "description": "Enable web search augmentation where supported."
+                    },
+                    "llm_knowledge": {
+                        "type": "boolean",
+                        "description": "Enable LLM knowledge augmentation where supported."
+                    },
+                    "system_prompt": {
+                        "type": "string",
+                        "description": "Optional custom system prompt for gateway modes."
+                    }
+                },
+                "required": ["query", "mode"]
+            }
+        ),
+        Tool(
+            name="obsidian_unified_query",
+            description="Run unified API query with optional mode override. Defaults to hybrid mode.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "User query."
+                    },
+                    "mode": {
+                        "type": "string",
+                        "description": "Optional mode override (default: hybrid).",
+                        "enum": [
+                            "lightrag",
+                            "entities",
+                            "hybrid",
+                            "dual-graph",
+                            "cascading",
+                            "notes+vector",
+                            "entities+vector",
+                            "deep-research"
+                        ],
+                        "default": "hybrid"
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Max results for non-deep-research modes (default: 10).",
+                        "default": 10,
+                        "minimum": 1,
+                        "maximum": 50
+                    },
+                    "concise": {
+                        "type": "boolean",
+                        "description": "Return concise response text (default: true).",
+                        "default": True
+                    },
+                    "llm_provider": {
+                        "type": "string",
+                        "description": "Optional LLM provider override."
+                    },
+                    "provider": {
+                        "type": "string",
+                        "description": "Optional provider alias."
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Optional model override."
+                    },
+                    "temperature": {
+                        "type": "number",
+                        "description": "Optional temperature override."
+                    },
+                    "entities_mode": {
+                        "type": "string",
+                        "description": "Optional entities mode (naive/local/global/hybrid)."
+                    },
+                    "force_mode": {
+                        "type": "boolean",
+                        "description": "Force entities mode behavior."
+                    },
+                    "require_llm": {
+                        "type": "boolean",
+                        "description": "Require LLM synthesis."
+                    },
+                    "relevance_threshold": {
+                        "type": "number",
+                        "description": "Relevance threshold 0-100."
+                    },
+                    "web_search": {
+                        "type": "boolean",
+                        "description": "Enable web search when supported."
+                    },
+                    "llm_knowledge": {
+                        "type": "boolean",
+                        "description": "Enable LLM-knowledge augmentation."
+                    },
+                    "system_prompt": {
+                        "type": "string",
+                        "description": "Optional custom system prompt."
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        Tool(
+            name="capture_note",
+            description=f"Create a capture note. Writes are restricted to '{CAPTURE_SUBDIR}'.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "type": "string",
+                        "description": "Main capture content."
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Optional note title."
+                    },
+                    "source": {
+                        "type": "string",
+                        "description": "Optional source descriptor."
+                    },
+                    "tags": {
+                        "type": "array",
+                        "description": "Optional initial tags.",
+                        "items": {"type": "string"}
+                    }
+                },
+                "required": ["content"]
+            }
+        ),
+        Tool(
+            name="summarize_url_to_capture",
+            description=f"Fetch a webpage, summarize it into points, and save to '{CAPTURE_SUBDIR}'.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "HTTP(S) URL to summarize."
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Optional capture title override."
+                    },
+                    "max_points": {
+                        "type": "integer",
+                        "description": "Maximum summary points (default: 8).",
+                        "default": 8,
+                        "minimum": 1,
+                        "maximum": 20
+                    }
+                },
+                "required": ["url"]
+            }
+        ),
+        Tool(
+            name="summarize_youtube_to_capture",
+            description=f"Summarize a YouTube video transcript and save to '{CAPTURE_SUBDIR}'.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "YouTube URL (youtube.com or youtu.be)."
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Optional capture title override."
+                    },
+                    "max_points": {
+                        "type": "integer",
+                        "description": "Maximum summary points (default: 8).",
+                        "default": 8,
+                        "minimum": 1,
+                        "maximum": 20
+                    }
+                },
+                "required": ["url"]
+            }
+        ),
+        Tool(
+            name="apply_existing_tags_frontmatter_only",
+            description=f"Apply existing vault tags to a note frontmatter. Writes are restricted to '{CAPTURE_SUBDIR}'.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Vault-relative markdown path inside capture folder."
+                    },
+                    "max_tags": {
+                        "type": "integer",
+                        "description": "Maximum tags to apply (default: 5).",
+                        "default": 5,
+                        "minimum": 1,
+                        "maximum": 20
+                    }
+                },
+                "required": ["path"]
+            }
         )
     ]
     
-    # Add graph tools if available (lazy check)
+    # Always expose graph query. It can use remote graph service even if local graph is unavailable.
+    tools.append(
+        Tool(
+            name="obsidian_graph_query",
+            description="Query your knowledge graph using LLM synthesis. Uses graph service first and falls back to local graph when available.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Your question about the knowledge graph (e.g., 'What treatments are mentioned?', 'How does CAR-T relate to lymphoma?')"
+                    },
+                    "max_entities": {
+                        "type": "integer",
+                        "description": "Maximum number of entities to consider for local graph fallback (default: 20)",
+                        "default": 20
+                    }
+                },
+                "required": ["query"]
+            }
+        )
+    )
+
+    # Add local graph-only tools when local graph is available
     if GRAPH_AVAILABLE:
         # Try to load graph (but don't fail if it can't load)
         try:
@@ -646,25 +1915,6 @@ async def list_tools() -> list[Tool]:
         
         if graph_loaded:
             tools.extend([
-                Tool(
-                    name="obsidian_graph_query",
-                    description="Query your knowledge graph using OpenAI synthesis. Ask questions about entities, relationships, and connections in your vault. Returns answers based on graph structure.",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {
-                            "query": {
-                                "type": "string",
-                                "description": "Your question about the knowledge graph (e.g., 'What treatments are mentioned?', 'How does CAR-T relate to lymphoma?')"
-                            },
-                            "max_entities": {
-                                "type": "integer",
-                                "description": "Maximum number of entities to consider (default: 20)",
-                                "default": 20
-                            }
-                        },
-                        "required": ["query"]
-                    }
-                ),
                 Tool(
                     name="get_entity_info",
                     description="Get detailed information about a specific entity in the knowledge graph, including its type, properties, and all relationships.",
@@ -753,6 +2003,18 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             return await read_vault_note(arguments)
         elif name == "read_attachment_text":
             return await read_attachment_text(arguments)
+        elif name == "obsidian_search_mode" or name == "search_mode":
+            return await search_with_mode(arguments)
+        elif name == "obsidian_unified_query":
+            return await obsidian_unified_query(arguments)
+        elif name == "capture_note":
+            return await capture_note(arguments)
+        elif name == "summarize_url_to_capture":
+            return await summarize_url_to_capture(arguments)
+        elif name == "summarize_youtube_to_capture":
+            return await summarize_youtube_to_capture(arguments)
+        elif name == "apply_existing_tags_frontmatter_only":
+            return await apply_existing_tags_frontmatter_only(arguments)
         elif name == "get_entity_info":
             return await get_entity_info(arguments)
         elif name == "find_entity_path":
@@ -984,6 +2246,567 @@ async def get_vault_statistics(arguments: dict) -> list[TextContent]:
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Stats error: {str(e)}")]
 
+
+def _normalize_mode(raw_mode: str | None) -> str:
+    mode = (raw_mode or "").strip().lower()
+    aliases = {
+        "deep_research": "deep-research",
+        "deepresearch": "deep-research",
+    }
+    return aliases.get(mode, mode)
+
+
+def _format_mode_result(mode: str, payload: dict) -> str:
+    answer = ""
+    if isinstance(payload, dict):
+        answer = str(payload.get("answer") or payload.get("response") or "").strip()
+        if not answer and mode == "deep-research":
+            deep_result = payload.get("result")
+            if isinstance(deep_result, dict):
+                answer = str(
+                    deep_result.get("answer")
+                    or deep_result.get("final_answer")
+                    or deep_result.get("response")
+                    or ""
+                ).strip()
+
+    lines = [
+        f"🔎 **Mode:** {mode}",
+        f"Gateway: {_gateway_base_url()}",
+    ]
+    if answer:
+        lines.extend(["", answer])
+
+    raw_json = json.dumps(payload, indent=2, ensure_ascii=False, default=str)
+    max_raw_chars = 30000
+    if len(raw_json) > max_raw_chars:
+        raw_json = raw_json[:max_raw_chars] + "\n...[TRUNCATED]"
+    lines.extend(["", "Raw Result:", raw_json])
+    return "\n".join(lines)
+
+
+async def _run_deep_research_via_gateway(query: str, provider: str | None, model: str | None) -> dict:
+    if not WEBSOCKETS_AVAILABLE:
+        raise RuntimeError("websockets package is not installed")
+
+    ws_url = _gateway_deep_research_ws_url()
+    headers = _service_headers()
+    ws_headers = headers if headers else None
+    request_payload = {"query": query}
+    if provider:
+        request_payload["provider"] = provider
+    if model:
+        request_payload["model"] = model
+
+    events = []
+    async with websockets.connect(
+        ws_url,
+        additional_headers=ws_headers,
+        open_timeout=10,
+        close_timeout=5,
+        max_size=8 * 1024 * 1024,
+    ) as websocket:
+        await websocket.send(json.dumps(request_payload))
+
+        while True:
+            message = await asyncio.wait_for(websocket.recv(), timeout=DEEP_RESEARCH_TIMEOUT)
+            event = json.loads(message)
+            event_type = event.get("type")
+            if event_type == "error":
+                raise RuntimeError(str(event.get("content") or event.get("message") or "Deep research failed"))
+            if event_type == "result":
+                return {
+                    "mode": "deep-research",
+                    "result": event.get("data"),
+                    "events": events,
+                }
+            events.append(event)
+            if len(events) > 50:
+                events = events[-50:]
+
+
+async def search_with_mode(arguments: dict) -> list[TextContent]:
+    """Run gateway search modes, including deep-research over websocket."""
+    args = arguments or {}
+    query = str(args.get("query") or "").strip()
+    mode = _normalize_mode(args.get("mode"))
+
+    if not query:
+        return [TextContent(type="text", text="❌ Query is required")]
+    if not mode:
+        return [TextContent(type="text", text="❌ Mode is required")]
+    if mode not in MODE_TOOL_SUPPORTED_MODES:
+        supported = ", ".join(sorted(MODE_TOOL_SUPPORTED_MODES))
+        return [TextContent(type="text", text=f"❌ Unsupported mode '{mode}'. Supported: {supported}")]
+
+    if mode == "deep-research":
+        try:
+            provider = args.get("provider") or args.get("llm_provider")
+            model = args.get("model")
+            result = await _run_deep_research_via_gateway(query, provider, model)
+            return [TextContent(type="text", text=_format_mode_result(mode, result))]
+        except Exception as e:
+            return [TextContent(type="text", text=f"❌ Deep research error: {str(e)}")]
+
+    gateway_mode = "entities" if mode == "lightrag" else mode
+    payload = {"query": query, "mode": gateway_mode}
+    for field in MODE_PASSTHROUGH_FIELDS:
+        if field in args and args[field] is not None:
+            payload[field] = args[field]
+
+    # Allow provider alias for convenience when running non-deep modes.
+    if "provider" in args and args["provider"] and "llm_provider" not in payload:
+        payload["llm_provider"] = args["provider"]
+
+    try:
+        response = requests.post(
+            _gateway_query_url(),
+            json=payload,
+            headers=_service_headers(),
+            timeout=GATEWAY_QUERY_TIMEOUT,
+        )
+        status_code = getattr(response, "status_code", None)
+        if not isinstance(status_code, int):
+            raise requests.exceptions.ConnectionError("Invalid response from API gateway")
+        if status_code != 200:
+            detail = response.text
+            try:
+                parsed = response.json()
+                detail = parsed.get("detail") or parsed
+            except Exception:
+                pass
+            return [TextContent(type="text", text=f"❌ Mode request failed ({status_code}): {detail}")]
+
+        result = response.json()
+        display_mode = "lightrag" if mode == "lightrag" else gateway_mode
+        return [TextContent(type="text", text=_format_mode_result(display_mode, result))]
+    except requests.exceptions.ConnectionError:
+        return [TextContent(
+            type="text",
+            text=f"❌ Cannot connect to API gateway at {_gateway_base_url()}. Make sure api-gateway is running."
+        )]
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Mode search error: {str(e)}")]
+
+
+def _is_medical_timeline_query(query: str) -> bool:
+    lowered = (query or "").lower()
+    if not lowered:
+        return False
+    has_medical = any(keyword in lowered for keyword in MEDICAL_QUERY_KEYWORDS)
+    has_timeline = any(keyword in lowered for keyword in TIMELINE_QUERY_KEYWORDS)
+    return has_medical and has_timeline
+
+
+def _extract_unified_source_labels(payload: dict) -> list[str]:
+    labels: list[str] = []
+    sources = payload.get("sources")
+    if not isinstance(sources, list):
+        notes = payload.get("notes")
+        if isinstance(notes, dict):
+            notes_data = notes.get("data")
+            if isinstance(notes_data, dict) and isinstance(notes_data.get("sources"), list):
+                sources = notes_data.get("sources")
+    if not isinstance(sources, list):
+        return labels
+
+    for source in sources:
+        if isinstance(source, dict):
+            raw_label = (
+                source.get("path")
+                or source.get("filepath")
+                or source.get("filename")
+                or source.get("note")
+                or source.get("source")
+            )
+            if isinstance(raw_label, str) and raw_label.strip():
+                labels.append(raw_label.strip())
+        elif isinstance(source, str) and source.strip():
+            labels.append(source.strip())
+    return labels
+
+
+def _answer_has_source_citation(answer: str, source_labels: list[str]) -> bool:
+    lowered = (answer or "").lower()
+    if not lowered:
+        return False
+
+    if re.search(r"\[[0-9]+\]", answer):
+        return True
+    if "source:" in lowered or "sources:" in lowered:
+        return True
+
+    for label in source_labels:
+        base = Path(label).name.lower()
+        if base and len(base) >= 6 and base in lowered:
+            return True
+    return False
+
+
+def _should_force_unknown_answer(query: str, answer: str, payload: dict) -> bool:
+    if not _is_medical_timeline_query(query):
+        return False
+    if (answer or "").strip().lower() == "unknown from current notes.":
+        return False
+
+    source_labels = _extract_unified_source_labels(payload)
+    if not source_labels:
+        return True
+    if not _answer_has_source_citation(answer, source_labels):
+        return True
+    return False
+
+
+def _format_unified_sources(payload: dict, limit: int = 5) -> list[str]:
+    lines: list[str] = []
+    sources = payload.get("sources")
+    if not isinstance(sources, list):
+        notes = payload.get("notes")
+        if isinstance(notes, dict):
+            notes_data = notes.get("data")
+            if isinstance(notes_data, dict) and isinstance(notes_data.get("sources"), list):
+                sources = notes_data.get("sources")
+    if not isinstance(sources, list):
+        return lines
+
+    for source in sources[:max(1, limit)]:
+        if isinstance(source, dict):
+            label = (
+                source.get("path")
+                or source.get("filepath")
+                or source.get("filename")
+                or source.get("note")
+                or source.get("source")
+                or "source"
+            )
+            if source.get("relevance") is not None:
+                lines.append(f"- {label} ({source.get('relevance')}%)")
+            else:
+                lines.append(f"- {label}")
+        else:
+            lines.append(f"- {str(source)}")
+    return lines
+
+
+def _extract_unified_answer(payload: dict) -> str:
+    answer = str(payload.get("answer") or payload.get("response") or "").strip()
+    if answer:
+        return answer
+
+    notes = payload.get("notes")
+    if isinstance(notes, dict):
+        notes_data = notes.get("data")
+        if isinstance(notes_data, dict):
+            answer = str(notes_data.get("answer") or notes_data.get("response") or "").strip()
+            if answer:
+                return answer
+
+    deep_result = payload.get("result")
+    if isinstance(deep_result, dict):
+        answer = str(
+            deep_result.get("answer")
+            or deep_result.get("final_answer")
+            or deep_result.get("response")
+            or ""
+        ).strip()
+    return answer
+
+
+async def obsidian_unified_query(arguments: dict) -> list[TextContent]:
+    args = arguments or {}
+    query = str(args.get("query") or "").strip()
+    mode = _normalize_mode(args.get("mode") or "hybrid")
+    concise = bool(args.get("concise", True))
+
+    if not query:
+        return [TextContent(type="text", text="❌ Query is required")]
+    if mode not in MODE_TOOL_SUPPORTED_MODES:
+        supported = ", ".join(sorted(MODE_TOOL_SUPPORTED_MODES))
+        return [TextContent(type="text", text=f"❌ Unsupported mode '{mode}'. Supported: {supported}")]
+
+    try:
+        if mode == "deep-research":
+            provider = args.get("provider") or args.get("llm_provider")
+            model = args.get("model")
+            payload = await _run_deep_research_via_gateway(query, provider, model)
+        else:
+            gateway_mode = "entities" if mode == "lightrag" else mode
+            request_payload = {"query": query, "mode": gateway_mode}
+            for field in MODE_PASSTHROUGH_FIELDS:
+                if field in args and args[field] is not None:
+                    request_payload[field] = args[field]
+            if "provider" in args and args["provider"] and "llm_provider" not in request_payload:
+                request_payload["llm_provider"] = args["provider"]
+
+            response = requests.post(
+                _gateway_query_url(),
+                json=request_payload,
+                headers=_service_headers(),
+                timeout=GATEWAY_QUERY_TIMEOUT,
+            )
+            status_code = getattr(response, "status_code", None)
+            if not isinstance(status_code, int):
+                raise requests.exceptions.ConnectionError("Invalid response from API gateway")
+            if status_code != 200:
+                detail = response.text
+                try:
+                    parsed = response.json()
+                    detail = parsed.get("detail") or parsed
+                except Exception:
+                    pass
+                return [TextContent(type="text", text=f"❌ Unified query failed ({status_code}): {detail}")]
+            payload = response.json()
+            payload["mode"] = gateway_mode
+
+        answer = _extract_unified_answer(payload)
+        if _should_force_unknown_answer(query, answer, payload):
+            answer = "Unknown from current notes."
+        display_mode = mode
+        lines = [f"🔎 **Mode:** {display_mode}"]
+        if answer:
+            lines.extend(["", answer])
+        else:
+            lines.extend(["", "No synthesized answer was returned by the gateway."])
+
+        source_lines = _format_unified_sources(payload)
+        if source_lines:
+            lines.extend(["", "Sources:", *source_lines])
+
+        if not concise:
+            raw_json = json.dumps(payload, indent=2, ensure_ascii=False, default=str)
+            max_raw_chars = 30000
+            if len(raw_json) > max_raw_chars:
+                raw_json = raw_json[:max_raw_chars] + "\n...[TRUNCATED]"
+            lines.extend(["", "Raw Result:", raw_json])
+
+        return [TextContent(type="text", text="\n".join(lines))]
+    except requests.exceptions.ConnectionError:
+        return [TextContent(
+            type="text",
+            text=f"❌ Cannot connect to API gateway at {_gateway_base_url()}. Make sure api-gateway is running."
+        )]
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Unified query error: {str(e)}")]
+
+
+def _build_capture_values(title: str, source: str, content: str, points: list[str], tags: list[str]) -> dict[str, str]:
+    now = datetime.now().astimezone()
+    summary_block = "\n".join([f"- {point}" for point in points]) if points else "- (no summary)"
+    details_block = content.strip() or "(empty)"
+    tags_block = ", ".join(tags) if tags else "(none)"
+    return {
+        "title": title,
+        "date": now.strftime("%Y-%m-%d"),
+        "time": now.strftime("%H:%M:%S %Z"),
+        "datetime": now.isoformat(timespec="seconds"),
+        "source": source,
+        "summary": summary_block,
+        "content": details_block,
+        "tags": tags_block,
+    }
+
+
+def _save_capture_from_text(title: str, source: str, content: str, points: list[str], tags: list[str]) -> tuple[str | None, str | None]:
+    template = _load_capture_template()
+    values = _build_capture_values(title=title, source=source, content=content, points=points, tags=tags)
+    markdown = _render_capture_note(template, values)
+    saved_path, write_error = _write_capture_note(title=title, content=markdown)
+    if write_error or saved_path is None:
+        return None, write_error
+    return _vault_relative_path(saved_path), None
+
+
+async def capture_note(arguments: dict) -> list[TextContent]:
+    args = arguments or {}
+    content = str(args.get("content") or "").strip()
+    title = str(args.get("title") or "").strip() or "Quick Capture"
+    source = str(args.get("source") or "manual-capture").strip()
+
+    if not content:
+        return [TextContent(type="text", text="❌ content is required")]
+
+    tags = []
+    raw_tags = args.get("tags")
+    if isinstance(raw_tags, list):
+        for item in raw_tags:
+            normalized = _normalize_tag(str(item))
+            if normalized:
+                tags.append(normalized)
+    points = _summarize_to_points(content, max_points=6)
+    path, error = _save_capture_from_text(title=title, source=source, content=content, points=points, tags=tags)
+    if error:
+        return [TextContent(type="text", text=error)]
+    return [TextContent(type="text", text=f"✅ Capture saved: `{path}`")]
+
+
+async def summarize_url_to_capture(arguments: dict) -> list[TextContent]:
+    args = arguments or {}
+    url = str(args.get("url") or "").strip()
+    title_override = str(args.get("title") or "").strip()
+    max_points = int(args.get("max_points", 8))
+    max_points = max(1, min(20, max_points))
+
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return [TextContent(type="text", text="❌ url must be a valid http(s) URL")]
+
+    try:
+        response = requests.get(url, timeout=20, headers={"User-Agent": "obsidian-rag-mcp/1.0"})
+        status = getattr(response, "status_code", None)
+        if not isinstance(status, int):
+            raise requests.exceptions.ConnectionError("Invalid response from URL fetch")
+        if status >= 400:
+            return [TextContent(type="text", text=f"❌ URL fetch failed ({status})")]
+
+        content_type = (response.headers.get("Content-Type") or "").lower()
+        raw_text = response.text
+        extracted = _extract_text_from_html(raw_text) if "html" in content_type or "<html" in raw_text.lower() else raw_text
+        extracted = extracted.strip()
+        if not extracted:
+            return [TextContent(type="text", text="❌ No readable text extracted from URL")]
+
+        parsed_payload = _extract_json_object(extracted)
+        health_points = (
+            _summarize_health_payload_to_points(parsed_payload, max_points=max_points)
+            if parsed_payload
+            else []
+        )
+
+        details_content = extracted
+        if health_points:
+            points = health_points
+            details_content = "\n".join([f"- {point}" for point in health_points])
+        else:
+            if len(extracted) > 30000:
+                extracted = extracted[:30000]
+            points = _summarize_to_points(extracted, max_points=max_points)
+            details_content = extracted
+
+        summary_text = "\n".join([f"- {point}" for point in points])
+        title = title_override or f"Web Capture - {parsed.netloc}"
+        path, error = _save_capture_from_text(
+            title=title,
+            source=url,
+            content=details_content,
+            points=points,
+            tags=[],
+        )
+        if error:
+            return [TextContent(type="text", text=error)]
+        return [TextContent(type="text", text=f"✅ URL summary saved: `{path}`\n\n{summary_text}")]
+    except requests.exceptions.ConnectionError:
+        return [TextContent(type="text", text=f"❌ Could not connect to URL: {url}")]
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ URL summarization error: {str(e)}")]
+
+
+async def summarize_youtube_to_capture(arguments: dict) -> list[TextContent]:
+    args = arguments or {}
+    url = str(args.get("url") or "").strip()
+    title_override = str(args.get("title") or "").strip()
+    max_points = int(args.get("max_points", 8))
+    max_points = max(1, min(20, max_points))
+
+    video_id = _extract_youtube_video_id(url)
+    if not video_id:
+        return [TextContent(type="text", text="❌ Only YouTube URLs are supported (youtube.com or youtu.be)")]
+
+    try:
+        transcript_text = _fetch_youtube_transcript(video_id)
+        if len(transcript_text) > 40000:
+            transcript_text = transcript_text[:40000]
+        filtered_points = _summarize_youtube_transcript_to_points(transcript_text, max_points=max_points * 2)
+        if not filtered_points:
+            return [TextContent(type="text", text="❌ Could not extract concise summary points from transcript")]
+
+        rewritten_points, details_text = _rewrite_points_abstractive(filtered_points, max_points=max_points)
+        points = _quality_gate_summary_bullets(
+            rewritten_points,
+            source_points=filtered_points,
+            max_points=max_points,
+        )
+        if len(points) < MIN_SUMMARY_BULLETS:
+            return [TextContent(type="text", text="❌ Could not extract concise summary points from transcript")]
+
+        details_text = _quality_gate_details_paragraph(details_text, points)
+        if not details_text:
+            details_text = _quality_gate_details_paragraph(_synthesize_details_paragraph(points), points)
+        if not details_text:
+            return [TextContent(type="text", text="❌ Could not extract concise summary points from transcript")]
+
+        title = title_override or _fetch_youtube_title(url)
+        summary_block = "\n".join([f"- {point}" for point in points])
+        path, error = _save_capture_from_text(
+            title=title,
+            source=url,
+            content=details_text,
+            points=points,
+            tags=[],
+        )
+        if error:
+            return [TextContent(type="text", text=error)]
+        return [TextContent(type="text", text=f"✅ YouTube summary saved: `{path}`\n\n{summary_block}")]
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ YouTube summarization error: {str(e)}")]
+
+
+async def apply_existing_tags_frontmatter_only(arguments: dict) -> list[TextContent]:
+    if not YAML_AVAILABLE:
+        return [TextContent(type="text", text="❌ pyyaml is required for frontmatter tag updates")]
+
+    args = arguments or {}
+    raw_path = str(args.get("path") or "").strip()
+    max_tags = int(args.get("max_tags", 5))
+    max_tags = max(1, min(20, max_tags))
+    if not raw_path:
+        return [TextContent(type="text", text="❌ path is required")]
+
+    resolved, error = _resolve_capture_note_path(raw_path)
+    if error or resolved is None:
+        return [TextContent(type="text", text=error or "❌ Invalid path")]
+    if resolved.suffix.lower() != ".md":
+        return [TextContent(type="text", text="❌ Only markdown notes are supported")]
+
+    try:
+        original = resolved.read_text(encoding="utf-8", errors="replace")
+        frontmatter, body, had_frontmatter = _split_frontmatter(original)
+        if not isinstance(frontmatter, dict):
+            frontmatter = {}
+        note_text = body if had_frontmatter else original
+
+        existing_tags = _collect_existing_tags()
+        if not existing_tags:
+            return [TextContent(type="text", text="❌ No existing tags found in vault")]
+
+        suggested_bare = _score_tags_for_note(note_text, existing_tags, max_tags=max_tags)
+        if not suggested_bare:
+            return [TextContent(type="text", text="ℹ️ No matching existing tags were detected for this note")]
+
+        current_tags = _extract_tags_from_frontmatter(frontmatter)
+        merged = []
+        seen = set()
+        for tag in sorted(current_tags):
+            bare = tag.lstrip("#")
+            if bare not in seen:
+                seen.add(bare)
+                merged.append(bare)
+        for bare in suggested_bare:
+            if bare not in seen:
+                seen.add(bare)
+                merged.append(bare)
+            if len(merged) >= max_tags:
+                break
+
+        frontmatter["tags"] = merged[:max_tags]
+        updated_markdown = _render_frontmatter(frontmatter, note_text)
+        resolved.write_text(updated_markdown, encoding="utf-8")
+        rel_path = _vault_relative_path(resolved)
+        applied = ", ".join(frontmatter["tags"])
+        return [TextContent(type="text", text=f"✅ Updated tags in `{rel_path}`\nTags: {applied}")]
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Tag update error: {str(e)}")]
+
+
 async def query_knowledge_graph(arguments: dict) -> list[TextContent]:
     """Query knowledge graph (tries LightRAG service first, falls back to local graph)"""
     query = arguments.get("query", "")
@@ -1147,10 +2970,11 @@ async def search_entities(arguments: dict) -> list[TextContent]:
     try:
         matching_entities = []
         for node in querier.graph.nodes():
-            if search_term in node.lower():
+            node_label = querier._node_label(node)
+            if search_term in node_label.lower():
                 node_data = dict(querier.graph.nodes[node])
                 matching_entities.append({
-                    'name': node,
+                    'name': node_label,
                     'type': node_data.get('entity_type', 'Unknown'),
                     'connections': querier.graph.degree(node)
                 })
