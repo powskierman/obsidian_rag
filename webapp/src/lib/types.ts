@@ -5,6 +5,7 @@ import { DataServiceState } from './serviceStatus';
 export type SearchMode =
   // Single-source modes
   | 'vector'          // Pure vector similarity (ChromaDB)
+  | 'hybrid'          // Graph + vector search
   // Agentic and pipeline modes
   | 'cascading'       // 5-Stage Waterfall
   | 'deep-thinking';  // Agentic reasoning mode
@@ -27,7 +28,8 @@ export interface Source {
   filepath: string;
   relevance: number;
   snippet: string;
-  sourceType?: 'linked-note' | 'direct-excerpt' | 'entity-context';
+  sourceType?: 'linked-note' | 'direct-excerpt' | 'entity-context' | 'web-result';
+  sourceCategory?: 'vault' | 'web';
 }
 
 export interface EnhancedSearchData {

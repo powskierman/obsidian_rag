@@ -2,12 +2,14 @@ import os
 import httpx
 import json
 import asyncio
+import subprocess
 import anthropic
 import uvicorn
 import math
 import re
 import time
 import sys
+import inspect
 from collections import OrderedDict
 from urllib.parse import urlparse, urlunparse
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
@@ -41,6 +43,141 @@ def _load_deep_thinking_rag():
         from deep_thinking.orchestrator import DeepThinkingRAG
 
         return DeepThinkingRAG
+
+
+def _get_env_value(name: str, default: str = "") -> str:
+    value = os.getenv(name, default)
+    if not isinstance(value, str):
+        return default
+    return value.strip()
+
+
+_LAST_MLX_RECOVERY_TS = 0.0
+
+
+def _project_root() -> str:
+    return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _recovery_script_path() -> str:
+    return os.path.join(_project_root(), "Scripts", "setup", "recover_api_gateway_and_mlx.sh")
+
+
+def _is_mlx_runtime_failure(
+    provider: Optional[str],
+    exc: Exception,
+    model: Optional[str] = None,
+) -> bool:
+    provider_normalized = (provider or "").strip().lower()
+    model_normalized = (model or "").strip().lower()
+
+    mlx_route_markers = [
+        "mlx",
+        "lfm2",
+        "qwen2.5-7b-instruct-4bit",
+    ]
+    points_to_local_mlx = "host.docker.internal:8090" in _get_env_value("OPENAI_BASE_URL").lower()
+    likely_mlx_route = (
+        provider_normalized == "mlx"
+        or any(marker in model_normalized for marker in mlx_route_markers)
+        or (provider_normalized == "chatgpt" and points_to_local_mlx)
+    )
+    if not likely_mlx_route:
+        return False
+
+    message = str(exc or "")
+    lowered = message.lower()
+    failure_markers = [
+        "host.docker.internal",
+        "port=8090",
+        "/v1/chat/completions",
+        "connection refused",
+        "max retries exceeded",
+        "newconnectionerror",
+        "httppool",
+        "remote end closed connection",
+        "remotedisconnected",
+        "insufficient memory",
+        "outofmemory",
+        "[metal]",
+        "kiogpucommandbuffercallbackerroroutofmemory",
+        "failed to establish a new connection",
+        "connection aborted",
+    ]
+    return any(marker in lowered for marker in failure_markers)
+
+
+def _looks_like_mlx_transport_failure_text(message: Optional[str]) -> bool:
+    lowered = (message or "").strip().lower()
+    if not lowered:
+        return False
+    failure_markers = [
+        "host.docker.internal",
+        "port=8090",
+        "/v1/chat/completions",
+        "connection refused",
+        "max retries exceeded",
+        "newconnectionerror",
+        "httppool",
+        "httpconnectionpool",
+        "remote end closed connection",
+        "remotedisconnected",
+        "connection aborted",
+        "failed to establish a new connection",
+        "insufficient memory",
+        "outofmemory",
+        "[metal]",
+        "kiogpucommandbuffercallbackerroroutofmemory",
+    ]
+    return any(marker in lowered for marker in failure_markers)
+
+
+def _start_mlx_recovery() -> bool:
+    global _LAST_MLX_RECOVERY_TS
+
+    now = time.time()
+    if now - _LAST_MLX_RECOVERY_TS < 20:
+        return False
+
+    script_path = _recovery_script_path()
+    if not os.path.exists(script_path):
+        return False
+
+    log_dir = os.path.join(_project_root(), "Scripts", "setup", "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    recovery_trigger_log = os.path.join(log_dir, "recovery-trigger.log")
+
+    with open(recovery_trigger_log, "ab") as handle:
+        subprocess.Popen(
+            ["/bin/bash", script_path, "--force"],
+            cwd=_project_root(),
+            stdout=handle,
+            stderr=handle,
+            start_new_session=True,
+        )
+
+    _LAST_MLX_RECOVERY_TS = now
+    return True
+
+
+def _mlx_recovery_error_payload(exc: Exception) -> Dict[str, Any]:
+    recovery_started = _start_mlx_recovery()
+    message = "Local MLX crashed or ran out of GPU memory"
+    if recovery_started:
+        message += "; recovery running. Retry in 15-30 seconds."
+    else:
+        message += "; recovery may already be running. Retry in 15-30 seconds."
+
+    return {
+        "type": "error",
+        "content": message,
+        "code": "MLX_RECOVERING",
+        "details": {
+            "provider": "mlx",
+            "recovery_started": recovery_started,
+            "raw_error": str(exc),
+        },
+    }
 
 
 def _apply_relevance_filter(sources: Any, threshold: float) -> Any:
@@ -1755,6 +1892,27 @@ async def get_stats():
     }
 
 
+@app.get("/api/v1/provider-status")
+async def get_provider_status():
+    """Return provider key/model visibility from the gateway runtime, not the webapp runtime."""
+    return {
+        "keys": {
+            "gemini": bool(_get_env_value("GEMINI_API_KEY")),
+            "anthropic": bool(_get_env_value("ANTHROPIC_API_KEY")),
+            "openai": bool(_get_env_value("OPENAI_API_KEY")),
+            "mlx": bool(_get_env_value("MLX_BASE_URL") or _get_env_value("MLX_MODEL")),
+        },
+        "models": {
+            "ollama": _get_env_value("OLLAMA_MODEL", "mistral"),
+            "openrouter": _get_env_value("OPENROUTER_MODEL", "google/gemini-2.0-flash-exp:free"),
+            "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o"),
+            "gemini": _get_env_value("GEMINI_MODEL", "gemini-1.5-pro"),
+            "claude": _get_env_value("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
+            "mlx": _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "LiquidAI/LFM2-24B-A2B-MLX-4bit")),
+        },
+    }
+
+
 def _extract_query_context(query: str, include_memory: bool = False) -> tuple[List[str], str]:
     """Centralized entity extraction and memory synthesis for downstream services."""
     entities = []
@@ -1863,10 +2021,10 @@ async def _synthesize_cascading_answer(
                 }
                 resolved_model = model or os.getenv("MLX_MODEL")
             elif resolved_provider in ["gemini", "google"]:
-                api_key = os.getenv("GEMINI_API_KEY")
+                api_key = _get_env_value("GEMINI_API_KEY")
                 if not api_key:
                     return f"Found {len(sources)} matching snippets in your vault. (LLM synthesis skipped: GEMINI_API_KEY missing)"
-                resolved_model = model or os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+                resolved_model = model or _get_env_value("GEMINI_MODEL", "gemini-1.5-flash")
                 # Ensure model name matches Gemini's expected format if needed
                 if not resolved_model.startswith("models/") and not resolved_model.startswith("gemini-"):
                      resolved_model = "gemini-1.5-flash"
@@ -1914,11 +2072,14 @@ async def _synthesize_cascading_answer(
                     if "choices" in data and len(data["choices"]) > 0:
                         content = data["choices"][0].get("message", {}).get("content", "")
                         return content
+                    raise ValueError(f"{resolved_provider.capitalize()} API returned no choices")
                 else:
-                    print(f"{resolved_provider.capitalize()} API Error: {resp.status_code} - {resp.text}")
+                    raise ValueError(f"{resolved_provider.capitalize()} API Error: {resp.status_code} - {resp.text}")
                     
     except Exception as e:
         print(f"Error in cascading fallback synthesis: {e}")
+        if resolved_provider == "mlx" or _looks_like_mlx_transport_failure_text(str(e)):
+            raise RuntimeError(str(e)) from e
         
     return f"Found {len(sources)} matching snippets in your vault."
 
@@ -2221,13 +2382,19 @@ async def unified_query(request: UnifiedQueryRequest):
                     sys_prompt = request.system_prompt or "You are a helpful AI assistant. Synthesize a concise answer to the user's query based ONLY on the provided vault context."
                     system_with_graph = f"{sys_prompt}\n\n{graph_context}"
 
-                answer = await _synthesize_cascading_answer(
-                    request.query,
-                    sources,
-                    request.llm_provider,
-                    request.model,
-                    system_with_graph
-                )
+                try:
+                    answer = await _synthesize_cascading_answer(
+                        request.query,
+                        sources,
+                        request.llm_provider,
+                        request.model,
+                        system_with_graph
+                    )
+                except Exception as synth_error:
+                    if _is_mlx_runtime_failure(request.llm_provider, synth_error, model=request.model) or _looks_like_mlx_transport_failure_text(str(synth_error)):
+                        recovery_payload = _mlx_recovery_error_payload(synth_error)
+                        raise HTTPException(status_code=503, detail=recovery_payload)
+                    raise
             
             if not answer:
                  answer = "No results found."
@@ -2252,6 +2419,8 @@ async def unified_query(request: UnifiedQueryRequest):
                     ],
                 },
             }
+        except HTTPException:
+            raise
         except Exception as e:
             import traceback
 
@@ -2324,6 +2493,17 @@ async def deep_research_websocket(websocket: WebSocket):
         query = data.get("query")
         provider = data.get("provider", "claude").lower()
         model = data.get("model")
+        max_sources_raw = data.get("max_sources")
+        try:
+            max_sources = int(max_sources_raw) if max_sources_raw is not None else 12
+        except (TypeError, ValueError):
+            max_sources = 12
+        max_sources = max(1, min(100, max_sources))
+        query_preview = str(query or "").strip().replace("\n", " ")[:120]
+        print(
+            f"Deep research request: provider={provider} model={model or '<default>'} "
+            f"max_sources={max_sources} query='{query_preview}'"
+        )
         supported_providers = {
             "claude",
             "gemini",
@@ -2341,7 +2521,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 return "openrouter"
             if ANTHROPIC_API_KEY:
                 return "claude"
-            if os.getenv("GEMINI_API_KEY"):
+            if _get_env_value("GEMINI_API_KEY"):
                 return "gemini"
             if os.getenv("OPENAI_API_KEY"):
                 return "chatgpt"
@@ -2387,7 +2567,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.close()
                 return
         elif provider == "gemini":
-            api_key = os.getenv("GEMINI_API_KEY")
+            api_key = _get_env_value("GEMINI_API_KEY")
             if not api_key:
                 await websocket.send_json(
                     {"type": "error", "content": "GEMINI_API_KEY not configured"}
@@ -2395,7 +2575,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.close()
                 return
         elif provider == "openrouter":
-            api_key = os.getenv("OPENROUTER_API_KEY")
+            api_key = _get_env_value("OPENROUTER_API_KEY")
             if not api_key:
                 await websocket.send_json(
                     {"type": "error", "content": "OPENROUTER_API_KEY not configured"}
@@ -2403,7 +2583,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.close()
                 return
         elif provider == "chatgpt":
-            api_key = os.getenv("OPENAI_API_KEY")
+            api_key = _get_env_value("OPENAI_API_KEY")
             if not api_key:
                 await websocket.send_json(
                     {"type": "error", "content": "OPENAI_API_KEY not configured"}
@@ -2411,7 +2591,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.close()
                 return
         elif provider == "perplexity":
-            api_key = os.getenv("PERPLEXITY_API_KEY")
+            api_key = _get_env_value("PERPLEXITY_API_KEY")
             if not api_key:
                 await websocket.send_json(
                     {"type": "error", "content": "PERPLEXITY_API_KEY not configured"}
@@ -2419,7 +2599,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.close()
                 return
         elif provider == "mlx":
-            api_key = os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
+            api_key = _get_env_value("QUERY_MLX_API_KEY") or _get_env_value("MLX_API_KEY", "mlx")
         elif provider == "ollama":
             api_key = "ollama"  # No key needed, but passing string to avoid validation errors downstream
 
@@ -2459,14 +2639,57 @@ async def deep_research_websocket(websocket: WebSocket):
 
         # Run the heavy blocking function in a thread pool
         def run_agent():
-            return rag.query(query, status_callback=sync_callback)
+            query_signature = inspect.signature(rag.query)
+            query_kwargs = {"status_callback": sync_callback}
+            if "max_sources" in query_signature.parameters:
+                query_kwargs["max_sources"] = max_sources
+
+            try:
+                return rag.query(query, **query_kwargs)
+            except TypeError as err:
+                if "unexpected keyword argument 'max_sources'" not in str(err):
+                    raise
+                return rag.query(query, status_callback=sync_callback)
 
         await websocket.send_json({"type": "status", "content": "Agent started"})
 
         # Execute in thread
         result = await asyncio.get_running_loop().run_in_executor(executor, run_agent)
 
+        # Safety net: some deep-thinking paths may return transport errors in the
+        # synthesized answer instead of raising. Convert these into MLX recovery payloads.
+        result_answer = ""
+        if isinstance(result, dict):
+            raw_answer = result.get("answer")
+            if isinstance(raw_answer, str):
+                result_answer = raw_answer
+        if _looks_like_mlx_transport_failure_text(result_answer):
+            await websocket.send_json(
+                {
+                    "type": "log",
+                    "message": "Detected MLX transport failure in synthesized result; starting recovery.",
+                    "details": {"provider": provider},
+                }
+            )
+            await websocket.send_json(_mlx_recovery_error_payload(Exception(result_answer)))
+            await websocket.close(code=1011)
+            return
+
         # Send final result
+        source_counts = {"vault": 0, "web": 0, "unknown": 0}
+        for src in (result.get("sources") or []):
+            if not isinstance(src, dict):
+                source_counts["unknown"] += 1
+                continue
+            category = str(src.get("source_category") or "").strip().lower()
+            if category in {"vault", "web"}:
+                source_counts[category] += 1
+            else:
+                source_counts["unknown"] += 1
+        print(
+            f"Deep research result: provider={provider} max_sources={max_sources} "
+            f"sources={source_counts} warnings={len(result.get('warnings') or [])}"
+        )
         await websocket.send_json({"type": "result", "data": result})
 
         await websocket.close()
@@ -2476,7 +2699,18 @@ async def deep_research_websocket(websocket: WebSocket):
     except Exception as e:
         print(f"Error: {e}")
         try:
-            await websocket.send_json({"type": "error", "content": str(e)})
+            raw_error = str(e or "")
+            if _is_mlx_runtime_failure(provider, e, model=model) or _looks_like_mlx_transport_failure_text(raw_error):
+                await websocket.send_json(
+                    {
+                        "type": "log",
+                        "message": "MLX local model became unavailable; starting recovery.",
+                        "details": {"provider": "mlx"},
+                    }
+                )
+                await websocket.send_json(_mlx_recovery_error_payload(e))
+            else:
+                await websocket.send_json({"type": "error", "content": str(e)})
             await websocket.close(code=1011)
         except:
             pass

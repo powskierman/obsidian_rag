@@ -31,7 +31,8 @@ export interface SearchResult {
   filepath: string;
   relevance: number;
   snippet: string;
-  sourceType?: 'linked-note' | 'direct-excerpt' | 'entity-context';
+  sourceType?: 'linked-note' | 'direct-excerpt' | 'entity-context' | 'web-result';
+  sourceCategory?: 'vault' | 'web';
 }
 
 export interface GraphResponse {
@@ -55,6 +56,7 @@ const normalizeSource = (source: any): SearchResult => {
     relevance,
     snippet,
     sourceType: source?.sourceType || source?.source_type,
+    sourceCategory: source?.sourceCategory || source?.source_category,
   };
 };
 
@@ -225,7 +227,10 @@ export const api = {
 
   getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; mlx: boolean }; models: Record<string, string> }> => {
     try {
-      const response = await fetch('/api/env-config');
+      let response = await fetch(`${GATEWAY_URL}/api/v1/provider-status`);
+      if (!response.ok) {
+        response = await fetch('/api/env-config');
+      }
       if (!response.ok) {
         return {
           keys: { gemini: false, anthropic: false, openai: false, mlx: false },

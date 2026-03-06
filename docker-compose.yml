@@ -186,6 +186,7 @@ services:
       - "4000:3000"
     volumes:
       - ./src:/app/src:ro
+      - ./deep_thinking:/app/deep_thinking:ro
 
     command: python src/services/api_gateway.py
     environment:
@@ -202,6 +203,11 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:8090/v1}
+      - MLX_API_KEY=${MLX_API_KEY:-mlx}
+      - MLX_MODEL=${MLX_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-LiquidAI/LFM2-24B-A2B-MLX-4bit}}}
+      - QUERY_MLX_BASE_URL=${QUERY_MLX_BASE_URL:-${MLX_BASE_URL:-http://host.docker.internal:8090/v1}}
+      - QUERY_MLX_API_KEY=${QUERY_MLX_API_KEY:-${MLX_API_KEY:-mlx}}
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3000/api/v1/health" ]

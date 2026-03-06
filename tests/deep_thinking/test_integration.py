@@ -96,6 +96,8 @@ class TestDeepThinkingIntegration(unittest.TestCase):
             self.assertEqual(result["answer"], "CAR-T works by modifying T-cells. You experienced fatigue.")
             self.assertEqual(len(result["research_steps"]), 2)
             self.assertEqual(len(result["citations"]), 2)
+            self.assertEqual(len(result["sources"]), 2)
+            self.assertEqual(result["sources"][0]["source_category"], "vault")
             self.assertEqual(result["research_steps"][0]["key_findings"], "CAR-T modifies T-cells to attack cancer.")
 
 if __name__ == '__main__':

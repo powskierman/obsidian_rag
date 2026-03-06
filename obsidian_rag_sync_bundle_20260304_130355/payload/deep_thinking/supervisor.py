@@ -1,0 +1,560 @@
+import requests
+from typing import List, Dict, Any
+import time
+import concurrent.futures
+from urllib.parse import urlparse
+from .state import Step, RAGState
+try:
+    from .reranker import Reranker
+    RERANKER_AVAILABLE = True
+except ImportError:
+    RERANKER_AVAILABLE = False
+    print("Warning: Reranker not available. Install sentence-transformers to enable reranking.")
+
+import os
+try:
+    from tavily import TavilyClient
+    WEB_SEARCH_AVAILABLE = True
+except ImportError:
+    WEB_SEARCH_AVAILABLE = False
+    print("Warning: tavily-python not available.")
+
+class RetrievalSupervisor:
+    def __init__(
+        self,
+        vector_service_url: str,
+        graph_service_url: str,
+        enable_reranking: bool = True,
+        llm_provider: str | None = None,
+        llm_model: str | None = None,
+    ):
+        self.vector_service_url = vector_service_url
+        self.graph_service_url = graph_service_url
+        self.enable_reranking = enable_reranking and RERANKER_AVAILABLE
+        self.llm_provider = (llm_provider or "").strip()
+        self.llm_model = (llm_model or "").strip()
+        
+        # Initialize reranker if available
+        if self.enable_reranking:
+            self.reranker = Reranker()
+            print("✅ Reranker initialized")
+        else:
+            self.reranker = None
+            if enable_reranking:
+                print("⚠️  Reranking disabled (sentence-transformers not installed)")
+        
+    def execute_step(self, step: Step, state: RAGState, trace_callback=None) -> List[Dict[str, Any]]:
+        """
+        Execute the search strategy specified in the step.
+        """
+        def trace(message: str, details: Dict[str, Any] | None = None) -> None:
+            line = f"{message}"
+            if details:
+                line = f"{line} {details}"
+            print(line)
+            if trace_callback:
+                trace_callback(message, details)
+
+        def summarize(results: List[Dict[str, Any]], limit: int = 3) -> Dict[str, Any]:
+            sample = []
+            for item in results[:limit]:
+                sample.append({
+                    "source": item.get("source"),
+                    "type": item.get("type"),
+                    "score": round(float(item.get("score", 0.0)), 4)
+                })
+            return {"count": len(results), "sample": sample}
+
+        # For vault searches (vector/hybrid), use keywords if available.
+        # Keywords have better signal than sub_questions which may include generic words.
+        strategy = step["search_strategy"]
+        if strategy in ["vector", "hybrid"]:
+            query = step["sub_question"]
+            if step.get("keywords"):
+                query = f"{query} {' '.join(step['keywords'])}"
+            original_question = state.get("original_question", "")
+            if original_question and original_question.lower() not in query.lower():
+                query = f"{query} {original_question}"
+            if step.get("target_folders"):
+                folder_tokens = []
+                for folder in step["target_folders"]:
+                    parts = [part for part in folder.replace("\\", "/").split("/") if part]
+                    folder_tokens.extend(parts)
+                if folder_tokens:
+                    query = f"{query} {' '.join(folder_tokens)}"
+        else:
+            query = step["sub_question"]
+        
+        # Apply Obsidian folder filtering
+        filters = self._build_filters(step["target_folders"])
+        
+        results = []
+        min_results = 3
+        debug_prefix = f"[DeepThinking] Step {step.get('step_number', '?')}"
+        
+        if strategy == "vector":
+            # Retrieve more results for reranking
+            n_results = 60 if self.enable_reranking else 20
+            trace(
+                f"{debug_prefix} vector query",
+                {"query": query, "filters": filters or None, "n_results": n_results}
+            )
+            results = self._query_vector(query, filters, n_results=n_results, trace_callback=trace)
+            trace(f"{debug_prefix} vector output", summarize(results))
+
+            if step.get("target_folders") and results:
+                filtered_results = self._filter_results_by_target_folders(results, step["target_folders"])
+                if filtered_results and len(filtered_results) >= min_results:
+                    results = filtered_results
+                    trace(f"{debug_prefix} vector path filter", summarize(results))
+
+            # Fallback: If filtered search returns too few, try without filters
+            if filters and len(results) < min_results:
+                trace(
+                    f"{debug_prefix} vector retry without filters",
+                    {"reason": "too_few_results", "count": len(results)}
+                )
+                results = self._query_vector(query, filters=None, n_results=n_results, trace_callback=trace)
+                if step.get("target_folders") and results:
+                    filtered_results = self._filter_results_by_target_folders(results, step["target_folders"])
+                    if filtered_results and len(filtered_results) >= min_results:
+                        results = filtered_results
+                trace(f"{debug_prefix} vector retry output", summarize(results))
+            
+        elif strategy.startswith("graph"):
+            # Use 'local' mode for specific entity questions, 'global' for summaries
+            mode = "global" if strategy == "graph-global" else "local"
+            results = self._query_graph(query, mode=mode, trace_callback=trace)
+            trace(f"{debug_prefix} graph output", summarize(results))
+            
+        elif strategy == "hybrid":
+            # True Hybrid: Combine Graph and Vector results in parallel
+            n_results = 60 if self.enable_reranking else 25
+            trace(
+                f"{debug_prefix} hybrid query",
+                {"query": query, "filters": filters or None, "n_results": n_results}
+            )
+            
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                vec_future = executor.submit(self._query_vector, query, filters, n_results, trace)
+                graph_future = executor.submit(self._query_graph, query, "hybrid", trace)
+                
+                vec_results = vec_future.result()
+                graph_results = graph_future.result()
+
+            if step.get("target_folders") and vec_results:
+                filtered_vec = self._filter_results_by_target_folders(vec_results, step["target_folders"])
+                if filtered_vec and len(filtered_vec) >= min_results:
+                    vec_results = filtered_vec
+
+            # Combine results
+            results = vec_results + graph_results
+            trace(
+                f"{debug_prefix} hybrid output",
+                {
+                    "vector": summarize(vec_results),
+                    "graph": summarize(graph_results),
+                    "total": len(results)
+                }
+            )
+            
+            # Fallback: If filtered vector search returns too few, retry without filters
+            if filters and len(vec_results) < min_results:
+                trace(
+                    f"{debug_prefix} hybrid retry without filters",
+                    {"reason": "too_few_vector_results", "vector_count": len(vec_results)}
+                )
+                vec_results = self._query_vector(query, filters=None, n_results=n_results, trace_callback=trace)
+                if step.get("target_folders") and vec_results:
+                    filtered_vec = self._filter_results_by_target_folders(vec_results, step["target_folders"])
+                    if filtered_vec and len(filtered_vec) >= min_results:
+                        vec_results = filtered_vec
+                results = vec_results + graph_results
+                trace(
+                    f"{debug_prefix} hybrid retry output",
+                    {"vector": summarize(vec_results), "total": len(results)}
+                )
+            
+        elif strategy == "web":
+            results, web_issue = self._query_web(query, trace_callback=trace)
+            if web_issue:
+                warnings = state.setdefault("warnings", [])
+                if web_issue not in warnings:
+                    warnings.append(web_issue)
+            elif not results:
+                warnings = state.setdefault("warnings", [])
+                empty_msg = f"Web search returned no results for query: {query}"
+                if empty_msg not in warnings:
+                    warnings.append(empty_msg)
+            trace(f"{debug_prefix} web output", summarize(results))
+        
+        # Apply reranking if enabled
+        if self.enable_reranking and results and len(results) > 0:
+            results = self.reranker.rerank(query, results, top_k=20)
+            trace(f"{debug_prefix} reranked output", summarize(results))
+            
+        # [NEW] Full Content Expansion for Critical Medical Files
+        # If we found a file that looks like a medical report, read the WHOLE file.
+        if strategy in ["vector", "hybrid"] and results:
+             results = self._expand_full_content(results, trace)
+
+        return results
+
+    @staticmethod
+    def _is_web_url(value: str) -> bool:
+        if not isinstance(value, str):
+            return False
+        parsed = urlparse(value.strip())
+        return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+    
+    def _expand_full_content(self, results: List[Dict[str, Any]], trace_func) -> List[Dict[str, Any]]:
+        """
+        Universal Content Expansion:
+        Load full content from disk for ANY local file to ensure high-fidelity context.
+        Limits: 100KB text size to prevent context overflow.
+        """
+        expanded_results = []
+        vault_root = os.getenv("OBSIDIAN_VAULT_PATH", "/app/vault")
+        
+        # Supported extensions for expansion
+        SUPPORTED_EXTS = {".md", ".txt", ".pdf", ".py", ".js", ".json", ".yml", ".yaml", ".sh", ".css", ".html"}
+        MAX_SIZE_BYTES = 100 * 1024 # 100KB limit
+        
+        for doc in results:
+            source = doc.get("filepath") or doc.get("source", "")
+            
+            # 1. Check if eligible for expansion (local file + supported extension)
+            if not source or self._is_web_url(source):
+                expanded_results.append(doc)
+                continue
+                
+            ext = os.path.splitext(source)[1].lower()
+            if ext not in SUPPORTED_EXTS:
+                expanded_results.append(doc)
+                continue
+
+            # 2. Construct full path and check existence
+            full_path = os.path.join(vault_root, source)
+            
+            try:
+                content = ""
+                if os.path.exists(full_path):
+                     # Check file size first
+                     file_size = os.path.getsize(full_path)
+                     if file_size > MAX_SIZE_BYTES and ext != ".pdf": # PDF size != text size
+                         trace_func(f"   ⚠️ File too large to expand: {source}", {"size": file_size, "limit": MAX_SIZE_BYTES})
+                         expanded_results.append(doc)
+                         continue
+                         
+                     if ext == ".pdf":
+                         # Attempt simplistic PDF read if pypdf is available
+                         try:
+                             import pypdf
+                             reader = pypdf.PdfReader(full_path)
+                             # Safety: Limit max pages to read
+                             max_pages = 20
+                             text = []
+                             for i, page in enumerate(reader.pages):
+                                 if i >= max_pages: break
+                                 text.append(page.extract_text())
+                             content = "\n".join(text)
+                             trace_func(f"   📖 Expanded PDF: {source}", {"pages": len(text)})
+                         except Exception as e:
+                             trace_func(f"   ⚠️ PDF Read Failed: {source}", {"error": str(e)})
+                             content = doc.get("content", "") # Fallback to chunk
+                     else:
+                         # Assume text/markdown/code
+                         with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
+                             content = f.read(MAX_SIZE_BYTES) # Read up to limit
+                         trace_func(f"   📖 Expanded File: {source}", {"length": len(content)})
+                
+                if content:
+                    doc["content"] = content
+                    # Mark as expanded so we know it is high fidelity
+                    doc["is_full_content"] = True
+                
+                expanded_results.append(doc)
+            except Exception as e:
+                trace_func(f"   ⚠️ Expansion Failed: {source}", {"error": str(e)})
+                expanded_results.append(doc)
+                
+        return expanded_results
+    
+    def _build_filters(self, target_folders: List[str]) -> Dict[str, Any]:
+        """Convert Obsidian folder paths to ChromaDB metadata filters."""
+        if not target_folders:
+            return {}
+
+        def folder_filter(folder_path: str) -> Dict[str, Any]:
+            parts = [part for part in folder_path.replace("\\", "/").split("/") if part]
+            if not parts:
+                return {}
+            if len(parts) == 1:
+                return {f"dir_{parts[0]}": True}
+            return {"$and": [{f"dir_{part}": True} for part in parts]}
+
+        filters = [folder_filter(folder) for folder in target_folders]
+        filters = [flt for flt in filters if flt]
+        if not filters:
+            return {}
+        if len(filters) == 1:
+            return filters[0]
+        return {"$or": filters}
+
+    @staticmethod
+    def _filter_results_by_target_folders(results: List[Dict[str, Any]], target_folders: List[str]) -> List[Dict[str, Any]]:
+        if not results or not target_folders:
+            return results
+        normalized_folders = []
+        for folder in target_folders:
+            norm = folder.replace("\\", "/").strip()
+            if not norm.endswith("/"):
+                norm = f"{norm}/"
+            normalized_folders.append(norm.lower())
+
+        filtered = []
+        for item in results:
+            source = item.get("source") or ""
+            source_norm = source.replace("\\", "/").lower()
+            if any(folder in source_norm for folder in normalized_folders):
+                filtered.append(item)
+        return filtered
+    
+    def _query_vector(
+        self,
+        query: str,
+        filters: Dict[str, Any] = None,
+        n_results: int = 10,
+        trace_callback=None
+    ) -> List[Dict[str, Any]]:
+        def trace(message: str, details: Dict[str, Any] | None = None) -> None:
+            line = f"{message}"
+            if details:
+                line = f"{line} {details}"
+            print(line)
+            if trace_callback:
+                trace_callback(message, details)
+
+        retries = 2
+        backoff = 0.5
+        for attempt in range(retries + 1):
+            try:
+                trace("[DeepThinking] vector request", {"query": query, "filters": filters, "n_results": n_results, "attempt": attempt + 1})
+                response = requests.post(
+                    f'{self.vector_service_url}/query',
+                    json={
+                        "query": query,
+                        "n_results": n_results,
+                        "filters": filters,
+                        "reranking": False,  # We do our own reranking
+                        "deduplicate": True
+                    },
+                    timeout=30
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    # Normalize format - embedding service returns documents/metadatas/distances arrays
+                    normalized = []
+                    if "documents" in data:
+                        documents = data.get("documents", [[]])[0]
+                        metadatas = data.get("metadatas", [[]])[0]
+                        distances = data.get("distances", [[]])[0]
+
+                        for doc, meta, dist in zip(documents, metadatas, distances):
+                            normalized.append({
+                                "content": doc,
+                                "source": meta.get("filepath", "Unknown"),
+                                "filepath": meta.get("filepath", "Unknown"),
+                                "filename": meta.get("filename") or os.path.basename(meta.get("filepath", "Unknown")),
+                                "snippet": doc,
+                                "type": "vector",
+                                "source_category": "vault",
+                                "source_type": "direct-excerpt",
+                                "score": float(1 - dist) if dist < 1 else 0.0  # Convert distance to similarity score
+                            })
+                    elif "results" in data:
+                        for item in data.get("results", []):
+                            meta = item.get("metadata", {}) or {}
+                            source = meta.get("file_path") or meta.get("filepath") or meta.get("source")
+                            if not source:
+                                source = item.get("source", "Unknown")
+                            score = item.get("score")
+                            normalized.append({
+                                "content": item.get("text") or item.get("content") or "",
+                                "source": source,
+                                "filepath": source,
+                                "filename": meta.get("filename") or os.path.basename(source),
+                                "snippet": item.get("text") or item.get("content") or "",
+                                "type": "vector",
+                                "source_category": "vault",
+                                "source_type": "direct-excerpt",
+                                "score": float(score) if score is not None else 0.0
+                            })
+                    trace("[DeepThinking] vector response", {"status": response.status_code, "count": len(normalized)})
+                    return normalized
+
+                error_body = response.text[:500] if response.text else ""
+                trace("[DeepThinking] vector error", {"status": response.status_code, "body": error_body})
+            except Exception as e:
+                trace("[DeepThinking] vector exception", {"error": str(e)})
+
+            if attempt < retries:
+                time.sleep(backoff * (2 ** attempt))
+        return []
+
+    def _query_graph(
+        self,
+        query: str,
+        mode: str = "hybrid",
+        trace_callback=None
+    ) -> List[Dict[str, Any]]:
+        def trace(message: str, details: Dict[str, Any] | None = None) -> None:
+            line = f"{message}"
+            if details:
+                line = f"{line} {details}"
+            print(line)
+            if trace_callback:
+                trace_callback(message, details)
+
+        retries = 2
+        backoff = 0.5
+        for attempt in range(retries + 1):
+            try:
+                trace("[DeepThinking] graph request", {"query": query, "mode": mode, "attempt": attempt + 1})
+                response = requests.post(
+                    f'{self.graph_service_url}/query',
+                    json={
+                        "query": query,
+                        "mode": mode,
+                        "llm_provider": self.llm_provider or None,
+                        "model": self.llm_model or None,
+                        "top_k": 30,
+                        "chunk_top_k": 10
+                    },
+                    timeout=300  # Increased from 180 to 300 seconds
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    # LightRAG returns a string response usually, but we might want chunks if available.
+                    if isinstance(data, str):
+                         results = [{
+                            "content": data,
+                            "source": "LightRAG Knowledge Graph",
+                            "type": "graph",
+                            "score": 1.0
+                        }]
+                         trace("[DeepThinking] graph response", {"status": response.status_code, "count": len(results)})
+                         return results
+                    elif isinstance(data, dict):
+                        results = []
+                        # Extract real sources from the Graph/LightRAG payload
+                        sources = data.get("sources", [])
+                        if sources:
+                            for src in sources[:15]:
+                                filepath = src.get("filepath") or src.get("file_path") or src.get("filename") or "Knowledge Graph"
+                                is_web = self._is_web_url(filepath)
+                                results.append({
+                                    "content": src.get("snippet", ""),
+                                    "source": filepath,
+                                    "filepath": filepath,
+                                    "filename": src.get("filename") or src.get("title") or filepath,
+                                    "snippet": src.get("snippet", ""),
+                                    "type": "graph",
+                                    "source_category": "web" if is_web else "vault",
+                                    "source_type": src.get("source_type") or ("web-result" if is_web else "entity-context"),
+                                    "relevance": float(src.get("relevance", 100)) if "relevance" in src else 100.0,
+                                    "score": float(src.get("relevance", 100)) / 100.0 if "relevance" in src else 1.0
+                                })
+                                
+                        # Also include the synthesized answer if generated by the graph service
+                        content = data.get("answer") or data.get("response")
+                        if content:
+                            results.append({
+                                "content": content,
+                                "source": "Graph Synthesis Summary",
+                                "type": "graph",
+                                "is_summary": True,
+                                "score": 1.0
+                            })
+                            
+                        if results:
+                            trace("[DeepThinking] graph response", {"status": response.status_code, "count": len(results)})
+                            return results
+                    return []
+
+                error_body = response.text[:500] if response.text else ""
+                trace("[DeepThinking] graph error", {"status": response.status_code, "body": error_body})
+            except requests.exceptions.Timeout:
+                trace("[DeepThinking] graph timeout", {"query": f"{query[:50]}..."})
+            except Exception as e:
+                trace("[DeepThinking] graph exception", {"error": str(e)})
+
+            if attempt < retries:
+                time.sleep(backoff * (2 ** attempt))
+        return []
+
+    def _query_web(self, query: str, n_results: int = 5, trace_callback=None) -> tuple[List[Dict[str, Any]], str | None]:
+        def trace(message: str, details: Dict[str, Any] | None = None) -> None:
+            line = f"{message}"
+            if details:
+                line = f"{line} {details}"
+            print(line)
+            if trace_callback:
+                trace_callback(message, details)
+
+        if not WEB_SEARCH_AVAILABLE:
+            reason = "Tavily web search is unavailable: tavily-python not installed."
+            trace("[DeepThinking] web disabled", {"reason": reason})
+            return [], reason
+            
+        api_key = (os.getenv("TAVILY_API_KEY") or "").strip()
+        if not api_key:
+            reason = "Tavily web search is unavailable: TAVILY_API_KEY not set."
+            trace("[DeepThinking] web disabled", {"reason": reason})
+            return [], reason
+
+        try:
+            trace("[DeepThinking] web request", {"query": query, "n_results": n_results})
+            tavily_client = TavilyClient(api_key=api_key)
+            # Use 'search' method with image support
+            response = tavily_client.search(
+                query, 
+                search_depth="advanced", 
+                max_results=n_results,
+                include_images=True  # Enable image retrieval
+            )
+            
+            formatted_results = []
+            images = response.get('images', [])
+            
+            if 'results' in response:
+                for i, res in enumerate(response['results']):
+                    doc = {
+                        "content": f"Title: {res['title']}\nSnippet: {res['content']}",
+                        "source": res['url'],
+                        "filepath": res['url'],
+                        "filename": res['title'],
+                        "title": res['title'],
+                        "snippet": res['content'],
+                        "type": "web",
+                        "source_category": "web",
+                        "source_type": "web-result",
+                        "relevance": float(res.get('score', 1.0)) * 100.0,
+                        "score": res.get('score', 1.0)
+                    }
+                    # Add first 2 images to first result if available
+                    if i == 0 and images:
+                        doc['images'] = images[:2]
+                    formatted_results.append(doc)
+            
+            # If we got images but no results, log it
+            if images and not formatted_results:
+                trace("[DeepThinking] web no text results", {"images": len(images)})
+
+            trace("[DeepThinking] web response", {"count": len(formatted_results)})
+            return formatted_results, None
+        except Exception as e:
+            reason = f"Tavily web search failed: {str(e)}"
+            trace("[DeepThinking] web error", {"error": reason})
+
+            return [], reason

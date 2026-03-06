@@ -80,6 +80,38 @@ def test_synthesizer_salvages_fields_from_malformed_json():
 
 
 @pytest.mark.unit
+def test_synthesizer_preserves_newlines_when_salvaging_malformed_json():
+    response_text = (
+        "{\"answer\":\"Line 1\\n\\n### Heading\\n* Bullet\","
+        "\"citations\":[],"
+        "\"confidence_score\":0.5"
+    )
+    client = FakeClient("gemini", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    result = generator.generate(make_state())
+
+    assert "Line 1\n\n### Heading\n* Bullet" == result["answer"]
+
+
+@pytest.mark.unit
+def test_synthesizer_strips_web_findings_when_no_web_docs():
+    response_text = (
+        "{\"answer\":\"Summary from notes.\\n\\n## Web Findings\\n- External claim\\n\\n## Next\\n- Done\","
+        "\"citations\":[],"
+        "\"confidence_score\":0.5}"
+    )
+    client = FakeClient("gemini", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    result = generator.generate(make_state())
+
+    assert "Web Findings" not in result["answer"]
+    assert "Summary from notes." in result["answer"]
+    assert "## Next" in result["answer"]
+
+
+@pytest.mark.unit
 def test_synthesizer_uses_openai_max_tokens_and_guardrails(monkeypatch):
     response_text = (
         "{\"answer\":\"ok\",\"citations\":[],"

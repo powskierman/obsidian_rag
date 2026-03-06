@@ -109,8 +109,16 @@ echo "🤖 Ollama Bind:   $OLLAMA_BIND_HOST"
 echo "⬆️  Bringing up services..."
 docker-compose up -d
 
+echo "⏳ Waiting for strict readiness across containers and MLX..."
+if ! "$SCRIPT_DIR/wait_for_obsidian_rag_ready.sh"; then
+    echo "❌ Startup readiness check failed. Review logs for details:"
+    echo "   ${LOG_DIR}/ready-check.log"
+    echo "   docker-compose logs -f"
+    exit 1
+fi
+
 echo ""
-echo "✅ Services Started!"
+echo "✅ Services started and all required components are healthy."
 echo "🌐 WebApp:    http://localhost:3000"
 echo "📊 Embedding: http://localhost:8000"
 echo "🕸️  Graph:     http://localhost:8002"

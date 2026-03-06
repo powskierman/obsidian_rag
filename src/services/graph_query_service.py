@@ -335,7 +335,7 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
 
     elif provider == "gemini":
         # Use Gemini API via REST
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = (os.getenv("GEMINI_API_KEY") or "").strip()
         if not api_key:
             raise ValueError("GEMINI_API_KEY not configured")
 
@@ -671,7 +671,7 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
     elif provider == "gemini":
         # Gemini doesn't support streaming in the same way, fall back to non-streaming
         # but chunk the response for client-side streaming effect
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = (os.getenv("GEMINI_API_KEY") or "").strip()
         if not api_key:
             raise ValueError("GEMINI_API_KEY not configured")
 

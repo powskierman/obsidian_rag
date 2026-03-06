@@ -13,6 +13,15 @@ from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
+def _clean_env_value(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        return None
+    cleaned = value.strip()
+    return cleaned or None
+
 class UniversalMessage:
     """Wrapper for message response to match Anthropic's structure"""
     def __init__(self, content_text: str):
@@ -22,7 +31,7 @@ class UniversalMessage:
 class UniversalClient:
     def __init__(self, provider: str = "claude", api_key: Optional[str] = None):
         self.provider = provider.lower()
-        self.api_key = api_key
+        self.api_key = _clean_env_value(api_key)
         
         # Initialize Anthropic client if needed
         if self.provider == "claude":
@@ -61,7 +70,7 @@ class UniversalClient:
     def _create_perplexity(self, model: str, messages: List[Dict[str, str]], 
                            max_tokens: int, temperature: float, system: str,
                            response_format: Optional[Dict[str, Any]] = None):
-        api_key = self.api_key or os.getenv("PERPLEXITY_API_KEY")
+        api_key = self.api_key or _clean_env_value(os.getenv("PERPLEXITY_API_KEY"))
         if not api_key:
             raise ValueError("PERPLEXITY_API_KEY not configured")
         
@@ -139,7 +148,8 @@ class UniversalClient:
     def _create_gemini(self, model: str, messages: List[Dict[str, str]], 
                        max_tokens: int, temperature: float, system: str,
                        response_format: Optional[Dict[str, Any]] = None):
-        if not self.api_key:
+        api_key = self.api_key or _clean_env_value(os.getenv("GEMINI_API_KEY"))
+        if not api_key:
             raise ValueError("GEMINI_API_KEY not configured")
 
         # Map Claude models to Gemini if provider switched but model name stuck
@@ -184,7 +194,7 @@ class UniversalClient:
         try:
             response = requests.post(
                 url,
-                headers={"x-goog-api-key": self.api_key, "Content-Type": "application/json"},
+                headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
                 json=payload,
                 timeout=60
             )
@@ -397,17 +407,29 @@ class UniversalClient:
             payload["response_format"] = response_format
 
         timeout = float(os.getenv("MLX_TIMEOUT", "300"))
-        try:
-            response = requests.post(
-                f"{base_url.rstrip('/')}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
-                json=payload,
-                timeout=timeout
-            )
+        
+        # Retry connection if MLX is still downloading the model and hasn't bound the port yet.
+        import time
+        max_retries = 120  # Up to 10 minutes (120 * 5 seconds)
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(
+                    f"{base_url.rstrip('/')}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json=payload,
+                    timeout=timeout
+                )
+                break
+            except requests.exceptions.ConnectionError as e:
+                if attempt == max_retries - 1:
+                    logger.error(f"MLX connection failed after {max_retries} retries: {e}")
+                    raise ValueError(f"MLX Server unreachable: is it running/downloading the model? {e}")
+                time.sleep(5)
 
+        try:
             if response.status_code != 200:
                 error_msg = f"MLX API Error {response.status_code}: {response.text}"
                 logger.error(error_msg)
@@ -484,6 +506,17 @@ class UniversalClient:
             url = f"{ollama_host}/api/chat"
             response = requests.post(url, json=payload, timeout=120)
             
+            # If Ollama returns a 404 for model not found, try to auto-pull it.
+            if response.status_code == 404 and "not found" in response.text.lower():
+                logger.info(f"Ollama model '{model}' not found locally. Auto-pulling...")
+                pull_url = f"{ollama_host}/api/pull"
+                pull_response = requests.post(pull_url, json={"name": model}, timeout=600)
+                if pull_response.status_code == 200:
+                    logger.info(f"Successfully pulled '{model}'. Retrying chat request.")
+                    response = requests.post(url, json=payload, timeout=120)
+                else:
+                    logger.error(f"Failed to pull Ollama model: {pull_response.text}")
+
             if response.status_code != 200:
                  error_msg = f"Ollama API Error {response.status_code}: {response.text}"
                  logger.error(error_msg)

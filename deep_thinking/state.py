@@ -3,7 +3,7 @@ from typing import TypedDict, List, Literal, Optional, Dict, Any
 class Step(TypedDict):
     step_number: int
     sub_question: str
-    search_strategy: Literal["vector", "graph", "hybrid", "web"]
+    search_strategy: Literal["vector", "graph", "graph-local", "graph-global", "hybrid", "web"]
     keywords: List[str]
     target_folders: List[str]
     reasoning: str
@@ -36,3 +36,7 @@ class RAGState(TypedDict):
     # Output
     final_answer: str
     citations: List[str]
+    raw_context_buffer: List[Dict[str, Any]]
+    confidence_score: float
+    confidence_justification: str
+    warnings: List[str]

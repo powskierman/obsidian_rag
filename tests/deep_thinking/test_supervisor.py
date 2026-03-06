@@ -84,5 +84,26 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["type"], "graph")
 
+    @patch('requests.post')
+    def test_query_graph_forwards_provider_and_model(self, mock_post):
+        supervisor = RetrievalSupervisor(
+            "http://vector",
+            "http://graph",
+            llm_provider="mlx",
+            llm_model="mlx-community/Qwen3-4B-8bit",
+            enable_reranking=False,
+        )
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"response": "graph answer"}
+        mock_post.return_value = mock_response
+
+        supervisor._query_graph("esp32-s3 vs esp32-c3", mode="hybrid")
+
+        _, kwargs = mock_post.call_args
+        payload = kwargs["json"]
+        self.assertEqual(payload["llm_provider"], "mlx")
+        self.assertEqual(payload["model"], "mlx-community/Qwen3-4B-8bit")
+
 if __name__ == '__main__':
     unittest.main()

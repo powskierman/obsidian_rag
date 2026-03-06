@@ -155,10 +155,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    if (parsedSettings?.deepThinking) {
+    const savedMode = savedSearchMode as SearchMode | null;
+    if (parsedSettings?.deepThinking || savedMode === 'deep-thinking') {
       setSearchModeState('deep-thinking');
-    } else if (savedSearchMode) {
-      setSearchModeState(savedSearchMode as SearchMode);
+      if (!parsedSettings?.deepThinking) {
+        setSettings((prev) => ({
+          ...prev,
+          deepThinking: true,
+          enhancedSearch: false,
+          settingsVersion: CURRENT_SETTINGS_VERSION,
+        }));
+      }
+    } else if (savedMode) {
+      setSearchModeState(savedMode);
     }
 
     if (savedProvider) {
@@ -220,7 +229,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const staleMlxDefaults = new Set([
-      '',
       'LiquidAI/LFM2-24B-A2B',
     ]);
     if (llmProvider === 'mlx' && staleMlxDefaults.has((settings.model || '').trim())) {
@@ -250,10 +258,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setLLMProvider = (provider: LLMProvider) => {
+    const previousProvider = llmProvider;
     setLLMProviderState(provider);
-    const defaultModel = providerModelDefaults[provider] || DEFAULT_PROVIDER_MODELS[provider] || '';
-    if (!defaultModel) return;
-    setSettings((prev) => ({ ...prev, model: defaultModel, settingsVersion: CURRENT_SETTINGS_VERSION }));
+    const nextDefaultModel = (providerModelDefaults[provider] || DEFAULT_PROVIDER_MODELS[provider] || '').trim();
+    const previousDefaultModel = (providerModelDefaults[previousProvider] || DEFAULT_PROVIDER_MODELS[previousProvider] || '').trim();
+
+    setSettings((prev) => {
+      const currentModel = (prev.model || '').trim();
+
+      // Preserve explicit user-selected models across provider switches.
+      // Only auto-switch model when the current one is empty or was the old provider's default.
+      if (!currentModel) {
+        return { ...prev, model: nextDefaultModel || currentModel, settingsVersion: CURRENT_SETTINGS_VERSION };
+      }
+      if (previousDefaultModel && currentModel === previousDefaultModel && nextDefaultModel) {
+        return { ...prev, model: nextDefaultModel, settingsVersion: CURRENT_SETTINGS_VERSION };
+      }
+      return { ...prev, settingsVersion: CURRENT_SETTINGS_VERSION };
+    });
   };
 
   const updateServices = (newServices: Partial<ServicesStatus>) => {

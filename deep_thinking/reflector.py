@@ -9,16 +9,42 @@ class ReflectionAgent:
         self.client = client
         self.model = "claude-sonnet-4-5-20250929"
 
+    @staticmethod
+    def _provider_limits(provider: str) -> tuple[int, int, int]:
+        provider = (provider or "").lower()
+        if provider == "mlx":
+            return (
+                int(os.getenv("DEEP_THINKING_MLX_REFLECT_DOCS", "3")),
+                int(os.getenv("DEEP_THINKING_MLX_REFLECT_DOC_CHARS", "2000")),
+                int(os.getenv("DEEP_THINKING_MLX_REFLECT_PAST_CHARS", "2500")),
+            )
+        return (
+            int(os.getenv("DEEP_THINKING_REFLECT_DOCS", "5")),
+            int(os.getenv("DEEP_THINKING_REFLECT_DOC_CHARS", "12000")),
+            int(os.getenv("DEEP_THINKING_REFLECT_PAST_CHARS", "6000")),
+        )
+
+    @staticmethod
+    def _truncate_text(value: str, limit: int) -> str:
+        text = str(value or "")
+        if len(text) <= limit:
+            return text
+        return text[: max(limit - 16, 0)].rstrip() + "\n... [truncated]"
+
     def reflect(self, step: Step, documents: List[Dict[str, Any]], state: RAGState) -> PastStep:
         """
         Summarize findings from the current step into a single insight.
         """
+        provider = getattr(self.client, "provider", "").lower()
+        max_docs, doc_char_limit, past_char_limit = self._provider_limits(provider)
+
         # Format documents for prompt
         doc_text = ""
-        for i, doc in enumerate(documents[:5]): # Limit to top 5 to save tokens
+        for i, doc in enumerate(documents[:max_docs]):
             doc_text += f"--- Document {i+1} ---\n"
-            # Allow up to 100,000 chars per doc to support full file expansion
-            doc_text += f"Content: {doc.get('content', '')[:100000]}\n\n"
+            doc_text += f"Content: {self._truncate_text(doc.get('content', ''), doc_char_limit)}\n\n"
+
+        previous_findings = self._truncate_text(self._format_past_steps(state['past_steps']), past_char_limit)
 
         prompt = f"""
         Research Step: "{step['sub_question']}"
@@ -29,7 +55,7 @@ class ReflectionAgent:
         {doc_text}
         
         Previous findings:
-        {self._format_past_steps(state['past_steps'])}
+        {previous_findings}
         
         Provide:
         1. One-sentence summary of key finding
@@ -46,7 +72,7 @@ class ReflectionAgent:
         
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=500,
+            max_tokens=250 if provider == "mlx" else 500,
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
@@ -116,3 +142,39 @@ class ReflectionAgent:
                 handle.write(json.dumps(payload) + "\n")
         except Exception:
             pass
+
+    def compress_context(self, context_text: str) -> str:
+        """
+        Hierarchical Memory: Compress early context into a dense summary.
+        """
+        if not context_text.strip():
+            return ""
+            
+        provider = getattr(self.client, "provider", "").lower()
+        
+        prompt = f"""
+        Compress the following research findings into a highly dense summary.
+        Retain EVERY specific entity, technical term, timeline detail, and concrete fact.
+        Strip out conversational filler and redundancies.
+        
+        Text to compress:
+        {context_text}
+        
+        Return ONLY the compressed text.
+        """
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=600 if provider == "mlx" else 1500,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            if hasattr(response.content[0], 'text'):
+                content = response.content[0].text.strip()
+            else:
+                 content = str(response.content).strip()
+            return f"[COMPRESSED EARLIER STEPS]\n{content}\n"
+        except Exception as e:
+            self._log_debug("Compression error", {"error": str(e)})
+            return f"... [earlier steps truncated] ...\n{context_text[-1000:]}"

@@ -17,6 +17,146 @@ import { api } from '../lib/api';
 import { useApp } from '../context/AppContext';
 import { Message, Source } from '../lib/types';
 
+const normalizeDeepThinkingSource = (source: any): Source => {
+    const filepath = source?.filepath || source?.file_path || source?.url || '';
+    const filename = source?.filename || source?.title || (typeof filepath === 'string' ? filepath.split('/').pop() : '') || 'Unknown';
+    const rawRelevance = source?.relevance;
+    const relevance = Number.isFinite(rawRelevance)
+        ? Number(rawRelevance)
+        : Number.isFinite(Number(rawRelevance))
+            ? Number(rawRelevance)
+            : 50;
+
+    return {
+        filename,
+        filepath: filepath || filename,
+        relevance,
+        snippet: source?.snippet || source?.content || '',
+        sourceType: source?.sourceType || source?.source_type,
+        sourceCategory: source?.sourceCategory || source?.source_category,
+    };
+};
+
+const mapDeepThinkingCitations = (rawCitations: any): Source[] => {
+    const flatCitations = Array.isArray(rawCitations) ? rawCitations.flat() : [rawCitations];
+
+    return flatCitations
+        .filter(Boolean)
+        .map((cit: any) => {
+            const citStr = typeof cit === 'string' ? cit : JSON.stringify(cit);
+
+            if (citStr.includes('[[') && citStr.includes(']]')) {
+                const match = citStr.match(/\[\[(.*?)\]\]/);
+                const inner = match ? match[1] : citStr;
+                return {
+                    filename: inner.split('/').pop() || inner,
+                    filepath: inner,
+                    relevance: 95,
+                    snippet: 'Cited via research reasoning.',
+                    sourceCategory: 'vault' as const,
+                };
+            }
+
+            const mdLinkMatch = citStr.match(/\[(.*?)\]\((.*?)\)/);
+            if (mdLinkMatch) {
+                return {
+                    filename: mdLinkMatch[1],
+                    filepath: mdLinkMatch[2],
+                    relevance: 90,
+                    snippet: 'Retrieved during research.',
+                    sourceType: 'web-result' as const,
+                    sourceCategory: 'web' as const,
+                };
+            }
+
+            if (citStr.startsWith('http')) {
+                return {
+                    filename: citStr,
+                    filepath: citStr,
+                    relevance: 85,
+                    snippet: citStr,
+                    sourceType: 'web-result' as const,
+                    sourceCategory: 'web' as const,
+                };
+            }
+
+            if (citStr.startsWith('[') && citStr.endsWith(']')) {
+                const inner = citStr.substring(1, citStr.length - 1);
+                return {
+                    filename: inner.split('/').pop() || inner,
+                    filepath: inner,
+                    relevance: 90,
+                    snippet: 'Identified during analysis.',
+                    sourceCategory: 'vault' as const,
+                };
+            }
+
+            return {
+                filename: citStr,
+                filepath: citStr,
+                relevance: 80,
+                snippet: 'Retrieved during research.',
+                sourceCategory: citStr.startsWith('http') ? 'web' : 'vault',
+            };
+        });
+};
+
+const formatThinkingLog = (data: any): string => {
+    const base = data.content || data.message || '';
+    const details = data.details;
+    if (!details || typeof details !== 'object') {
+        return base;
+    }
+
+    const detailMessage = details.error || details.reason || details.message;
+    if (!detailMessage || typeof detailMessage !== 'string') {
+        return base;
+    }
+
+    return base ? `${base}: ${detailMessage}` : detailMessage;
+};
+
+const appendRetrievalWarnings = (answer: string, warnings: any): string => {
+    const warningList = Array.isArray(warnings)
+        ? warnings.filter((warning) => typeof warning === 'string' && warning.trim())
+        : [];
+
+    if (warningList.length === 0) {
+        return answer;
+    }
+
+    return `${answer}\n\n---\n\n### Retrieval Warnings\n${warningList.map((warning) => `- ${warning}`).join('\n')}`;
+};
+
+const formatDeepThinkingError = (data: any): string => {
+    if (data?.code === 'MLX_RECOVERING') {
+        return 'Error: Local MLX crashed or ran out of GPU memory; recovery running. Retry in 15-30 seconds.';
+    }
+
+    const rawContent = typeof data?.content === 'string' ? data.content : '';
+    const lowered = rawContent.toLowerCase();
+    const mlxTransportMarkers = [
+        'remotedisconnected',
+        'remote end closed connection',
+        'connection aborted',
+        'max retries exceeded',
+        'host.docker.internal',
+        '/v1/chat/completions',
+        'connection refused',
+        'insufficient memory',
+        '[metal]',
+    ];
+    if (mlxTransportMarkers.some((marker) => lowered.includes(marker))) {
+        return 'Error: Local MLX crashed or became unavailable; recovery running. Retry in 15-30 seconds.';
+    }
+
+    if (typeof data?.content === 'string' && data.content.trim()) {
+        return `Error: ${data.content}`;
+    }
+
+    return 'Error: Deep Thinking request failed.';
+};
+
 export default function Home() {
     console.log('Home component rendering');
 
@@ -43,6 +183,7 @@ export default function Home() {
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
     const [showGraph, setShowGraph] = useState(false);
     const modeLabel = searchMode === 'deep-thinking' ? 'deep thinking' : searchMode;
+    const isDeepThinkingMode = searchMode === 'deep-thinking';
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -58,7 +199,7 @@ export default function Home() {
 
         try {
             // Deep Thinking Mode (WebSocket)
-            if (settings.deepThinking) {
+            if (isDeepThinkingMode) {
                 const ws = new WebSocket(api.deepResearchEndpoint);
 
                 ws.onopen = () => {
@@ -66,7 +207,8 @@ export default function Home() {
                     ws.send(JSON.stringify({
                         query: userMsg,
                         provider: llmProvider,
-                        model: (llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx') ? settings.model : undefined
+                        model: (llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx') ? settings.model : undefined,
+                        max_sources: settings.sources,
                     }));
                 };
 
@@ -75,75 +217,22 @@ export default function Home() {
                         const data = JSON.parse(event.data);
 
                         if (data.type === 'log' || data.type === 'status') {
-                            setThinkingLog(data.content || data.message);
+                            setThinkingLog(formatThinkingLog(data));
                         } else if (data.type === 'result') {
                             // Final result received
                             const answer = data.data?.answer || data.markdown || data.content;
                             if (answer) {
-                                // Extract and map citations to structured Source objects
-                                const rawCitations = data.data?.citations || [];
-                                // Flatten if the model returned nested lists accidentally
-                                const flatCitations = Array.isArray(rawCitations) ? rawCitations.flat() : [rawCitations];
-
-                                const mappedSources: Source[] = flatCitations.map((cit: any) => {
-                                    const citStr = typeof cit === 'string' ? cit : JSON.stringify(cit);
-
-                                    // Handle Obsidian link format [[Path/To/File]]
-                                    if (citStr.includes('[[') && citStr.includes(']]')) {
-                                        const match = citStr.match(/\[\[(.*?)\]\]/);
-                                        const inner = match ? match[1] : citStr;
-                                        return {
-                                            filename: inner.split('/').pop() || inner,
-                                            filepath: inner,
-                                            relevance: 95,
-                                            snippet: 'Cited via Research Reasoning'
-                                        };
-                                    }
-
-                                    // Handle standard markdown links [Link Text](URL)
-                                    const mdLinkMatch = citStr.match(/\[(.*?)\]\((.*?)\)/);
-                                    if (mdLinkMatch) {
-                                        return {
-                                            filename: mdLinkMatch[1],
-                                            filepath: mdLinkMatch[2],
-                                            relevance: 90,
-                                            snippet: 'Retrieved during research'
-                                        };
-                                    }
-
-                                    // Handle bracketed text that isn't a full markdown link [Note Name]
-                                    if (citStr.startsWith('[') && citStr.endsWith(']')) {
-                                        const inner = citStr.substring(1, citStr.length - 1);
-                                        return {
-                                            filename: inner.split('/').pop() || inner,
-                                            filepath: inner,
-                                            relevance: 90,
-                                            snippet: 'Identified during analysis'
-                                        };
-                                    }
-
-                                    // Handle URLs
-                                    if (citStr.startsWith('http')) {
-                                        return {
-                                            filename: 'Web Source',
-                                            filepath: citStr,
-                                            relevance: 85,
-                                            snippet: citStr
-                                        };
-                                    }
-
-                                    // Fallback for other formats
-                                    return {
-                                        filename: citStr,
-                                        filepath: citStr,
-                                        relevance: 80,
-                                        snippet: 'Retrieved during research'
-                                    };
-                                });
+                                const backendSources = Array.isArray(data.data?.sources)
+                                    ? data.data.sources.map(normalizeDeepThinkingSource)
+                                    : [];
+                                const mappedSources: Source[] = backendSources.length > 0
+                                    ? backendSources
+                                    : mapDeepThinkingCitations(data.data?.citations || []);
+                                const finalContent = appendRetrievalWarnings(answer, data.data?.warnings);
 
                                 addMessage({
                                     role: 'assistant',
-                                    content: answer,
+                                    content: finalContent,
                                     sources: settings.showSources ? mappedSources : undefined,
                                     queryId,
                                     timestamp: new Date().toISOString(),
@@ -159,10 +248,13 @@ export default function Home() {
                             setIsLoading(false);
                             setThinkingLog('');
                         } else if (data.type === 'error') {
-                            console.error('Deep Thinking Error:', data.content);
+                            console.warn('Deep Thinking Error:', data.content);
+                            if (data.code === 'MLX_RECOVERING') {
+                                setThinkingLog('MLX local model became unavailable; recovery running.');
+                            }
                             addMessage({
                                 role: 'assistant',
-                                content: `Error: ${data.content}`,
+                                content: formatDeepThinkingError(data),
                             });
                             ws.close();
                             setIsLoading(false);
@@ -192,7 +284,7 @@ export default function Home() {
 
             } else {
                 // Standard Unified Search (HTTP)
-                const backendMode = searchMode === 'deep-thinking' ? 'cascading' : searchMode;
+                const backendMode = searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
                 const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx' ? settings.model : '';

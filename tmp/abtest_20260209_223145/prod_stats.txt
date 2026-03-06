@@ -1,0 +1,28 @@
+LightRAG Relevant Statistics
+============================
+Generated at: 2026-02-10T05:33:31.601179+00:00
+Storage dir: /Users/michel/obsidian_rag_local_data/lightrag_db
+Inputs dir:  inputs
+
+Core:
+- Documents: 1752
+- Chunks: 2582
+- Entity mentions: 35526
+- Relation mentions: 30190
+- Graph nodes/edges: 25845/29142
+- LLM cache entries: 6918
+
+Content:
+- Document chars (mean): 2964.071917808219
+- Document words (mean): 382.3670091324201
+- Chunk tokens (mean): 496.28776142525174
+
+Time:
+- Earliest timestamp: 1970-01-01T00:00:00+00:00
+- Latest timestamp: 2026-02-10T05:33:29.907802+00:00
+- Newest age (seconds): 1.6933767795562744
+- Processing duration (mean seconds): 152.44961832061068
+
+Files:
+- Storage files: 48 (670.97 MB)
+- Input files: 10 (95.59 KB)
