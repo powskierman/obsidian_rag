@@ -7,6 +7,19 @@ class PlannerAgent:
         self.client = client
         self.model = "claude-sonnet-4-5-20250929"
 
+    @staticmethod
+    def _normalize_steps_payload(payload: Any) -> List[Step]:
+        """
+        Accept either a raw step list or an object wrapper such as {"steps": [...]}.
+        """
+        if isinstance(payload, list):
+            return payload
+        if isinstance(payload, dict):
+            steps = payload.get("steps")
+            if isinstance(steps, list):
+                return steps
+        raise ValueError("Planner payload did not contain a step list")
+
     def create_plan(self, question: str, vault_context: Dict[str, Any]) -> List[Step]:
         """
         Uses LLM to break down the question into 2-5 sub-steps.
@@ -104,7 +117,7 @@ class PlannerAgent:
                 content = content[:-3]
             content = content.strip()
             
-            plan_data = json.loads(content)
+            plan_data = self._normalize_steps_payload(json.loads(content))
             return plan_data
         except Exception as e:
             print(f"Error parsing plan: {e}")
@@ -165,7 +178,7 @@ class PlannerAgent:
                 content = content[:-3]
             content = content.strip()
             
-            new_steps = json.loads(content)
+            new_steps = self._normalize_steps_payload(json.loads(content))
             
             # Assign step numbers continuing from existing plan
             current_max = len(state["plan"])

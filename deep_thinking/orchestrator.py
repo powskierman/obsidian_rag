@@ -170,6 +170,16 @@ class DeepThinkingRAG:
                 return str(value)
         return None
 
+    @staticmethod
+    def _normalize_plan_steps(plan_payload: Any) -> List[Dict[str, Any]]:
+        if isinstance(plan_payload, list):
+            return plan_payload
+        if isinstance(plan_payload, dict):
+            steps = plan_payload.get("steps")
+            if isinstance(steps, list):
+                return steps
+        raise ValueError("Planner returned an invalid plan payload")
+
     def _commit_step_result(
         self,
         state: RAGState,
@@ -484,7 +494,9 @@ class DeepThinkingRAG:
         
         # Step 1: Create plan
         update_status("🤔 Planning research strategy...")
-        state["plan"] = self.planner.create_plan(question, state["user_context"])
+        state["plan"] = self._normalize_plan_steps(
+            self.planner.create_plan(question, state["user_context"])
+        )
         update_status("📋 Plan created", {"plan": state["plan"]})
 
         has_vault_step = any(

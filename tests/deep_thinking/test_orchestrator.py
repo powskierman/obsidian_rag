@@ -54,6 +54,37 @@ class TestDeepThinkingRAG(unittest.TestCase):
         self.orchestrator.policy.decide.assert_called_once()
         self.orchestrator.synthesizer.generate.assert_called_once()
 
+    def test_query_flow_accepts_wrapped_plan_object(self):
+        self.orchestrator.planner.create_plan.return_value = {
+            "steps": [{
+                "step_number": 1,
+                "sub_question": "q1",
+                "search_strategy": "vector",
+                "keywords": [],
+                "target_folders": [],
+                "reasoning": ""
+            }]
+        }
+        self.orchestrator.supervisor.execute_step.return_value = [{
+            "content": "doc1",
+            "source": "Tech/ESP32.md",
+            "filepath": "Tech/ESP32.md",
+            "filename": "ESP32.md",
+            "snippet": "doc1",
+            "type": "vector",
+            "score": 0.9,
+            "source_category": "vault",
+        }]
+        self.orchestrator.reflector.reflect.return_value = {"key_findings": "f1", "confidence": 0.9}
+        self.orchestrator.policy.decide.return_value = "FINISH"
+        self.orchestrator.synthesizer.generate.return_value = ("Final Answer", ["citation1"])
+
+        result = self.orchestrator.query("test question")
+
+        self.assertEqual(result["answer"], "Final Answer")
+        self.assertEqual(len(result["research_steps"]), 1)
+        self.assertEqual(len(result["sources"]), 1)
+
     def test_query_max_iterations(self):
         # Setup mocks to loop
         self.orchestrator.planner.create_plan.return_value = [{

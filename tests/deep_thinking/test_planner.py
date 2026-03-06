@@ -19,6 +19,17 @@ class TestPlannerAgent(unittest.TestCase):
         self.assertEqual(plan[0]["sub_question"], "test")
         self.assertEqual(plan[0]["search_strategy"], "vector")
 
+    def test_create_plan_accepts_wrapped_steps_object(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"steps":[{"step_number": 1, "sub_question": "test", "search_strategy": "vector", "keywords": ["test"], "target_folders": [], "reasoning": "test"}]}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        plan = self.planner.create_plan("test question", {})
+
+        self.assertEqual(len(plan), 1)
+        self.assertEqual(plan[0]["sub_question"], "test")
+        self.assertEqual(plan[0]["search_strategy"], "vector")
+
     def test_create_plan_parsing_error(self):
         # Mock invalid JSON response
         mock_response = MagicMock()
@@ -46,6 +57,23 @@ class TestPlannerAgent(unittest.TestCase):
         
         new_steps = self.planner.extend_plan(state)
         
+        self.assertEqual(len(new_steps), 1)
+        self.assertEqual(new_steps[0]["step_number"], 2)
+        self.assertEqual(new_steps[0]["sub_question"], "new step")
+
+    def test_extend_plan_accepts_wrapped_steps_object(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"steps":[{"sub_question": "new step", "search_strategy": "graph", "keywords": [], "target_folders": [], "reasoning": "gap"}]}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "orig",
+            "plan": [{"step_number": 1}],
+            "past_steps": [{"step": {"step_number": 1, "sub_question": "q"}, "key_findings": "f"}]
+        }
+
+        new_steps = self.planner.extend_plan(state)
+
         self.assertEqual(len(new_steps), 1)
         self.assertEqual(new_steps[0]["step_number"], 2)
         self.assertEqual(new_steps[0]["sub_question"], "new step")
