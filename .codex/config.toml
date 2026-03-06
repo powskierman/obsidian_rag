@@ -1,0 +1,19 @@
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 3
+max_depth = 1
+
+[agents.coordinator]
+description = "Coordinates the initial remediation focusing on orchestration and content expansion."
+config_file = "agents/coordinator.toml"
+
+[agents.orchestrator_serializer]
+description = "Fixes orchestration: execute one plan step at a time or with bounded concurrency, and make reflection incremental. Focuses on orchestrator.py and supervisor.py (Finding #1)."
+config_file = "agents/orchestrator_serializer.toml"
+
+[agents.content_limiter]
+description = "Redesigns content expansion to be lazy and cached, expanding only what synthesis needs. Focuses on execute_step() and _expand_full_content() (Finding #2)."
+config_file = "agents/content_limiter.toml"
+
