@@ -2,7 +2,7 @@
 
 ## Summary
 Obsidian RAG provides a local-first retrieval system for an Obsidian vault, combining
-vector search and graph reasoning behind a single API gateway with optional streaming
+vector search and staged graph reasoning behind a single API gateway with optional
 and deep research workflows.
 
 ## Goals
@@ -20,10 +20,10 @@ and deep research workflows.
 - Developers maintaining local indexing and search services.
 
 ## User Stories
-- As a user, I want a single API to run vector, notes, entities, dual-source modes, and
-  hybrid retrieval so I do not need to choose backends manually.
-- As a user, I want streaming responses for long-running queries so I can see
-  progress and partial answers.
+- As a user, I want a simple search surface with fast vector retrieval, thorough cascading
+  retrieval, and a separate deep thinking workflow so I do not need to choose among many
+  overlapping graph modes.
+- As a user, I want long-running deep thinking queries to stream progress over WebSocket.
 - As a maintainer, I want incremental indexing by default so day-to-day edits do
   not require full rebuilds.
 - As a maintainer, I want a documented full reindex workflow so I can recover from
@@ -39,7 +39,8 @@ and deep research workflows.
   - `GET /api/v1/stats`
   - WebSocket deep research at `ws://localhost:4000/api/v1/deep-research`.
 - The gateway shall support search modes:
-  - `vector`, `cascading`, `deep-research`.
+  - `vector` and `cascading` on `POST /api/v1/query`
+  - deep thinking on `ws://localhost:4000/api/v1/deep-research`
 - The system shall support incremental indexing for vector and graph data stores.
 - The system shall support explicit full reindexing of vector, NetworkX, and LightRAG
   stores when requested.
@@ -50,8 +51,7 @@ and deep research workflows.
 ## Non-Functional Requirements
 - Latency targets for typical queries:
   - Vector < 1s
-  - Graph < 5s
-  - Hybrid < 8s
+  - Cascading < 8s
   - Deep thinking < 120s
 - Generated databases shall remain local-only and rebuildable.
 - Indexing workflows shall be safe to run repeatedly without data loss.
@@ -63,7 +63,7 @@ and deep research workflows.
 
 ## Success Criteria
 - Health checks pass for gateway and core services.
-- Each search mode returns results for a typical query.
+- Vector, cascading, and deep thinking each return results for a typical query.
 - Indexing can be run incrementally and as a full rebuild without errors.
 
 ## References

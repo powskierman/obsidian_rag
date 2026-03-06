@@ -9,7 +9,7 @@ The following flowchart describes how the frontend application, API Gateway, and
 ```mermaid
 graph TD
     Client[Frontend Client / Streamlit / Next.js] -->|HTTP POST /api/v1/query| Gateway[API Gateway]
-    Client -->|WebSocket /ws/chat| Gateway
+    Client -->|WebSocket /api/v1/deep-research| Gateway
     
     Gateway -->|Vector Mode| Embed[Embedding Service / ChromaDB]
     Gateway -->|Cascading Mode| Cascading[Cascading Retriever]
@@ -49,7 +49,7 @@ flowchart TD
     CascadingResults --> Return
     
     %% Deep Research Mode
-    Route -->|mode: deep-research| DeepResearch[Deep Thinking Agent]
+    Route -->|deep thinking websocket| DeepResearch[Deep Thinking Agent]
     DeepResearch --> Loop[Iterative Planning & Execution]
     Loop <--> Tools[Search Tools: Vector, Graph, Web]
     Loop --> FinalEval[Evaluation & Refinement]
@@ -61,4 +61,4 @@ flowchart TD
 
 1. **Vector**: Fast, raw retrieval using embeddings. Returns source snippets directly without LLM synthesis.
 2. **Cascading**: Thorough, hybrid retrieval pipeline. Uses graph topology to anchor the concept, expands understanding via LightRAG, falls back to targeted vector search, and uses an LLM to synthesize a concise answer.
-3. **Deep Research**: Agentic, multi-step problem solving. Uses a supervisor agent to break down complex queries, iteratively gather information using various tools, and syntheize a comprehensive research report.
+3. **Deep Thinking**: Agentic, multi-step problem solving over the deep-research WebSocket. Uses a supervisor agent to break down complex queries, iteratively gather information using various tools, and synthesize a comprehensive research report.

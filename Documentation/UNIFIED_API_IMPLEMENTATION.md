@@ -9,17 +9,16 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 ## Key Endpoints
 
 - `POST /api/v1/query`
-- `POST /api/v1/query`
-- `POST /api/v1/query` (SSE streaming proxy)
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
+- `WS /api/v1/deep-research`
 
 ## Core Request Fields
 
 ```json
 {
   "query": "...",
-  "mode": "vector|cascading|deep-research",
+  "mode": "vector|cascading",
   "max_results": 10,
   "llm_provider": "ollama|claude|gemini|gpt-oss|kimi|openrouter|chatgpt|perplexity",
   "relevance_threshold": 75,
@@ -28,21 +27,12 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 }
 ```
 
-The gateway proxies to the embedding service, graph service, and LightRAG service based on mode.
+The HTTP gateway proxies to the embedding service or cascading retriever based on mode. Deep thinking uses the dedicated WebSocket endpoint.
 
 Provider note:
 - `kimi` is an OpenRouter-backed provider label.
 - OpenRouter model choice should be passed via `model` (request) or env defaults (`GRAPH_MODEL`, `LIGHTRAG_MODEL`).
 
-Streaming behavior:
-- `POST /api/v1/query` returns `text/event-stream` SSE chunks.
-- Streaming currently supports `vector`, `notes`/`graph`, and `hybrid` modes.
-- The underlying Graph Service endpoint (`POST /query_stream`) is internal-only/deprecated for direct client traffic.
-
-Compatibility aliases:
-- `graph` -> `notes`
-- `networkx` -> `notes`
-- `lightrag` -> `entities`
-
-LightRAG behavior:
-- In `entities` mode, if LightRAG returns "Not found in notes", the gateway falls back to vector results (when fallbacks are enabled).
+Deep thinking behavior:
+- Use `ws://localhost:4000/api/v1/deep-research` for long-running agentic research.
+- Deep thinking is not a valid HTTP `mode` on `POST /api/v1/query`.

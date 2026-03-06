@@ -7,17 +7,17 @@ This document is mirrored in:
 Both files must remain aligned.
 
 ## Purpose
-Obsidian RAG is a local-first retrieval system for a personal Obsidian vault. It combines vector search and graph reasoning behind a unified API gateway, with repeatable indexing workflows and strong privacy defaults.
+Obsidian RAG is a local-first retrieval system for a personal Obsidian vault. It combines vector search, staged cascading retrieval, and deep thinking behind a unified API gateway, with repeatable indexing workflows and strong privacy defaults.
 
 ## Primary Users and Use Cases
 - Knowledge workers querying private vault content.
-- Hybrid retrieval: semantic vectors plus graph reasoning.
+- Fast vector retrieval and thorough cascading retrieval.
 - Deep research flows with streaming updates and multi-step reasoning.
 
 ## Scope
 In scope:
 - Local services: embedding, NetworkX graph, LightRAG graph, API gateway, Streamlit UI, and WebApp.
-- Search modes: `vector`, `cascading`, `deep-research`, and deep-research WebSocket.
+- Search entry points: `vector`, `cascading`, and deep-research WebSocket.
 - Incremental indexing and explicit rebuild workflows.
 - MCP integration and Docker-based local deployment.
 
@@ -50,19 +50,9 @@ Changes must satisfy functional and performance gates defined in this constituti
 
 ## Public Interfaces (API Gateway)
 - `POST /api/v1/query`
-- `POST /api/v1/query` (SSE `text/event-stream`)
-- `POST /api/v1/query`
 - `GET /api/v1/health`
 - `GET /api/v1/stats`
 - `ws://localhost:4000/api/v1/deep-research`
-
-Compatibility aliases:
-- `graph` -> `notes`
-- `networkx` -> `notes`
-- `lightrag` -> `entities`
-
-Internal-only compatibility endpoint:
-- `POST http://localhost:8002/query_stream` is internal and deprecated for direct client traffic. Clients should use `POST /api/v1/query`.
 
 ## Data and Indexing Principles
 - Primary stores:
@@ -81,8 +71,7 @@ Pass criteria:
 - Non-chat retrieval modes must return non-zero sources.
 - Latency targets:
   - Vector: `< 1s`
-  - Graph (`notes`, `entities`): `< 5s`
-  - Hybrid/combined (`notes+vector`, `entities+vector`, `dual-graph`, `hybrid`, `cascading`): `< 8s`
+  - Cascading: `< 8s`
   - Deep Thinking: `< 120s`
 
 ## Security and Privacy
@@ -107,6 +96,6 @@ This constitution supersedes ad-hoc practices. Changes must update both mirrored
 - `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/DEEP_THINKING_PROTOCOL.md`
 - `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/STREAMING_IMPLEMENTATION.md`
 
-**Version**: 2.1.0  
+**Version**: 2.1.1  
 **Ratified**: 2025-01-01  
-**Last Amended**: 2026-02-06
+**Last Amended**: 2026-03-06

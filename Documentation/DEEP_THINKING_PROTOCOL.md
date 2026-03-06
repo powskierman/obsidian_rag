@@ -23,12 +23,12 @@ Wrapper around ChromaDB response.
 ```
 *Note: Has no top-level `answer` key.*
 
-### Graph/Hybrid Modes (`mode="hybrid" | "notes" | "cascading"`)
+### Cascading Mode (`mode="cascading"`)
 Returns synthesized answer and flattened sources.
 ```json
 {
   "query": "user query",
-  "mode": "hybrid",
+  "mode": "cascading",
   "answer": "Synthesized text...",
   "sources": [
       {"filename": "foo.md", "snippet": "...", "relevance": 85.0}
@@ -53,6 +53,5 @@ Run `python Scripts/debug/audit_search_modes.py` to verify all modes.
 - **Pass Criteria**: `status=PASS` AND `source_count > 0` (for non-chat modes).
 - **Latency Targets**: 
     - Vector: < 1s
-    - Graph: < 5s
-    - Hybrid: < 8s
+    - Cascading: < 8s
     - Deep Thinking: < 120s

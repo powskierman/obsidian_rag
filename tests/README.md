@@ -39,6 +39,7 @@ Additional focused tests:
 - `tests/unit/test_embedding_service_query.py`
 - `tests/unit/test_deep_thinking_filters.py`
 - `tests/unit/test_api_gateway_filters.py`
+- `tests/integration/test_search_modes.py`
 - `tests/integration/test_deep_research_websocket.py`
 
 ## Test Categories
@@ -50,6 +51,7 @@ Additional focused tests:
 
 - **Integration Tests**: Multi-component tests (~30+ tests)
   - MCP server endpoints
+  - Unified search mode coverage (`vector`, `cascading`, deep research WebSocket)
   - Full workflows
 
 ## Coverage

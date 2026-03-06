@@ -148,6 +148,90 @@ class DeepThinkingRAG:
         )
 
     @staticmethod
+    def _use_orchestrator_v2() -> bool:
+        return os.getenv("DEEP_THINKING_ORCHESTRATOR_V2", "false").strip().lower() in {
+            "1", "true", "yes", "on"
+        }
+
+    @staticmethod
+    def _max_concurrent_v2_steps() -> int:
+        try:
+            return max(1, int(os.getenv("DEEP_THINKING_MAX_CONCURRENT_STEPS", "1")))
+        except (TypeError, ValueError):
+            return 1
+
+    @staticmethod
+    def _step_parallel_group(step: Dict[str, Any]) -> str | None:
+        for key in ("parallel_group", "independent_group"):
+            value = step.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+            if value not in (None, False, ""):
+                return str(value)
+        return None
+
+    def _commit_step_result(
+        self,
+        state: RAGState,
+        step: Dict[str, Any],
+        docs: List[Dict[str, Any]],
+        past_step: Dict[str, Any],
+        update_status,
+        buffer_docs_per_step: int,
+        buffer_doc_chars: int,
+        buffer_total_chars: int,
+        accumulated_context_chars: int,
+    ) -> None:
+        state["retrieved_documents"].extend(docs)
+
+        for doc in docs[:buffer_docs_per_step]:
+            state["raw_context_buffer"].append({
+                "source": doc.get("source", "Unknown"),
+                "content": self._truncate_text(doc.get("content", ""), buffer_doc_chars),
+                "step": step["step_number"]
+            })
+
+        total_buffer_chars = sum(len(str(item.get("content", ""))) for item in state["raw_context_buffer"])
+        while state["raw_context_buffer"] and total_buffer_chars > buffer_total_chars:
+            removed = state["raw_context_buffer"].pop(0)
+            total_buffer_chars -= len(str(removed.get("content", "")))
+
+        state["past_steps"].append(past_step)
+        state["accumulated_context"] += f"\n\nStep {step['step_number']}: {past_step['key_findings']}"
+
+        limit = int(accumulated_context_chars * 0.7)
+        if len(state["accumulated_context"]) > limit:
+            update_status("🗜️ Compressing earlier context (Hierarchical Memory)...")
+
+            split_idx = len(state["accumulated_context"]) // 2
+            next_step_idx = state["accumulated_context"].find("\n\nStep ", split_idx)
+            if next_step_idx == -1:
+                next_step_idx = split_idx
+
+            early_context = state["accumulated_context"][:next_step_idx].strip()
+            recent_context = state["accumulated_context"][next_step_idx:]
+
+            if early_context:
+                summary = self.reflector.compress_context(early_context)
+                state["accumulated_context"] = summary + "\n" + recent_context
+
+            if len(state["accumulated_context"]) > accumulated_context_chars:
+                state["accumulated_context"] = "... [earlier steps truncated] ..." + state["accumulated_context"][-accumulated_context_chars:]
+
+    def _run_step_and_reflect(
+        self,
+        step: Dict[str, Any],
+        state: RAGState,
+        update_status,
+    ) -> tuple[Dict[str, Any], List[Dict[str, Any]], Dict[str, Any]]:
+        update_status(f"👣 Step {step['step_number']}: {step['sub_question']}")
+        docs = self.supervisor.execute_step(step, state, trace_callback=update_status)
+        update_status(f"   Found {len(docs)} documents for Step {step['step_number']}.")
+        past_step = self.reflector.reflect(step, docs, state)
+        update_status(f"   Insight for Step {step['step_number']}: {past_step['key_findings']}")
+        return step, docs, past_step
+
+    @staticmethod
     def _truncate_text(value: Any, limit: int) -> str:
         text = str(value or "")
         if len(text) <= limit:
@@ -435,97 +519,175 @@ class DeepThinkingRAG:
                 "reasoning": "Ensure external verification for technical comparison queries."
             })
 
+        use_orchestrator_v2 = self._use_orchestrator_v2()
+        if use_orchestrator_v2:
+            update_status(
+                "⚙️ Using orchestrator v2",
+                {"max_concurrent_steps": self._max_concurrent_v2_steps()}
+            )
+
         
         # Step 2: Execute plan with reflection loop
         while state["should_continue"] and state["iteration_count"] < max_iterations:
             state["iteration_count"] += 1
-            
-            # Get current step
-            if state["current_step_index"] >= len(state["plan"]):
-                # Plan exhausted, check policy
-                pass
+
+            if not use_orchestrator_v2:
+                # Get current step
+                if state["current_step_index"] >= len(state["plan"]):
+                    # Plan exhausted, check policy
+                    pass
+                else:
+                    steps_to_run = state["plan"][state["current_step_index"]:]
+
+                    # Execute step and reflection
+                    def run_and_reflect(step):
+                        update_status(f"👣 Step {step['step_number']}: {step['sub_question']}")
+                        docs = self.supervisor.execute_step(step, state, trace_callback=update_status)
+                        update_status(f"   Found {len(docs)} documents for Step {step['step_number']}.")
+                        past_step = self.reflector.reflect(step, docs, state)
+                        update_status(f"   Insight for Step {step['step_number']}: {past_step['key_findings']}")
+                        return step, docs, past_step
+
+                    # Use ThreadPoolExecutor to run independent planned steps in parallel
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=len(steps_to_run)) as executor:
+                        futures = [executor.submit(run_and_reflect, step) for step in steps_to_run]
+                        results = [f.result() for f in futures] # keep order
+
+                    for step, docs, past_step in results:
+                        state["retrieved_documents"].extend(docs)
+
+                        for doc in docs[:buffer_docs_per_step]:
+                            state["raw_context_buffer"].append({
+                                "source": doc.get("source", "Unknown"),
+                                "content": self._truncate_text(doc.get("content", ""), buffer_doc_chars),
+                                "step": step["step_number"]
+                            })
+
+                        total_buffer_chars = sum(len(str(item.get("content", ""))) for item in state["raw_context_buffer"])
+                        while state["raw_context_buffer"] and total_buffer_chars > buffer_total_chars:
+                            removed = state["raw_context_buffer"].pop(0)
+                            total_buffer_chars -= len(str(removed.get("content", "")))
+
+                        state["past_steps"].append(past_step)
+                        state["accumulated_context"] += f"\n\nStep {step['step_number']}: {past_step['key_findings']}"
+
+                        # Cap context to prevent token bloat (Hierarchical Memory)
+                        limit = int(accumulated_context_chars * 0.7)
+                        if len(state["accumulated_context"]) > limit:
+                            update_status("🗜️ Compressing earlier context (Hierarchical Memory)...")
+
+                            split_idx = len(state["accumulated_context"]) // 2
+                            next_step_idx = state["accumulated_context"].find("\n\nStep ", split_idx)
+                            if next_step_idx == -1:
+                                next_step_idx = split_idx
+
+                            early_context = state["accumulated_context"][:next_step_idx].strip()
+                            recent_context = state["accumulated_context"][next_step_idx:]
+
+                            if early_context:
+                                summary = self.reflector.compress_context(early_context)
+                                state["accumulated_context"] = summary + "\n" + recent_context
+
+                            # Hard cap just in case it still exceeds the absolute limit
+                            if len(state["accumulated_context"]) > accumulated_context_chars:
+                                state["accumulated_context"] = "... [earlier steps truncated] ..." + state["accumulated_context"][-accumulated_context_chars:]
+
+                    state["current_step_index"] += len(steps_to_run)
+
+                # Check if we should continue
+                # Plan complete or empty - ask policy if we have enough
+                if state["current_step_index"] >= len(state["plan"]):
+                    decision = self.policy.decide(state)
+                    update_status(f"⚖️ Policy Decision: {decision}")
+
+                    if decision == "FINISH":
+                        state["should_continue"] = False
+                    elif decision == "REVISE_PLAN":
+                        # Generate additional steps
+                        update_status("🔄 Revising plan...")
+                        new_steps = self.planner.extend_plan(state)
+                        state["plan"].extend(new_steps)
+                    elif decision == "CONTINUE":
+                        # If policy says continue but no steps left, force finish or extend?
+                        # If no steps left, we MUST extend or finish.
+                        if state["current_step_index"] >= len(state["plan"]):
+                             update_status("   No steps left, forcing plan extension...")
+                             new_steps = self.planner.extend_plan(state)
+                             if not new_steps:
+                                 update_status("   Could not extend plan, finishing.")
+                                 state["should_continue"] = False
+                             else:
+                                 state["plan"].extend(new_steps)
             else:
-                steps_to_run = state["plan"][state["current_step_index"]:]
-                
-                # Execute step and reflection
-                def run_and_reflect(step):
-                    update_status(f"👣 Step {step['step_number']}: {step['sub_question']}")
-                    docs = self.supervisor.execute_step(step, state, trace_callback=update_status)
-                    update_status(f"   Found {len(docs)} documents for Step {step['step_number']}.")
-                    past_step = self.reflector.reflect(step, docs, state)
-                    update_status(f"   Insight for Step {step['step_number']}: {past_step['key_findings']}")
-                    return step, docs, past_step
+                steps_to_run: List[Dict[str, Any]] = []
+                if state["current_step_index"] < len(state["plan"]):
+                    current_step = state["plan"][state["current_step_index"]]
+                    steps_to_run = [current_step]
+                    parallel_group = self._step_parallel_group(current_step)
+                    max_concurrent_steps = self._max_concurrent_v2_steps()
 
-                # Use ThreadPoolExecutor to run independent planned steps in parallel
-                with concurrent.futures.ThreadPoolExecutor(max_workers=len(steps_to_run)) as executor:
-                    futures = [executor.submit(run_and_reflect, step) for step in steps_to_run]
-                    results = [f.result() for f in futures] # keep order
+                    if parallel_group and max_concurrent_steps > 1:
+                        for candidate in state["plan"][state["current_step_index"] + 1:]:
+                            if len(steps_to_run) >= max_concurrent_steps:
+                                break
+                            if self._step_parallel_group(candidate) != parallel_group:
+                                break
+                            steps_to_run.append(candidate)
 
-                for step, docs, past_step in results:
-                    state["retrieved_documents"].extend(docs)
-                    
-                    for doc in docs[:buffer_docs_per_step]:
-                        state["raw_context_buffer"].append({
-                            "source": doc.get("source", "Unknown"),
-                            "content": self._truncate_text(doc.get("content", ""), buffer_doc_chars),
-                            "step": step["step_number"]
-                        })
+                    if len(steps_to_run) > 1:
+                        update_status(
+                            "👥 Executing step group",
+                            {
+                                "group": parallel_group,
+                                "steps": [step["step_number"] for step in steps_to_run],
+                            },
+                        )
+                        with concurrent.futures.ThreadPoolExecutor(
+                            max_workers=min(len(steps_to_run), max_concurrent_steps)
+                        ) as executor:
+                            futures = [
+                                executor.submit(self._run_step_and_reflect, step, state, update_status)
+                                for step in steps_to_run
+                            ]
+                            results = [f.result() for f in futures]
+                    else:
+                        results = [
+                            self._run_step_and_reflect(steps_to_run[0], state, update_status)
+                        ]
 
-                    total_buffer_chars = sum(len(str(item.get("content", ""))) for item in state["raw_context_buffer"])
-                    while state["raw_context_buffer"] and total_buffer_chars > buffer_total_chars:
-                        removed = state["raw_context_buffer"].pop(0)
-                        total_buffer_chars -= len(str(removed.get("content", "")))
-                        
-                    state["past_steps"].append(past_step)
-                    state["accumulated_context"] += f"\n\nStep {step['step_number']}: {past_step['key_findings']}"
-                    
-                    # Cap context to prevent token bloat (Hierarchical Memory)
-                    limit = int(accumulated_context_chars * 0.7)
-                    if len(state["accumulated_context"]) > limit:
-                        update_status("🗜️ Compressing earlier context (Hierarchical Memory)...")
-                        
-                        split_idx = len(state["accumulated_context"]) // 2
-                        next_step_idx = state["accumulated_context"].find("\n\nStep ", split_idx)
-                        if next_step_idx == -1:
-                            next_step_idx = split_idx
-                            
-                        early_context = state["accumulated_context"][:next_step_idx].strip()
-                        recent_context = state["accumulated_context"][next_step_idx:]
-                        
-                        if early_context:
-                            summary = self.reflector.compress_context(early_context)
-                            state["accumulated_context"] = summary + "\n" + recent_context
-                            
-                        # Hard cap just in case it still exceeds the absolute limit
-                        if len(state["accumulated_context"]) > accumulated_context_chars:
-                            state["accumulated_context"] = "... [earlier steps truncated] ..." + state["accumulated_context"][-accumulated_context_chars:]
-                
-                state["current_step_index"] += len(steps_to_run)
-            
-            # Check if we should continue
-            # Plan complete or empty - ask policy if we have enough
-            if state["current_step_index"] >= len(state["plan"]):
+                    for step, docs, past_step in results:
+                        self._commit_step_result(
+                            state,
+                            step,
+                            docs,
+                            past_step,
+                            update_status,
+                            buffer_docs_per_step,
+                            buffer_doc_chars,
+                            buffer_total_chars,
+                            accumulated_context_chars,
+                        )
+
+                    state["current_step_index"] += len(steps_to_run)
+
                 decision = self.policy.decide(state)
                 update_status(f"⚖️ Policy Decision: {decision}")
-                
+
                 if decision == "FINISH":
                     state["should_continue"] = False
                 elif decision == "REVISE_PLAN":
-                    # Generate additional steps
                     update_status("🔄 Revising plan...")
                     new_steps = self.planner.extend_plan(state)
                     state["plan"].extend(new_steps)
                 elif decision == "CONTINUE":
-                    # If policy says continue but no steps left, force finish or extend?
-                    # If no steps left, we MUST extend or finish.
                     if state["current_step_index"] >= len(state["plan"]):
-                         update_status("   No steps left, forcing plan extension...")
-                         new_steps = self.planner.extend_plan(state)
-                         if not new_steps:
-                             update_status("   Could not extend plan, finishing.")
-                             state["should_continue"] = False
-                         else:
-                             state["plan"].extend(new_steps)
+                        update_status("   No steps left, forcing plan extension...")
+                        new_steps = self.planner.extend_plan(state)
+                        if not new_steps:
+                            update_status("   Could not extend plan, finishing.")
+                            state["should_continue"] = False
+                        else:
+                            state["plan"].extend(new_steps)
 
         # Safety: For technical comparison/spec queries, ensure at least one successful web retrieval.
         if self._should_force_web_step(question) and not self._has_web_documents(state["retrieved_documents"]):
