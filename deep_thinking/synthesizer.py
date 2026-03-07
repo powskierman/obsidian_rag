@@ -1,8 +1,12 @@
 import json
+import logging
 import os
 import re
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 from .state import RAGState
+from .source_utils import canonicalize_web_url, normalize_vault_path
+from .supervisor import RetrievalSupervisor
+from .utils.universal_client import extract_response_text
 try:
     from src.utils.prompt_builder import build_prompt_appendix, build_provider_guardrails
 except ImportError:
@@ -13,6 +17,8 @@ except ImportError:
             return ""
         def build_provider_guardrails(provider: str) -> str:
             return ""
+
+logger = logging.getLogger(__name__)
 
 class FinalAnswerGenerator:
     def __init__(self, client):
@@ -78,19 +84,416 @@ Finally, provide your answer in a structured, easy-to-read format."""
             return text
         return text[: max(limit - 32, 0)].rstrip() + "\n... [truncated]"
 
-    def generate(self, state: RAGState) -> dict:
-        """
-        Synthesize final answer with Obsidian-style citations.
-        """
-        provider = getattr(self.client, "provider", "").lower()
-        per_doc_char_limit, total_context_char_limit, max_docs, summary_char_limit = self._provider_limits(provider)
-        query_lower = str(state.get("original_question", "")).lower()
-        is_comparison_query = any(token in query_lower for token in [" vs ", " versus ", "compare", "difference"])
+    @staticmethod
+    def _use_lazy_expansion_v2() -> bool:
+        return os.getenv("DEEP_THINKING_LAZY_EXPANSION_V2", "false").strip().lower() in {
+            "1", "true", "yes", "on"
+        }
 
-        # Format documents for citation
+    @staticmethod
+    def _is_web_doc(doc: Dict[str, Any]) -> bool:
+        if doc.get("type") == "web" or doc.get("source_category") == "web":
+            return True
+        source = str(doc.get("source", "") or doc.get("filepath", ""))
+        return source.startswith("http://") or source.startswith("https://")
+
+    @staticmethod
+    def _is_reasoning_doc(doc: Dict[str, Any]) -> bool:
+        return not RetrievalSupervisor._is_graph_summary_doc(doc)
+
+    @staticmethod
+    def _is_citable_doc(doc: Dict[str, Any]) -> bool:
+        return RetrievalSupervisor._is_citable_doc(doc)
+
+    @classmethod
+    def _citation_lookup(cls, documents: List[Dict[str, Any]]) -> tuple[Dict[str, str], Dict[str, str | None], Dict[str, str]]:
+        vault_by_path: Dict[str, str] = {}
+        vault_by_basename: Dict[str, str | None] = {}
+        web_by_url: Dict[str, str] = {}
+
+        for doc in documents or []:
+            if not isinstance(doc, dict) or not cls._is_citable_doc(doc):
+                continue
+
+            source = str(doc.get("filepath") or doc.get("url") or doc.get("source") or "").strip()
+            if not source:
+                continue
+
+            if cls._is_web_doc(doc):
+                canonical_url = canonicalize_web_url(doc.get("canonical_url") or source) or source
+                web_by_url[canonical_url.lower()] = canonical_url
+                continue
+
+            normalized_path = normalize_vault_path(source)
+            if not normalized_path:
+                continue
+            vault_by_path[normalized_path.lower()] = normalized_path
+
+            basename = os.path.basename(normalized_path).lower()
+            existing = vault_by_basename.get(basename)
+            if existing is None and basename not in vault_by_basename:
+                vault_by_basename[basename] = normalized_path
+            elif existing != normalized_path:
+                vault_by_basename[basename] = None
+
+        return vault_by_path, vault_by_basename, web_by_url
+
+    @classmethod
+    def _authoritative_documents(
+        cls,
+        question: str,
+        retrieved_documents: List[Dict[str, Any]],
+        max_docs: int,
+    ) -> tuple[Dict[str, Any], List[Dict[str, Any]], List[Dict[str, Any]]]:
+        query_profile = RetrievalSupervisor.build_query_profile(question)
+        reasoning_docs = [
+            doc for doc in (retrieved_documents or [])
+            if cls._is_reasoning_doc(doc)
+        ]
+        citable_reasoning_docs = [
+            doc for doc in reasoning_docs
+            if cls._is_citable_doc(doc)
+        ]
+        selected_doc_limit = query_profile["max_sources"] or max_docs
+        selected_documents = RetrievalSupervisor.select_minimal_evidence_set(
+            question,
+            citable_reasoning_docs,
+            max_docs=selected_doc_limit,
+        )
+        authoritative_documents = selected_documents or citable_reasoning_docs
+        return query_profile, authoritative_documents, reasoning_docs
+
+    @staticmethod
+    def _retry_documents(documents: List[Dict[str, Any]], query_profile: Dict[str, Any]) -> List[Dict[str, Any]]:
+        if not documents:
+            return []
+        if len(documents) == 1:
+            return documents
+        retry_limit = 2 if query_profile.get("is_summary_request") else 3
+        reduced_count = min(len(documents) - 1, retry_limit)
+        return documents[: max(1, reduced_count)]
+
+    @staticmethod
+    def _record_synthesis_failure(state: RAGState, reason: str, raw: str = "") -> None:
+        state["_synthesis_failure_reason"] = reason
+        snippet = str(raw or "").strip()[:240]
+        logger.warning("Synthesis fallback reason=%s raw=%s", reason, snippet)
+        warnings = state.setdefault("warnings", [])
+        warning_msg = f"Synthesis fallback triggered: {reason}"
+        if warning_msg not in warnings:
+            warnings.append(warning_msg)
+
+    @classmethod
+    def _normalize_citations(
+        cls,
+        citations: List[Any],
+        documents: List[Dict[str, Any]],
+        query_entities: List[str] | None = None,
+    ) -> List[str]:
+        vault_by_path, vault_by_basename, web_by_url = cls._citation_lookup(documents)
+        normalized: List[str] = []
+        seen: set[str] = set()
+        dropped: List[str] = []
+
+        for citation in citations or []:
+            if not isinstance(citation, str):
+                continue
+            text = citation.strip()
+            if not text:
+                continue
+
+            resolved: str | None = None
+            obsidian_match = re.search(r"\[\[([^\]]+)\]\]", text)
+            markdown_match = re.search(r"\[[^\]]+\]\(([^)]+)\)", text)
+
+            if obsidian_match:
+                candidate = normalize_vault_path(obsidian_match.group(1))
+                direct = vault_by_path.get(candidate.lower())
+                if direct:
+                    resolved = f"[[{direct}]]"
+                else:
+                    basename = os.path.basename(candidate).lower()
+                    matched = vault_by_basename.get(basename)
+                    if matched and cls._document_path_matches_query_entities(matched, documents, query_entities):
+                        resolved = f"[[{matched}]]"
+            elif markdown_match:
+                target = markdown_match.group(1).strip()
+                if target.startswith("http://") or target.startswith("https://"):
+                    canonical_url = canonicalize_web_url(target).lower()
+                    resolved = web_by_url.get(canonical_url)
+                else:
+                    candidate = normalize_vault_path(target)
+                    direct = vault_by_path.get(candidate.lower())
+                    if direct:
+                        resolved = f"[[{direct}]]"
+            elif text.startswith("http://") or text.startswith("https://"):
+                canonical_url = canonicalize_web_url(text).lower()
+                resolved = web_by_url.get(canonical_url)
+            else:
+                candidate = normalize_vault_path(text)
+                direct = vault_by_path.get(candidate.lower())
+                if direct:
+                    resolved = f"[[{direct}]]"
+                else:
+                    basename = os.path.basename(candidate).lower()
+                    matched = vault_by_basename.get(basename)
+                    if matched and cls._document_path_matches_query_entities(matched, documents, query_entities):
+                        resolved = f"[[{matched}]]"
+
+            if resolved and resolved not in seen:
+                normalized.append(resolved)
+                seen.add(resolved)
+            elif not resolved:
+                dropped.append(text)
+
+        if dropped:
+            print(f"Dropped invalid citations: {dropped}")
+
+        return normalized
+
+    @staticmethod
+    def _relationship_max_chars() -> int:
+        try:
+            return max(120, int(os.getenv("DEEP_THINKING_RELATIONSHIP_MAX_CHARS", "350")))
+        except (TypeError, ValueError):
+            return 350
+
+    @staticmethod
+    def _allow_web_only_relationship_answers() -> bool:
+        return os.getenv("DEEP_THINKING_ALLOW_WEB_ONLY_RELATIONSHIP_ANSWERS", "true").strip().lower() in {
+            "1", "true", "yes", "on"
+        }
+
+    @classmethod
+    def _document_path_matches_query_entities(
+        cls,
+        normalized_path: str,
+        documents: List[Dict[str, Any]],
+        query_entities: List[str] | None,
+    ) -> bool:
+        if not query_entities:
+            return True
+        normalized = normalize_vault_path(normalized_path).lower()
+        for doc in documents or []:
+            if normalize_vault_path(doc.get("filepath") or doc.get("source") or "").lower() != normalized:
+                continue
+            if any(RetrievalSupervisor._doc_contains_anchor(doc, entity) for entity in query_entities):
+                return True
+        return False
+
+    @staticmethod
+    def _document_lookup_key(doc: Dict[str, Any]) -> tuple[str, str]:
+        source = str(doc.get("filepath") or doc.get("url") or doc.get("source") or doc.get("filename") or "").strip()
+        category = str(doc.get("source_category") or "").strip().lower()
+        if category != "web" and not source.startswith("http://") and not source.startswith("https://"):
+            return "vault", normalize_vault_path(source).lower()
+        canonical = canonicalize_web_url(doc.get("canonical_url") or source) or source
+        return "web", canonical.lower()
+
+    @classmethod
+    def _resolve_used_documents(
+        cls,
+        citations: List[str],
+        selected_documents: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        if not selected_documents:
+            return []
+
+        citation_targets = set()
+        vault_by_path, vault_by_basename, web_by_url = cls._citation_lookup(selected_documents)
+        for citation in citations or []:
+            if not isinstance(citation, str):
+                continue
+            text = citation.strip()
+            if not text:
+                continue
+
+            obsidian_match = re.search(r"\[\[([^\]]+)\]\]", text)
+            markdown_match = re.search(r"\[[^\]]+\]\(([^)]+)\)", text)
+            resolved: tuple[str, str] | None = None
+
+            if obsidian_match:
+                candidate = normalize_vault_path(obsidian_match.group(1))
+                direct = vault_by_path.get(candidate.lower())
+                if direct:
+                    resolved = ("vault", direct.lower())
+                else:
+                    basename = os.path.basename(candidate).lower()
+                    matched = vault_by_basename.get(basename)
+                    if matched:
+                        resolved = ("vault", matched.lower())
+            elif markdown_match:
+                target = markdown_match.group(1).strip()
+                if target.startswith("http://") or target.startswith("https://"):
+                    canonical = canonicalize_web_url(target).lower()
+                    if canonical in web_by_url:
+                        resolved = ("web", canonical)
+                else:
+                    candidate = normalize_vault_path(target)
+                    direct = vault_by_path.get(candidate.lower())
+                    if direct:
+                        resolved = ("vault", direct.lower())
+            elif text.startswith("http://") or text.startswith("https://"):
+                canonical = canonicalize_web_url(text).lower()
+                if canonical in web_by_url:
+                    resolved = ("web", canonical)
+            else:
+                candidate = normalize_vault_path(text)
+                direct = vault_by_path.get(candidate.lower())
+                if direct:
+                    resolved = ("vault", direct.lower())
+
+            if resolved:
+                citation_targets.add(resolved)
+
+        if not citation_targets:
+            return selected_documents
+
+        used = [
+            doc for doc in selected_documents
+            if cls._document_lookup_key(doc) in citation_targets
+        ]
+        return used or selected_documents
+
+    @staticmethod
+    def _has_section_headers(text: str) -> bool:
+        return bool(re.search(r"^\s*#{1,6}\s", str(text or ""), flags=re.MULTILINE))
+
+    @staticmethod
+    def _unique_citations(values: List[str]) -> List[str]:
+        unique: List[str] = []
+        seen: set[str] = set()
+        for value in values or []:
+            if not isinstance(value, str):
+                continue
+            text = value.strip()
+            if not text or text in seen:
+                continue
+            seen.add(text)
+            unique.append(text)
+        return unique
+
+    @classmethod
+    def _relationship_claim_supported(cls, query_profile: Dict[str, Any], documents: List[Dict[str, Any]]) -> bool:
+        anchors = query_profile.get("anchor_entities", [])
+        if not anchors:
+            return bool(documents)
+        if any(RetrievalSupervisor._doc_contains_all_anchors(doc, anchors) for doc in documents):
+            return True
+        if len(anchors) < 2:
+            return any(RetrievalSupervisor._doc_contains_anchor(doc, anchors[0]) for doc in documents)
+
+        left_docs = [doc for doc in documents if RetrievalSupervisor._doc_contains_anchor(doc, anchors[0])]
+        right_docs = [doc for doc in documents if RetrievalSupervisor._doc_contains_anchor(doc, anchors[1])]
+        if not left_docs or not right_docs:
+            return False
+
+        for left in left_docs:
+            for right in right_docs:
+                if left is right:
+                    continue
+                if RetrievalSupervisor._bridge_overlap_score(left, right, query_profile) >= 2:
+                    return True
+        return False
+
+    @classmethod
+    def _build_relationship_fallback_answer(
+        cls,
+        query_profile: Dict[str, Any],
+        documents: List[Dict[str, Any]],
+    ) -> str:
+        anchors = query_profile.get("anchor_entities", [])
+        if len(anchors) >= 2:
+            if cls._relationship_claim_supported(query_profile, documents):
+                return f"{anchors[0]} is related to {anchors[1]} based on the retrieved evidence, but the model output could not be validated cleanly. Review the attached sources for the exact relationship."
+            return f"I found evidence about {anchors[0]} and {anchors[1]}, but the retrieved sources do not show a clear direct connection."
+        return "The retrieved sources do not support a clear relationship answer."
+
+    @classmethod
+    def _enforce_relationship_length(cls, answer: str) -> str:
+        text = re.sub(r"\s+", " ", str(answer or "").strip())
+        if not text:
+            return text
+        sentences = re.split(r"(?<=[.!?])\s+", text)
+        clipped = " ".join(sentences[:2]).strip()
+        limit = cls._relationship_max_chars()
+        if len(clipped) <= limit:
+            return clipped
+        return clipped[: limit - 3].rstrip() + "..."
+
+    @classmethod
+    def validate_answer_evidence_consistency(
+        cls,
+        answer: str,
+        citations: List[str],
+        used_documents: List[Dict[str, Any]],
+        query_profile: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        normalized_citations = cls._normalize_citations(
+            citations,
+            used_documents,
+            query_profile.get("anchor_entities"),
+        )
+        inline_citations = cls._extract_citations_from_text(answer)
+        normalized_inline = cls._normalize_citations(
+            inline_citations,
+            used_documents,
+            query_profile.get("anchor_entities"),
+        )
+        merged = cls._unique_citations(normalized_citations + normalized_inline)
+        valid = True
+        reason = ""
+
+        if len(normalized_citations) < len([c for c in citations or [] if isinstance(c, str) and c.strip()]):
+            valid = False
+            reason = "invalid_citation"
+        elif inline_citations and len(normalized_inline) < len(inline_citations):
+            valid = False
+            reason = "inline_citation_mismatch"
+
+        if query_profile.get("is_relationship"):
+            if cls._has_section_headers(answer):
+                valid = False
+                reason = reason or "relationship_format"
+            elif len(re.sub(r"\s+", " ", str(answer or "").strip())) > cls._relationship_max_chars():
+                valid = False
+                reason = reason or "relationship_too_long"
+            elif not cls._relationship_claim_supported(query_profile, used_documents):
+                valid = False
+                reason = reason or "unsupported_relationship"
+
+        return {
+            "valid": valid,
+            "reason": reason,
+            "citations": merged,
+            "used_documents": used_documents,
+        }
+
+    def _call_model_for_json(self, system_prompt: str, prompt: str, max_tokens: int):
+        response = self.client.messages.create(
+            model=self.model,
+            max_tokens=max_tokens,
+            system=system_prompt,
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
+        )
+        return extract_response_text(response)
+
+    def _build_prompt_documents(
+        self,
+        documents: List[Dict[str, Any]],
+        state: RAGState,
+        provider: str,
+        per_doc_char_limit: int,
+        total_context_char_limit: int,
+        max_docs: int,
+        lazy_expansion_v2: bool,
+        lazy_max_expanded_docs: int,
+        lazy_max_expanded_bytes: int,
+    ) -> tuple[str, str, List[str]]:
         vault_docs = ""
         web_docs = ""
-        image_urls = []
+        image_urls: List[str] = []
         consumed_chars = 0
         consumed_docs = 0
 
@@ -113,37 +516,298 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 vault_docs += block
             consumed_chars += len(trimmed)
             consumed_docs += 1
-        
-        # Priority 1: Use Raw Context Buffer if available (high fidelity)
-        raw_buffer = state.get("raw_context_buffer", [])
-        if raw_buffer:
-            for item in raw_buffer:
-                source = item.get("source", "Unknown")
-                append_doc(
-                    source,
-                    item.get("content", ""),
-                    "http" in source and "localhost" not in source
-                )
-                if consumed_docs >= max_docs or consumed_chars >= total_context_char_limit:
-                    break
-                    
-        # Priority 2: Fallback to standard retrieved_documents (if buffer empty)
-        else:
-            for doc in state['retrieved_documents']:
-                source = doc.get('source', 'Unknown')
-                
-                # Collect images from web results safely
-                images = doc.get('images')
+
+        prompt_docs = list(documents or [])
+        if lazy_expansion_v2 and prompt_docs:
+            expandable_docs = []
+            seen_expandable = set()
+            for doc in prompt_docs:
+                images = doc.get("images")
                 if images and isinstance(images, list):
                     for img in images:
-                        if isinstance(img, str) and img.startswith('http'):
+                        if isinstance(img, str) and img.startswith("http"):
                             image_urls.append(img)
-                        elif isinstance(img, dict) and img.get('url'):
-                            image_urls.append(img['url'])
-                
-                append_doc(source, doc.get('content', ''), doc.get('type') == 'web')
-                if consumed_docs >= max_docs or consumed_chars >= total_context_char_limit:
+                        elif isinstance(img, dict) and img.get("url"):
+                            image_urls.append(img["url"])
+
+                if self._is_web_doc(doc):
+                    continue
+                source = doc.get("filepath") or doc.get("source")
+                if not source or source in seen_expandable:
+                    continue
+                seen_expandable.add(source)
+                expandable_docs.append(doc)
+                if len(expandable_docs) >= lazy_max_expanded_docs:
                     break
+
+            RetrievalSupervisor.expand_for_synthesis(
+                expandable_docs,
+                state,
+                provider,
+                max_docs=lazy_max_expanded_docs,
+                max_total_bytes=lazy_max_expanded_bytes,
+            )
+
+        for doc in prompt_docs:
+            images = doc.get("images")
+            if images and isinstance(images, list):
+                for img in images:
+                    if isinstance(img, str) and img.startswith("http"):
+                        image_urls.append(img)
+                    elif isinstance(img, dict) and img.get("url"):
+                        image_urls.append(img["url"])
+            source = doc.get("source", "Unknown")
+            append_doc(source, doc.get("content", ""), self._is_web_doc(doc))
+            if consumed_docs >= max_docs or consumed_chars >= total_context_char_limit:
+                break
+
+        return vault_docs, web_docs, image_urls[:5]
+
+    def _generate_relationship_attempt(
+        self,
+        state: RAGState,
+        query_profile: Dict[str, Any],
+        documents: List[Dict[str, Any]],
+        provider: str,
+        strict: bool,
+    ) -> Dict[str, Any]:
+        per_doc_char_limit, total_context_char_limit, max_docs, summary_char_limit = self._provider_limits(provider)
+        lazy_expansion_v2 = self._use_lazy_expansion_v2()
+        lazy_max_expanded_docs = int(os.getenv("DEEP_THINKING_LAZY_MAX_EXPANDED_DOCS", "8"))
+        lazy_max_expanded_bytes = int(os.getenv("DEEP_THINKING_LAZY_MAX_EXPANDED_BYTES", "200000"))
+        question = str(state.get("original_question", ""))
+        research_summary = self._truncate_text(
+            state.get("accumulated_context", ""),
+            min(summary_char_limit, int(os.getenv("DEEP_THINKING_RELATIONSHIP_SUMMARY_CHARS", "1200"))),
+        )
+        vault_docs, web_docs, image_urls = self._build_prompt_documents(
+            documents,
+            state,
+            provider,
+            per_doc_char_limit,
+            total_context_char_limit,
+            min(max_docs, query_profile.get("max_sources") or max_docs),
+            lazy_expansion_v2,
+            lazy_max_expanded_docs,
+            lazy_max_expanded_bytes,
+        )
+        images_section = ""
+        if image_urls:
+            images_section = "\nRelevant Images Found:\n" + "\n".join(
+                f"- Image {idx + 1}: {url}" for idx, url in enumerate(image_urls[:5])
+            )
+
+        strict_clause = ""
+        if strict:
+            strict_clause = (
+                f"\nAnswer in at most 2 short sentences and no more than {self._relationship_max_chars()} characters. "
+                "Focus only on explaining the relationship between the two entities."
+            )
+
+        prompt = f"""
+Original question: "{question}"
+
+Research summary:
+{research_summary}
+
+Vault Documents:
+{vault_docs}
+
+Web Search Results:
+{web_docs}
+{images_section}
+
+This is a relationship/connection question.
+- Answer in 1-2 short sentences.
+- State the relationship directly.
+- Optional second sentence may explain mechanism, eligibility, or the nature of the link.
+- No section headers.
+- No trial names unless the question explicitly asks for outcomes.
+- No long label text or broad overview.
+- Keep citations to the minimal evidence actually used.{strict_clause}
+
+Return ONLY a JSON object:
+{{
+  "answer": "...",
+  "citations": ["[[Exact Document Name]]"],
+  "confidence_score": 0.9,
+  "confidence_justification": "Reasoning based closely on provided documents."
+}}
+""".strip()
+
+        system_prompt = self.system_prompt
+        guardrails = build_provider_guardrails(provider)
+        if guardrails:
+            system_prompt = f"{system_prompt}\n\n{guardrails}"
+
+        max_tokens = int(os.getenv("DEEP_THINKING_MAX_TOKENS", "4096"))
+        if provider == "claude":
+            max_tokens = int(os.getenv("DEEP_THINKING_CLAUDE_MAX_TOKENS", "8192"))
+        if provider in ("chatgpt", "openai"):
+            max_tokens = int(os.getenv("DEEP_THINKING_OPENAI_MAX_TOKENS", str(max_tokens)))
+        if provider == "mlx":
+            max_tokens = int(os.getenv("DEEP_THINKING_MLX_MAX_TOKENS", "1024"))
+
+        content = self._call_model_for_json(system_prompt, prompt, max_tokens)
+        clean_content = content
+        if "```json" in clean_content:
+            clean_content = clean_content.split("```json")[1].split("```")[0].strip()
+        elif "```" in clean_content:
+            clean_content = clean_content.split("```")[1].split("```")[0].strip()
+
+        try:
+            result = json.loads(clean_content)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", content, re.DOTALL)
+            if match:
+                result = json.loads(match.group(0))
+            else:
+                salvaged = self._salvage_fields(content) or {}
+                result = salvaged
+
+        answer = self._sanitize_answer(result.get("answer") or "", bool(web_docs.strip()))
+        citations = self._normalize_citations(
+            result.get("citations", []),
+            documents,
+            query_profile.get("anchor_entities"),
+        )
+        used_documents = self._resolve_used_documents(citations, documents)
+
+        return {
+            "answer": answer,
+            "citations": citations,
+            "confidence_score": result.get("confidence_score", 0.0),
+            "confidence_justification": result.get("confidence_justification", ""),
+            "used_documents": used_documents,
+        }
+
+    def generate(self, state: RAGState) -> dict:
+        """
+        Synthesize final answer with Obsidian-style citations.
+        """
+        provider = getattr(self.client, "provider", "").lower()
+        per_doc_char_limit, total_context_char_limit, max_docs, summary_char_limit = self._provider_limits(provider)
+        lazy_expansion_v2 = self._use_lazy_expansion_v2()
+        lazy_max_expanded_docs = int(os.getenv("DEEP_THINKING_LAZY_MAX_EXPANDED_DOCS", "8"))
+        lazy_max_expanded_bytes = int(os.getenv("DEEP_THINKING_LAZY_MAX_EXPANDED_BYTES", "200000"))
+        question = str(state.get("original_question", ""))
+        query_lower = question.lower()
+        is_comparison_query = any(token in query_lower for token in [" vs ", " versus ", "compare", "difference"])
+        query_profile, authoritative_documents, reasoning_docs = self._authoritative_documents(
+            question,
+            state.get("retrieved_documents", []),
+            max_docs,
+        )
+        retry_documents = state.get("_synthesis_retry_documents")
+        if isinstance(retry_documents, list):
+            authoritative_documents = [doc for doc in retry_documents if isinstance(doc, dict)]
+        if authoritative_documents:
+            state["_selected_evidence_documents"] = authoritative_documents
+        relationship_mode = bool(query_profile["is_relationship"])
+
+        if relationship_mode:
+            attempt_queue: List[Dict[str, Any]] = [{
+                "documents": authoritative_documents,
+                "strict": False,
+                "web_only": False,
+            }]
+            web_only_docs: List[Dict[str, Any]] = []
+            if query_profile.get("is_medical") and self._allow_web_only_relationship_answers():
+                candidate_web_docs = [doc for doc in authoritative_documents if self._is_web_doc(doc)]
+                if candidate_web_docs:
+                    web_only_docs = RetrievalSupervisor.select_minimal_evidence_set(
+                        question,
+                        candidate_web_docs,
+                        max_docs=query_profile.get("max_sources") or 3,
+                    )
+
+            attempted: set[tuple[tuple[tuple[str, str], ...], bool, bool]] = set()
+            last_result: Dict[str, Any] | None = None
+            last_reason = ""
+
+            while attempt_queue:
+                attempt = attempt_queue.pop(0)
+                documents = attempt.get("documents") or []
+                doc_signature = tuple(sorted(self._document_lookup_key(doc) for doc in documents))
+                attempt_key = (doc_signature, bool(attempt.get("strict")), bool(attempt.get("web_only")))
+                if attempt_key in attempted:
+                    continue
+                attempted.add(attempt_key)
+                if not documents:
+                    continue
+
+                result = self._generate_relationship_attempt(
+                    state,
+                    query_profile,
+                    documents,
+                    provider,
+                    strict=bool(attempt.get("strict")),
+                )
+                validation = self.validate_answer_evidence_consistency(
+                    result.get("answer", ""),
+                    result.get("citations", []),
+                    result.get("used_documents", []) or documents,
+                    query_profile,
+                )
+                last_result = result
+                last_reason = validation.get("reason", "")
+
+                if validation["valid"]:
+                    result["citations"] = validation["citations"]
+                    result["used_documents"] = validation["used_documents"]
+                    result["answer"] = self._enforce_relationship_length(result.get("answer", ""))
+                    return result
+
+                if not attempt.get("strict"):
+                    attempt_queue.insert(0, {
+                        "documents": documents,
+                        "strict": True,
+                        "web_only": bool(attempt.get("web_only")),
+                    })
+
+                if (
+                    query_profile.get("is_medical")
+                    and self._allow_web_only_relationship_answers()
+                    and web_only_docs
+                    and not attempt.get("web_only")
+                    and any(not self._is_web_doc(doc) for doc in documents)
+                ):
+                    attempt_queue.append({
+                        "documents": web_only_docs,
+                        "strict": True,
+                        "web_only": True,
+                    })
+
+            fallback_docs = web_only_docs or authoritative_documents
+            fallback_answer = self._build_relationship_fallback_answer(query_profile, fallback_docs)
+            if last_result and last_result.get("answer") and self._relationship_claim_supported(query_profile, fallback_docs):
+                fallback_answer = self._enforce_relationship_length(last_result.get("answer", ""))
+
+            normalized_citations = self._normalize_citations(
+                (last_result or {}).get("citations", []),
+                fallback_docs,
+                query_profile.get("anchor_entities"),
+            )
+            used_documents = self._resolve_used_documents(normalized_citations, fallback_docs)
+            return {
+                "answer": fallback_answer,
+                "citations": normalized_citations,
+                "confidence_score": (last_result or {}).get("confidence_score", 0.0),
+                "confidence_justification": (last_result or {}).get("confidence_justification", "") or last_reason,
+                "used_documents": used_documents,
+            }
+
+        vault_docs, web_docs, image_urls = self._build_prompt_documents(
+            authoritative_documents,
+            state,
+            provider,
+            per_doc_char_limit,
+            total_context_char_limit,
+            max_docs,
+            lazy_expansion_v2,
+            lazy_max_expanded_docs,
+            lazy_max_expanded_bytes,
+        )
 
         # DEEP THINKING DEBUG
         print(f"DEBUG SYNTHESIZER: Vault Docs Length: {len(vault_docs)}")
@@ -159,7 +823,10 @@ Finally, provide your answer in a structured, easy-to-read format."""
             for idx, img_url in enumerate(image_urls[:5]):  # Limit to top 5 images
                 images_section += f"        - Image {idx+1}: {img_url}\n"
         
-        research_summary = self._truncate_text(state['accumulated_context'], summary_char_limit)
+        effective_summary_limit = summary_char_limit
+        if relationship_mode:
+            effective_summary_limit = min(summary_char_limit, int(os.getenv("DEEP_THINKING_RELATIONSHIP_SUMMARY_CHARS", "1200")))
+        research_summary = self._truncate_text(state['accumulated_context'], effective_summary_limit)
 
         comparison_instruction = ""
         if is_comparison_query:
@@ -170,8 +837,26 @@ Finally, provide your answer in a structured, easy-to-read format."""
             - at least 5 substantive comparison points.
         """
 
+        relationship_instruction = ""
+        web_instruction = """
+        5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard definitions, methodologies, or external context found in the web results.
+        """
+        if relationship_mode:
+            web_instruction = """
+        5. If web results are provided, use them only when they add a unique fact not already present in the vault evidence. Do NOT add a separate "Web Findings" section for a simple relationship question unless an external source is essential.
+        """
+            relationship_instruction = """
+        12. This is a simple relationship/connection question.
+            - Answer in 1-2 core sentences.
+            - State the relationship directly and plainly.
+            - Optionally add at most 2 short bullets only for line-of-therapy limits or major exclusions that materially change the connection.
+            - Do NOT turn the answer into a long label summary.
+            - Do NOT mention trials unless they are necessary; if you mention one, include the key outcome in a short clause.
+            - Keep the citations array to the minimal evidence set actually needed.
+        """
+
         prompt = f"""
-        Original question: "{state['original_question']}"
+        Original question: "{question}"
         
         Research summary:
         {research_summary}
@@ -188,7 +873,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
         2. Synthesizes findings from all research steps. You MUST INTEGRATE information from the Vault Documents if any are provided. Do not ignore the user's personal vault notes.
         3. Cites vault sources using Obsidian link format ONLY: [[Folder/Note Name]]. Do NOT output Vault links as URLs (e.g. no "http://...md").
         4. Cites web sources using markdown links with the ACTUAL page title from the web results: [Actual Page Title](https://example.com).
-        5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard definitions, methodologies, or external context found in the web results.
+        {web_instruction}
         6. If images are provided above, embed relevant ones using markdown format: ![Description](image_url)
            - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics
            - Place images in appropriate sections (e.g., under "Hardware Connection" or "Wiring Diagram")
@@ -198,6 +883,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
         10. If the Web Search Results section is empty, your "citations" array should ONLY contain Vault Document names. Do not hallucinate websites.
         11. If the Web Search Results section is empty, you MUST NOT include a "Web Findings" section and you MUST NOT introduce external facts, datasheet details, or website titles that are not explicitly present in the Vault Documents.
         {comparison_instruction}
+        {relationship_instruction}
 
         Return ONLY a JSON object:
         {{
@@ -232,18 +918,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
-        
-        if hasattr(response.content[0], 'text'):
-            raw_content = response.content[0].text
-        else:
-            raw_content = response.content
-
-        if raw_content is None:
-            content = ""
-        elif isinstance(raw_content, str):
-            content = raw_content.strip()
-        else:
-            content = str(raw_content).strip()
+        content = extract_response_text(response)
         
         # 1. Try cleaning markdown code blocks
         clean_content = content
@@ -256,6 +931,12 @@ Finally, provide your answer in a structured, easy-to-read format."""
             # 2. Try direct JSON parse
             result = json.loads(clean_content)
             answer = self._sanitize_answer(result.get("answer") or "", has_web_docs)
+            normalized_citations = self._normalize_citations(
+                result.get("citations", []),
+                authoritative_documents,
+                query_profile.get("anchor_entities"),
+            )
+            used_documents = self._resolve_used_documents(normalized_citations, authoritative_documents)
             if not answer.strip():
                 salvaged = self._salvage_fields(content)
                 salvaged_answer = ""
@@ -264,13 +945,22 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 if salvaged_answer.strip():
                     answer = self._sanitize_answer(salvaged_answer, has_web_docs)
                 else:
+                    if not state.get("_synthesis_retry_performed"):
+                        reduced_documents = self._retry_documents(authoritative_documents, query_profile)
+                        if reduced_documents and reduced_documents != authoritative_documents:
+                            retry_state = dict(state)
+                            retry_state["_synthesis_retry_performed"] = True
+                            retry_state["_synthesis_retry_documents"] = reduced_documents
+                            return self.generate(retry_state)
+                    self._record_synthesis_failure(state, "empty_answer", content)
                     answer = self._sanitize_answer(self._fallback_answer(state, content), has_web_docs)
 
             return {
                 "answer": answer,
-                "citations": result.get("citations", []),
+                "citations": normalized_citations,
                 "confidence_score": result.get("confidence_score", 0.0),
-                "confidence_justification": result.get("confidence_justification", "")
+                "confidence_justification": result.get("confidence_justification", ""),
+                "used_documents": used_documents,
             }
         except json.JSONDecodeError:
             # 3. Fallback: Try identifying the JSON object with regex or simple finding
@@ -279,11 +969,17 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 if json_match:
                     possible_json = json_match.group(0)
                     result = json.loads(possible_json)
+                    normalized_citations = self._normalize_citations(
+                        result.get("citations", []),
+                        authoritative_documents,
+                        query_profile.get("anchor_entities"),
+                    )
                     return {
                         "answer": self._sanitize_answer(result.get("answer", "Could not generate answer."), has_web_docs),
-                        "citations": result.get("citations", []),
+                        "citations": normalized_citations,
                         "confidence_score": result.get("confidence_score", 0.0),
-                        "confidence_justification": result.get("confidence_justification", "")
+                        "confidence_justification": result.get("confidence_justification", ""),
+                        "used_documents": self._resolve_used_documents(normalized_citations, authoritative_documents),
                     }
             except Exception:
                 pass
@@ -292,24 +988,45 @@ Finally, provide your answer in a structured, easy-to-read format."""
             salvaged = self._salvage_fields(content)
             if salvaged:
                 salvaged["answer"] = self._sanitize_answer(salvaged.get("answer", ""), has_web_docs)
+                salvaged["citations"] = self._normalize_citations(
+                    salvaged.get("citations", []),
+                    authoritative_documents,
+                    query_profile.get("anchor_entities"),
+                )
+                salvaged["used_documents"] = self._resolve_used_documents(salvaged.get("citations", []), authoritative_documents)
+                if not str(salvaged.get("answer") or "").strip():
+                    if not state.get("_synthesis_retry_performed"):
+                        reduced_documents = self._retry_documents(authoritative_documents, query_profile)
+                        if reduced_documents and reduced_documents != authoritative_documents:
+                            retry_state = dict(state)
+                            retry_state["_synthesis_retry_performed"] = True
+                            retry_state["_synthesis_retry_documents"] = reduced_documents
+                            return self.generate(retry_state)
+                    self._record_synthesis_failure(state, "empty_answer", content)
+                    salvaged["answer"] = self._sanitize_answer(self._fallback_answer(state, content), has_web_docs)
                 return salvaged
 
             # 5. Ultimate Fallback: Return raw content as the answer
             # This ensures the user gets *something* even if formatting failed
             print("JSON Parse failed. Returning raw content.")
+            self._record_synthesis_failure(state, "json_parse_failure", content)
             return {
                 "answer": self._sanitize_answer(self._fallback_answer(state, content), has_web_docs),
                 "citations": [],
                 "confidence_score": 0.0,
-                "confidence_justification": "JSON parsing failed, returning raw output."
+                "confidence_justification": "JSON parsing failed, returning raw output.",
+                "used_documents": authoritative_documents,
             }
         except Exception as e:
             print(f"Error generating final answer: {e}")
+            failure_reason = "timeout" if "timeout" in str(e).lower() else "provider_exception"
+            self._record_synthesis_failure(state, failure_reason, str(e))
             return {
                 "answer": self._sanitize_answer(self._fallback_answer(state, f"Error generating answer: {str(e)}"), has_web_docs),
                 "citations": [],
                 "confidence_score": 0.0,
-                "confidence_justification": f"Error: {e}"
+                "confidence_justification": f"Error: {e}",
+                "used_documents": authoritative_documents,
             }
 
     @staticmethod
@@ -452,6 +1169,13 @@ Finally, provide your answer in a structured, easy-to-read format."""
     @staticmethod
     def _fallback_answer(state: RAGState, raw: str) -> str:
         context = (state.get("accumulated_context") or "").strip()
+        failure_reason = str(state.get("_synthesis_failure_reason") or "").strip().lower()
+        reason_message = {
+            "empty_answer": "Model returned an empty answer; showing retrieved context summary instead",
+            "json_parse_failure": "Model returned unusable JSON; showing retrieved context summary instead",
+            "timeout": "Model request timed out; showing retrieved context summary instead",
+            "provider_exception": "Model call failed; showing retrieved context summary instead",
+        }.get(failure_reason, "No response from model. Using retrieved context summary instead")
         if context:
             note = ""
             raw_text = str(raw or "").strip()
@@ -468,7 +1192,9 @@ Finally, provide your answer in a structured, easy-to-read format."""
                         snippet = raw_text[:240]
                         note = f" ({snippet})"
                         break
-            return "No response from model" + note + ". Using retrieved context summary:\n\n" + context
+            return reason_message + note + ":\n\n" + context
         if raw:
             return raw
+        if failure_reason:
+            return reason_message + "."
         return "No response from model. Please retry."

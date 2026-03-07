@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timezone
 from typing import List, Dict, Any
 from .state import Step, PastStep, RAGState
+from .utils.universal_client import extract_response_text
 
 class ReflectionAgent:
     def __init__(self, client):
@@ -77,11 +78,9 @@ class ReflectionAgent:
             response_format={"type": "json_object"}
         )
         
+        content = ""
         try:
-            if hasattr(response.content[0], 'text'):
-                content = response.content[0].text.strip()
-            else:
-                 content = str(response.content).strip()
+            content = extract_response_text(response)
             # Robust JSON extraction
             start_idx = content.find('{')
             end_idx = content.rfind('}')
@@ -170,10 +169,7 @@ class ReflectionAgent:
                 messages=[{"role": "user", "content": prompt}]
             )
             
-            if hasattr(response.content[0], 'text'):
-                content = response.content[0].text.strip()
-            else:
-                 content = str(response.content).strip()
+            content = extract_response_text(response)
             return f"[COMPRESSED EARLIER STEPS]\n{content}\n"
         except Exception as e:
             self._log_debug("Compression error", {"error": str(e)})

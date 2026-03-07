@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Literal, Optional, Dict, Any
+from typing import TypedDict, List, Literal, Optional, Dict, Any, NotRequired
 
 class Step(TypedDict):
     step_number: int
@@ -7,6 +7,7 @@ class Step(TypedDict):
     keywords: List[str]
     target_folders: List[str]
     reasoning: str
+    references: NotRequired[List[str]]
 
 class PastStep(TypedDict):
     step: Step

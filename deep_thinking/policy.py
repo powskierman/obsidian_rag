@@ -2,6 +2,8 @@ import json
 import os
 from typing import Literal
 from .state import RAGState
+from .supervisor import RetrievalSupervisor
+from .utils.universal_client import extract_response_text
 
 class PolicyAgent:
     def __init__(self, client):
@@ -55,10 +57,7 @@ class PolicyAgent:
         )
         
         try:
-            if hasattr(response.content[0], 'text'):
-                content = response.content[0].text.strip()
-            else:
-                 content = str(response.content).strip()
+            content = extract_response_text(response)
             if content.startswith("```json"):
                 content = content[7:]
             if content.endswith("```"):
@@ -67,6 +66,7 @@ class PolicyAgent:
             
             decision_data = json.loads(content)
             decision = decision_data.get("decision", "CONTINUE")
+            query_profile = RetrievalSupervisor.build_query_profile(state.get("original_question", ""))
             
             # Programmatic Check: Force REVISE_PLAN if external enrichment is needed but no web search
             # This ensures we enrich personal notes with external data
@@ -81,7 +81,13 @@ class PolicyAgent:
             remaining_steps = state.get('plan', [])[state.get('current_step_index', 0):]
             has_planned_web = any(step.get('search_strategy') == 'web' for step in remaining_steps)
             
-            if decision_data.get("needs_external_enrichment") and not has_web_search and not has_planned_web and decision == "FINISH":
+            if (
+                decision_data.get("needs_external_enrichment")
+                and not query_profile.get("prefers_vault_only_summary")
+                and not has_web_search
+                and not has_planned_web
+                and decision == "FINISH"
+            ):
                 print("⚠️ Policy: External enrichment needed but no web search. Forcing REVISE_PLAN.")
                 return "REVISE_PLAN"
             

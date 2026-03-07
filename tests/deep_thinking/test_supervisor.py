@@ -1,6 +1,8 @@
 import sys
 import types
 import unittest
+import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 fake_st = types.SimpleNamespace(
@@ -82,7 +84,9 @@ class TestRetrievalSupervisor(unittest.TestCase):
         results = self.supervisor.execute_step(step, {})
         
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["type"], "graph")
+        self.assertEqual(results[0]["source_type"], "graph-reasoning")
+        self.assertTrue(results[0]["internal_only"])
+        self.assertEqual(results[0]["content"], "graph answer")
 
     @patch('requests.post')
     def test_query_graph_forwards_provider_and_model(self, mock_post):
@@ -104,6 +108,325 @@ class TestRetrievalSupervisor(unittest.TestCase):
         payload = kwargs["json"]
         self.assertEqual(payload["llm_provider"], "mlx")
         self.assertEqual(payload["model"], "mlx-community/Qwen3-4B-8bit")
+
+    @patch('requests.post')
+    def test_query_graph_drops_synthesis_summary_from_results(self, mock_post):
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "sources": [{
+                "filepath": "Medical/Graph/Entity.md",
+                "filename": "Entity.md",
+                "snippet": "entity snippet",
+                "relevance": 87,
+            }],
+            "answer": "This is a synthesized graph answer."
+        }
+        mock_post.return_value = mock_response
+
+        results = self.supervisor._query_graph("query", mode="hybrid")
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]["source"], "Medical/Graph/Entity.md")
+        self.assertFalse(any(doc.get("source") == "Graph Synthesis Summary" for doc in results))
+
+    def test_execute_step_hybrid_filters_graph_summary_before_rerank(self):
+        vector_docs = [{
+            "content": "vector content",
+            "source": "Medical/Vector.md",
+            "filepath": "Medical/Vector.md",
+            "type": "vector",
+            "source_category": "vault",
+            "score": 0.8,
+        }]
+        graph_docs = [
+            {
+                "content": "graph snippet",
+                "source": "Medical/Graph.md",
+                "filepath": "Medical/Graph.md",
+                "type": "graph",
+                "source_category": "vault",
+                "score": 0.7,
+            },
+            {
+                "content": "synthetic summary",
+                "source": "Graph Synthesis Summary",
+                "type": "graph",
+                "is_summary": True,
+                "score": 1.0,
+            },
+        ]
+        self.supervisor.enable_reranking = True
+        self.supervisor.reranker = MagicMock()
+        self.supervisor.reranker.rerank.side_effect = lambda query, docs, top_k=20: docs
+
+        with patch.object(self.supervisor, "_query_vector", return_value=vector_docs), patch.object(
+            self.supervisor, "_query_graph", return_value=graph_docs
+        ):
+            results = self.supervisor.execute_step(
+                {
+                    "step_number": 1,
+                    "sub_question": "q",
+                    "search_strategy": "hybrid",
+                    "keywords": [],
+                    "target_folders": [],
+                    "reasoning": "",
+                },
+                {"original_question": "", "warnings": []},
+            )
+
+        rerank_docs = self.supervisor.reranker.rerank.call_args.args[1]
+        self.assertFalse(any(doc.get("source") == "Graph Synthesis Summary" for doc in rerank_docs))
+        self.assertFalse(any(doc.get("source") == "Graph Synthesis Summary" for doc in results))
+
+    def test_effective_metadata_ignores_contradictory_chemotherapy_phase_for_car_t_content(self):
+        metadata = RetrievalSupervisor._effective_metadata(
+            {
+                "filename": "Yescarta.pdf",
+                "content": "Yescarta is a CD19-directed CAR-T cell therapy for relapsed or refractory DLBCL.",
+                "treatment_phase": "chemotherapy",
+                "tags": ["lymphoma"],
+            }
+        )
+
+        self.assertIn("car_t", metadata["tags"])
+        self.assertNotIn("chemotherapy", metadata["tags"])
+
+    def test_rank_sources_for_relationship_query_prefers_direct_drug_disease_evidence(self):
+        docs = [
+            {
+                "source": "Medical/Lymphoma/Diagnosis and Options.md",
+                "filepath": "Medical/Lymphoma/Diagnosis and Options.md",
+                "filename": "Diagnosis and Options.md",
+                "snippet": "Overview of diagnosis and treatment options for lymphoma.",
+                "content": "Overview of diagnosis and treatment options for lymphoma.",
+                "source_category": "vault",
+                "source_type": "entity-context",
+                "score": 0.96,
+            },
+            {
+                "source": "Medical/Lymphoma/R-CHOP.md",
+                "filepath": "Medical/Lymphoma/R-CHOP.md",
+                "filename": "R-CHOP.md",
+                "snippet": "R-CHOP is a chemotherapy regimen used in DLBCL.",
+                "content": "R-CHOP is a chemotherapy regimen used in DLBCL.",
+                "source_category": "vault",
+                "source_type": "entity-context",
+                "score": 0.95,
+                "treatment_phase": "chemotherapy",
+            },
+            {
+                "source": "Medical/Lymphoma/media/Yescarta.pdf",
+                "filepath": "Medical/Lymphoma/media/Yescarta.pdf",
+                "filename": "Yescarta.pdf",
+                "snippet": "Yescarta (axicabtagene ciloleucel) is a CD19-directed CAR-T cell therapy indicated for adult patients with relapsed or refractory large B-cell lymphoma, including DLBCL.",
+                "content": "Yescarta (axicabtagene ciloleucel) is a CD19-directed CAR-T cell therapy indicated for adult patients with relapsed or refractory large B-cell lymphoma, including DLBCL.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.62,
+                "treatment_phase": "chemotherapy",
+            },
+            {
+                "source": "Medical/Lymphoma/DLBCL, Follicular Lymphoma.md",
+                "filepath": "Medical/Lymphoma/DLBCL, Follicular Lymphoma.md",
+                "filename": "DLBCL, Follicular Lymphoma.md",
+                "snippet": "DLBCL is a subtype of large B-cell lymphoma.",
+                "content": "DLBCL is a subtype of large B-cell lymphoma.",
+                "source_category": "vault",
+                "source_type": "entity-context",
+                "score": 0.7,
+                "tags": ["lymphoma"],
+            },
+        ]
+
+        ranked = RetrievalSupervisor.rank_sources_for_query(
+            "What is the connection between Yescarta and DLBCL?",
+            docs,
+        )
+
+        self.assertLessEqual(len(ranked), 3)
+        self.assertEqual(ranked[0]["filename"], "Yescarta.pdf")
+        self.assertNotIn("R-CHOP.md", [doc["filename"] for doc in ranked])
+
+    def test_medical_relationship_drops_suspicious_tech_vault_doc(self):
+        docs = [
+            {
+                "source": "Tech/Electronics/Projects/Halcyon/Blynk-local-server-auth-token.md",
+                "filepath": "Tech/Electronics/Projects/Halcyon/Blynk-local-server-auth-token.md",
+                "filename": "Blynk-local-server-auth-token.md",
+                "snippet": "Authentication token setup for the local Blynk server.",
+                "content": "Authentication token setup for the local Blynk server.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.99,
+            },
+            {
+                "source": "https://ncbi.nlm.nih.gov/books/NBK550115",
+                "filepath": "https://ncbi.nlm.nih.gov/books/NBK550115",
+                "filename": "Axicabtagene Ciloleucel for Large B-cell Lymphoma - NCBI - NIH",
+                "snippet": "Axicabtagene ciloleucel is indicated for large B-cell lymphoma including DLBCL.",
+                "content": "Axicabtagene ciloleucel is indicated for large B-cell lymphoma including DLBCL.",
+                "source_category": "web",
+                "source_type": "web-result",
+                "score": 0.91,
+            },
+        ]
+
+        selected = RetrievalSupervisor.select_minimal_evidence_set(
+            "How is axicabtagene ciloleucel related to diffuse large B-cell lymphoma?",
+            docs,
+            max_docs=3,
+        )
+
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0]["source_category"], "web")
+
+    def test_summary_query_excludes_prompt_template_docs_and_prefers_exact_vault_note(self):
+        docs = [
+            {
+                "source": "Books/Books/The Wisdom of Psychopaths.md",
+                "filepath": "Books/Books/The Wisdom of Psychopaths.md",
+                "filename": "The Wisdom of Psychopaths.md",
+                "title": "The Wisdom of Psychopaths",
+                "snippet": "Main idea and highlights.",
+                "content": "Main idea and highlights.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.72,
+            },
+            {
+                "source": "copilot/copilot-custom-prompts/Summarize.md",
+                "filepath": "copilot/copilot-custom-prompts/Summarize.md",
+                "filename": "Summarize.md",
+                "title": "Summarize",
+                "snippet": "Create a bullet-point summary of {}.",
+                "content": "Create a bullet-point summary of {}.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.99,
+            },
+            {
+                "source": "https://blinkist.com/en/books/the-wisdom-of-psychopaths-en",
+                "filepath": "https://blinkist.com/en/books/the-wisdom-of-psychopaths-en",
+                "filename": "Blinkist Summary",
+                "title": "The Wisdom of Psychopaths Summary",
+                "snippet": "External summary.",
+                "content": "External summary.",
+                "source_category": "web",
+                "source_type": "web-result",
+                "score": 0.95,
+            },
+        ]
+
+        selected = RetrievalSupervisor.select_minimal_evidence_set(
+            "Provide a point form summary of The Wisdom of Psychopaths",
+            docs,
+            max_docs=5,
+        )
+
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(selected[0]["filepath"], "Books/Books/The Wisdom of Psychopaths.md")
+
+    def test_resolve_expansion_target_uses_vault_relative_index_path(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            vault_root = Path(tmpdir)
+            note_path = vault_root / "Medical" / "CAR-T.md"
+            note_path.parent.mkdir(parents=True, exist_ok=True)
+            note_path.write_text("full content", encoding="utf-8")
+
+            with patch.dict("os.environ", {"OBSIDIAN_VAULT_PATH": str(vault_root)}):
+                target = self.supervisor._resolve_expansion_target({"filepath": "Medical/CAR-T.md"})
+
+            self.assertIsNotNone(target)
+            self.assertEqual(target["source"], "Medical/CAR-T.md")
+            self.assertEqual(Path(target["full_path"]).resolve(), note_path.resolve())
+
+    def test_resolve_expansion_target_normalizes_absolute_path_to_index_path(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            vault_root = Path(tmpdir)
+            note_path = vault_root / "Medical" / "CAR-T.md"
+            note_path.parent.mkdir(parents=True, exist_ok=True)
+            note_path.write_text("full content", encoding="utf-8")
+
+            with patch.dict("os.environ", {"OBSIDIAN_VAULT_PATH": str(vault_root)}):
+                target = self.supervisor._resolve_expansion_target({"filepath": str(note_path)})
+
+            self.assertIsNotNone(target)
+            self.assertEqual(target["source"], "Medical/CAR-T.md")
+            self.assertEqual(Path(target["full_path"]).resolve(), note_path.resolve())
+
+    def test_expand_doc_with_cache_reuses_normalized_source_key(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            vault_root = Path(tmpdir)
+            note_path = vault_root / "Medical" / "CAR-T.md"
+            note_path.parent.mkdir(parents=True, exist_ok=True)
+            note_path.write_text("full content", encoding="utf-8")
+            state = {}
+
+            with patch.dict("os.environ", {"OBSIDIAN_VAULT_PATH": str(vault_root)}), patch.object(
+                RetrievalSupervisor,
+                "_load_full_content",
+                return_value="full content",
+            ) as mock_load:
+                doc1 = self.supervisor.expand_doc_with_cache(
+                    {"filepath": "Medical/CAR-T.md", "content": "snippet"},
+                    state,
+                    1024,
+                )
+                doc2 = self.supervisor.expand_doc_with_cache(
+                    {"filepath": str(note_path), "content": "snippet"},
+                    state,
+                    1024,
+                )
+
+            self.assertTrue(doc1["is_full_content"])
+            self.assertTrue(doc2["is_full_content"])
+            self.assertEqual(mock_load.call_count, 1)
+            cache_keys = list(state["_expansion_cache_v2"].keys())
+            self.assertEqual(len(cache_keys), 1)
+            self.assertEqual(cache_keys[0][0], "Medical/CAR-T.md")
+
+    def test_expand_doc_with_cache_repairs_case_mismatch(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            vault_root = Path(tmpdir)
+            note_path = vault_root / "Medical" / "CAR-T.md"
+            note_path.parent.mkdir(parents=True, exist_ok=True)
+            note_path.write_text("full content", encoding="utf-8")
+            state = {}
+
+            with patch.dict("os.environ", {"OBSIDIAN_VAULT_PATH": str(vault_root)}), patch.object(
+                RetrievalSupervisor,
+                "_load_full_content",
+                return_value="full content",
+            ):
+                doc = self.supervisor.expand_doc_with_cache(
+                    {"filepath": "medical/car-t.md", "content": "snippet"},
+                    state,
+                    1024,
+                )
+
+            self.assertTrue(doc["is_full_content"])
+            cache_keys = list(state["_expansion_cache_v2"].keys())
+            self.assertEqual(cache_keys[0][0], "Medical/CAR-T.md")
+
+    def test_expand_doc_with_cache_logs_missing_file_with_context(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            vault_root = Path(tmpdir)
+            state = {}
+
+            with patch.dict("os.environ", {"OBSIDIAN_VAULT_PATH": str(vault_root)}):
+                with self.assertLogs("deep_thinking.supervisor", level="WARNING") as logs:
+                    doc = self.supervisor.expand_doc_with_cache(
+                        {"filepath": "Medical/Missing.md", "content": "snippet"},
+                        state,
+                        1024,
+                    )
+
+            self.assertEqual(doc["content"], "snippet")
+            joined = "\n".join(logs.output)
+            self.assertIn("raw_source=Medical/Missing.md", joined)
+            self.assertIn("normalized_source=Medical/Missing.md", joined)
+            self.assertIn("resolved_path=", joined)
 
 if __name__ == '__main__':
     unittest.main()

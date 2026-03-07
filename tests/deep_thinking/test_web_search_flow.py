@@ -163,21 +163,59 @@ def test_retrieval_supervisor_executes_web_search(retrieval_supervisor):
     }
 
     # Mock TavilyClient
-    with patch('deep_thinking.supervisor.TavilyClient') as MockTavily:
-        mock_tavily_instance = MockTavily.return_value
-        
-        # Mock search results
-        mock_tavily_instance.search.return_value = {
-            "results": [
-                {"title": "R-CHOP Side Effects", "content": "Common side effects include...", "url": "http://cancer.org/r-chop", "score": 0.9}
-            ]
-        }
+    with patch('deep_thinking.supervisor.WEB_SEARCH_AVAILABLE', True):
+        with patch('deep_thinking.supervisor.TavilyClient', create=True) as MockTavily:
+            mock_tavily_instance = MockTavily.return_value
+            
+            # Mock search results
+            mock_tavily_instance.search.return_value = {
+                "results": [
+                    {"title": "R-CHOP Side Effects", "content": "Common side effects include...", "url": "http://cancer.org/r-chop", "score": 0.9}
+                ]
+            }
 
-        # Mock environment variable
-        with patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"}):
-            results = retrieval_supervisor.execute_step(step, {})
+            # Mock environment variable
+            with patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"}):
+                results = retrieval_supervisor.execute_step(step, {})
 
         assert len(results) == 1
         assert results[0]["type"] == "web"
         assert results[0]["source"] == "http://cancer.org/r-chop"
         assert "Side Effects" in results[0]["content"]
+
+def test_retrieval_supervisor_canonicalizes_and_dedupes_tracking_urls(retrieval_supervisor):
+    step = {
+        "step_number": 2,
+        "sub_question": "What are the side effects of R-CHOP?",
+        "search_strategy": "web",
+        "keywords": ["R-CHOP"],
+        "target_folders": [],
+        "reasoning": "External search"
+    }
+
+    with patch('deep_thinking.supervisor.WEB_SEARCH_AVAILABLE', True):
+        with patch('deep_thinking.supervisor.TavilyClient', create=True) as MockTavily:
+            mock_tavily_instance = MockTavily.return_value
+            mock_tavily_instance.search.return_value = {
+                "results": [
+                    {
+                        "title": "R-CHOP Side Effects",
+                        "content": "Common side effects include...",
+                        "url": "https://www.cancer.org/r-chop?utm_source=newsletter&srsltid=abc",
+                        "score": 0.9
+                    },
+                    {
+                        "title": "R-CHOP Side Effects Copy",
+                        "content": "Duplicate canonical page",
+                        "url": "https://cancer.org/r-chop?utm_medium=email",
+                        "score": 0.8
+                    }
+                ]
+            }
+
+            with patch.dict(os.environ, {"TAVILY_API_KEY": "test-key"}):
+                results = retrieval_supervisor.execute_step(step, {})
+
+        assert len(results) == 1
+        assert results[0]["source"] == "https://cancer.org/r-chop"
+        assert results[0]["filepath"] == "https://cancer.org/r-chop"

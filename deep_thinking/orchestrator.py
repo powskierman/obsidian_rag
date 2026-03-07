@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from .state import RAGState
 from .planner import PlannerAgent
 from .supervisor import RetrievalSupervisor
+from .source_utils import canonicalize_web_url, normalize_vault_path
 from .reflector import ReflectionAgent
 from .policy import PolicyAgent
 from .synthesizer import FinalAnswerGenerator
@@ -149,7 +150,7 @@ class DeepThinkingRAG:
 
     @staticmethod
     def _use_orchestrator_v2() -> bool:
-        return os.getenv("DEEP_THINKING_ORCHESTRATOR_V2", "false").strip().lower() in {
+        return os.getenv("DEEP_THINKING_ORCHESTRATOR_V2", "true").strip().lower() in {
             "1", "true", "yes", "on"
         }
 
@@ -180,6 +181,17 @@ class DeepThinkingRAG:
                 return steps
         raise ValueError("Planner returned an invalid plan payload")
 
+    def _extend_plan_with_enforcement(self, state: RAGState, update_status) -> List[Dict[str, Any]]:
+        new_steps = self.planner.extend_plan(state)
+        validator = getattr(type(self.planner), "validate_extended_steps", None)
+        if callable(validator):
+            filtered_steps = self.planner.validate_extended_steps(new_steps, state)
+            dropped = max(0, len(new_steps) - len(filtered_steps))
+            if dropped:
+                update_status("   Dropped unanchored extension steps", {"dropped": dropped})
+            return filtered_steps
+        return new_steps
+
     def _commit_step_result(
         self,
         state: RAGState,
@@ -194,7 +206,7 @@ class DeepThinkingRAG:
     ) -> None:
         state["retrieved_documents"].extend(docs)
 
-        for doc in docs[:buffer_docs_per_step]:
+        for doc in RetrievalSupervisor._filter_citable_docs(docs)[:buffer_docs_per_step]:
             state["raw_context_buffer"].append({
                 "source": doc.get("source", "Unknown"),
                 "content": self._truncate_text(doc.get("content", ""), buffer_doc_chars),
@@ -236,6 +248,7 @@ class DeepThinkingRAG:
     ) -> tuple[Dict[str, Any], List[Dict[str, Any]], Dict[str, Any]]:
         update_status(f"👣 Step {step['step_number']}: {step['sub_question']}")
         docs = self.supervisor.execute_step(step, state, trace_callback=update_status)
+        docs = RetrievalSupervisor._filter_reasoning_docs(docs)
         update_status(f"   Found {len(docs)} documents for Step {step['step_number']}.")
         past_step = self.reflector.reflect(step, docs, state)
         update_status(f"   Insight for Step {step['step_number']}: {past_step['key_findings']}")
@@ -298,12 +311,16 @@ class DeepThinkingRAG:
                 continue
             obsidian_match = re.search(r"\[\[([^\]]+)\]\]", citation)
             if obsidian_match:
-                targets.add(obsidian_match.group(1).strip().lower())
+                targets.add(normalize_vault_path(obsidian_match.group(1)).lower())
             md_match = re.search(r"\[[^\]]+\]\(([^)]+)\)", citation)
             if md_match:
-                targets.add(md_match.group(1).strip().lower())
+                target = md_match.group(1).strip()
+                if target.startswith("http://") or target.startswith("https://"):
+                    targets.add(canonicalize_web_url(target).lower())
+                else:
+                    targets.add(normalize_vault_path(target).lower())
             if citation.startswith("http://") or citation.startswith("https://"):
-                targets.add(citation.strip().lower())
+                targets.add(canonicalize_web_url(citation).lower())
         return targets
 
     def _build_structured_sources(
@@ -320,7 +337,7 @@ class DeepThinkingRAG:
         for doc in documents:
             if not isinstance(doc, dict):
                 continue
-            if doc.get("is_summary"):
+            if not RetrievalSupervisor._is_citable_doc(doc):
                 continue
 
             filepath = str(doc.get("filepath") or doc.get("url") or doc.get("source") or "").strip()
@@ -335,6 +352,11 @@ class DeepThinkingRAG:
             source_category = str(doc.get("source_category") or "").strip().lower()
             if source_category not in {"vault", "web"}:
                 source_category = "web" if self._is_web_url(filepath) else "vault"
+
+            if source_category == "web":
+                filepath = canonicalize_web_url(doc.get("canonical_url") or filepath) or filepath
+            else:
+                filepath = normalize_vault_path(filepath)
 
             if not filename:
                 if source_category == "web" and filepath:
@@ -351,13 +373,15 @@ class DeepThinkingRAG:
                 relevance *= 100.0
             relevance = max(1.0, min(100.0, relevance))
 
-            dedupe_key = (source_category, (filepath or filename).lower())
+            dedupe_target = filepath or filename
+            dedupe_key = (source_category, dedupe_target.lower())
             if dedupe_key in seen:
                 continue
             seen.add(dedupe_key)
 
-            target = (filepath or filename).lower()
-            is_cited = target in citation_targets or filename.lower() in citation_targets
+            target = dedupe_target.lower()
+            normalized_filename = normalize_vault_path(filename).lower()
+            is_cited = target in citation_targets or normalized_filename in citation_targets
 
             structured.append({
                 "filename": filename,
@@ -417,6 +441,43 @@ class DeepThinkingRAG:
             item.pop("_is_cited", None)
 
         return structured[:source_limit]
+
+    @staticmethod
+    def _document_identity_set(documents: List[Dict[str, Any]]) -> set[tuple[str, str]]:
+        identities: set[tuple[str, str]] = set()
+        for doc in documents or []:
+            if not RetrievalSupervisor._is_citable_doc(doc):
+                continue
+            source_category = str(doc.get("source_category") or "").strip().lower()
+            locator = str(doc.get("filepath") or doc.get("url") or doc.get("source") or doc.get("filename") or "").strip()
+            if source_category == "web" or locator.startswith("http://") or locator.startswith("https://"):
+                source_category = "web"
+                locator = canonicalize_web_url(doc.get("canonical_url") or locator) or locator
+            else:
+                source_category = "vault"
+                locator = normalize_vault_path(locator)
+            if locator:
+                identities.add((source_category, locator.lower()))
+        return identities
+
+    def _align_structured_sources_to_used_documents(
+        self,
+        structured_sources: List[Dict[str, Any]],
+        used_documents: List[Dict[str, Any]],
+        max_sources: int,
+    ) -> List[Dict[str, Any]]:
+        used_identities = self._document_identity_set(used_documents)
+        aligned = [
+            source for source in structured_sources
+            if (
+                str(source.get("source_category") or "").strip().lower(),
+                str(source.get("filepath") or source.get("filename") or "").strip().lower(),
+            ) in used_identities
+        ]
+        aligned_identities = self._document_identity_set(aligned)
+        if aligned_identities == used_identities:
+            return aligned[:max_sources]
+        return self._build_structured_sources(used_documents, [], max_sources=max_sources)
 
         
     def query(
@@ -555,6 +616,7 @@ class DeepThinkingRAG:
                     def run_and_reflect(step):
                         update_status(f"👣 Step {step['step_number']}: {step['sub_question']}")
                         docs = self.supervisor.execute_step(step, state, trace_callback=update_status)
+                        docs = RetrievalSupervisor._filter_reasoning_docs(docs)
                         update_status(f"   Found {len(docs)} documents for Step {step['step_number']}.")
                         past_step = self.reflector.reflect(step, docs, state)
                         update_status(f"   Insight for Step {step['step_number']}: {past_step['key_findings']}")
@@ -568,7 +630,7 @@ class DeepThinkingRAG:
                     for step, docs, past_step in results:
                         state["retrieved_documents"].extend(docs)
 
-                        for doc in docs[:buffer_docs_per_step]:
+                        for doc in RetrievalSupervisor._filter_citable_docs(docs)[:buffer_docs_per_step]:
                             state["raw_context_buffer"].append({
                                 "source": doc.get("source", "Unknown"),
                                 "content": self._truncate_text(doc.get("content", ""), buffer_doc_chars),
@@ -609,6 +671,7 @@ class DeepThinkingRAG:
                 # Check if we should continue
                 # Plan complete or empty - ask policy if we have enough
                 if state["current_step_index"] >= len(state["plan"]):
+                    update_status("⚖️ Evaluating completion policy...")
                     decision = self.policy.decide(state)
                     update_status(f"⚖️ Policy Decision: {decision}")
 
@@ -617,14 +680,18 @@ class DeepThinkingRAG:
                     elif decision == "REVISE_PLAN":
                         # Generate additional steps
                         update_status("🔄 Revising plan...")
-                        new_steps = self.planner.extend_plan(state)
-                        state["plan"].extend(new_steps)
+                        new_steps = self._extend_plan_with_enforcement(state, update_status)
+                        if not new_steps:
+                            update_status("   No valid revised steps, finishing.")
+                            state["should_continue"] = False
+                        else:
+                            state["plan"].extend(new_steps)
                     elif decision == "CONTINUE":
                         # If policy says continue but no steps left, force finish or extend?
                         # If no steps left, we MUST extend or finish.
                         if state["current_step_index"] >= len(state["plan"]):
                              update_status("   No steps left, forcing plan extension...")
-                             new_steps = self.planner.extend_plan(state)
+                             new_steps = self._extend_plan_with_enforcement(state, update_status)
                              if not new_steps:
                                  update_status("   Could not extend plan, finishing.")
                                  state["should_continue"] = False
@@ -682,6 +749,7 @@ class DeepThinkingRAG:
 
                     state["current_step_index"] += len(steps_to_run)
 
+                update_status("⚖️ Evaluating completion policy...")
                 decision = self.policy.decide(state)
                 update_status(f"⚖️ Policy Decision: {decision}")
 
@@ -689,12 +757,16 @@ class DeepThinkingRAG:
                     state["should_continue"] = False
                 elif decision == "REVISE_PLAN":
                     update_status("🔄 Revising plan...")
-                    new_steps = self.planner.extend_plan(state)
-                    state["plan"].extend(new_steps)
+                    new_steps = self._extend_plan_with_enforcement(state, update_status)
+                    if not new_steps:
+                        update_status("   No valid revised steps, finishing.")
+                        state["should_continue"] = False
+                    else:
+                        state["plan"].extend(new_steps)
                 elif decision == "CONTINUE":
                     if state["current_step_index"] >= len(state["plan"]):
                         update_status("   No steps left, forcing plan extension...")
-                        new_steps = self.planner.extend_plan(state)
+                        new_steps = self._extend_plan_with_enforcement(state, update_status)
                         if not new_steps:
                             update_status("   Could not extend plan, finishing.")
                             state["should_continue"] = False
@@ -715,7 +787,7 @@ class DeepThinkingRAG:
             web_docs = self.supervisor.execute_step(fallback_step, state, trace_callback=update_status)
             if web_docs:
                 state["retrieved_documents"].extend(web_docs)
-                for doc in web_docs[:buffer_docs_per_step]:
+                for doc in RetrievalSupervisor._filter_citable_docs(web_docs)[:buffer_docs_per_step]:
                     state["raw_context_buffer"].append({
                         "source": doc.get("source", "Unknown"),
                         "content": self._truncate_text(doc.get("content", ""), buffer_doc_chars),
@@ -755,50 +827,28 @@ class DeepThinkingRAG:
         state["citations"] = synthesis_result["citations"]
         state["confidence_score"] = synthesis_result["confidence_score"]
         state["confidence_justification"] = synthesis_result["confidence_justification"]
+        used_documents = synthesis_result.get("used_documents") or state["retrieved_documents"]
         
         structured_sources = self._build_structured_sources(
-            state["retrieved_documents"],
+            used_documents,
             state["citations"],
             max_sources=max_sources,
         )
-
-        # Final guardrail: ensure a visible web source exists for web-required technical comparisons.
-        # This catches edge cases where the planner/retrieval path succeeded partially but no web source
-        # survives into the final source list.
+        structured_sources = self._align_structured_sources_to_used_documents(
+            structured_sources,
+            used_documents,
+            max_sources=max_sources,
+        )
         if self._should_force_web_step(question) and not self._has_web_sources(structured_sources):
-            update_status("🌐 Final source check found no web items; running last web retrieval pass...")
-            final_web_docs = self.supervisor.execute_step(
-                {
-                    "step_number": len(state["plan"]) + 1,
-                    "sub_question": question,
-                    "search_strategy": "web",
-                    "keywords": [],
-                    "target_folders": [],
-                    "reasoning": "Final source-level safeguard for technical comparison queries.",
-                },
-                state,
-                trace_callback=update_status,
+            warning_msg = (
+                "Web evidence was retrieved earlier, but the final answer did not retain any citable web sources."
+                if self._has_web_documents(state["retrieved_documents"])
+                else "Web retrieval attempted earlier but produced no citable web sources."
             )
-            if final_web_docs:
-                state["retrieved_documents"].extend(final_web_docs)
-                structured_sources = self._build_structured_sources(
-                    state["retrieved_documents"],
-                    state["citations"],
-                    max_sources=max_sources,
-                )
-                update_status(
-                    "   Final web retrieval pass attached sources",
-                    {"documents": len(final_web_docs)},
-                )
-            else:
-                warning_msg = (
-                    "Web retrieval attempted multiple times but returned no usable results "
-                    "(check Tavily/API/network and query constraints)."
-                )
-                warnings = state.setdefault("warnings", [])
-                if warning_msg not in warnings:
-                    warnings.append(warning_msg)
-                update_status("   Final web retrieval pass returned no documents.")
+            warnings = state.setdefault("warnings", [])
+            if warning_msg not in warnings:
+                warnings.append(warning_msg)
+            update_status("   Final source check found no web items.")
 
         output = {
             "answer": state["final_answer"],

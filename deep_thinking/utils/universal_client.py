@@ -22,6 +22,43 @@ def _clean_env_value(value: Optional[str]) -> Optional[str]:
     cleaned = value.strip()
     return cleaned or None
 
+
+def _stringify_message_content(value: Any) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list):
+        parts: List[str] = []
+        for item in value:
+            text = _stringify_message_content(item)
+            if text:
+                parts.append(text)
+        return "".join(parts)
+    if isinstance(value, dict):
+        if "text" in value:
+            return _stringify_message_content(value.get("text"))
+        if "content" in value:
+            return _stringify_message_content(value.get("content"))
+        return json.dumps(value, ensure_ascii=False)
+    return str(value)
+
+
+def extract_response_text(response: Any) -> str:
+    raw_content: Any = response
+    if hasattr(response, "content"):
+        raw_content = getattr(response, "content")
+        if isinstance(raw_content, list):
+            if not raw_content:
+                return ""
+            first = raw_content[0]
+            if hasattr(first, "text"):
+                raw_content = getattr(first, "text")
+            else:
+                raw_content = first
+
+    return _stringify_message_content(raw_content).strip()
+
 class UniversalMessage:
     """Wrapper for message response to match Anthropic's structure"""
     def __init__(self, content_text: str):
@@ -175,8 +212,15 @@ class UniversalClient:
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         
-        # Gemini needs sufficient output tokens - ensure minimum of 8192
-        output_tokens = max(max_tokens, 8192)
+        # Keep control-plane Gemini calls small and responsive.
+        # The previous hard floor of 8192 made tiny JSON tasks like policy/reflection
+        # unnecessarily slow because every call advertised a huge output budget.
+        try:
+            requested_tokens = int(max_tokens)
+        except (TypeError, ValueError):
+            requested_tokens = 512
+        output_tokens = max(128, requested_tokens)
+        timeout_seconds = float(os.getenv("GEMINI_TIMEOUT", "60"))
         
         payload = {
             "contents": [{
@@ -196,7 +240,7 @@ class UniversalClient:
                 url,
                 headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
                 json=payload,
-                timeout=60
+                timeout=timeout_seconds
             )
             
             if response.status_code != 200:

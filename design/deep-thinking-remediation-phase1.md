@@ -1,17 +1,19 @@
 # Deep Thinking Remediation Phase 1
 
+Status: implemented and partially extended beyond the original phase-1 scope as of March 7, 2026.
+
 ## Scope
 
-This note covers the first remediation pass for the two highest-priority findings in the deep-thinking pipeline:
+This note originally covered the first remediation pass for the two highest-priority findings in the deep-thinking pipeline:
 
 1. Finding #1: the orchestrator executes all remaining plan steps at once.
 2. Finding #2: full-content expansion happens too early and too broadly.
 
-The relevant live code is in `deep_thinking/orchestrator.py` and `deep_thinking/supervisor.py`.
+The relevant live code is in `deep_thinking/orchestrator.py`, `deep_thinking/supervisor.py`, `deep_thinking/synthesizer.py`, `deep_thinking/planner.py`, and `deep_thinking/policy.py`.
 
-## Current Behavior
+## Pre-Remediation Behavior
 
-### How the orchestrator executes plan steps today
+### How the orchestrator executed plan steps before remediation
 
 `DeepThinkingRAG.query()` initializes state, builds the initial plan, and then enters the main loop in `deep_thinking/orchestrator.py`.
 
@@ -37,7 +39,7 @@ Implications:
 - Plan revision and policy checks only happen after the whole remaining tail finishes.
 - Peak memory is the sum of all in-flight step payloads, not one step's payload.
 
-### Where full-content expansion is triggered today
+### Where full-content expansion was triggered before lazy selection
 
 `RetrievalSupervisor.execute_step()` in `deep_thinking/supervisor.py` performs retrieval, optional reranking, and then expansion.
 
@@ -59,148 +61,50 @@ Implications:
 - Expansion is broad: every eligible result in the post-rerank list is considered.
 - Expansion is repeated: the same file can be reopened and reread across multiple steps because there is no per-query cache keyed by file identity and freshness.
 
-## Phase A: Orchestrator Serialization
+## Implemented Status
 
-### Goal
+### Orchestrator serialization is now the default
 
-Execute one plan step at a time by default, or at most in small bounded groups where independence is explicit, while preserving existing plan/policy behavior and making reflection truly incremental.
+- The serialized scheduler is now the default runtime path.
+- State is committed after each step, so reflection, policy, and replanning see the latest `past_steps`, `retrieved_documents`, and accumulated context.
+- The legacy fan-out path remains available only as an explicit fallback path.
 
-### Proposed Changes
+### Evidence selection is now authoritative and bounded
 
-1. Replace tail-of-plan execution with a step window.
+- Prompt construction, citation normalization, and final source rendering all use the same authoritative citable evidence set.
+- Post-synthesis source mutation was removed, so final sources are no longer backfilled with unseen web documents.
+- Text-only graph outputs are preserved as internal reasoning evidence, but they are excluded from final citations.
 
-- Change the execution loop so it selects one step at `state["current_step_index"]` by default.
-- Keep a narrow seam for bounded groups later, for example `next_steps = _select_step_batch(state)`.
-- Initial implementation should return a single step to minimize behavioral risk.
+### Summary-query handling was tightened after phase 1
 
-2. Split "run step" from "commit step".
+- Summary-style queries now use a vault-first fast path with a single-step plan unless the user explicitly asks for outside context.
+- Prompt-template and instruction notes are filtered out of normal evidence ranking.
+- Summary queries prefer an exact vault-note match plus at most a very small supporting set, rather than broad mixed web retrieval.
 
-- Extract a helper that executes one step and returns `(step, docs, past_step)`.
-- Extract a helper that commits one step's outputs into shared state:
-  - `retrieved_documents`
-  - `raw_context_buffer`
-  - `past_steps`
-  - `accumulated_context`
-  - `current_step_index`
-- Reuse the current buffer trimming and context compression logic inside the commit path so the state shape stays stable.
+### Synthesis failure handling is now explicit
 
-3. Commit state immediately after each step.
+- If the model returns an empty answer, synthesis retries once with a reduced authoritative evidence set.
+- Fallback responses now record and surface the failure reason, including `empty_answer`, `json_parse_failure`, `timeout`, and `provider_exception`.
+- Retrieved-context fallback remains available, but it is no longer silent about why it happened.
 
-- Run `execute_step()`.
-- Run `reflect()` using the current state.
-- Commit that step's docs and findings before moving to the next step.
-- This guarantees that the next step, any later `reflect()` call, `planner.extend_plan()`, and `policy.decide()` all see updated state.
-
-4. Keep the existing outer loop and policy contract.
-
-- Preserve:
-  - forced vault/web step insertion
-  - `max_iterations`
-  - policy decisions `FINISH`, `REVISE_PLAN`, `CONTINUE`
-  - fallback web retrieval paths
-- The key change is sequencing, not planner semantics.
-
-5. Add bounded-group execution only behind an explicit selector.
-
-- If grouped execution is still desired, only batch steps that are explicitly marked independent.
-- Commit results group-by-group, never for the entire remaining tail.
-- Reflection should still run after each committed step, not only after the whole group.
-
-### Expected Outcome
+## Expected Outcome
 
 - Peak memory drops because only one step payload is live at a time by default.
 - Reflection becomes real feedback instead of post-hoc summarization over stale state.
 - Planner extension and policy decisions can react to intermediate findings.
+- Summary queries stay focused on vault evidence and avoid unnecessary web expansion.
+- Source lists now better match the evidence the model actually saw.
 
-### Validation for Phase A
+## Validation
 
-- Add tests for a multi-step plan proving:
+- Regression coverage includes multi-step plan tests proving:
   - step 2 sees step 1 in `state["past_steps"]`
   - `current_step_index` advances one step at a time
   - `policy.decide()` is reached with committed intermediate state
-- Add a regression test ensuring final output shape stays unchanged for a representative multi-step query.
-
-## Phase B: Lazy Content Expansion and Per-Query Cache
-
-### Goal
-
-Stop expanding full content during every retrieval step. Keep retrieval results lightweight, expand only the small set of documents that synthesis will actually consume, and avoid rereading the same file within a query.
-
-### Proposed Changes
-
-1. Introduce a query-scoped expansion cache.
-
-- Create a per-query cache object at the start of `DeepThinkingRAG.query()`.
-- Pass it through to `RetrievalSupervisor.execute_step()` and `_expand_full_content()`.
-- Key entries by a stable file freshness key:
-  - preferred: `(full_path, mtime_ns)`
-  - acceptable: `(full_path, mtime)`
-- Cache value should contain expanded content and lightweight metadata such as size/ext.
-
-2. Separate lightweight retrieval docs from expanded docs.
-
-- Treat retrieval output as snippet-first documents.
-- Preserve current fields like `filepath`, `source`, `filename`, `snippet`, `content`, and scores.
-- Use `is_full_content` only as an annotation when expansion actually occurs.
-
-3. Make expansion lazy.
-
-- Remove unconditional full expansion from the normal `execute_step()` path for `vector` and `hybrid`.
-- Introduce a helper that expands only selected docs on demand.
-- First consumer should be synthesis, because that is where the final prompt budget is known.
-
-4. Expand only a bounded synthesis set.
-
-- Before prompt assembly, choose a small set of docs that synthesis will actually use.
-- Expand only those docs, for example:
-  - top-N ranked vault docs selected for the prompt
-  - any explicitly promoted support docs if such a mechanism is added
-- Keep final source rendering snippet-based unless a source explicitly needs expanded text.
-
-5. Preserve ranking semantics.
-
-- Expansion must not affect ranking, dedupe, or source selection order.
-- Retrieval, hybrid merge, and reranking continue to work on lightweight docs.
-- Expansion only changes content fidelity for a chosen subset.
-
-6. Add caps and observability.
-
-- Add config for:
-  - max docs to expand per query
-  - max total bytes/chars to expand per query
-  - optional max docs to expand per synthesis call
-- Trace:
-  - cache hits/misses
-  - docs expanded
-  - docs skipped due to caps
-
-### Recommended Rollout
-
-Phase B should be delivered in two substeps:
-
-1. Phase B1: add the per-query cache first, while keeping the current expansion trigger.
-2. Phase B2: move expansion out of retrieval and into synthesis-time selection.
-
-This keeps risk down:
-
-- B1 removes repeated file reads without changing which docs become full-content.
-- B2 changes when expansion happens, but only after the cache and instrumentation exist.
-
-### Validation for Phase B
-
-- Add tests proving repeated hits to the same file in one query reuse the cache.
-- Add tests proving synthesis expands only the selected top-N docs.
-- Add tests proving non-selected docs remain snippet-sized in state.
-- Add a regression test for repeated vector/hybrid hits to the same file.
-
-## Implementation Order
-
-1. Phase A: serialize orchestrator execution and commit state after each step.
-2. Phase B1: add per-query expansion cache with no behavioral change in selection.
-3. Phase B2: move to lazy synthesis-driven expansion with bounded document selection.
-
-## Approval Boundary
-
-This document is planning only. No implementation code has been changed yet.
-
-Before editing `deep_thinking/orchestrator.py`, `deep_thinking/supervisor.py`, or related runtime code, get explicit approval.
+- Regression tests preserve final output shape for representative multi-step queries.
+- Regression coverage for summary queries proves:
+  - a dominant vault note is preferred
+  - prompt-template notes are excluded
+  - web enrichment is skipped by default
+  - empty-answer retries reduce the evidence set
+  - failure-mode fallbacks are surfaced explicitly

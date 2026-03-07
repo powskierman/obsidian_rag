@@ -188,23 +188,15 @@ export const api = {
   },
 
   getOllamaModels: async (): Promise<string[]> => {
-    // This might still need to go direct if gateway doesn't proxy tags yet, 
-    // BUT strictly we should use gateway. For now, assuming direct or proxied if available.
-    // Keeping direct call for now as Gateway V1 might not have /tags proxy.
-    // TODO: move to gateway /api/v1/models if implemented
     try {
-      const OLLAMA_URL = process.env.NEXT_PUBLIC_OLLAMA_URL || 'http://localhost:11434';
-      const response = await fetch(`${OLLAMA_URL}/api/tags`);
-      if (!response.ok) return [];
-
+      const response = await fetch('/api/ollama/models');
+      if (!response.ok) {
+        return [];
+      }
       const data = await response.json();
-      const models = data.models || [];
-      return models
-        .filter((m: any) => !m.name.includes('embed'))
-        .map((m: any) => m.name);
+      return Array.isArray(data?.models) ? data.models : [];
     } catch (error) {
-      // Avoid using console.error(error) to prevent Next.js from throwing dev overlays
-      console.log('Ollama is not running locally or unreachable. Returning empty model list.');
+      console.log('Ollama model discovery failed via webapp proxy. Returning empty model list.');
       return [];
     }
   },

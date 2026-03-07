@@ -38,6 +38,20 @@ class TestReflectionAgent(unittest.TestCase):
         self.assertEqual(past_step["key_findings"], "No documents retrieved for this step.")
         self.assertEqual(past_step["confidence"], 0.0)
 
+    def test_reflect_empty_content_falls_back_without_unboundlocalerror(self):
+        mock_response = MagicMock()
+        mock_response.content = []
+        self.mock_client.messages.create.return_value = mock_response
+
+        step = {"step_number": 1, "sub_question": "q"}
+        documents = [{"content": "doc1", "source": "s1"}]
+        state = {"past_steps": []}
+
+        past_step = self.reflector.reflect(step, documents, state)
+
+        self.assertEqual(past_step["key_findings"], "Retrieved 1 documents. Top sources: s1.")
+        self.assertEqual(past_step["confidence"], 0.0)
+
     def test_compress_context(self):
         # Mock response
         mock_response = MagicMock()

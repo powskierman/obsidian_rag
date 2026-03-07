@@ -2,7 +2,7 @@
 multi_agent = true
 
 [agents]
-max_threads = 3
+max_threads = 6
 max_depth = 1
 
 [agents.coordinator]
@@ -17,3 +17,18 @@ config_file = "agents/orchestrator_serializer.toml"
 description = "Redesigns content expansion to be lazy and cached, expanding only what synthesis needs. Focuses on execute_step() and _expand_full_content() (Finding #2)."
 config_file = "agents/content_limiter.toml"
 
+[agents.state_deduper]
+description = "Normalizes and deduplicates evidence shapes across state fields, eliminating redundant copies and clarifying which structure is authoritative for synthesis and sources. Focuses on state.py, orchestrator.py, reflector.py, planner.py, policy.py, and synthesizer.py for Finding #3."
+config_file = "agents/state_deduper.toml"
+
+[agents.source_pipeline_fixer]
+description = "Simplifies and re-couples source-building with synthesis so final sources reflect only evidence the model actually used, avoiding unnecessary rescans and post-hoc web fetches. Focuses on _build_structured_sources() and related paths for Finding #4."
+config_file = "agents/source_pipeline_fixer.toml"
+
+[agents.planner_strictifier]
+description = "Fixes planner response format mismatches, avoids fallback retrieval, and adds tests for multi-step plans and source consistency. Focuses on planner.py for Finding #5."
+config_file = "agents/planner_strictifier.toml"
+
+[agents.churn_reducer]
+description = "Targets smaller but persistent CPU/memory churn (repeated sums over buffers, large-string concatenation in synthesis) with more efficient data structures and incremental updates. Focuses on orchestrator.py and synthesizer.py for Finding #6."
+config_file = "agents/churn_reducer.toml"

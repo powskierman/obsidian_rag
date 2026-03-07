@@ -71,10 +71,32 @@ def test_synthesizer_salvages_fields_from_malformed_json():
     client = FakeClient("claude", response_text)
     generator = FinalAnswerGenerator(client)
 
-    result = generator.generate(make_state())
+    state = make_state()
+    state["retrieved_documents"] = [
+        {
+            "source": "Note",
+            "filepath": "Note",
+            "filename": "Note.md",
+            "content": "Vault note content",
+            "snippet": "Vault note content",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+        },
+        {
+            "source": "https://example.com",
+            "canonical_url": "https://example.com",
+            "title": "Example",
+            "content": "Example web content",
+            "snippet": "Example web content",
+            "source_category": "web",
+            "source_type": "web-search",
+        },
+    ]
+
+    result = generator.generate(state)
 
     assert result["answer"] == "Hello"
-    assert result["citations"] == ["[[Note]]", "https://example.com"]
+    assert result["citations"] == ["[[Note]]", "https://example.com/"]
     assert result["confidence_score"] == 0.82
     assert result["confidence_justification"] == "OK"
 
@@ -150,5 +172,5 @@ def test_synthesizer_uses_context_when_answer_empty():
 
     result = generator.generate(state)
 
-    assert "No response from model" in result["answer"]
+    assert "showing retrieved context summary instead" in result["answer"].lower()
     assert "Found scan notes" in result["answer"]
