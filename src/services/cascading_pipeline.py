@@ -223,7 +223,7 @@ def default_cascading_model(provider: str) -> Optional[str]:
     provider = canonical_cascading_provider_name(provider)
     defaults = {
         "claude": _get_env_value("CLAUDE_MODEL", "claude-sonnet-4-5-20250929"),
-        "gemini": _get_env_value("GEMINI_MODEL", "gemini-1.5-flash"),
+        "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-flash-preview"),
         "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o-mini"),
         "openrouter": _get_env_value("OPENROUTER_MODEL", "openrouter/auto"),
         "ollama": _get_env_value("OLLAMA_MODEL", _get_env_value("LLM_MODEL", "qwen2.5:7b-instruct")),
@@ -389,7 +389,10 @@ async def synthesize_cascading_answer(
     sys_prompt = system_prompt or (
         "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
         "Return JSON only with keys: answer, citations. "
-        "The answer must be concise and grounded. "
+        "The answer must be a brief executive concept index or high-level overview. "
+        "Do NOT provide didactic, step-by-step explanations or walk through processes unless strictly necessary. "
+        "Instead, rapidly name and list the core concepts, frameworks, or relationships present in the context. "
+        "Keep it tight and concise, under 200 words if possible. "
         "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
         "Do not invent citations. If the context does not contain the answer, say so."
     )

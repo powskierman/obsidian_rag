@@ -485,7 +485,7 @@ class DeepThinkingRAG:
         question: str,
         max_iterations: int = 7,
         status_callback=None,
-        max_sources: int = 12,
+        max_sources: int = 24, # Increase limit for broader cognitive synthesis
     ) -> Dict[str, Any]:
         """
         Main reasoning loop.

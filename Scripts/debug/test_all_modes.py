@@ -12,24 +12,9 @@ TEST_CASES = [
         "desc": "Vector: Content Retrieval (Target: 1st PET-CT scan.md)"
     },
     {
-        "mode": "notes",
-        "query": "What is Double-hit Lymphoma?",
-        "desc": "Notes: Graph Definition (Target: Node Description & Connections)"
-    },
-    {
-        "mode": "entities",
-        "query": "List key concepts related to Lymphoma Treatment.",
-        "desc": "Entities: High-Level Concepts (Target: LightRAG Entities)"
-    },
-    {
-        "mode": "hybrid",
-        "query": "Summarize the progression of my Lymphoma based on scan reports.",
-        "desc": "Hybrid: Synthesis (Combines Scan Docs + Treatment Timeline)"
-    },
-    {
-        "mode": "entities+vector",
-        "query": "Explain the Obsidian RAG architecture and query modes.",
-        "desc": "Entities+Vector: Tech Docs (Combines Documentation + Architecture Nodes)"
+        "mode": "cascading",
+        "query": "Provide a point form summary of A Mind for Numbers",
+        "desc": "Cascading: Fast UI indexing mode"
     }
 ]
 

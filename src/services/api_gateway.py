@@ -408,7 +408,7 @@ def _default_cascading_model(provider: str) -> Optional[str]:
     provider = _canonical_cascading_provider_name(provider)
     defaults = {
         "claude": _get_env_value("CLAUDE_MODEL", "claude-sonnet-4-5-20250929"),
-        "gemini": _get_env_value("GEMINI_MODEL", "gemini-1.5-flash"),
+        "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-flash-preview"),
         "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o-mini"),
         "openrouter": _get_env_value("OPENROUTER_MODEL", "openrouter/auto"),
         "ollama": _get_env_value("OLLAMA_MODEL", _get_env_value("LLM_MODEL", "qwen2.5:7b-instruct")),
@@ -2053,7 +2053,7 @@ async def get_provider_status():
             "ollama": _get_env_value("OLLAMA_MODEL", "mistral"),
             "openrouter": _get_env_value("OPENROUTER_MODEL", "google/gemini-2.0-flash-exp:free"),
             "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o"),
-            "gemini": _get_env_value("GEMINI_MODEL", "gemini-1.5-pro"),
+            "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-pro-preview"),
             "claude": _get_env_value("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
             "mlx": _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "LiquidAI/LFM2-24B-A2B-MLX-4bit")),
         },
@@ -2524,9 +2524,12 @@ async def unified_query(request: UnifiedQueryRequest):
         # Pure vector search
         if mode == "vector":
             try:
+                # 1. Enforce strict top-K limit for UI vector queries to tighten retrieval
+                vector_limit = min(request.max_results, 5) # Cap at 5 for vector UI mode
+                
                 payload = {
                     "query": retrieval_query,
-                    "n_results": request.max_results,
+                    "n_results": vector_limit * 3, # Retrieve more to allow for post-filtering
                     "relevance_threshold": effective_relevance_threshold
                 }
                 if filters:
@@ -2543,21 +2546,80 @@ async def unified_query(request: UnifiedQueryRequest):
                         status_code=response.status_code, detail=response.text
                     )
                 result = response.json()
+                
+                # 2. Extract and filter sources (query-to-title matching logic)
+                sources = []
+                query_lower = request.query.lower()
+                docs = result.get("documents", [[]])[0]
+                metas = result.get("metadatas", [[]])[0]
+                dists = result.get("distances", [[]])[0]
+                
+                for doc, meta, dist in zip(docs, metas, dists):
+                    relevance = _distance_to_relevance_impl(dist, default=50.0)
+                    doc_text = doc if isinstance(doc, str) else ""
+                    filename = meta.get("filename", "unknown")
+                    canonical_id = meta.get("canonical_id", "")
+                    
+                    # Boost exact/partial title matches
+                    if filename.lower().endswith(".md"):
+                        base_name = filename[:-3].lower()
+                        if base_name in query_lower or query_lower in base_name or canonical_id in query_lower:
+                            relevance = min(100.0, relevance + 25.0) # Significant boost for file match
+                    elif "mind" in filename.lower() or "consciousness" in filename.lower():
+                        # Demote generic semantic bleed if query looks like a specific book
+                        relevance = max(0.0, relevance - 15.0)
+
+                    snippet = (doc_text[:300] + "...") if len(doc_text) > 300 else doc_text
+                    sources.append({
+                        "filename": filename,
+                        "filepath": meta.get("filepath", "unknown"),
+                        "relevance": relevance,
+                        "snippet": snippet,
+                    })
+
+                # Sort by new relevance and enforce final limit
+                sources = sorted(sources, key=lambda s: s.get("relevance", 0), reverse=True)
+                sources = _apply_relevance_filter(sources, effective_relevance_threshold)[:vector_limit]
+
+                # 3. Micro-compressor logic
+                micro_compressor_prompt = "Create 3-5 bullet points that capture the key ideas in these snippets; do not add information not present in the snippets."
+                synthesized_answer = ""
+                
+                if sources:
+                    try:
+                        # Use cascade synthesizer as the micro compressor since it handles LLM dispatching
+                        compressor_result = await _synthesize_cascading_answer_impl(
+                            query=request.query,
+                            sources=sources,
+                            llm_provider=request.llm_provider,
+                            model=request.model,
+                            system_prompt=micro_compressor_prompt
+                        )
+                        if isinstance(compressor_result, dict):
+                            synthesized_answer = compressor_result.get("answer", "")
+                        else:
+                            synthesized_answer = str(compressor_result)
+                    except Exception as e:
+                        print(f"Micro-compressor failed: {e}")
+                        synthesized_answer = "" # Fallback to empty if LLM fails
 
                 return {
                     "query": request.query,
                     "mode": "vector",
+                    "answer": synthesized_answer, # Return the structured output instead of raw UI display
+                    "sources": sources,
                     "results": result,
                     "metadata": {
                         "source": "ChromaDB Vectors",
-                        "description": "Pure vector similarity search across 7,102 document chunks",
+                        "description": "Pure vector similarity search with micro-compression.",
                     },
                 }
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 raise HTTPException(
                     status_code=503, detail=f"Vector service error: {str(e)}"
                 )
-
 
 
 

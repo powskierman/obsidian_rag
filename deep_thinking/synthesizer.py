@@ -884,19 +884,21 @@ Return ONLY a JSON object:
         {images_section}
         
         {prompt_task}
-        1. Directly addresses the original question
-        2. Synthesizes findings from all research steps. You MUST INTEGRATE information from the Vault Documents if any are provided. Do not ignore the user's personal vault notes.
-        3. Cites vault sources using Obsidian link format ONLY: [[Folder/Note Name]]. Do NOT output Vault links as URLs (e.g. no "http://...md").
+        1. Directly addresses the original question using a structured cognitive format.
+        2. Synthesizes findings from all research steps. You MUST INTEGRATE information from the Vault Documents if any are provided.
+        3. Cites vault sources using Obsidian link format ONLY: [[Folder/Note Name]]. Do NOT output Vault links as URLs.
         4. Cites web sources using markdown links with the ACTUAL page title from the web results: [Actual Page Title](https://example.com).
         {web_instruction}
         6. If images are provided above, embed relevant ones using markdown format: ![Description](image_url)
-           - For hardware/wiring questions, prioritize pinout diagrams and wiring schematics
-           - Place images in appropriate sections (e.g., under "Hardware Connection" or "Wiring Diagram")
         7. Acknowledges any gaps or uncertainties
-        8. DO NOT INVENT CITATIONS. Only use the Exact Names of Vault Documents or URLs provided above. If no Web Search Results are provided, you MUST NOT output any URLs.
-        9. CRITICAL: Never cite the section headers (e.g., do NOT output "[[Vault Documents]]" or "Web Source"). Cite the specific name of the source provided in the list (e.g. "[[Tech/ESP32/note.md]]").
-        10. If the Web Search Results section is empty, your "citations" array should ONLY contain Vault Document names. Do not hallucinate websites.
-        11. If the Web Search Results section is empty, you MUST NOT include a "Web Findings" section and you MUST NOT introduce external facts, datasheet details, or website titles that are not explicitly present in the Vault Documents.
+        8. DO NOT INVENT CITATIONS. Only use the Exact Names of Vault Documents or URLs provided above.
+        9. CRITICAL: Never cite the section headers (e.g., do NOT output "[[Vault Documents]]"). Cite the specific name of the source provided in the list.
+        10. If the Web Search Results section is empty, your "citations" array should ONLY contain Vault Document names.
+        11. If the Web Search Results section is empty, you MUST NOT include a "Web Findings" section and you MUST NOT introduce external facts.
+        12. STRUCTURAL REQUIREMENT: Unless superseded by comparison/summary/relationship instructions below, your answer MUST use the following cognitive structure:
+            - **Problem Framing**: A brief statement of the core issue, context, or question being explored.
+            - **Concept Graphing**: An interconnected breakdown of the underlying ideas, mechanisms, and how they relate to each other (synthesizing across the retrieved context).
+            - **Applied Recipes**: Actionable synthesis detailing how the user can actually run these mental models, execute the steps, or apply the theory.
         {comparison_instruction}
         {summary_instruction}
         {relationship_instruction}
