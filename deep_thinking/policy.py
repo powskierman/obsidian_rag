@@ -67,6 +67,15 @@ class PolicyAgent:
             decision_data = json.loads(content)
             decision = decision_data.get("decision", "CONTINUE")
             query_profile = RetrievalSupervisor.build_query_profile(state.get("original_question", ""))
+            remaining_steps = state.get('plan', [])[state.get('current_step_index', 0):]
+
+            if (
+                query_profile.get("is_summary_request")
+                and state.get("summary_intent") == "broad"
+                and remaining_steps
+                and decision == "FINISH"
+            ):
+                return "CONTINUE"
             
             # Programmatic Check: Force REVISE_PLAN if external enrichment is needed but no web search
             # This ensures we enrich personal notes with external data
@@ -78,7 +87,6 @@ class PolicyAgent:
             )
             
             # Check if we have a PLANNED web search remaining
-            remaining_steps = state.get('plan', [])[state.get('current_step_index', 0):]
             has_planned_web = any(step.get('search_strategy') == 'web' for step in remaining_steps)
             
             if (

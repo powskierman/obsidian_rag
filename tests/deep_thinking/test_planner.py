@@ -73,9 +73,11 @@ class TestPlannerAgent(unittest.TestCase):
             {}
         )
 
-        self.assertEqual(len(plan), 1)
+        self.assertEqual(len(plan), 2)
         self.assertEqual(plan[0]["search_strategy"], "vector")
-        self.assertIn("summary", plan[0]["reasoning"].lower())
+        self.assertEqual(plan[1]["search_strategy"], "hybrid")
+        self.assertIn("faithful", plan[0]["reasoning"].lower())
+        self.assertIn("broaden", plan[1]["reasoning"].lower())
         self.mock_client.messages.create.assert_not_called()
 
     def test_create_plan_invalid_payload_falls_back(self):

@@ -705,6 +705,25 @@ Return ONLY a JSON object:
             state["_selected_evidence_documents"] = authoritative_documents
         relationship_mode = bool(query_profile["is_relationship"])
         summary_mode = bool(query_profile.get("is_summary_request"))
+        broad_summary_mode = summary_mode and state.get("summary_intent") == "broad"
+
+        if broad_summary_mode:
+            broader_limit = max(
+                query_profile.get("max_sources") or 0,
+                min(max_docs, int(os.getenv("DEEP_THINKING_BROAD_SUMMARY_MAX_SOURCES", "4"))),
+            )
+            broader_candidates = [
+                doc for doc in (reasoning_docs or [])
+                if self._is_citable_doc(doc)
+            ]
+            broader_ranked = RetrievalSupervisor.rank_sources_for_query(
+                question,
+                broader_candidates,
+                max_results=broader_limit,
+            )
+            if broader_ranked:
+                authoritative_documents = broader_ranked[:broader_limit]
+                state["_selected_evidence_documents"] = authoritative_documents
 
         if relationship_mode:
             attempt_queue: List[Dict[str, Any]] = [{
@@ -845,11 +864,24 @@ Return ONLY a JSON object:
         5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard definitions, methodologies, or external context found in the web results.
         """
         if summary_mode:
-            prompt_task = "Generate a concise point-form summary that:"
+            if broad_summary_mode:
+                prompt_task = "Generate a broad point-form synthesis that:"
+            else:
+                prompt_task = "Generate a concise point-form summary that:"
             web_instruction = """
         5. If web search results are provided, use them only when the user explicitly asked for outside context or review material. Do NOT add a separate "Web Findings" section for a normal vault summary.
         """
-            summary_instruction = """
+            if broad_summary_mode:
+                summary_instruction = """
+        12. This is a deep-thinking summary request.
+            - Answer as a broader point-form synthesis, not a narrow excerpt compression.
+            - Cover the major themes, mechanisms, methods, and practical applications present across the retrieved vault evidence.
+            - Prefer 5-8 bullets when the evidence supports it.
+            - If the retrieved evidence only supports one cluster of ideas, say that the vault coverage is limited rather than inventing breadth.
+            - Keep the citations array to the minimal vault note set actually used.
+        """
+            else:
+                summary_instruction = """
         12. This is a summary request.
             - Answer as concise bullet points.
             - Focus on the main ideas, methods, and memorable takeaways from the retrieved note(s).

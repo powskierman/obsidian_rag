@@ -540,6 +540,8 @@ class DeepThinkingRAG:
             "raw_context_buffer": [],  # New: Store raw text snippets
             "warnings": [],
         }
+        if RetrievalSupervisor.build_query_profile(question).get("is_summary_request"):
+            state["summary_intent"] = "broad"
         
         # Step 0: Get User Context from mem0
         try:

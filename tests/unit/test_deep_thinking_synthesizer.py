@@ -152,7 +152,7 @@ def test_synthesizer_uses_openai_max_tokens_and_guardrails(monkeypatch):
 
 
 @pytest.mark.unit
-def test_synthesizer_uses_summary_specific_prompt_instructions():
+def test_synthesizer_uses_broad_summary_specific_prompt_instructions():
     response_text = (
         "{\"answer\":\"- Main idea\\n- Key takeaway\",\"citations\":[],"
         "\"confidence_score\":0.9,\"confidence_justification\":\"fine\"}"
@@ -162,14 +162,39 @@ def test_synthesizer_uses_summary_specific_prompt_instructions():
 
     state = make_state()
     state["original_question"] = "Provide a point form summary of A Mind for Numbers"
+    state["summary_intent"] = "broad"
+    state["retrieved_documents"] = [
+        {
+            "source": "Books/Books/A Mind for Numbers.md",
+            "filepath": "Books/Books/A Mind for Numbers.md",
+            "filename": "A Mind for Numbers.md",
+            "title": "A Mind for Numbers",
+            "snippet": "Focused and diffuse modes matter.",
+            "content": "Focused and diffuse modes matter.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "score": 0.9,
+        },
+        {
+            "source": "Books/Books/Oakley-A Mind For Numbers.md",
+            "filepath": "Books/Books/Oakley-A Mind For Numbers.md",
+            "filename": "Oakley-A Mind For Numbers.md",
+            "title": "Oakley-A Mind For Numbers",
+            "snippet": "Practice and recall build durable understanding.",
+            "content": "Practice and recall build durable understanding.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "score": 0.7,
+        },
+    ]
 
     result = generator.generate(state)
 
     prompt = client.messages.calls[0]["messages"][0]["content"]
     assert result["answer"].startswith("- Main idea")
-    assert "Generate a concise point-form summary that:" in prompt
-    assert "Answer as concise bullet points." in prompt
-    assert "Do NOT add generic framing, introductions, or conclusions." in prompt
+    assert "Generate a broad point-form synthesis that:" in prompt
+    assert "Answer as a broader point-form synthesis" in prompt
+    assert "If the retrieved evidence only supports one cluster of ideas" in prompt
 
 
 @pytest.mark.unit

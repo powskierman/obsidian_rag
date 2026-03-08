@@ -109,6 +109,41 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertEqual(payload["llm_provider"], "mlx")
         self.assertEqual(payload["model"], "mlx-community/Qwen3-4B-8bit")
 
+    def test_rank_sources_persists_summary_match_flags(self):
+        docs = [
+            {
+                "source": "Books/Books/A Mind for Numbers.md",
+                "filepath": "Books/Books/A Mind for Numbers.md",
+                "filename": "A Mind for Numbers.md",
+                "title": "A Mind for Numbers",
+                "snippet": "Focused and diffuse modes matter.",
+                "content": "Focused and diffuse modes matter.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.9,
+            },
+            {
+                "source": "Books/Books/The Mind Club.md",
+                "filepath": "Books/Books/The Mind Club.md",
+                "filename": "The Mind Club.md",
+                "title": "The Mind Club",
+                "snippet": "Mind is a matter of perception.",
+                "content": "Mind is a matter of perception.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.4,
+            },
+        ]
+
+        ranked = RetrievalSupervisor.rank_sources_for_query(
+            "Provide a point form summary of A Mind for Numbers",
+            docs,
+            max_results=5,
+        )
+
+        self.assertTrue(ranked[0]["_summary_focus_exact_match"])
+        self.assertTrue(ranked[0]["_summary_focus_title_match"])
+
     @patch('requests.post')
     def test_query_graph_drops_synthesis_summary_from_results(self, mock_post):
         mock_response = MagicMock()

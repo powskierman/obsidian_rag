@@ -651,6 +651,8 @@ class RetrievalSupervisor:
             doc["_relationship_explicit"] = bool(signals["explicit_relation"])
             doc["_generic_overview"] = bool(signals["generic_overview"])
             doc["_covers_all_anchors"] = bool(signals["covers_all_anchors"])
+            doc["_summary_focus_title_match"] = bool(signals["summary_focus_title_match"])
+            doc["_summary_focus_exact_match"] = bool(signals["summary_focus_exact_match"])
             ranked.append(doc)
 
         ranked.sort(
