@@ -1,9 +1,9 @@
 """
 Tests for the streamlined unified query mode surface.
 """
+import os
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, List
-import os
 
 import httpx
 import pytest
@@ -92,7 +92,12 @@ def _default_vector_routes() -> Dict[str, Callable[[Dict[str, Any]], FakeRespons
     }
 
 
-def _post_query(client: TestClient, mode: str, query: str = "nextion esp32") -> httpx.Response:
+def _post_query(
+    client: TestClient,
+    mode: str,
+    query: str = "nextion esp32",
+    **overrides: Any,
+) -> httpx.Response:
     payload = {
         "query": query,
         "mode": mode,
@@ -102,6 +107,7 @@ def _post_query(client: TestClient, mode: str, query: str = "nextion esp32") -> 
         "temperature": 0.2,
         "relevance_threshold": 12.5,
     }
+    payload.update(overrides)
     api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
     headers = {"X-API-Key": api_key} if api_key else None
     return client.post("/api/v1/query", json=payload, headers=headers)
@@ -154,6 +160,340 @@ def test_cascading_mode_uses_retriever(monkeypatch):
     assert data["mode"] == "cascading"
     assert data["results"]["answer"] == "cascading"
     assert captured[1]["max_results"] == 5
+
+
+@pytest.mark.integration
+def test_cascading_dedupes_by_canonical_identity_not_filename(monkeypatch):
+    class FakeRetriever:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def retrieve(self, query: str, max_results: int, entities: List[str], mem0_context: str):
+            return {
+                "query": query,
+                "stages": {
+                    "anchors": {
+                        "answer": "Anchor answer",
+                        "sources": [
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                                "relevance": 90.0,
+                                "snippet": "Primary note content.",
+                            },
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Archive/Ahrens-How to Take Smart Notes.md",
+                                "relevance": 84.0,
+                                "snippet": "Archived copy content.",
+                            },
+                        ],
+                    },
+                    "vectors": {},
+                    "diagnostics": {"pipeline": "staged", "stage_order": ["anchors"]},
+                },
+            }
+
+    async def _fake_synth(*_args, **_kwargs):
+        return "summary"
+
+    monkeypatch.setattr(api_gateway, "CascadingRetriever", FakeRetriever)
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer", _fake_synth)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "cascading", query="ahrens smart notes summary")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["sources"]) == 2
+    assert {source["filepath"] for source in data["sources"]} == {
+        "Books/Books/Ahrens-How to Take Smart Notes.md",
+        "Archive/Ahrens-How to Take Smart Notes.md",
+    }
+    assert data["metadata"]["diagnostics"]["pipeline"] == "staged"
+    assert data["metadata"]["diagnostics"]["stage_order"] == ["anchors"]
+
+
+@pytest.mark.integration
+def test_cascading_selects_minimal_evidence_for_single_note_summary(monkeypatch):
+    class FakeRetriever:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def retrieve(self, query: str, max_results: int, entities: List[str], mem0_context: str):
+            return {
+                "query": query,
+                "stages": {
+                    "anchors": {
+                        "answer": "Anchor answer",
+                        "sources": [
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                                "relevance": 90.0,
+                                "snippet": "Primary note content.",
+                            }
+                        ],
+                    },
+                    "vectors": {
+                        "documents": [[
+                            "Ahrens summary excerpt",
+                            "Oscilloscope guide excerpt",
+                            "Math note excerpt",
+                            "Rigol guide excerpt",
+                        ]],
+                        "metadatas": [[
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                            },
+                            {
+                                "filename": "MSO5000_users_guide.pdf",
+                                "filepath": "Tech/Electronics/Instruments/Oscilloscopes/media/MSO5000_users_guide.pdf",
+                            },
+                            {
+                                "filename": "ASAP.md",
+                                "filepath": "Math/ASAP.md",
+                            },
+                            {
+                                "filename": "Rigol DS1000Z UserGuide.pdf",
+                                "filepath": "Tech/Electronics/Instruments/Oscilloscopes/media/Rigol DS1000Z UserGuide.pdf",
+                            },
+                        ]],
+                        "distances": [[-0.4, -0.35, -0.3, -0.25]],
+                    },
+                },
+            }
+
+    async def _fake_synth(*_args, **_kwargs):
+        return "summary"
+
+    monkeypatch.setattr(api_gateway, "CascadingRetriever", FakeRetriever)
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer", _fake_synth)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "cascading", query="summary of Ahrens-How to Take Smart Notes")
+
+    assert response.status_code == 200
+    data = response.json()
+    filenames = {source["filename"] for source in data["sources"]}
+    assert "Ahrens-How to Take Smart Notes.md" in filenames
+    assert "MSO5000_users_guide.pdf" not in filenames
+    assert "ASAP.md" not in filenames
+    assert "Rigol DS1000Z UserGuide.pdf" not in filenames
+    assert data["metadata"]["evidence"]["selected_source_count"] <= data["metadata"]["evidence"]["candidate_source_count"]
+    assert data["results"]["used_documents"] == data["sources"]
+
+
+@pytest.mark.integration
+def test_cascading_structured_synthesis_aligns_final_sources_to_used_documents(monkeypatch):
+    class FakeRetriever:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def retrieve(self, query: str, max_results: int, entities: List[str], mem0_context: str):
+            return {
+                "query": query,
+                "stages": {
+                    "anchors": {
+                        "answer": "Anchor answer",
+                        "sources": [
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                                "relevance": 90.0,
+                                "snippet": "Primary note content.",
+                            }
+                        ],
+                    },
+                    "vectors": {
+                        "documents": [[
+                            "Ahrens summary excerpt",
+                            "Supporting note excerpt",
+                        ]],
+                        "metadatas": [[
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                            },
+                            {
+                                "filename": "Related Writing Workflow.md",
+                                "filepath": "Books/Writing/Related Writing Workflow.md",
+                            },
+                        ]],
+                        "distances": [[-0.4, -0.32]],
+                    },
+                },
+            }
+
+    async def _fake_synth(*_args, **_kwargs):
+        return {
+            "answer": "Structured summary",
+            "citations": ["[[Books/Books/Ahrens-How to Take Smart Notes.md]]"],
+            "used_documents": [
+                {
+                    "filename": "Ahrens-How to Take Smart Notes.md",
+                    "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                    "relevance": 90.0,
+                    "snippet": "Primary note content.",
+                    "source_type": "anchor",
+                }
+            ],
+        }
+
+    monkeypatch.setattr(api_gateway, "CascadingRetriever", FakeRetriever)
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer", _fake_synth)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "cascading", query="summary of Ahrens-How to Take Smart Notes")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["answer"] == "Structured summary"
+    assert data["results"]["citations"] == ["[[Books/Books/Ahrens-How to Take Smart Notes.md]]"]
+    assert len(data["sources"]) == 1
+    assert data["sources"][0]["filepath"] == "Books/Books/Ahrens-How to Take Smart Notes.md"
+    assert data["results"]["used_documents"] == data["sources"]
+
+
+@pytest.mark.integration
+def test_cascading_preserves_anchor_answer_when_synthesis_degrades(monkeypatch):
+    class FakeRetriever:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def retrieve(self, query: str, max_results: int, entities: List[str], mem0_context: str):
+            return {
+                "query": query,
+                "stages": {
+                    "anchors": {
+                        "answer": "Anchor answer that should be preserved.",
+                        "sources": [
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                                "relevance": 90.0,
+                                "snippet": "Primary note content.",
+                            }
+                        ],
+                    },
+                    "vectors": {},
+                    "diagnostics": {"pipeline": "staged", "failures": {}},
+                },
+            }
+
+    async def _fake_synth(*_args, **_kwargs):
+        return {
+            "answer": "Found 1 matching snippets in your vault. (LLM synthesis skipped: unknown provider 'anthropic')",
+            "citations": [],
+            "used_documents": [
+                {
+                    "filename": "Ahrens-How to Take Smart Notes.md",
+                    "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                    "relevance": 90.0,
+                    "snippet": "Primary note content.",
+                    "source_type": "anchor",
+                }
+            ],
+            "fallback_reason": "unknown_provider",
+        }
+
+    monkeypatch.setattr(api_gateway, "CascadingRetriever", FakeRetriever)
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer", _fake_synth)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "cascading", query="summary of Ahrens-How to Take Smart Notes")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["answer"].startswith("Anchor answer that should be preserved.")
+    assert "preserved anchor answer" in " ".join(data["metadata"]["warnings"]).lower()
+    assert data["results"]["synthesis_fallback_reason"] == "unknown_provider"
+
+
+@pytest.mark.integration
+def test_cascading_surfaces_degraded_stage_warning_in_metadata(monkeypatch):
+    class FakeRetriever:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def retrieve(self, query: str, max_results: int, entities: List[str], mem0_context: str):
+            return {
+                "query": query,
+                "stages": {
+                    "anchors": {
+                        "answer": "",
+                        "sources": [
+                            {
+                                "filename": "Ahrens-How to Take Smart Notes.md",
+                                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                                "relevance": 90.0,
+                                "snippet": "Primary note content.",
+                            }
+                        ],
+                    },
+                    "vectors": {},
+                    "diagnostics": {
+                        "pipeline": "staged",
+                        "failures": {"expansion": {"error": "TimeoutError", "message": "timed out"}},
+                    },
+                },
+            }
+
+    async def _fake_synth(*_args, **_kwargs):
+        return {
+            "answer": "Partial summary",
+            "citations": ["[[Books/Books/Ahrens-How to Take Smart Notes.md]]"],
+            "used_documents": [
+                {
+                    "filename": "Ahrens-How to Take Smart Notes.md",
+                    "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                    "relevance": 90.0,
+                    "snippet": "Primary note content.",
+                    "source_type": "anchor",
+                }
+            ],
+        }
+
+    monkeypatch.setattr(api_gateway, "CascadingRetriever", FakeRetriever)
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer", _fake_synth)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "cascading", query="summary of Ahrens-How to Take Smart Notes")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert any("partial evidence" in warning.lower() for warning in data["metadata"]["warnings"])
+
+
+@pytest.mark.integration
+def test_cascading_characterizes_tag_filters_dropped_before_retriever(monkeypatch):
+    captured: List[Dict[str, Any]] = []
+
+    class FakeRetriever:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def retrieve(self, query: str, max_results: int, entities: List[str], mem0_context: str, **kwargs):
+            captured.append(
+                {
+                    "query": query,
+                    "max_results": max_results,
+                    "entities": entities,
+                    "mem0_context": mem0_context,
+                    "kwargs": kwargs,
+                }
+            )
+            return {"answer": "cascading", "sources": [], "query": query, "max_results": max_results}
+
+    monkeypatch.setattr(api_gateway, "CascadingRetriever", FakeRetriever)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "cascading", query="ahrens tag:book-notes")
+
+    assert response.status_code == 200
+    assert captured[0]["query"] == "ahrens"
+    assert "filters" not in captured[0]["kwargs"]
 
 
 @pytest.mark.integration

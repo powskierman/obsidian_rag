@@ -1,4 +1,6 @@
+import os
 import re
+from typing import Any, Mapping
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 _TRACKING_QUERY_KEYS = {
@@ -64,3 +66,87 @@ def canonicalize_web_url(value: str) -> str:
 
     query = urlencode(filtered_query, doseq=True)
     return urlunsplit((scheme, netloc, path, query, ""))
+
+
+def is_web_locator(value: Any) -> bool:
+    raw = str(value or "").strip().lower()
+    return raw.startswith("http://") or raw.startswith("https://")
+
+
+def extract_source_locator(value: Any) -> str:
+    if isinstance(value, Mapping):
+        for key in ("filepath", "url", "source", "filename", "title"):
+            candidate = str(value.get(key) or "").strip()
+            if candidate:
+                return candidate
+        return ""
+    return str(value or "").strip()
+
+
+def infer_source_category(value: Any, default: str = "vault") -> str:
+    if isinstance(value, Mapping):
+        category = str(value.get("source_category") or value.get("type") or "").strip().lower()
+        if category in {"vault", "web"}:
+            return category
+        if category == "note":
+            return "vault"
+        if category in {"url", "website", "webpage"}:
+            return "web"
+    locator = extract_source_locator(value)
+    if is_web_locator(locator):
+        return "web"
+    return "vault" if default not in {"vault", "web"} else default
+
+
+def canonicalize_source_locator(value: Any, default_category: str = "vault") -> tuple[str, str]:
+    category = infer_source_category(value, default=default_category)
+    locator = extract_source_locator(value)
+
+    if category == "web":
+        candidate = locator
+        if isinstance(value, Mapping):
+            candidate = str(value.get("canonical_url") or locator).strip()
+        canonical = canonicalize_web_url(candidate) or candidate
+        return "web", canonical
+
+    normalized = normalize_vault_path(locator)
+    return "vault", normalized
+
+
+def canonical_source_identity(value: Any, default_category: str = "vault") -> tuple[str, str]:
+    category, locator = canonicalize_source_locator(value, default_category=default_category)
+    return category, locator.lower()
+
+
+def canonical_source_display_name(value: Any, default_category: str = "vault") -> str:
+    if isinstance(value, Mapping):
+        explicit = str(value.get("filename") or value.get("title") or "").strip()
+        if explicit:
+            return explicit
+    category, locator = canonicalize_source_locator(value, default_category=default_category)
+    if not locator:
+        return "Unknown"
+    if category == "web":
+        return locator
+    return os.path.basename(locator) or locator
+
+
+def normalize_source_record(value: Mapping[str, Any], default_category: str = "vault") -> dict[str, Any]:
+    category, locator = canonicalize_source_locator(value, default_category=default_category)
+    normalized = dict(value)
+    normalized["source_category"] = category
+    normalized["canonical_locator"] = locator
+
+    if category == "web":
+        normalized["canonical_url"] = locator
+        normalized["url"] = locator
+        normalized["filepath"] = locator
+        if not str(normalized.get("filename") or "").strip():
+            normalized["filename"] = locator
+    else:
+        normalized["filepath"] = locator
+        if not str(normalized.get("filename") or "").strip():
+            normalized["filename"] = os.path.basename(locator) or locator or "Unknown"
+
+    normalized["_source_identity"] = canonical_source_identity(normalized, default_category=default_category)
+    return normalized

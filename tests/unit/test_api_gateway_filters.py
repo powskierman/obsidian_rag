@@ -2,6 +2,7 @@
 Unit tests for API gateway relevance filtering helpers.
 """
 import pytest
+from deep_thinking.utils import universal_client
 
 from src.services import api_gateway
 
@@ -36,6 +37,140 @@ def test_filter_result_sources_threshold():
 
     assert len(filtered["sources"]) == 1
     assert filtered["sources"][0]["relevance"] == 50
+
+
+@pytest.mark.unit
+def test_source_path_key_distinguishes_duplicate_basenames_across_folders():
+    first = {
+        "filename": "Ahrens-How to Take Smart Notes.md",
+        "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+    }
+    second = {
+        "filename": "Ahrens-How to Take Smart Notes.md",
+        "filepath": "Archive/Ahrens-How to Take Smart Notes.md",
+    }
+
+    assert api_gateway._source_path_key(first) != api_gateway._source_path_key(second)
+    assert api_gateway._source_basename(first) == api_gateway._source_basename(second)
+
+
+@pytest.mark.unit
+def test_normalize_vector_sources_uses_file_path_when_present():
+    result = {
+        "sources": [
+            {
+                "filename": "Ahrens-How to Take Smart Notes.md",
+                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                "relevance": 90.0,
+                "snippet": "Primary note content.",
+            },
+            {
+                "filename": "Ahrens-How to Take Smart Notes.md",
+                "filepath": "Archive/Ahrens-How to Take Smart Notes.md",
+                "relevance": 84.0,
+                "snippet": "Archived copy content.",
+            },
+        ]
+    }
+
+    normalized = api_gateway._normalize_vector_sources(result)
+
+    assert [item["filepath"] for item in normalized] == [
+        "Books/Books/Ahrens-How to Take Smart Notes.md",
+        "Archive/Ahrens-How to Take Smart Notes.md",
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_uses_unified_provider_stack(monkeypatch):
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, provider: str = "claude", api_key=None):
+            captured["provider"] = provider
+            captured["api_key"] = api_key
+            self.messages = self
+
+        def create(self, **kwargs):
+            captured["create_kwargs"] = kwargs
+            return universal_client.UniversalMessage(
+                '{"answer":"Structured summary","citations":["[[Books/Books/Ahrens-How to Take Smart Notes.md]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "summary of Ahrens-How to Take Smart Notes",
+        [
+            {
+                "filename": "Ahrens-How to Take Smart Notes.md",
+                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                "relevance": 90.0,
+                "snippet": "Primary note content.",
+                "source_category": "vault",
+            }
+        ],
+        "anthropic",
+        "claude-3-5-sonnet",
+    )
+
+    assert captured["provider"] == "claude"
+    assert captured["create_kwargs"]["response_format"] == {"type": "json_object"}
+    assert result["answer"] == "Structured summary"
+    assert result["citations"] == ["[[Books/Books/Ahrens-How to Take Smart Notes.md]]"]
+    assert len(result["used_documents"]) == 1
+    assert result["used_documents"][0]["filepath"] == "Books/Books/Ahrens-How to Take Smart Notes.md"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_retries_with_reduced_evidence(monkeypatch):
+    responses = [
+        universal_client.UniversalMessage('{"answer":"Found 2 matching snippets in your vault.","citations":[]}'),
+        universal_client.UniversalMessage(
+            '{"answer":"Reduced-evidence summary","citations":["[[Books/Books/Ahrens-How to Take Smart Notes.md]]"]}'
+        ),
+    ]
+    captured_messages = []
+
+    class FakeClient:
+        def __init__(self, provider: str = "claude", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            captured_messages.append(kwargs["messages"][0]["content"])
+            return responses.pop(0)
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "summary of Ahrens-How to Take Smart Notes",
+        [
+            {
+                "filename": "Ahrens-How to Take Smart Notes.md",
+                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                "relevance": 90.0,
+                "snippet": "Primary note content.",
+                "source_category": "vault",
+            },
+            {
+                "filename": "Related Writing Workflow.md",
+                "filepath": "Books/Writing/Related Writing Workflow.md",
+                "relevance": 65.0,
+                "snippet": "Supporting note content.",
+                "source_category": "vault",
+            },
+        ],
+        "anthropic",
+        "claude-3-5-sonnet",
+    )
+
+    assert len(captured_messages) == 2
+    assert result["answer"] == "Reduced-evidence summary"
+    assert result["fallback_reason"] == "retry_reduced_evidence"
+    assert len(result["used_documents"]) == 1
+    assert result["used_documents"][0]["filepath"] == "Books/Books/Ahrens-How to Take Smart Notes.md"
 
 
 @pytest.mark.unit

@@ -9,11 +9,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 # Mock the get_memory_manager function instead of patching the module
 import src.utils.memory_manager
+import utils.memory_manager
 from unittest.mock import patch, MagicMock
 
 mock_manager = MagicMock()
 mock_manager.search_memory.return_value = "Mocked memory context"
 src.utils.memory_manager.get_memory_manager = MagicMock(return_value=mock_manager)
+utils.memory_manager.get_memory_manager = MagicMock(return_value=mock_manager)
 
 from services.api_gateway import app, CascadingRetriever
 from fastapi.testclient import TestClient
@@ -80,42 +82,84 @@ def test_cascading_retriever_payloads(mock_post):
 
     print("✅ CascadingRetriever payloads pass entities and mem0_context correctly.")
 
+
+@patch('httpx.AsyncClient.post', new_callable=AsyncMock)
+def test_cascading_retriever_characterizes_stage3_context_drop(mock_post):
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = {}
+    mock_post.return_value = mock_resp
+
+    retriever = CascadingRetriever(
+        embed_url="http://embed",
+        graph_url="http://graph",
+        lightrag_url="http://lightrag",
+        llm_provider="test_llm"
+    )
+
+    async def run_retrieve():
+        return await retriever.retrieve(
+            "test query",
+            max_results=5,
+            entities=["test", "query"],
+            mem0_context="test mem0 context"
+        )
+
+    asyncio.run(run_retrieve())
+
+    vector_calls = [
+        call.kwargs.get('json') or call.args[1]
+        for call in mock_post.call_args_list
+        if call.args and call.args[0] == "http://embed/query"
+    ]
+
+    assert len(vector_calls) >= 2
+    initial_payload = next(payload for payload in vector_calls if "entities" in payload)
+    assert initial_payload["entities"] == ["test", "query"]
+    assert initial_payload["mem0_context"] == "test mem0 context"
+    for payload in vector_calls:
+        if payload is initial_payload:
+            continue
+        assert "entities" not in payload
+        assert "mem0_context" not in payload
+
 @patch('services.api_gateway._post_json', new_callable=AsyncMock)
-def test_unified_search_payloads(mock_post_json):
+def test_unified_query_vector_payloads(mock_post_json):
     # Setup mock
     mock_resp = MagicMock()
     mock_resp.status_code = 200
     mock_resp.json.return_value = {}
     mock_post_json.return_value = mock_resp
 
-    # Test notes mode
-    response = client.post("/api/v1/search", json={
-        "query": "find medical notes",
-        "mode": "notes",
-        "llm_knowledge": True
+    response = client.post("/api/v1/query", json={
+        "query": "find medical notes tag:drug",
+        "mode": "vector",
+        "llm_knowledge": True,
+        "max_results": 5,
+        "relevance_threshold": 0,
     })
-    
+
     if response.status_code != 200:
         raise AssertionError(f"Expected 200, got {response.status_code}: {response.text}")
-    
+
     # Check what was passed to _post_json
     if mock_post_json.call_count < 1:
         raise AssertionError(f"mock_post_json was not called! Call count is {mock_post_json.call_count}")
     call_args = mock_post_json.call_args_list[0]
     payload = call_args[0][2] # args[2] is the payload usually
-    
-    assert 'entities' in payload
-    assert 'mem0_context' in payload
-    assert payload['mem0_context'].startswith("Mocked memory context")
 
-    print("✅ API Gateway /api/v1/search forwards entities and mem0_context to JSON payloads correctly.")
+    assert payload["query"] == "find medical notes"
+    assert payload["filters"] == {"tags": ["drug"]}
+    assert payload["n_results"] == 5
+
+    print("✅ API Gateway /api/v1/query vector payload forwards cleaned query and filters correctly.")
 
 if __name__ == "__main__":
     print("Running Tests...\n")
     try:
         test_extract_query_context()
         test_cascading_retriever_payloads()
-        test_unified_search_payloads()
+        test_unified_query_vector_payloads()
         print("\n🎉 All tests passed successfully!")
     except AssertionError as e:
         print(f"\n❌ Test failed: {e}")

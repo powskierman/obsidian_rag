@@ -704,6 +704,7 @@ Return ONLY a JSON object:
         if authoritative_documents:
             state["_selected_evidence_documents"] = authoritative_documents
         relationship_mode = bool(query_profile["is_relationship"])
+        summary_mode = bool(query_profile.get("is_summary_request"))
 
         if relationship_mode:
             attempt_queue: List[Dict[str, Any]] = [{
@@ -838,8 +839,22 @@ Return ONLY a JSON object:
         """
 
         relationship_instruction = ""
+        summary_instruction = ""
+        prompt_task = "Generate a comprehensive answer that:"
         web_instruction = """
         5. You MUST include a separate "## Web Findings" section if any web search results are provided. Use this section to explain standard definitions, methodologies, or external context found in the web results.
+        """
+        if summary_mode:
+            prompt_task = "Generate a concise point-form summary that:"
+            web_instruction = """
+        5. If web search results are provided, use them only when the user explicitly asked for outside context or review material. Do NOT add a separate "Web Findings" section for a normal vault summary.
+        """
+            summary_instruction = """
+        12. This is a summary request.
+            - Answer as concise bullet points.
+            - Focus on the main ideas, methods, and memorable takeaways from the retrieved note(s).
+            - Do NOT add generic framing, introductions, or conclusions.
+            - Keep the citations array to the minimal vault note set actually used.
         """
         if relationship_mode:
             web_instruction = """
@@ -868,7 +883,7 @@ Return ONLY a JSON object:
         {web_docs}
         {images_section}
         
-        Generate a comprehensive answer that:
+        {prompt_task}
         1. Directly addresses the original question
         2. Synthesizes findings from all research steps. You MUST INTEGRATE information from the Vault Documents if any are provided. Do not ignore the user's personal vault notes.
         3. Cites vault sources using Obsidian link format ONLY: [[Folder/Note Name]]. Do NOT output Vault links as URLs (e.g. no "http://...md").
@@ -883,6 +898,7 @@ Return ONLY a JSON object:
         10. If the Web Search Results section is empty, your "citations" array should ONLY contain Vault Document names. Do not hallucinate websites.
         11. If the Web Search Results section is empty, you MUST NOT include a "Web Findings" section and you MUST NOT introduce external facts, datasheet details, or website titles that are not explicitly present in the Vault Documents.
         {comparison_instruction}
+        {summary_instruction}
         {relationship_instruction}
 
         Return ONLY a JSON object:
@@ -995,6 +1011,20 @@ Return ONLY a JSON object:
                 )
                 salvaged["used_documents"] = self._resolve_used_documents(salvaged.get("citations", []), authoritative_documents)
                 if not str(salvaged.get("answer") or "").strip():
+                    plain_text = self._salvage_plain_text_answer(content, has_web_docs)
+                    if plain_text:
+                        citations = self._normalize_citations(
+                            plain_text.get("citations", []),
+                            authoritative_documents,
+                            query_profile.get("anchor_entities"),
+                        )
+                        return {
+                            "answer": plain_text["answer"],
+                            "citations": citations,
+                            "confidence_score": plain_text["confidence_score"],
+                            "confidence_justification": plain_text["confidence_justification"],
+                            "used_documents": self._resolve_used_documents(citations, authoritative_documents),
+                        }
                     if not state.get("_synthesis_retry_performed"):
                         reduced_documents = self._retry_documents(authoritative_documents, query_profile)
                         if reduced_documents and reduced_documents != authoritative_documents:
@@ -1005,6 +1035,21 @@ Return ONLY a JSON object:
                     self._record_synthesis_failure(state, "empty_answer", content)
                     salvaged["answer"] = self._sanitize_answer(self._fallback_answer(state, content), has_web_docs)
                 return salvaged
+
+            plain_text = self._salvage_plain_text_answer(content, has_web_docs)
+            if plain_text:
+                citations = self._normalize_citations(
+                    plain_text.get("citations", []),
+                    authoritative_documents,
+                    query_profile.get("anchor_entities"),
+                )
+                return {
+                    "answer": plain_text["answer"],
+                    "citations": citations,
+                    "confidence_score": plain_text["confidence_score"],
+                    "confidence_justification": plain_text["confidence_justification"],
+                    "used_documents": self._resolve_used_documents(citations, authoritative_documents),
+                }
 
             # 5. Ultimate Fallback: Return raw content as the answer
             # This ensures the user gets *something* even if formatting failed
@@ -1165,6 +1210,52 @@ Return ONLY a JSON object:
                 "confidence_justification": confidence_justification or ""
             }
         return None
+
+    @staticmethod
+    def _salvage_plain_text_answer(raw: str, has_web_docs: bool) -> dict | None:
+        text = str(raw or "").strip()
+        if not text:
+            return None
+
+        fence_match = re.fullmatch(r"```(?:\w+)?\s*(.*?)\s*```", text, flags=re.DOTALL)
+        if fence_match:
+            text = fence_match.group(1).strip()
+
+        lowered = text.lower()
+        if any(
+            marker in lowered
+            for marker in (
+                "error generating answer",
+                "api error",
+                "no choices returned",
+                "empty response from openai",
+                "unsupported provider",
+                "no candidates returned",
+                "model returned unusable json",
+                "no response from model",
+            )
+        ):
+            return None
+
+        if text.lstrip().startswith(("{", "[")):
+            return None
+
+        if not re.search(r"[A-Za-z]", text):
+            return None
+
+        word_count = len(re.findall(r"\b\w+\b", text))
+        looks_structured = bool(re.search(r"(?m)^\s*(?:[-*•]|\d+\.)\s+\S", text)) or bool(
+            re.search(r"^\s*#{1,6}\s", text, flags=re.MULTILINE)
+        )
+        if word_count < 8 and not looks_structured:
+            return None
+
+        return {
+            "answer": FinalAnswerGenerator._sanitize_answer(text, has_web_docs),
+            "citations": FinalAnswerGenerator._extract_citations_from_text(text),
+            "confidence_score": 0.0,
+            "confidence_justification": "Model returned plain text instead of the required JSON format.",
+        }
 
     @staticmethod
     def _fallback_answer(state: RAGState, raw: str) -> str:

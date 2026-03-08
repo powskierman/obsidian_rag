@@ -152,6 +152,27 @@ def test_synthesizer_uses_openai_max_tokens_and_guardrails(monkeypatch):
 
 
 @pytest.mark.unit
+def test_synthesizer_uses_summary_specific_prompt_instructions():
+    response_text = (
+        "{\"answer\":\"- Main idea\\n- Key takeaway\",\"citations\":[],"
+        "\"confidence_score\":0.9,\"confidence_justification\":\"fine\"}"
+    )
+    client = FakeClient("openrouter", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    state = make_state()
+    state["original_question"] = "Provide a point form summary of A Mind for Numbers"
+
+    result = generator.generate(state)
+
+    prompt = client.messages.calls[0]["messages"][0]["content"]
+    assert result["answer"].startswith("- Main idea")
+    assert "Generate a concise point-form summary that:" in prompt
+    assert "Answer as concise bullet points." in prompt
+    assert "Do NOT add generic framing, introductions, or conclusions." in prompt
+
+
+@pytest.mark.unit
 def test_synthesizer_falls_back_when_answer_empty():
     response_text = "{\"answer\":\"\",\"citations\":[],\"confidence_score\":0.5}"
     client = FakeClient("chatgpt", response_text)
@@ -174,3 +195,39 @@ def test_synthesizer_uses_context_when_answer_empty():
 
     assert "showing retrieved context summary instead" in result["answer"].lower()
     assert "Found scan notes" in result["answer"]
+
+
+@pytest.mark.unit
+def test_synthesizer_salvages_plain_text_summary_when_json_missing():
+    response_text = (
+        "- Focused and diffuse modes matter.\n"
+        "- Practice and recall build durable understanding.\n"
+        "- Procrastination can be interrupted with small starts.\n"
+        "[[Books/Books/A Mind for Numbers.md]]"
+    )
+    client = FakeClient("openrouter", response_text)
+    generator = FinalAnswerGenerator(client)
+
+    state = make_state()
+    state["original_question"] = "Provide a point form summary of A Mind for Numbers"
+    state["retrieved_documents"] = [
+        {
+            "source": "Books/Books/A Mind for Numbers.md",
+            "filepath": "Books/Books/A Mind for Numbers.md",
+            "filename": "A Mind for Numbers.md",
+            "title": "A Mind for Numbers",
+            "snippet": "Focused and diffuse modes matter.",
+            "content": "Focused and diffuse modes matter.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "score": 0.9,
+        }
+    ]
+    state["accumulated_context"] = "Step 1: Retrieved 19 documents."
+
+    result = generator.generate(state)
+
+    assert result["answer"].startswith("- Focused and diffuse modes matter.")
+    assert "retrieved context summary instead" not in result["answer"].lower()
+    assert result["citations"] == ["[[Books/Books/A Mind for Numbers.md]]"]
+    assert result["confidence_justification"] == "Model returned plain text instead of the required JSON format."

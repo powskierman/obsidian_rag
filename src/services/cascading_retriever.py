@@ -1,10 +1,13 @@
-import asyncio
 import logging
 import os
 from typing import List, Dict, Any, Optional
 import httpx
-import math
 import re
+
+try:
+    from cascading_pipeline import distance_to_relevance
+except ImportError:
+    from src.services.cascading_pipeline import distance_to_relevance
 
 logger = logging.getLogger(__name__)
 
@@ -102,15 +105,80 @@ class CascadingRetriever:
         docs = vector_data.get("documents", [[]])[0]
         return bool(docs)
 
+    def _looks_like_single_note_summary_query(self, query: str) -> bool:
+        if not isinstance(query, str):
+            return False
+        lowered = query.strip().lower()
+        if not lowered:
+            return False
+        summary_markers = {
+            "summary",
+            "summarize",
+            "point form",
+            "point-form",
+            "bullet",
+            "bullets",
+            "notes on",
+        }
+        title_hints = (
+            ".md",
+            "book",
+            "chapter",
+            "how to take smart notes",
+        )
+        return any(marker in lowered for marker in summary_markers) and any(
+            hint in lowered for hint in title_hints
+        )
+
+    def _summarize_failure(self, exc: Exception) -> Dict[str, str]:
+        return {"error": exc.__class__.__name__, "message": str(exc)}
+
+    async def _post_stage(
+        self,
+        client: httpx.AsyncClient,
+        stage_name: str,
+        url: str,
+        payload: Dict[str, Any],
+        timeout: float,
+    ) -> Dict[str, Any]:
+        stage_info: Dict[str, Any] = {
+            "name": stage_name,
+            "url": url,
+            "payload": payload,
+            "status": "pending",
+        }
+        try:
+            response = await client.post(
+                url,
+                json=payload,
+                timeout=timeout,
+                headers=self._service_headers(),
+            )
+            stage_info["http_status"] = response.status_code
+            if response.status_code == 200:
+                stage_info["status"] = "ok"
+                stage_info["data"] = response.json()
+            else:
+                stage_info["status"] = "http_error"
+                stage_info["data"] = {}
+        except Exception as exc:
+            stage_info["status"] = "exception"
+            stage_info["data"] = {}
+            stage_info["error"] = self._summarize_failure(exc)
+        return stage_info
+
     async def retrieve(self, query: str, max_results: int = 10, entities: Optional[List[str]] = None, mem0_context: str = "") -> Dict[str, Any]:
         """
-        Orchestrates the 5-stage retrieval pipeline using asyncio.gather for parallelization.
+        Orchestrates the staged retrieval pipeline with explicit stage diagnostics.
         """
-        stages = {}
+        stage_debug: Dict[str, Any] = {
+            "pipeline": "staged",
+            "summary_short_circuit": False,
+            "stage_order": [],
+            "statuses": {},
+            "failures": {},
+        }
         async with httpx.AsyncClient() as client:
-            # --- STAGE 1, 2, 3: Anchor + Expand in parallel ---
-            logger.info(f"Cascading Stage 1-3: Parallel execution of Anchor/Expand queries for '{query}'")
-            
             notes_payload = {
                 "query": query,
                 "mode": "graph",
@@ -131,36 +199,45 @@ class CascadingRetriever:
                 "mem0_context": mem0_context,
             }
             lr_payload = {"query": query, "mode": "hybrid"}
-            
-            tasks = [
-                client.post(f"{self.graph_url}/query", json=notes_payload, timeout=30.0, headers=self._service_headers()),
-                client.post(f"{self.embed_url}/query", json=vec_payload, timeout=30.0, headers=self._service_headers()),
-                client.post(f"{self.lightrag_url}/query", json=lr_payload, timeout=60.0, headers=self._service_headers())
-            ]
-            responses = await asyncio.gather(*tasks, return_exceptions=True)
 
-            notes_resp = responses[0] if not isinstance(responses[0], Exception) else None
-            vec_resp = responses[1] if not isinstance(responses[1], Exception) else None
-            lr_resp = responses[2] if not isinstance(responses[2], Exception) else None
-
-            # Process Notes (Graph)
-            notes_data = notes_resp.json() if notes_resp and notes_resp.status_code == 200 else {}
+            logger.info("Cascading Stage 1: Anchor retrieval for '%s'", query)
+            stage_debug["stage_order"].append("anchors")
+            anchor_stage = await self._post_stage(
+                client,
+                "anchors",
+                f"{self.graph_url}/query",
+                notes_payload,
+                30.0,
+            )
+            stage_debug["statuses"]["anchors"] = anchor_stage["status"]
+            if anchor_stage["status"] == "exception":
+                stage_debug["failures"]["anchors"] = anchor_stage.get("error", {})
+            notes_data = anchor_stage.get("data", {})
             anchors = []
             if isinstance(notes_data, dict):
                 anchors = notes_data.get("sources", []) or []
 
-            # Fallback to Base Vector if no Graph Anchors
-            if not anchors and vec_resp and vec_resp.status_code == 200:
-                vec_data = vec_resp.json()
+            logger.info("Cascading Stage 1b: Anchor fallback vector for '%s'", query)
+            fallback_stage = None
+            if not anchors:
+                stage_debug["stage_order"].append("anchor_fallback_vector")
+                fallback_stage = await self._post_stage(
+                    client,
+                    "anchor_fallback_vector",
+                    f"{self.embed_url}/query",
+                    vec_payload,
+                    30.0,
+                )
+                stage_debug["statuses"]["anchor_fallback_vector"] = fallback_stage["status"]
+                if fallback_stage["status"] == "exception":
+                    stage_debug["failures"]["anchor_fallback_vector"] = fallback_stage.get("error", {})
+                vec_data = fallback_stage.get("data", {})
                 if self._vector_has_docs(vec_data):
                     docs = vec_data.get("documents", [[]])[0]
                     metas = vec_data.get("metadatas", [[]])[0]
                     dists = vec_data.get("distances", [[]])[0]
                     for doc, meta, dist in zip(docs, metas, dists):
-                        try:
-                            relevance = max(0.0, (1.0 - (dist / 2.0)) * 100.0)
-                        except Exception:
-                            relevance = 50.0
+                        relevance = distance_to_relevance(dist, default=50.0)
                         anchors.append({
                             "filename": meta.get("filename", "unknown"),
                             "filepath": meta.get("filepath", "unknown"),
@@ -175,16 +252,31 @@ class CascadingRetriever:
             if not extracted_entities:
                 extracted_entities = self._extract_terms(query)
 
-            # Process Semantic Expansion (LightRAG)
             expanded_context = {}
             expansion_terms = set()
             expansion_query = query
-            if lr_resp and lr_resp.status_code == 200:
-                expanded_context = lr_resp.json()
+            should_expand = not anchors or not self._looks_like_single_note_summary_query(query)
+            if should_expand:
+                logger.info("Cascading Stage 2: Expansion retrieval for '%s'", query)
+                stage_debug["stage_order"].append("expansion")
+                expansion_stage = await self._post_stage(
+                    client,
+                    "expansion",
+                    f"{self.lightrag_url}/query",
+                    lr_payload,
+                    60.0,
+                )
+                stage_debug["statuses"]["expansion"] = expansion_stage["status"]
+                if expansion_stage["status"] == "exception":
+                    stage_debug["failures"]["expansion"] = expansion_stage.get("error", {})
+                expanded_context = expansion_stage.get("data", {})
                 expanded_text = ""
                 if isinstance(expanded_context, dict):
                     expanded_text = expanded_context.get("result") or expanded_context.get("answer") or ""
                 expansion_terms = self._extract_terms(expanded_text)
+            else:
+                stage_debug["summary_short_circuit"] = True
+                stage_debug["statuses"]["expansion"] = "skipped_summary_short_circuit"
 
             # Stage 3: Context-Aware Vector Search
             combined_terms = []
@@ -194,9 +286,10 @@ class CascadingRetriever:
             combined_terms = combined_terms[:12]
             enhanced_query = query if not combined_terms else f"{query} " + " ".join(combined_terms)
 
-            logger.info(f"Stage 3: Vector Search with raw query, fallback to enhanced query if needed")
+            logger.info("Cascading Stage 3: Vector Search for '%s'", query)
             vector_chunks = {}
             vector_query = None
+            attempted_vector_queries: List[Dict[str, Any]] = []
             try:
                 query_candidates = [query]
                 if enhanced_query != query:
@@ -211,13 +304,21 @@ class CascadingRetriever:
                             "relevance_threshold": threshold,
                             "expand_query": candidate == query,
                         }
-                        vec_resp_final = await client.post(
-                            f"{self.embed_url}/query",
-                            json=vec_payload_final,
-                            timeout=30.0,
-                            headers=self._service_headers(),
+                        attempted_vector_queries.append(
+                            {"query": candidate, "relevance_threshold": threshold}
                         )
-                        vector_chunks = vec_resp_final.json() if vec_resp_final.status_code == 200 else {}
+                        vector_stage = await self._post_stage(
+                            client,
+                            "targeted_vector",
+                            f"{self.embed_url}/query",
+                            vec_payload_final,
+                            30.0,
+                        )
+                        stage_debug["stage_order"].append("targeted_vector")
+                        stage_debug["statuses"]["targeted_vector"] = vector_stage["status"]
+                        if vector_stage["status"] == "exception":
+                            stage_debug["failures"]["targeted_vector"] = vector_stage.get("error", {})
+                        vector_chunks = vector_stage.get("data", {})
                         if self._vector_has_docs(vector_chunks):
                             vector_query = candidate
                             break
@@ -227,6 +328,8 @@ class CascadingRetriever:
                 logger.error(f"Stage 3 vector fail: {e}")
                 vector_chunks = {}
                 vector_query = None
+                stage_debug["statuses"]["targeted_vector"] = "exception"
+                stage_debug["failures"]["targeted_vector"] = self._summarize_failure(e)
 
             # Stage 4: Synthesis package
             return {
@@ -247,6 +350,12 @@ class CascadingRetriever:
                     "vectors": vector_chunks,
                     "vector_query": vector_query,
                     "enhanced_query": enhanced_query,
+                    "diagnostics": {
+                        **stage_debug,
+                        "attempted_vector_queries": attempted_vector_queries,
+                        "anchor_count": len(anchors),
+                        "entity_count": len(extracted_entities),
+                    },
                 },
                 # We return raw data, the API gateway or UI can choose to synthesize it via LLM
                 # Or we can do it here if we had an LLM client.
