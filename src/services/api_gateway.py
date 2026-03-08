@@ -11,6 +11,7 @@ import time
 import sys
 import inspect
 from collections import OrderedDict
+from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,6 +50,7 @@ try:
     from deep_thinking.source_utils import (
         canonical_source_identity,
         normalize_source_record,
+        normalize_vault_path,
     )
 except ImportError:
     base_path = os.path.dirname(
@@ -58,6 +60,7 @@ except ImportError:
     from deep_thinking.source_utils import (
         canonical_source_identity,
         normalize_source_record,
+        normalize_vault_path,
     )
 
 
@@ -92,6 +95,272 @@ _LAST_MLX_RECOVERY_TS = 0.0
 
 def _project_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _vault_root() -> Path:
+    return Path(os.getenv("OBSIDIAN_VAULT_PATH", "/app/vault")).expanduser().resolve()
+
+
+def _normalize_summary_focus_text(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    text = os.path.splitext(os.path.basename(text.replace("\\", "/")))[0]
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return " ".join(text.split())
+
+
+def _summary_query_targets_source(query: str, source: Dict[str, Any]) -> bool:
+    normalized_query = _normalize_summary_focus_text(query)
+    if not normalized_query:
+        return False
+
+    candidates = [
+        source.get("filename"),
+        source.get("filepath"),
+        source.get("canonical_id"),
+    ]
+    for candidate in candidates:
+        normalized_candidate = _normalize_summary_focus_text(candidate)
+        if normalized_candidate and normalized_candidate in normalized_query:
+            return True
+    return False
+
+
+def _resolve_vault_source_path(source: Dict[str, Any]) -> Optional[Path]:
+    raw_path = normalize_vault_path(source.get("filepath") or source.get("source") or "")
+    if not raw_path:
+        return None
+
+    vault_root = _vault_root()
+    try:
+        resolved = (vault_root / raw_path).resolve()
+        resolved.relative_to(vault_root)
+    except Exception:
+        return None
+
+    return resolved if resolved.is_file() else None
+
+
+def _expand_summary_sources_for_synthesis(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    try:
+        expansion_limit = max(
+            1000,
+            int(os.getenv("VECTOR_SUMMARY_SOURCE_EXPANSION_CHARS", "12000")),
+        )
+    except (TypeError, ValueError):
+        expansion_limit = 12000
+
+    expanded_sources: List[Dict[str, Any]] = []
+    for source in sources or []:
+        prepared = dict(source)
+        if not _summary_query_targets_source(query, prepared):
+            expanded_sources.append(prepared)
+            continue
+
+        resolved = _resolve_vault_source_path(prepared)
+        if not resolved or resolved.suffix.lower() not in {".md", ".txt"}:
+            expanded_sources.append(prepared)
+            continue
+
+        try:
+            with resolved.open("r", encoding="utf-8", errors="ignore") as handle:
+                content = handle.read(expansion_limit).strip()
+        except OSError:
+            expanded_sources.append(prepared)
+            continue
+
+        if content and len(content) > len(str(prepared.get("snippet") or "")):
+            prepared["snippet"] = content
+            prepared["content"] = content
+            prepared["is_full_content"] = True
+
+        expanded_sources.append(prepared)
+
+    return expanded_sources
+
+
+def _should_expand_named_sources_for_synthesis(query: str, sources: List[Dict[str, Any]]) -> bool:
+    tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{1,}", str(query or ""))
+    if not tokens or len(tokens) > 4:
+        return False
+    return any(_summary_query_targets_source(query, source) for source in (sources or []) if isinstance(source, dict))
+
+
+def _prepare_vector_sources_for_synthesis(
+    query: str,
+    sources: List[Dict[str, Any]],
+    *,
+    expand_named_sources: bool = False,
+) -> List[Dict[str, Any]]:
+    prepared_sources = list(sources or [])
+    if expand_named_sources:
+        prepared_sources = _expand_summary_sources_for_synthesis(query, prepared_sources)
+
+    try:
+        snippet_limit = max(
+            400,
+            int(os.getenv("VECTOR_SYNTHESIS_SNIPPET_CHARS", "1800")),
+        )
+    except (TypeError, ValueError):
+        snippet_limit = 1800
+
+    cleaned_sources: List[Dict[str, Any]] = []
+    for source in prepared_sources:
+        prepared = dict(source)
+        raw_text = str(prepared.get("content") or prepared.get("snippet") or "")
+        cleaned = _clean_extractive_fallback_text(raw_text)
+        if cleaned:
+            prepared["snippet"] = cleaned[:snippet_limit].rstrip() + ("..." if len(cleaned) > snippet_limit else "")
+            prepared["content"] = cleaned
+        cleaned_sources.append(prepared)
+    return cleaned_sources
+
+
+def _summary_display_sources(sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    preview_limit = 1200
+    display_sources: List[Dict[str, Any]] = []
+    for source in sources or []:
+        prepared = dict(source)
+        snippet = str(prepared.get("snippet") or "").strip()
+        if len(snippet) > preview_limit:
+            prepared["snippet"] = snippet[:preview_limit].rstrip() + "..."
+        display_sources.append(prepared)
+    return display_sources
+
+
+def _clean_extractive_fallback_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+
+    text = re.sub(r"^---\s*.*?\s*---\s*", "", text, flags=re.DOTALL)
+    notes_match = re.search(
+        r"(?ims)^#{1,6}\s+notes\s*$([\s\S]*?)(?=^#{1,6}\s+(related notes|questions|to-do|smart connections insights)\s*$|\Z)",
+        text,
+    )
+    if notes_match:
+        text = notes_match.group(1).strip()
+    text = re.sub(r"(?:\[[^\]]+:\s[^\]]+\]\s*)+", "", text)
+    text = re.sub(r"<mark[^>]*>", "", text, flags=re.IGNORECASE)
+    text = text.replace("</mark>", "")
+    text = text.replace("==", "")
+    text = re.sub(r"!\[[^\]]*\]\([^)]+\)", " ", text)
+    text = re.sub(r"\[\[([^\]]+)\]\]", r"\1", text)
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
+    text = re.sub(r"^#{1,6}\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*[-*+]\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*\d+\.\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _extractive_fallback_candidates(text: str) -> List[str]:
+    cleaned = _clean_extractive_fallback_text(text)
+    if not cleaned:
+        return []
+
+    fragments = re.split(r"(?<=[.!?])\s+", cleaned)
+    candidates: List[str] = []
+    for fragment in fragments:
+        candidate = fragment.strip(" -\n\t")
+        if len(candidate) < 35:
+            continue
+        if len(candidate) > 320:
+            continue
+        lowered = candidate.lower()
+        if lowered.startswith(("source:", "date:", "canonical id:", "entity type:", "timeline date:", "tags:")):
+            continue
+        if lowered.startswith(("main idea", "references", "related notes", "questions / ideas for further exploration", "to-do", "smart connections insights")):
+            continue
+        if "mermaid" in lowered or "xychart-beta" in lowered:
+            continue
+        if candidate.count(":") >= 2 and len(candidate.split()) < 18:
+            continue
+        if candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
+
+
+def _load_vector_fallback_source_text(query: str, source: Dict[str, Any]) -> str:
+    base_text = str(source.get("content") or source.get("snippet") or "")
+    resolved = _resolve_vault_source_path(source)
+    if not resolved or resolved.suffix.lower() not in {".md", ".txt"}:
+        return base_text
+
+    try:
+        expansion_limit = max(
+            500,
+            int(os.getenv("VECTOR_FALLBACK_SOURCE_EXPANSION_CHARS", "4000")),
+        )
+    except (TypeError, ValueError):
+        expansion_limit = 4000
+
+    try:
+        with resolved.open("r", encoding="utf-8", errors="ignore") as handle:
+            content = handle.read(expansion_limit).strip()
+    except OSError:
+        return base_text
+
+    if not content:
+        return base_text
+
+    normalized_query = _normalize_summary_focus_text(query)
+    normalized_source = _normalize_summary_focus_text(
+        source.get("filename") or source.get("filepath") or source.get("canonical_id")
+    )
+    if normalized_query and normalized_source and any(
+        token in normalized_source for token in normalized_query.split()
+    ):
+        return content
+
+    if len(content) > len(base_text):
+        return content
+    return base_text
+
+
+def _build_extractive_vector_fallback_answer(
+    query: str,
+    sources: List[Dict[str, Any]],
+    *,
+    max_bullets: int = 4,
+) -> str:
+    if not sources:
+        return "No results found."
+
+    query_terms = {
+        token.lower()
+        for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", str(query or ""))
+        if token
+    }
+    ranked: List[tuple[float, str]] = []
+    seen: set[str] = set()
+
+    for source_index, source in enumerate(sources[:5]):
+        snippet = _load_vector_fallback_source_text(query, source)
+        relevance = float(source.get("relevance", 0.0) or 0.0)
+        for candidate_index, candidate in enumerate(_extractive_fallback_candidates(snippet)[:4]):
+            candidate = re.sub(r"^[^A-Za-z0-9]+", "", candidate).strip()
+            if candidate and candidate[0].islower():
+                candidate = candidate[0].upper() + candidate[1:]
+            normalized = re.sub(r"[^a-z0-9]+", " ", candidate.lower()).strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            term_hits = sum(1 for term in query_terms if term and term in normalized)
+            score = (term_hits * 1000) + (relevance * 10) - (source_index * 10) - candidate_index
+            ranked.append((score, candidate))
+
+    if not ranked:
+        return "I found relevant vault evidence. Review the attached sources for the most reliable details."
+
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    bullets = [candidate.rstrip(". ") + "." for _, candidate in ranked[:max_bullets]]
+    return "\n".join(f"- {bullet}" for bullet in bullets)
 
 
 def _recovery_script_path() -> str:
@@ -1755,7 +2024,7 @@ app = FastAPI(title="Obsidian RAG Unified API", version="1.0")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_parse_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -2526,6 +2795,7 @@ async def unified_query(request: UnifiedQueryRequest):
             try:
                 # 1. Enforce strict top-K limit for UI vector queries to tighten retrieval
                 vector_limit = min(request.max_results, 5) # Cap at 5 for vector UI mode
+                summary_like = bool(re.search(r"\b(summary|summarize)\b", request.query.lower()))
                 
                 payload = {
                     "query": retrieval_query,
@@ -2580,34 +2850,84 @@ async def unified_query(request: UnifiedQueryRequest):
                 # Sort by new relevance and enforce final limit
                 sources = sorted(sources, key=lambda s: s.get("relevance", 0), reverse=True)
                 sources = _apply_relevance_filter(sources, effective_relevance_threshold)[:vector_limit]
+                if summary_like and sources:
+                    selected_sources = _select_cascading_evidence_set(
+                        request.query,
+                        sources,
+                        max_results=min(2, vector_limit),
+                    )
+                    if selected_sources:
+                        sources = selected_sources
 
                 # 3. Micro-compressor logic
                 micro_compressor_prompt = "Create 3-5 bullet points that capture the key ideas in these snippets; do not add information not present in the snippets."
+                if summary_like:
+                    micro_compressor_prompt = (
+                        "Create 3-6 bullet points that faithfully summarize only the named note or book from these snippets. "
+                        "Stay grounded in the retrieved vault evidence. "
+                        "Do not generalize beyond the snippets. "
+                        "If the snippets only cover one theme, summarize only that theme."
+                    )
                 synthesized_answer = ""
+                synthesis_fallback_reason = ""
+                synthesis_sources = sources
+                response_sources = sources
+                if sources:
+                    expand_named_sources = summary_like or _should_expand_named_sources_for_synthesis(
+                        request.query,
+                        sources,
+                    )
+                    synthesis_sources = _prepare_vector_sources_for_synthesis(
+                        request.query,
+                        sources,
+                        expand_named_sources=expand_named_sources,
+                    )
+                    if expand_named_sources:
+                        response_sources = _summary_display_sources(synthesis_sources)
                 
                 if sources:
                     try:
                         # Use cascade synthesizer as the micro compressor since it handles LLM dispatching
                         compressor_result = await _synthesize_cascading_answer_impl(
                             query=request.query,
-                            sources=sources,
+                            sources=synthesis_sources,
                             llm_provider=request.llm_provider,
                             model=request.model,
                             system_prompt=micro_compressor_prompt
                         )
                         if isinstance(compressor_result, dict):
                             synthesized_answer = compressor_result.get("answer", "")
+                            synthesis_fallback_reason = str(
+                                compressor_result.get("fallback_reason", "") or ""
+                            ).strip().lower()
                         else:
                             synthesized_answer = str(compressor_result)
                     except Exception as e:
                         print(f"Micro-compressor failed: {e}")
                         synthesized_answer = "" # Fallback to empty if LLM fails
 
+                if (
+                    not synthesized_answer
+                    or _is_generic_cascading_fallback_answer(synthesized_answer)
+                    or _is_insufficient_answer(synthesized_answer)
+                    or synthesis_fallback_reason in {
+                        "timeout",
+                        "unknown_provider",
+                        "provider_exception",
+                        "empty_answer",
+                        "weak_answer",
+                    }
+                ):
+                    synthesized_answer = _build_extractive_vector_fallback_answer(
+                        request.query,
+                        synthesis_sources,
+                    )
+
                 return {
                     "query": request.query,
                     "mode": "vector",
                     "answer": synthesized_answer, # Return the structured output instead of raw UI display
-                    "sources": sources,
+                    "sources": response_sources,
                     "results": result,
                     "metadata": {
                         "source": "ChromaDB Vectors",

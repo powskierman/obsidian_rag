@@ -1,6 +1,8 @@
 """
 Unit tests for API gateway relevance filtering helpers.
 """
+import time
+
 import pytest
 from deep_thinking.utils import universal_client
 
@@ -171,6 +173,72 @@ async def test_synthesize_cascading_answer_retries_with_reduced_evidence(monkeyp
     assert result["fallback_reason"] == "retry_reduced_evidence"
     assert len(result["used_documents"]) == 1
     assert result["used_documents"][0]["filepath"] == "Books/Books/Ahrens-How to Take Smart Notes.md"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_salvages_truncated_json_answer(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "gemini", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            return universal_client.UniversalMessage(
+                '{\n  "answer": "- Yescarta significantly improved event-free survival for LBCL compared to standard treatments.\\n- Side effects lasting'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "yescarta",
+        [
+            {
+                "filename": "Yescarta.md",
+                "filepath": "Medical/Lymphoma/Yescarta.md",
+                "relevance": 100.0,
+                "snippet": "Yescarta improved event-free survival.",
+                "source_category": "vault",
+            }
+        ],
+        "gemini",
+        "gemini-3-flash-preview",
+    )
+
+    assert result["answer"].startswith("- Yescarta significantly improved")
+    assert not result["answer"].startswith("{")
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_times_out_to_fallback(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "mlx", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            time.sleep(1.1)
+            return universal_client.UniversalMessage('{"answer":"too late","citations":[]}')
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+    monkeypatch.setenv("CASCADING_SYNTHESIS_TIMEOUT_SECONDS", "1")
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "yescarta",
+        [
+            {
+                "filename": "Yescarta.md",
+                "filepath": "Medical/Lymphoma/Yescarta.md",
+                "relevance": 100.0,
+                "snippet": "Yescarta improved event-free survival.",
+                "source_category": "vault",
+            }
+        ],
+        "mlx",
+        "qwen2.5:7b-instruct",
+    )
+
+    assert result["fallback_reason"] == "timeout"
+    assert "timed out" in result["answer"].lower()
 
 
 @pytest.mark.unit

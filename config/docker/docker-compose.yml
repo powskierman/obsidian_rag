@@ -19,6 +19,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 180s
     networks:
       - rag-network
 
@@ -50,6 +51,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 120s
     networks:
       - rag-network
 
@@ -85,10 +87,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 120s
     networks:
       - rag-network
     depends_on:
-      - embedding-service
+      embedding-service:
+        condition: service_healthy
 
   # Unified API Gateway
   api-gateway:
@@ -101,8 +105,10 @@ services:
     volumes:
       - ./src/services/api_gateway.py:/app/api_gateway.py:ro
       - ./deep_thinking:/app/deep_thinking:ro
+      - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
+      - OBSIDIAN_VAULT_PATH=/app/vault
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       - GRAPH_SERVICE_URL=http://graph-service:8002
       - LIGHTRAG_SERVICE_URL=http://lightrag-service:8001
@@ -122,12 +128,16 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
     networks:
       - rag-network
     depends_on:
-      - embedding-service
-      - graph-service
-      - lightrag-service
+      embedding-service:
+        condition: service_healthy
+      graph-service:
+        condition: service_healthy
+      lightrag-service:
+        condition: service_healthy
 
   # Streamlit UI
   streamlit-ui:
@@ -149,8 +159,12 @@ services:
     networks:
       - rag-network
     depends_on:
-      - embedding-service
-      - graph-service
+      embedding-service:
+        condition: service_healthy
+      graph-service:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
 
 networks:
   rag-network:

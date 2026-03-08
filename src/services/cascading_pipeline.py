@@ -80,6 +80,58 @@ def _extract_json_object(text: str) -> Dict[str, Any]:
         return {}
 
 
+def _decode_json_string_fragment(fragment: str) -> str:
+    candidate = str(fragment or "")
+    if not candidate:
+        return ""
+    try:
+        return json.loads(f"\"{candidate}\"")
+    except json.JSONDecodeError:
+        return (
+            candidate.replace("\\n", "\n")
+            .replace("\\t", "\t")
+            .replace('\\"', '"')
+            .replace("\\\\", "\\")
+        )
+
+
+def _extract_partial_json_string_field(text: str, field_name: str) -> str:
+    if not isinstance(text, str):
+        return ""
+
+    marker = f'"{field_name}"'
+    field_pos = text.find(marker)
+    if field_pos == -1:
+        return ""
+
+    colon_pos = text.find(":", field_pos + len(marker))
+    if colon_pos == -1:
+        return ""
+
+    opening_quote = text.find('"', colon_pos + 1)
+    if opening_quote == -1:
+        return ""
+
+    chars: List[str] = []
+    escaped = False
+    for ch in text[opening_quote + 1 :]:
+        if escaped:
+            chars.append(ch)
+            escaped = False
+            continue
+        if ch == "\\":
+            chars.append(ch)
+            escaped = True
+            continue
+        if ch == '"':
+            return _decode_json_string_fragment("".join(chars))
+        chars.append(ch)
+
+    fragment = "".join(chars).rstrip()
+    fragment = re.sub(r'[\s,}\]]+\Z', "", fragment)
+    return _decode_json_string_fragment(fragment)
+
+
 def distance_to_relevance(distance: Any, default: float = 50.0) -> float:
     try:
         return max(0.0, min(100.0, 100.0 / (1.0 + math.exp(float(distance) / 2.0))))
@@ -295,6 +347,8 @@ def _salvage_structured_response(text: str) -> Dict[str, Any]:
             answer_text = json.loads(f"\"{answer_match.group('answer')}\"")
         except json.JSONDecodeError:
             answer_text = answer_match.group("answer")
+    elif '"answer"' in str(text):
+        answer_text = _extract_partial_json_string_field(text, "answer")
     citations_match = re.search(r'"citations"\s*:\s*\[(?P<body>.*?)\]', text, re.DOTALL)
     if citations_match:
         citations = re.findall(r'"((?:[^"\\]|\\.)*)"', citations_match.group("body"))
@@ -317,6 +371,22 @@ async def synthesize_cascading_answer(
     model: str,
     system_prompt: Optional[str],
 ) -> Dict[str, Any]:
+    try:
+        synthesis_timeout_seconds = max(
+            1.0,
+            float(_get_env_value("CASCADING_SYNTHESIS_TIMEOUT_SECONDS", "25")),
+        )
+    except (TypeError, ValueError):
+        synthesis_timeout_seconds = 25.0
+
+    try:
+        synthesis_temperature = max(
+            0.0,
+            min(1.0, float(_get_env_value("CASCADING_SYNTHESIS_TEMPERATURE", "0"))),
+        )
+    except (TypeError, ValueError):
+        synthesis_temperature = 0.0
+
     def fallback_payload(answer_text: str, active_sources: List[Dict[str, Any]], reason: str = "fallback") -> Dict[str, Any]:
         citations = []
         seen = set()
@@ -441,18 +511,28 @@ async def synthesize_cascading_answer(
                 "Return JSON only in the form "
                 '{"answer": "concise grounded answer", "citations": ["[[Exact/Path.md]]"]}.'
             )
-            response = await asyncio.to_thread(
-                universal_client.UniversalClient(
-                    provider=resolved_provider,
-                    api_key=cascading_provider_api_key(resolved_provider),
-                ).messages.create,
-                model=model or default_cascading_model(resolved_provider),
-                messages=[{"role": "user", "content": active_prompt}],
-                max_tokens=1024,
-                temperature=0.3,
-                system=sys_prompt,
-                response_format={"type": "json_object"},
-            )
+            try:
+                response = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        universal_client.UniversalClient(
+                            provider=resolved_provider,
+                            api_key=cascading_provider_api_key(resolved_provider),
+                        ).messages.create,
+                        model=model or default_cascading_model(resolved_provider),
+                        messages=[{"role": "user", "content": active_prompt}],
+                        max_tokens=1024,
+                        temperature=synthesis_temperature,
+                        system=sys_prompt,
+                        response_format={"type": "json_object"},
+                    ),
+                    timeout=synthesis_timeout_seconds,
+                )
+            except asyncio.TimeoutError:
+                return fallback_payload(
+                    "I found relevant vault evidence, but the synthesis step timed out. Review the attached sources.",
+                    active_sources,
+                    reason="timeout",
+                )
             parsed = parse_structured_response(universal_client.extract_response_text(response), active_sources)
             answer_text = str(parsed.get("answer") or "").strip()
             if answer_text and not is_generic_cascading_fallback_answer(answer_text):

@@ -127,8 +127,219 @@ def test_vector_mode_routes_to_embedding(monkeypatch):
     assert data["results"] == routes[f"{api_gateway.EMBEDDING_SERVICE_URL}/query"](None).json_data
     assert len(calls) == 1
     assert calls[0]["url"] == f"{api_gateway.EMBEDDING_SERVICE_URL}/query"
-    assert calls[0]["json"]["n_results"] == 5
+    assert calls[0]["json"]["n_results"] == 15
     assert calls[0]["json"]["relevance_threshold"] == 12.5
+
+
+@pytest.mark.integration
+def test_vector_summary_prefers_exact_named_note(monkeypatch):
+    embedding_result = {
+        "documents": [[
+            "Focused and diffuse modes matter.",
+            "Practice and recall build durable understanding.",
+            "Create a bullet-point summary of {}.",
+            "Mind is a matter of perception.",
+        ]],
+        "metadatas": [[
+            {"filename": "A Mind for Numbers.md", "filepath": "Books/Books/A Mind for Numbers.md", "canonical_id": "a-mind-for-numbers"},
+            {"filename": "Oakley-A Mind For Numbers.md", "filepath": "Books/Books/Oakley-A Mind For Numbers.md", "canonical_id": "oakley-a-mind-for-numbers"},
+            {"filename": "Summarize.md", "filepath": "copilot/copilot-custom-prompts/Summarize.md", "canonical_id": "summarize"},
+            {"filename": "The Mind Club.md", "filepath": "Books/Books/The Mind Club.md", "canonical_id": "the-mind-club"},
+        ]],
+        "distances": [[0.2, 0.25, 0.4, 0.45]],
+    }
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(embedding_result),
+    }
+    _client_with_routes(monkeypatch, routes)
+    async def _fake_compressor(**_kwargs):
+        return {"answer": "- Focused and diffuse modes", "citations": ["[[Books/Books/A Mind for Numbers.md]]"]}
+
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer_impl", _fake_compressor)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(
+        client,
+        "vector",
+        query="Provide a point form summary of A Mind for Numbers",
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["answer"].startswith("- Focused and diffuse modes")
+    assert [source["filepath"] for source in data["sources"]] == [
+        "Books/Books/A Mind for Numbers.md"
+    ]
+
+
+@pytest.mark.integration
+def test_vector_summary_expands_named_note_from_vault(monkeypatch, tmp_path):
+    vault_note = tmp_path / "Books" / "Books" / "A Mind for Numbers.md"
+    vault_note.parent.mkdir(parents=True, exist_ok=True)
+    vault_note.write_text(
+        "---\n"
+        "tags:\n"
+        "  - book-notes\n"
+        "---\n"
+        "### Main Idea\n"
+        "- cover image\n\n"
+        "### Notes\n"
+        "If you are trying to understand something new, use diffuse mode.\n"
+        "Research has shown you need to revisit new information.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(tmp_path))
+
+    embedding_result = {
+        "documents": [[
+            "[Source: A Mind for Numbers.md]\n### Main Idea\n- cover image\n### References\n- [387](https://readwise.io/...)",
+        ]],
+        "metadatas": [[
+            {
+                "filename": "A Mind for Numbers.md",
+                "filepath": "Books/Books/A Mind for Numbers.md",
+                "canonical_id": "a-mind-for-numbers",
+            }
+        ]],
+        "distances": [[0.2]],
+    }
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(embedding_result),
+    }
+    _client_with_routes(monkeypatch, routes)
+
+    captured = {}
+
+    async def _fake_compressor(**kwargs):
+        captured["sources"] = kwargs["sources"]
+        return {"answer": "- Diffuse mode matters", "citations": ["[[Books/Books/A Mind for Numbers.md]]"]}
+
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer_impl", _fake_compressor)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(
+        client,
+        "vector",
+        query="Provide a point form summary of A Mind for Numbers",
+    )
+
+    assert response.status_code == 200
+    assert "diffuse mode" in captured["sources"][0]["snippet"].lower()
+    assert "revisit new information" in captured["sources"][0]["snippet"].lower()
+
+
+@pytest.mark.integration
+def test_vector_mode_builds_extractive_fallback_when_synthesis_is_generic(monkeypatch):
+    embedding_result = {
+        "documents": [[
+            "[Source: Yescarta.md] Yescarta significantly improved event-free survival for LBCL compared to standard treatments.",
+            "[Source: Yescarta Side Effects.md] Side effects lasting more than 90 days can occur in 17-24% of patients.",
+        ]],
+        "metadatas": [[
+            {"filename": "Yescarta.md", "filepath": "Medical/Lymphoma/Yescarta.md", "canonical_id": "yescarta"},
+            {"filename": "Yescarta Side Effects.md", "filepath": "Medical/Lymphoma/Yescarta Side Effects.md", "canonical_id": "yescarta-side-effects"},
+        ]],
+        "distances": [[0.1, 0.15]],
+    }
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(embedding_result),
+    }
+    _client_with_routes(monkeypatch, routes)
+
+    async def _generic_compressor(**_kwargs):
+        return {"answer": "Found 2 matching snippets in your vault.", "citations": []}
+
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer_impl", _generic_compressor)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "vector", query="yescarta")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "matching snippets in your vault" not in data["answer"].lower()
+    assert "yescarta" in data["answer"].lower()
+
+
+@pytest.mark.integration
+def test_vector_mode_builds_extractive_fallback_when_synthesis_times_out(monkeypatch):
+    embedding_result = {
+        "documents": [[
+            "[Source: Yescarta.md] Yescarta significantly improved event-free survival for LBCL compared to standard treatments.",
+            "[Source: Yescarta Side Effects.md] Side effects lasting more than 90 days can occur in 17-24% of patients.",
+        ]],
+        "metadatas": [[
+            {"filename": "Yescarta.md", "filepath": "Medical/Lymphoma/Yescarta.md", "canonical_id": "yescarta"},
+            {"filename": "Yescarta Side Effects.md", "filepath": "Medical/Lymphoma/Yescarta Side Effects.md", "canonical_id": "yescarta-side-effects"},
+        ]],
+        "distances": [[0.1, 0.15]],
+    }
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(embedding_result),
+    }
+    _client_with_routes(monkeypatch, routes)
+
+    async def _timed_out_compressor(**_kwargs):
+        return {
+            "answer": "I found relevant vault evidence, but the synthesis step timed out. Review the attached sources.",
+            "citations": [],
+            "fallback_reason": "timeout",
+        }
+
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer_impl", _timed_out_compressor)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "vector", query="yescarta")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "timed out" not in data["answer"].lower()
+    assert "yescarta" in data["answer"].lower()
+
+
+@pytest.mark.integration
+def test_vector_mode_expands_named_entity_note_for_synthesis(monkeypatch, tmp_path):
+    vault_note = tmp_path / "Medical" / "Lymphoma" / "Yescarta.md"
+    vault_note.parent.mkdir(parents=True, exist_ok=True)
+    vault_note.write_text(
+        "---\n"
+        "tags:\n"
+        "  - yescarta\n"
+        "---\n"
+        "### Notes\n"
+        "- Double-/Triple-Hit Lymphomas: ==Yescarta is specifically indicated for high-grade B-cell lymphomas.==\n"
+        "- In the ZUMA-12 trial, patients achieved an 86% complete response rate.\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(tmp_path))
+
+    embedding_result = {
+        "documents": [[
+            "[Source: Yescarta.md] ] trial for LBCL, it significantly improved event-free survival...",
+        ]],
+        "metadatas": [[
+            {"filename": "Yescarta.md", "filepath": "Medical/Lymphoma/Yescarta.md", "canonical_id": "yescarta"},
+        ]],
+        "distances": [[0.1]],
+    }
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(embedding_result),
+    }
+    _client_with_routes(monkeypatch, routes)
+
+    captured = {}
+
+    async def _fake_compressor(**kwargs):
+        captured["sources"] = kwargs["sources"]
+        return {"answer": "- ok", "citations": ["[[Medical/Lymphoma/Yescarta.md]]"]}
+
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer_impl", _fake_compressor)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "vector", query="yescarta")
+
+    assert response.status_code == 200
+    assert "high-grade b-cell lymphomas" in captured["sources"][0]["snippet"].lower()
+    assert "==" not in captured["sources"][0]["snippet"]
 
 
 @pytest.mark.integration

@@ -46,6 +46,7 @@ export interface WebSearchResult {
 export interface SettingsState {
   settingsVersion?: number;
   model: string;
+  providerModels?: Partial<Record<LLMProvider, string>>;
   sources: number;
   temperature: number;
   relevanceThreshold: number;  // 0-100%, 0 = show all
@@ -100,8 +101,9 @@ export interface AppState {
 }
 
 export const defaultSettings: SettingsState = {
-  settingsVersion: 2,
+  settingsVersion: 3,
   model: 'llama3.2:latest',
+  providerModels: {},
   sources: 10,
   temperature: 0.3,
   relevanceThreshold: 0,  // 0-100%, 0 = show all results
