@@ -1,11 +1,11 @@
 const DEFAULT_GATEWAY_CANDIDATES = [
   process.env.API_GATEWAY_URL,
   process.env.GATEWAY_URL,
-  process.env.NEXT_PUBLIC_GATEWAY_URL,
   'http://api-gateway:3000',
   'http://host.docker.internal:4000',
   'http://127.0.0.1:4000',
   'http://localhost:4000',
+  process.env.NEXT_PUBLIC_GATEWAY_URL,
 ];
 
 const normalizeBaseUrl = (value: string | undefined | null): string | null => {
@@ -29,6 +29,18 @@ export const proxyGatewayJson = async (
 ): Promise<Response> => {
   const errors: string[] = [];
 
+  const isTimeoutError = (error: unknown): boolean => {
+    if (!error) {
+      return false;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      message.includes('The operation was aborted due to timeout')
+      || message.includes('AbortError')
+      || message.includes('timed out')
+    );
+  };
+
   for (const baseUrl of getGatewayBaseCandidates()) {
     try {
       const response = await fetch(`${baseUrl}${pathname}`, {
@@ -45,6 +57,9 @@ export const proxyGatewayJson = async (
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       errors.push(`${baseUrl}${pathname}: ${message}`);
+      if (isTimeoutError(error)) {
+        break;
+      }
     }
   }
 

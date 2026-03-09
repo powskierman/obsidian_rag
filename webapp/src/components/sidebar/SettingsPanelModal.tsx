@@ -41,7 +41,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     updateSettings({ ...settings, temperature });
   };
 
-  const handleToggle = (key: 'showSources' | 'enhancedSearch') => {
+  const handleToggle = (key: 'showSources' | 'enhancedSearch' | 'briefConceptIndex') => {
     if (key === 'enhancedSearch' && enhancedDisabled) {
       return;
     }
@@ -77,7 +77,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               LLM Provider
             </label>
             <div className="bg-[#2C2C2E] p-1 rounded-xl flex border border-[#3C3C3E]">
-              {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'mlx'].map((provider) => (
+              {['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'lmstudio'].map((provider) => (
                 <button
                   key={provider}
                   onClick={() => {
@@ -159,19 +159,19 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             </div>
           )}
 
-          {llmProvider === 'mlx' && (
+          {llmProvider === 'lmstudio' && (
             <div>
               <label className="block text-sm font-medium text-white mb-2">
-                MLX Model
+                LM Studio Model
               </label>
               <input
                 value={settings.model}
                 onChange={(e) => updateSettings({ ...settings, model: e.target.value })}
-                placeholder="LiquidAI/LFM2-24B-A2B-MLX-4bit"
+                placeholder="local-model"
                 className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
               />
               <p className="text-xs text-white/40 mt-1.5">
-                Use the model ID exposed by your local MLX server.
+                Use the model ID exposed by your local LM Studio server.
               </p>
             </div>
           )}
@@ -283,7 +283,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             <div>
               <div className="text-sm font-medium text-white">Enhanced Search</div>
               <div className="text-xs text-white/40 mt-1">
-                {enhancedDisabled ? 'Disabled while Deep Thinking is enabled' : 'Enable re-ranking and deduplication'}
+                {enhancedDisabled ? 'Disabled while Deep Thinking is enabled' : 'Add web search and memory context'}
               </div>
             </div>
             <button
@@ -294,6 +294,25 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             >
               <div
                 className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${settings.enhancedSearch ? 'translate-x-6' : 'translate-x-0'
+                  }`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-3 bg-[#2C2C2E] rounded-lg border border-[#3C3C3E]">
+            <div>
+              <div className="text-sm font-medium text-white">Brief Concept Index</div>
+              <div className="text-xs text-white/40 mt-1">
+                {settings.briefConceptIndex ? 'Prefer terse concept-index answers' : 'Prefer fuller grounded answers'}
+              </div>
+            </div>
+            <button
+              onClick={() => handleToggle('briefConceptIndex')}
+              className={`relative w-12 h-6 rounded-full transition-colors ${settings.briefConceptIndex ? 'bg-[#0A84FF]' : 'bg-[#3C3C3E]'
+                }`}
+            >
+              <div
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${settings.briefConceptIndex ? 'translate-x-6' : 'translate-x-0'
                   }`}
               />
             </button>

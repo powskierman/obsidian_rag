@@ -59,6 +59,7 @@ services:
       - OLLAMA_HOST=http://host.docker.internal:11434
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
       - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
+      - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
       - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:1234/v1}
       - MLX_API_KEY=${MLX_API_KEY:-mlx}
       - MLX_MODEL=${MLX_MODEL:-}
@@ -160,6 +161,9 @@ services:
       - OPENAI_TIMEOUT=${OPENAI_TIMEOUT:-60}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
+      - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
+      - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
       - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:8090/v1}
       - MLX_API_KEY=${MLX_API_KEY:-mlx}
       - MLX_MODEL=${MLX_MODEL:-LiquidAI/LFM2-24B-A2B-MLX-4bit}
@@ -209,6 +213,11 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
+      - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
+      - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
+      - QUERY_LMSTUDIO_BASE_URL=${QUERY_LMSTUDIO_BASE_URL:-${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}}
+      - QUERY_LMSTUDIO_API_KEY=${QUERY_LMSTUDIO_API_KEY:-${LMSTUDIO_API_KEY:-lmstudio}}
       - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:8090/v1}
       - MLX_API_KEY=${MLX_API_KEY:-mlx}
       - MLX_MODEL=${MLX_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-LiquidAI/LFM2-24B-A2B-MLX-4bit}}}

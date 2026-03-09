@@ -143,8 +143,14 @@ def _default_model_for_provider(provider: str, streaming: bool = False) -> str:
         return _default_openrouter_model()
     if provider == "chatgpt":
         return os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    if provider == "mlx":
-        return os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or os.getenv("LLM_MODEL") or "LiquidAI/LFM2-24B-A2B-MLX-4bit"
+    if provider in {"lmstudio", "mlx"}:
+        return (
+            os.getenv("LMSTUDIO_MODEL")
+            or os.getenv("MLX_MODEL")
+            or os.getenv("LLM_MODEL_PATH")
+            or os.getenv("LLM_MODEL")
+            or "local-model"
+        )
     return "llama2" if streaming else "llama3.2"
 def extract_entities_from_graph(graph_text: str) -> list:
     """Extract key entities from graph response text."""
@@ -457,12 +463,22 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
         response = client.chat.completions.create(timeout=request_timeout, **request_payload)
         return response.choices[0].message.content
 
-    elif provider == "mlx":
-        api_key = os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
-        base_url = os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")
+    elif provider in {"lmstudio", "mlx"}:
+        api_key = (
+            os.getenv("QUERY_LMSTUDIO_API_KEY")
+            or os.getenv("LMSTUDIO_API_KEY", "lmstudio")
+            or os.getenv("QUERY_MLX_API_KEY")
+            or os.getenv("MLX_API_KEY", "mlx")
+        )
+        base_url = (
+            os.getenv("QUERY_LMSTUDIO_BASE_URL")
+            or os.getenv("LMSTUDIO_BASE_URL")
+            or os.getenv("QUERY_MLX_BASE_URL")
+            or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")
+        )
 
         if not model:
-            model = _default_model_for_provider("mlx", streaming=False)
+            model = _default_model_for_provider(provider, streaming=False)
 
         client = OpenAI(
             base_url=base_url,
@@ -595,7 +611,7 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
         if response_text:
             yield response_text
 
-    elif provider == "mlx":
+    elif provider in {"lmstudio", "mlx"}:
         response_text = call_llm(provider, model, system_prompt, user_query, temperature)
         if response_text:
             yield response_text

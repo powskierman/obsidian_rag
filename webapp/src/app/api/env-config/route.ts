@@ -6,7 +6,7 @@ export async function GET() {
       gemini: !!process.env.GEMINI_API_KEY,
       anthropic: !!process.env.ANTHROPIC_API_KEY,
       openai: !!process.env.OPENAI_API_KEY,
-      mlx: !!(process.env.MLX_BASE_URL || process.env.MLX_MODEL || process.env.LLM_MODEL_PATH),
+      lmstudio: !!(process.env.LMSTUDIO_BASE_URL || process.env.LMSTUDIO_MODEL || process.env.LLM_MODEL_PATH),
     },
     models: {
       ollama: process.env.OLLAMA_MODEL || 'mistral',
@@ -14,7 +14,7 @@ export async function GET() {
       chatgpt: process.env.OPENAI_MODEL || 'gpt-4o',
       gemini: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
       claude: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-latest',
-      mlx: process.env.MLX_MODEL || process.env.LLM_MODEL_PATH || 'LiquidAI/LFM2-24B-A2B-MLX-4bit'
+      lmstudio: process.env.LMSTUDIO_MODEL || process.env.LLM_MODEL_PATH || 'local-model'
     }
   };
 

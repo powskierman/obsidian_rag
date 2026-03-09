@@ -5,8 +5,43 @@ import { proxyGatewayJson } from '../_lib/gateway';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+type QueryRouteBody = {
+  llm_provider?: string;
+  mode?: string;
+};
+
+const parseTimeoutMs = (rawValue: string | undefined, fallbackMs: number): number => {
+  const parsedValue = Number(rawValue);
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : fallbackMs;
+};
+
+const resolveGatewayQueryTimeoutMs = (body: QueryRouteBody): number => {
+  const defaultTimeoutMs = parseTimeoutMs(process.env.GATEWAY_QUERY_TIMEOUT_MS, 60000);
+  const provider = String(body.llm_provider || '').trim().toLowerCase();
+  const mode = String(body.mode || '').trim().toLowerCase();
+
+  if (mode === 'cascading') {
+    const cascadingTimeoutMs = parseTimeoutMs(
+      process.env.GATEWAY_QUERY_TIMEOUT_MS_CASCADING,
+      120000,
+    );
+
+    if (provider === 'lmstudio') {
+      return parseTimeoutMs(
+        process.env.GATEWAY_QUERY_TIMEOUT_MS_LMSTUDIO_CASCADING,
+        Math.max(cascadingTimeoutMs, 180000),
+      );
+    }
+
+    return cascadingTimeoutMs;
+  }
+
+  return defaultTimeoutMs;
+};
+
 export async function POST(request: Request) {
-  const body = await request.text();
+  const parsedBody = (await request.json()) as QueryRouteBody;
+  const timeoutMs = resolveGatewayQueryTimeoutMs(parsedBody);
   const response = await proxyGatewayJson(
     '/api/v1/query',
     {
@@ -14,9 +49,9 @@ export async function POST(request: Request) {
       headers: {
         'Content-Type': request.headers.get('content-type') || 'application/json',
       },
-      body,
+      body: JSON.stringify(parsedBody),
     },
-    60000,
+    timeoutMs,
   );
   const text = await response.text();
 

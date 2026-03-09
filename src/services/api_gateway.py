@@ -127,6 +127,38 @@ def _summary_query_targets_source(query: str, source: Dict[str, Any]) -> bool:
     return False
 
 
+def _cascading_source_rank_score(query: str, source: Dict[str, Any]) -> float:
+    base_relevance = float(source.get("relevance", 0.0) or 0.0)
+    normalized_query = _normalize_summary_focus_text(query)
+    if not normalized_query:
+        return base_relevance
+
+    query_terms = [
+        term for term in normalized_query.split()
+        if len(term) > 2 and term not in {
+            "what", "when", "where", "which", "with", "from", "into", "about",
+            "study", "studies", "results", "result", "note", "notes",
+        }
+    ]
+    candidates = [
+        _normalize_summary_focus_text(source.get("filename")),
+        _normalize_summary_focus_text(source.get("filepath")),
+        _normalize_summary_focus_text(source.get("canonical_id")),
+    ]
+
+    bonus = 0.0
+    for candidate in candidates:
+        if not candidate:
+            continue
+        if candidate in normalized_query:
+            bonus = max(bonus, 30.0)
+        overlap = sum(1 for term in query_terms if term in candidate)
+        if overlap:
+            bonus = max(bonus, min(24.0, overlap * 8.0))
+
+    return base_relevance + bonus
+
+
 def _resolve_vault_source_path(source: Dict[str, Any]) -> Optional[Path]:
     raw_path = normalize_vault_path(source.get("filepath") or source.get("source") or "")
     if not raw_path:
@@ -361,6 +393,82 @@ def _build_extractive_vector_fallback_answer(
     ranked.sort(key=lambda item: item[0], reverse=True)
     bullets = [candidate.rstrip(". ") + "." for _, candidate in ranked[:max_bullets]]
     return "\n".join(f"- {bullet}" for bullet in bullets)
+
+
+async def _perform_tavily_web_search(
+    client: httpx.AsyncClient,
+    query: str,
+    *,
+    max_results: int = 3,
+) -> Dict[str, Any]:
+    search_terms = str(query or "").strip()
+    if not search_terms:
+        return {
+            "search_terms": "",
+            "results": [],
+            "message": "No web search terms available.",
+        }
+
+    api_key = _get_env_value("TAVILY_API_KEY")
+    if not api_key:
+        return {
+            "search_terms": search_terms,
+            "results": [],
+            "message": "TAVILY_API_KEY not configured.",
+        }
+
+    payload = {
+        "api_key": api_key,
+        "query": search_terms,
+        "search_depth": "advanced",
+        "max_results": max(max_results, 5),
+        "include_answer": False,
+        "include_raw_content": False,
+    }
+
+    try:
+        response = await _post_json(
+            client,
+            "https://api.tavily.com/search",
+            payload,
+            timeout=20.0,
+            service="web_search",
+        )
+        data = response.json() if hasattr(response, "json") else {}
+    except Exception as exc:
+        return {
+            "search_terms": search_terms,
+            "results": [],
+            "message": f"Web search failed: {exc}",
+        }
+
+    normalized_results: List[Dict[str, str]] = []
+    for item in (data.get("results") or [])[:max_results]:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title") or "").strip()
+        url = str(item.get("url") or "").strip()
+        content = _truncate_source_snippet(
+            item.get("content") or item.get("snippet") or "",
+            limit=280,
+        )
+        if not (title or url or content):
+            continue
+        normalized_results.append(
+            {
+                "title": title or url or "Untitled result",
+                "url": url,
+                "content": content,
+            }
+        )
+
+    result = {
+        "search_terms": search_terms,
+        "results": normalized_results,
+    }
+    if not normalized_results:
+        result["message"] = "No web results found."
+    return result
 
 
 def _recovery_script_path() -> str:
@@ -667,7 +775,8 @@ def _canonical_cascading_provider_name(provider: str) -> str:
         "chatgpt": "chatgpt",
         "openrouter": "openrouter",
         "ollama": "ollama",
-        "mlx": "mlx",
+        "lmstudio": "lmstudio",
+        "mlx": "lmstudio",
         "perplexity": "perplexity",
     }
     return aliases.get(normalized, normalized)
@@ -681,7 +790,7 @@ def _default_cascading_model(provider: str) -> Optional[str]:
         "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o-mini"),
         "openrouter": _get_env_value("OPENROUTER_MODEL", "openrouter/auto"),
         "ollama": _get_env_value("OLLAMA_MODEL", _get_env_value("LLM_MODEL", "qwen2.5:7b-instruct")),
-        "mlx": _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "LiquidAI/LFM2-24B-A2B")),
+        "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         "perplexity": _get_env_value("PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online"),
     }
     return defaults.get(provider)
@@ -699,8 +808,14 @@ def _cascading_provider_api_key(provider: str) -> Optional[str]:
         return _get_env_value("OPENROUTER_API_KEY") or None
     if provider == "ollama":
         return None
-    if provider == "mlx":
-        return _get_env_value("QUERY_MLX_API_KEY") or _get_env_value("MLX_API_KEY", "mlx") or "mlx"
+    if provider == "lmstudio":
+        return (
+            _get_env_value("QUERY_LMSTUDIO_API_KEY")
+            or _get_env_value("LMSTUDIO_API_KEY", "lmstudio")
+            or _get_env_value("QUERY_MLX_API_KEY")
+            or _get_env_value("MLX_API_KEY", "mlx")
+            or "lmstudio"
+        )
     if provider == "perplexity":
         return _get_env_value("PERPLEXITY_API_KEY") or None
     return None
@@ -1184,7 +1299,7 @@ def _resolve_query_normalizer_provider(provider: str, model: Optional[str]) -> t
     candidate_provider = override_provider or (provider or "").strip().lower()
     candidate_model = override_model or model
 
-    supported = {"ollama", "openrouter", "chatgpt", "mlx"}
+    supported = {"ollama", "openrouter", "chatgpt", "lmstudio", "mlx"}
     if candidate_provider in supported:
         return candidate_provider, candidate_model
 
@@ -1192,8 +1307,13 @@ def _resolve_query_normalizer_provider(provider: str, model: Optional[str]) -> t
         return "openrouter", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("OPENROUTER_MODEL", "openrouter/auto")
     if os.getenv("OPENAI_API_KEY"):
         return "chatgpt", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    if os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
-        return "mlx", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("MLX_MODEL")
+    if os.getenv("LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
+        return (
+            "lmstudio",
+            os.getenv("QUERY_NORMALIZER_MODEL", "").strip()
+            or os.getenv("LMSTUDIO_MODEL")
+            or os.getenv("MLX_MODEL"),
+        )
     if os.getenv("OLLAMA_HOST"):
         return "ollama", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("LLM_MODEL", "qwen2.5:7b-instruct")
     return None, None
@@ -1257,14 +1377,21 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
                     "Content-Type": "application/json",
                 }
                 resolved_model = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-            elif provider == "mlx":
-                api_key = os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
-                url = f'{(os.getenv("QUERY_MLX_BASE_URL") or os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")).rstrip("/")}/chat/completions'
+            elif provider in {"lmstudio", "mlx"}:
+                api_key = (
+                    os.getenv("QUERY_LMSTUDIO_API_KEY")
+                    or os.getenv("LMSTUDIO_API_KEY", "lmstudio")
+                    or os.getenv("QUERY_MLX_API_KEY")
+                    or os.getenv("MLX_API_KEY", "mlx")
+                )
+                url = (
+                    f'{(os.getenv("QUERY_LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_BASE_URL") or os.getenv("QUERY_MLX_BASE_URL") or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")).rstrip("/")}/chat/completions'
+                )
                 headers = {
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                 }
-                resolved_model = model or os.getenv("MLX_MODEL")
+                resolved_model = model or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_MODEL")
             else:
                 return None
 
@@ -1276,7 +1403,9 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
                 ],
                 "temperature": 0,
                 "max_tokens": 120,
-                "response_format": {"type": "json_object"},
+                "response_format": {
+                    "type": "text" if provider in {"lmstudio", "mlx"} else "json_object"
+                },
             }
             async with httpx.AsyncClient(timeout=_QUERY_NORMALIZER_TIMEOUT) as client:
                 resp = await client.post(url, headers=headers, json=payload)
@@ -2316,7 +2445,12 @@ async def get_provider_status():
             "gemini": bool(_get_env_value("GEMINI_API_KEY")),
             "anthropic": bool(_get_env_value("ANTHROPIC_API_KEY")),
             "openai": bool(_get_env_value("OPENAI_API_KEY")),
-            "mlx": bool(_get_env_value("MLX_BASE_URL") or _get_env_value("MLX_MODEL")),
+            "lmstudio": bool(
+                _get_env_value("LMSTUDIO_BASE_URL")
+                or _get_env_value("LMSTUDIO_MODEL")
+                or _get_env_value("MLX_BASE_URL")
+                or _get_env_value("MLX_MODEL")
+            ),
         },
         "models": {
             "ollama": _get_env_value("OLLAMA_MODEL", "mistral"),
@@ -2324,7 +2458,7 @@ async def get_provider_status():
             "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o"),
             "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-pro-preview"),
             "claude": _get_env_value("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
-            "mlx": _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "LiquidAI/LFM2-24B-A2B-MLX-4bit")),
+            "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         },
     }
 
@@ -2369,7 +2503,9 @@ async def _synthesize_cascading_answer(
     sources: List[Dict[str, Any]],
     llm_provider: str,
     model: str,
-    system_prompt: str = None
+    system_prompt: str = None,
+    brief_concept_index: bool = True,
+    supplemental_context: str = None,
 ) -> Dict[str, Any]:
     try:
         return await _synthesize_cascading_answer_impl(
@@ -2378,11 +2514,14 @@ async def _synthesize_cascading_answer(
             llm_provider,
             model,
             system_prompt,
+            brief_concept_index,
+            supplemental_context,
         )
     except Exception as e:
         print(f"Error in cascading fallback synthesis: {e}")
         resolved_provider = _canonical_cascading_provider_name(llm_provider)
-        if resolved_provider == "mlx" or _looks_like_mlx_transport_failure_text(str(e)):
+        raw_provider = str(llm_provider or "").strip().lower()
+        if raw_provider == "mlx" or resolved_provider == "mlx":
             raise RuntimeError(str(e)) from e
         raise
 
@@ -2398,6 +2537,7 @@ class UnifiedQueryRequest(BaseModel):
     system_prompt: Optional[str] = None
     web_search: bool = False
     llm_knowledge: bool = False
+    brief_concept_index: bool = True
     entities_mode: Optional[str] = None  # naive, local, global, hybrid
     force_mode: bool = False
     require_llm: bool = False
@@ -2597,10 +2737,16 @@ async def unified_query(request: UnifiedQueryRequest):
             for src in sources:
                 source_identity = canonical_source_identity(src, default_category="vault")
                 rel = src.get("relevance", 0) or 0
+                src["_query_rank_score"] = _cascading_source_rank_score(retrieval_query, src)
                 if source_identity not in deduped or rel > deduped[source_identity].get("relevance", 0):
                     deduped[source_identity] = src
             sources = sorted(
-                deduped.values(), key=lambda s: s.get("relevance", 0), reverse=True
+                deduped.values(),
+                key=lambda s: (
+                    float(s.get("_query_rank_score", s.get("relevance", 0)) or 0.0),
+                    float(s.get("relevance", 0) or 0.0),
+                ),
+                reverse=True,
             )
             sources = _apply_relevance_filter(sources, effective_relevance_threshold)
 
@@ -2677,21 +2823,21 @@ async def unified_query(request: UnifiedQueryRequest):
                 answer = result.get("answer", "") or ""
 
             # Always synthesize if we have sources, but pass the existing graph answer in as context
+            web_search_result = None
             if sources:
-                system_with_graph = request.system_prompt
-                if answer:
-                    graph_context = f"The following is a partial analytical answer derived from the knowledge graph. Incorporate it into your final response:\n{answer}\n\n"
-                    # If there's an existing answer, we use the vector synthesis to augment it.
-                    sys_prompt = request.system_prompt or "You are a helpful AI assistant. Synthesize a concise answer to the user's query based ONLY on the provided vault context."
-                    system_with_graph = f"{sys_prompt}\n\n{graph_context}"
-
                 try:
                     synthesis_result = await _synthesize_cascading_answer(
                         request.query,
                         sources,
                         request.llm_provider,
                         request.model,
-                        system_with_graph
+                        request.system_prompt,
+                        request.brief_concept_index,
+                        (
+                            "The following is a partial analytical answer derived from the knowledge graph. "
+                            "Incorporate it into your final response only where it is consistent with the provided vault context.\n"
+                            f"{answer}"
+                        ) if answer else None,
                     )
                     if isinstance(synthesis_result, dict):
                         synthesized_answer = str(synthesis_result.get("answer") or "").strip()
@@ -2736,6 +2882,13 @@ async def unified_query(request: UnifiedQueryRequest):
                         recovery_payload = _mlx_recovery_error_payload(synth_error)
                         raise HTTPException(status_code=503, detail=recovery_payload)
                     raise
+
+            if request.web_search:
+                async with httpx.AsyncClient() as client:
+                    web_search_result = await _perform_tavily_web_search(
+                        client,
+                        retrieval_query or request.query,
+                    )
             
             if diagnostics.get("failures"):
                 warnings.append("Some retrieval stages failed; answer may be based on partial evidence.")
@@ -2760,6 +2913,8 @@ async def unified_query(request: UnifiedQueryRequest):
                 "mode": "cascading",
                 "answer": answer,
                 "sources": sources,
+                "web_search": web_search_result,
+                "llm_knowledge": mem0_context if request.llm_knowledge and mem0_context else None,
                 "results": result,
                 "metadata": {
                     "description": "5-Stage Cascading Retrieval (Anchor -> Entity -> Expand -> Vector -> Synthesis)",
@@ -2774,6 +2929,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "candidate_source_count": candidate_source_count,
                         "selected_source_count": len(sources),
                     },
+                    "web_search_enabled": bool(request.web_search),
                     "warnings": warnings,
                 },
             }
@@ -2796,6 +2952,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 # 1. Enforce strict top-K limit for UI vector queries to tighten retrieval
                 vector_limit = min(request.max_results, 5) # Cap at 5 for vector UI mode
                 summary_like = bool(re.search(r"\b(summary|summarize)\b", request.query.lower()))
+                web_search_result = None
                 
                 payload = {
                     "query": retrieval_query,
@@ -2861,7 +3018,14 @@ async def unified_query(request: UnifiedQueryRequest):
 
                 # 3. Micro-compressor logic
                 micro_compressor_prompt = "Create 3-5 bullet points that capture the key ideas in these snippets; do not add information not present in the snippets."
-                if summary_like:
+                if not request.brief_concept_index:
+                    micro_compressor_prompt = (
+                        "Answer the query using only these snippets. "
+                        "Provide a fuller grounded response in complete sentences with concrete details from the evidence. "
+                        "Be concise, but do not reduce the answer to a terse concept index or minimal bullets. "
+                        "Do not add information not present in the snippets."
+                    )
+                if summary_like and request.brief_concept_index:
                     micro_compressor_prompt = (
                         "Create 3-6 bullet points that faithfully summarize only the named note or book from these snippets. "
                         "Stay grounded in the retrieved vault evidence. "
@@ -2923,15 +3087,23 @@ async def unified_query(request: UnifiedQueryRequest):
                         synthesis_sources,
                     )
 
+                if request.web_search:
+                    web_search_result = await _perform_tavily_web_search(
+                        client,
+                        retrieval_query or request.query,
+                    )
+
                 return {
                     "query": request.query,
                     "mode": "vector",
                     "answer": synthesized_answer, # Return the structured output instead of raw UI display
                     "sources": response_sources,
+                    "web_search": web_search_result,
                     "results": result,
                     "metadata": {
                         "source": "ChromaDB Vectors",
                         "description": "Pure vector similarity search with micro-compression.",
+                        "web_search_enabled": bool(request.web_search),
                     },
                 }
             except Exception as e:
@@ -2981,6 +3153,7 @@ async def deep_research_websocket(websocket: WebSocket):
             "openrouter",
             "chatgpt",
             "ollama",
+            "lmstudio",
             "mlx",
             "perplexity",
         }
@@ -2996,8 +3169,8 @@ async def deep_research_websocket(websocket: WebSocket):
                 return "gemini"
             if os.getenv("OPENAI_API_KEY"):
                 return "chatgpt"
-            if os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
-                return "mlx"
+            if os.getenv("LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
+                return "lmstudio"
             if os.getenv("OLLAMA_HOST"):  # Basic check for Ollama
                 return "ollama"
             return None
@@ -3013,7 +3186,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.send_json(
                     {
                         "type": "error",
-                        "content": "Deep Thinking supports MLX, Perplexity, Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found.",
+                        "content": "Deep Thinking supports LM Studio, Perplexity, Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found.",
                     }
                 )
                 await websocket.close()
@@ -3069,8 +3242,13 @@ async def deep_research_websocket(websocket: WebSocket):
                 )
                 await websocket.close()
                 return
-        elif provider == "mlx":
-            api_key = _get_env_value("QUERY_MLX_API_KEY") or _get_env_value("MLX_API_KEY", "mlx")
+        elif provider in {"lmstudio", "mlx"}:
+            api_key = (
+                _get_env_value("QUERY_LMSTUDIO_API_KEY")
+                or _get_env_value("LMSTUDIO_API_KEY", "lmstudio")
+                or _get_env_value("QUERY_MLX_API_KEY")
+                or _get_env_value("MLX_API_KEY", "mlx")
+            )
         elif provider == "ollama":
             api_key = "ollama"  # No key needed, but passing string to avoid validation errors downstream
 
@@ -3134,7 +3312,7 @@ async def deep_research_websocket(websocket: WebSocket):
             raw_answer = result.get("answer")
             if isinstance(raw_answer, str):
                 result_answer = raw_answer
-        if _looks_like_mlx_transport_failure_text(result_answer):
+        if provider == "mlx" and _looks_like_mlx_transport_failure_text(result_answer):
             await websocket.send_json(
                 {
                     "type": "log",
@@ -3171,7 +3349,7 @@ async def deep_research_websocket(websocket: WebSocket):
         print(f"Error: {e}")
         try:
             raw_error = str(e or "")
-            if _is_mlx_runtime_failure(provider, e, model=model) or _looks_like_mlx_transport_failure_text(raw_error):
+            if _is_mlx_runtime_failure(provider, e, model=model) or (provider == "mlx" and _looks_like_mlx_transport_failure_text(raw_error)):
                 await websocket.send_json(
                     {
                         "type": "log",

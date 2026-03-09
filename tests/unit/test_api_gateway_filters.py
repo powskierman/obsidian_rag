@@ -7,6 +7,7 @@ import pytest
 from deep_thinking.utils import universal_client
 
 from src.services import api_gateway
+from src.services import cascading_pipeline
 
 
 @pytest.mark.unit
@@ -177,14 +178,14 @@ async def test_synthesize_cascading_answer_retries_with_reduced_evidence(monkeyp
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_synthesize_cascading_answer_salvages_truncated_json_answer(monkeypatch):
+async def test_synthesize_cascading_answer_replaces_incomplete_truncated_answer(monkeypatch):
     class FakeClient:
         def __init__(self, provider: str = "gemini", api_key=None):
             self.messages = self
 
         def create(self, **kwargs):
             return universal_client.UniversalMessage(
-                '{\n  "answer": "- Yescarta significantly improved event-free survival for LBCL compared to standard treatments.\\n- Side effects lasting'
+                '{\n  "answer": "The Zuma-12 study investigated the efficacy of Yescarta (axicabtagene ciloleucel) in'
             )
 
     monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
@@ -204,8 +205,9 @@ async def test_synthesize_cascading_answer_salvages_truncated_json_answer(monkey
         "gemini-3-flash-preview",
     )
 
-    assert result["answer"].startswith("- Yescarta significantly improved")
-    assert not result["answer"].startswith("{")
+    assert result["fallback_reason"] == "incomplete_answer"
+    assert result["answer"].startswith("- ")
+    assert "Yescarta improved event-free survival" in result["answer"]
 
 
 @pytest.mark.unit
@@ -239,6 +241,283 @@ async def test_synthesize_cascading_answer_times_out_to_fallback(monkeypatch):
 
     assert result["fallback_reason"] == "timeout"
     assert "timed out" in result["answer"].lower()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_uses_longer_timeout_for_lmstudio(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "lmstudio", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            time.sleep(1.1)
+            return universal_client.UniversalMessage(
+                '{"answer":"LM Studio completed with extended timeout","citations":["[[Medical/Lymphoma/Yescarta.md]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+    monkeypatch.setenv("CASCADING_SYNTHESIS_TIMEOUT_SECONDS", "1")
+    monkeypatch.setenv("CASCADING_SYNTHESIS_TIMEOUT_SECONDS_LMSTUDIO", "2")
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "yescarta",
+        [
+            {
+                "filename": "Yescarta.md",
+                "filepath": "Medical/Lymphoma/Yescarta.md",
+                "relevance": 100.0,
+                "snippet": "Yescarta improved event-free survival.",
+                "source_category": "vault",
+            }
+        ],
+        "lmstudio",
+        "liquid/lfm2-24b-a2b",
+    )
+
+    assert result["answer"] == "LM Studio completed with extended timeout"
+    assert "fallback_reason" not in result
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_limits_lmstudio_prompt_context(monkeypatch):
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, provider: str = "lmstudio", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            captured["prompt"] = kwargs["messages"][0]["content"]
+            return universal_client.UniversalMessage(
+                '{"answer":"Condensed LM Studio answer","citations":["[[Recipes/media/Pizza Dough.pdf]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+    monkeypatch.setenv("CASCADING_SYNTHESIS_MAX_SOURCES_LMSTUDIO", "2")
+    monkeypatch.setenv("CASCADING_SYNTHESIS_MAX_SNIPPET_CHARS_LMSTUDIO", "40")
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "pizza recipe",
+        [
+            {
+                "filename": "Pizza Dough.pdf",
+                "filepath": "Recipes/media/Pizza Dough.pdf",
+                "relevance": 92.0,
+                "snippet": "A" * 120,
+                "source_category": "vault",
+            },
+            {
+                "filename": "Making Pizza Dough.pdf",
+                "filepath": "Recipes/media/Making Pizza Dough.pdf",
+                "relevance": 90.0,
+                "snippet": "B" * 120,
+                "source_category": "vault",
+            },
+            {
+                "filename": "Extra.md",
+                "filepath": "Recipes/Extra.md",
+                "relevance": 70.0,
+                "snippet": "C" * 120,
+                "source_category": "vault",
+            },
+        ],
+        "lmstudio",
+        "liquid/lfm2-24b-a2b",
+    )
+
+    assert result["answer"] == "Condensed LM Studio answer"
+    assert captured["prompt"].count("Snippet ") == 2
+    assert "A" * 41 not in captured["prompt"]
+    assert "B" * 41 not in captured["prompt"]
+    assert "Extra.md" not in captured["prompt"]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_uses_procedural_prompt_for_recipe_queries(monkeypatch):
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, provider: str = "chatgpt", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            captured["system"] = kwargs["system"]
+            return universal_client.UniversalMessage(
+                '{"answer":"Use the poolish, then ferment and bake.","citations":["[[Recipes/media/Pizza Dough.pdf]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "pizza dough recipe",
+        [
+            {
+                "filename": "Pizza Dough.pdf",
+                "filepath": "Recipes/media/Pizza Dough.pdf",
+                "relevance": 92.0,
+                "snippet": "Making the poolish: 300ml water, 300gr flour, 5gr yeast, 5gr honey.",
+                "source_category": "vault",
+            }
+        ],
+        "chatgpt",
+        "gpt-5-mini",
+    )
+
+    assert result["answer"] == "Use the poolish, then ferment and bake."
+    assert "ingredients" in captured["system"].lower()
+    assert "ordered steps" in captured["system"].lower()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_uses_relation_prompt_when_brief_index_disabled(monkeypatch):
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, provider: str = "chatgpt", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            captured["system"] = kwargs["system"]
+            return universal_client.UniversalMessage(
+                '{"answer":"Derivatives describe local slope, while asymptotes describe limiting behavior; they meet when limiting slope identifies an oblique asymptote.","citations":["[[Math/Asymptotes.md]]","[[Math/derivative.md]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "How do asymptotes relate to derivatives",
+        [
+            {
+                "filename": "Asymptotes.md",
+                "filepath": "Math/Asymptotes.md",
+                "relevance": 95.0,
+                "snippet": "Asymptotes describe limiting behavior.",
+                "source_category": "vault",
+            },
+            {
+                "filename": "derivative.md",
+                "filepath": "Math/derivative.md",
+                "relevance": 95.0,
+                "snippet": "Derivatives describe slope.",
+                "source_category": "vault",
+            },
+        ],
+        "chatgpt",
+        "gpt-5-mini",
+        brief_concept_index=False,
+    )
+
+    assert result["answer"].startswith("Derivatives describe local slope")
+    assert "how the queried concepts relate" in captured["system"].lower()
+
+
+@pytest.mark.unit
+def test_select_cascading_evidence_set_prefers_relation_sources():
+    selected = cascading_pipeline.select_cascading_evidence_set(
+        "How do asymptotes relate to derivatives",
+        [
+            {
+                "filename": "Asymptotes.md",
+                "filepath": "Math/Asymptotes.md",
+                "relevance": 70.0,
+                "snippet": "Asymptotes describe limiting behavior.",
+            },
+            {
+                "filename": "derivative.md",
+                "filepath": "Math/derivative.md",
+                "relevance": 68.0,
+                "snippet": "Derivatives describe slope.",
+            },
+            {
+                "filename": "conjugate.md",
+                "filepath": "Math/conjugate.md",
+                "relevance": 90.0,
+                "snippet": "Conjugates help simplify radicals.",
+            },
+        ],
+        max_results=2,
+    )
+
+    assert [item["filepath"] for item in selected] == [
+        "Math/Asymptotes.md",
+        "Math/derivative.md",
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_rejects_unsupported_grounded_details(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "ollama", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            return universal_client.UniversalMessage(
+                '{"answer":"Combine 3 cups flour, 1 tablespoon sugar, and bake at 475°F.","citations":["[[Recipes/media/Pizza Dough.pdf]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "pizza dough recipe",
+        [
+            {
+                "filename": "Pizza Dough.pdf",
+                "filepath": "Recipes/media/Pizza Dough.pdf",
+                "relevance": 92.0,
+                "snippet": "Making the poolish 1. (300ml water, 300gr flour, 5gr yeast, 5gr honey). Mix everything together. 2. Keep 1 hour at room temperature.",
+                "source_category": "vault",
+            }
+        ],
+        "ollama",
+        "qwen2.5:7b-instruct",
+    )
+
+    assert result["fallback_reason"] == "unsupported_grounded_detail"
+    assert "300ml water" in result["answer"].lower()
+    assert result["answer"].lstrip().startswith("- ")
+    assert "475" not in result["answer"]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_uses_elaborate_prompt_when_brief_index_disabled(monkeypatch):
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, provider: str = "chatgpt", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            captured["system"] = kwargs["system"]
+            return universal_client.UniversalMessage(
+                '{"answer":"A fuller grounded answer.","citations":["[[Books/Books/Ahrens-How to Take Smart Notes.md]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "what is the main idea of smart notes",
+        [
+            {
+                "filename": "Ahrens-How to Take Smart Notes.md",
+                "filepath": "Books/Books/Ahrens-How to Take Smart Notes.md",
+                "relevance": 90.0,
+                "snippet": "Smart notes turn reading into linked writing.",
+                "source_category": "vault",
+            }
+        ],
+        "chatgpt",
+        "gpt-5-mini",
+        brief_concept_index=False,
+    )
+
+    assert result["answer"] == "A fuller grounded answer."
+    assert "fuller grounded answer" in captured["system"].lower()
 
 
 @pytest.mark.unit

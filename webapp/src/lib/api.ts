@@ -69,6 +69,7 @@ export const api = {
     temperature = 0.7,
     relevance_threshold = 0,  // 0-100%, 0 = show all results
     enhanced_search = false,
+    brief_concept_index = true,
     system_prompt = ''
   ): Promise<{
     answer: string;
@@ -81,7 +82,7 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
-      const enableWebSearch = enhanced_search && ['gemini', 'claude', 'kimi', 'openrouter', 'chatgpt'].includes(llm_provider);
+      const enableWebSearch = enhanced_search;
       const enableLlmKnowledge = enhanced_search;
       const requestBody = {
         query,
@@ -93,6 +94,7 @@ export const api = {
         relevance_threshold,
         web_search: enableWebSearch,
         llm_knowledge: enableLlmKnowledge,
+        brief_concept_index,
         system_prompt: system_prompt || null
       };
       console.log('🌐 API request body:', requestBody);
@@ -147,7 +149,9 @@ export const api = {
           answer: data.answer || 'No results found',
           sources: (data.sources || []).map(normalizeSource),
           extracted_entities: data.results?.entities || [],
-          retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent
+          retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent,
+          web_search: data.web_search,
+          llm_knowledge: data.llm_knowledge,
         };
       } else {
         return {
@@ -200,7 +204,7 @@ export const api = {
     };
   },
 
-  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; mlx: boolean }; models: Record<string, string> }> => {
+  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; lmstudio: boolean }; models: Record<string, string> }> => {
     try {
       let response = await fetch('/api/provider-status');
       if (!response.ok) {
@@ -208,7 +212,7 @@ export const api = {
       }
       if (!response.ok) {
         return {
-          keys: { gemini: false, anthropic: false, openai: false, mlx: false },
+          keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
           models: {}
         };
       }
@@ -216,7 +220,7 @@ export const api = {
     } catch (error) {
       console.error('Failed to get env config:', error);
       return {
-        keys: { gemini: false, anthropic: false, openai: false, mlx: false },
+        keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
         models: {}
       };
     }

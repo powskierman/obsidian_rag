@@ -132,6 +132,42 @@ def test_vector_mode_routes_to_embedding(monkeypatch):
 
 
 @pytest.mark.integration
+def test_vector_mode_returns_web_search_results_when_enabled(monkeypatch):
+    monkeypatch.setenv("TAVILY_API_KEY", "test-key")
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(
+            {
+                "documents": [["Vector doc"]],
+                "metadatas": [[{"filename": "vector.md", "filepath": "/vault/vector.md"}]],
+                "distances": [[0.2]],
+            }
+        ),
+        "https://api.tavily.com/search": lambda payload: FakeResponse(
+            {
+                "results": [
+                    {
+                        "title": "External result",
+                        "url": "https://example.com/external-result",
+                        "content": "Relevant public web context.",
+                    }
+                ],
+                "query": payload["query"],
+            }
+        ),
+    }
+    calls = _client_with_routes(monkeypatch, routes)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "vector", query="nextion esp32 wiring", web_search=True)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["web_search"]["search_terms"] == "nextion esp32 wiring"
+    assert data["web_search"]["results"][0]["title"] == "External result"
+    assert any(call["url"] == "https://api.tavily.com/search" for call in calls)
+
+
+@pytest.mark.integration
 def test_vector_summary_prefers_exact_named_note(monkeypatch):
     embedding_result = {
         "documents": [[

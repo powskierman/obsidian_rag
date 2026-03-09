@@ -63,12 +63,12 @@ Finally, provide your answer in a structured, easy-to-read format."""
     @staticmethod
     def _provider_limits(provider: str) -> tuple[int, int, int, int]:
         provider = (provider or "").lower()
-        if provider == "mlx":
+        if provider in ("lmstudio", "mlx"):
             return (
-                int(os.getenv("DEEP_THINKING_MLX_DOC_CHARS", "4000")),
-                int(os.getenv("DEEP_THINKING_MLX_TOTAL_CONTEXT_CHARS", "18000")),
-                int(os.getenv("DEEP_THINKING_MLX_MAX_DOCS", "6")),
-                int(os.getenv("DEEP_THINKING_MLX_SUMMARY_CHARS", "4000")),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_DOC_CHARS", os.getenv("DEEP_THINKING_MLX_DOC_CHARS", "4000"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_TOTAL_CONTEXT_CHARS", os.getenv("DEEP_THINKING_MLX_TOTAL_CONTEXT_CHARS", "18000"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_MAX_DOCS", os.getenv("DEEP_THINKING_MLX_MAX_DOCS", "6"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_SUMMARY_CHARS", os.getenv("DEEP_THINKING_MLX_SUMMARY_CHARS", "4000"))),
             )
         return (
             int(os.getenv("DEEP_THINKING_DOC_CHARS", "12000")),
@@ -645,8 +645,8 @@ Return ONLY a JSON object:
             max_tokens = int(os.getenv("DEEP_THINKING_CLAUDE_MAX_TOKENS", "8192"))
         if provider in ("chatgpt", "openai"):
             max_tokens = int(os.getenv("DEEP_THINKING_OPENAI_MAX_TOKENS", str(max_tokens)))
-        if provider == "mlx":
-            max_tokens = int(os.getenv("DEEP_THINKING_MLX_MAX_TOKENS", "1024"))
+        if provider in ("lmstudio", "mlx"):
+            max_tokens = int(os.getenv("DEEP_THINKING_LMSTUDIO_MAX_TOKENS", os.getenv("DEEP_THINKING_MLX_MAX_TOKENS", "1024")))
 
         content = self._call_model_for_json(system_prompt, prompt, max_tokens)
         clean_content = content
@@ -953,8 +953,8 @@ Return ONLY a JSON object:
             max_tokens = int(os.getenv("DEEP_THINKING_CLAUDE_MAX_TOKENS", "8192"))
         if provider in ("chatgpt", "openai"):
             max_tokens = int(os.getenv("DEEP_THINKING_OPENAI_MAX_TOKENS", str(max_tokens)))
-        if provider == "mlx":
-            max_tokens = int(os.getenv("DEEP_THINKING_MLX_MAX_TOKENS", "1024"))
+        if provider in ("lmstudio", "mlx"):
+            max_tokens = int(os.getenv("DEEP_THINKING_LMSTUDIO_MAX_TOKENS", os.getenv("DEEP_THINKING_MLX_MAX_TOKENS", "1024")))
 
         system_prompt = self.system_prompt
         guardrails = build_provider_guardrails(provider)

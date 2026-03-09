@@ -61,13 +61,13 @@ export default function SettingsPanel() {
         </div>
       )}
 
-      {llmProvider === 'mlx' && (
+      {llmProvider === 'lmstudio' && (
         <div className="space-y-2">
-          <label className="text-xs text-white/60">MLX Model</label>
+          <label className="text-xs text-white/60">LM Studio Model</label>
           <input
             value={settings.model}
             onChange={(e) => updateSettings({ model: e.target.value })}
-            placeholder="LiquidAI/LFM2-24B-A2B-MLX-4bit"
+            placeholder="local-model"
             className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
           />
         </div>
@@ -163,6 +163,18 @@ export default function SettingsPanel() {
           />
           <span className="text-sm text-white/80 group-hover:text-white transition-colors">
             {enhancedDisabled ? 'Enhanced Search (Deep Thinking)' : 'Enhanced Search'}
+          </span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={settings.briefConceptIndex}
+            onChange={(e) => updateSettings({ briefConceptIndex: e.target.checked })}
+            className="w-4 h-4 rounded border-[#2C2C2E] bg-[#1C1C1E] text-[#0A84FF] focus:ring-[#0A84FF] focus:ring-offset-0"
+          />
+          <span className="text-sm text-white/80 group-hover:text-white transition-colors">
+            Brief Concept Index
           </span>
         </label>
       </div>

@@ -186,6 +186,82 @@ def is_summary_style_query(query: str) -> bool:
     )
 
 
+def is_procedural_style_query(query: str) -> bool:
+    lowered = str(query or "").strip().lower()
+    if not lowered:
+        return False
+    procedural_markers = (
+        "recipe",
+        "how to ",
+        "how do i ",
+        "steps for ",
+        "instructions for ",
+        "ingredients for ",
+        "procedure for ",
+    )
+    return any(marker in lowered for marker in procedural_markers)
+
+
+def _relation_query_sides(query: str) -> tuple[set[str], set[str]]:
+    lowered = str(query or "").strip().lower()
+    if not lowered:
+        return set(), set()
+
+    patterns = (
+        r"how do\s+(?P<left>.+?)\s+relate to\s+(?P<right>.+)",
+        r"what is the relationship between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
+        r"how are\s+(?P<left>.+?)\s+and\s+(?P<right>.+?)\s+related",
+        r"compare\s+(?P<left>.+?)\s+(?:with|and)\s+(?P<right>.+)",
+        r"difference between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, lowered)
+        if not match:
+            continue
+        left = {
+            token for token in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", match.group("left"))
+            if token not in {"how", "what", "does", "relate", "related", "between", "compare", "difference"}
+        }
+        right = {
+            token for token in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", match.group("right"))
+            if token not in {"how", "what", "does", "relate", "related", "between", "compare", "difference"}
+        }
+        if left and right:
+            return left, right
+    return set(), set()
+
+
+def is_relation_style_query(query: str) -> bool:
+    left, right = _relation_query_sides(query)
+    return bool(left and right)
+
+
+def _relation_query_source_score(query: str, source: Dict[str, Any]) -> float:
+    left_terms, right_terms = _relation_query_sides(query)
+    if not left_terms or not right_terms:
+        return 0.0
+
+    haystack = " ".join(
+        _normalize_summary_focus_text(value)
+        for value in (
+            source.get("filename"),
+            source.get("filepath"),
+            source.get("snippet"),
+            source.get("content"),
+            source.get("canonical_id"),
+        )
+    )
+    if not haystack.strip():
+        return 0.0
+
+    left_hits = sum(1 for term in left_terms if term in haystack)
+    right_hits = sum(1 for term in right_terms if term in haystack)
+    if not left_hits and not right_hits:
+        return 0.0
+    both_bonus = 20.0 if left_hits and right_hits else 0.0
+    return both_bonus + (left_hits * 8.0) + (right_hits * 8.0)
+
+
 def select_cascading_evidence_set(
     query: str,
     sources: List[Dict[str, Any]],
@@ -214,6 +290,22 @@ def select_cascading_evidence_set(
         if exact_matches:
             exact_matches.sort(key=lambda item: float(item.get("relevance", 0.0)), reverse=True)
             return exact_matches[:1]
+
+    if is_relation_style_query(query):
+        ranked_relation_sources = sorted(
+            candidate_sources,
+            key=lambda source: (
+                _relation_query_source_score(query, source),
+                float(source.get("relevance", 0.0) or 0.0),
+            ),
+            reverse=True,
+        )
+        positive_relation_sources = [
+            source for source in ranked_relation_sources
+            if _relation_query_source_score(query, source) > 0
+        ]
+        if positive_relation_sources:
+            return positive_relation_sources[:max(2, min(max_results, len(positive_relation_sources)))]
 
     try:
         from deep_thinking.supervisor import RetrievalSupervisor
@@ -265,7 +357,8 @@ def canonical_cascading_provider_name(provider: str) -> str:
         "chatgpt": "chatgpt",
         "openrouter": "openrouter",
         "ollama": "ollama",
-        "mlx": "mlx",
+        "lmstudio": "lmstudio",
+        "mlx": "lmstudio",
         "perplexity": "perplexity",
     }
     return aliases.get(normalized, normalized)
@@ -279,7 +372,7 @@ def default_cascading_model(provider: str) -> Optional[str]:
         "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o-mini"),
         "openrouter": _get_env_value("OPENROUTER_MODEL", "openrouter/auto"),
         "ollama": _get_env_value("OLLAMA_MODEL", _get_env_value("LLM_MODEL", "qwen2.5:7b-instruct")),
-        "mlx": _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "LiquidAI/LFM2-24B-A2B")),
+        "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         "perplexity": _get_env_value("PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online"),
     }
     return defaults.get(provider)
@@ -297,8 +390,14 @@ def cascading_provider_api_key(provider: str) -> Optional[str]:
         return _get_env_value("OPENROUTER_API_KEY") or None
     if provider == "ollama":
         return None
-    if provider == "mlx":
-        return _get_env_value("QUERY_MLX_API_KEY") or _get_env_value("MLX_API_KEY", "mlx") or "mlx"
+    if provider == "lmstudio":
+        return (
+            _get_env_value("QUERY_LMSTUDIO_API_KEY")
+            or _get_env_value("LMSTUDIO_API_KEY", "lmstudio")
+            or _get_env_value("QUERY_MLX_API_KEY")
+            or _get_env_value("MLX_API_KEY", "mlx")
+            or "lmstudio"
+        )
     if provider == "perplexity":
         return _get_env_value("PERPLEXITY_API_KEY") or None
     return None
@@ -338,6 +437,191 @@ def build_cascading_degraded_answer(
     return "No results found."
 
 
+def _prepare_synthesis_prompt_sources(
+    provider: str,
+    sources: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    resolved_provider = canonical_cascading_provider_name(provider)
+    prepared_sources = [
+        dict(source)
+        for source in sources
+        if isinstance(source, Mapping)
+    ]
+    if resolved_provider != "lmstudio":
+        return prepared_sources
+
+    try:
+        max_sources = max(
+            1,
+            int(
+                _get_env_value(
+                    "CASCADING_SYNTHESIS_MAX_SOURCES_LMSTUDIO",
+                    "4",
+                )
+            ),
+        )
+    except (TypeError, ValueError):
+        max_sources = 4
+
+    try:
+        max_snippet_chars = max(
+            200,
+            int(
+                _get_env_value(
+                    "CASCADING_SYNTHESIS_MAX_SNIPPET_CHARS_LMSTUDIO",
+                    "700",
+                )
+            ),
+        )
+    except (TypeError, ValueError):
+        max_snippet_chars = 700
+
+    limited_sources: List[Dict[str, Any]] = []
+    for source in prepared_sources[:max_sources]:
+        snippet = str(source.get("snippet") or "")
+        if len(snippet) > max_snippet_chars:
+            source["snippet"] = f"{snippet[:max_snippet_chars].rstrip()}..."
+        limited_sources.append(source)
+    return limited_sources
+
+
+def _clean_extractive_fallback_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+
+    text = re.sub(r"^---\s*.*?\s*---\s*", "", text, flags=re.DOTALL)
+    text = re.sub(r"(?:\[[^\]]+:\s[^\]]+\]\s*)+", "", text)
+    text = re.sub(r"<mark[^>]*>", "", text, flags=re.IGNORECASE)
+    text = text.replace("</mark>", "")
+    text = text.replace("==", "")
+    text = re.sub(r"!\[[^\]]*\]\([^)]+\)", " ", text)
+    text = re.sub(r"\[\[([^\]]+)\]\]", r"\1", text)
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
+    text = re.sub(r"^#{1,6}\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _extractive_fallback_candidates(text: str) -> List[str]:
+    cleaned = _clean_extractive_fallback_text(text)
+    if not cleaned:
+        return []
+
+    numbered = re.split(r"\s(?=\d+\.\s)", cleaned)
+    fragments: List[str] = []
+    for chunk in numbered:
+        fragments.extend(re.split(r"(?<=[.!?])\s+", chunk))
+
+    candidates: List[str] = []
+    for fragment in fragments:
+        candidate = re.sub(r"^\d+\.\s*", "", fragment).strip(" -\n\t")
+        if len(candidate) < 20:
+            continue
+        if len(candidate) > 320:
+            continue
+        lowered = candidate.lower()
+        if lowered.startswith(("source:", "date:", "canonical id:", "entity type:", "timeline date:", "tags:")):
+            continue
+        if candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
+
+
+_GROUNDED_DETAIL_PATTERN = re.compile(
+    r"\b\d+(?:[./]\d+)?\s*(?:°\s*[fc]|degrees?\s*[fc]|cups?|tbsp|tsp|teaspoons?|tablespoons?|"
+    r"g|gr|kg|ml|l|oz|lbs?|pounds?|minutes?|mins?|hours?|hrs?)\b",
+    re.IGNORECASE,
+)
+
+
+def _answer_has_unsupported_grounded_details(
+    answer_text: str,
+    sources: List[Dict[str, Any]],
+) -> bool:
+    combined_source_text = " ".join(
+        _clean_extractive_fallback_text(source.get("content") or source.get("snippet") or "")
+        for source in (sources or [])
+        if isinstance(source, Mapping)
+    ).lower()
+    if not combined_source_text:
+        return False
+
+    answer_details = {
+        re.sub(r"\s+", " ", match.group(0).lower()).strip()
+        for match in _GROUNDED_DETAIL_PATTERN.finditer(str(answer_text or ""))
+    }
+    if not answer_details:
+        return False
+
+    for detail in answer_details:
+        normalized_detail = detail.replace("degrees ", "").replace("° ", "°")
+        if detail not in combined_source_text and normalized_detail not in combined_source_text:
+            return True
+    return False
+
+
+def _build_extractive_cascading_fallback_answer(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> str:
+    if not sources:
+        return "No results found."
+
+    ranked: List[tuple[float, str]] = []
+    seen: set[str] = set()
+    query_terms = {
+        token.lower()
+        for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", str(query or ""))
+        if token
+    }
+
+    for source_index, source in enumerate(sources[:5]):
+        snippet = str(source.get("content") or source.get("snippet") or "")
+        relevance = float(source.get("relevance", 0.0) or 0.0)
+        for candidate_index, candidate in enumerate(_extractive_fallback_candidates(snippet)[:6]):
+            normalized = re.sub(r"[^a-z0-9]+", " ", candidate.lower()).strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            term_hits = sum(1 for term in query_terms if term in normalized)
+            measurement_bonus = 150 if _GROUNDED_DETAIL_PATTERN.search(candidate) else 0
+            score = (term_hits * 1000) + measurement_bonus + (relevance * 10) - (source_index * 10) - candidate_index
+            ranked.append((score, candidate.rstrip(". ") + "."))
+
+    if not ranked:
+        return "I found relevant vault evidence. Review the attached sources for the most reliable details."
+
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    top_candidates = [candidate for _, candidate in ranked[:4]]
+    return "\n".join(f"- {candidate}" for candidate in top_candidates)
+
+
+def _looks_incomplete_answer(text: str) -> bool:
+    answer_text = str(text or "").strip()
+    if not answer_text:
+        return True
+    if answer_text.endswith((".", "!", "?", "]", ")", "\"")):
+        return False
+    if len(answer_text.split()) < 8:
+        return False
+
+    trailing_terms = {
+        "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "is",
+        "of", "on", "or", "that", "the", "to", "was", "were", "with",
+    }
+    last_token_match = re.search(r"([A-Za-z]+)\s*$", answer_text)
+    last_token = last_token_match.group(1).lower() if last_token_match else ""
+    if last_token in trailing_terms:
+        return True
+    if answer_text.endswith((",", ";", ":", "-", "(", "/", "—")):
+        return True
+    if answer_text.count("(") > answer_text.count(")"):
+        return True
+    return False
+
+
 def _salvage_structured_response(text: str) -> Dict[str, Any]:
     citations: List[str] = []
     answer_text = ""
@@ -370,14 +654,34 @@ async def synthesize_cascading_answer(
     llm_provider: str,
     model: str,
     system_prompt: Optional[str],
+    brief_concept_index: bool = True,
+    supplemental_context: Optional[str] = None,
 ) -> Dict[str, Any]:
+    resolved_provider = canonical_cascading_provider_name(llm_provider)
+
     try:
-        synthesis_timeout_seconds = max(
+        base_timeout_seconds = max(
             1.0,
             float(_get_env_value("CASCADING_SYNTHESIS_TIMEOUT_SECONDS", "25")),
         )
     except (TypeError, ValueError):
-        synthesis_timeout_seconds = 25.0
+        base_timeout_seconds = 25.0
+
+    synthesis_timeout_seconds = base_timeout_seconds
+    if resolved_provider == "lmstudio":
+        try:
+            lmstudio_timeout_seconds = max(
+                1.0,
+                float(
+                    _get_env_value(
+                        "CASCADING_SYNTHESIS_TIMEOUT_SECONDS_LMSTUDIO",
+                        _get_env_value("CASCADING_SYNTHESIS_TIMEOUT_SECONDS_MLX", "180"),
+                    )
+                ),
+            )
+        except (TypeError, ValueError):
+            lmstudio_timeout_seconds = 180.0
+        synthesis_timeout_seconds = max(base_timeout_seconds, lmstudio_timeout_seconds)
 
     try:
         synthesis_temperature = max(
@@ -451,30 +755,76 @@ async def synthesize_cascading_answer(
     if not sources:
         return {"answer": "No results found", "citations": [], "used_documents": [], "fallback_reason": "no_sources"}
 
-    context_text = "\n\n".join([
-        f"Snippet {i+1} from {s.get('filename', 'Unknown')}:\n{s.get('snippet', '')}"
-        for i, s in enumerate(sources[:15])
-    ])
+    supplemental_context_text = str(supplemental_context or "").strip()
 
-    sys_prompt = system_prompt or (
-        "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
-        "Return JSON only with keys: answer, citations. "
-        "The answer must be a brief executive concept index or high-level overview. "
-        "Do NOT provide didactic, step-by-step explanations or walk through processes unless strictly necessary. "
-        "Instead, rapidly name and list the core concepts, frameworks, or relationships present in the context. "
-        "Keep it tight and concise, under 200 words if possible. "
-        "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
-        "Do not invent citations. If the context does not contain the answer, say so."
-    )
-    prompt = (
-        f"Context:\n{context_text}\n\n"
-        f"Query: {query}\n\n"
-        "Return JSON only in the form "
-        '{"answer": "concise grounded answer", "citations": ["[[Exact/Path.md]]"]}.'
-    )
+    procedural_query = is_procedural_style_query(query)
+    relation_query = is_relation_style_query(query)
 
-    resolved_provider = canonical_cascading_provider_name(llm_provider)
-    if resolved_provider not in {"claude", "gemini", "openrouter", "chatgpt", "ollama", "mlx", "perplexity"}:
+    if system_prompt:
+        sys_prompt = system_prompt
+    elif procedural_query and not brief_concept_index:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Provide a fuller grounded procedural answer, not a terse synopsis. "
+            "Include the available ingredients, measurements, timings, temperatures, and ordered steps from the vault evidence. "
+            "Prefer a usable step-by-step answer over a one-sentence summary when the context supports it. "
+            "If a needed detail is not present in the context, say that it is not specified in the vault evidence. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations."
+        )
+    elif procedural_query:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "For recipe or how-to queries, provide a compact but usable procedural answer. "
+            "Include concrete ingredients, measurements, timings, temperatures, and ordered steps when they appear in the context. "
+            "Do not stop at a one-line overview if the sources contain a fuller procedure. "
+            "If an important detail is missing from the context, say that it is not specified in the vault evidence. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations."
+        )
+    elif relation_query and not brief_concept_index:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Provide a fuller grounded explanation of how the queried concepts relate to each other. "
+            "State the connection explicitly, note any important differences or limits, and tie each point to the retrieved evidence. "
+            "Do not drift into generic background definitions if the relation can be explained directly from the context. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations. If the context is insufficient, say so."
+        )
+    elif relation_query:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Give a concise explanation of how the queried concepts relate, including the most important connection or contrast from the evidence. "
+            "Avoid generic textbook framing when the relation can be stated directly. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations. If the context is insufficient, say so."
+        )
+    elif not brief_concept_index:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Provide a fuller grounded answer, not a terse concept index. "
+            "Explain the main points in complete sentences, and include concrete details from the retrieved evidence when relevant. "
+            "Be concise, but do not compress the answer so aggressively that useful detail is lost. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations. If the context does not contain the answer, say so."
+        )
+    else:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "The answer must be a brief executive concept index or high-level overview. "
+            "Do NOT provide didactic, step-by-step explanations or walk through processes unless strictly necessary. "
+            "Instead, rapidly name and list the core concepts, frameworks, or relationships present in the context. "
+            "Keep it tight and concise, under 200 words if possible. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations. If the context does not contain the answer, say so."
+        )
+    if resolved_provider not in {"claude", "gemini", "openrouter", "chatgpt", "ollama", "lmstudio", "perplexity"}:
         return fallback_payload(
             f"Found {len(sources)} matching snippets in your vault. (LLM synthesis skipped: unknown provider '{llm_provider}')",
             sources,
@@ -501,12 +851,20 @@ async def synthesize_cascading_answer(
             if signature in attempted_signatures:
                 continue
             attempted_signatures.add(signature)
+            prompt_sources = _prepare_synthesis_prompt_sources(
+                resolved_provider,
+                active_sources,
+            )
             active_context = "\n\n".join([
                 f"Snippet {i+1} from {s.get('filename', 'Unknown')}:\n{s.get('snippet', '')}"
-                for i, s in enumerate(active_sources[:15])
+                for i, s in enumerate(prompt_sources[:15])
             ])
+            active_sections = []
+            if supplemental_context_text:
+                active_sections.append(f"Supplemental context:\n{supplemental_context_text}")
+            active_sections.append(f"Context:\n{active_context}")
             active_prompt = (
-                f"Context:\n{active_context}\n\n"
+                f"{'\n\n'.join(active_sections)}\n\n"
                 f"Query: {query}\n\n"
                 "Return JSON only in the form "
                 '{"answer": "concise grounded answer", "citations": ["[[Exact/Path.md]]"]}.'
@@ -535,6 +893,22 @@ async def synthesize_cascading_answer(
                 )
             parsed = parse_structured_response(universal_client.extract_response_text(response), active_sources)
             answer_text = str(parsed.get("answer") or "").strip()
+            if _answer_has_unsupported_grounded_details(answer_text, active_sources):
+                parsed = fallback_payload(
+                    _build_extractive_cascading_fallback_answer(query, active_sources),
+                    active_sources,
+                    reason="unsupported_grounded_detail",
+                )
+                answer_text = str(parsed.get("answer") or "").strip()
+            if _looks_incomplete_answer(answer_text):
+                if attempt_index < len(attempt_sources_list) - 1:
+                    continue
+                parsed = fallback_payload(
+                    _build_extractive_cascading_fallback_answer(query, active_sources),
+                    active_sources,
+                    reason="incomplete_answer",
+                )
+                answer_text = str(parsed.get("answer") or "").strip()
             if answer_text and not is_generic_cascading_fallback_answer(answer_text):
                 if attempt_index:
                     parsed["fallback_reason"] = "retry_reduced_evidence"

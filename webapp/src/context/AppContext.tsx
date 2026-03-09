@@ -23,21 +23,21 @@ interface AppContextType extends AppState {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-const CURRENT_SETTINGS_VERSION = 3;
-const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'mlx'];
+const CURRENT_SETTINGS_VERSION = 4;
+const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'lmstudio'];
 const DEFAULT_PROVIDER_MODELS: Record<LLMProvider, string> = {
   ollama: 'mistral',
   gemini: 'gemini-1.5-pro',
   claude: 'claude-3-5-sonnet-latest',
   openrouter: 'google/gemini-2.0-flash-exp:free',
   chatgpt: 'gpt-4o',
-  mlx: 'LiquidAI/LFM2-24B-A2B-MLX-4bit',
+  lmstudio: 'local-model',
 };
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
-const normalizeProvider = (rawProvider: string | null | undefined): LLMProvider => rawProvider === 'perplexity'
-  ? 'mlx'
+const normalizeProvider = (rawProvider: string | null | undefined): LLMProvider => rawProvider === 'mlx'
+  ? 'lmstudio'
   : VALID_LLM_PROVIDERS.includes(rawProvider as LLMProvider)
     ? rawProvider as LLMProvider
     : 'ollama';
@@ -62,12 +62,12 @@ const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsS
   } as SettingsState;
   const rawSettingsVersion = Number(parsed.settingsVersion);
   const normalizedSettingsVersion = Number.isFinite(rawSettingsVersion) ? rawSettingsVersion : 0;
-  const needsV2Reset = normalizedSettingsVersion < CURRENT_SETTINGS_VERSION;
+  const needsRelevanceThresholdReset = normalizedSettingsVersion < 3;
 
   // Migration safety: old distanceThreshold values can map too aggressively.
   // Reset to 0% so users never get silently over-restrictive filtering.
   if (
-    needsV2Reset &&
+    needsRelevanceThresholdReset &&
     (
       ('distanceThreshold' in parsed && !('relevanceThreshold' in parsed)) ||
       Number(next.relevanceThreshold) > 0
@@ -94,6 +94,9 @@ const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsS
 
   next.showSources = Boolean(next.showSources);
   next.enhancedSearch = Boolean(next.enhancedSearch);
+  next.briefConceptIndex = parsed.briefConceptIndex === undefined
+    ? defaultSettings.briefConceptIndex
+    : Boolean(next.briefConceptIndex);
   next.deepThinking = Boolean(next.deepThinking);
   const parsedProviderModels = parsed.providerModels && typeof parsed.providerModels === 'object'
     ? parsed.providerModels as Record<string, unknown>
@@ -105,6 +108,14 @@ const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsS
     if (typeof value === 'string' && value.trim()) {
       providerModels[provider] = value.trim();
     }
+  }
+  const legacyMlxProviderModel = parsedProviderModels.mlx;
+  if (
+    !providerModels.lmstudio &&
+    typeof legacyMlxProviderModel === 'string' &&
+    legacyMlxProviderModel.trim()
+  ) {
+    providerModels.lmstudio = legacyMlxProviderModel.trim();
   }
   if (!parsedProviderModels || Object.keys(parsedProviderModels).length === 0) {
     if (legacyModel) {
@@ -222,7 +233,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           claude: config.models.claude || DEFAULT_PROVIDER_MODELS.claude,
           openrouter: config.models.openrouter || DEFAULT_PROVIDER_MODELS.openrouter,
           chatgpt: config.models.chatgpt || DEFAULT_PROVIDER_MODELS.chatgpt,
-          mlx: config.models.mlx || DEFAULT_PROVIDER_MODELS.mlx,
+          lmstudio: config.models.lmstudio || DEFAULT_PROVIDER_MODELS.lmstudio,
         });
         setSettings((prev) => {
           const mergedProviderModels: Partial<Record<LLMProvider, string>> = {
@@ -274,20 +285,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [systemPrompt]);
 
   useEffect(() => {
-    const staleMlxDefaults = new Set([
+    const staleLmStudioDefaults = new Set([
       'LiquidAI/LFM2-24B-A2B',
     ]);
-    const storedMlxModel = (settings.providerModels?.mlx || settings.model || '').trim();
-    if (staleMlxDefaults.has(storedMlxModel)) {
-      const repairedModel = providerModelDefaults.mlx || DEFAULT_PROVIDER_MODELS.mlx;
-      if (repairedModel && repairedModel !== storedMlxModel) {
+    const storedLmStudioModel = (settings.providerModels?.lmstudio || settings.model || '').trim();
+    if (staleLmStudioDefaults.has(storedLmStudioModel)) {
+      const repairedModel = providerModelDefaults.lmstudio || DEFAULT_PROVIDER_MODELS.lmstudio;
+      if (repairedModel && repairedModel !== storedLmStudioModel) {
         setSettings((prev) => ({
           ...prev,
           providerModels: {
             ...prev.providerModels,
-            mlx: repairedModel,
+            lmstudio: repairedModel,
           },
-          model: llmProvider === 'mlx' ? repairedModel : prev.model,
+          model: llmProvider === 'lmstudio' ? repairedModel : prev.model,
           settingsVersion: CURRENT_SETTINGS_VERSION,
         }));
       }

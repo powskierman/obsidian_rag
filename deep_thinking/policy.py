@@ -24,8 +24,12 @@ class PolicyAgent:
         provider = getattr(self.client, "provider", "").lower()
         summary_limit = int(
             os.getenv(
-                "DEEP_THINKING_MLX_POLICY_SUMMARY_CHARS" if provider == "mlx" else "DEEP_THINKING_POLICY_SUMMARY_CHARS",
-                "2500" if provider == "mlx" else "6000",
+                "DEEP_THINKING_LMSTUDIO_POLICY_SUMMARY_CHARS"
+                if provider in ("lmstudio", "mlx")
+                else "DEEP_THINKING_POLICY_SUMMARY_CHARS",
+                os.getenv("DEEP_THINKING_MLX_POLICY_SUMMARY_CHARS", "2500")
+                if provider in ("lmstudio", "mlx")
+                else "6000",
             )
         )
         research_summary = self._truncate_text(self._format_research_summary(state['past_steps']), summary_limit)
@@ -51,7 +55,7 @@ class PolicyAgent:
         
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=200 if provider == "mlx" else 300,
+            max_tokens=200 if provider in ("lmstudio", "mlx") else 300,
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )

@@ -97,8 +97,8 @@ class UniversalClient:
             return self._create_openai(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "ollama":
             return self._create_ollama(model, messages, max_tokens, temperature, system, response_format)
-        elif self.provider == "mlx":
-            return self._create_mlx(model, messages, max_tokens, temperature, system, response_format)
+        elif self.provider in ("lmstudio", "mlx"):
+            return self._create_lmstudio(model, messages, max_tokens, temperature, system, response_format)
         elif self.provider == "perplexity":
             return self._create_perplexity(model, messages, max_tokens, temperature, system, response_format)
         else:
@@ -291,7 +291,11 @@ class UniversalClient:
         }
         
         if response_format:
-            payload["response_format"] = response_format
+            requested_type = str(response_format.get("type") or "").strip().lower()
+            if requested_type == "json_object":
+                payload["response_format"] = {"type": "text"}
+            else:
+                payload["response_format"] = response_format
 
         # Add identifying headers for better OpenRouter citizenship & stability
         headers = {
@@ -375,7 +379,11 @@ class UniversalClient:
             payload["temperature"] = temperature
 
         if response_format:
-            payload["response_format"] = response_format
+            requested_type = str(response_format.get("type") or "").strip().lower()
+            if requested_type == "json_object":
+                payload["response_format"] = {"type": "text"}
+            else:
+                payload["response_format"] = response_format
 
         try:
             response = requests.post(
@@ -428,29 +436,54 @@ class UniversalClient:
             logger.error(f"OpenAI request failed: {e}")
             raise e
 
-    def _create_mlx(self, model: str, messages: List[Dict[str, str]],
-                    max_tokens: int, temperature: float, system: str,
-                    response_format: Optional[Dict[str, Any]] = None):
-        base_url = os.getenv("QUERY_MLX_BASE_URL") or os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")
-        api_key = self.api_key or os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
+    def _create_lmstudio(self, model: str, messages: List[Dict[str, str]],
+                         max_tokens: int, temperature: float, system: str,
+                         response_format: Optional[Dict[str, Any]] = None):
+        provider = (self.provider or "lmstudio").lower()
+        if provider == "mlx":
+            base_url = (
+                os.getenv("QUERY_MLX_BASE_URL")
+                or os.getenv("MLX_BASE_URL")
+                or os.getenv("QUERY_LMSTUDIO_BASE_URL")
+                or os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1")
+            )
+            api_key = self.api_key or os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
+            default_model = os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or "LiquidAI/LFM2-24B-A2B"
+            timeout_env = "MLX_TIMEOUT"
+            display_name = "MLX"
+        else:
+            base_url = (
+                os.getenv("QUERY_LMSTUDIO_BASE_URL")
+                or os.getenv("LMSTUDIO_BASE_URL")
+                or os.getenv("QUERY_MLX_BASE_URL")
+                or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")
+            )
+            api_key = self.api_key or os.getenv("QUERY_LMSTUDIO_API_KEY") or os.getenv("LMSTUDIO_API_KEY", "lmstudio")
+            default_model = os.getenv("LMSTUDIO_MODEL") or os.getenv("LLM_MODEL_PATH") or os.getenv("LLM_MODEL") or "local-model"
+            timeout_env = "LMSTUDIO_TIMEOUT"
+            display_name = "LM Studio"
         if not model or "claude" in model.lower() or "gpt" in model.lower():
-            model = os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or "LiquidAI/LFM2-24B-A2B"
+            model = default_model
 
-        mlx_messages = list(messages)
+        lmstudio_messages = list(messages)
         if system:
-            mlx_messages = [{"role": "system", "content": system}] + mlx_messages
+            lmstudio_messages = [{"role": "system", "content": system}] + lmstudio_messages
 
         payload = {
             "model": model,
-            "messages": mlx_messages,
+            "messages": lmstudio_messages,
             "max_tokens": max_tokens,
             "temperature": temperature
         }
 
         if response_format:
-            payload["response_format"] = response_format
+            requested_type = str(response_format.get("type") or "").strip().lower()
+            if requested_type == "json_object":
+                payload["response_format"] = {"type": "text"}
+            else:
+                payload["response_format"] = response_format
 
-        timeout = float(os.getenv("MLX_TIMEOUT", "300"))
+        timeout = float(os.getenv(timeout_env, os.getenv("MLX_TIMEOUT", "300")))
         
         # Retry connection if MLX is still downloading the model and hasn't bound the port yet.
         import time
@@ -469,20 +502,20 @@ class UniversalClient:
                 break
             except requests.exceptions.ConnectionError as e:
                 if attempt == max_retries - 1:
-                    logger.error(f"MLX connection failed after {max_retries} retries: {e}")
-                    raise ValueError(f"MLX Server unreachable: is it running/downloading the model? {e}")
+                    logger.error(f"{display_name} connection failed after {max_retries} retries: {e}")
+                    raise ValueError(f"{display_name} server unreachable: is it running? {e}")
                 time.sleep(5)
 
         try:
             if response.status_code != 200:
-                error_msg = f"MLX API Error {response.status_code}: {response.text}"
+                error_msg = f"{display_name} API Error {response.status_code}: {response.text}"
                 logger.error(error_msg)
                 raise ValueError(error_msg)
 
             data = response.json()
             choices = data.get("choices", [])
             if not choices:
-                raise ValueError("No choices returned from MLX")
+                raise ValueError(f"No choices returned from {display_name}")
 
             message = choices[0].get("message", {})
             content = message.get("content", "")
@@ -496,7 +529,7 @@ class UniversalClient:
                 content = "".join(parts)
             return UniversalMessage(str(content))
         except Exception as e:
-            logger.error(f"MLX request failed: {e}")
+            logger.error(f"{display_name} request failed: {e}")
             raise e
 
     def _create_ollama(self, model: str, messages: List[Dict[str, str]],

@@ -16,6 +16,7 @@ Use this as the entry point for active project documentation.
 - System overview: `./SYSTEM_OVERVIEW_2025.md`
 - API quickstart: `./API_GATEWAY_QUICKSTART.md`
 - Unified API details: `./UNIFIED_API_IMPLEMENTATION.md`
+- Web search details: `./WEB_SEARCH_IMPLEMENTATION.md`
 - Search modes: `./Features/SEARCH_MODES_GUIDE.md`
 - Indexing scripts: `./Setup/INDEXING_SCRIPTS_GUIDE.md`
 - Canonical partial LightRAG indexing: `./Setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
@@ -47,7 +48,10 @@ Use this as the entry point for active project documentation.
 - WebSocket: `ws://localhost:4000/api/v1/deep-research`
 
 Notes:
-- `graph` is still accepted as a backward-compatible alias for `notes`.
+- `POST /api/v1/query` currently supports `vector` and `cascading`.
+- Deep thinking uses `ws://localhost:4000/api/v1/deep-research`.
+- `lmstudio` is the supported local OpenAI-compatible provider label; `mlx` remains a compatibility alias in parts of the backend.
+- Enhanced search returns supplemental web-search results after vault sources in the webapp.
 - Active documentation intentionally excludes archived historical documents from navigation.
 
 ## Full Index
