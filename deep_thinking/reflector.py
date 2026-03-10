@@ -13,11 +13,11 @@ class ReflectionAgent:
     @staticmethod
     def _provider_limits(provider: str) -> tuple[int, int, int]:
         provider = (provider or "").lower()
-        if provider == "mlx":
+        if provider in ("lmstudio", "mlx"):
             return (
-                int(os.getenv("DEEP_THINKING_MLX_REFLECT_DOCS", "3")),
-                int(os.getenv("DEEP_THINKING_MLX_REFLECT_DOC_CHARS", "2000")),
-                int(os.getenv("DEEP_THINKING_MLX_REFLECT_PAST_CHARS", "2500")),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_REFLECT_DOCS", os.getenv("DEEP_THINKING_MLX_REFLECT_DOCS", "3"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_REFLECT_DOC_CHARS", os.getenv("DEEP_THINKING_MLX_REFLECT_DOC_CHARS", "2000"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_REFLECT_PAST_CHARS", os.getenv("DEEP_THINKING_MLX_REFLECT_PAST_CHARS", "2500"))),
             )
         return (
             int(os.getenv("DEEP_THINKING_REFLECT_DOCS", "5")),
@@ -73,7 +73,7 @@ class ReflectionAgent:
         
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=250 if provider == "mlx" else 500,
+            max_tokens=250 if provider in ("lmstudio", "mlx") else 500,
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
@@ -165,7 +165,7 @@ class ReflectionAgent:
         try:
             response = self.client.messages.create(
                 model=self.model,
-                max_tokens=600 if provider == "mlx" else 1500,
+                max_tokens=600 if provider in ("lmstudio", "mlx") else 1500,
                 messages=[{"role": "user", "content": prompt}]
             )
             

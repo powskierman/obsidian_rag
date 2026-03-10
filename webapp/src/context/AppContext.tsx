@@ -23,20 +23,38 @@ interface AppContextType extends AppState {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-const CURRENT_SETTINGS_VERSION = 2;
-const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'mlx'];
+const CURRENT_SETTINGS_VERSION = 4;
+const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'lmstudio'];
 const DEFAULT_PROVIDER_MODELS: Record<LLMProvider, string> = {
   ollama: 'mistral',
   gemini: 'gemini-1.5-pro',
   claude: 'claude-3-5-sonnet-latest',
   openrouter: 'google/gemini-2.0-flash-exp:free',
   chatgpt: 'gpt-4o',
-  mlx: 'LiquidAI/LFM2-24B-A2B-MLX-4bit',
+  lmstudio: 'local-model',
 };
 
 const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
 
-const normalizeSettings = (raw: unknown): SettingsState => {
+const normalizeProvider = (rawProvider: string | null | undefined): LLMProvider => rawProvider === 'mlx'
+  ? 'lmstudio'
+  : VALID_LLM_PROVIDERS.includes(rawProvider as LLMProvider)
+    ? rawProvider as LLMProvider
+    : 'ollama';
+
+const resolveProviderModel = (
+  settings: SettingsState,
+  provider: LLMProvider,
+  defaults: Record<LLMProvider, string>,
+): string => {
+  const providerModel = settings.providerModels?.[provider];
+  if (typeof providerModel === 'string' && providerModel.trim()) {
+    return providerModel.trim();
+  }
+  return defaults[provider];
+};
+
+const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsState => {
   const parsed = (raw && typeof raw === 'object') ? raw as Record<string, unknown> : {};
   const next: SettingsState = {
     ...defaultSettings,
@@ -44,12 +62,12 @@ const normalizeSettings = (raw: unknown): SettingsState => {
   } as SettingsState;
   const rawSettingsVersion = Number(parsed.settingsVersion);
   const normalizedSettingsVersion = Number.isFinite(rawSettingsVersion) ? rawSettingsVersion : 0;
-  const needsV2Reset = normalizedSettingsVersion < CURRENT_SETTINGS_VERSION;
+  const needsRelevanceThresholdReset = normalizedSettingsVersion < 3;
 
   // Migration safety: old distanceThreshold values can map too aggressively.
   // Reset to 0% so users never get silently over-restrictive filtering.
   if (
-    needsV2Reset &&
+    needsRelevanceThresholdReset &&
     (
       ('distanceThreshold' in parsed && !('relevanceThreshold' in parsed)) ||
       Number(next.relevanceThreshold) > 0
@@ -76,7 +94,36 @@ const normalizeSettings = (raw: unknown): SettingsState => {
 
   next.showSources = Boolean(next.showSources);
   next.enhancedSearch = Boolean(next.enhancedSearch);
+  next.briefConceptIndex = parsed.briefConceptIndex === undefined
+    ? defaultSettings.briefConceptIndex
+    : Boolean(next.briefConceptIndex);
   next.deepThinking = Boolean(next.deepThinking);
+  const parsedProviderModels = parsed.providerModels && typeof parsed.providerModels === 'object'
+    ? parsed.providerModels as Record<string, unknown>
+    : {};
+  const legacyModel = typeof parsed.model === 'string' ? parsed.model.trim() : '';
+  const providerModels: Partial<Record<LLMProvider, string>> = {};
+  for (const provider of VALID_LLM_PROVIDERS) {
+    const value = parsedProviderModels[provider];
+    if (typeof value === 'string' && value.trim()) {
+      providerModels[provider] = value.trim();
+    }
+  }
+  const legacyMlxProviderModel = parsedProviderModels.mlx;
+  if (
+    !providerModels.lmstudio &&
+    typeof legacyMlxProviderModel === 'string' &&
+    legacyMlxProviderModel.trim()
+  ) {
+    providerModels.lmstudio = legacyMlxProviderModel.trim();
+  }
+  if (!parsedProviderModels || Object.keys(parsedProviderModels).length === 0) {
+    if (legacyModel) {
+      providerModels[activeProvider] = legacyModel;
+    }
+  }
+  next.providerModels = providerModels;
+  next.model = resolveProviderModel({ ...next, providerModels }, activeProvider, DEFAULT_PROVIDER_MODELS);
   next.settingsVersion = CURRENT_SETTINGS_VERSION;
 
   return next;
@@ -129,13 +176,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const savedHistory = localStorage.getItem('obsidian-rag-chat-history');
     const savedSearchMode = localStorage.getItem('obsidian-rag-search-mode');
     const savedProvider = localStorage.getItem('obsidian-rag-llm-provider');
+    const initialProvider = normalizeProvider(savedProvider);
     const savedPrompt = localStorage.getItem('obsidian-rag-system-prompt');
     let parsedSettings: SettingsState | null = null;
 
     if (savedSettings) {
       try {
         const parsed = JSON.parse(savedSettings);
-        const normalized = normalizeSettings(parsed);
+        const normalized = normalizeSettings(parsed, initialProvider);
         setSettings(normalized);
         parsedSettings = normalized;
       } catch (e) {
@@ -170,14 +218,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setSearchModeState(savedMode);
     }
 
-    if (savedProvider) {
-      const normalizedProvider = savedProvider === 'perplexity'
-        ? 'mlx'
-        : VALID_LLM_PROVIDERS.includes(savedProvider as LLMProvider)
-          ? savedProvider as LLMProvider
-          : 'ollama';
-      setLLMProvider(normalizedProvider);
-    }
+    setLLMProviderState(initialProvider);
 
     if (savedPrompt) {
       setSystemPrompt(savedPrompt);
@@ -192,7 +233,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
           claude: config.models.claude || DEFAULT_PROVIDER_MODELS.claude,
           openrouter: config.models.openrouter || DEFAULT_PROVIDER_MODELS.openrouter,
           chatgpt: config.models.chatgpt || DEFAULT_PROVIDER_MODELS.chatgpt,
-          mlx: config.models.mlx || DEFAULT_PROVIDER_MODELS.mlx,
+          lmstudio: config.models.lmstudio || DEFAULT_PROVIDER_MODELS.lmstudio,
+        });
+        setSettings((prev) => {
+          const mergedProviderModels: Partial<Record<LLMProvider, string>> = {
+            ...config.models,
+            ...prev.providerModels,
+          };
+          const activeModel = resolveProviderModel({ ...prev, providerModels: mergedProviderModels }, initialProvider, {
+            ...DEFAULT_PROVIDER_MODELS,
+            ...config.models,
+          } as Record<LLMProvider, string>);
+          return {
+            ...prev,
+            providerModels: mergedProviderModels,
+            model: activeModel,
+            settingsVersion: CURRENT_SETTINGS_VERSION,
+          };
         });
       } catch (e) {
         console.error('Failed to load provider model defaults:', e);
@@ -228,19 +285,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [systemPrompt]);
 
   useEffect(() => {
-    const staleMlxDefaults = new Set([
+    const staleLmStudioDefaults = new Set([
       'LiquidAI/LFM2-24B-A2B',
     ]);
-    if (llmProvider === 'mlx' && staleMlxDefaults.has((settings.model || '').trim())) {
-      const repairedModel = providerModelDefaults.mlx || DEFAULT_PROVIDER_MODELS.mlx;
-      if (repairedModel && repairedModel !== settings.model) {
-        setSettings((prev) => ({ ...prev, model: repairedModel, settingsVersion: CURRENT_SETTINGS_VERSION }));
+    const storedLmStudioModel = (settings.providerModels?.lmstudio || settings.model || '').trim();
+    if (staleLmStudioDefaults.has(storedLmStudioModel)) {
+      const repairedModel = providerModelDefaults.lmstudio || DEFAULT_PROVIDER_MODELS.lmstudio;
+      if (repairedModel && repairedModel !== storedLmStudioModel) {
+        setSettings((prev) => ({
+          ...prev,
+          providerModels: {
+            ...prev.providerModels,
+            lmstudio: repairedModel,
+          },
+          model: llmProvider === 'lmstudio' ? repairedModel : prev.model,
+          settingsVersion: CURRENT_SETTINGS_VERSION,
+        }));
       }
     }
-  }, [llmProvider, providerModelDefaults, settings.model]);
+  }, [llmProvider, providerModelDefaults, settings.model, settings.providerModels]);
 
   const updateSettings = (newSettings: Partial<SettingsState>) => {
-    const updated = { ...settings, ...newSettings, settingsVersion: CURRENT_SETTINGS_VERSION };
+    const nextProviderModels: Partial<Record<LLMProvider, string>> = {
+      ...(settings.providerModels || {}),
+      ...(newSettings.providerModels || {}),
+    };
+    if (typeof newSettings.model === 'string') {
+      nextProviderModels[llmProvider] = newSettings.model;
+    }
+    const updated = {
+      ...settings,
+      ...newSettings,
+      providerModels: nextProviderModels,
+      settingsVersion: CURRENT_SETTINGS_VERSION,
+    };
     if (updated.deepThinking) {
       updated.enhancedSearch = false;
     }
@@ -258,23 +336,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const setLLMProvider = (provider: LLMProvider) => {
-    const previousProvider = llmProvider;
     setLLMProviderState(provider);
-    const nextDefaultModel = (providerModelDefaults[provider] || DEFAULT_PROVIDER_MODELS[provider] || '').trim();
-    const previousDefaultModel = (providerModelDefaults[previousProvider] || DEFAULT_PROVIDER_MODELS[previousProvider] || '').trim();
-
     setSettings((prev) => {
-      const currentModel = (prev.model || '').trim();
-
-      // Preserve explicit user-selected models across provider switches.
-      // Only auto-switch model when the current one is empty or was the old provider's default.
-      if (!currentModel) {
-        return { ...prev, model: nextDefaultModel || currentModel, settingsVersion: CURRENT_SETTINGS_VERSION };
-      }
-      if (previousDefaultModel && currentModel === previousDefaultModel && nextDefaultModel) {
-        return { ...prev, model: nextDefaultModel, settingsVersion: CURRENT_SETTINGS_VERSION };
-      }
-      return { ...prev, settingsVersion: CURRENT_SETTINGS_VERSION };
+      const defaults = { ...DEFAULT_PROVIDER_MODELS, ...providerModelDefaults };
+      return {
+        ...prev,
+        model: resolveProviderModel(prev, provider, defaults),
+        settingsVersion: CURRENT_SETTINGS_VERSION,
+      };
     });
   };
 

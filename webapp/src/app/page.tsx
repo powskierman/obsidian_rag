@@ -15,7 +15,7 @@ import RatingButtons from '../components/chat/RatingButtons';
 import StaticHexBackground from '../components/StaticHexBackground';
 import { api } from '../lib/api';
 import { useApp } from '../context/AppContext';
-import { Message, Source } from '../lib/types';
+import { EnhancedSearchData, Message, Source } from '../lib/types';
 
 const normalizeDeepThinkingSource = (source: any): Source => {
     const filepath = source?.filepath || source?.file_path || source?.url || '';
@@ -128,9 +128,23 @@ const appendRetrievalWarnings = (answer: string, warnings: any): string => {
     return `${answer}\n\n---\n\n### Retrieval Warnings\n${warningList.map((warning) => `- ${warning}`).join('\n')}`;
 };
 
+const mapWebResultsToSources = (webSearch: any): Source[] => {
+    const results = Array.isArray(webSearch?.results) ? webSearch.results : [];
+    return results
+        .filter((result: any) => result && typeof result === 'object')
+        .map((result: any, index: number) => ({
+            filename: String(result.title || result.url || `Web result ${index + 1}`),
+            filepath: String(result.url || ''),
+            relevance: Math.max(5, 30 - (index * 2)),
+            snippet: String(result.content || result.snippet || ''),
+            sourceType: 'web-result' as const,
+            sourceCategory: 'web' as const,
+        }));
+};
+
 const formatDeepThinkingError = (data: any): string => {
     if (data?.code === 'MLX_RECOVERING') {
-        return 'Error: Local MLX crashed or ran out of GPU memory; recovery running. Retry in 15-30 seconds.';
+        return 'Error: Local LM Studio provider became unavailable; recovery running. Retry in 15-30 seconds.';
     }
 
     const rawContent = typeof data?.content === 'string' ? data.content : '';
@@ -147,7 +161,7 @@ const formatDeepThinkingError = (data: any): string => {
         '[metal]',
     ];
     if (mlxTransportMarkers.some((marker) => lowered.includes(marker))) {
-        return 'Error: Local MLX crashed or became unavailable; recovery running. Retry in 15-30 seconds.';
+        return 'Error: Local LM Studio provider became unavailable; recovery running. Retry in 15-30 seconds.';
     }
 
     if (typeof data?.content === 'string' && data.content.trim()) {
@@ -207,7 +221,7 @@ export default function Home() {
                     ws.send(JSON.stringify({
                         query: userMsg,
                         provider: llmProvider,
-                        model: (llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx') ? settings.model : undefined,
+                        model: (llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'lmstudio') ? settings.model : undefined,
                         max_sources: settings.sources,
                     }));
                 };
@@ -250,7 +264,7 @@ export default function Home() {
                         } else if (data.type === 'error') {
                             console.warn('Deep Thinking Error:', data.content);
                             if (data.code === 'MLX_RECOVERING') {
-                                setThinkingLog('MLX local model became unavailable; recovery running.');
+                                setThinkingLog('LM Studio local model became unavailable; recovery running.');
                             }
                             addMessage({
                                 role: 'assistant',
@@ -287,7 +301,7 @@ export default function Home() {
                 const backendMode = searchMode;
 
                 // Use empty model for non-Ollama providers to let backend choose defaults
-                const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'mlx' ? settings.model : '';
+                const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'lmstudio' ? settings.model : '';
 
                 // Unified Search Call
                 console.log('📡 Sending query settings:', {
@@ -304,11 +318,24 @@ export default function Home() {
                     settings.temperature,
                     settings.relevanceThreshold,
                     settings.enhancedSearch,
+                    settings.briefConceptIndex,
                     systemPrompt
                 );
 
                 let answer = result.answer;
-                const sources: Source[] = result.sources || [];
+                const vaultSources: Source[] = result.sources || [];
+                const webSources: Source[] = settings.enhancedSearch ? mapWebResultsToSources(result.web_search) : [];
+                const sources: Source[] = [...vaultSources, ...webSources];
+                const enhancedSearchData: EnhancedSearchData | undefined = settings.enhancedSearch
+                    ? {
+                        llmKnowledge: typeof result.llm_knowledge === 'string'
+                            ? result.llm_knowledge
+                            : result.llm_knowledge ? JSON.stringify(result.llm_knowledge) : undefined,
+                        webResults: Array.isArray(result.web_search?.results) ? result.web_search.results : [],
+                        webSearchTerms: result.web_search?.search_terms || '',
+                        webStatus: result.web_search?.message || result.web_search?.error || '',
+                    }
+                    : undefined;
 
                 // Handle Graph Visualization
                 if (result.extracted_entities && result.extracted_entities.length > 0) {
@@ -369,28 +396,11 @@ export default function Home() {
                     setGraphData(null);
                 }
 
-                // Append enhanced search content if available
-                if (settings.enhancedSearch) {
-                    if (result.llm_knowledge) {
-                        const kbText = typeof result.llm_knowledge === 'string'
-                            ? result.llm_knowledge
-                            : JSON.stringify(result.llm_knowledge);
-                        answer += `\n\n---\n\n### 🧠 LLM Knowledge\n\n${kbText}`;
-                    }
-
-                    if (result.web_search && result.web_search.results) {
-                        const webResults = result.web_search.results
-                            .map((r: any, i: number) => `${i + 1}. [${r.title}](${r.url})\n   ${r.content.substring(0, 200)}...`)
-                            .join('\n\n');
-                        const searchTerms = result.web_search.search_terms || '';
-                        answer += `\n\n---\n\n### 🌐 Web Search\n\n**Terms**: _${searchTerms}_\n\n${webResults}`;
-                    }
-                }
-
                 addMessage({
                     role: 'assistant',
                     content: answer,
                     sources: settings.showSources ? sources : undefined,
+                    enhancedSearch: enhancedSearchData,
                     retrievalIntent: result.retrievalIntent,
                     queryId,
                     timestamp: new Date().toISOString(),
@@ -574,6 +584,37 @@ export default function Home() {
                                                 sources={msg.sources}
                                                 retrievalIntent={msg.retrievalIntent}
                                             />
+                                        )}
+
+                                        {msg.role === 'assistant' && msg.enhancedSearch && (
+                                            <div className="mt-4 pt-4 border-t border-[#2C2C2E] space-y-3 text-sm">
+                                                {msg.enhancedSearch.llmKnowledge && (
+                                                    <div>
+                                                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45 mb-2">
+                                                            LLM Knowledge
+                                                        </div>
+                                                        <div className="text-white/70 leading-relaxed">
+                                                            {msg.enhancedSearch.llmKnowledge}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {msg.enhancedSearch.webStatus && (!msg.enhancedSearch.webResults || msg.enhancedSearch.webResults.length === 0) && (
+                                                    <div>
+                                                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45 mb-2">
+                                                            Web Search
+                                                        </div>
+                                                        {msg.enhancedSearch.webSearchTerms && (
+                                                            <div className="text-xs text-white/40 mb-1">
+                                                                Terms: {msg.enhancedSearch.webSearchTerms}
+                                                            </div>
+                                                        )}
+                                                        <div className="text-white/55 italic">
+                                                            {msg.enhancedSearch.webStatus}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
 
                                         {/* Rating Buttons */}

@@ -9,10 +9,7 @@ const resolveUrl = (envVal: string | undefined, defaultPort: string, isWs = fals
   return envVal || (isWs ? `ws://127.0.0.1:${defaultPort}` : `http://127.0.0.1:${defaultPort}`);
 };
 
-const GATEWAY_URL = resolveUrl(process.env.NEXT_PUBLIC_GATEWAY_URL, '4000');
 const WS_GATEWAY_URL = resolveUrl(process.env.NEXT_PUBLIC_WS_GATEWAY_URL, '4000', true);
-const EMBEDDING_URL = resolveUrl(process.env.NEXT_PUBLIC_EMBEDDING_URL, '8000');
-const GRAPH_URL = resolveUrl(process.env.NEXT_PUBLIC_GRAPH_URL, '8002');
 
 const tryFetchJson = async (url: string): Promise<any | null> => {
   try {
@@ -72,6 +69,7 @@ export const api = {
     temperature = 0.7,
     relevance_threshold = 0,  // 0-100%, 0 = show all results
     enhanced_search = false,
+    brief_concept_index = true,
     system_prompt = ''
   ): Promise<{
     answer: string;
@@ -84,7 +82,7 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
-      const enableWebSearch = enhanced_search && ['gemini', 'claude', 'kimi', 'openrouter', 'chatgpt'].includes(llm_provider);
+      const enableWebSearch = enhanced_search;
       const enableLlmKnowledge = enhanced_search;
       const requestBody = {
         query,
@@ -96,12 +94,13 @@ export const api = {
         relevance_threshold,
         web_search: enableWebSearch,
         llm_knowledge: enableLlmKnowledge,
+        brief_concept_index,
         system_prompt: system_prompt || null
       };
       console.log('🌐 API request body:', requestBody);
 
       // Use the new unified query endpoint
-      const response = await fetch(`${GATEWAY_URL}/api/v1/query`, {
+      const response = await fetch('/api/query', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,9 +118,11 @@ export const api = {
 
       if (mode === 'vector') {
         const vectorData = data.results || data;
-        let sources: SearchResult[] = [];
+        let sources: SearchResult[] = Array.isArray(data.sources)
+          ? data.sources.map(normalizeSource)
+          : [];
 
-        if (vectorData.documents && vectorData.documents[0]) {
+        if (sources.length === 0 && vectorData.documents && vectorData.documents[0]) {
           sources = vectorData.documents[0].map((doc: string, i: number) => {
             const dist = vectorData.distances[0][i];
             const relevance = dist !== undefined
@@ -138,7 +139,9 @@ export const api = {
         }
 
         return {
-          answer: sources.length > 0 ? `Found ${sources.length} matching snippets in your vault.` : 'No results found',
+          answer: typeof data.answer === 'string' && data.answer.trim()
+            ? data.answer
+            : (sources.length > 0 ? `Found ${sources.length} matching snippets in your vault.` : 'No results found'),
           sources: sources
         };
       } else if (mode === 'cascading') {
@@ -146,7 +149,9 @@ export const api = {
           answer: data.answer || 'No results found',
           sources: (data.sources || []).map(normalizeSource),
           extracted_entities: data.results?.entities || [],
-          retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent
+          retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent,
+          web_search: data.web_search,
+          llm_knowledge: data.llm_knowledge,
         };
       } else {
         return {
@@ -161,30 +166,12 @@ export const api = {
   },
 
   getStats: async () => {
-    const gatewayData = await tryFetchJson(`${GATEWAY_URL}/api/v1/stats`);
-    if (gatewayData) {
-      return {
-        documents: gatewayData.documents || 0,
-        graph: gatewayData.graph || null,
-        lightrag: gatewayData.lightrag || null
-      };
-    }
-
-    const [embeddingData, graphData] = await Promise.all([
-      tryFetchJson(`${EMBEDDING_URL}/stats`),
-      tryFetchJson(`${GRAPH_URL}/stats`)
-    ]);
-
-    const documents = embeddingData?.total_documents || embeddingData?.documents || 0;
-    const graph = graphData
-      ? {
-        nodes: graphData.total_nodes ?? graphData.nodes ?? 0,
-        edges: graphData.total_edges ?? graphData.edges ?? 0,
-        graph_loaded: true
-      }
-      : null;
-
-    return { documents, graph, lightrag: null };
+    const gatewayData = await tryFetchJson('/api/stats');
+    return {
+      documents: gatewayData?.documents || 0,
+      graph: gatewayData?.graph || null,
+      lightrag: gatewayData?.lightrag || null
+    };
   },
 
   getOllamaModels: async (): Promise<string[]> => {
@@ -217,15 +204,15 @@ export const api = {
     };
   },
 
-  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; mlx: boolean }; models: Record<string, string> }> => {
+  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; lmstudio: boolean }; models: Record<string, string> }> => {
     try {
-      let response = await fetch(`${GATEWAY_URL}/api/v1/provider-status`);
+      let response = await fetch('/api/provider-status');
       if (!response.ok) {
         response = await fetch('/api/env-config');
       }
       if (!response.ok) {
         return {
-          keys: { gemini: false, anthropic: false, openai: false, mlx: false },
+          keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
           models: {}
         };
       }
@@ -233,7 +220,7 @@ export const api = {
     } catch (error) {
       console.error('Failed to get env config:', error);
       return {
-        keys: { gemini: false, anthropic: false, openai: false, mlx: false },
+        keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
         models: {}
       };
     }

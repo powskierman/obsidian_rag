@@ -3,6 +3,7 @@ import httpx
 import json
 import asyncio
 import subprocess
+import logging
 import anthropic
 import uvicorn
 import math
@@ -11,6 +12,7 @@ import time
 import sys
 import inspect
 from collections import OrderedDict
+from pathlib import Path
 from urllib.parse import urlparse, urlunparse
 from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +20,8 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 from concurrent.futures import ThreadPoolExecutor
+
+logger = logging.getLogger(__name__)
 
 # Import CascadingRetriever - handle both package and direct execution
 try:
@@ -28,6 +32,7 @@ try:
     from cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
@@ -38,6 +43,7 @@ except ImportError:
     from src.services.cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
@@ -49,6 +55,7 @@ try:
     from deep_thinking.source_utils import (
         canonical_source_identity,
         normalize_source_record,
+        normalize_vault_path,
     )
 except ImportError:
     base_path = os.path.dirname(
@@ -58,6 +65,7 @@ except ImportError:
     from deep_thinking.source_utils import (
         canonical_source_identity,
         normalize_source_record,
+        normalize_vault_path,
     )
 
 
@@ -92,6 +100,408 @@ _LAST_MLX_RECOVERY_TS = 0.0
 
 def _project_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def _vault_root() -> Path:
+    return Path(os.getenv("OBSIDIAN_VAULT_PATH", "/app/vault")).expanduser().resolve()
+
+
+def _normalize_summary_focus_text(value: Any) -> str:
+    text = str(value or "").strip().lower()
+    if not text:
+        return ""
+    text = os.path.splitext(os.path.basename(text.replace("\\", "/")))[0]
+    text = re.sub(r"[^a-z0-9]+", " ", text)
+    return " ".join(text.split())
+
+
+def _summary_query_targets_source(query: str, source: Dict[str, Any]) -> bool:
+    normalized_query = _normalize_summary_focus_text(query)
+    if not normalized_query:
+        return False
+
+    candidates = [
+        source.get("filename"),
+        source.get("filepath"),
+        source.get("canonical_id"),
+    ]
+    for candidate in candidates:
+        normalized_candidate = _normalize_summary_focus_text(candidate)
+        if normalized_candidate and normalized_candidate in normalized_query:
+            return True
+    return False
+
+
+def _format_web_search_context_for_synthesis(web_search_result: Optional[Dict[str, Any]]) -> str:
+    if not isinstance(web_search_result, dict):
+        return ""
+
+    results = web_search_result.get("results") or []
+    if not isinstance(results, list) or not results:
+        return ""
+
+    lines = ["Supplemental web evidence:"]
+    for index, result in enumerate(results[:3], start=1):
+        if not isinstance(result, dict):
+            continue
+        title = str(result.get("title") or "").strip()
+        url = str(result.get("url") or "").strip()
+        content = _truncate_source_snippet(
+            result.get("content") or result.get("snippet") or "",
+            limit=500,
+        )
+        entry = [f"{index}. {title or url or 'Web result'}"]
+        if url:
+            entry.append(f"URL: {url}")
+        if content:
+            entry.append(f"Snippet: {content}")
+        lines.append("\n".join(entry))
+
+    return "\n\n".join(lines) if len(lines) > 1 else ""
+
+
+def _cascading_source_rank_score(query: str, source: Dict[str, Any]) -> float:
+    base_relevance = float(source.get("relevance", 0.0) or 0.0)
+    normalized_query = _normalize_summary_focus_text(query)
+    if not normalized_query:
+        return base_relevance
+
+    query_terms = [
+        term for term in normalized_query.split()
+        if len(term) > 2 and term not in {
+            "what", "when", "where", "which", "with", "from", "into", "about",
+            "study", "studies", "results", "result", "note", "notes",
+        }
+    ]
+    candidates = [
+        _normalize_summary_focus_text(source.get("filename")),
+        _normalize_summary_focus_text(source.get("filepath")),
+        _normalize_summary_focus_text(source.get("canonical_id")),
+    ]
+
+    bonus = 0.0
+    for candidate in candidates:
+        if not candidate:
+            continue
+        if candidate in normalized_query:
+            bonus = max(bonus, 30.0)
+        overlap = sum(1 for term in query_terms if term in candidate)
+        if overlap:
+            bonus = max(bonus, min(24.0, overlap * 8.0))
+
+    return base_relevance + bonus
+
+
+def _resolve_vault_source_path(source: Dict[str, Any]) -> Optional[Path]:
+    raw_path = normalize_vault_path(source.get("filepath") or source.get("source") or "")
+    if not raw_path:
+        return None
+
+    vault_root = _vault_root()
+    try:
+        resolved = (vault_root / raw_path).resolve()
+        resolved.relative_to(vault_root)
+    except Exception:
+        return None
+
+    return resolved if resolved.is_file() else None
+
+
+def _expand_summary_sources_for_synthesis(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    try:
+        expansion_limit = max(
+            1000,
+            int(os.getenv("VECTOR_SUMMARY_SOURCE_EXPANSION_CHARS", "12000")),
+        )
+    except (TypeError, ValueError):
+        expansion_limit = 12000
+
+    expanded_sources: List[Dict[str, Any]] = []
+    for source in sources or []:
+        prepared = dict(source)
+        if not _summary_query_targets_source(query, prepared):
+            expanded_sources.append(prepared)
+            continue
+
+        resolved = _resolve_vault_source_path(prepared)
+        if not resolved or resolved.suffix.lower() not in {".md", ".txt"}:
+            expanded_sources.append(prepared)
+            continue
+
+        try:
+            with resolved.open("r", encoding="utf-8", errors="ignore") as handle:
+                content = handle.read(expansion_limit).strip()
+        except OSError:
+            expanded_sources.append(prepared)
+            continue
+
+        if content and len(content) > len(str(prepared.get("snippet") or "")):
+            prepared["snippet"] = content
+            prepared["content"] = content
+            prepared["is_full_content"] = True
+
+        expanded_sources.append(prepared)
+
+    return expanded_sources
+
+
+def _should_expand_named_sources_for_synthesis(query: str, sources: List[Dict[str, Any]]) -> bool:
+    tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{1,}", str(query or ""))
+    if not tokens or len(tokens) > 4:
+        return False
+    return any(_summary_query_targets_source(query, source) for source in (sources or []) if isinstance(source, dict))
+
+
+def _prepare_vector_sources_for_synthesis(
+    query: str,
+    sources: List[Dict[str, Any]],
+    *,
+    expand_named_sources: bool = False,
+) -> List[Dict[str, Any]]:
+    prepared_sources = list(sources or [])
+    if expand_named_sources:
+        prepared_sources = _expand_summary_sources_for_synthesis(query, prepared_sources)
+
+    try:
+        snippet_limit = max(
+            400,
+            int(os.getenv("VECTOR_SYNTHESIS_SNIPPET_CHARS", "1800")),
+        )
+    except (TypeError, ValueError):
+        snippet_limit = 1800
+
+    cleaned_sources: List[Dict[str, Any]] = []
+    for source in prepared_sources:
+        prepared = dict(source)
+        raw_text = str(prepared.get("content") or prepared.get("snippet") or "")
+        cleaned = _clean_extractive_fallback_text(raw_text)
+        if cleaned:
+            prepared["snippet"] = cleaned[:snippet_limit].rstrip() + ("..." if len(cleaned) > snippet_limit else "")
+            prepared["content"] = cleaned
+        cleaned_sources.append(prepared)
+    return cleaned_sources
+
+
+def _summary_display_sources(sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    preview_limit = 1200
+    display_sources: List[Dict[str, Any]] = []
+    for source in sources or []:
+        prepared = dict(source)
+        snippet = str(prepared.get("snippet") or "").strip()
+        if len(snippet) > preview_limit:
+            prepared["snippet"] = snippet[:preview_limit].rstrip() + "..."
+        display_sources.append(prepared)
+    return display_sources
+
+
+def _clean_extractive_fallback_text(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+
+    text = re.sub(r"^---\s*.*?\s*---\s*", "", text, flags=re.DOTALL)
+    notes_match = re.search(
+        r"(?ims)^#{1,6}\s+notes\s*$([\s\S]*?)(?=^#{1,6}\s+(related notes|questions|to-do|smart connections insights)\s*$|\Z)",
+        text,
+    )
+    if notes_match:
+        text = notes_match.group(1).strip()
+    text = re.sub(r"(?:\[[^\]]+:\s[^\]]+\]\s*)+", "", text)
+    text = re.sub(r"<mark[^>]*>", "", text, flags=re.IGNORECASE)
+    text = text.replace("</mark>", "")
+    text = text.replace("==", "")
+    text = re.sub(r"!\[[^\]]*\]\([^)]+\)", " ", text)
+    text = re.sub(r"\[\[([^\]]+)\]\]", r"\1", text)
+    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+    text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
+    text = re.sub(r"^#{1,6}\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*[-*+]\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^\s*\d+\.\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _extractive_fallback_candidates(text: str) -> List[str]:
+    cleaned = _clean_extractive_fallback_text(text)
+    if not cleaned:
+        return []
+
+    fragments = re.split(r"(?<=[.!?])\s+", cleaned)
+    candidates: List[str] = []
+    for fragment in fragments:
+        candidate = fragment.strip(" -\n\t")
+        if len(candidate) < 35:
+            continue
+        if len(candidate) > 320:
+            continue
+        lowered = candidate.lower()
+        if lowered.startswith(("source:", "date:", "canonical id:", "entity type:", "timeline date:", "tags:")):
+            continue
+        if lowered.startswith(("main idea", "references", "related notes", "questions / ideas for further exploration", "to-do", "smart connections insights")):
+            continue
+        if "mermaid" in lowered or "xychart-beta" in lowered:
+            continue
+        if candidate.count(":") >= 2 and len(candidate.split()) < 18:
+            continue
+        if candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
+
+
+def _load_vector_fallback_source_text(query: str, source: Dict[str, Any]) -> str:
+    base_text = str(source.get("content") or source.get("snippet") or "")
+    resolved = _resolve_vault_source_path(source)
+    if not resolved or resolved.suffix.lower() not in {".md", ".txt"}:
+        return base_text
+
+    try:
+        expansion_limit = max(
+            500,
+            int(os.getenv("VECTOR_FALLBACK_SOURCE_EXPANSION_CHARS", "4000")),
+        )
+    except (TypeError, ValueError):
+        expansion_limit = 4000
+
+    try:
+        with resolved.open("r", encoding="utf-8", errors="ignore") as handle:
+            content = handle.read(expansion_limit).strip()
+    except OSError:
+        return base_text
+
+    if not content:
+        return base_text
+
+    normalized_query = _normalize_summary_focus_text(query)
+    normalized_source = _normalize_summary_focus_text(
+        source.get("filename") or source.get("filepath") or source.get("canonical_id")
+    )
+    if normalized_query and normalized_source and any(
+        token in normalized_source for token in normalized_query.split()
+    ):
+        return content
+
+    if len(content) > len(base_text):
+        return content
+    return base_text
+
+
+def _build_extractive_vector_fallback_answer(
+    query: str,
+    sources: List[Dict[str, Any]],
+    *,
+    max_bullets: int = 4,
+) -> str:
+    if not sources:
+        return "No results found."
+
+    query_terms = {
+        token.lower()
+        for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", str(query or ""))
+        if token
+    }
+    ranked: List[tuple[float, str]] = []
+    seen: set[str] = set()
+
+    for source_index, source in enumerate(sources[:5]):
+        snippet = _load_vector_fallback_source_text(query, source)
+        relevance = float(source.get("relevance", 0.0) or 0.0)
+        for candidate_index, candidate in enumerate(_extractive_fallback_candidates(snippet)[:4]):
+            candidate = re.sub(r"^[^A-Za-z0-9]+", "", candidate).strip()
+            if candidate and candidate[0].islower():
+                candidate = candidate[0].upper() + candidate[1:]
+            normalized = re.sub(r"[^a-z0-9]+", " ", candidate.lower()).strip()
+            if not normalized or normalized in seen:
+                continue
+            seen.add(normalized)
+            term_hits = sum(1 for term in query_terms if term and term in normalized)
+            score = (term_hits * 1000) + (relevance * 10) - (source_index * 10) - candidate_index
+            ranked.append((score, candidate))
+
+    if not ranked:
+        return "I found relevant vault evidence. Review the attached sources for the most reliable details."
+
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    bullets = [candidate.rstrip(". ") + "." for _, candidate in ranked[:max_bullets]]
+    return "\n".join(f"- {bullet}" for bullet in bullets)
+
+
+async def _perform_tavily_web_search(
+    client: httpx.AsyncClient,
+    query: str,
+    *,
+    max_results: int = 3,
+) -> Dict[str, Any]:
+    search_terms = str(query or "").strip()
+    if not search_terms:
+        return {
+            "search_terms": "",
+            "results": [],
+            "message": "No web search terms available.",
+        }
+
+    api_key = _get_env_value("TAVILY_API_KEY")
+    if not api_key:
+        return {
+            "search_terms": search_terms,
+            "results": [],
+            "message": "TAVILY_API_KEY not configured.",
+        }
+
+    payload = {
+        "api_key": api_key,
+        "query": search_terms,
+        "search_depth": "advanced",
+        "max_results": max(max_results, 5),
+        "include_answer": False,
+        "include_raw_content": False,
+    }
+
+    try:
+        response = await _post_json(
+            client,
+            "https://api.tavily.com/search",
+            payload,
+            timeout=20.0,
+            service="web_search",
+        )
+        data = response.json() if hasattr(response, "json") else {}
+    except Exception as exc:
+        return {
+            "search_terms": search_terms,
+            "results": [],
+            "message": f"Web search failed: {exc}",
+        }
+
+    normalized_results: List[Dict[str, str]] = []
+    for item in (data.get("results") or [])[:max_results]:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title") or "").strip()
+        url = str(item.get("url") or "").strip()
+        content = _truncate_source_snippet(
+            item.get("content") or item.get("snippet") or "",
+            limit=280,
+        )
+        if not (title or url or content):
+            continue
+        normalized_results.append(
+            {
+                "title": title or url or "Untitled result",
+                "url": url,
+                "content": content,
+            }
+        )
+
+    result = {
+        "search_terms": search_terms,
+        "results": normalized_results,
+    }
+    if not normalized_results:
+        result["message"] = "No web results found."
+    return result
 
 
 def _recovery_script_path() -> str:
@@ -353,6 +763,13 @@ def _normalize_cascading_source(
     )
 
 
+def _hydrate_cascading_sources(
+    base_sources: List[Dict[str, Any]],
+    hydrated_sources: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    return _hydrate_cascading_sources_impl(base_sources, hydrated_sources)
+
+
 def _normalize_summary_focus_text(value: Any) -> str:
     text = str(value or "").strip().lower()
     if not text:
@@ -398,7 +815,8 @@ def _canonical_cascading_provider_name(provider: str) -> str:
         "chatgpt": "chatgpt",
         "openrouter": "openrouter",
         "ollama": "ollama",
-        "mlx": "mlx",
+        "lmstudio": "lmstudio",
+        "mlx": "lmstudio",
         "perplexity": "perplexity",
     }
     return aliases.get(normalized, normalized)
@@ -412,7 +830,7 @@ def _default_cascading_model(provider: str) -> Optional[str]:
         "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o-mini"),
         "openrouter": _get_env_value("OPENROUTER_MODEL", "openrouter/auto"),
         "ollama": _get_env_value("OLLAMA_MODEL", _get_env_value("LLM_MODEL", "qwen2.5:7b-instruct")),
-        "mlx": _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "LiquidAI/LFM2-24B-A2B")),
+        "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         "perplexity": _get_env_value("PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online"),
     }
     return defaults.get(provider)
@@ -430,8 +848,14 @@ def _cascading_provider_api_key(provider: str) -> Optional[str]:
         return _get_env_value("OPENROUTER_API_KEY") or None
     if provider == "ollama":
         return None
-    if provider == "mlx":
-        return _get_env_value("QUERY_MLX_API_KEY") or _get_env_value("MLX_API_KEY", "mlx") or "mlx"
+    if provider == "lmstudio":
+        return (
+            _get_env_value("QUERY_LMSTUDIO_API_KEY")
+            or _get_env_value("LMSTUDIO_API_KEY", "lmstudio")
+            or _get_env_value("QUERY_MLX_API_KEY")
+            or _get_env_value("MLX_API_KEY", "mlx")
+            or "lmstudio"
+        )
     if provider == "perplexity":
         return _get_env_value("PERPLEXITY_API_KEY") or None
     return None
@@ -915,7 +1339,7 @@ def _resolve_query_normalizer_provider(provider: str, model: Optional[str]) -> t
     candidate_provider = override_provider or (provider or "").strip().lower()
     candidate_model = override_model or model
 
-    supported = {"ollama", "openrouter", "chatgpt", "mlx"}
+    supported = {"ollama", "openrouter", "chatgpt", "lmstudio", "mlx"}
     if candidate_provider in supported:
         return candidate_provider, candidate_model
 
@@ -923,8 +1347,13 @@ def _resolve_query_normalizer_provider(provider: str, model: Optional[str]) -> t
         return "openrouter", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("OPENROUTER_MODEL", "openrouter/auto")
     if os.getenv("OPENAI_API_KEY"):
         return "chatgpt", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    if os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
-        return "mlx", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("MLX_MODEL")
+    if os.getenv("LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
+        return (
+            "lmstudio",
+            os.getenv("QUERY_NORMALIZER_MODEL", "").strip()
+            or os.getenv("LMSTUDIO_MODEL")
+            or os.getenv("MLX_MODEL"),
+        )
     if os.getenv("OLLAMA_HOST"):
         return "ollama", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("LLM_MODEL", "qwen2.5:7b-instruct")
     return None, None
@@ -988,14 +1417,21 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
                     "Content-Type": "application/json",
                 }
                 resolved_model = model or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-            elif provider == "mlx":
-                api_key = os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
-                url = f'{(os.getenv("QUERY_MLX_BASE_URL") or os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")).rstrip("/")}/chat/completions'
+            elif provider in {"lmstudio", "mlx"}:
+                api_key = (
+                    os.getenv("QUERY_LMSTUDIO_API_KEY")
+                    or os.getenv("LMSTUDIO_API_KEY", "lmstudio")
+                    or os.getenv("QUERY_MLX_API_KEY")
+                    or os.getenv("MLX_API_KEY", "mlx")
+                )
+                url = (
+                    f'{(os.getenv("QUERY_LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_BASE_URL") or os.getenv("QUERY_MLX_BASE_URL") or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")).rstrip("/")}/chat/completions'
+                )
                 headers = {
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                 }
-                resolved_model = model or os.getenv("MLX_MODEL")
+                resolved_model = model or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_MODEL")
             else:
                 return None
 
@@ -1007,7 +1443,9 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
                 ],
                 "temperature": 0,
                 "max_tokens": 120,
-                "response_format": {"type": "json_object"},
+                "response_format": {
+                    "type": "text" if provider in {"lmstudio", "mlx"} else "json_object"
+                },
             }
             async with httpx.AsyncClient(timeout=_QUERY_NORMALIZER_TIMEOUT) as client:
                 resp = await client.post(url, headers=headers, json=payload)
@@ -1755,7 +2193,7 @@ app = FastAPI(title="Obsidian RAG Unified API", version="1.0")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_parse_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -2047,7 +2485,12 @@ async def get_provider_status():
             "gemini": bool(_get_env_value("GEMINI_API_KEY")),
             "anthropic": bool(_get_env_value("ANTHROPIC_API_KEY")),
             "openai": bool(_get_env_value("OPENAI_API_KEY")),
-            "mlx": bool(_get_env_value("MLX_BASE_URL") or _get_env_value("MLX_MODEL")),
+            "lmstudio": bool(
+                _get_env_value("LMSTUDIO_BASE_URL")
+                or _get_env_value("LMSTUDIO_MODEL")
+                or _get_env_value("MLX_BASE_URL")
+                or _get_env_value("MLX_MODEL")
+            ),
         },
         "models": {
             "ollama": _get_env_value("OLLAMA_MODEL", "mistral"),
@@ -2055,7 +2498,7 @@ async def get_provider_status():
             "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o"),
             "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-pro-preview"),
             "claude": _get_env_value("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
-            "mlx": _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "LiquidAI/LFM2-24B-A2B-MLX-4bit")),
+            "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         },
     }
 
@@ -2100,7 +2543,9 @@ async def _synthesize_cascading_answer(
     sources: List[Dict[str, Any]],
     llm_provider: str,
     model: str,
-    system_prompt: str = None
+    system_prompt: str = None,
+    brief_concept_index: bool = True,
+    supplemental_context: str = None,
 ) -> Dict[str, Any]:
     try:
         return await _synthesize_cascading_answer_impl(
@@ -2109,11 +2554,14 @@ async def _synthesize_cascading_answer(
             llm_provider,
             model,
             system_prompt,
+            brief_concept_index,
+            supplemental_context,
         )
     except Exception as e:
         print(f"Error in cascading fallback synthesis: {e}")
         resolved_provider = _canonical_cascading_provider_name(llm_provider)
-        if resolved_provider == "mlx" or _looks_like_mlx_transport_failure_text(str(e)):
+        raw_provider = str(llm_provider or "").strip().lower()
+        if raw_provider == "mlx" or resolved_provider == "mlx":
             raise RuntimeError(str(e)) from e
         raise
 
@@ -2129,6 +2577,7 @@ class UnifiedQueryRequest(BaseModel):
     system_prompt: Optional[str] = None
     web_search: bool = False
     llm_knowledge: bool = False
+    brief_concept_index: bool = True
     entities_mode: Optional[str] = None  # naive, local, global, hybrid
     force_mode: bool = False
     require_llm: bool = False
@@ -2240,14 +2689,24 @@ async def unified_query(request: UnifiedQueryRequest):
                 graph_url=GRAPH_SERVICE_URL,
                 lightrag_url=LIGHTRAG_SERVICE_URL,
                 llm_provider=request.llm_provider,
+                llm_model=request.model,
                 api_key=api_key,
             )
 
+            retrieval_started_at = time.perf_counter()
             result = await retriever.retrieve(
                 retrieval_query,
                 max_results=request.max_results,
                 entities=extracted_entities,
                 mem0_context=mem0_context
+            )
+            retrieval_elapsed_ms = int((time.perf_counter() - retrieval_started_at) * 1000)
+            logger.info(
+                "cascading_query.retrieval_complete provider=%s max_results=%d retrieval_ms=%d query=%s",
+                request.llm_provider,
+                request.max_results,
+                retrieval_elapsed_ms,
+                retrieval_query[:160],
             )
 
             answer = ""
@@ -2309,7 +2768,13 @@ async def unified_query(request: UnifiedQueryRequest):
             def _is_boilerplate_snippet(text: str) -> bool:
                 if not text:
                     return True
-                return bool(re.match(r"^\s*context\s*:", text, re.IGNORECASE))
+                lowered = str(text).strip().lower()
+                return (
+                    bool(re.match(r"^\s*context\s*:", text, re.IGNORECASE))
+                    or lowered.startswith("on explicit graph path.")
+                    or lowered.startswith("connected via explicit graph path")
+                    or "seed_hits=" in lowered
+                )
 
             if anchor_sources and vector_snippets_by_identity:
                 for src in anchor_sources:
@@ -2328,10 +2793,16 @@ async def unified_query(request: UnifiedQueryRequest):
             for src in sources:
                 source_identity = canonical_source_identity(src, default_category="vault")
                 rel = src.get("relevance", 0) or 0
+                src["_query_rank_score"] = _cascading_source_rank_score(retrieval_query, src)
                 if source_identity not in deduped or rel > deduped[source_identity].get("relevance", 0):
                     deduped[source_identity] = src
             sources = sorted(
-                deduped.values(), key=lambda s: s.get("relevance", 0), reverse=True
+                deduped.values(),
+                key=lambda s: (
+                    float(s.get("_query_rank_score", s.get("relevance", 0)) or 0.0),
+                    float(s.get("relevance", 0) or 0.0),
+                ),
+                reverse=True,
             )
             sources = _apply_relevance_filter(sources, effective_relevance_threshold)
 
@@ -2407,29 +2878,55 @@ async def unified_query(request: UnifiedQueryRequest):
             if not answer and isinstance(result, dict):
                 answer = result.get("answer", "") or ""
 
+            # Fetch supplemental web evidence before synthesis so the model can use it when requested.
+            web_search_result = None
+            if request.web_search:
+                async with httpx.AsyncClient() as client:
+                    web_search_result = await _perform_tavily_web_search(
+                        client,
+                        retrieval_query or request.query,
+                    )
+
             # Always synthesize if we have sources, but pass the existing graph answer in as context
             if sources:
-                system_with_graph = request.system_prompt
-                if answer:
-                    graph_context = f"The following is a partial analytical answer derived from the knowledge graph. Incorporate it into your final response:\n{answer}\n\n"
-                    # If there's an existing answer, we use the vector synthesis to augment it.
-                    sys_prompt = request.system_prompt or "You are a helpful AI assistant. Synthesize a concise answer to the user's query based ONLY on the provided vault context."
-                    system_with_graph = f"{sys_prompt}\n\n{graph_context}"
-
                 try:
+                    synthesis_started_at = time.perf_counter()
+                    supplemental_sections = []
+                    if answer:
+                        supplemental_sections.append(
+                            "The following is a partial analytical answer derived from the knowledge graph. "
+                            "Incorporate it into your final response only where it is consistent with the provided vault context.\n"
+                            f"{answer}"
+                        )
+                    web_context = _format_web_search_context_for_synthesis(web_search_result)
+                    if web_context:
+                        supplemental_sections.append(web_context)
                     synthesis_result = await _synthesize_cascading_answer(
                         request.query,
                         sources,
                         request.llm_provider,
                         request.model,
-                        system_with_graph
+                        request.system_prompt,
+                        request.brief_concept_index,
+                        "\n\n".join(section for section in supplemental_sections if section) or None,
                     )
+                    synthesis_elapsed_ms = int((time.perf_counter() - synthesis_started_at) * 1000)
                     if isinstance(synthesis_result, dict):
                         synthesized_answer = str(synthesis_result.get("answer") or "").strip()
                         fallback_reason = str(synthesis_result.get("fallback_reason") or "").strip()
                         synthesis_used_documents = synthesis_result.get("used_documents")
                         synthesis_citations = synthesis_result.get("citations")
                         if isinstance(synthesis_used_documents, list) and synthesis_used_documents:
+                            sources = _hydrate_cascading_sources(sources, synthesis_used_documents)
+                        if (
+                            isinstance(synthesis_used_documents, list)
+                            and synthesis_used_documents
+                            and (
+                                len(sources) <= 2
+                                or len(synthesis_used_documents) >= min(2, len(sources))
+                                or _summary_query_targets_source(request.query, synthesis_used_documents[0])
+                            )
+                        ):
                             sources = [
                                 _normalize_cascading_source(
                                     source,
@@ -2457,12 +2954,38 @@ async def unified_query(request: UnifiedQueryRequest):
                                 warnings.append(f"Cascading synthesis fallback: {fallback_reason}.")
                         if isinstance(result, dict):
                             result["citations"] = synthesis_citations if isinstance(synthesis_citations, list) else []
-                            result["used_documents"] = sources
+                            result["used_documents"] = (
+                                _hydrate_cascading_sources(synthesis_used_documents, sources)
+                                if isinstance(synthesis_used_documents, list) and synthesis_used_documents
+                                else sources
+                            )
                             if fallback_reason:
                                 result["synthesis_fallback_reason"] = fallback_reason
+                        logger.info(
+                            "cascading_query.synthesis_complete provider=%s selected_sources=%d synthesis_ms=%d fallback_reason=%s answer_chars=%d",
+                            request.llm_provider,
+                            len(sources),
+                            synthesis_elapsed_ms,
+                            fallback_reason,
+                            len(answer),
+                        )
                     else:
                         answer = str(synthesis_result or "").strip()
+                        logger.info(
+                            "cascading_query.synthesis_complete provider=%s selected_sources=%d synthesis_ms=%d fallback_reason=%s answer_chars=%d",
+                            request.llm_provider,
+                            len(sources),
+                            synthesis_elapsed_ms,
+                            "",
+                            len(answer),
+                        )
                 except Exception as synth_error:
+                    logger.warning(
+                        "cascading_query.synthesis_failed provider=%s selected_sources=%d error=%s",
+                        request.llm_provider,
+                        len(sources),
+                        synth_error,
+                    )
                     if _is_mlx_runtime_failure(request.llm_provider, synth_error, model=request.model) or _looks_like_mlx_transport_failure_text(str(synth_error)):
                         recovery_payload = _mlx_recovery_error_payload(synth_error)
                         raise HTTPException(status_code=503, detail=recovery_payload)
@@ -2491,6 +3014,8 @@ async def unified_query(request: UnifiedQueryRequest):
                 "mode": "cascading",
                 "answer": answer,
                 "sources": sources,
+                "web_search": web_search_result,
+                "llm_knowledge": mem0_context if request.llm_knowledge and mem0_context else None,
                 "results": result,
                 "metadata": {
                     "description": "5-Stage Cascading Retrieval (Anchor -> Entity -> Expand -> Vector -> Synthesis)",
@@ -2505,6 +3030,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         "candidate_source_count": candidate_source_count,
                         "selected_source_count": len(sources),
                     },
+                    "web_search_enabled": bool(request.web_search),
                     "warnings": warnings,
                 },
             }
@@ -2526,6 +3052,8 @@ async def unified_query(request: UnifiedQueryRequest):
             try:
                 # 1. Enforce strict top-K limit for UI vector queries to tighten retrieval
                 vector_limit = min(request.max_results, 5) # Cap at 5 for vector UI mode
+                summary_like = bool(re.search(r"\b(summary|summarize)\b", request.query.lower()))
+                web_search_result = None
                 
                 payload = {
                     "query": retrieval_query,
@@ -2580,38 +3108,108 @@ async def unified_query(request: UnifiedQueryRequest):
                 # Sort by new relevance and enforce final limit
                 sources = sorted(sources, key=lambda s: s.get("relevance", 0), reverse=True)
                 sources = _apply_relevance_filter(sources, effective_relevance_threshold)[:vector_limit]
+                if summary_like and sources:
+                    selected_sources = _select_cascading_evidence_set(
+                        request.query,
+                        sources,
+                        max_results=min(2, vector_limit),
+                    )
+                    if selected_sources:
+                        sources = selected_sources
+
+                if request.web_search:
+                    web_search_result = await _perform_tavily_web_search(
+                        client,
+                        retrieval_query or request.query,
+                    )
 
                 # 3. Micro-compressor logic
-                micro_compressor_prompt = "Create 3-5 bullet points that capture the key ideas in these snippets; do not add information not present in the snippets."
+                micro_compressor_prompt = (
+                    "Create 3-5 bullet points that capture the key ideas in the provided evidence; "
+                    "do not add information not present in that evidence."
+                )
+                if not request.brief_concept_index:
+                    micro_compressor_prompt = (
+                        "Answer the query using only the provided evidence. "
+                        "Provide a fuller grounded response in complete sentences with concrete details from the evidence. "
+                        "Be concise, but do not reduce the answer to a terse concept index or minimal bullets. "
+                        "Do not add information not present in the evidence."
+                    )
+                if summary_like and request.brief_concept_index:
+                    micro_compressor_prompt = (
+                        "Create 3-6 bullet points that faithfully summarize only the named note or book from the provided vault evidence. "
+                        "Stay grounded in the retrieved vault evidence. "
+                        "Do not generalize beyond that evidence. "
+                        "If the snippets only cover one theme, summarize only that theme."
+                    )
                 synthesized_answer = ""
+                synthesis_fallback_reason = ""
+                synthesis_sources = sources
+                response_sources = sources
+                supplemental_context = _format_web_search_context_for_synthesis(web_search_result)
+                if sources:
+                    expand_named_sources = summary_like or _should_expand_named_sources_for_synthesis(
+                        request.query,
+                        sources,
+                    )
+                    synthesis_sources = _prepare_vector_sources_for_synthesis(
+                        request.query,
+                        sources,
+                        expand_named_sources=expand_named_sources,
+                    )
+                    if expand_named_sources:
+                        response_sources = _summary_display_sources(synthesis_sources)
                 
                 if sources:
                     try:
                         # Use cascade synthesizer as the micro compressor since it handles LLM dispatching
                         compressor_result = await _synthesize_cascading_answer_impl(
                             query=request.query,
-                            sources=sources,
+                            sources=synthesis_sources,
                             llm_provider=request.llm_provider,
                             model=request.model,
-                            system_prompt=micro_compressor_prompt
+                            system_prompt=micro_compressor_prompt,
+                            supplemental_context=supplemental_context,
                         )
                         if isinstance(compressor_result, dict):
                             synthesized_answer = compressor_result.get("answer", "")
+                            synthesis_fallback_reason = str(
+                                compressor_result.get("fallback_reason", "") or ""
+                            ).strip().lower()
                         else:
                             synthesized_answer = str(compressor_result)
                     except Exception as e:
                         print(f"Micro-compressor failed: {e}")
                         synthesized_answer = "" # Fallback to empty if LLM fails
 
+                if (
+                    not synthesized_answer
+                    or _is_generic_cascading_fallback_answer(synthesized_answer)
+                    or _is_insufficient_answer(synthesized_answer)
+                    or synthesis_fallback_reason in {
+                        "timeout",
+                        "unknown_provider",
+                        "provider_exception",
+                        "empty_answer",
+                        "weak_answer",
+                    }
+                ):
+                    synthesized_answer = _build_extractive_vector_fallback_answer(
+                        request.query,
+                        synthesis_sources,
+                    )
+
                 return {
                     "query": request.query,
                     "mode": "vector",
                     "answer": synthesized_answer, # Return the structured output instead of raw UI display
-                    "sources": sources,
+                    "sources": response_sources,
+                    "web_search": web_search_result,
                     "results": result,
                     "metadata": {
                         "source": "ChromaDB Vectors",
                         "description": "Pure vector similarity search with micro-compression.",
+                        "web_search_enabled": bool(request.web_search),
                     },
                 }
             except Exception as e:
@@ -2661,6 +3259,7 @@ async def deep_research_websocket(websocket: WebSocket):
             "openrouter",
             "chatgpt",
             "ollama",
+            "lmstudio",
             "mlx",
             "perplexity",
         }
@@ -2676,8 +3275,8 @@ async def deep_research_websocket(websocket: WebSocket):
                 return "gemini"
             if os.getenv("OPENAI_API_KEY"):
                 return "chatgpt"
-            if os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
-                return "mlx"
+            if os.getenv("LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
+                return "lmstudio"
             if os.getenv("OLLAMA_HOST"):  # Basic check for Ollama
                 return "ollama"
             return None
@@ -2693,7 +3292,7 @@ async def deep_research_websocket(websocket: WebSocket):
                 await websocket.send_json(
                     {
                         "type": "error",
-                        "content": "Deep Thinking supports MLX, Perplexity, Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found.",
+                        "content": "Deep Thinking supports LM Studio, Perplexity, Claude, Gemini, OpenRouter, ChatGPT, or Ollama. No compatible configuration found.",
                     }
                 )
                 await websocket.close()
@@ -2749,8 +3348,13 @@ async def deep_research_websocket(websocket: WebSocket):
                 )
                 await websocket.close()
                 return
-        elif provider == "mlx":
-            api_key = _get_env_value("QUERY_MLX_API_KEY") or _get_env_value("MLX_API_KEY", "mlx")
+        elif provider in {"lmstudio", "mlx"}:
+            api_key = (
+                _get_env_value("QUERY_LMSTUDIO_API_KEY")
+                or _get_env_value("LMSTUDIO_API_KEY", "lmstudio")
+                or _get_env_value("QUERY_MLX_API_KEY")
+                or _get_env_value("MLX_API_KEY", "mlx")
+            )
         elif provider == "ollama":
             api_key = "ollama"  # No key needed, but passing string to avoid validation errors downstream
 
@@ -2814,7 +3418,7 @@ async def deep_research_websocket(websocket: WebSocket):
             raw_answer = result.get("answer")
             if isinstance(raw_answer, str):
                 result_answer = raw_answer
-        if _looks_like_mlx_transport_failure_text(result_answer):
+        if provider == "mlx" and _looks_like_mlx_transport_failure_text(result_answer):
             await websocket.send_json(
                 {
                     "type": "log",
@@ -2851,7 +3455,7 @@ async def deep_research_websocket(websocket: WebSocket):
         print(f"Error: {e}")
         try:
             raw_error = str(e or "")
-            if _is_mlx_runtime_failure(provider, e, model=model) or _looks_like_mlx_transport_failure_text(raw_error):
+            if _is_mlx_runtime_failure(provider, e, model=model) or (provider == "mlx" and _looks_like_mlx_transport_failure_text(raw_error)):
                 await websocket.send_json(
                     {
                         "type": "log",

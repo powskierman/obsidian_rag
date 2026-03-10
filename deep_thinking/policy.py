@@ -24,8 +24,12 @@ class PolicyAgent:
         provider = getattr(self.client, "provider", "").lower()
         summary_limit = int(
             os.getenv(
-                "DEEP_THINKING_MLX_POLICY_SUMMARY_CHARS" if provider == "mlx" else "DEEP_THINKING_POLICY_SUMMARY_CHARS",
-                "2500" if provider == "mlx" else "6000",
+                "DEEP_THINKING_LMSTUDIO_POLICY_SUMMARY_CHARS"
+                if provider in ("lmstudio", "mlx")
+                else "DEEP_THINKING_POLICY_SUMMARY_CHARS",
+                os.getenv("DEEP_THINKING_MLX_POLICY_SUMMARY_CHARS", "2500")
+                if provider in ("lmstudio", "mlx")
+                else "6000",
             )
         )
         research_summary = self._truncate_text(self._format_research_summary(state['past_steps']), summary_limit)
@@ -51,7 +55,7 @@ class PolicyAgent:
         
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=200 if provider == "mlx" else 300,
+            max_tokens=200 if provider in ("lmstudio", "mlx") else 300,
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
@@ -67,6 +71,15 @@ class PolicyAgent:
             decision_data = json.loads(content)
             decision = decision_data.get("decision", "CONTINUE")
             query_profile = RetrievalSupervisor.build_query_profile(state.get("original_question", ""))
+            remaining_steps = state.get('plan', [])[state.get('current_step_index', 0):]
+
+            if (
+                query_profile.get("is_summary_request")
+                and state.get("summary_intent") == "broad"
+                and remaining_steps
+                and decision == "FINISH"
+            ):
+                return "CONTINUE"
             
             # Programmatic Check: Force REVISE_PLAN if external enrichment is needed but no web search
             # This ensures we enrich personal notes with external data
@@ -78,7 +91,6 @@ class PolicyAgent:
             )
             
             # Check if we have a PLANNED web search remaining
-            remaining_steps = state.get('plan', [])[state.get('current_step_index', 0):]
             has_planned_web = any(step.get('search_strategy') == 'web' for step in remaining_steps)
             
             if (

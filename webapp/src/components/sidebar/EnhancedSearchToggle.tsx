@@ -28,6 +28,9 @@ export default function EnhancedSearchToggle() {
           <div className="text-sm text-white font-medium">
             {isDisabled ? 'Disabled (Deep Thinking)' : settings.enhancedSearch ? 'Enabled' : 'Disabled'}
           </div>
+          <div className="text-xs text-white/50">
+            Web search + memory context
+          </div>
         </div>
       </div>
       <div

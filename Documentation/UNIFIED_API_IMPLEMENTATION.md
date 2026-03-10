@@ -20,18 +20,35 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
   "query": "...",
   "mode": "vector|cascading",
   "max_results": 10,
-  "llm_provider": "ollama|claude|gemini|gpt-oss|kimi|openrouter|chatgpt|perplexity",
+  "llm_provider": "ollama|claude|gemini|openrouter|chatgpt|lmstudio|perplexity",
+  "model": "optional-model-id",
+  "temperature": 0.3,
   "relevance_threshold": 75,
   "web_search": false,
-  "llm_knowledge": false
+  "llm_knowledge": false,
+  "brief_concept_index": true,
+  "system_prompt": null
 }
 ```
 
 The HTTP gateway proxies to the embedding service or cascading retriever based on mode. Deep thinking uses the dedicated WebSocket endpoint.
 
 Provider note:
-- `kimi` is an OpenRouter-backed provider label.
-- OpenRouter model choice should be passed via `model` (request) or env defaults (`GRAPH_MODEL`, `LIGHTRAG_MODEL`).
+- `mlx` is a backward-compatible alias for `lmstudio`.
+- OpenRouter and LM Studio model choice should be passed via `model` (request) or env defaults.
+- LM Studio uses an OpenAI-compatible endpoint and currently expects `response_format.type` values compatible with LM Studio (`text` rather than `json_object`).
+
+HTTP query behavior:
+- `vector` performs vault retrieval from the embedding service, then runs a compact synthesis step.
+- `cascading` performs staged retrieval (anchors, entities, expansion, vectors) and then synthesizes a final answer from the selected evidence set.
+- `brief_concept_index=false` asks the synthesizer for a fuller grounded answer.
+- Query-aware prompting is used for procedural queries and relation/comparison queries.
+- Incomplete or unsupported-grounded synthesis results degrade to extractive vault-based fallbacks instead of being returned as-is.
+
+Enhanced search behavior:
+- `web_search=true` enables a supplemental Tavily lookup when `TAVILY_API_KEY` is configured.
+- `llm_knowledge=true` enables memory-context injection where available.
+- Web search results are returned separately from vault sources so clients can render them with lower priority.
 
 Deep thinking behavior:
 - Use `ws://localhost:4000/api/v1/deep-research` for long-running agentic research.

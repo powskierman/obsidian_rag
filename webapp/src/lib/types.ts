@@ -10,7 +10,7 @@ export type SearchMode =
   | 'cascading'       // 5-Stage Waterfall
   | 'deep-thinking';  // Agentic reasoning mode
 
-export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'mlx';
+export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'lmstudio';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -35,6 +35,8 @@ export interface Source {
 export interface EnhancedSearchData {
   llmKnowledge?: string;
   webResults?: WebSearchResult[];
+  webSearchTerms?: string;
+  webStatus?: string;
 }
 
 export interface WebSearchResult {
@@ -46,11 +48,13 @@ export interface WebSearchResult {
 export interface SettingsState {
   settingsVersion?: number;
   model: string;
+  providerModels?: Partial<Record<LLMProvider, string>>;
   sources: number;
   temperature: number;
   relevanceThreshold: number;  // 0-100%, 0 = show all
   showSources: boolean;
   enhancedSearch: boolean;
+  briefConceptIndex: boolean;
   deepThinking: boolean;
 }
 
@@ -100,13 +104,15 @@ export interface AppState {
 }
 
 export const defaultSettings: SettingsState = {
-  settingsVersion: 2,
+  settingsVersion: 3,
   model: 'llama3.2:latest',
+  providerModels: {},
   sources: 10,
   temperature: 0.3,
   relevanceThreshold: 0,  // 0-100%, 0 = show all results
   showSources: true,
   enhancedSearch: false,
+  briefConceptIndex: true,
   deepThinking: false,
 };
 

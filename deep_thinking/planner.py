@@ -257,15 +257,24 @@ class PlannerAgent:
         query_profile = RetrievalSupervisor.build_query_profile(question)
         if query_profile.get("prefers_vault_only_summary"):
             keywords = query_profile.get("terms") or []
-            if query_profile.get("summary_focus"):
-                keywords = RetrievalSupervisor._query_terms(query_profile["summary_focus"]) or keywords
+            summary_focus = query_profile.get("summary_focus") or question
+            if summary_focus:
+                keywords = RetrievalSupervisor._query_terms(summary_focus) or keywords
+            broad_keywords = list(dict.fromkeys((keywords[:5] + ["themes", "methods", "applications"])[:5]))
             return [{
                 "step_number": 1,
                 "sub_question": question,
                 "search_strategy": "vector",
                 "keywords": keywords[:5],
                 "target_folders": [],
-                "reasoning": "Summary request should use the vault note first and skip external enrichment unless explicitly requested."
+                "reasoning": "Retrieve the named vault note first to establish a faithful summary baseline."
+            }, {
+                "step_number": 2,
+                "sub_question": f"What major themes, mechanisms, methods, and applications appear in {summary_focus} across related vault material?",
+                "search_strategy": "hybrid",
+                "keywords": broad_keywords,
+                "target_folders": [],
+                "reasoning": "Broaden the answer into a concept-level synthesis using related vault evidence without leaving the vault."
             }]
 
         system_prompt = """

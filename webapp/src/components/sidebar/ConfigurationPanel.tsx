@@ -35,7 +35,7 @@ export default function ConfigurationPanel() {
       'claude': 'Claude API',
       'openrouter': 'OpenRouter',
       'chatgpt': 'ChatGPT',
-      'mlx': 'MLX Local'
+      'lmstudio': 'LM Studio'
     };
     return labels[llmProvider] || 'Ollama';
   };

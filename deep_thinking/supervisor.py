@@ -651,6 +651,8 @@ class RetrievalSupervisor:
             doc["_relationship_explicit"] = bool(signals["explicit_relation"])
             doc["_generic_overview"] = bool(signals["generic_overview"])
             doc["_covers_all_anchors"] = bool(signals["covers_all_anchors"])
+            doc["_summary_focus_title_match"] = bool(signals["summary_focus_title_match"])
+            doc["_summary_focus_exact_match"] = bool(signals["summary_focus_exact_match"])
             ranked.append(doc)
 
         ranked.sort(
@@ -1075,13 +1077,13 @@ class RetrievalSupervisor:
     @staticmethod
     def _provider_limits(provider: str) -> tuple[int, int]:
         provider = (provider or "").lower()
-        if provider == "mlx":
-            default_doc_chars = os.getenv("DEEP_THINKING_MLX_BUFFER_DOC_CHARS", "4000")
-            default_total_chars = os.getenv("DEEP_THINKING_MLX_BUFFER_TOTAL_CHARS", "18000")
+        if provider in ("lmstudio", "mlx"):
+            default_doc_chars = os.getenv("DEEP_THINKING_LMSTUDIO_BUFFER_DOC_CHARS", os.getenv("DEEP_THINKING_MLX_BUFFER_DOC_CHARS", "4000"))
+            default_total_chars = os.getenv("DEEP_THINKING_LMSTUDIO_BUFFER_TOTAL_CHARS", os.getenv("DEEP_THINKING_MLX_BUFFER_TOTAL_CHARS", "18000"))
 
             return (
-                int(os.getenv("DEEP_THINKING_MLX_DOC_CHARS", default_doc_chars)),
-                int(os.getenv("DEEP_THINKING_MLX_TOTAL_CONTEXT_CHARS", default_total_chars)),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_DOC_CHARS", os.getenv("DEEP_THINKING_MLX_DOC_CHARS", default_doc_chars))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_TOTAL_CONTEXT_CHARS", os.getenv("DEEP_THINKING_MLX_TOTAL_CONTEXT_CHARS", default_total_chars))),
             )
 
         return (
@@ -1098,10 +1100,10 @@ class RetrievalSupervisor:
         if total_context_chars <= int(os.getenv("DEEP_THINKING_SMALL_CONTEXT_THRESHOLD_CHARS", "10000")):
             return 0
 
-        if provider != "mlx":
+        if provider not in ("lmstudio", "mlx"):
             return int(os.getenv("DEEP_THINKING_FULL_FILE_EXPANSION_BYTES", "102400"))
 
-        # Keep mlx expansion bounded to ~3-4KB to avoid overflowing 4K/18K-style contexts.
+        # Keep local LM Studio expansion bounded to ~3-4KB to avoid overflowing small local contexts.
         return min(4 * 1024, max(1, min(per_doc_chars, total_context_chars // 4)))
 
     @staticmethod

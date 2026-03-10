@@ -57,8 +57,8 @@ class DeepThinkingRAG:
                 default_model = os.getenv("GEMINI_MODEL", "gemini-3-pro-preview")
             elif provider_name in ("chatgpt", "openai"):
                 default_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-            elif provider_name == "mlx":
-                default_model = os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or "LiquidAI/LFM2-24B-A2B"
+            elif provider_name in ("lmstudio", "mlx"):
+                default_model = os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or "local-model"
             elif provider_name == "perplexity":
                 default_model = os.getenv("PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online")
 
@@ -134,12 +134,12 @@ class DeepThinkingRAG:
     @staticmethod
     def _provider_limits(provider: str) -> tuple[int, int, int, int]:
         provider = (provider or "").lower()
-        if provider == "mlx":
+        if provider in ("lmstudio", "mlx"):
             return (
-                int(os.getenv("DEEP_THINKING_MLX_BUFFER_DOCS_PER_STEP", "2")),
-                int(os.getenv("DEEP_THINKING_MLX_BUFFER_DOC_CHARS", "1500")),
-                int(os.getenv("DEEP_THINKING_MLX_BUFFER_TOTAL_CHARS", "6000")),
-                int(os.getenv("DEEP_THINKING_MLX_ACCUMULATED_CONTEXT_CHARS", "4000")),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_BUFFER_DOCS_PER_STEP", os.getenv("DEEP_THINKING_MLX_BUFFER_DOCS_PER_STEP", "2"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_BUFFER_DOC_CHARS", os.getenv("DEEP_THINKING_MLX_BUFFER_DOC_CHARS", "1500"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_BUFFER_TOTAL_CHARS", os.getenv("DEEP_THINKING_MLX_BUFFER_TOTAL_CHARS", "6000"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_ACCUMULATED_CONTEXT_CHARS", os.getenv("DEEP_THINKING_MLX_ACCUMULATED_CONTEXT_CHARS", "4000"))),
             )
         return (
             int(os.getenv("DEEP_THINKING_BUFFER_DOCS_PER_STEP", "3")),
@@ -540,6 +540,8 @@ class DeepThinkingRAG:
             "raw_context_buffer": [],  # New: Store raw text snippets
             "warnings": [],
         }
+        if RetrievalSupervisor.build_query_profile(question).get("is_summary_request"):
+            state["summary_intent"] = "broad"
         
         # Step 0: Get User Context from mem0
         try:
