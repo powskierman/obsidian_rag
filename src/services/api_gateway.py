@@ -3,6 +3,7 @@ import httpx
 import json
 import asyncio
 import subprocess
+import logging
 import anthropic
 import uvicorn
 import math
@@ -20,6 +21,8 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 from concurrent.futures import ThreadPoolExecutor
 
+logger = logging.getLogger(__name__)
+
 # Import CascadingRetriever - handle both package and direct execution
 try:
     from cascading_retriever import CascadingRetriever
@@ -29,6 +32,7 @@ try:
     from cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
@@ -39,6 +43,7 @@ except ImportError:
     from src.services.cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
@@ -125,6 +130,34 @@ def _summary_query_targets_source(query: str, source: Dict[str, Any]) -> bool:
         if normalized_candidate and normalized_candidate in normalized_query:
             return True
     return False
+
+
+def _format_web_search_context_for_synthesis(web_search_result: Optional[Dict[str, Any]]) -> str:
+    if not isinstance(web_search_result, dict):
+        return ""
+
+    results = web_search_result.get("results") or []
+    if not isinstance(results, list) or not results:
+        return ""
+
+    lines = ["Supplemental web evidence:"]
+    for index, result in enumerate(results[:3], start=1):
+        if not isinstance(result, dict):
+            continue
+        title = str(result.get("title") or "").strip()
+        url = str(result.get("url") or "").strip()
+        content = _truncate_source_snippet(
+            result.get("content") or result.get("snippet") or "",
+            limit=500,
+        )
+        entry = [f"{index}. {title or url or 'Web result'}"]
+        if url:
+            entry.append(f"URL: {url}")
+        if content:
+            entry.append(f"Snippet: {content}")
+        lines.append("\n".join(entry))
+
+    return "\n\n".join(lines) if len(lines) > 1 else ""
 
 
 def _cascading_source_rank_score(query: str, source: Dict[str, Any]) -> float:
@@ -728,6 +761,13 @@ def _normalize_cascading_source(
         source_type=source_type,
         default_relevance=default_relevance,
     )
+
+
+def _hydrate_cascading_sources(
+    base_sources: List[Dict[str, Any]],
+    hydrated_sources: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    return _hydrate_cascading_sources_impl(base_sources, hydrated_sources)
 
 
 def _normalize_summary_focus_text(value: Any) -> str:
@@ -2649,14 +2689,24 @@ async def unified_query(request: UnifiedQueryRequest):
                 graph_url=GRAPH_SERVICE_URL,
                 lightrag_url=LIGHTRAG_SERVICE_URL,
                 llm_provider=request.llm_provider,
+                llm_model=request.model,
                 api_key=api_key,
             )
 
+            retrieval_started_at = time.perf_counter()
             result = await retriever.retrieve(
                 retrieval_query,
                 max_results=request.max_results,
                 entities=extracted_entities,
                 mem0_context=mem0_context
+            )
+            retrieval_elapsed_ms = int((time.perf_counter() - retrieval_started_at) * 1000)
+            logger.info(
+                "cascading_query.retrieval_complete provider=%s max_results=%d retrieval_ms=%d query=%s",
+                request.llm_provider,
+                request.max_results,
+                retrieval_elapsed_ms,
+                retrieval_query[:160],
             )
 
             answer = ""
@@ -2718,7 +2768,13 @@ async def unified_query(request: UnifiedQueryRequest):
             def _is_boilerplate_snippet(text: str) -> bool:
                 if not text:
                     return True
-                return bool(re.match(r"^\s*context\s*:", text, re.IGNORECASE))
+                lowered = str(text).strip().lower()
+                return (
+                    bool(re.match(r"^\s*context\s*:", text, re.IGNORECASE))
+                    or lowered.startswith("on explicit graph path.")
+                    or lowered.startswith("connected via explicit graph path")
+                    or "seed_hits=" in lowered
+                )
 
             if anchor_sources and vector_snippets_by_identity:
                 for src in anchor_sources:
@@ -2822,10 +2878,29 @@ async def unified_query(request: UnifiedQueryRequest):
             if not answer and isinstance(result, dict):
                 answer = result.get("answer", "") or ""
 
-            # Always synthesize if we have sources, but pass the existing graph answer in as context
+            # Fetch supplemental web evidence before synthesis so the model can use it when requested.
             web_search_result = None
+            if request.web_search:
+                async with httpx.AsyncClient() as client:
+                    web_search_result = await _perform_tavily_web_search(
+                        client,
+                        retrieval_query or request.query,
+                    )
+
+            # Always synthesize if we have sources, but pass the existing graph answer in as context
             if sources:
                 try:
+                    synthesis_started_at = time.perf_counter()
+                    supplemental_sections = []
+                    if answer:
+                        supplemental_sections.append(
+                            "The following is a partial analytical answer derived from the knowledge graph. "
+                            "Incorporate it into your final response only where it is consistent with the provided vault context.\n"
+                            f"{answer}"
+                        )
+                    web_context = _format_web_search_context_for_synthesis(web_search_result)
+                    if web_context:
+                        supplemental_sections.append(web_context)
                     synthesis_result = await _synthesize_cascading_answer(
                         request.query,
                         sources,
@@ -2833,18 +2908,25 @@ async def unified_query(request: UnifiedQueryRequest):
                         request.model,
                         request.system_prompt,
                         request.brief_concept_index,
-                        (
-                            "The following is a partial analytical answer derived from the knowledge graph. "
-                            "Incorporate it into your final response only where it is consistent with the provided vault context.\n"
-                            f"{answer}"
-                        ) if answer else None,
+                        "\n\n".join(section for section in supplemental_sections if section) or None,
                     )
+                    synthesis_elapsed_ms = int((time.perf_counter() - synthesis_started_at) * 1000)
                     if isinstance(synthesis_result, dict):
                         synthesized_answer = str(synthesis_result.get("answer") or "").strip()
                         fallback_reason = str(synthesis_result.get("fallback_reason") or "").strip()
                         synthesis_used_documents = synthesis_result.get("used_documents")
                         synthesis_citations = synthesis_result.get("citations")
                         if isinstance(synthesis_used_documents, list) and synthesis_used_documents:
+                            sources = _hydrate_cascading_sources(sources, synthesis_used_documents)
+                        if (
+                            isinstance(synthesis_used_documents, list)
+                            and synthesis_used_documents
+                            and (
+                                len(sources) <= 2
+                                or len(synthesis_used_documents) >= min(2, len(sources))
+                                or _summary_query_targets_source(request.query, synthesis_used_documents[0])
+                            )
+                        ):
                             sources = [
                                 _normalize_cascading_source(
                                     source,
@@ -2872,23 +2954,42 @@ async def unified_query(request: UnifiedQueryRequest):
                                 warnings.append(f"Cascading synthesis fallback: {fallback_reason}.")
                         if isinstance(result, dict):
                             result["citations"] = synthesis_citations if isinstance(synthesis_citations, list) else []
-                            result["used_documents"] = sources
+                            result["used_documents"] = (
+                                _hydrate_cascading_sources(synthesis_used_documents, sources)
+                                if isinstance(synthesis_used_documents, list) and synthesis_used_documents
+                                else sources
+                            )
                             if fallback_reason:
                                 result["synthesis_fallback_reason"] = fallback_reason
+                        logger.info(
+                            "cascading_query.synthesis_complete provider=%s selected_sources=%d synthesis_ms=%d fallback_reason=%s answer_chars=%d",
+                            request.llm_provider,
+                            len(sources),
+                            synthesis_elapsed_ms,
+                            fallback_reason,
+                            len(answer),
+                        )
                     else:
                         answer = str(synthesis_result or "").strip()
+                        logger.info(
+                            "cascading_query.synthesis_complete provider=%s selected_sources=%d synthesis_ms=%d fallback_reason=%s answer_chars=%d",
+                            request.llm_provider,
+                            len(sources),
+                            synthesis_elapsed_ms,
+                            "",
+                            len(answer),
+                        )
                 except Exception as synth_error:
+                    logger.warning(
+                        "cascading_query.synthesis_failed provider=%s selected_sources=%d error=%s",
+                        request.llm_provider,
+                        len(sources),
+                        synth_error,
+                    )
                     if _is_mlx_runtime_failure(request.llm_provider, synth_error, model=request.model) or _looks_like_mlx_transport_failure_text(str(synth_error)):
                         recovery_payload = _mlx_recovery_error_payload(synth_error)
                         raise HTTPException(status_code=503, detail=recovery_payload)
                     raise
-
-            if request.web_search:
-                async with httpx.AsyncClient() as client:
-                    web_search_result = await _perform_tavily_web_search(
-                        client,
-                        retrieval_query or request.query,
-                    )
             
             if diagnostics.get("failures"):
                 warnings.append("Some retrieval stages failed; answer may be based on partial evidence.")
@@ -3016,26 +3117,36 @@ async def unified_query(request: UnifiedQueryRequest):
                     if selected_sources:
                         sources = selected_sources
 
+                if request.web_search:
+                    web_search_result = await _perform_tavily_web_search(
+                        client,
+                        retrieval_query or request.query,
+                    )
+
                 # 3. Micro-compressor logic
-                micro_compressor_prompt = "Create 3-5 bullet points that capture the key ideas in these snippets; do not add information not present in the snippets."
+                micro_compressor_prompt = (
+                    "Create 3-5 bullet points that capture the key ideas in the provided evidence; "
+                    "do not add information not present in that evidence."
+                )
                 if not request.brief_concept_index:
                     micro_compressor_prompt = (
-                        "Answer the query using only these snippets. "
+                        "Answer the query using only the provided evidence. "
                         "Provide a fuller grounded response in complete sentences with concrete details from the evidence. "
                         "Be concise, but do not reduce the answer to a terse concept index or minimal bullets. "
-                        "Do not add information not present in the snippets."
+                        "Do not add information not present in the evidence."
                     )
                 if summary_like and request.brief_concept_index:
                     micro_compressor_prompt = (
-                        "Create 3-6 bullet points that faithfully summarize only the named note or book from these snippets. "
+                        "Create 3-6 bullet points that faithfully summarize only the named note or book from the provided vault evidence. "
                         "Stay grounded in the retrieved vault evidence. "
-                        "Do not generalize beyond the snippets. "
+                        "Do not generalize beyond that evidence. "
                         "If the snippets only cover one theme, summarize only that theme."
                     )
                 synthesized_answer = ""
                 synthesis_fallback_reason = ""
                 synthesis_sources = sources
                 response_sources = sources
+                supplemental_context = _format_web_search_context_for_synthesis(web_search_result)
                 if sources:
                     expand_named_sources = summary_like or _should_expand_named_sources_for_synthesis(
                         request.query,
@@ -3057,7 +3168,8 @@ async def unified_query(request: UnifiedQueryRequest):
                             sources=synthesis_sources,
                             llm_provider=request.llm_provider,
                             model=request.model,
-                            system_prompt=micro_compressor_prompt
+                            system_prompt=micro_compressor_prompt,
+                            supplemental_context=supplemental_context,
                         )
                         if isinstance(compressor_result, dict):
                             synthesized_answer = compressor_result.get("answer", "")
@@ -3085,12 +3197,6 @@ async def unified_query(request: UnifiedQueryRequest):
                     synthesized_answer = _build_extractive_vector_fallback_answer(
                         request.query,
                         synthesis_sources,
-                    )
-
-                if request.web_search:
-                    web_search_result = await _perform_tavily_web_search(
-                        client,
-                        retrieval_query or request.query,
                     )
 
                 return {

@@ -1,9 +1,13 @@
+import ast
 import asyncio
 import json
+import logging
 import math
 import os
+from pathlib import Path
 import re
 import sys
+import time
 from typing import Any, Dict, List, Mapping, Optional
 
 
@@ -17,6 +21,10 @@ def _ensure_project_root_on_path() -> None:
         sys.path.append(root)
 
 
+def _vault_root() -> Path:
+    return Path(os.getenv("OBSIDIAN_VAULT_PATH", "/app/vault")).expanduser().resolve()
+
+
 try:
     from deep_thinking.source_utils import canonical_source_identity, normalize_source_record
     from deep_thinking.synthesizer import FinalAnswerGenerator
@@ -28,11 +36,93 @@ except ImportError:
     from deep_thinking.utils import universal_client
 
 
+logger = logging.getLogger(__name__)
+
+
 def _get_env_value(name: str, default: str = "") -> str:
     value = os.getenv(name, default)
     if not isinstance(value, str):
         return default
     return value.strip()
+
+
+def _get_env_int(name: str, default: int, *, minimum: int = 0) -> int:
+    try:
+        return max(minimum, int(_get_env_value(name, str(default))))
+    except (TypeError, ValueError):
+        return max(minimum, default)
+
+
+def _get_env_float(name: str, default: float, *, minimum: float = 0.0) -> float:
+    try:
+        return max(minimum, float(_get_env_value(name, str(default))))
+    except (TypeError, ValueError):
+        return max(minimum, default)
+
+
+def _query_preview(text: str, limit: int = 120) -> str:
+    compact = re.sub(r"\s+", " ", str(text or "").strip())
+    if len(compact) <= limit:
+        return compact
+    return compact[: max(limit - 3, 0)].rstrip() + "..."
+
+
+def _provider_synthesis_timeout_seconds(provider: str) -> float:
+    resolved_provider = canonical_cascading_provider_name(provider)
+    base_timeout_seconds = _get_env_float(
+        "CASCADING_SYNTHESIS_TIMEOUT_SECONDS",
+        25.0,
+        minimum=1.0,
+    )
+    if resolved_provider == "lmstudio":
+        lmstudio_timeout_seconds = _get_env_float(
+            "CASCADING_SYNTHESIS_TIMEOUT_SECONDS_LMSTUDIO",
+            _get_env_float("CASCADING_SYNTHESIS_TIMEOUT_SECONDS_MLX", 180.0, minimum=1.0),
+            minimum=1.0,
+        )
+        return max(base_timeout_seconds, lmstudio_timeout_seconds)
+    if resolved_provider == "ollama":
+        ollama_timeout_seconds = _get_env_float(
+            "CASCADING_SYNTHESIS_TIMEOUT_SECONDS_OLLAMA",
+            _get_env_float("CASCADING_SYNTHESIS_TIMEOUT_SECONDS_LOCAL", 90.0, minimum=1.0),
+            minimum=1.0,
+        )
+        return max(base_timeout_seconds, ollama_timeout_seconds)
+    return base_timeout_seconds
+
+
+def _provider_prompt_source_caps(provider: str) -> tuple[Optional[int], Optional[int], int]:
+    resolved_provider = canonical_cascading_provider_name(provider)
+    if resolved_provider == "lmstudio":
+        return (
+            _get_env_int("CASCADING_SYNTHESIS_MAX_SOURCES_LMSTUDIO", 4, minimum=1),
+            _get_env_int("CASCADING_SYNTHESIS_MAX_SNIPPET_CHARS_LMSTUDIO", 700, minimum=40),
+            _get_env_int("CASCADING_SYNTHESIS_MAX_CONTEXT_SOURCES_LMSTUDIO", 4, minimum=1),
+        )
+    if resolved_provider == "ollama":
+        max_sources = _get_env_int("CASCADING_SYNTHESIS_MAX_SOURCES_OLLAMA", 4, minimum=1)
+        return (
+            max_sources,
+            _get_env_int("CASCADING_SYNTHESIS_MAX_SNIPPET_CHARS_OLLAMA", 1400, minimum=40),
+            _get_env_int("CASCADING_SYNTHESIS_MAX_CONTEXT_SOURCES_OLLAMA", max_sources, minimum=1),
+        )
+    return None, None, 15
+
+
+def _provider_source_expansion_chars(provider: str) -> int:
+    resolved_provider = canonical_cascading_provider_name(provider)
+    default_expansion_chars = _get_env_int(
+        "CASCADING_SYNTHESIS_SOURCE_EXPANSION_CHARS",
+        8000,
+        minimum=1000,
+    )
+    if resolved_provider == "ollama":
+        return _get_env_int(
+            "CASCADING_SYNTHESIS_SOURCE_EXPANSION_CHARS_OLLAMA",
+            min(default_expansion_chars, 2500),
+            minimum=1000,
+        )
+    return default_expansion_chars
 
 
 def _extract_query_terms(query: str) -> List[str]:
@@ -132,6 +222,39 @@ def _extract_partial_json_string_field(text: str, field_name: str) -> str:
     return _decode_json_string_fragment(fragment)
 
 
+def _normalize_answer_paragraphs(items: List[Any]) -> str:
+    paragraphs: List[str] = []
+    for item in items:
+        text = str(item or "").strip()
+        if not text:
+            continue
+        paragraphs.append(text)
+    return "\n\n".join(paragraphs)
+
+
+def _coerce_answer_text(answer_value: Any, query: str) -> str:
+    if isinstance(answer_value, list):
+        return _normalize_answer_paragraphs(answer_value)
+
+    text = str(answer_value or "").strip()
+    if not text:
+        return ""
+
+    if is_summary_style_query(query) and text.startswith("[") and text.endswith("]"):
+        parsed_list: Any = None
+        try:
+            parsed_list = json.loads(text)
+        except json.JSONDecodeError:
+            try:
+                parsed_list = ast.literal_eval(text)
+            except (ValueError, SyntaxError):
+                parsed_list = None
+        if isinstance(parsed_list, list):
+            return _normalize_answer_paragraphs(parsed_list)
+
+    return text
+
+
 def distance_to_relevance(distance: Any, default: float = 50.0) -> float:
     try:
         return max(0.0, min(100.0, 100.0 / (1.0 + math.exp(float(distance) / 2.0))))
@@ -163,6 +286,55 @@ def normalize_cascading_source(
     normalized["source_type"] = normalized.get("source_type") or source_type
     normalized["_source_identity"] = canonical_source_identity(normalized, default_category="vault")
     return normalized
+
+
+def _source_hydration_score(source: Mapping[str, Any]) -> tuple[int, int, int]:
+    snippet = str(source.get("snippet") or "").strip()
+    content = str(source.get("content") or "").strip()
+    return (
+        1 if source.get("is_full_content") else 0,
+        0 if _looks_like_boilerplate_source_snippet(snippet or content) else 1,
+        max(len(content), len(snippet)),
+    )
+
+
+def hydrate_cascading_sources(
+    base_sources: List[Dict[str, Any]],
+    hydrated_sources: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    if not base_sources:
+        return [dict(source) for source in (hydrated_sources or []) if isinstance(source, Mapping)]
+    if not hydrated_sources:
+        return [dict(source) for source in base_sources if isinstance(source, Mapping)]
+
+    best_by_identity: Dict[tuple[str, str], Dict[str, Any]] = {}
+    for source in hydrated_sources:
+        if not isinstance(source, Mapping):
+            continue
+        prepared = dict(source)
+        source_identity = canonical_source_identity(prepared, default_category="vault")
+        current = best_by_identity.get(source_identity)
+        if current is None or _source_hydration_score(prepared) > _source_hydration_score(current):
+            best_by_identity[source_identity] = prepared
+
+    merged: List[Dict[str, Any]] = []
+    for source in base_sources:
+        if not isinstance(source, Mapping):
+            continue
+        prepared = dict(source)
+        source_identity = canonical_source_identity(prepared, default_category="vault")
+        hydrated = best_by_identity.get(source_identity)
+        if hydrated:
+            hydrated_snippet = str(hydrated.get("snippet") or "").strip()
+            hydrated_content = str(hydrated.get("content") or "").strip()
+            if hydrated_snippet:
+                prepared["snippet"] = hydrated_snippet
+            if hydrated_content:
+                prepared["content"] = hydrated_content
+            if hydrated.get("is_full_content"):
+                prepared["is_full_content"] = True
+        merged.append(prepared)
+    return merged
 
 
 def _normalize_summary_focus_text(value: Any) -> str:
@@ -441,48 +613,107 @@ def _prepare_synthesis_prompt_sources(
     provider: str,
     sources: List[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
-    resolved_provider = canonical_cascading_provider_name(provider)
     prepared_sources = [
         dict(source)
         for source in sources
         if isinstance(source, Mapping)
     ]
-    if resolved_provider != "lmstudio":
+    max_sources, max_snippet_chars, _ = _provider_prompt_source_caps(provider)
+    if max_sources is not None:
+        prepared_sources = prepared_sources[:max_sources]
+    if max_snippet_chars is None:
         return prepared_sources
 
-    try:
-        max_sources = max(
-            1,
-            int(
-                _get_env_value(
-                    "CASCADING_SYNTHESIS_MAX_SOURCES_LMSTUDIO",
-                    "4",
-                )
-            ),
-        )
-    except (TypeError, ValueError):
-        max_sources = 4
-
-    try:
-        max_snippet_chars = max(
-            200,
-            int(
-                _get_env_value(
-                    "CASCADING_SYNTHESIS_MAX_SNIPPET_CHARS_LMSTUDIO",
-                    "700",
-                )
-            ),
-        )
-    except (TypeError, ValueError):
-        max_snippet_chars = 700
-
     limited_sources: List[Dict[str, Any]] = []
-    for source in prepared_sources[:max_sources]:
-        snippet = str(source.get("snippet") or "")
+    for source in prepared_sources:
+        snippet = str(source.get("snippet") or source.get("content") or "")
         if len(snippet) > max_snippet_chars:
-            source["snippet"] = f"{snippet[:max_snippet_chars].rstrip()}..."
+            clipped = f"{snippet[:max_snippet_chars].rstrip()}..."
+            source["snippet"] = clipped
+            if source.get("content"):
+                source["content"] = clipped
         limited_sources.append(source)
     return limited_sources
+
+
+def _resolve_vault_source_path(source: Mapping[str, Any]) -> Optional[Path]:
+    raw_path = str(source.get("filepath") or source.get("source") or "").strip()
+    if not raw_path or raw_path.startswith(("http://", "https://")):
+        return None
+
+    raw_path = raw_path.replace("\\", "/").lstrip("/")
+    vault_root = _vault_root()
+    try:
+        resolved = (vault_root / raw_path).resolve()
+        resolved.relative_to(vault_root)
+    except Exception:
+        return None
+    return resolved if resolved.is_file() else None
+
+
+def _looks_like_boilerplate_source_snippet(text: str) -> bool:
+    snippet = str(text or "").strip()
+    if not snippet:
+        return True
+    lowered = snippet.lower()
+    return (
+        lowered.startswith("context:")
+        or lowered.startswith("on explicit graph path.")
+        or lowered.startswith("connected via explicit graph path")
+        or (len(snippet) < 140 and "mentioned." in lowered)
+    )
+
+
+def _expand_sources_for_synthesis(
+    query: str,
+    sources: List[Dict[str, Any]],
+    provider: str = "",
+) -> List[Dict[str, Any]]:
+    expansion_limit = _provider_source_expansion_chars(provider)
+
+    query_terms = {
+        token for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", str(query or "").lower())
+        if token not in {"what", "when", "where", "which", "with", "from", "into", "about", "how"}
+    }
+
+    expanded_sources: List[Dict[str, Any]] = []
+    for source in sources or []:
+        prepared = dict(source)
+        resolved = _resolve_vault_source_path(prepared)
+        if not resolved or resolved.suffix.lower() not in {".md", ".txt"}:
+            expanded_sources.append(prepared)
+            continue
+
+        source_label = " ".join(
+            _normalize_summary_focus_text(value)
+            for value in (
+                prepared.get("filename"),
+                prepared.get("filepath"),
+                prepared.get("canonical_id"),
+            )
+        )
+        should_expand = _looks_like_boilerplate_source_snippet(prepared.get("snippet") or prepared.get("content"))
+        if not should_expand and query_terms:
+            overlap = sum(1 for term in query_terms if term in source_label)
+            should_expand = overlap > 0 and len(str(prepared.get("snippet") or "")) < 500
+        if not should_expand:
+            expanded_sources.append(prepared)
+            continue
+
+        try:
+            with resolved.open("r", encoding="utf-8", errors="ignore") as handle:
+                content = handle.read(expansion_limit).strip()
+        except OSError:
+            expanded_sources.append(prepared)
+            continue
+
+        if content and len(content) > len(str(prepared.get("snippet") or "")):
+            prepared["content"] = content
+            prepared["snippet"] = content
+            prepared["is_full_content"] = True
+        expanded_sources.append(prepared)
+
+    return expanded_sources
 
 
 def _clean_extractive_fallback_text(value: Any) -> str:
@@ -522,6 +753,10 @@ def _extractive_fallback_candidates(text: str) -> List[str]:
         if len(candidate) > 320:
             continue
         lowered = candidate.lower()
+        if _looks_like_boilerplate_source_snippet(candidate):
+            continue
+        if "depth=" in lowered or "seed_hits=" in lowered:
+            continue
         if lowered.startswith(("source:", "date:", "canonical id:", "entity type:", "timeline date:", "tags:")):
             continue
         if candidate not in candidates:
@@ -604,7 +839,8 @@ def _looks_incomplete_answer(text: str) -> bool:
         return True
     if answer_text.endswith((".", "!", "?", "]", ")", "\"")):
         return False
-    if len(answer_text.split()) < 8:
+    word_count = len(answer_text.split())
+    if word_count < 8:
         return False
 
     trailing_terms = {
@@ -618,6 +854,10 @@ def _looks_incomplete_answer(text: str) -> bool:
     if answer_text.endswith((",", ";", ":", "-", "(", "/", "—")):
         return True
     if answer_text.count("(") > answer_text.count(")"):
+        return True
+    if re.search(r"\b(however|but|therefore|thus|additionally|moreover|because|which means)\b", answer_text.lower()):
+        return True
+    if word_count >= 12:
         return True
     return False
 
@@ -658,30 +898,10 @@ async def synthesize_cascading_answer(
     supplemental_context: Optional[str] = None,
 ) -> Dict[str, Any]:
     resolved_provider = canonical_cascading_provider_name(llm_provider)
-
-    try:
-        base_timeout_seconds = max(
-            1.0,
-            float(_get_env_value("CASCADING_SYNTHESIS_TIMEOUT_SECONDS", "25")),
-        )
-    except (TypeError, ValueError):
-        base_timeout_seconds = 25.0
-
-    synthesis_timeout_seconds = base_timeout_seconds
-    if resolved_provider == "lmstudio":
-        try:
-            lmstudio_timeout_seconds = max(
-                1.0,
-                float(
-                    _get_env_value(
-                        "CASCADING_SYNTHESIS_TIMEOUT_SECONDS_LMSTUDIO",
-                        _get_env_value("CASCADING_SYNTHESIS_TIMEOUT_SECONDS_MLX", "180"),
-                    )
-                ),
-            )
-        except (TypeError, ValueError):
-            lmstudio_timeout_seconds = 180.0
-        synthesis_timeout_seconds = max(base_timeout_seconds, lmstudio_timeout_seconds)
+    synthesis_timeout_seconds = _provider_synthesis_timeout_seconds(resolved_provider)
+    max_prompt_sources, max_prompt_snippet_chars, max_context_sources = _provider_prompt_source_caps(
+        resolved_provider
+    )
 
     try:
         synthesis_temperature = max(
@@ -727,7 +947,7 @@ async def synthesize_cascading_answer(
         parsed = _extract_json_object(text)
         if not parsed:
             parsed = _salvage_structured_response(text)
-        answer_text = str(parsed.get("answer") or "").strip()
+        answer_text = _coerce_answer_text(parsed.get("answer"), query)
         citations_raw = parsed.get("citations")
         citations = citations_raw if isinstance(citations_raw, list) else []
         query_entities = _extract_query_terms(query)
@@ -756,6 +976,20 @@ async def synthesize_cascading_answer(
         return {"answer": "No results found", "citations": [], "used_documents": [], "fallback_reason": "no_sources"}
 
     supplemental_context_text = str(supplemental_context or "").strip()
+    has_web_supplemental_context = "Supplemental web evidence:" in supplemental_context_text
+    resolved_model = model or default_cascading_model(resolved_provider) or ""
+    overall_started_at = time.perf_counter()
+    logger.info(
+        "cascading_synthesis.start provider=%s model=%s sources=%d brief=%s timeout_s=%.1f max_prompt_sources=%s max_snippet_chars=%s query=%s",
+        resolved_provider,
+        resolved_model,
+        len(sources),
+        brief_concept_index,
+        synthesis_timeout_seconds,
+        max_prompt_sources if max_prompt_sources is not None else "unbounded",
+        max_prompt_snippet_chars if max_prompt_snippet_chars is not None else "unbounded",
+        _query_preview(query),
+    )
 
     procedural_query = is_procedural_style_query(query)
     relation_query = is_relation_style_query(query)
@@ -824,6 +1058,13 @@ async def synthesize_cascading_answer(
             "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
             "Do not invent citations. If the context does not contain the answer, say so."
         )
+    if has_web_supplemental_context:
+        sys_prompt = (
+            f"{sys_prompt} "
+            "Supplemental web evidence may also be provided. "
+            "Prioritize vault evidence. If the vault is insufficient but the supplemental web evidence is relevant, you may use it carefully to answer the question. "
+            "When you do so, say clearly that the specific point comes from supplemental web evidence rather than the vault."
+        )
     if resolved_provider not in {"claude", "gemini", "openrouter", "chatgpt", "ollama", "lmstudio", "perplexity"}:
         return fallback_payload(
             f"Found {len(sources)} matching snippets in your vault. (LLM synthesis skipped: unknown provider '{llm_provider}')",
@@ -847,17 +1088,30 @@ async def synthesize_cascading_answer(
                 attempt_sources_list.append(reduced_sources)
 
         for attempt_index, active_sources in enumerate(attempt_sources_list):
+            attempt_started_at = time.perf_counter()
             signature = tuple(source.get("_source_identity") for source in active_sources if isinstance(source, Mapping))
             if signature in attempted_signatures:
                 continue
             attempted_signatures.add(signature)
+            prompt_prep_started_at = time.perf_counter()
             prompt_sources = _prepare_synthesis_prompt_sources(
                 resolved_provider,
                 active_sources,
             )
+            prompt_sources = _expand_sources_for_synthesis(
+                query,
+                prompt_sources,
+                provider=resolved_provider,
+            )
+            prompt_sources = _prepare_synthesis_prompt_sources(
+                resolved_provider,
+                prompt_sources,
+            )
+            hydrated_active_sources = hydrate_cascading_sources(active_sources, prompt_sources)
+            context_sources = prompt_sources[:max_context_sources]
             active_context = "\n\n".join([
                 f"Snippet {i+1} from {s.get('filename', 'Unknown')}:\n{s.get('snippet', '')}"
-                for i, s in enumerate(prompt_sources[:15])
+                for i, s in enumerate(context_sources)
             ])
             active_sections = []
             if supplemental_context_text:
@@ -869,6 +1123,18 @@ async def synthesize_cascading_answer(
                 "Return JSON only in the form "
                 '{"answer": "concise grounded answer", "citations": ["[[Exact/Path.md]]"]}.'
             )
+            prompt_prep_elapsed_ms = int((time.perf_counter() - prompt_prep_started_at) * 1000)
+            logger.info(
+                "cascading_synthesis.prompt_prepared provider=%s model=%s attempt=%d source_count=%d context_sources=%d context_chars=%d prep_ms=%d",
+                resolved_provider,
+                resolved_model,
+                attempt_index + 1,
+                len(prompt_sources),
+                len(context_sources),
+                len(active_context),
+                prompt_prep_elapsed_ms,
+            )
+            llm_started_at = time.perf_counter()
             try:
                 response = await asyncio.wait_for(
                     asyncio.to_thread(
@@ -876,7 +1142,7 @@ async def synthesize_cascading_answer(
                             provider=resolved_provider,
                             api_key=cascading_provider_api_key(resolved_provider),
                         ).messages.create,
-                        model=model or default_cascading_model(resolved_provider),
+                        model=resolved_model,
                         messages=[{"role": "user", "content": active_prompt}],
                         max_tokens=1024,
                         temperature=synthesis_temperature,
@@ -886,41 +1152,121 @@ async def synthesize_cascading_answer(
                     timeout=synthesis_timeout_seconds,
                 )
             except asyncio.TimeoutError:
+                llm_elapsed_ms = int((time.perf_counter() - llm_started_at) * 1000)
+                total_elapsed_ms = int((time.perf_counter() - overall_started_at) * 1000)
+                logger.warning(
+                    "cascading_synthesis.timeout provider=%s model=%s attempt=%d source_count=%d context_chars=%d prep_ms=%d llm_ms=%d total_ms=%d timeout_s=%.1f",
+                    resolved_provider,
+                    resolved_model,
+                    attempt_index + 1,
+                    len(prompt_sources),
+                    len(active_context),
+                    prompt_prep_elapsed_ms,
+                    llm_elapsed_ms,
+                    total_elapsed_ms,
+                    synthesis_timeout_seconds,
+                )
                 return fallback_payload(
                     "I found relevant vault evidence, but the synthesis step timed out. Review the attached sources.",
-                    active_sources,
+                    hydrated_active_sources,
                     reason="timeout",
                 )
-            parsed = parse_structured_response(universal_client.extract_response_text(response), active_sources)
+            llm_elapsed_ms = int((time.perf_counter() - llm_started_at) * 1000)
+            raw_response_text = universal_client.extract_response_text(response)
+            parsed = parse_structured_response(raw_response_text, prompt_sources)
             answer_text = str(parsed.get("answer") or "").strip()
+            logger.info(
+                "cascading_synthesis.model_complete provider=%s model=%s attempt=%d llm_ms=%d answer_chars=%d citations=%d fallback_reason=%s",
+                resolved_provider,
+                resolved_model,
+                attempt_index + 1,
+                llm_elapsed_ms,
+                len(answer_text),
+                len(parsed.get("citations") or []),
+                str(parsed.get("fallback_reason") or ""),
+            )
             if _answer_has_unsupported_grounded_details(answer_text, active_sources):
                 parsed = fallback_payload(
-                    _build_extractive_cascading_fallback_answer(query, active_sources),
-                    active_sources,
+                    _build_extractive_cascading_fallback_answer(query, prompt_sources),
+                    prompt_sources,
                     reason="unsupported_grounded_detail",
                 )
                 answer_text = str(parsed.get("answer") or "").strip()
+                logger.warning(
+                    "cascading_synthesis.unsupported_detail provider=%s model=%s attempt=%d fallback_reason=%s total_ms=%d",
+                    resolved_provider,
+                    resolved_model,
+                    attempt_index + 1,
+                    parsed.get("fallback_reason"),
+                    int((time.perf_counter() - attempt_started_at) * 1000),
+                )
             if _looks_incomplete_answer(answer_text):
                 if attempt_index < len(attempt_sources_list) - 1:
+                    logger.info(
+                        "cascading_synthesis.retry_reduced_evidence provider=%s model=%s attempt=%d answer_chars=%d",
+                        resolved_provider,
+                        resolved_model,
+                        attempt_index + 1,
+                        len(answer_text),
+                    )
                     continue
                 parsed = fallback_payload(
-                    _build_extractive_cascading_fallback_answer(query, active_sources),
-                    active_sources,
+                    _build_extractive_cascading_fallback_answer(query, prompt_sources),
+                    prompt_sources,
                     reason="incomplete_answer",
                 )
                 answer_text = str(parsed.get("answer") or "").strip()
+                logger.warning(
+                    "cascading_synthesis.incomplete_answer provider=%s model=%s attempt=%d fallback_reason=%s total_ms=%d",
+                    resolved_provider,
+                    resolved_model,
+                    attempt_index + 1,
+                    parsed.get("fallback_reason"),
+                    int((time.perf_counter() - attempt_started_at) * 1000),
+                )
             if answer_text and not is_generic_cascading_fallback_answer(answer_text):
                 if attempt_index:
                     parsed["fallback_reason"] = "retry_reduced_evidence"
+                logger.info(
+                    "cascading_synthesis.complete provider=%s model=%s attempt=%d total_ms=%d fallback_reason=%s used_documents=%d",
+                    resolved_provider,
+                    resolved_model,
+                    attempt_index + 1,
+                    int((time.perf_counter() - overall_started_at) * 1000),
+                    str(parsed.get("fallback_reason") or ""),
+                    len(parsed.get("used_documents") or []),
+                )
                 return parsed
             if attempt_index == len(attempt_sources_list) - 1:
                 parsed["fallback_reason"] = parsed.get("fallback_reason") or "weak_answer"
+                logger.warning(
+                    "cascading_synthesis.weak_answer provider=%s model=%s attempt=%d total_ms=%d fallback_reason=%s",
+                    resolved_provider,
+                    resolved_model,
+                    attempt_index + 1,
+                    int((time.perf_counter() - overall_started_at) * 1000),
+                    parsed["fallback_reason"],
+                )
                 return parsed
     except Exception as exc:
+        logger.exception(
+            "cascading_synthesis.provider_exception provider=%s model=%s total_ms=%d",
+            resolved_provider,
+            resolved_model,
+            int((time.perf_counter() - overall_started_at) * 1000),
+        )
         raise exc
 
-    return fallback_payload(
+    payload = fallback_payload(
         f"Found {len(sources)} matching snippets in your vault.",
         sources,
         reason="provider_exception",
     )
+    logger.warning(
+        "cascading_synthesis.provider_fallback provider=%s model=%s total_ms=%d fallback_reason=%s",
+        resolved_provider,
+        resolved_model,
+        int((time.perf_counter() - overall_started_at) * 1000),
+        payload.get("fallback_reason"),
+    )
+    return payload
