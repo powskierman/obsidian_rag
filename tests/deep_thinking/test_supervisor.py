@@ -155,6 +155,21 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertFalse(profile["needs_authoritative_sources"])
         self.assertFalse(profile["needs_external_authority"])
 
+    def test_build_query_profile_includes_structured_relationship_normalization(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "How are my lymphoma treatment notes connected to follow-up scan notes?"
+        )
+
+        self.assertTrue(profile["is_relationship"])
+        self.assertEqual(profile["intent"], "relationship")
+        self.assertEqual(profile["anchor_entities"], ["lymphoma treatment", "follow-up scan"])
+        self.assertEqual(profile["relations"], ["connected to"])
+        self.assertEqual(
+            profile["clean_query"],
+            "relationship between lymphoma treatment and follow-up scan",
+        )
+        self.assertEqual(profile["facets"], [["lymphoma", "treatment"], ["follow-up", "scan"]])
+
     def test_build_query_profile_marks_specs_query_as_authority_seeking(self):
         profile = RetrievalSupervisor.build_query_profile(
             "What are the official specs of ESP32?"

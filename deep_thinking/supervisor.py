@@ -41,6 +41,42 @@ except ImportError:
     def source_set_covers_query_facets(query: str, sources: List[Dict[str, Any]]) -> bool:
         return False
 
+try:
+    from src.services.query_normalizer import (
+        clean_entity_phrase as _clean_entity_phrase_impl,
+        normalize_query_structure as _normalize_query_structure_impl,
+        query_terms as _query_terms_impl,
+    )
+except ImportError:
+
+    def _clean_entity_phrase_impl(value: str) -> str:
+        return str(value or "").strip()
+
+    def _normalize_query_structure_impl(query: str) -> Dict[str, Any]:
+        normalized = re.sub(r"\s+", " ", str(query or "").strip())
+        return {
+            "original_query": normalized,
+            "clean_query": normalized,
+            "intent": "lookup",
+            "entities": [],
+            "relations": [],
+            "facets": [],
+            "must_terms": [],
+        }
+
+    def _query_terms_impl(query: str, *, stopwords=None) -> List[str]:
+        terms: List[str] = []
+        seen: set[str] = set()
+        effective_stopwords = set(stopwords or ())
+        for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9._-]{1,}", str(query or "").lower()):
+            cleaned = token.strip("._-")
+            if len(cleaned) < 2 or cleaned in effective_stopwords:
+                continue
+            if cleaned not in seen:
+                seen.add(cleaned)
+                terms.append(cleaned)
+        return terms
+
 class RetrievalSupervisor:
     GRAPH_SUMMARY_SOURCES = {"Graph Synthesis Summary", "LightRAG Knowledge Graph"}
     QUERY_STOPWORDS = {
@@ -280,42 +316,16 @@ class RetrievalSupervisor:
 
     @staticmethod
     def _clean_entity_phrase(value: str) -> str:
-        text = re.sub(r"\s+", " ", str(value or "").strip(" \t\r\n\"'`()[]{}.,;:!?"))
-        text = re.sub(r"^(the|a|an|my|your|our)\s+", "", text, flags=re.IGNORECASE)
-        text = re.sub(
-            r"\s+(?:notes?|docs?|documents?|files?)$",
-            "",
-            text,
-            flags=re.IGNORECASE,
-        )
-        return text.strip()
+        return _clean_entity_phrase_impl(value)
 
     @classmethod
     def _extract_relationship_entities(cls, query: str) -> List[str]:
-        normalized = re.sub(r"\s+", " ", str(query or "").strip())
-        for pattern in cls.RELATIONSHIP_PATTERNS:
-            match = pattern.search(normalized)
-            if not match:
-                continue
-            entities = [
-                cls._clean_entity_phrase(match.group("a")),
-                cls._clean_entity_phrase(match.group("b")),
-            ]
-            return [entity for entity in entities if entity]
-        return []
+        payload = _normalize_query_structure_impl(query)
+        return [entity for entity in payload.get("entities", []) if entity]
 
     @classmethod
     def _query_terms(cls, query: str) -> List[str]:
-        terms: List[str] = []
-        seen: set[str] = set()
-        for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9._-]{1,}", str(query or "").lower()):
-            cleaned = token.strip("._-")
-            if len(cleaned) < 2 or cleaned in cls.QUERY_STOPWORDS:
-                continue
-            if cleaned not in seen:
-                seen.add(cleaned)
-                terms.append(cleaned)
-        return terms
+        return _query_terms_impl(query, stopwords=cls.QUERY_STOPWORDS)
 
     @staticmethod
     def _normalize_match_text(value: Any) -> str:
@@ -415,10 +425,17 @@ class RetrievalSupervisor:
     def build_query_profile(cls, query: str) -> Dict[str, Any]:
         normalized = re.sub(r"\s+", " ", str(query or "").strip())
         lower = normalized.lower()
-        anchors = cls._extract_relationship_entities(normalized)
+        normalized_query = _normalize_query_structure_impl(normalized)
+        anchors = [entity for entity in normalized_query.get("entities", []) if entity]
         compare_mode = any(hint in lower for hint in cls.OPTION_QUERY_HINTS)
         needs_outcomes = any(hint in lower for hint in cls.OUTCOME_QUERY_HINTS)
-        is_relationship = cls._enable_connection_mode() and cls.is_relationship_query(normalized)
+        is_relationship = (
+            cls._enable_connection_mode()
+            and (
+                normalized_query.get("intent") == "relationship"
+                or cls.is_relationship_query(normalized)
+            )
+        )
         is_summary_request = cls.is_summary_request(normalized)
         summary_focus = cls._summary_focus_text(normalized)
         requires_current_information = cls.is_current_info_query(normalized)
@@ -443,10 +460,15 @@ class RetrievalSupervisor:
             max_sources = 3
         return {
             "query": normalized,
+            "normalized_query": normalized_query,
+            "clean_query": str(normalized_query.get("clean_query") or normalized),
             "lower": lower,
             "terms": cls._query_terms(normalized),
             "anchor_entities": anchors,
             "anchor_terms": cls._query_terms(" ".join(anchors)),
+            "relations": list(normalized_query.get("relations") or []),
+            "facets": list(normalized_query.get("facets") or []),
+            "intent": str(normalized_query.get("intent") or "lookup"),
             "is_relationship": is_relationship,
             "is_summary_request": is_summary_request,
             "summary_focus": summary_focus,

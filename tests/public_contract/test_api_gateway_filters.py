@@ -972,6 +972,19 @@ def test_deterministic_normalize_query_strips_instruction_wrapper():
 
 
 @pytest.mark.unit
+def test_normalize_query_object_extracts_relationship_structure():
+    payload = api_gateway._normalize_query_object(
+        "How are my lymphoma treatment notes connected to follow-up scan notes?"
+    )
+
+    assert payload["intent"] == "relationship"
+    assert payload["entities"] == ["lymphoma treatment", "follow-up scan"]
+    assert payload["relations"] == ["connected to"]
+    assert payload["clean_query"] == "relationship between lymphoma treatment and follow-up scan"
+    assert payload["facets"] == [["lymphoma", "treatment"], ["follow-up", "scan"]]
+
+
+@pytest.mark.unit
 def test_should_normalize_query_only_for_verbose_or_instructional_queries():
     assert api_gateway._should_normalize_query(
         "Show both linked-note context and direct note excerpts for yescarta"
@@ -1011,7 +1024,7 @@ async def test_normalize_query_for_retrieval_preserves_multi_facet_query(monkeyp
         "test-model",
     )
 
-    assert normalized.lower() == query.lower().rstrip("?")
+    assert normalized == "relationship between thermostat control and relay wiring"
 
 
 @pytest.mark.unit
@@ -1044,6 +1057,75 @@ def test_source_set_covers_query_facets_requires_both_sides():
             },
         ],
     )
+
+
+@pytest.mark.unit
+def test_should_require_vault_relationship_guardrail_for_personal_scope_query():
+    query = "In my canmore network what is the relationship between tuya and matter devices"
+
+    assert api_gateway._should_require_vault_relationship_guardrail(
+        query,
+        [
+            {
+                "filename": "Canmore Tuya Devices.md",
+                "filepath": "Tech/Networking/Canmore Tuya Devices.md",
+                "snippet": "Inventory of Tuya devices on the Canmore network.",
+                "source_category": "vault",
+            }
+        ],
+    )
+
+    assert not api_gateway._should_require_vault_relationship_guardrail(
+        query,
+        [
+            {
+                "filename": "Canmore Tuya Devices.md",
+                "filepath": "Tech/Networking/Canmore Tuya Devices.md",
+                "snippet": "Inventory of Tuya devices on the Canmore network.",
+                "source_category": "vault",
+            },
+            {
+                "filename": "Matter Integration.md",
+                "filepath": "Tech/Networking/Matter Integration.md",
+                "snippet": "Matter devices on the Canmore network and Tuya bridge references.",
+                "source_category": "vault",
+            },
+        ],
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_blocks_web_bridging_for_personal_scope_relationship_query(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "ollama", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            raise AssertionError("LLM synthesis should not run when vault relationship guardrail triggers")
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "In my canmore network what is the relationship between tuya and matter devices",
+        [
+            {
+                "filename": "Canmore Tuya Devices.md",
+                "filepath": "Tech/Networking/Canmore Tuya Devices.md",
+                "relevance": 95.0,
+                "snippet": "Inventory of Tuya devices on the Canmore network.",
+                "source_category": "vault",
+            }
+        ],
+        "ollama",
+        "qwen2.5:7b-instruct",
+        supplemental_context="Supplemental web evidence:\n1. Tuya supports Matter devices in general.",
+    )
+
+    assert result["fallback_reason"] == "insufficient_vault_relationship_evidence"
+    assert "tuya" in result["answer"].lower()
+    assert "matter" in result["answer"].lower()
+    assert "clear direct connection" in result["answer"].lower()
 
 
 @pytest.mark.unit

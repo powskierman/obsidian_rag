@@ -10,6 +10,30 @@ import sys
 import time
 from typing import Any, Dict, List, Mapping, Optional
 
+try:
+    from query_normalizer import (
+        extract_query_facets as _extract_query_facets_impl,
+        has_multi_facet_query as _has_multi_facet_query_impl,
+        is_relation_style_query as _is_relation_style_query_impl,
+        normalize_query_structure as _normalize_query_structure_impl,
+    )
+except ImportError:
+    try:
+        from src.services.query_normalizer import (
+            extract_query_facets as _extract_query_facets_impl,
+            has_multi_facet_query as _has_multi_facet_query_impl,
+            is_relation_style_query as _is_relation_style_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+        )
+    except ImportError:
+        _ensure_project_root_on_path()
+        from src.services.query_normalizer import (
+            extract_query_facets as _extract_query_facets_impl,
+            has_multi_facet_query as _has_multi_facet_query_impl,
+            is_relation_style_query as _is_relation_style_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+        )
+
 
 def _project_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -36,7 +60,7 @@ except ImportError:
     from deep_thinking.utils import universal_client
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("src.services.cascading_pipeline")
 
 
 def _get_env_value(name: str, default: str = "") -> str:
@@ -375,79 +399,65 @@ def is_procedural_style_query(query: str) -> bool:
 
 
 def _relation_query_sides(query: str) -> tuple[set[str], set[str]]:
-    lowered = str(query or "").strip().lower()
-    if not lowered:
+    facets = _extract_query_facets_impl(query)
+    if len(facets) < 2:
         return set(), set()
-
-    relation_stopwords = {
-        "how",
-        "what",
-        "does",
-        "relate",
-        "related",
-        "between",
-        "compare",
-        "difference",
-        "connected",
-        "connection",
-        "link",
-        "linked",
-        "my",
-        "your",
-        "our",
-        "notes",
-        "note",
-        "docs",
-        "doc",
-        "documents",
-        "files",
-        "file",
-    }
-
-    patterns = (
-        r"how do\s+(?P<left>.+?)\s+relate to\s+(?P<right>.+)",
-        r"what is the relationship between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
-        r"how are\s+(?P<left>.+?)\s+and\s+(?P<right>.+?)\s+related",
-        r"how are\s+(?P<left>.+?)\s+connected to\s+(?P<right>.+)",
-        r"how is\s+(?P<left>.+?)\s+connected to\s+(?P<right>.+)",
-        r"what is the connection between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
-        r"what is the link between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
-        r"compare\s+(?P<left>.+?)\s+(?:with|and)\s+(?P<right>.+)",
-        r"difference between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
-    )
-    for pattern in patterns:
-        match = re.search(pattern, lowered)
-        if not match:
-            continue
-        left = {
-            token for token in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", match.group("left"))
-            if token not in relation_stopwords
-        }
-        right = {
-            token for token in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", match.group("right"))
-            if token not in relation_stopwords
-        }
-        if left and right:
-            return left, right
-    return set(), set()
+    return set(facets[0]), set(facets[1])
 
 
 def extract_query_facets(query: str) -> List[set[str]]:
-    left, right = _relation_query_sides(query)
-    facets: List[set[str]] = []
-    if left:
-        facets.append(set(left))
-    if right:
-        facets.append(set(right))
-    return facets
+    return [set(facet) for facet in _extract_query_facets_impl(query)]
 
 
 def has_multi_facet_query(query: str) -> bool:
-    return len(extract_query_facets(query)) >= 2
+    return _has_multi_facet_query_impl(query)
 
 
 def is_relation_style_query(query: str) -> bool:
-    return has_multi_facet_query(query)
+    return _is_relation_style_query_impl(query)
+
+
+def is_personal_scope_query(query: str) -> bool:
+    lowered = str(query or "").strip().lower()
+    if not lowered:
+        return False
+    scope_markers = (
+        " in my ",
+        " from my ",
+        " within my ",
+        " my notes",
+        " my vault",
+        " my network",
+        " my setup",
+        " my system",
+        " our notes",
+        " our network",
+        " our system",
+    )
+    padded = f" {lowered} "
+    return any(marker in padded for marker in scope_markers)
+
+
+def build_relationship_insufficient_answer(query: str) -> str:
+    payload = _normalize_query_structure_impl(query)
+    entities = [str(entity or "").strip() for entity in payload.get("entities") or [] if str(entity or "").strip()]
+    if len(entities) >= 2:
+        return (
+            f"I found evidence about {entities[0]} and {entities[1]}, "
+            "but the retrieved vault sources do not show a clear direct connection."
+        )
+    return "I found evidence about the queried topics, but the retrieved vault sources do not show a clear direct connection."
+
+
+def should_require_vault_relationship_guardrail(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> bool:
+    return (
+        is_relation_style_query(query)
+        and is_personal_scope_query(query)
+        and not source_set_covers_query_facets(query, sources)
+    )
 
 
 def _relation_query_source_score(query: str, source: Dict[str, Any]) -> float:
@@ -1125,6 +1135,14 @@ async def synthesize_cascading_answer(
 
     procedural_query = is_procedural_style_query(query)
     relation_query = is_relation_style_query(query)
+    require_vault_relationship_guardrail = should_require_vault_relationship_guardrail(query, sources)
+
+    if require_vault_relationship_guardrail:
+        return fallback_payload(
+            build_relationship_insufficient_answer(query),
+            sources,
+            reason="insufficient_vault_relationship_evidence",
+        )
 
     if system_prompt:
         sys_prompt = system_prompt

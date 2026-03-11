@@ -31,30 +31,36 @@ except ImportError:
 try:
     from cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
+        build_relationship_insufficient_answer as _build_relationship_insufficient_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
         extract_query_facets as _extract_cascading_query_facets_impl,
         has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_personal_scope_query as _is_personal_scope_query_impl,
         is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
         source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
     )
 except ImportError:
     from src.services.cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
+        build_relationship_insufficient_answer as _build_relationship_insufficient_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
         extract_query_facets as _extract_cascading_query_facets_impl,
         has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_personal_scope_query as _is_personal_scope_query_impl,
         is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
         source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
     )
@@ -75,6 +81,30 @@ except ImportError:
         normalize_source_record,
         normalize_vault_path,
     )
+
+try:
+    from query_normalizer import (
+        deterministic_clean_query as _deterministic_clean_query_impl,
+        normalize_query_structure as _normalize_query_structure_impl,
+        query_terms as _query_normalizer_terms_impl,
+    )
+except ImportError:
+    try:
+        from src.services.query_normalizer import (
+            deterministic_clean_query as _deterministic_clean_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+            query_terms as _query_normalizer_terms_impl,
+        )
+    except ImportError:
+        base_path = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        sys.path.append(base_path)
+        from src.services.query_normalizer import (
+            deterministic_clean_query as _deterministic_clean_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+            query_terms as _query_normalizer_terms_impl,
+        )
 
 
 def _load_deep_thinking_rag():
@@ -828,6 +858,10 @@ def _source_set_covers_query_facets(query: str, sources: List[Dict[str, Any]]) -
     return _source_set_covers_query_facets_impl(query, sources)
 
 
+def _should_require_vault_relationship_guardrail(query: str, sources: List[Dict[str, Any]]) -> bool:
+    return _should_require_vault_relationship_guardrail_impl(query, sources)
+
+
 def _canonical_cascading_provider_name(provider: str) -> str:
     normalized = str(provider or "").strip().lower()
     aliases = {
@@ -1282,35 +1316,22 @@ def _should_normalize_query(query: str) -> bool:
 
 
 def _deterministic_normalize_query(query: str) -> str:
-    if not isinstance(query, str):
-        return ""
-    normalized = query.strip()
-    if not normalized:
-        return ""
+    return _deterministic_clean_query_impl(query)
 
-    direct_excerpt_patterns = (
-        r"^\s*show both linked-note context and direct note excerpts for\s+",
-        r"^\s*show linked-note context and direct note excerpts for\s+",
-        r"^\s*show direct note excerpts and linked-note context for\s+",
-        r"^\s*show both direct note excerpts and linked-note context for\s+",
-    )
-    for pattern in direct_excerpt_patterns:
-        normalized = re.sub(pattern, "", normalized, flags=re.IGNORECASE).strip()
 
-    relationships_match = re.match(
-        r"^\s*what relationships and treatments are associated with\s+(.+?)\s+in my notes\??\s*$",
-        normalized,
-        flags=re.IGNORECASE,
-    )
-    if relationships_match:
-        topic = relationships_match.group(1).strip()
-        return f"{topic} relationships treatments".strip()
-
-    normalized = re.sub(r"\bin my notes\b", "", normalized, flags=re.IGNORECASE)
-    normalized = re.sub(r"\bfrom my notes\b", "", normalized, flags=re.IGNORECASE)
-    normalized = re.sub(r"\bin the graph\b", "", normalized, flags=re.IGNORECASE)
-    normalized = re.sub(r"\s+", " ", normalized).strip(" ?")
-    return normalized or query.strip()
+def _normalize_query_object(query: str) -> Dict[str, Any]:
+    payload = _normalize_query_structure_impl(query)
+    if not isinstance(payload, dict):
+        return {
+            "original_query": str(query or "").strip(),
+            "clean_query": _deterministic_normalize_query(query),
+            "intent": "lookup",
+            "entities": [],
+            "relations": [],
+            "facets": [],
+            "must_terms": [],
+        }
+    return payload
 
 
 def _normalizer_cache_key(query: str, provider: str, model: Optional[str]) -> str:
@@ -1501,13 +1522,14 @@ async def _normalize_query_for_retrieval(
     if not query:
         return ""
 
-    deterministic = _deterministic_normalize_query(query)
+    normalized_payload = _normalize_query_object(query)
+    deterministic = str(normalized_payload.get("clean_query") or _deterministic_normalize_query(query)).strip()
     if _has_multi_facet_query(query):
         return deterministic
     if not _should_normalize_query(query):
         return deterministic
 
-    if len(_query_terms(deterministic)) <= 4:
+    if len(_query_normalizer_terms_impl(deterministic)) <= 4:
         return deterministic
 
     provider, resolved_model = _resolve_query_normalizer_provider(llm_provider, model)
@@ -2916,13 +2938,17 @@ async def unified_query(request: UnifiedQueryRequest):
             )
             if selected_sources:
                 sources = selected_sources
+            relationship_guardrail = _should_require_vault_relationship_guardrail(
+                request.query,
+                sources,
+            )
 
             if not answer and isinstance(result, dict):
                 answer = result.get("answer", "") or ""
 
             # Fetch supplemental web evidence before synthesis so the model can use it when requested.
             web_search_result = None
-            if request.web_search:
+            if request.web_search and not relationship_guardrail:
                 async with httpx.AsyncClient() as client:
                     web_search_result = await _perform_tavily_web_search(
                         client,
@@ -2989,6 +3015,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             _is_generic_cascading_fallback_answer(synthesized_answer)
                             and anchor_answer
                             and not _is_insufficient_answer(anchor_answer)
+                            and not relationship_guardrail
                         ):
                             answer = _build_cascading_degraded_answer(
                                 anchor_answer,
@@ -3001,6 +3028,8 @@ async def unified_query(request: UnifiedQueryRequest):
                             answer = synthesized_answer
                             if fallback_reason:
                                 warnings.append(f"Cascading synthesis fallback: {fallback_reason}.")
+                            if relationship_guardrail and fallback_reason == "insufficient_vault_relationship_evidence":
+                                warnings.append("Vault relationship guardrail applied; no direct vault connection was established.")
                         if isinstance(result, dict):
                             result["citations"] = synthesis_citations if isinstance(synthesis_citations, list) else []
                             result["used_documents"] = (
