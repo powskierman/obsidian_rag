@@ -985,6 +985,19 @@ def test_normalize_query_object_extracts_relationship_structure():
 
 
 @pytest.mark.unit
+def test_normalize_query_object_extracts_comparison_structure():
+    payload = api_gateway._normalize_query_object(
+        "From my vault, What is the difference between the bambu p1s and the Creality CR-10"
+    )
+
+    assert payload["intent"] == "comparison"
+    assert payload["entities"] == ["bambu p1s", "Creality CR-10"]
+    assert payload["relations"] == ["difference between"]
+    assert payload["clean_query"] == "compare bambu p1s and Creality CR-10"
+    assert payload["facets"] == [["bambu", "p1s"], ["cr-10", "creality"]]
+
+
+@pytest.mark.unit
 def test_should_normalize_query_only_for_verbose_or_instructional_queries():
     assert api_gateway._should_normalize_query(
         "Show both linked-note context and direct note excerpts for yescarta"
@@ -1090,6 +1103,23 @@ def test_should_require_vault_relationship_guardrail_for_personal_scope_query():
                 "snippet": "Matter devices on the Canmore network and Tuya bridge references.",
                 "source_category": "vault",
             },
+        ],
+    )
+
+
+@pytest.mark.unit
+def test_vault_relationship_guardrail_does_not_apply_to_comparison_query():
+    query = "From my vault, What is the difference between the bambu p1s and the Creality CR-10"
+
+    assert not api_gateway._should_require_vault_relationship_guardrail(
+        query,
+        [
+            {
+                "filename": "bambu-lab-P1S-tech-specs.pdf",
+                "filepath": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "snippet": "Bambu P1S technical specifications.",
+                "source_category": "vault",
+            }
         ],
     )
 

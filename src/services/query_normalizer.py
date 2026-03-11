@@ -39,15 +39,15 @@ RELATION_STOPWORDS = {
 }
 
 RELATION_PATTERNS = (
-    (re.compile(r"how do\s+(?P<left>.+?)\s+relate to\s+(?P<right>.+)", re.IGNORECASE), "conceptual relationship"),
-    (re.compile(r"what is the relationship between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "relationship"),
-    (re.compile(r"how are\s+(?P<left>.+?)\s+and\s+(?P<right>.+?)\s+related", re.IGNORECASE), "relationship"),
-    (re.compile(r"how are\s+(?P<left>.+?)\s+connected to\s+(?P<right>.+)", re.IGNORECASE), "connected to"),
-    (re.compile(r"how is\s+(?P<left>.+?)\s+connected to\s+(?P<right>.+)", re.IGNORECASE), "connected to"),
-    (re.compile(r"what is the connection between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "connection between"),
-    (re.compile(r"what is the link between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "link between"),
-    (re.compile(r"compare\s+(?P<left>.+?)\s+(?:with|and)\s+(?P<right>.+)", re.IGNORECASE), "compare"),
-    (re.compile(r"difference between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "difference between"),
+    (re.compile(r"how do\s+(?P<left>.+?)\s+relate to\s+(?P<right>.+)", re.IGNORECASE), "conceptual relationship", "relationship"),
+    (re.compile(r"what is the relationship between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "relationship", "relationship"),
+    (re.compile(r"how are\s+(?P<left>.+?)\s+and\s+(?P<right>.+?)\s+related", re.IGNORECASE), "relationship", "relationship"),
+    (re.compile(r"how are\s+(?P<left>.+?)\s+connected to\s+(?P<right>.+)", re.IGNORECASE), "connected to", "relationship"),
+    (re.compile(r"how is\s+(?P<left>.+?)\s+connected to\s+(?P<right>.+)", re.IGNORECASE), "connected to", "relationship"),
+    (re.compile(r"what is the connection between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "connection between", "relationship"),
+    (re.compile(r"what is the link between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "link between", "relationship"),
+    (re.compile(r"compare\s+(?P<left>.+?)\s+(?:with|and)\s+(?P<right>.+)", re.IGNORECASE), "compare", "comparison"),
+    (re.compile(r"(?:what is )?the difference between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)", re.IGNORECASE), "difference between", "comparison"),
 )
 
 SUMMARY_PATTERNS = (
@@ -110,9 +110,9 @@ def deterministic_clean_query(query: str) -> str:
     return normalized or query.strip()
 
 
-def _extract_relation_match(query: str) -> tuple[List[str], List[Set[str]], List[str]]:
+def _extract_relation_match(query: str) -> tuple[List[str], List[Set[str]], List[str], str]:
     normalized = re.sub(r"\s+", " ", str(query or "").strip())
-    for pattern, relation in RELATION_PATTERNS:
+    for pattern, relation, intent in RELATION_PATTERNS:
         match = pattern.search(normalized)
         if not match:
             continue
@@ -124,12 +124,12 @@ def _extract_relation_match(query: str) -> tuple[List[str], List[Set[str]], List
         facets = [set(query_terms(entity, stopwords=RELATION_STOPWORDS)) for entity in entities]
         facets = [facet for facet in facets if facet]
         if len(entities) >= 2 and len(facets) >= 2:
-            return entities, facets, [relation]
-    return [], [], []
+            return entities, facets, [relation], intent
+    return [], [], [], "lookup"
 
 
 def extract_query_facets(query: str) -> List[Set[str]]:
-    _entities, facets, _relations = _extract_relation_match(query)
+    _entities, facets, _relations, _intent = _extract_relation_match(query)
     return facets
 
 
@@ -138,7 +138,8 @@ def has_multi_facet_query(query: str) -> bool:
 
 
 def is_relation_style_query(query: str) -> bool:
-    return has_multi_facet_query(query)
+    _entities, facets, _relations, intent = _extract_relation_match(query)
+    return len(facets) >= 2 and intent == "relationship"
 
 
 def _summary_focus_text(query: str) -> str:
@@ -156,11 +157,13 @@ def _summary_focus_text(query: str) -> str:
 def normalize_query_structure(query: str) -> Dict[str, Any]:
     original_query = re.sub(r"\s+", " ", str(query or "").strip())
     clean_query = deterministic_clean_query(original_query)
-    entities, facets, relations = _extract_relation_match(clean_query)
+    entities, facets, relations, intent = _extract_relation_match(clean_query)
 
     if relations and len(entities) >= 2:
-        clean_query = f"relationship between {entities[0]} and {entities[1]}"
-        intent = "relationship"
+        if intent == "comparison":
+            clean_query = f"compare {entities[0]} and {entities[1]}"
+        else:
+            clean_query = f"relationship between {entities[0]} and {entities[1]}"
         must_terms = [entity for entity in entities if entity]
     else:
         summary_focus = _summary_focus_text(clean_query)

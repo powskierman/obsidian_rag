@@ -170,6 +170,18 @@ class TestRetrievalSupervisor(unittest.TestCase):
         )
         self.assertEqual(profile["facets"], [["lymphoma", "treatment"], ["follow-up", "scan"]])
 
+    def test_build_query_profile_marks_difference_query_as_comparison(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "From my vault, What is the difference between the bambu p1s and the Creality CR-10"
+        )
+
+        self.assertFalse(profile["is_relationship"])
+        self.assertEqual(profile["intent"], "comparison")
+        self.assertEqual(profile["anchor_entities"], ["bambu p1s", "Creality CR-10"])
+        self.assertEqual(profile["relations"], ["difference between"])
+        self.assertEqual(profile["clean_query"], "compare bambu p1s and Creality CR-10")
+        self.assertEqual(profile["facets"], [["bambu", "p1s"], ["cr-10", "creality"]])
+
     def test_build_query_profile_marks_specs_query_as_authority_seeking(self):
         profile = RetrievalSupervisor.build_query_profile(
             "What are the official specs of ESP32?"
