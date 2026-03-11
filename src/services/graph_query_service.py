@@ -1,6 +1,8 @@
 """
-Flask service for Claude-powered knowledge graph queries
-Runs alongside your existing embedding service in Docker
+Legacy internal graph retrieval service.
+
+This service still backs internal graph-dependent retrieval paths, but it is no longer
+the public search-mode surface of the API gateway.
 """
 
 from flask import Flask, request, jsonify, Response, stream_with_context

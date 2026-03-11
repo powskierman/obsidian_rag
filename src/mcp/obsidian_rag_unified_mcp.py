@@ -84,13 +84,8 @@ PDF_MAX_PAGES = int(os.getenv("MCP_PDF_MAX_PAGES", "25"))
 MAX_ATTACHMENTS_PER_NOTE = int(os.getenv("MCP_MAX_ATTACHMENTS_PER_NOTE", "3"))
 
 MODE_TOOL_SUPPORTED_MODES = {
-    "lightrag",
-    "entities",
-    "hybrid",
-    "dual-graph",
+    "vector",
     "cascading",
-    "notes+vector",
-    "entities+vector",
     "deep-research",
 }
 MODE_PASSTHROUGH_FIELDS = [
@@ -1614,8 +1609,7 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="obsidian_search_mode",
             description=(
-                "Run gateway search modes. Supports LightRAG as a distinct mode plus "
-                "hybrid, dual-graph, cascading, notes+vector, entities+vector, and deep-research."
+                "Run supported gateway search modes: vector, cascading, and deep-research."
             ),
             inputSchema={
                 "type": "object",
@@ -1627,20 +1621,14 @@ async def list_tools() -> list[Tool]:
                     "mode": {
                         "type": "string",
                         "description": (
-                            "Search mode. Use 'lightrag' for LightRAG entities mode. "
-                            "For deep thinking, use 'deep-research'."
+                            "Search mode. For deep thinking, use 'deep-research'."
                         ),
                         "enum": [
-                            "lightrag",
-                            "entities",
-                            "hybrid",
-                            "dual-graph",
+                            "vector",
                             "cascading",
-                            "notes+vector",
-                            "entities+vector",
                             "deep-research"
                         ],
-                        "default": "hybrid"
+                        "default": "cascading"
                     },
                     "max_results": {
                         "type": "integer",
@@ -1667,15 +1655,15 @@ async def list_tools() -> list[Tool]:
                     },
                     "entities_mode": {
                         "type": "string",
-                        "description": "Entities retrieval mode for LightRAG-backed requests (naive/local/global/hybrid)."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "force_mode": {
                         "type": "boolean",
-                        "description": "Force entities mode even if gateway would auto-switch."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "require_llm": {
                         "type": "boolean",
-                        "description": "Require LLM synthesis for entities requests."
+                        "description": "Require LLM synthesis where supported."
                     },
                     "relevance_threshold": {
                         "type": "number",
@@ -1699,7 +1687,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="obsidian_unified_query",
-            description="Run unified API query with optional mode override. Defaults to hybrid mode.",
+            description="Run unified API query with optional mode override. Defaults to cascading mode.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -1709,18 +1697,13 @@ async def list_tools() -> list[Tool]:
                     },
                     "mode": {
                         "type": "string",
-                        "description": "Optional mode override (default: hybrid).",
+                        "description": "Optional mode override (default: cascading).",
                         "enum": [
-                            "lightrag",
-                            "entities",
-                            "hybrid",
-                            "dual-graph",
+                            "vector",
                             "cascading",
-                            "notes+vector",
-                            "entities+vector",
                             "deep-research"
                         ],
-                        "default": "hybrid"
+                        "default": "cascading"
                     },
                     "max_results": {
                         "type": "integer",
@@ -1752,11 +1735,11 @@ async def list_tools() -> list[Tool]:
                     },
                     "entities_mode": {
                         "type": "string",
-                        "description": "Optional entities mode (naive/local/global/hybrid)."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "force_mode": {
                         "type": "boolean",
-                        "description": "Force entities mode behavior."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "require_llm": {
                         "type": "boolean",
@@ -2348,7 +2331,7 @@ async def search_with_mode(arguments: dict) -> list[TextContent]:
         except Exception as e:
             return [TextContent(type="text", text=f"❌ Deep research error: {str(e)}")]
 
-    gateway_mode = "entities" if mode == "lightrag" else mode
+    gateway_mode = mode
     payload = {"query": query, "mode": gateway_mode}
     for field in MODE_PASSTHROUGH_FIELDS:
         if field in args and args[field] is not None:
@@ -2378,7 +2361,7 @@ async def search_with_mode(arguments: dict) -> list[TextContent]:
             return [TextContent(type="text", text=f"❌ Mode request failed ({status_code}): {detail}")]
 
         result = response.json()
-        display_mode = "lightrag" if mode == "lightrag" else gateway_mode
+        display_mode = gateway_mode
         return [TextContent(type="text", text=_format_mode_result(display_mode, result))]
     except requests.exceptions.ConnectionError:
         return [TextContent(
@@ -2515,7 +2498,7 @@ def _extract_unified_answer(payload: dict) -> str:
 async def obsidian_unified_query(arguments: dict) -> list[TextContent]:
     args = arguments or {}
     query = str(args.get("query") or "").strip()
-    mode = _normalize_mode(args.get("mode") or "hybrid")
+    mode = _normalize_mode(args.get("mode") or "cascading")
     concise = bool(args.get("concise", True))
 
     if not query:
@@ -2530,7 +2513,7 @@ async def obsidian_unified_query(arguments: dict) -> list[TextContent]:
             model = args.get("model")
             payload = await _run_deep_research_via_gateway(query, provider, model)
         else:
-            gateway_mode = "entities" if mode == "lightrag" else mode
+            gateway_mode = mode
             request_payload = {"query": query, "mode": gateway_mode}
             for field in MODE_PASSTHROUGH_FIELDS:
                 if field in args and args[field] is not None:

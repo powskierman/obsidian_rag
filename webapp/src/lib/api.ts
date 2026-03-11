@@ -142,7 +142,9 @@ export const api = {
           answer: typeof data.answer === 'string' && data.answer.trim()
             ? data.answer
             : (sources.length > 0 ? `Found ${sources.length} matching snippets in your vault.` : 'No results found'),
-          sources: sources
+          sources,
+          web_search: data.web_search,
+          llm_knowledge: data.llm_knowledge,
         };
       } else if (mode === 'cascading') {
         return {

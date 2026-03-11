@@ -108,7 +108,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--output",
-        default="Documentation/DUPLICATE_ENTITY_REPORT.md",
+        default="Documentation/operations/quality/DUPLICATE_ENTITY_REPORT.md",
         help="Output markdown report path",
     )
     args = parser.parse_args()

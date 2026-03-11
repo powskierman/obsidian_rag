@@ -10,16 +10,16 @@ const searchModes = [
     icon: '🔍'
   },
   {
-    id: 'knowledge-graph' as SearchMode,
-    label: 'Knowledge-Graph',
-    description: 'Deep reasoning & connections',
-    icon: '🧠'
+    id: 'cascading' as SearchMode,
+    label: 'Cascading',
+    description: 'Multi-stage retrieval pipeline',
+    icon: '🌊'
   },
   {
-    id: 'hybrid' as SearchMode,
-    label: 'Hybrid',
-    description: 'Best of both worlds',
-    icon: '🔗'
+    id: 'deep-thinking' as SearchMode,
+    label: 'Deep Thinking',
+    description: 'Agentic reasoning over retrieved evidence',
+    icon: '🧠'
   }
 ];
 

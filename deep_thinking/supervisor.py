@@ -103,6 +103,27 @@ class RetrievalSupervisor:
         "review", "reviews", "reception", "critique", "external context", "outside context",
         "web", "internet", "goodreads", "guardian", "blinkist", "shortform",
     )
+    CURRENT_INFO_HINTS = (
+        "latest", "recent", "currently", "current", "today", "now", "newest",
+        "up to date", "up-to-date", "as of", "release notes", "changelog",
+    )
+    AUTHORITATIVE_SOURCE_HINTS = (
+        "official", "authoritative", "guideline", "guidelines", "standard", "standards",
+        "regulation", "regulations", "law", "laws", "statute", "statutes",
+        "policy", "policies", "api reference", "reference docs", "documentation",
+        "datasheet", "specification", "specifications", "spec", "specs", "manual",
+    )
+    CONCEPTUAL_EXPLANATION_PATTERNS = (
+        re.compile(r"\bhow do(?:es)? (?P<a>.+?) relate to (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
+        re.compile(r"\bwhat is the difference between (?P<a>.+?) and (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
+        re.compile(r"\bexplain (?:the )?(?:relationship|difference|intuition|concept)\b", re.IGNORECASE),
+        re.compile(r"\bwhy do(?:es)?\b", re.IGNORECASE),
+        re.compile(r"\bhow does\b.+\bwork\b", re.IGNORECASE),
+    )
+    CONCEPTUAL_EXPLANATION_HINTS = (
+        "first principles", "conceptually", "intuition", "why does", "why do",
+        "difference between", "relate to", "relationship between", "how does",
+    )
     INSTRUCTION_QUERY_HINTS = (
         "prompt", "prompts", "template", "templates", "instruction", "instructions",
         "copilot", "agent", "workflow",
@@ -295,6 +316,33 @@ class RetrievalSupervisor:
         return bool(cls._summary_focus_text(query))
 
     @classmethod
+    def is_current_info_query(cls, query: str) -> bool:
+        lower = str(query or "").lower()
+        return any(hint in lower for hint in cls.CURRENT_INFO_HINTS)
+
+    @classmethod
+    def needs_authoritative_external_sources(cls, query: str) -> bool:
+        lower = str(query or "").lower()
+        return cls.is_current_info_query(query) or any(
+            hint in lower for hint in cls.AUTHORITATIVE_SOURCE_HINTS
+        )
+
+    @classmethod
+    def is_conceptual_explanation_query(cls, query: str) -> bool:
+        normalized = re.sub(r"\s+", " ", str(query or "").strip())
+        lower = normalized.lower()
+        if (
+            not normalized
+            or cls.is_summary_request(normalized)
+            or cls._allows_instruction_docs(lower)
+            or cls.needs_authoritative_external_sources(normalized)
+        ):
+            return False
+        if any(pattern.search(normalized) for pattern in cls.CONCEPTUAL_EXPLANATION_PATTERNS):
+            return True
+        return any(hint in lower for hint in cls.CONCEPTUAL_EXPLANATION_HINTS)
+
+    @classmethod
     def _allows_instruction_docs(cls, query_lower: str) -> bool:
         return any(hint in str(query_lower or "") for hint in cls.INSTRUCTION_QUERY_HINTS)
 
@@ -348,14 +396,26 @@ class RetrievalSupervisor:
         is_relationship = cls._enable_connection_mode() and cls.is_relationship_query(normalized)
         is_summary_request = cls.is_summary_request(normalized)
         summary_focus = cls._summary_focus_text(normalized)
+        requires_current_information = cls.is_current_info_query(normalized)
+        needs_authoritative_sources = cls.needs_authoritative_external_sources(normalized)
+        is_conceptual_explanation = cls.is_conceptual_explanation_query(normalized)
         prefers_vault_only_summary = is_summary_request and not any(
             hint in lower for hint in cls.EXTERNAL_SUMMARY_HINTS
+        )
+        is_medical = cls.is_medical_query(normalized, anchors)
+        needs_external_authority = bool(
+            requires_current_information or needs_authoritative_sources or is_medical
+        )
+        prefers_reasoning_first = bool(
+            is_conceptual_explanation and not needs_external_authority
         )
         max_sources = None
         if is_relationship:
             max_sources = cls._max_sources_for_simple_relationship()
         elif is_summary_request:
             max_sources = 2
+        elif prefers_reasoning_first:
+            max_sources = 3
         return {
             "query": normalized,
             "lower": lower,
@@ -366,8 +426,13 @@ class RetrievalSupervisor:
             "is_summary_request": is_summary_request,
             "summary_focus": summary_focus,
             "prefers_vault_only_summary": prefers_vault_only_summary,
+            "is_conceptual_explanation": is_conceptual_explanation,
+            "requires_current_information": requires_current_information,
+            "needs_authoritative_sources": needs_authoritative_sources,
+            "needs_external_authority": needs_external_authority,
+            "prefers_reasoning_first": prefers_reasoning_first,
             "allows_instruction_docs": cls._allows_instruction_docs(lower),
-            "is_medical": cls.is_medical_query(normalized, anchors),
+            "is_medical": is_medical,
             "allows_generic_overview": compare_mode,
             "needs_outcomes": needs_outcomes,
             "preferred_tags": cls._preferred_tags_for_query(lower, anchors),
@@ -640,6 +705,11 @@ class RetrievalSupervisor:
                     rank += 4.0
                 if signals["summary_focus_exact_match"]:
                     rank += 5.0
+            if profile.get("prefers_reasoning_first"):
+                if source_category == "vault":
+                    rank += 1.25
+                else:
+                    rank -= 1.25
             if signals["generic_overview"] and not profile["allows_generic_overview"]:
                 rank -= 3.5
             if signals["trial_outcome"] and not profile["needs_outcomes"]:

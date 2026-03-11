@@ -276,7 +276,7 @@ class UniversalClient:
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY not configured")
 
-        if not model or "/" not in model:
+        if not str(model or "").strip():
             model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
 
         openrouter_messages = list(messages)

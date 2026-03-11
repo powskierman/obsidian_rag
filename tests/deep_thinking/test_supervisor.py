@@ -144,6 +144,26 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertTrue(ranked[0]["_summary_focus_exact_match"])
         self.assertTrue(ranked[0]["_summary_focus_title_match"])
 
+    def test_build_query_profile_marks_timeless_conceptual_queries_reasoning_first(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "How do asymptotes relate to derivatives?"
+        )
+
+        self.assertTrue(profile["is_conceptual_explanation"])
+        self.assertTrue(profile["prefers_reasoning_first"])
+        self.assertFalse(profile["requires_current_information"])
+        self.assertFalse(profile["needs_authoritative_sources"])
+        self.assertFalse(profile["needs_external_authority"])
+
+    def test_build_query_profile_marks_specs_query_as_authority_seeking(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "What are the official specs of ESP32?"
+        )
+
+        self.assertFalse(profile["prefers_reasoning_first"])
+        self.assertTrue(profile["needs_authoritative_sources"])
+        self.assertTrue(profile["needs_external_authority"])
+
     @patch('requests.post')
     def test_query_graph_drops_synthesis_summary_from_results(self, mock_post):
         mock_response = MagicMock()

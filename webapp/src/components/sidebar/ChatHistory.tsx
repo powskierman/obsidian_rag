@@ -14,9 +14,7 @@ export default function ChatHistory() {
     switch (mode) {
       case 'vector':
         return '🔍';
-      case 'knowledge-graph':
-        return '🧠';
-      case 'hybrid':
+      case 'cascading':
         return '🔗';
       case 'deep-thinking':
         return '🧠';

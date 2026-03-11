@@ -28,12 +28,14 @@ class CascadingRetriever:
         graph_url: str = "http://localhost:8002",
         lightrag_url: str = "http://localhost:8001",
         llm_provider: str = "claude",  # Default, can be overridden per query
+        llm_model: str = "",
         api_key: Optional[str] = None,
     ):
         self.embed_url = embed_url
         self.graph_url = graph_url
         self.lightrag_url = lightrag_url
         self.llm_provider = llm_provider
+        self.llm_model = str(llm_model or "").strip()
         self.api_key = api_key
 
         # We might need a lightweight LLM client for entity extraction if not using regex
@@ -198,7 +200,13 @@ class CascadingRetriever:
                 "entities": entities,
                 "mem0_context": mem0_context,
             }
-            lr_payload = {"query": query, "mode": "hybrid"}
+            lr_payload = {
+                "query": query,
+                "mode": "hybrid",
+                "llm_provider": self.llm_provider,
+            }
+            if self.llm_model:
+                lr_payload["model"] = self.llm_model
 
             logger.info("Cascading Stage 1: Anchor retrieval for '%s'", query)
             stage_debug["stage_order"].append("anchors")

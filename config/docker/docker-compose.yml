@@ -23,7 +23,7 @@ services:
     networks:
       - rag-network
 
-  # LightRAG Service - Entity-centric knowledge graph for semantic search
+  # Internal legacy graph subsystem: LightRAG used by cascading/deep-research retrieval.
   lightrag-service:
     build:
       context: .
@@ -55,7 +55,7 @@ services:
     networks:
       - rag-network
 
-  # Reasoning Graph Service (NetworkX)
+  # Internal legacy graph subsystem: NetworkX graph service used by cascading/deep-research retrieval.
   graph-service:
     build:
       context: .
@@ -110,6 +110,7 @@ services:
       - PYTHONUNBUFFERED=1
       - OBSIDIAN_VAULT_PATH=/app/vault
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
+      # Internal-only graph subsystem dependencies. Do not expose as public user-selectable modes.
       - GRAPH_SERVICE_URL=http://graph-service:8002
       - LIGHTRAG_SERVICE_URL=http://lightrag-service:8001
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -139,6 +140,7 @@ services:
     depends_on:
       embedding-service:
         condition: service_healthy
+      # Required today for internal cascading/deep-research retrieval only.
       graph-service:
         condition: service_healthy
       lightrag-service:
@@ -166,6 +168,7 @@ services:
     depends_on:
       embedding-service:
         condition: service_healthy
+      # Streamlit talks to the gateway; graph-service remains only because the gateway still depends on it internally.
       graph-service:
         condition: service_healthy
       api-gateway:

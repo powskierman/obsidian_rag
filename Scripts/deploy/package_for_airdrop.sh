@@ -57,9 +57,9 @@ echo "      ✅ Docker files copied"
 
 # 5. Documentation
 echo "  5/8 Copying documentation..."
-cp MAC_MINI_QUICK_START.md "$PACKAGE_DIR/" 2>/dev/null || echo "      ⚠️  MAC_MINI_QUICK_START.md not found"
+cp Documentation/deployments/mac-mini/MAC_MINI_QUICK_START.md "$PACKAGE_DIR/" 2>/dev/null || echo "      ⚠️  MAC_MINI_QUICK_START.md not found"
 mkdir -p "$PACKAGE_DIR/Documentation"
-cp Documentation/DUAL_GRAPH_ARCHITECTURE.md "$PACKAGE_DIR/Documentation/" 2>/dev/null || true
+cp Documentation/reference/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md "$PACKAGE_DIR/Documentation/" 2>/dev/null || true
 echo "      ✅ Documentation copied"
 
 # 6. Environment file (if exists)

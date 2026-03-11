@@ -2586,24 +2586,17 @@ class UnifiedQueryRequest(BaseModel):
 @app.post("/api/v1/query")
 async def unified_query(request: UnifiedQueryRequest):
     """
-    Enhanced unified query endpoint with multiple knowledge source modes
+    Enhanced unified query endpoint for the currently supported retrieval modes.
 
-    Single-source modes:
-    - vector: Pure vector similarity (ChromaDB, 7k chunks)
-    - notes (or networkx): Note-centric graph with wiki-links (16k nodes)
-    - entities (or lightrag): Entity-centric semantic graph (2k notes)
+    REST modes:
+    - vector: Pure vector similarity search (ChromaDB)
+    - cascading: Staged retrieval and synthesis pipeline
 
-    Dual-source modes:
-    - notes+vector: NetworkX graph + ChromaDB vectors
-    - entities+vector: LightRAG graph + ChromaDB vectors
-    - dual-graph: Both graphs (NetworkX + LightRAG)
-
-    Ultimate mode:
-    - hybrid: All three sources (Vector + Notes + Entities) - RECOMMENDED
+    Deep research is exposed separately over WebSocket at /api/v1/deep-research.
     """
     mode = request.mode.lower()
 
-    # Normalize mode aliases (keep backward compatibility)
+    # Preserve legacy aliases so older clients fail with the normalized mode name.
     mode_aliases = {"graph": "notes", "networkx": "notes", "lightrag": "entities"}
     mode = mode_aliases.get(mode, mode)
     supported_modes = {
@@ -2620,13 +2613,7 @@ async def unified_query(request: UnifiedQueryRequest):
             ),
         )
 
-    if request.system_prompt and mode in {
-        "entities",
-        "entities+vector",
-        "dual-graph",
-        "hybrid",
-        "cascading",
-    }:
+    if request.system_prompt and mode == "cascading":
         invalid_placeholders = _invalid_system_prompt_placeholders(request.system_prompt)
         if invalid_placeholders:
             raise HTTPException(
@@ -3005,7 +2992,9 @@ async def unified_query(request: UnifiedQueryRequest):
             if isinstance(result, dict):
                 result["answer"] = answer
                 result["sources"] = sources
-                result["used_documents"] = result.get("used_documents") or sources
+                # Keep used_documents aligned with the final normalized source list
+                # returned to the client.
+                result["used_documents"] = sources
                 if warnings:
                     result["warnings"] = warnings
 

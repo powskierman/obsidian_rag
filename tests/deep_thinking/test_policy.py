@@ -121,5 +121,26 @@ class TestPolicyAgent(unittest.TestCase):
         decision = self.policy.decide(state)
         self.assertEqual(decision, "CONTINUE")
 
+    def test_decide_conceptual_query_does_not_force_external_enrichment(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"decision": "FINISH", "reasoning": "done", "needs_external_enrichment": true}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How do asymptotes relate to derivatives?",
+            "past_steps": [{
+                "step": {"step_number": 1, "sub_question": "Search math notes", "search_strategy": "vector", "keywords": ["asymptote", "derivative"], "target_folders": ["Math/"], "reasoning": ""},
+                "confidence": 0.8,
+                "key_findings": "Found notes about asymptotes, derivatives, and limits.",
+            }],
+            "plan": [{"step_number": 1, "search_strategy": "vector"}],
+            "current_step_index": 1,
+            "iteration_count": 1,
+            "max_iterations": 5,
+        }
+
+        decision = self.policy.decide(state)
+        self.assertEqual(decision, "FINISH")
+
 if __name__ == '__main__':
     unittest.main()

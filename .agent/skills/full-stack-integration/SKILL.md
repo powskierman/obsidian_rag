@@ -26,7 +26,7 @@ To prevent regressions like the 503 Service Unavailable error or broken UI state
 
 3.  **API E2E Check**
     *   Send a real search request via curl (mimicking the frontend):
-    *   `curl -X POST http://localhost:4000/api/v1/search -H "Content-Type: application/json" -d '{"query": "test", "mode": "hybrid"}'`
+    *   `curl -X POST http://localhost:4000/api/v1/query -H "Content-Type: application/json" -d '{"query": "test", "mode": "cascading"}'`
     *   Verify response is JSON and contains `results`.
 
 ## Constraints

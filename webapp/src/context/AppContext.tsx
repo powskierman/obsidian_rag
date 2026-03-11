@@ -130,7 +130,7 @@ const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsS
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [searchMode, setSearchModeState] = useState<SearchMode>('hybrid');
+  const [searchMode, setSearchModeState] = useState<SearchMode>('cascading');
   const [llmProvider, setLLMProviderState] = useState<LLMProvider>('ollama');
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [services, setServices] = useState<ServicesStatus>(defaultServices);
@@ -203,7 +203,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const savedMode = savedSearchMode as SearchMode | null;
+    const savedMode = (
+      savedSearchMode === 'hybrid' ? 'cascading' : savedSearchMode
+    ) as SearchMode | null;
     if (parsedSettings?.deepThinking || savedMode === 'deep-thinking') {
       setSearchModeState('deep-thinking');
       if (!parsedSettings?.deepThinking) {

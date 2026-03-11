@@ -33,6 +33,7 @@ class PolicyAgent:
             )
         )
         research_summary = self._truncate_text(self._format_research_summary(state['past_steps']), summary_limit)
+        query_profile = RetrievalSupervisor.build_query_profile(state.get("original_question", ""))
 
         prompt = f"""
         Original Question: "{state['original_question']}"
@@ -48,7 +49,13 @@ class PolicyAgent:
         - FINISH: Sufficient information gathered, generate answer
         - REVISE_PLAN: Current plan won't work, need different approach
         
-        CRITICAL: Set "needs_external_enrichment": true if the research findings contain specific entities, technical terms, or claims that could be enriched with external data (specs, news, definitions, side effects), AND you haven't done a web search yet.
+        Query profile:
+        - needs_external_authority: {query_profile.get("needs_external_authority")}
+        - requires_current_information: {query_profile.get("requires_current_information")}
+        - needs_authoritative_sources: {query_profile.get("needs_authoritative_sources")}
+        - prefers_reasoning_first: {query_profile.get("prefers_reasoning_first")}
+
+        CRITICAL: Set "needs_external_enrichment": true only when the answer still requires current or authoritative external information that has not been retrieved yet. Do not set it true merely because the question contains technical vocabulary or named entities.
         
         Return ONLY a JSON object: {{"decision": "CONTINUE|FINISH|REVISE_PLAN", "reasoning": "...", "needs_external_enrichment": true|false}}
         """
@@ -70,7 +77,6 @@ class PolicyAgent:
             
             decision_data = json.loads(content)
             decision = decision_data.get("decision", "CONTINUE")
-            query_profile = RetrievalSupervisor.build_query_profile(state.get("original_question", ""))
             remaining_steps = state.get('plan', [])[state.get('current_step_index', 0):]
 
             if (
@@ -96,6 +102,7 @@ class PolicyAgent:
             if (
                 decision_data.get("needs_external_enrichment")
                 and not query_profile.get("prefers_vault_only_summary")
+                and query_profile.get("needs_external_authority")
                 and not has_web_search
                 and not has_planned_web
                 and decision == "FINISH"

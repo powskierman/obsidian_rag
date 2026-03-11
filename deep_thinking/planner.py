@@ -277,6 +277,30 @@ class PlannerAgent:
                 "reasoning": "Broaden the answer into a concept-level synthesis using related vault evidence without leaving the vault."
             }]
 
+        if query_profile.get("prefers_reasoning_first"):
+            keywords = query_profile.get("anchor_terms") or query_profile.get("terms") or []
+            conceptual_focus = question.rstrip(" ?.")
+            clarification_keywords = list(dict.fromkeys((keywords[:5] + ["definition", "conditions", "counterexample"])[:5]))
+            return [{
+                "step_number": 1,
+                "sub_question": question,
+                "search_strategy": "vector",
+                "keywords": keywords[:5],
+                "target_folders": [],
+                "reasoning": "Start with vault notes and direct explanations before leaving the vault for this timeless conceptual question."
+            }, {
+                "step_number": 2,
+                "sub_question": f"What definitions, conditions, edge cases, or counterexamples in my vault clarify {conceptual_focus}?",
+                "search_strategy": "hybrid",
+                "keywords": clarification_keywords,
+                "target_folders": [],
+                "reasoning": "Stress-test necessary versus sufficient conditions and resolve common misconceptions using local evidence before considering external sources."
+            }]
+
+        routing_mode = "balanced"
+        if query_profile.get("needs_external_authority"):
+            routing_mode = "external_authority"
+
         system_prompt = """
         You are an Augmented Research Planner for an Obsidian vault.
         Your goal is to create a research plan that combines LOCAL vault data with EXTERNAL web context.
@@ -291,13 +315,33 @@ class PlannerAgent:
            - Official documentation (API references, specs)
            - External tutorials and how-to guides
            - Real-world specifications or up-to-date guidelines
-        3. If in doubt, prefer "web" over "vector" - it's better to get fresh, authoritative information
-        4. For technical queries, at MINIMUM have 2 web search steps
-        5. For specific deep dives, ALWAYS include web search to verify context.
+        3. Prefer web ONLY when the query is time-sensitive, explicitly asks for official/authoritative sources, or local context is insufficient
+        4. For timeless conceptual questions, prefer first-principles reasoning plus vault evidence; do not force web search
+        5. Distinguish definitions from heuristics and necessary conditions from sufficient conditions when the user asks conceptual "how/why/relate" questions
+        """
+
+        if routing_mode == "external_authority":
+            routing_guidance = """
+        Routing mode: external-authority.
+        This query likely needs current or authoritative external verification.
+        Include at least one web step early in the plan.
+        """
+        else:
+            routing_guidance = """
+        Routing mode: balanced.
+        Start from vault evidence when possible and add web only if it materially improves the answer.
         """
 
         user_prompt = f"""
         User question: "{question}"
+
+        Query profile:
+        - needs_external_authority: {query_profile.get("needs_external_authority")}
+        - requires_current_information: {query_profile.get("requires_current_information")}
+        - needs_authoritative_sources: {query_profile.get("needs_authoritative_sources")}
+        - prefers_reasoning_first: {query_profile.get("prefers_reasoning_first")}
+
+        {routing_guidance}
         
         Create a research plan with 2-5 steps. For each step:
         1. Write a clear sub-question
@@ -318,7 +362,7 @@ class PlannerAgent:
         }}
         Do not include markdown formatting.
         
-        Example 1 (Technical Query):
+        Example 1 (Authority-Seeking Query):
         {{
           "steps": [{{
             "step_number": 1,
@@ -330,7 +374,27 @@ class PlannerAgent:
           }}]
         }}
 
-        Example 2 (Complex Vault Synthesis):
+        Example 2 (Timeless Conceptual Query):
+        {{
+          "steps": [{{
+            "step_number": 1,
+            "sub_question": "How do asymptotes relate to derivatives in my notes?",
+            "search_strategy": "vector",
+            "keywords": ["asymptote", "derivative", "limit"],
+            "target_folders": ["Math/"],
+            "reasoning": "Start with first-principles explanations and local examples before using any external sources."
+          }},
+          {{
+            "step_number": 2,
+            "sub_question": "What definitions, conditions, and counterexamples clarify how asymptotes and derivatives are connected?",
+            "search_strategy": "hybrid",
+            "keywords": ["asymptote", "derivative", "counterexample", "limit"],
+            "target_folders": ["Math/"],
+            "reasoning": "Clarify necessary versus sufficient conditions and avoid overgeneralized claims."
+          }}]
+        }}
+
+        Example 3 (Complex Vault Synthesis):
         {{
           "steps": [{{
             "step_number": 1,
@@ -389,6 +453,20 @@ class PlannerAgent:
             if anchor_evidence["requires_references"]
             else 'No concrete vault files are available right now, so "references" may be an empty array if a web search is needed.'
         )
+        if query_profile.get("prefers_reasoning_first"):
+            enrichment_rule = (
+                'This is a timeless conceptual query. Only generate a "web" search step if a concrete unanswered gap remains '
+                'after local reasoning and vault retrieval. Do NOT add web steps merely because the question contains technical terms.'
+            )
+        elif query_profile.get("needs_external_authority"):
+            enrichment_rule = (
+                'If the research contains specific entities, current-version concerns, or requests for official guidance/specs, '
+                'you MUST generate a "web" step when authoritative external verification is still missing.'
+            )
+        else:
+            enrichment_rule = (
+                'Use a "web" step only when external sources would materially improve correctness, completeness, or authority.'
+            )
         prompt = f"""
         Original question: "{state['original_question']}"
         
@@ -403,7 +481,13 @@ class PlannerAgent:
         
         What information is still missing to answer the question?
         
-        CRITICAL: If the research so far contains specific entities, technical terms, drugs, or conditions (e.g. "R-CHOP", "ESP32", "Python 3.12"), but lacks external context (side effects, specs, release dates), you MUST generate a "web" search step.
+        Query profile:
+        - needs_external_authority: {query_profile.get("needs_external_authority")}
+        - requires_current_information: {query_profile.get("requires_current_information")}
+        - needs_authoritative_sources: {query_profile.get("needs_authoritative_sources")}
+        - prefers_reasoning_first: {query_profile.get("prefers_reasoning_first")}
+
+        CRITICAL: {enrichment_rule}
         
         For the "web" step:
         1. Extract the SPECIFIC terms found in the research.

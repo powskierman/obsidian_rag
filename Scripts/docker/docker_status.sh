@@ -32,14 +32,24 @@ else
     echo "❌ Embedding Service (port 8000) - Not responding"
 fi
 
-# LightRAG service
+# Internal LightRAG service
 if curl -s http://localhost:8001/health > /dev/null 2>&1; then
     GRAPH_STATS=$(curl -s http://localhost:8001/stats)
     DB_EXISTS=$(echo $GRAPH_STATS | grep -o '"database_exists":[a-z]*' | cut -d':' -f2)
-    echo "✅ LightRAG Service (port 8001)"
+    echo "✅ Internal LightRAG Service (port 8001)"
     echo "   Database: ${DB_EXISTS:-unknown}"
 else
-    echo "❌ LightRAG Service (port 8001) - Not responding"
+    echo "❌ Internal LightRAG Service (port 8001) - Not responding"
+fi
+
+# Internal graph service
+if curl -s http://localhost:8002/health > /dev/null 2>&1; then
+    GRAPH_HEALTH=$(curl -s http://localhost:8002/health)
+    GRAPH_LOADED=$(echo $GRAPH_HEALTH | grep -o '"graph_loaded":[a-z]*' | cut -d':' -f2)
+    echo "✅ Internal Graph Service (port 8002)"
+    echo "   Graph loaded: ${GRAPH_LOADED:-unknown}"
+else
+    echo "❌ Internal Graph Service (port 8002) - Not responding"
 fi
 
 # Streamlit UI
@@ -61,12 +71,13 @@ fi
 echo ""
 echo "========================================================================"
 echo ""
+echo "Note: Graph and LightRAG services are internal retrieval dependencies, not public user modes."
+echo ""
 echo "Quick Actions:"
 echo "  View logs:   docker-compose logs -f [service-name]"
 echo "  Restart:     docker-compose restart [service-name]"
 echo "  Stop all:    docker-compose down"
 echo "  Rebuild:     docker-compose up -d --build"
 echo ""
-
 
 
