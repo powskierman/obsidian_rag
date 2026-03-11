@@ -59,6 +59,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
 LIGHTRAG_MODEL = (
     os.getenv("LIGHTRAG_MODEL")
     or os.getenv("KIMI_MODEL")
@@ -168,6 +169,7 @@ storages_ready = False
 _chunks_cache = {"mtime": None, "data": None}
 _lexical_index_cache = {"mtime": None, "entries": None, "inverted": None}
 _mlx_models_cache: dict[str, tuple[float, list[str]]] = {}
+_ollama_models_cache: dict[str, tuple[float, list[str]]] = {}
 index_progress = {
     "status": "idle",
     "total_files": 0,
@@ -1532,7 +1534,69 @@ def _resolve_mlx_model_name(requested_model: str | None, base_url: str, api_key:
         available_models = _list_mlx_models(base_url, api_key)
     except Exception as exc:
         logger.warning("Failed to list MLX models from %s: %s", base_url, exc)
+    return preferred_model
+
+
+def _list_ollama_models(host: str, force_refresh: bool = False) -> list[str]:
+    cache_key = (host or "").rstrip("/")
+    now = time.time()
+    cached = _ollama_models_cache.get(cache_key)
+    if cached and not force_refresh and (now - cached[0]) < 60:
+        return cached[1]
+
+    tags_url = f"{cache_key}/api/tags"
+    req = urlrequest.Request(tags_url, headers={"Accept": "application/json"}, method="GET")
+    with urlrequest.urlopen(req, timeout=5) as resp:
+        payload = json.loads(resp.read().decode("utf-8"))
+
+    models = [
+        item.get("name", "").strip()
+        for item in payload.get("models", [])
+        if isinstance(item, dict) and item.get("name")
+    ]
+    _ollama_models_cache[cache_key] = (now, models)
+    return models
+
+
+def _resolve_embed_model_name(
+    requested_model: str | None, host: str, force_refresh: bool = False
+) -> str:
+    preferred_model = (requested_model or "nomic-embed-text").strip()
+    alias_candidates = {
+        "nomic-ai/nomic-embed-text-v1.5": [
+            "nomic-embed-text:latest",
+            "nomic-embed-text",
+        ],
+        "nomic-embed-text": [
+            "nomic-embed-text:latest",
+        ],
+    }
+
+    try:
+        available_models = _list_ollama_models(host, force_refresh=force_refresh)
+    except Exception as exc:
+        logger.warning("Failed to list Ollama models from %s: %s", host, exc)
         return preferred_model
+
+    if not available_models:
+        return preferred_model
+    if preferred_model in available_models:
+        return preferred_model
+
+    candidates = alias_candidates.get(preferred_model, [])
+    if preferred_model.startswith("nomic") or "nomic-embed-text" in preferred_model:
+        candidates = [*candidates, "nomic-embed-text:latest", "nomic-embed-text"]
+
+    for candidate in candidates:
+        if candidate in available_models:
+            logger.warning(
+                "Resolved LightRAG embed model alias '%s' -> '%s'",
+                preferred_model,
+                candidate,
+            )
+            return candidate
+
+    return preferred_model
 
     if not available_models:
         return preferred_model
@@ -3257,6 +3321,35 @@ def get_effective_query_llm_provider() -> str:
     return get_effective_llm_provider()
 
 
+def _get_default_query_llm_model_for_provider(provider: str) -> str:
+    configured_query_provider = (QUERY_LLM_PROVIDER or LLM_PROVIDER or "ollama").strip().lower()
+    query_model_matches_provider = bool(QUERY_LLM_MODEL) and configured_query_provider == provider
+
+    if provider == "openrouter":
+        if query_model_matches_provider:
+            return QUERY_LLM_MODEL
+        return OPENROUTER_MODEL or LIGHTRAG_MODEL or "openrouter/auto"
+    if provider == "lmstudio":
+        if query_model_matches_provider:
+            return QUERY_LLM_MODEL
+        return LLM_MODEL_PATH or LLM_MODEL
+    if provider == "mlx":
+        if query_model_matches_provider:
+            requested = QUERY_LLM_MODEL
+        else:
+            requested = MLX_MODEL or LLM_MODEL_PATH or LLM_MODEL
+        return _resolve_mlx_model_name(requested, QUERY_MLX_BASE_URL, QUERY_MLX_API_KEY)
+    if provider in {"openai", "chatgpt"}:
+        if query_model_matches_provider:
+            return QUERY_LLM_MODEL
+        return QUERY_OPENAI_MODEL or OPENAI_MODEL or "gpt-4o-mini"
+    if provider == "ollama":
+        if query_model_matches_provider:
+            return QUERY_LLM_MODEL
+        return LLM_MODEL
+    return LLM_MODEL
+
+
 def get_effective_query_llm_model() -> str:
     provider = get_effective_query_llm_provider()
     request_model = str(REQUEST_QUERY_LLM_MODEL.get() or "").strip()
@@ -3264,20 +3357,7 @@ def get_effective_query_llm_model() -> str:
         if provider == "mlx":
             return _resolve_mlx_model_name(request_model, QUERY_MLX_BASE_URL, QUERY_MLX_API_KEY)
         return request_model
-    if QUERY_LLM_MODEL:
-        if provider == "mlx":
-            return _resolve_mlx_model_name(QUERY_LLM_MODEL, QUERY_MLX_BASE_URL, QUERY_MLX_API_KEY)
-        return QUERY_LLM_MODEL
-    if provider == "openrouter":
-        return LIGHTRAG_MODEL or "openrouter/auto"
-    if provider == "lmstudio":
-        return LLM_MODEL_PATH or LLM_MODEL
-    if provider == "mlx":
-        requested = MLX_MODEL or LLM_MODEL_PATH or LLM_MODEL
-        return _resolve_mlx_model_name(requested, QUERY_MLX_BASE_URL, QUERY_MLX_API_KEY)
-    if provider in {"openai", "chatgpt"}:
-        return QUERY_OPENAI_MODEL or OPENAI_MODEL or "gpt-4o-mini"
-    return LLM_MODEL
+    return _get_default_query_llm_model_for_provider(provider)
 
 
 def get_effective_query_temperature() -> str:
@@ -3808,13 +3888,25 @@ async def initialize_rag():
         logger.info(f"Initializing LightRAG at startup (Working Dir: {WORKING_DIR})...")
         try:
             logger.info("Step 1: Constructing LightRAG instance...")
+            resolved_embed_model = _resolve_embed_model_name(
+                EMBED_MODEL,
+                OLLAMA_HOST,
+                force_refresh=True,
+            )
+            if resolved_embed_model != EMBED_MODEL:
+                logger.info(
+                    "Using resolved LightRAG embed model '%s' for requested '%s'",
+                    resolved_embed_model,
+                    EMBED_MODEL,
+                )
             def wrapped_embed(texts):
                 # Pre-truncate to avoid Ollama context-length errors.
                 safe_texts = [t[:8000] if isinstance(t, str) else t for t in texts]
+                embed_model_name = resolved_embed_model
                 try:
                     return ollama_embed.func(
                         safe_texts,
-                        embed_model=EMBED_MODEL,
+                        embed_model=embed_model_name,
                         host=OLLAMA_HOST,
                         options={"num_ctx": 8192} 
                     )
@@ -3823,9 +3915,14 @@ async def initialize_rag():
                     logger.warning(f"Embedding failed (likely context length): {e}. Retrying with truncation...")
                     truncated_texts = [t[:8000] for t in texts] # Truncate more aggressively for safety
                     try:
+                         embed_model_name_retry = _resolve_embed_model_name(
+                            EMBED_MODEL,
+                            OLLAMA_HOST,
+                            force_refresh=True,
+                        )
                          return ollama_embed.func(
                             truncated_texts,
-                            embed_model=EMBED_MODEL,
+                            embed_model=embed_model_name_retry,
                             host=OLLAMA_HOST,
                             options={"num_ctx": 8192}
                         )
@@ -4478,10 +4575,19 @@ def query_graph():
         
         logging.info(f"Incoming query: '{query_text}' | Requested mode: '{mode}'")
 
+        if llm_provider_override and not model_override:
+            model_override = _get_default_query_llm_model_for_provider(llm_provider_override)
+
         if llm_provider_override:
             provider_token = REQUEST_QUERY_LLM_PROVIDER.set(llm_provider_override)
         if model_override:
             model_token = REQUEST_QUERY_LLM_MODEL.set(model_override)
+        if llm_provider_override or model_override:
+            logger.info(
+                "LightRAG query overrides: provider=%s model=%s",
+                llm_provider_override or get_effective_query_llm_provider(),
+                model_override or get_effective_query_llm_model(),
+            )
         if temperature_override is not None and str(temperature_override).strip() != "":
             temp_token = REQUEST_QUERY_TEMPERATURE.set(str(temperature_override).strip())
         

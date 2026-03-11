@@ -336,6 +336,106 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0]["source_category"], "web")
 
+    def test_select_minimal_evidence_set_treats_connected_to_as_relationship_query(self):
+        docs = [
+            {
+                "source": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "filename": "Lymphoma Treatment Summary.md",
+                "snippet": "Treatment summary linked to lymphoma treatment and treatment log.",
+                "content": "Treatment summary linked to lymphoma treatment and treatment log.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.95,
+            },
+            {
+                "source": "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+                "filepath": "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+                "filename": "CT Scan Post-CAR-T.md",
+                "snippet": "Follow-up scan findings after CAR-T therapy.",
+                "content": "Follow-up scan findings after CAR-T therapy.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.72,
+            },
+            {
+                "source": "Medical/Lymphoma/Random Overview.md",
+                "filepath": "Medical/Lymphoma/Random Overview.md",
+                "filename": "Random Overview.md",
+                "snippet": "General overview of lymphoma topics.",
+                "content": "General overview of lymphoma topics.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.99,
+            },
+        ]
+
+        selected = RetrievalSupervisor.select_minimal_evidence_set(
+            "How are my lymphoma treatment notes connected to follow-up scan notes?",
+            docs,
+            max_docs=2,
+        )
+
+        self.assertEqual(
+            [doc["filepath"] for doc in selected],
+            [
+                "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+            ],
+        )
+
+    def test_preserve_multi_facet_query_coverage_supplements_second_side(self):
+        query = "How are my lymphoma treatment notes connected to follow-up scan notes?"
+        treatment_doc = {
+            "source": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filename": "Lymphoma Treatment Summary.md",
+            "snippet": "Treatment summary covering chemotherapy and CAR-T planning.",
+            "content": "Treatment summary covering chemotherapy and CAR-T planning.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 7.0,
+        }
+        scan_doc = {
+            "source": "Medical/Lymphoma/4th PET Scan - Treatment Options.md",
+            "filepath": "Medical/Lymphoma/4th PET Scan - Treatment Options.md",
+            "filename": "4th PET Scan - Treatment Options.md",
+            "snippet": "Follow-up scan notes and PET scan findings after treatment.",
+            "content": "Follow-up scan notes and PET scan findings after treatment.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 6.5,
+        }
+
+        def fake_indexes(doc, _query):
+            if doc["filepath"].endswith("Lymphoma Treatment Summary.md"):
+                return {0}
+            if doc["filepath"].endswith("4th PET Scan - Treatment Options.md"):
+                return {1}
+            return set()
+
+        with patch("deep_thinking.supervisor.has_multi_facet_query", return_value=True), patch(
+            "deep_thinking.supervisor.source_set_covers_query_facets",
+            side_effect=lambda _query, docs: len(set().union(*(fake_indexes(doc, _query) for doc in docs))) >= 2,
+        ), patch(
+            "deep_thinking.supervisor.source_facet_match_indexes",
+            side_effect=fake_indexes,
+        ):
+            supplemented = RetrievalSupervisor._preserve_multi_facet_query_coverage(
+                query,
+                [treatment_doc],
+                [treatment_doc, scan_doc],
+                max_results=5,
+            )
+
+        self.assertEqual(
+            [doc["filepath"] for doc in supplemented],
+            [
+                "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "Medical/Lymphoma/4th PET Scan - Treatment Options.md",
+            ],
+        )
+
     def test_summary_query_excludes_prompt_template_docs_and_prefers_exact_vault_note(self):
         docs = [
             {

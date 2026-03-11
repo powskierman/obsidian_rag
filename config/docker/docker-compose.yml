@@ -42,7 +42,8 @@ services:
       - KIMI_MODEL=${KIMI_MODEL:-}
       - LIGHTRAG_DIR=/app/lightrag_db
       - OLLAMA_HOST=http://host.docker.internal:11434
-      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text:latest}
+      - LIGHTRAG_EMBED_MODEL=${LIGHTRAG_EMBED_MODEL:-nomic-embed-text:latest}
+      - EMBED_MODEL=${LIGHTRAG_EMBED_MODEL:-${EMBED_MODEL:-nomic-embed-text:latest}}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped

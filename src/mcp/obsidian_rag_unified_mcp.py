@@ -2791,36 +2791,28 @@ async def apply_existing_tags_frontmatter_only(arguments: dict) -> list[TextCont
 
 
 async def query_knowledge_graph(arguments: dict) -> list[TextContent]:
-    """Query knowledge graph (tries LightRAG service first, falls back to local graph)"""
+    """Query knowledge graph using the internal in-process graph adapter."""
     query = arguments.get("query", "")
     max_entities = arguments.get("max_entities", 20)
 
     if not query:
         return [TextContent(type="text", text="❌ Query is required")]
 
-    # 1. Try LightRAG (Docker Service)
-    # Check if we should prefer local graph via env var
-    prefer_local = os.getenv("MCP_GRAPH_PROVIDER", "").lower() == "local"
-    
-    if not prefer_local:
-        try:
-            # Check health or just try query
-            response = requests.post(
-                f"{GRAPH_SERVICE_URL}/query",
-                json={"query": query, "mode": "hybrid"},
-                headers=_service_headers(),
-                timeout=30  # Give LightRAG time to think
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                answer = result.get("response", "")
-                if answer:
-                    return [TextContent(type="text", text=f"🧠 **(LightRAG)** {answer}")]
-        except Exception as e:
-            logger.warning(f"LightRAG query failed, falling back to local graph: {e}")
+    try:
+        from src.services.internal_graph_transport import query_networkx_graph
 
-    # 2. Fallback to Local NetworkX Graph
+        status_code, result = await asyncio.to_thread(
+            query_networkx_graph,
+            {"query": query, "mode": "hybrid", "max_entities": max_entities},
+        )
+        if status_code == 200 and isinstance(result, dict):
+            answer = result.get("response") or result.get("answer") or ""
+            if answer:
+                return [TextContent(type="text", text=f"🕸️ **(Internal Graph)** {answer}")]
+    except Exception as e:
+        logger.warning(f"Internal graph adapter failed, falling back to local graph: {e}")
+
+    # Fallback to direct local NetworkX graph access
     if not GRAPH_AVAILABLE:
         return [TextContent(
             type="text",

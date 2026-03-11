@@ -142,5 +142,97 @@ class TestPolicyAgent(unittest.TestCase):
         decision = self.policy.decide(state)
         self.assertEqual(decision, "FINISH")
 
+    def test_decide_vault_scoped_query_continues_when_vault_step_remains(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"decision": "FINISH", "reasoning": "done", "needs_external_enrichment": false}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How are my notes connected to follow-up scan notes?",
+            "past_steps": [{
+                "step": {"step_number": 1, "sub_question": "Check outside references", "search_strategy": "web", "keywords": [], "target_folders": [], "reasoning": ""},
+                "confidence": 0.6,
+                "key_findings": "Found general follow-up guidance.",
+            }],
+            "retrieved_documents": [
+                {
+                    "filepath": "https://example.com/follow-up",
+                    "source_category": "web",
+                    "snippet": "General follow-up guidance.",
+                }
+            ],
+            "plan": [
+                {"step_number": 1, "search_strategy": "web"},
+                {"step_number": 2, "search_strategy": "vector"},
+            ],
+            "current_step_index": 1,
+            "iteration_count": 1,
+            "max_iterations": 5,
+        }
+
+        decision = self.policy.decide(state)
+        self.assertEqual(decision, "CONTINUE")
+
+    def test_decide_vault_scoped_query_revises_when_only_web_evidence_exists(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"decision": "FINISH", "reasoning": "done", "needs_external_enrichment": false}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How are treatment notes connected to scan notes?",
+            "past_steps": [{
+                "step": {"step_number": 1, "sub_question": "Check outside references", "search_strategy": "web", "keywords": [], "target_folders": [], "reasoning": ""},
+                "confidence": 0.6,
+                "key_findings": "Found general follow-up guidance.",
+            }],
+            "retrieved_documents": [
+                {
+                    "filepath": "https://example.com/follow-up",
+                    "source_category": "web",
+                    "snippet": "General follow-up guidance.",
+                }
+            ],
+            "plan": [
+                {"step_number": 1, "search_strategy": "web"},
+            ],
+            "current_step_index": 1,
+            "iteration_count": 1,
+            "max_iterations": 5,
+        }
+
+        decision = self.policy.decide(state)
+        self.assertEqual(decision, "REVISE_PLAN")
+
+    def test_decide_vault_scoped_query_revises_when_vault_evidence_is_only_thin_metadata(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"decision": "FINISH", "reasoning": "done", "needs_external_enrichment": false}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How are my treatment notes connected to scan notes?",
+            "past_steps": [{
+                "step": {"step_number": 1, "sub_question": "Check graph links", "search_strategy": "graph-local", "keywords": [], "target_folders": [], "reasoning": ""},
+                "confidence": 0.6,
+                "key_findings": "Found graph links.",
+            }],
+            "retrieved_documents": [
+                {
+                    "filepath": "Medical/Treatment Notes.md",
+                    "source_category": "vault",
+                    "source_type": "entity-context",
+                    "snippet": "On explicit graph path. depth=9, seed_hits=8.",
+                }
+            ],
+            "plan": [
+                {"step_number": 1, "search_strategy": "graph-local"},
+            ],
+            "current_step_index": 1,
+            "iteration_count": 1,
+            "max_iterations": 5,
+        }
+
+        decision = self.policy.decide(state)
+        self.assertEqual(decision, "REVISE_PLAN")
+
 if __name__ == '__main__':
     unittest.main()

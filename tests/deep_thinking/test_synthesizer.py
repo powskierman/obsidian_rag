@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from deep_thinking.synthesizer import FinalAnswerGenerator
 
@@ -56,6 +56,82 @@ class TestFinalAnswerGenerator(unittest.TestCase):
             result["citations"],
             ["[[Tech/ESP32.md]]", "https://example.com/spec"],
         )
+
+    def test_generate_normalizes_short_vault_title_citations(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"answer":"A","citations":["[[Lymphoma Treatment]]"],"confidence_score":0.9,"confidence_justification":"ok"}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How are my treatment notes connected to follow-up scan notes?",
+            "user_context": {},
+            "plan": [],
+            "current_step_index": 0,
+            "past_steps": [],
+            "accumulated_context": "",
+            "retrieved_documents": [
+                {
+                    "source": "Medical/Lymphoma/Lymphoma Treatment.md",
+                    "filepath": "Medical/Lymphoma/Lymphoma Treatment.md",
+                    "filename": "Lymphoma Treatment.md",
+                    "title": "Lymphoma Treatment",
+                    "content": "Vault content.",
+                    "type": "vector",
+                    "source_category": "vault",
+                },
+            ],
+            "iteration_count": 0,
+            "max_iterations": 1,
+            "should_continue": False,
+            "final_answer": "",
+            "citations": [],
+            "raw_context_buffer": [],
+            "confidence_score": 0.0,
+            "confidence_justification": "",
+            "warnings": [],
+        }
+
+        result = self.generator.generate(state)
+
+        self.assertEqual(result["citations"], ["[[Medical/Lymphoma/Lymphoma Treatment.md]]"])
+
+    def test_generate_normalizes_slash_style_vault_title_citations(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"answer":"A","citations":["[[Lymphoma Treatment Log/Journal]]"],"confidence_score":0.9,"confidence_justification":"ok"}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How are my treatment notes connected to follow-up scan notes?",
+            "user_context": {},
+            "plan": [],
+            "current_step_index": 0,
+            "past_steps": [],
+            "accumulated_context": "",
+            "retrieved_documents": [
+                {
+                    "source": "Medical/Lymphoma/Lymphoma Treatment Log.md",
+                    "filepath": "Medical/Lymphoma/Lymphoma Treatment Log.md",
+                    "filename": "Lymphoma Treatment Log.md",
+                    "title": "Lymphoma Treatment Log - Journal",
+                    "content": "Vault log content.",
+                    "type": "vector",
+                    "source_category": "vault",
+                },
+            ],
+            "iteration_count": 0,
+            "max_iterations": 1,
+            "should_continue": False,
+            "final_answer": "",
+            "citations": [],
+            "raw_context_buffer": [],
+            "confidence_score": 0.0,
+            "confidence_justification": "",
+            "warnings": [],
+        }
+
+        result = self.generator.generate(state)
+
+        self.assertEqual(result["citations"], ["[[Medical/Lymphoma/Lymphoma Treatment Log.md]]"])
 
     def test_generate_relationship_mode_uses_minimal_evidence_set(self):
         mock_response = MagicMock()
@@ -227,6 +303,142 @@ class TestFinalAnswerGenerator(unittest.TestCase):
 
         self.assertEqual(result["citations"], ["https://ncbi.nlm.nih.gov/books/NBK550115"])
         self.assertEqual([doc["source_category"] for doc in result["used_documents"]], ["web"])
+
+    def test_relationship_validation_accepts_multi_facet_coverage(self):
+        query_profile = {
+            "query": "How are my treatment notes connected to follow-up scan notes?",
+            "anchor_entities": ["treatment", "follow-up scan"],
+            "is_relationship": True,
+        }
+        docs = [
+            {
+                "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "source_category": "vault",
+                "content": "Treatment summary and therapy notes.",
+            },
+            {
+                "filepath": "Medical/Lymphoma/4th PET Scan - Treatment Options.md",
+                "source_category": "vault",
+                "content": "Follow-up scan notes and PET findings.",
+            },
+        ]
+
+        with patch("deep_thinking.synthesizer.source_set_covers_query_facets", return_value=True):
+            validation = FinalAnswerGenerator.validate_answer_evidence_consistency(
+                "Treatment notes connect to follow-up scan notes through treatment decisions and later imaging.",
+                [],
+                docs,
+                query_profile,
+            )
+
+        self.assertTrue(validation["valid"])
+
+    def test_generate_vault_scoped_relationship_retains_vault_evidence(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"answer":"Your notes connect treatment planning with follow-up scans through the treatment note and follow-up guidance.","citations":["https://example.com/follow-up-care"],"confidence_score":0.91,"confidence_justification":"Mixed evidence."}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How are my treatment notes connected to follow-up scan notes?",
+            "user_context": {},
+            "plan": [],
+            "current_step_index": 0,
+            "past_steps": [],
+            "accumulated_context": "",
+            "retrieved_documents": [
+                {
+                    "source": "Medical/Treatment Notes.md",
+                    "filepath": "Medical/Treatment Notes.md",
+                    "filename": "Treatment Notes.md",
+                    "content": "Treatment notes mention planned PET and CT follow-up scans.",
+                    "snippet": "Treatment notes mention planned PET and CT follow-up scans.",
+                    "type": "vector",
+                    "source_category": "vault",
+                    "source_type": "direct-excerpt",
+                },
+                {
+                    "source": "https://example.com/follow-up-care",
+                    "filepath": "https://example.com/follow-up-care",
+                    "filename": "Follow-up Care",
+                    "content": "General follow-up care guidance.",
+                    "snippet": "General follow-up care guidance.",
+                    "type": "web",
+                    "source_category": "web",
+                    "source_type": "web-result",
+                },
+            ],
+            "iteration_count": 0,
+            "max_iterations": 1,
+            "should_continue": False,
+            "final_answer": "",
+            "citations": [],
+            "raw_context_buffer": [],
+            "confidence_score": 0.0,
+            "confidence_justification": "",
+            "warnings": [],
+        }
+
+        result = self.generator.generate(state)
+
+        used_categories = [doc["source_category"] for doc in result["used_documents"]]
+        self.assertIn("vault", used_categories)
+        self.assertNotEqual(used_categories, ["web"])
+
+    def test_generate_vault_scoped_relationship_supplements_web_only_minimal_set(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"answer":"Your notes connect treatment planning with follow-up scans.","citations":["https://example.com/follow-up-care"],"confidence_score":0.91,"confidence_justification":"Mixed evidence."}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "How are my treatment notes connected to follow-up scan notes?",
+            "user_context": {},
+            "plan": [],
+            "current_step_index": 0,
+            "past_steps": [],
+            "accumulated_context": "",
+            "retrieved_documents": [
+                {
+                    "source": "Medical/Treatment Notes.md",
+                    "filepath": "Medical/Treatment Notes.md",
+                    "filename": "Treatment Notes.md",
+                    "content": "Treatment notes mention planned PET and CT follow-up scans and how treatment affects imaging.",
+                    "snippet": "Treatment notes mention planned PET and CT follow-up scans.",
+                    "type": "vector",
+                    "source_category": "vault",
+                    "source_type": "direct-excerpt",
+                },
+                {
+                    "source": "https://example.com/follow-up-care",
+                    "filepath": "https://example.com/follow-up-care",
+                    "filename": "Follow-up Care",
+                    "content": "General follow-up care guidance.",
+                    "snippet": "General follow-up care guidance.",
+                    "type": "web",
+                    "source_category": "web",
+                    "source_type": "web-result",
+                },
+            ],
+            "iteration_count": 0,
+            "max_iterations": 1,
+            "should_continue": False,
+            "final_answer": "",
+            "citations": [],
+            "raw_context_buffer": [],
+            "confidence_score": 0.0,
+            "confidence_justification": "",
+            "warnings": [],
+        }
+
+        with patch(
+            "deep_thinking.synthesizer.RetrievalSupervisor.select_minimal_evidence_set",
+            side_effect=lambda question, docs, max_docs=3: [doc for doc in docs if doc.get("source_category") == "web"][:1]
+            if any(doc.get("source_category") == "web" for doc in docs)
+            else docs[:1],
+        ):
+            result = self.generator.generate(state)
+
+        used_categories = [doc["source_category"] for doc in result["used_documents"]]
+        self.assertIn("vault", used_categories)
 
     def test_generate_uses_authoritative_documents_not_raw_context_buffer(self):
         mock_response = MagicMock()

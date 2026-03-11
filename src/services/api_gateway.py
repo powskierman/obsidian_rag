@@ -32,22 +32,30 @@ try:
     from cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        extract_query_facets as _extract_cascading_query_facets_impl,
+        has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
     )
 except ImportError:
     from src.services.cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        extract_query_facets as _extract_cascading_query_facets_impl,
+        has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
     )
 
@@ -804,6 +812,22 @@ def _select_cascading_evidence_set(
     )
 
 
+def _is_relation_style_query(query: str) -> bool:
+    return _is_relation_style_query_impl(query)
+
+
+def _extract_cascading_query_facets(query: str) -> List[set[str]]:
+    return _extract_cascading_query_facets_impl(query)
+
+
+def _has_multi_facet_query(query: str) -> bool:
+    return _has_multi_facet_query_impl(query)
+
+
+def _source_set_covers_query_facets(query: str, sources: List[Dict[str, Any]]) -> bool:
+    return _source_set_covers_query_facets_impl(query, sources)
+
+
 def _canonical_cascading_provider_name(provider: str) -> str:
     normalized = str(provider or "").strip().lower()
     aliases = {
@@ -1478,6 +1502,8 @@ async def _normalize_query_for_retrieval(
         return ""
 
     deterministic = _deterministic_normalize_query(query)
+    if _has_multi_facet_query(query):
+        return deterministic
     if not _should_normalize_query(query):
         return deterministic
 
@@ -1494,6 +1520,10 @@ async def _normalize_query_for_retrieval(
 
     candidate = await _call_query_normalizer_llm(deterministic, provider, resolved_model)
     normalized = candidate.strip() if isinstance(candidate, str) and candidate.strip() else deterministic
+    if _has_multi_facet_query(query) and not _source_set_covers_query_facets(query, [
+        {"filename": normalized, "filepath": normalized, "snippet": normalized, "content": normalized}
+    ]):
+        return deterministic
     _set_cached_normalized_query(query, provider, resolved_model, normalized)
     return normalized
 
@@ -2390,43 +2420,68 @@ async def health_check():
     except:
         emb_status = "unreachable"
 
-    try:
-        async with httpx.AsyncClient() as client:
-            graph_resp = await _get_json(
-                client, f"{GRAPH_SERVICE_URL}/health", timeout=2.0, service="graph"
-            )
-            if graph_resp and graph_resp.status_code == 200:
-                graph_data = graph_resp.json()
-                graph_status = "healthy"
-            else:
-                graph_status = "unhealthy"
-    except:
-        graph_status = "unreachable"
+    async def _fetch_graph_health_over_http() -> tuple[str, dict]:
+        try:
+            async with httpx.AsyncClient() as client:
+                graph_resp = await _get_json(
+                    client, f"{GRAPH_SERVICE_URL}/health", timeout=2.0, service="graph"
+                )
+                if graph_resp and graph_resp.status_code == 200:
+                    return "healthy", graph_resp.json()
+                return "unhealthy", {}
+        except:
+            return "unreachable", {}
 
     try:
-        async with httpx.AsyncClient() as client:
-            lightrag_resp = await _get_json(
-                client, f"{LIGHTRAG_SERVICE_URL}/health", timeout=2.0, service="lightrag"
-            )
-            if lightrag_resp and lightrag_resp.status_code == 200:
-                lightrag_data = lightrag_resp.json()
-                lightrag_status = "healthy"
-            else:
-                lightrag_status = "unhealthy"
-    except:
-        lightrag_status = "unreachable"
+        from src.services.internal_graph_transport import graph_health, lightrag_health, lightrag_stats
 
-    # Get LightRAG stats
-    try:
-        async with httpx.AsyncClient() as client:
-            stats_resp = await _get_json(
-                client, f"{LIGHTRAG_SERVICE_URL}/stats", timeout=2.0, service="lightrag"
-            )
-            if stats_resp and stats_resp.status_code == 200:
-                lightrag_stats = stats_resp.json()
-                lightrag_data.update(lightrag_stats)
+        graph_code, graph_payload = await asyncio.to_thread(graph_health)
+        graph_ready = bool(graph_payload.get("graph_loaded")) if isinstance(graph_payload, dict) else False
+        graph_nodes = int(graph_payload.get("nodes", 0) or 0) if isinstance(graph_payload, dict) else 0
+        graph_edges = int(graph_payload.get("edges", 0) or 0) if isinstance(graph_payload, dict) else 0
+        if graph_code == 200 and graph_ready and (graph_nodes > 0 or graph_edges > 0):
+            graph_data = graph_payload
+            graph_status = "healthy"
+        else:
+            graph_status, graph_data = await _fetch_graph_health_over_http()
     except:
-        pass
+        graph_status, graph_data = await _fetch_graph_health_over_http()
+
+    try:
+        lightrag_code, lightrag_payload = await asyncio.to_thread(lightrag_health)
+        if lightrag_code == 200:
+            lightrag_data = lightrag_payload
+            lightrag_status = "healthy"
+        else:
+            lightrag_status = "unhealthy"
+    except:
+        try:
+            async with httpx.AsyncClient() as client:
+                lightrag_resp = await _get_json(
+                    client, f"{LIGHTRAG_SERVICE_URL}/health", timeout=2.0, service="lightrag"
+                )
+                if lightrag_resp and lightrag_resp.status_code == 200:
+                    lightrag_data = lightrag_resp.json()
+                    lightrag_status = "healthy"
+                else:
+                    lightrag_status = "unhealthy"
+        except:
+            lightrag_status = "unreachable"
+
+    try:
+        stats_code, stats_payload = await asyncio.to_thread(lightrag_stats)
+        if stats_code == 200 and isinstance(stats_payload, dict):
+            lightrag_data.update(stats_payload)
+    except:
+        try:
+            async with httpx.AsyncClient() as client:
+                stats_resp = await _get_json(
+                    client, f"{LIGHTRAG_SERVICE_URL}/stats", timeout=2.0, service="lightrag"
+                )
+                if stats_resp and stats_resp.status_code == 200:
+                    lightrag_data.update(stats_resp.json())
+        except:
+            pass
 
     return {
         "success": True,
@@ -2905,12 +2960,19 @@ async def unified_query(request: UnifiedQueryRequest):
                         synthesis_citations = synthesis_result.get("citations")
                         if isinstance(synthesis_used_documents, list) and synthesis_used_documents:
                             sources = _hydrate_cascading_sources(sources, synthesis_used_documents)
+                        multi_facet_query = _has_multi_facet_query(request.query)
+                        relationship_query = _is_relation_style_query(request.query)
+                        synthesized_covers_facets = _source_set_covers_query_facets(
+                            request.query,
+                            synthesis_used_documents if isinstance(synthesis_used_documents, list) else [],
+                        )
                         if (
                             isinstance(synthesis_used_documents, list)
                             and synthesis_used_documents
                             and (
-                                len(sources) <= 2
+                                ((not relationship_query and not multi_facet_query) and len(sources) <= 2)
                                 or len(synthesis_used_documents) >= min(2, len(sources))
+                                or synthesized_covers_facets
                                 or _summary_query_targets_source(request.query, synthesis_used_documents[0])
                             )
                         ):
@@ -3350,12 +3412,21 @@ async def deep_research_websocket(websocket: WebSocket):
         # Initialize Agent with Universal Client
         # Note: We must use the INTERNAL Docker URLs here
         DeepThinkingRAG = _load_deep_thinking_rag()
+        deep_thinking_graph_transport = (
+            _get_env_value("DEEP_THINKING_GRAPH_TRANSPORT", "").strip().lower()
+        )
+        graph_service_url = (
+            "internal://graph"
+            if deep_thinking_graph_transport == "internal"
+            else GRAPH_SERVICE_URL
+        )
+
         rag = DeepThinkingRAG(
             provider=provider,
             api_key=api_key,
             model=model,
             vector_service_url=EMBEDDING_SERVICE_URL,
-            graph_service_url=GRAPH_SERVICE_URL,
+            graph_service_url=graph_service_url,
             enable_reranking=True,
         )
 

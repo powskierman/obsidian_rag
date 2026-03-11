@@ -655,6 +655,72 @@ def test_select_cascading_evidence_set_prefers_relation_sources():
 
 
 @pytest.mark.unit
+def test_select_cascading_evidence_set_treats_connected_to_as_relationship_query():
+    selected = cascading_pipeline.select_cascading_evidence_set(
+        "How are my lymphoma treatment notes connected to follow-up scan notes?",
+        [
+            {
+                "filename": "Lymphoma Treatment Summary.md",
+                "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "relevance": 95.0,
+                "snippet": "Treatment summary linked to lymphoma treatment and treatment log.",
+            },
+            {
+                "filename": "CT Scan Post-CAR-T.md",
+                "filepath": "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+                "relevance": 72.0,
+                "snippet": "Follow-up scan findings after CAR-T therapy.",
+            },
+            {
+                "filename": "Random Overview.md",
+                "filepath": "Medical/Lymphoma/Random Overview.md",
+                "relevance": 99.0,
+                "snippet": "General overview of lymphoma topics.",
+            },
+        ],
+        max_results=2,
+    )
+
+    assert [item["filepath"] for item in selected] == [
+        "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+        "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+    ]
+
+
+@pytest.mark.unit
+def test_select_cascading_evidence_set_preserves_generic_multi_facet_coverage():
+    selected = cascading_pipeline.select_cascading_evidence_set(
+        "How are thermostat control notes connected to relay wiring notes?",
+        [
+            {
+                "filename": "Thermostat Control.md",
+                "filepath": "Home/Automation/Thermostat Control.md",
+                "relevance": 95.0,
+                "snippet": "Thermostat control logic and schedules.",
+            },
+            {
+                "filename": "Relay Wiring.md",
+                "filepath": "Home/Automation/Relay Wiring.md",
+                "relevance": 72.0,
+                "snippet": "Relay wiring notes and diagrams.",
+            },
+            {
+                "filename": "General Overview.md",
+                "filepath": "Home/Automation/General Overview.md",
+                "relevance": 99.0,
+                "snippet": "General overview of automation topics.",
+            },
+        ],
+        max_results=2,
+    )
+
+    assert [item["filepath"] for item in selected] == [
+        "Home/Automation/Thermostat Control.md",
+        "Home/Automation/Relay Wiring.md",
+    ]
+
+
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_synthesize_cascading_answer_rejects_unsupported_grounded_details(monkeypatch):
     class FakeClient:
@@ -928,6 +994,56 @@ async def test_normalize_query_for_retrieval_short_circuits_after_deterministic_
     )
 
     assert normalized == "yescarta"
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_normalize_query_for_retrieval_preserves_multi_facet_query(monkeypatch):
+    async def _unexpected(*_args, **_kwargs):
+        raise AssertionError("LLM normalizer should not be called for multi-facet queries")
+
+    monkeypatch.setattr(api_gateway, "_call_query_normalizer_llm", _unexpected)
+
+    query = "How are thermostat control notes connected to relay wiring notes?"
+    normalized = await api_gateway._normalize_query_for_retrieval(
+        query,
+        "mlx",
+        "test-model",
+    )
+
+    assert normalized.lower() == query.lower().rstrip("?")
+
+
+@pytest.mark.unit
+def test_source_set_covers_query_facets_requires_both_sides():
+    query = "How are thermostat control notes connected to relay wiring notes?"
+
+    assert not api_gateway._source_set_covers_query_facets(
+        query,
+        [
+            {
+                "filename": "Thermostat Control.md",
+                "filepath": "Home/Automation/Thermostat Control.md",
+                "snippet": "Thermostat control logic and schedules.",
+            }
+        ],
+    )
+
+    assert api_gateway._source_set_covers_query_facets(
+        query,
+        [
+            {
+                "filename": "Thermostat Control.md",
+                "filepath": "Home/Automation/Thermostat Control.md",
+                "snippet": "Thermostat control logic and schedules.",
+            },
+            {
+                "filename": "Relay Wiring.md",
+                "filepath": "Home/Automation/Relay Wiring.md",
+                "snippet": "Relay wiring notes and diagrams.",
+            },
+        ],
+    )
 
 
 @pytest.mark.unit

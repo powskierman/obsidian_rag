@@ -20,6 +20,12 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+try:
+    from src.services.cascading_pipeline import source_set_covers_query_facets
+except ImportError:
+    def source_set_covers_query_facets(query: str, sources: List[Dict[str, Any]]) -> bool:
+        return False
+
 class FinalAnswerGenerator:
     def __init__(self, client):
         self.client = client
@@ -139,6 +145,49 @@ Finally, provide your answer in a structured, easy-to-read format."""
         return vault_by_path, vault_by_basename, web_by_url
 
     @classmethod
+    def _vault_alias_lookup(cls, documents: List[Dict[str, Any]]) -> Dict[str, str | None]:
+        alias_map: Dict[str, str | None] = {}
+
+        def register(alias: Any, path: str) -> None:
+            text = normalize_vault_path(alias).strip()
+            if not text:
+                text = str(alias or "").strip()
+            if not text:
+                return
+            text = text.strip()
+            lowered = text.lower()
+            existing = alias_map.get(lowered)
+            if existing is None and lowered in alias_map:
+                return
+            if existing and existing != path:
+                alias_map[lowered] = None
+                return
+            alias_map[lowered] = path
+
+        for doc in documents or []:
+            if not isinstance(doc, dict) or cls._is_web_doc(doc) or not cls._is_citable_doc(doc):
+                continue
+            path = normalize_vault_path(doc.get("filepath") or doc.get("source") or "")
+            if not path:
+                continue
+            register(path, path)
+            basename = os.path.basename(path)
+            register(basename, path)
+            if "." in basename:
+                register(os.path.splitext(basename)[0], path)
+            register(doc.get("filename"), path)
+            filename = str(doc.get("filename") or "").strip()
+            if filename and "." in filename:
+                register(os.path.splitext(filename)[0], path)
+            register(doc.get("title"), path)
+            register(doc.get("canonical_id"), path)
+            title = str(doc.get("title") or "").strip()
+            if title:
+                register(title.replace(" - ", "/"), path)
+                register(title.replace(":", "/"), path)
+        return alias_map
+
+    @classmethod
     def _authoritative_documents(
         cls,
         question: str,
@@ -191,6 +240,7 @@ Finally, provide your answer in a structured, easy-to-read format."""
         query_entities: List[str] | None = None,
     ) -> List[str]:
         vault_by_path, vault_by_basename, web_by_url = cls._citation_lookup(documents)
+        vault_aliases = cls._vault_alias_lookup(documents)
         normalized: List[str] = []
         seen: set[str] = set()
         dropped: List[str] = []
@@ -214,6 +264,8 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 else:
                     basename = os.path.basename(candidate).lower()
                     matched = vault_by_basename.get(basename)
+                    if not matched:
+                        matched = vault_aliases.get(candidate.lower())
                     if matched and cls._document_path_matches_query_entities(matched, documents, query_entities):
                         resolved = f"[[{matched}]]"
             elif markdown_match:
@@ -237,6 +289,8 @@ Finally, provide your answer in a structured, easy-to-read format."""
                 else:
                     basename = os.path.basename(candidate).lower()
                     matched = vault_by_basename.get(basename)
+                    if not matched:
+                        matched = vault_aliases.get(candidate.lower())
                     if matched and cls._document_path_matches_query_entities(matched, documents, query_entities):
                         resolved = f"[[{matched}]]"
 
@@ -263,6 +317,55 @@ Finally, provide your answer in a structured, easy-to-read format."""
         return os.getenv("DEEP_THINKING_ALLOW_WEB_ONLY_RELATIONSHIP_ANSWERS", "true").strip().lower() in {
             "1", "true", "yes", "on"
         }
+
+    @classmethod
+    def _prefers_vault_first(cls, question: str) -> bool:
+        lowered = str(question or "").lower()
+        patterns = (
+            r"\b(?:my|our)\s+(?:notes?|vault|documents?|files?|logs?|pdfs?|reports?)\b",
+            r"\b(?:in|from)\s+(?:my|our)\s+vault\b",
+            r"\b(?:these|those)\s+notes\b",
+            r"\bmy\s+vault\b",
+            r"\bvault\b",
+            r"\bnotes\b",
+        )
+        return any(re.search(pattern, lowered) for pattern in patterns)
+
+    @classmethod
+    def _dedupe_documents(cls, documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        deduped: List[Dict[str, Any]] = []
+        seen: set[tuple[str, str]] = set()
+        for doc in documents or []:
+            key = cls._document_lookup_key(doc)
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(doc)
+        return deduped
+
+    @classmethod
+    def _ensure_vault_evidence_retained(
+        cls,
+        question: str,
+        query_profile: Dict[str, Any],
+        used_documents: List[Dict[str, Any]],
+        selected_documents: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        if not cls._prefers_vault_first(question):
+            return used_documents
+        if any(not cls._is_web_doc(doc) for doc in (used_documents or [])):
+            return used_documents
+
+        vault_docs = [doc for doc in (selected_documents or []) if not cls._is_web_doc(doc)]
+        if not vault_docs:
+            return used_documents
+
+        supplemental = RetrievalSupervisor.select_minimal_evidence_set(
+            question,
+            vault_docs,
+            max_docs=query_profile.get("max_sources") or 3,
+        ) or vault_docs[: max(1, min(len(vault_docs), query_profile.get("max_sources") or 3))]
+        return cls._dedupe_documents(list(used_documents or []) + list(supplemental))
 
     @classmethod
     def _document_path_matches_query_entities(
@@ -375,6 +478,9 @@ Finally, provide your answer in a structured, easy-to-read format."""
 
     @classmethod
     def _relationship_claim_supported(cls, query_profile: Dict[str, Any], documents: List[Dict[str, Any]]) -> bool:
+        query_text = str(query_profile.get("query") or "").strip()
+        if query_text and source_set_covers_query_facets(query_text, documents):
+            return True
         anchors = query_profile.get("anchor_entities", [])
         if not anchors:
             return bool(documents)
@@ -706,6 +812,21 @@ Return ONLY a JSON object:
         relationship_mode = bool(query_profile["is_relationship"])
         summary_mode = bool(query_profile.get("is_summary_request"))
         broad_summary_mode = summary_mode and state.get("summary_intent") == "broad"
+        prefers_vault_first = self._prefers_vault_first(question)
+        all_citable_reasoning_docs = [
+            doc for doc in (reasoning_docs or [])
+            if self._is_citable_doc(doc)
+        ]
+
+        if prefers_vault_first:
+            authoritative_documents = self._ensure_vault_evidence_retained(
+                question,
+                query_profile,
+                authoritative_documents,
+                all_citable_reasoning_docs,
+            )
+            if authoritative_documents:
+                state["_selected_evidence_documents"] = authoritative_documents
 
         if broad_summary_mode:
             broader_limit = max(
@@ -732,7 +853,11 @@ Return ONLY a JSON object:
                 "web_only": False,
             }]
             web_only_docs: List[Dict[str, Any]] = []
-            if query_profile.get("is_medical") and self._allow_web_only_relationship_answers():
+            if (
+                query_profile.get("is_medical")
+                and self._allow_web_only_relationship_answers()
+                and not prefers_vault_first
+            ):
                 candidate_web_docs = [doc for doc in authoritative_documents if self._is_web_doc(doc)]
                 if candidate_web_docs:
                     web_only_docs = RetrievalSupervisor.select_minimal_evidence_set(
@@ -774,7 +899,12 @@ Return ONLY a JSON object:
 
                 if validation["valid"]:
                     result["citations"] = validation["citations"]
-                    result["used_documents"] = validation["used_documents"]
+                    result["used_documents"] = self._ensure_vault_evidence_retained(
+                        question,
+                        query_profile,
+                        validation["used_documents"],
+                        documents,
+                    )
                     result["answer"] = self._enforce_relationship_length(result.get("answer", ""))
                     return result
 
@@ -808,7 +938,12 @@ Return ONLY a JSON object:
                 fallback_docs,
                 query_profile.get("anchor_entities"),
             )
-            used_documents = self._resolve_used_documents(normalized_citations, fallback_docs)
+            used_documents = self._ensure_vault_evidence_retained(
+                question,
+                query_profile,
+                self._resolve_used_documents(normalized_citations, fallback_docs),
+                fallback_docs,
+            )
             return {
                 "answer": fallback_answer,
                 "citations": normalized_citations,

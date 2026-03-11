@@ -22,6 +22,13 @@ except ImportError:
     except ImportError:
         def get_memory_manager(): return None
 
+
+def _normalized_openrouter_model(value: str | None) -> str:
+    model = str(value or "").strip().strip("\"'")
+    if not model or " " in model:
+        return "openrouter/auto"
+    return model
+
 class DeepThinkingRAG:
     def __init__(
         self, 
@@ -48,7 +55,9 @@ class DeepThinkingRAG:
         default_model = model
         if not default_model:
             if provider_name == "openrouter":
-                default_model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+                default_model = _normalized_openrouter_model(
+                    os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+                )
             elif provider_name == "ollama":
                 default_model = os.getenv("OLLAMA_MODEL", "mistral")
             elif provider_name == "claude":

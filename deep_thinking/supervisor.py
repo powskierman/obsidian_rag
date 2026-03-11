@@ -25,6 +25,22 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+try:
+    from src.services.cascading_pipeline import (
+        has_multi_facet_query,
+        source_facet_match_indexes,
+        source_set_covers_query_facets,
+    )
+except ImportError:
+    def has_multi_facet_query(query: str) -> bool:
+        return False
+
+    def source_facet_match_indexes(source: Dict[str, Any], query: str) -> set[int]:
+        return set()
+
+    def source_set_covers_query_facets(query: str, sources: List[Dict[str, Any]]) -> bool:
+        return False
+
 class RetrievalSupervisor:
     GRAPH_SUMMARY_SOURCES = {"Graph Synthesis Summary", "LightRAG Knowledge Graph"}
     QUERY_STOPWORDS = {
@@ -36,6 +52,9 @@ class RetrievalSupervisor:
         re.compile(r"\bwhat(?:'s| is)? the connection between (?P<a>.+?) and (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
         re.compile(r"\bwhat(?:'s| is)? the link between (?P<a>.+?) and (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
         re.compile(r"\bhow is (?P<a>.+?) related to (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
+        re.compile(r"\bhow are (?P<a>.+?) connected to (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
+        re.compile(r"\bhow is (?P<a>.+?) connected to (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
+        re.compile(r"\bhow are (?P<a>.+?) linked to (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
         re.compile(r"\bis (?P<a>.+?) used to treat (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
         re.compile(r"\bdoes (?P<a>.+?) treat (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
         re.compile(r"\bis (?P<a>.+?) indicated for (?P<b>.+?)(?:\?|$)", re.IGNORECASE),
@@ -49,7 +68,7 @@ class RetrievalSupervisor:
     )
     RELATIONSHIP_HINTS = (
         "connection", "related to", "relationship", "used to treat", "treat",
-        "indicated for", "linked to", "role of", "associated with", "marker for",
+        "indicated for", "linked to", "connected to", "role of", "associated with", "marker for",
         "cause", "diagnose", "indicate",
     )
     RELATIONSHIP_EVIDENCE_HINTS = (
@@ -122,7 +141,7 @@ class RetrievalSupervisor:
     )
     CONCEPTUAL_EXPLANATION_HINTS = (
         "first principles", "conceptually", "intuition", "why does", "why do",
-        "difference between", "relate to", "relationship between", "how does",
+        "difference between", "relate to", "relationship between", "connected to", "how does",
     )
     INSTRUCTION_QUERY_HINTS = (
         "prompt", "prompts", "template", "templates", "instruction", "instructions",
@@ -262,7 +281,13 @@ class RetrievalSupervisor:
     @staticmethod
     def _clean_entity_phrase(value: str) -> str:
         text = re.sub(r"\s+", " ", str(value or "").strip(" \t\r\n\"'`()[]{}.,;:!?"))
-        text = re.sub(r"^(the|a|an)\s+", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"^(the|a|an|my|your|our)\s+", "", text, flags=re.IGNORECASE)
+        text = re.sub(
+            r"\s+(?:notes?|docs?|documents?|files?)$",
+            "",
+            text,
+            flags=re.IGNORECASE,
+        )
         return text.strip()
 
     @classmethod
@@ -444,6 +469,15 @@ class RetrievalSupervisor:
         text = str(value or "").strip().lower().replace("#", "")
         text = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
         return text
+
+    @staticmethod
+    def _document_lookup_key(doc: Dict[str, Any]) -> tuple[str, str]:
+        source = str(doc.get("filepath") or doc.get("url") or doc.get("source") or doc.get("filename") or "").strip()
+        category = str(doc.get("source_category") or "").strip().lower()
+        if category != "web" and not source.startswith("http://") and not source.startswith("https://"):
+            return "vault", normalize_vault_path(source).lower()
+        canonical = canonicalize_web_url(doc.get("canonical_url") or source) or source
+        return "web", canonical.lower()
 
     @classmethod
     def _doc_title_text(cls, doc: Dict[str, Any]) -> str:
@@ -661,6 +695,7 @@ class RetrievalSupervisor:
         query: str,
         docs: List[Dict[str, Any]],
         max_results: int | None = None,
+        apply_relationship_limit: bool = True,
     ) -> List[Dict[str, Any]]:
         profile = cls.build_query_profile(query)
         docs = cls.filter_vault_docs_by_domain_and_entities(docs, profile)
@@ -763,12 +798,69 @@ class RetrievalSupervisor:
             ]
             if useful:
                 deduped = useful
-            limit = min(max_results or profile["max_sources"] or 5, 5, profile["max_sources"] or 5)
-            return deduped[:max(1, limit)]
+            if apply_relationship_limit:
+                limit = min(max_results or profile["max_sources"] or 5, 5, profile["max_sources"] or 5)
+                return deduped[:max(1, limit)]
+            if max_results is None:
+                return deduped
+            return deduped[:max_results]
 
         if max_results is None:
             return deduped
         return deduped[:max_results]
+
+    @classmethod
+    def _preserve_multi_facet_query_coverage(
+        cls,
+        query: str,
+        selected_docs: List[Dict[str, Any]],
+        candidate_docs: List[Dict[str, Any]],
+        max_results: int,
+    ) -> List[Dict[str, Any]]:
+        if not has_multi_facet_query(query):
+            return selected_docs[:max_results]
+        if source_set_covers_query_facets(query, selected_docs):
+            return selected_docs[:max_results]
+
+        covered = set()
+        for doc in selected_docs:
+            covered.update(source_facet_match_indexes(doc, query))
+
+        supplemented = list(selected_docs)
+        seen_keys = {
+            cls._document_lookup_key(doc)
+            for doc in supplemented
+            if isinstance(doc, dict)
+        }
+
+        def uncovered_count(doc: Dict[str, Any]) -> int:
+            return len(source_facet_match_indexes(doc, query) - covered)
+
+        ordered_candidates = sorted(
+            [doc for doc in candidate_docs if isinstance(doc, dict)],
+            key=lambda doc: (
+                -uncovered_count(doc),
+                -float(doc.get("_query_rank_score", 0.0)),
+            ),
+        )
+
+        for doc in ordered_candidates:
+            if len(supplemented) >= max_results:
+                break
+            key = cls._document_lookup_key(doc)
+            if key in seen_keys:
+                continue
+            match_indexes = source_facet_match_indexes(doc, query)
+            if not match_indexes:
+                continue
+            if match_indexes - covered:
+                supplemented.append(doc)
+                seen_keys.add(key)
+                covered.update(match_indexes)
+                if source_set_covers_query_facets(query, supplemented):
+                    break
+
+        return supplemented[:max_results]
 
     @classmethod
     def select_minimal_evidence_set(
@@ -1056,7 +1148,18 @@ class RetrievalSupervisor:
 
         ranking_query = state.get("original_question") or query
         if results:
-            results = self.rank_sources_for_query(ranking_query, results, max_results=min(len(results), 20))
+            candidate_results = self.rank_sources_for_query(
+                ranking_query,
+                results,
+                max_results=min(len(results), 20),
+                apply_relationship_limit=False,
+            )
+            results = self._preserve_multi_facet_query_coverage(
+                ranking_query,
+                candidate_results[: min(len(candidate_results), 5)],
+                candidate_results,
+                max_results=min(len(candidate_results), 5),
+            )
             trace(f"{debug_prefix} query-shaped output", summarize(results))
             
         # [NEW] Full Content Expansion for Critical Medical Files
@@ -1654,28 +1757,53 @@ class RetrievalSupervisor:
 
         retries = 2
         backoff = 0.5
+        transport_override = os.getenv(
+            "DEEP_THINKING_GRAPH_TRANSPORT", ""
+        ).strip().lower()
+        use_internal_transport = (
+            transport_override == "internal"
+            or str(self.graph_service_url or "").startswith("internal://")
+        )
         for attempt in range(retries + 1):
             try:
                 trace("[DeepThinking] graph request", {"query": query, "mode": mode, "attempt": attempt + 1})
-                response = requests.post(
-                    f'{self.graph_service_url}/query',
-                    json={
-                        "query": query,
-                        "mode": mode,
-                        "llm_provider": self.llm_provider or None,
-                        "model": self.llm_model or None,
-                        "top_k": 30,
-                        "chunk_top_k": 10
-                    },
-                    timeout=300  # Increased from 180 to 300 seconds
-                )
-                if response.status_code == 200:
-                    data = response.json()
+                if use_internal_transport:
+                    from src.services.internal_graph_transport import query_networkx_graph
+
+                    status_code, data = query_networkx_graph(
+                        {
+                            "query": query,
+                            "mode": mode,
+                            "llm_provider": self.llm_provider or None,
+                            "model": self.llm_model or None,
+                            "top_k": 30,
+                            "chunk_top_k": 10,
+                        }
+                    )
+                    error_body = str(data)[:500] if data else ""
+                else:
+                    response = requests.post(
+                        f'{self.graph_service_url}/query',
+                        json={
+                            "query": query,
+                            "mode": mode,
+                            "llm_provider": self.llm_provider or None,
+                            "model": self.llm_model or None,
+                            "top_k": 30,
+                            "chunk_top_k": 10
+                        },
+                        timeout=300  # Increased from 180 to 300 seconds
+                    )
+                    status_code = response.status_code
+                    data = response.json() if response.content else {}
+                    error_body = response.text[:500] if response.text else ""
+
+                if status_code == 200:
                     if isinstance(data, str):
                         results = [self._graph_reasoning_doc(data, mode)] if str(data).strip() else []
                         trace(
                             "[DeepThinking] graph response",
-                            {"status": response.status_code, "count": len(results), "internal_reasoning": bool(results)}
+                            {"status": status_code, "count": len(results), "internal_reasoning": bool(results)}
                         )
                         return results
                     elif isinstance(data, dict):
@@ -1708,12 +1836,11 @@ class RetrievalSupervisor:
                             results.append(self._graph_reasoning_doc(content, mode))
 
                         if results:
-                            trace("[DeepThinking] graph response", {"status": response.status_code, "count": len(results)})
+                            trace("[DeepThinking] graph response", {"status": status_code, "count": len(results)})
                             return results
                     return []
 
-                error_body = response.text[:500] if response.text else ""
-                trace("[DeepThinking] graph error", {"status": response.status_code, "body": error_body})
+                trace("[DeepThinking] graph error", {"status": status_code, "body": error_body})
             except requests.exceptions.Timeout:
                 trace("[DeepThinking] graph timeout", {"query": f"{query[:50]}..."})
             except Exception as e:
