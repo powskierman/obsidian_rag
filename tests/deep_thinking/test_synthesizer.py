@@ -133,6 +133,67 @@ class TestFinalAnswerGenerator(unittest.TestCase):
 
         self.assertEqual(result["citations"], ["[[Medical/Lymphoma/Lymphoma Treatment Log.md]]"])
 
+    def test_generate_relationship_rehydrates_multi_facet_used_documents_when_citations_collapse(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"answer":"Your treatment notes connect to follow-up scan notes through ongoing tracking in the treatment log.","citations":["[[Medical/Lymphoma/Lymphoma Treatment Summary.md]]"],"confidence_score":0.9,"confidence_justification":"ok"}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        treatment_doc = {
+            "source": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filename": "Lymphoma Treatment Summary.md",
+            "title": "Lymphoma Treatment Summary",
+            "content": "Treatment summary.",
+            "type": "vector",
+            "source_category": "vault",
+        }
+        scan_doc = {
+            "source": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+            "filepath": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+            "filename": "Scans After Yescarta Treatment.md",
+            "title": "Scans After Yescarta Treatment",
+            "content": "Follow-up scan findings.",
+            "type": "graph",
+            "source_category": "vault",
+        }
+
+        state = {
+            "original_question": "How are my treatment notes connected to follow-up scan notes?",
+            "user_context": {},
+            "plan": [],
+            "current_step_index": 0,
+            "past_steps": [],
+            "accumulated_context": "",
+            "retrieved_documents": [treatment_doc, scan_doc],
+            "iteration_count": 0,
+            "max_iterations": 1,
+            "should_continue": False,
+            "final_answer": "",
+            "citations": [],
+            "raw_context_buffer": [],
+            "confidence_score": 0.0,
+            "confidence_justification": "",
+            "warnings": [],
+        }
+
+        with patch(
+            "deep_thinking.synthesizer.source_set_covers_query_facets",
+            side_effect=lambda query, docs: any(doc["filepath"].endswith("Treatment Summary.md") for doc in docs)
+            and any(doc["filepath"].endswith("Scans After Yescarta Treatment.md") for doc in docs),
+        ), patch(
+            "deep_thinking.synthesizer.RetrievalSupervisor.select_minimal_evidence_set",
+            return_value=[treatment_doc, scan_doc],
+        ):
+            result = self.generator.generate(state)
+
+        self.assertEqual(
+            [doc["filepath"] for doc in result["used_documents"]],
+            [
+                "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+            ],
+        )
+
     def test_generate_relationship_mode_uses_minimal_evidence_set(self):
         mock_response = MagicMock()
         mock_response.content = [MagicMock(text='{"answer":"DLBCL is a type of large B-cell lymphoma, and Yescarta is a CD19-directed CAR-T therapy used for relapsed or refractory large B-cell lymphoma including DLBCL.","citations":["[[Medical/Lymphoma/media/Yescarta.pdf]]","[[Medical/Lymphoma/DLBCL, Follicular Lymphoma.md]]"],"confidence_score":0.94,"confidence_justification":"Direct indication evidence plus disease definition."}')]

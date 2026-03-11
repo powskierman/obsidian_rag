@@ -384,6 +384,82 @@ class TestRetrievalSupervisor(unittest.TestCase):
             ],
         )
 
+    def test_select_minimal_evidence_set_preserves_multi_facet_coverage_after_bridge_selection(self):
+        query = "How are my treatment notes connected to follow-up scan notes?"
+        treatment_doc = {
+            "source": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filename": "Lymphoma Treatment Summary.md",
+            "snippet": "Treatment summary.",
+            "content": "Treatment summary and treatment log.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 7.0,
+            "_anchor_entities_found": ["treatment"],
+        }
+        bridge_doc = {
+            "source": "Medical/Lymphoma/Lymphoma Treatment Log.md",
+            "filepath": "Medical/Lymphoma/Lymphoma Treatment Log.md",
+            "filename": "Lymphoma Treatment Log.md",
+            "snippet": "Treatment log referencing scan follow-up.",
+            "content": "Treatment log referencing follow-up scan scheduling.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 6.8,
+            "_anchor_entities_found": ["treatment"],
+        }
+        scan_doc = {
+            "source": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+            "filepath": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+            "filename": "Scans After Yescarta Treatment.md",
+            "snippet": "Follow-up scan results after treatment.",
+            "content": "Follow-up scan results after treatment.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 6.2,
+            "_anchor_entities_found": ["scan"],
+        }
+
+        with patch.object(
+            RetrievalSupervisor,
+            "build_query_profile",
+            return_value={"is_relationship": True, "max_sources": 3, "anchor_entities": ["treatment", "scan"]},
+        ), patch.object(
+            RetrievalSupervisor,
+            "filter_vault_docs_by_domain_and_entities",
+            side_effect=lambda docs, _profile: docs,
+        ), patch.object(
+            RetrievalSupervisor,
+            "rank_sources_for_query",
+            return_value=[treatment_doc, bridge_doc, scan_doc],
+        ), patch(
+            "deep_thinking.supervisor.has_multi_facet_query",
+            return_value=True,
+        ), patch(
+            "deep_thinking.supervisor.source_set_covers_query_facets",
+            side_effect=lambda _query, docs: any(doc["filepath"].endswith("Treatment Summary.md") for doc in docs)
+            and any(doc["filepath"].endswith("Scans After Yescarta Treatment.md") for doc in docs),
+        ), patch(
+            "deep_thinking.supervisor.source_facet_match_indexes",
+            side_effect=lambda doc, _query: {0}
+            if doc["filepath"].endswith("Treatment Summary.md") or doc["filepath"].endswith("Treatment Log.md")
+            else {1},
+        ), patch.object(
+            RetrievalSupervisor,
+            "_bridge_overlap_score",
+            side_effect=lambda doc, chosen, _profile: 2 if doc["filepath"].endswith("Treatment Log.md") else 0,
+        ):
+            selected = RetrievalSupervisor.select_minimal_evidence_set(query, [treatment_doc, bridge_doc, scan_doc], max_docs=3)
+
+        self.assertEqual(
+            [doc["filepath"] for doc in selected],
+            [
+                "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+                "Medical/Lymphoma/Lymphoma Treatment Log.md",
+            ],
+        )
+
     def test_preserve_multi_facet_query_coverage_supplements_second_side(self):
         query = "How are my lymphoma treatment notes connected to follow-up scan notes?"
         treatment_doc = {

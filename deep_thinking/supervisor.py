@@ -985,6 +985,13 @@ class RetrievalSupervisor:
         if not selected:
             selected = ranked[:limit]
 
+        selected = cls._preserve_multi_facet_query_coverage(
+            query,
+            selected,
+            ranked,
+            max_results=limit,
+        )
+
         return selected[:limit]
         
     def execute_step(self, step: Step, state: RAGState, trace_callback=None) -> List[Dict[str, Any]]:

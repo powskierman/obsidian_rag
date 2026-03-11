@@ -368,6 +368,31 @@ Finally, provide your answer in a structured, easy-to-read format."""
         return cls._dedupe_documents(list(used_documents or []) + list(supplemental))
 
     @classmethod
+    def _ensure_query_facet_coverage_retained(
+        cls,
+        question: str,
+        used_documents: List[Dict[str, Any]],
+        selected_documents: List[Dict[str, Any]],
+        max_docs: int | None = None,
+    ) -> List[Dict[str, Any]]:
+        if not question or not selected_documents:
+            return used_documents
+        if source_set_covers_query_facets(question, used_documents or []):
+            return used_documents
+        if not source_set_covers_query_facets(question, selected_documents or []):
+            return used_documents
+
+        supplemented = RetrievalSupervisor.select_minimal_evidence_set(
+            question,
+            selected_documents,
+            max_docs=max_docs or len(selected_documents),
+        )
+        combined = cls._dedupe_documents(list(used_documents or []) + list(supplemented or []))
+        if source_set_covers_query_facets(question, combined):
+            return combined
+        return used_documents
+
+    @classmethod
     def _document_path_matches_query_entities(
         cls,
         normalized_path: str,
@@ -905,6 +930,12 @@ Return ONLY a JSON object:
                         validation["used_documents"],
                         documents,
                     )
+                    result["used_documents"] = self._ensure_query_facet_coverage_retained(
+                        question,
+                        result["used_documents"],
+                        documents,
+                        max_docs=query_profile.get("max_sources") or len(documents),
+                    )
                     result["answer"] = self._enforce_relationship_length(result.get("answer", ""))
                     return result
 
@@ -943,6 +974,12 @@ Return ONLY a JSON object:
                 query_profile,
                 self._resolve_used_documents(normalized_citations, fallback_docs),
                 fallback_docs,
+            )
+            used_documents = self._ensure_query_facet_coverage_retained(
+                question,
+                used_documents,
+                fallback_docs,
+                max_docs=query_profile.get("max_sources") or len(fallback_docs),
             )
             return {
                 "answer": fallback_answer,
@@ -1122,6 +1159,12 @@ Return ONLY a JSON object:
                 query_profile.get("anchor_entities"),
             )
             used_documents = self._resolve_used_documents(normalized_citations, authoritative_documents)
+            used_documents = self._ensure_query_facet_coverage_retained(
+                question,
+                used_documents,
+                authoritative_documents,
+                max_docs=query_profile.get("max_sources") or len(authoritative_documents),
+            )
             if not answer.strip():
                 salvaged = self._salvage_fields(content)
                 salvaged_answer = ""
@@ -1164,7 +1207,12 @@ Return ONLY a JSON object:
                         "citations": normalized_citations,
                         "confidence_score": result.get("confidence_score", 0.0),
                         "confidence_justification": result.get("confidence_justification", ""),
-                        "used_documents": self._resolve_used_documents(normalized_citations, authoritative_documents),
+                        "used_documents": self._ensure_query_facet_coverage_retained(
+                            question,
+                            self._resolve_used_documents(normalized_citations, authoritative_documents),
+                            authoritative_documents,
+                            max_docs=query_profile.get("max_sources") or len(authoritative_documents),
+                        ),
                     }
             except Exception:
                 pass
