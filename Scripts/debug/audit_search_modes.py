@@ -20,29 +20,17 @@ import websockets
 # Configurations
 GATEWAY_URL = os.getenv("AUDIT_GATEWAY_URL", "http://localhost:4000")
 WS_GATEWAY_URL = GATEWAY_URL.replace("http://", "ws://").replace("https://", "wss://")
-OUTPUT_FILE = os.getenv("AUDIT_OUTPUT_FILE", "Documentation/SEARCH_MODE_AUDIT.md")
+OUTPUT_FILE = os.getenv("AUDIT_OUTPUT_FILE", "Documentation/operations/quality/SEARCH_MODE_AUDIT.md")
 TEST_QUERY = os.getenv("AUDIT_QUERY", "What is the treatment for DLBCL?")
 DEEP_PROVIDER = os.getenv("AUDIT_DEEP_PROVIDER", "ollama")
 
 MODES = [
     "vector",
-    "notes",
-    "entities",
-    "notes+vector",
-    "entities+vector",
-    "dual-graph",
-    "hybrid",
     "cascading",
 ]
 
 LATENCY_TARGETS = {
     "vector": 1.0,
-    "notes": 5.0,
-    "entities": 5.0,
-    "notes+vector": 8.0,
-    "entities+vector": 8.0,
-    "dual-graph": 8.0,
-    "hybrid": 8.0,
     "cascading": 8.0,
     "deep-thinking": 120.0,
 }
@@ -69,13 +57,6 @@ def _extract_answer_text(mode: str, data: Dict[str, Any]) -> str:
         if isinstance(nested, str) and nested.strip():
             return nested
 
-    for key in ("notes", "entities"):
-        branch = data.get(key, {})
-        branch_data = branch.get("data") if isinstance(branch, dict) else None
-        if isinstance(branch_data, dict):
-            nested = branch_data.get("answer") or branch_data.get("result")
-            if isinstance(nested, str) and nested.strip():
-                return nested
     return ""
 
 
@@ -102,25 +83,13 @@ def _extract_source_count(mode: str, data: Dict[str, Any]) -> int:
     if mode == "vector":
         return _count_vector_sources(data.get("results", data))
 
-    if mode in {"notes", "entities", "cascading"}:
+    if mode == "cascading":
         return max(
             _count_source_list(data),
             _count_source_list(data.get("results")),
             _count_vector_sources(data.get("results", {})),
         )
-
-    # Multi-branch modes (notes+vector/entities+vector/dual-graph/hybrid)
-    source_count = 0
-    for key in ("notes", "entities", "vector"):
-        branch = data.get(key, {})
-        if not isinstance(branch, dict):
-            continue
-        branch_data = branch.get("data")
-        if not isinstance(branch_data, dict):
-            continue
-        source_count += _count_source_list(branch_data)
-        source_count += _count_vector_sources(branch_data)
-    return source_count
+    return 0
 
 
 def test_rest_mode(mode: str) -> Dict[str, Any]:

@@ -10,6 +10,30 @@ import sys
 import time
 from typing import Any, Dict, List, Mapping, Optional
 
+try:
+    from query_normalizer import (
+        extract_query_facets as _extract_query_facets_impl,
+        has_multi_facet_query as _has_multi_facet_query_impl,
+        is_relation_style_query as _is_relation_style_query_impl,
+        normalize_query_structure as _normalize_query_structure_impl,
+    )
+except ImportError:
+    try:
+        from src.services.query_normalizer import (
+            extract_query_facets as _extract_query_facets_impl,
+            has_multi_facet_query as _has_multi_facet_query_impl,
+            is_relation_style_query as _is_relation_style_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+        )
+    except ImportError:
+        _ensure_project_root_on_path()
+        from src.services.query_normalizer import (
+            extract_query_facets as _extract_query_facets_impl,
+            has_multi_facet_query as _has_multi_facet_query_impl,
+            is_relation_style_query as _is_relation_style_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+        )
+
 
 def _project_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -36,7 +60,7 @@ except ImportError:
     from deep_thinking.utils import universal_client
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("src.services.cascading_pipeline")
 
 
 def _get_env_value(name: str, default: str = "") -> str:
@@ -375,37 +399,117 @@ def is_procedural_style_query(query: str) -> bool:
 
 
 def _relation_query_sides(query: str) -> tuple[set[str], set[str]]:
-    lowered = str(query or "").strip().lower()
-    if not lowered:
+    facets = _extract_query_facets_impl(query)
+    if len(facets) < 2:
         return set(), set()
+    return set(facets[0]), set(facets[1])
 
-    patterns = (
-        r"how do\s+(?P<left>.+?)\s+relate to\s+(?P<right>.+)",
-        r"what is the relationship between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
-        r"how are\s+(?P<left>.+?)\s+and\s+(?P<right>.+?)\s+related",
-        r"compare\s+(?P<left>.+?)\s+(?:with|and)\s+(?P<right>.+)",
-        r"difference between\s+(?P<left>.+?)\s+and\s+(?P<right>.+)",
-    )
-    for pattern in patterns:
-        match = re.search(pattern, lowered)
-        if not match:
-            continue
-        left = {
-            token for token in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", match.group("left"))
-            if token not in {"how", "what", "does", "relate", "related", "between", "compare", "difference"}
-        }
-        right = {
-            token for token in re.findall(r"[a-z0-9][a-z0-9_-]{2,}", match.group("right"))
-            if token not in {"how", "what", "does", "relate", "related", "between", "compare", "difference"}
-        }
-        if left and right:
-            return left, right
-    return set(), set()
+
+def extract_query_facets(query: str) -> List[set[str]]:
+    return [set(facet) for facet in _extract_query_facets_impl(query)]
+
+
+def has_multi_facet_query(query: str) -> bool:
+    return _has_multi_facet_query_impl(query)
 
 
 def is_relation_style_query(query: str) -> bool:
-    left, right = _relation_query_sides(query)
-    return bool(left and right)
+    return _is_relation_style_query_impl(query)
+
+
+def _query_intent(query: str) -> str:
+    return str(_normalize_query_structure_impl(query).get("intent") or "lookup")
+
+
+def is_comparison_style_query(query: str) -> bool:
+    return _query_intent(query) == "comparison"
+
+
+def _is_generic_overview_source(source: Dict[str, Any]) -> bool:
+    haystack = " ".join(
+        str(source.get(key) or "")
+        for key in ("filename", "filepath", "canonical_id", "title", "snippet")
+    ).lower()
+    return any(marker in haystack for marker in ("moc", "map of content", "overview", "general"))
+
+
+def is_personal_scope_query(query: str) -> bool:
+    lowered = str(query or "").strip().lower()
+    if not lowered:
+        return False
+    scope_markers = (
+        " in my ",
+        " from my ",
+        " within my ",
+        " my notes",
+        " my vault",
+        " my network",
+        " my setup",
+        " my system",
+        " our notes",
+        " our network",
+        " our system",
+    )
+    padded = f" {lowered} "
+    return any(marker in padded for marker in scope_markers)
+
+
+def build_relationship_insufficient_answer(query: str) -> str:
+    payload = _normalize_query_structure_impl(query)
+    entities = [str(entity or "").strip() for entity in payload.get("entities") or [] if str(entity or "").strip()]
+    if len(entities) >= 2:
+        return (
+            f"I found evidence about {entities[0]} and {entities[1]}, "
+            "but the retrieved vault sources do not show a clear direct connection."
+        )
+    return "I found evidence about the queried topics, but the retrieved vault sources do not show a clear direct connection."
+
+
+def should_require_vault_relationship_guardrail(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> bool:
+    return (
+        is_relation_style_query(query)
+        and is_personal_scope_query(query)
+        and not source_set_covers_query_facets(query, sources)
+    )
+
+
+def _source_set_covers_query_facets_with_specificity(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> bool:
+    facets = extract_query_facets(query)
+    if len(facets) < 2:
+        return True
+    covered: set[int] = set()
+    for source in sources or []:
+        if not isinstance(source, Mapping) or _is_generic_overview_source(source):
+            continue
+        covered.update(source_facet_match_indexes(source, query))
+        if len(covered) >= len(facets):
+            return True
+    return False
+
+
+def build_comparison_insufficient_answer(query: str) -> str:
+    payload = _normalize_query_structure_impl(query)
+    entities = [str(entity or "").strip() for entity in payload.get("entities") or [] if str(entity or "").strip()]
+    if len(entities) >= 2:
+        return f"I’m sorry, but I don’t have enough information in the provided documents to compare {entities[0]} with {entities[1]}."
+    return "I’m sorry, but I don’t have enough information in the provided documents to make that comparison."
+
+
+def should_require_vault_comparison_guardrail(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> bool:
+    return (
+        is_comparison_style_query(query)
+        and is_personal_scope_query(query)
+        and not _source_set_covers_query_facets_with_specificity(query, sources)
+    )
 
 
 def _relation_query_source_score(query: str, source: Dict[str, Any]) -> float:
@@ -432,6 +536,67 @@ def _relation_query_source_score(query: str, source: Dict[str, Any]) -> float:
         return 0.0
     both_bonus = 20.0 if left_hits and right_hits else 0.0
     return both_bonus + (left_hits * 8.0) + (right_hits * 8.0)
+
+
+def _relation_query_side_hits(query: str, source: Dict[str, Any]) -> tuple[int, int]:
+    facets = extract_query_facets(query)
+    if len(facets) < 2:
+        return 0, 0
+    left_terms, right_terms = facets[0], facets[1]
+
+    haystack = " ".join(
+        _normalize_summary_focus_text(value)
+        for value in (
+            source.get("filename"),
+            source.get("filepath"),
+            source.get("snippet"),
+            source.get("content"),
+            source.get("canonical_id"),
+        )
+    )
+    if not haystack.strip():
+        return 0, 0
+
+    left_hits = sum(1 for term in left_terms if term in haystack)
+    right_hits = sum(1 for term in right_terms if term in haystack)
+    return left_hits, right_hits
+
+
+def source_facet_match_indexes(source: Dict[str, Any], query: str) -> set[int]:
+    facets = extract_query_facets(query)
+    if not facets:
+        return set()
+    haystack = " ".join(
+        _normalize_summary_focus_text(value)
+        for value in (
+            source.get("filename"),
+            source.get("filepath"),
+            source.get("snippet"),
+            source.get("content"),
+            source.get("canonical_id"),
+        )
+    )
+    if not haystack.strip():
+        return set()
+    return {
+        idx
+        for idx, facet in enumerate(facets)
+        if facet and any(term in haystack for term in facet)
+    }
+
+
+def source_set_covers_query_facets(query: str, sources: List[Dict[str, Any]]) -> bool:
+    facets = extract_query_facets(query)
+    if len(facets) < 2:
+        return True
+    covered: set[int] = set()
+    for source in sources or []:
+        if not isinstance(source, Mapping):
+            continue
+        covered.update(source_facet_match_indexes(source, query))
+        if len(covered) >= len(facets):
+            return True
+    return False
 
 
 def select_cascading_evidence_set(
@@ -477,7 +642,80 @@ def select_cascading_evidence_set(
             if _relation_query_source_score(query, source) > 0
         ]
         if positive_relation_sources:
-            return positive_relation_sources[:max(2, min(max_results, len(positive_relation_sources)))]
+            limit = max(2, min(max_results, len(positive_relation_sources)))
+            selected: List[Dict[str, Any]] = []
+            covered_facets: set[int] = set()
+
+            for source in positive_relation_sources:
+                match_indexes = source_facet_match_indexes(source, query)
+                if len(match_indexes) >= 2:
+                    selected.append(source)
+                    covered_facets.update(match_indexes)
+                    break
+
+            for source in positive_relation_sources:
+                if len(selected) >= limit:
+                    break
+                if source in selected:
+                    continue
+                match_indexes = source_facet_match_indexes(source, query)
+                new_coverage = match_indexes - covered_facets
+                if new_coverage:
+                    selected.append(source)
+                    covered_facets.update(match_indexes)
+
+            for source in positive_relation_sources:
+                if len(selected) >= limit:
+                    break
+                if source in selected:
+                    continue
+                selected.append(source)
+
+            return selected[:limit]
+
+    if is_comparison_style_query(query):
+        ranked_comparison_sources = sorted(
+            candidate_sources,
+            key=lambda source: (
+                -1 if _is_generic_overview_source(source) else 0,
+                len(source_facet_match_indexes(source, query)),
+                _relation_query_source_score(query, source),
+                float(source.get("relevance", 0.0) or 0.0),
+            ),
+            reverse=True,
+        )
+        specific_sources = [source for source in ranked_comparison_sources if not _is_generic_overview_source(source)]
+        if specific_sources:
+            selected: List[Dict[str, Any]] = []
+            covered_facets: set[int] = set()
+            limit = max(2, min(max_results, len(specific_sources)))
+
+            for source in specific_sources:
+                match_indexes = source_facet_match_indexes(source, query)
+                if len(match_indexes) >= 2:
+                    selected.append(source)
+                    covered_facets.update(match_indexes)
+                    break
+
+            for source in specific_sources:
+                if len(selected) >= limit:
+                    break
+                if source in selected:
+                    continue
+                match_indexes = source_facet_match_indexes(source, query)
+                if match_indexes - covered_facets:
+                    selected.append(source)
+                    covered_facets.update(match_indexes)
+
+            for source in specific_sources:
+                if len(selected) >= limit:
+                    break
+                if source in selected:
+                    continue
+                selected.append(source)
+
+            if selected:
+                return selected[:limit]
 
     try:
         from deep_thinking.supervisor import RetrievalSupervisor
@@ -993,6 +1231,22 @@ async def synthesize_cascading_answer(
 
     procedural_query = is_procedural_style_query(query)
     relation_query = is_relation_style_query(query)
+    comparison_query = is_comparison_style_query(query)
+    require_vault_relationship_guardrail = should_require_vault_relationship_guardrail(query, sources)
+    require_vault_comparison_guardrail = should_require_vault_comparison_guardrail(query, sources)
+
+    if require_vault_relationship_guardrail:
+        return fallback_payload(
+            build_relationship_insufficient_answer(query),
+            sources,
+            reason="insufficient_vault_relationship_evidence",
+        )
+    if require_vault_comparison_guardrail:
+        return fallback_payload(
+            build_comparison_insufficient_answer(query),
+            sources,
+            reason="insufficient_vault_comparison_evidence",
+        )
 
     if system_prompt:
         sys_prompt = system_prompt
@@ -1015,6 +1269,25 @@ async def synthesize_cascading_answer(
             "Include concrete ingredients, measurements, timings, temperatures, and ordered steps when they appear in the context. "
             "Do not stop at a one-line overview if the sources contain a fuller procedure. "
             "If an important detail is missing from the context, say that it is not specified in the vault evidence. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations."
+        )
+    elif comparison_query and not brief_concept_index:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Provide a grounded comparison of the queried items. "
+            "Describe the most relevant differences and similarities supported by the evidence. "
+            "If the vault evidence is one-sided or incomplete, say so plainly instead of inventing the missing side. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations."
+        )
+    elif comparison_query:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Give a concise grounded comparison of the queried items. "
+            "If the provided evidence does not support a real comparison, say that clearly. "
             "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
             "Do not invent citations."
         )

@@ -38,12 +38,6 @@ export default function ChatSidebar() {
 
         const searchModeLabel = ({
             'vector': 'Vector',
-            'notes': 'Notes',
-            'entities': 'Entities',
-            'notes+vector': 'Notes+Vector',
-            'entities+vector': 'Entities+Vector',
-            'dual-graph': 'Dual-Graph',
-            'hybrid': 'Hybrid',
             'cascading': 'Cascading',
             'deep-thinking': 'Deep Thinking'
         } as Record<string, string>)[searchMode] || searchMode;

@@ -56,7 +56,7 @@ def run_test():
                 # Handle complicated Unified Gateway returns
                 # Sometimes it returns { "vector": { "data": ... } }
                 if not answer:
-                    for key in ["vector", "notes", "entities"]:
+                    for key in ["vector", "cascading"]:
                         if key in data and data[key] and "data" in data[key]:
                              inner = data[key]["data"]
                              if isinstance(inner, dict):

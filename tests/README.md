@@ -20,11 +20,13 @@ pytest -m "unit and not slow"
 
 ## Structure
 
-```
+```text
 tests/
 ├── README.md              # This file
 ├── conftest.py           # Shared fixtures
 ├── __init__.py           # Package marker
+├── public_contract/      # Supported public API contract tests
+├── internal_graph/       # Internal legacy graph subsystem tests
 ├── unit/                 # Unit tests (fast)
 │   ├── test_frontmatter.py      # 15+ tests
 │   ├── test_tag_generation.py   # 20+ tests
@@ -38,9 +40,11 @@ Additional focused tests:
 - `tests/unit/test_embedding_dedup.py`
 - `tests/unit/test_embedding_service_query.py`
 - `tests/unit/test_deep_thinking_filters.py`
-- `tests/unit/test_api_gateway_filters.py`
-- `tests/integration/test_search_modes.py`
-- `tests/integration/test_deep_research_websocket.py`
+- `tests/public_contract/test_api_gateway_filters.py`
+- `tests/public_contract/test_search_modes.py`
+- `tests/public_contract/test_deep_research_websocket.py`
+- `tests/internal_graph/test_lightrag_query_mode.py`
+- `tests/internal_graph/test_networkx_graph_retrieval.py`
 
 ## Test Categories
 
@@ -53,6 +57,18 @@ Additional focused tests:
   - MCP server endpoints
   - Unified search mode coverage (`vector`, `cascading`, deep research WebSocket)
   - Full workflows
+
+- **Public Contract Tests**: Supported external behavior
+  - API gateway auth and filter contracts
+  - REST search contract (`vector`, `cascading`)
+  - Deep research WebSocket contract
+  - Auto-marked with `@pytest.mark.public_contract` via local `conftest.py`
+
+- **Internal Graph Tests**: Legacy internal subsystem coverage
+  - NetworkX graph retrieval behavior
+  - LightRAG query/indexing behavior
+  - Internal graph path and ranking logic
+  - Auto-marked with `@pytest.mark.internal_graph` via local `conftest.py`
 
 ## Coverage
 
@@ -77,13 +93,19 @@ open htmlcov/index.html
 pytest unit/test_frontmatter.py
 
 # Override addopts for a quick, no-coverage run
-pytest -o addopts="" tests/integration/test_search_modes.py
+pytest -o addopts="" tests/public_contract/test_search_modes.py
 
 # Deep thinking websocket integration
-pytest -m integration tests/integration/test_deep_research_websocket.py
+pytest -m integration tests/public_contract/test_deep_research_websocket.py
 
 # Embedding service query unit tests
 pytest -o addopts="" tests/unit/test_embedding_service_query.py
+
+# Public contract only
+pytest -m public_contract
+
+# Internal graph only
+pytest -m internal_graph
 
 # Single class
 pytest unit/test_tag_generation.py::TestContentTypeDetection

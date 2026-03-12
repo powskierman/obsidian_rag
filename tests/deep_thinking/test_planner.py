@@ -80,6 +80,19 @@ class TestPlannerAgent(unittest.TestCase):
         self.assertIn("broaden", plan[1]["reasoning"].lower())
         self.mock_client.messages.create.assert_not_called()
 
+    def test_create_plan_uses_reasoning_first_fast_path_for_timeless_conceptual_query(self):
+        plan = self.planner.create_plan(
+            "How do asymptotes relate to derivatives?",
+            {}
+        )
+
+        self.assertEqual(len(plan), 2)
+        self.assertEqual(plan[0]["search_strategy"], "vector")
+        self.assertEqual(plan[1]["search_strategy"], "hybrid")
+        self.assertIn("timeless conceptual question", plan[0]["reasoning"].lower())
+        self.assertIn("necessary versus sufficient", plan[1]["reasoning"].lower())
+        self.mock_client.messages.create.assert_not_called()
+
     def test_create_plan_invalid_payload_falls_back(self):
         mock_response = MagicMock()
         mock_response.content = [MagicMock(text='{"foo": "bar"}')]

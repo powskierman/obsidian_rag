@@ -1,11 +1,14 @@
-const DEFAULT_GATEWAY_CANDIDATES = [
+const SERVER_GATEWAY_CANDIDATES = [
   process.env.API_GATEWAY_URL,
   process.env.GATEWAY_URL,
   'http://api-gateway:3000',
+];
+
+const FALLBACK_GATEWAY_CANDIDATES = [
+  process.env.NEXT_PUBLIC_GATEWAY_URL,
   'http://host.docker.internal:4000',
   'http://127.0.0.1:4000',
   'http://localhost:4000',
-  process.env.NEXT_PUBLIC_GATEWAY_URL,
 ];
 
 const normalizeBaseUrl = (value: string | undefined | null): string | null => {
@@ -20,7 +23,13 @@ const normalizeBaseUrl = (value: string | undefined | null): string | null => {
 };
 
 export const getGatewayBaseCandidates = (): string[] =>
-  [...new Set(DEFAULT_GATEWAY_CANDIDATES.map(normalizeBaseUrl).filter((value): value is string => Boolean(value)))];
+  [
+    ...new Set(
+      [...SERVER_GATEWAY_CANDIDATES, ...FALLBACK_GATEWAY_CANDIDATES]
+        .map(normalizeBaseUrl)
+        .filter((value): value is string => Boolean(value)),
+    ),
+  ];
 
 export const proxyGatewayJson = async (
   pathname: string,

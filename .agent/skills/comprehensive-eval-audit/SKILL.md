@@ -8,7 +8,7 @@ description: Audit all search modes (Vector, Graph, Hybrid, Deep Thinking) for e
 This skill systematically checks every search strategy available in the Obsidian RAG system.
 
 ## Goal
-To generate a status report (`Documentation/SEARCH_MODE_AUDIT.md`) detailing which modes are functional, how fast they are, and if they return sources.
+To generate a status report (`Documentation/operations/quality/SEARCH_MODE_AUDIT.md`) detailing which modes are functional, how fast they are, and if they return sources.
 
 ## Tools & Scripts
 *   **Audit Script:** `python Scripts/audit_search_modes.py`
@@ -24,7 +24,7 @@ To generate a status report (`Documentation/SEARCH_MODE_AUDIT.md`) detailing whi
     *   This script will hit `http://localhost:4000` with a standard query ("What is the treatment for DLBCL?").
 
 3.  **Analysis**
-    *   Read `Documentation/SEARCH_MODE_AUDIT.md`.
+    *   Read `Documentation/operations/quality/SEARCH_MODE_AUDIT.md`.
     *   **FAIL** statuses indicate API errors or Gateway misconfigurations.
     *   **Low Source Counts** (0) indicate indexing issues or overly aggressive filtering.
 

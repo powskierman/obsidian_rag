@@ -7,7 +7,7 @@ from typing import Dict, Any, List
 
 # Configuration
 GATEWAY_URL = "http://localhost:4000/api/v1/query"
-OUTPUT_FILE = "Documentation/DATA_COVERAGE_REPORT.md"
+OUTPUT_FILE = "Documentation/operations/quality/DATA_COVERAGE_REPORT.md"
 
 # Test Topics
 TOPICS = [
@@ -18,11 +18,8 @@ TOPICS = [
     "3d printing"     # DIY / Tech
 ]
 
-# Modes to separate data sources
-# vector = ChromaDB
-# notes = NetworkX (Graph V1)
-# entities = LightRAG (Graph V2)
-MODES = ["vector", "notes", "entities"]
+# Supported REST modes
+MODES = ["vector", "cascading"]
 
 def query_gateway(topic: str, mode: str) -> Dict[str, Any]:
     """Query the gateway and return standardized stats."""
@@ -51,7 +48,7 @@ def query_gateway(topic: str, mode: str) -> Dict[str, Any]:
                      # Flatten the first batch
                      sources = inner["metadatas"][0]
         else:
-            # Graph/Hybrid returns {sources: [...]}
+            # Cascading returns {sources: [...]}
             sources = data.get("sources", [])
             
         # Analyze sources
@@ -105,8 +102,7 @@ def generate_report(results: Dict[str, Dict[str, Any]]):
                 # Map mode to DB name for clarity
                 db_name = {
                     "vector": "Vector (Chroma)",
-                    "notes": "Graph (NetworkX)", 
-                    "entities": "Graph (LightRAG)"
+                    "cascading": "Cascading"
                 }.get(mode, mode)
                 
                 f.write(f"| **{topic}** | {db_name} | {hits} | {unique} | {files} |\n")

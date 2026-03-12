@@ -21,15 +21,8 @@ export default function ActionsPanel({ onClose }: ActionsPanelProps) {
 
     const searchModeLabel = ({
       'vector': 'Vector',
-      'knowledge-graph': 'Knowledge-Graph',
-      'hybrid': 'Hybrid',
       'cascading': 'Cascading',
       'deep-thinking': 'Deep Thinking',
-      'notes': 'Notes',
-      'entities': 'Entities',
-      'notes+vector': 'Notes+Vector',
-      'entities+vector': 'Entities+Vector',
-      'dual-graph': 'Dual-Graph'
     } as Record<string, string>)[searchMode] || searchMode;
 
     let markdown = `# Obsidian RAG Conversation\n`;

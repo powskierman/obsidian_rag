@@ -14,6 +14,16 @@ from typing import List, Dict, Any, Optional
 logger = logging.getLogger(__name__)
 
 
+def _normalized_openrouter_model(value: str | None) -> str:
+    model = str(value or "").strip().strip("\"'")
+    if not model:
+        return "openrouter/auto"
+    # OpenRouter model ids are slug-like and should not be free-form labels.
+    if " " in model:
+        return "openrouter/auto"
+    return model
+
+
 def _clean_env_value(value: Optional[str]) -> Optional[str]:
     if value is None:
         return None
@@ -276,8 +286,10 @@ class UniversalClient:
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY not configured")
 
-        if not model or "/" not in model:
-            model = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
+        if not str(model or "").strip():
+            model = _normalized_openrouter_model(os.getenv("OPENROUTER_MODEL", "openrouter/auto"))
+        else:
+            model = _normalized_openrouter_model(model)
 
         openrouter_messages = list(messages)
         if system:

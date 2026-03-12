@@ -144,6 +144,104 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertTrue(ranked[0]["_summary_focus_exact_match"])
         self.assertTrue(ranked[0]["_summary_focus_title_match"])
 
+    def test_build_query_profile_marks_timeless_conceptual_queries_reasoning_first(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "How do asymptotes relate to derivatives?"
+        )
+
+        self.assertTrue(profile["is_conceptual_explanation"])
+        self.assertTrue(profile["prefers_reasoning_first"])
+        self.assertFalse(profile["requires_current_information"])
+        self.assertFalse(profile["needs_authoritative_sources"])
+        self.assertFalse(profile["needs_external_authority"])
+
+    def test_build_query_profile_includes_structured_relationship_normalization(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "How are my lymphoma treatment notes connected to follow-up scan notes?"
+        )
+
+        self.assertTrue(profile["is_relationship"])
+        self.assertEqual(profile["intent"], "relationship")
+        self.assertEqual(profile["anchor_entities"], ["lymphoma treatment", "follow-up scan"])
+        self.assertEqual(profile["relations"], ["connected to"])
+        self.assertEqual(
+            profile["clean_query"],
+            "relationship between lymphoma treatment and follow-up scan",
+        )
+        self.assertEqual(profile["facets"], [["lymphoma", "treatment"], ["follow-up", "scan"]])
+
+    def test_build_query_profile_marks_difference_query_as_comparison(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "From my vault, What is the difference between the bambu p1s and the Creality CR-10"
+        )
+
+        self.assertFalse(profile["is_relationship"])
+        self.assertEqual(profile["intent"], "comparison")
+        self.assertEqual(profile["anchor_entities"], ["bambu p1s", "Creality CR-10"])
+        self.assertEqual(profile["relations"], ["difference between"])
+        self.assertEqual(profile["clean_query"], "compare bambu p1s and Creality CR-10")
+        self.assertEqual(profile["facets"], [["bambu", "p1s"], ["cr-10", "creality"]])
+        self.assertFalse(profile["allows_generic_overview"])
+
+    def test_rank_sources_for_comparison_prefers_specs_over_mocs_and_firmware(self):
+        docs = [
+            {
+                "source": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "filepath": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "filename": "bambu-lab-P1S-tech-specs.pdf",
+                "snippet": "Bambu P1S technical specifications and build volume.",
+                "content": "Bambu P1S technical specifications and build volume.",
+                "source_category": "vault",
+                "entity_type": "pdf_document",
+                "score": 0.72,
+            },
+            {
+                "source": "Tech/3D-Printing/Bambu Labs MoC.md",
+                "filepath": "Tech/3D-Printing/Bambu Labs MoC.md",
+                "filename": "Bambu Labs MoC.md",
+                "snippet": "Overview of bambu labs notes and references.",
+                "content": "Overview of bambu labs notes and references.",
+                "source_category": "vault",
+                "score": 0.78,
+            },
+            {
+                "source": "Tech/3D-Printing/Creality/Firmware.md",
+                "filepath": "Tech/3D-Printing/Creality/Firmware.md",
+                "filename": "Firmware.md",
+                "snippet": "Firmware configuration and setup for Creality printers.",
+                "content": "Firmware configuration and setup for Creality printers.",
+                "source_category": "vault",
+                "score": 0.76,
+            },
+            {
+                "source": "Tech/3D-Printing/Creality MoC.md",
+                "filepath": "Tech/3D-Printing/Creality MoC.md",
+                "filename": "Creality MoC.md",
+                "snippet": "Overview of Creality notes and resources.",
+                "content": "Overview of Creality notes and resources.",
+                "source_category": "vault",
+                "score": 0.74,
+            },
+        ]
+
+        ranked = RetrievalSupervisor.rank_sources_for_query(
+            "From my vault, What is the difference between the bambu p1s and the Creality CR-10",
+            docs,
+            max_results=4,
+        )
+
+        assert ranked[0]["filepath"] == "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf"
+        assert all("MoC" not in doc["filepath"] for doc in ranked[:2])
+
+    def test_build_query_profile_marks_specs_query_as_authority_seeking(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "What are the official specs of ESP32?"
+        )
+
+        self.assertFalse(profile["prefers_reasoning_first"])
+        self.assertTrue(profile["needs_authoritative_sources"])
+        self.assertTrue(profile["needs_external_authority"])
+
     @patch('requests.post')
     def test_query_graph_drops_synthesis_summary_from_results(self, mock_post):
         mock_response = MagicMock()
@@ -315,6 +413,182 @@ class TestRetrievalSupervisor(unittest.TestCase):
 
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0]["source_category"], "web")
+
+    def test_select_minimal_evidence_set_treats_connected_to_as_relationship_query(self):
+        docs = [
+            {
+                "source": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "filename": "Lymphoma Treatment Summary.md",
+                "snippet": "Treatment summary linked to lymphoma treatment and treatment log.",
+                "content": "Treatment summary linked to lymphoma treatment and treatment log.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.95,
+            },
+            {
+                "source": "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+                "filepath": "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+                "filename": "CT Scan Post-CAR-T.md",
+                "snippet": "Follow-up scan findings after CAR-T therapy.",
+                "content": "Follow-up scan findings after CAR-T therapy.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.72,
+            },
+            {
+                "source": "Medical/Lymphoma/Random Overview.md",
+                "filepath": "Medical/Lymphoma/Random Overview.md",
+                "filename": "Random Overview.md",
+                "snippet": "General overview of lymphoma topics.",
+                "content": "General overview of lymphoma topics.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.99,
+            },
+        ]
+
+        selected = RetrievalSupervisor.select_minimal_evidence_set(
+            "How are my lymphoma treatment notes connected to follow-up scan notes?",
+            docs,
+            max_docs=2,
+        )
+
+        self.assertEqual(
+            [doc["filepath"] for doc in selected],
+            [
+                "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "Medical/Lymphoma/CT Scan Post-CAR-T.md",
+            ],
+        )
+
+    def test_select_minimal_evidence_set_preserves_multi_facet_coverage_after_bridge_selection(self):
+        query = "How are my treatment notes connected to follow-up scan notes?"
+        treatment_doc = {
+            "source": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filename": "Lymphoma Treatment Summary.md",
+            "snippet": "Treatment summary.",
+            "content": "Treatment summary and treatment log.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 7.0,
+            "_anchor_entities_found": ["treatment"],
+        }
+        bridge_doc = {
+            "source": "Medical/Lymphoma/Lymphoma Treatment Log.md",
+            "filepath": "Medical/Lymphoma/Lymphoma Treatment Log.md",
+            "filename": "Lymphoma Treatment Log.md",
+            "snippet": "Treatment log referencing scan follow-up.",
+            "content": "Treatment log referencing follow-up scan scheduling.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 6.8,
+            "_anchor_entities_found": ["treatment"],
+        }
+        scan_doc = {
+            "source": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+            "filepath": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+            "filename": "Scans After Yescarta Treatment.md",
+            "snippet": "Follow-up scan results after treatment.",
+            "content": "Follow-up scan results after treatment.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 6.2,
+            "_anchor_entities_found": ["scan"],
+        }
+
+        with patch.object(
+            RetrievalSupervisor,
+            "build_query_profile",
+            return_value={"is_relationship": True, "max_sources": 3, "anchor_entities": ["treatment", "scan"]},
+        ), patch.object(
+            RetrievalSupervisor,
+            "filter_vault_docs_by_domain_and_entities",
+            side_effect=lambda docs, _profile: docs,
+        ), patch.object(
+            RetrievalSupervisor,
+            "rank_sources_for_query",
+            return_value=[treatment_doc, bridge_doc, scan_doc],
+        ), patch(
+            "deep_thinking.supervisor.has_multi_facet_query",
+            return_value=True,
+        ), patch(
+            "deep_thinking.supervisor.source_set_covers_query_facets",
+            side_effect=lambda _query, docs: any(doc["filepath"].endswith("Treatment Summary.md") for doc in docs)
+            and any(doc["filepath"].endswith("Scans After Yescarta Treatment.md") for doc in docs),
+        ), patch(
+            "deep_thinking.supervisor.source_facet_match_indexes",
+            side_effect=lambda doc, _query: {0}
+            if doc["filepath"].endswith("Treatment Summary.md") or doc["filepath"].endswith("Treatment Log.md")
+            else {1},
+        ), patch.object(
+            RetrievalSupervisor,
+            "_bridge_overlap_score",
+            side_effect=lambda doc, chosen, _profile: 2 if doc["filepath"].endswith("Treatment Log.md") else 0,
+        ):
+            selected = RetrievalSupervisor.select_minimal_evidence_set(query, [treatment_doc, bridge_doc, scan_doc], max_docs=3)
+
+        self.assertEqual(
+            [doc["filepath"] for doc in selected],
+            [
+                "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+                "Medical/Lymphoma/Lymphoma Treatment Log.md",
+            ],
+        )
+
+    def test_preserve_multi_facet_query_coverage_supplements_second_side(self):
+        query = "How are my lymphoma treatment notes connected to follow-up scan notes?"
+        treatment_doc = {
+            "source": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filepath": "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+            "filename": "Lymphoma Treatment Summary.md",
+            "snippet": "Treatment summary covering chemotherapy and CAR-T planning.",
+            "content": "Treatment summary covering chemotherapy and CAR-T planning.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 7.0,
+        }
+        scan_doc = {
+            "source": "Medical/Lymphoma/4th PET Scan - Treatment Options.md",
+            "filepath": "Medical/Lymphoma/4th PET Scan - Treatment Options.md",
+            "filename": "4th PET Scan - Treatment Options.md",
+            "snippet": "Follow-up scan notes and PET scan findings after treatment.",
+            "content": "Follow-up scan notes and PET scan findings after treatment.",
+            "source_category": "vault",
+            "source_type": "direct-excerpt",
+            "_query_rank_score": 6.5,
+        }
+
+        def fake_indexes(doc, _query):
+            if doc["filepath"].endswith("Lymphoma Treatment Summary.md"):
+                return {0}
+            if doc["filepath"].endswith("4th PET Scan - Treatment Options.md"):
+                return {1}
+            return set()
+
+        with patch("deep_thinking.supervisor.has_multi_facet_query", return_value=True), patch(
+            "deep_thinking.supervisor.source_set_covers_query_facets",
+            side_effect=lambda _query, docs: len(set().union(*(fake_indexes(doc, _query) for doc in docs))) >= 2,
+        ), patch(
+            "deep_thinking.supervisor.source_facet_match_indexes",
+            side_effect=fake_indexes,
+        ):
+            supplemented = RetrievalSupervisor._preserve_multi_facet_query_coverage(
+                query,
+                [treatment_doc],
+                [treatment_doc, scan_doc],
+                max_results=5,
+            )
+
+        self.assertEqual(
+            [doc["filepath"] for doc in supplemented],
+            [
+                "Medical/Lymphoma/Lymphoma Treatment Summary.md",
+                "Medical/Lymphoma/4th PET Scan - Treatment Options.md",
+            ],
+        )
 
     def test_summary_query_excludes_prompt_template_docs_and_prefers_exact_vault_note(self):
         docs = [

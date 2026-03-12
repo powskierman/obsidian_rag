@@ -69,7 +69,7 @@ This project defines reusable Agent Skills under `.agent/skills/`. Each skill is
 
 Current skills:
 
-- `comprehensive-eval-audit`: Audit all search modes (Vector, Graph, Hybrid, Deep Thinking) for efficacy and latency. Goal: Generate a status report (Documentation/SEARCH_MODE_AUDIT.md) detailing functionality and performance of search strategies.
+- `comprehensive-eval-audit`: Audit all supported search modes (Vector, Cascading, Deep Thinking) for efficacy and latency. Goal: Generate a status report (`Documentation/operations/quality/SEARCH_MODE_AUDIT.md`) detailing functionality and performance of search strategies.
 - `deep-think-trace`: Debug and verify "Deep Thinking" reasoning chains. Goal: Verify that the "System 2" reasoning engine (Planner, Supervisor, Reflector) is selecting correct tools and generating valid plans.
 - `full-stack-integration`: Ensure the entire stack is communicating correctly (Frontend -> Gateway -> Graph -> Chroma). Goal: Prevent regressions like 503 errors or broken UI states by running integration tests across the lifecycle.
 - `gateway-deployment`: SManage the API Gateway and service containers. Goal: Safely deploy, restart, and validate backend services (API Gateway, Graph Service) without downtime or breakage.

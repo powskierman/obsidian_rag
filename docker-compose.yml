@@ -31,7 +31,7 @@ services:
     networks:
       - rag-network
 
-  # LightRAG Service - Entity-centric knowledge graph for semantic search
+  # Internal legacy graph subsystem: LightRAG used by cascading/deep-research retrieval.
   lightrag-service:
     build:
       context: .
@@ -63,7 +63,8 @@ services:
       - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:1234/v1}
       - MLX_API_KEY=${MLX_API_KEY:-mlx}
       - MLX_MODEL=${MLX_MODEL:-}
-      - EMBED_MODEL=${EMBED_MODEL:-nomic-embed-text:latest}
+      - LIGHTRAG_EMBED_MODEL=${LIGHTRAG_EMBED_MODEL:-nomic-embed-text:latest}
+      - EMBED_MODEL=${LIGHTRAG_EMBED_MODEL:-${EMBED_MODEL:-nomic-embed-text:latest}}
       - RAG_QUERY_TIMEOUT=${RAG_QUERY_TIMEOUT:-120}
       - EMBED_ASYNC=${EMBED_ASYNC:-1}
       - LLM_ASYNC=${LLM_ASYNC:-1}
@@ -99,7 +100,7 @@ services:
       - LIGHTRAG_SYNTHESIS_SNIPPET_CHARS=${LIGHTRAG_SYNTHESIS_SNIPPET_CHARS:-1100}
       - LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS=${LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS:-75}
       - QUERY_LLM_PROVIDER=${QUERY_LLM_PROVIDER:-openrouter}
-      - QUERY_LLM_MODEL=${QUERY_LLM_MODEL:-anthropic/claude-3.5-haiku}
+      - QUERY_LLM_MODEL=${QUERY_LLM_MODEL:-}
       - QUERY_LLM_MAX_TOKENS=${QUERY_LLM_MAX_TOKENS:-2048}
       - QUERY_LLM_TEMPERATURE=${QUERY_LLM_TEMPERATURE:-0}
       - QUERY_OPENROUTER_API_KEY=${QUERY_OPENROUTER_API_KEY:-}
@@ -134,7 +135,7 @@ services:
     networks:
       - rag-network
 
-  # Reasoning Graph Service (NetworkX)
+  # Internal legacy graph subsystem: NetworkX graph service used by cascading/deep-research retrieval.
   graph-service:
     build:
       context: .
@@ -202,6 +203,7 @@ services:
       - PYTHONUNBUFFERED=1
       - OBSIDIAN_VAULT_PATH=/app/vault
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
+      # Internal-only graph subsystem dependencies. Do not expose as public user-selectable modes.
       - GRAPH_SERVICE_URL=http://graph-service:8002
       - LIGHTRAG_SERVICE_URL=http://lightrag-service:8001
       - LIGHTRAG_QUERY_TIMEOUT=${LIGHTRAG_QUERY_TIMEOUT:-60}
@@ -211,6 +213,7 @@ services:
       - OPENAI_TIMEOUT=${OPENAI_TIMEOUT:-60}
       - TAVILY_API_KEY=${TAVILY_API_KEY:-}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openrouter/auto}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
@@ -235,6 +238,7 @@ services:
     depends_on:
       embedding-service:
         condition: service_healthy
+      # Required today for internal cascading/deep-research retrieval only.
       graph-service:
         condition: service_healthy
       lightrag-service:
@@ -262,6 +266,7 @@ services:
     depends_on:
       embedding-service:
         condition: service_healthy
+      # Streamlit talks to the gateway; graph-service remains only because the gateway still depends on it internally.
       graph-service:
         condition: service_healthy
       api-gateway:
@@ -283,8 +288,10 @@ services:
       - NODE_ENV=development
       # Client-side (Browser) request URL - hits host port 4000
       - NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000
-      # Server-side request URL (if used) - hits internal docker service
-      # - GATEWAY_URL=http://api-gateway:3000
+      # Server-side request URL - resolves over the internal docker network
+      - GATEWAY_URL=http://api-gateway:3000
+      - API_GATEWAY_URL=http://api-gateway:3000
+      - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openrouter/auto}
     restart: unless-stopped
     networks:
       - rag-network

@@ -6,6 +6,7 @@ Combines enhanced vault search with knowledge graph queries.
 
 import argparse
 import asyncio
+import importlib.util
 import json
 import logging
 import os
@@ -20,11 +21,6 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse, urlunparse
 
 import requests
-try:
-    import google.generativeai as genai
-    GENAI_AVAILABLE = True
-except ImportError:
-    GENAI_AVAILABLE = False
 
 try:
     import networkx as nx
@@ -84,13 +80,8 @@ PDF_MAX_PAGES = int(os.getenv("MCP_PDF_MAX_PAGES", "25"))
 MAX_ATTACHMENTS_PER_NOTE = int(os.getenv("MCP_MAX_ATTACHMENTS_PER_NOTE", "3"))
 
 MODE_TOOL_SUPPORTED_MODES = {
-    "lightrag",
-    "entities",
-    "hybrid",
-    "dual-graph",
+    "vector",
     "cascading",
-    "notes+vector",
-    "entities+vector",
     "deep-research",
 }
 MODE_PASSTHROUGH_FIELDS = [
@@ -194,6 +185,17 @@ def _slugify(text: str, fallback: str = "capture") -> str:
     lowered = (text or "").strip().lower()
     lowered = re.sub(r"[^a-z0-9]+", "-", lowered).strip("-")
     return lowered or fallback
+
+
+def _load_gemini_sdk():
+    try:
+        import google.generativeai as genai
+        return genai
+    except ImportError:
+        return None
+
+
+GENAI_AVAILABLE = importlib.util.find_spec("google.generativeai") is not None
 
 
 def _vault_relative_path(path: Path) -> str:
@@ -762,6 +764,9 @@ def _rewrite_points_with_openai(points: list[str], max_points: int) -> tuple[lis
 def _rewrite_points_with_gemini(points: list[str], max_points: int) -> tuple[list[str], str] | None:
     if not GENAI_AVAILABLE:
         return None
+    genai = _load_gemini_sdk()
+    if genai is None:
+        return None
     gemini_key = os.getenv("GEMINI_API_KEY")
     if not gemini_key:
         return None
@@ -1179,10 +1184,15 @@ class GraphQuerier:
         
         # Configure the selected provider
         if self.provider == "gemini":
+            genai = _load_gemini_sdk()
+            if genai is None:
+                raise ValueError("MCP_GRAPH_PROVIDER is 'gemini' but google-generativeai could not be imported.")
             genai.configure(api_key=self.gemini_key)
+            self._gemini_sdk = genai
             self.model = os.environ.get("GEMINI_MODEL", "gemini-1.5-pro-latest")
         else:
             # Default to OpenAI logic (or fallback)
+            self._gemini_sdk = None
             self.model = os.environ.get("OPENAI_MODEL", "gpt-4o")
 
         self.timeout = float(os.environ.get("OPENAI_TIMEOUT", "60"))
@@ -1329,7 +1339,9 @@ class GraphQuerier:
     def _call_llm(self, prompt: str):
         if self.provider == "gemini":
             try:
-                model = genai.GenerativeModel(self.model)
+                if self._gemini_sdk is None:
+                    raise ValueError("Gemini SDK is not available")
+                model = self._gemini_sdk.GenerativeModel(self.model)
                 response = model.generate_content(prompt)
                 return response.text
             except Exception as e:
@@ -1614,8 +1626,7 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="obsidian_search_mode",
             description=(
-                "Run gateway search modes. Supports LightRAG as a distinct mode plus "
-                "hybrid, dual-graph, cascading, notes+vector, entities+vector, and deep-research."
+                "Run supported gateway search modes: vector, cascading, and deep-research."
             ),
             inputSchema={
                 "type": "object",
@@ -1627,20 +1638,14 @@ async def list_tools() -> list[Tool]:
                     "mode": {
                         "type": "string",
                         "description": (
-                            "Search mode. Use 'lightrag' for LightRAG entities mode. "
-                            "For deep thinking, use 'deep-research'."
+                            "Search mode. For deep thinking, use 'deep-research'."
                         ),
                         "enum": [
-                            "lightrag",
-                            "entities",
-                            "hybrid",
-                            "dual-graph",
+                            "vector",
                             "cascading",
-                            "notes+vector",
-                            "entities+vector",
                             "deep-research"
                         ],
-                        "default": "hybrid"
+                        "default": "cascading"
                     },
                     "max_results": {
                         "type": "integer",
@@ -1667,15 +1672,15 @@ async def list_tools() -> list[Tool]:
                     },
                     "entities_mode": {
                         "type": "string",
-                        "description": "Entities retrieval mode for LightRAG-backed requests (naive/local/global/hybrid)."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "force_mode": {
                         "type": "boolean",
-                        "description": "Force entities mode even if gateway would auto-switch."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "require_llm": {
                         "type": "boolean",
-                        "description": "Require LLM synthesis for entities requests."
+                        "description": "Require LLM synthesis where supported."
                     },
                     "relevance_threshold": {
                         "type": "number",
@@ -1699,7 +1704,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="obsidian_unified_query",
-            description="Run unified API query with optional mode override. Defaults to hybrid mode.",
+            description="Run unified API query with optional mode override. Defaults to cascading mode.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -1709,18 +1714,13 @@ async def list_tools() -> list[Tool]:
                     },
                     "mode": {
                         "type": "string",
-                        "description": "Optional mode override (default: hybrid).",
+                        "description": "Optional mode override (default: cascading).",
                         "enum": [
-                            "lightrag",
-                            "entities",
-                            "hybrid",
-                            "dual-graph",
+                            "vector",
                             "cascading",
-                            "notes+vector",
-                            "entities+vector",
                             "deep-research"
                         ],
-                        "default": "hybrid"
+                        "default": "cascading"
                     },
                     "max_results": {
                         "type": "integer",
@@ -1752,11 +1752,11 @@ async def list_tools() -> list[Tool]:
                     },
                     "entities_mode": {
                         "type": "string",
-                        "description": "Optional entities mode (naive/local/global/hybrid)."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "force_mode": {
                         "type": "boolean",
-                        "description": "Force entities mode behavior."
+                        "description": "Legacy LightRAG override. Ignored by current gateway REST modes."
                     },
                     "require_llm": {
                         "type": "boolean",
@@ -2348,7 +2348,7 @@ async def search_with_mode(arguments: dict) -> list[TextContent]:
         except Exception as e:
             return [TextContent(type="text", text=f"❌ Deep research error: {str(e)}")]
 
-    gateway_mode = "entities" if mode == "lightrag" else mode
+    gateway_mode = mode
     payload = {"query": query, "mode": gateway_mode}
     for field in MODE_PASSTHROUGH_FIELDS:
         if field in args and args[field] is not None:
@@ -2378,7 +2378,7 @@ async def search_with_mode(arguments: dict) -> list[TextContent]:
             return [TextContent(type="text", text=f"❌ Mode request failed ({status_code}): {detail}")]
 
         result = response.json()
-        display_mode = "lightrag" if mode == "lightrag" else gateway_mode
+        display_mode = gateway_mode
         return [TextContent(type="text", text=_format_mode_result(display_mode, result))]
     except requests.exceptions.ConnectionError:
         return [TextContent(
@@ -2515,7 +2515,7 @@ def _extract_unified_answer(payload: dict) -> str:
 async def obsidian_unified_query(arguments: dict) -> list[TextContent]:
     args = arguments or {}
     query = str(args.get("query") or "").strip()
-    mode = _normalize_mode(args.get("mode") or "hybrid")
+    mode = _normalize_mode(args.get("mode") or "cascading")
     concise = bool(args.get("concise", True))
 
     if not query:
@@ -2530,7 +2530,7 @@ async def obsidian_unified_query(arguments: dict) -> list[TextContent]:
             model = args.get("model")
             payload = await _run_deep_research_via_gateway(query, provider, model)
         else:
-            gateway_mode = "entities" if mode == "lightrag" else mode
+            gateway_mode = mode
             request_payload = {"query": query, "mode": gateway_mode}
             for field in MODE_PASSTHROUGH_FIELDS:
                 if field in args and args[field] is not None:
@@ -2808,36 +2808,28 @@ async def apply_existing_tags_frontmatter_only(arguments: dict) -> list[TextCont
 
 
 async def query_knowledge_graph(arguments: dict) -> list[TextContent]:
-    """Query knowledge graph (tries LightRAG service first, falls back to local graph)"""
+    """Query knowledge graph using the internal in-process graph adapter."""
     query = arguments.get("query", "")
     max_entities = arguments.get("max_entities", 20)
 
     if not query:
         return [TextContent(type="text", text="❌ Query is required")]
 
-    # 1. Try LightRAG (Docker Service)
-    # Check if we should prefer local graph via env var
-    prefer_local = os.getenv("MCP_GRAPH_PROVIDER", "").lower() == "local"
-    
-    if not prefer_local:
-        try:
-            # Check health or just try query
-            response = requests.post(
-                f"{GRAPH_SERVICE_URL}/query",
-                json={"query": query, "mode": "hybrid"},
-                headers=_service_headers(),
-                timeout=30  # Give LightRAG time to think
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                answer = result.get("response", "")
-                if answer:
-                    return [TextContent(type="text", text=f"🧠 **(LightRAG)** {answer}")]
-        except Exception as e:
-            logger.warning(f"LightRAG query failed, falling back to local graph: {e}")
+    try:
+        from src.services.internal_graph_transport import query_networkx_graph
 
-    # 2. Fallback to Local NetworkX Graph
+        status_code, result = await asyncio.to_thread(
+            query_networkx_graph,
+            {"query": query, "mode": "hybrid", "max_entities": max_entities},
+        )
+        if status_code == 200 and isinstance(result, dict):
+            answer = result.get("response") or result.get("answer") or ""
+            if answer:
+                return [TextContent(type="text", text=f"🕸️ **(Internal Graph)** {answer}")]
+    except Exception as e:
+        logger.warning(f"Internal graph adapter failed, falling back to local graph: {e}")
+
+    # Fallback to direct local NetworkX graph access
     if not GRAPH_AVAILABLE:
         return [TextContent(
             type="text",
@@ -3224,6 +3216,7 @@ def build_streamable_http_app(
     from starlette.applications import Starlette
     from starlette.middleware import Middleware
     from starlette.middleware.authentication import AuthenticationMiddleware
+    from starlette.responses import JSONResponse, PlainTextResponse
     from starlette.routing import Route
     from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 
@@ -3233,6 +3226,33 @@ def build_streamable_http_app(
     http_app = _StreamableHTTPASGIApp(session_manager, api_key=api_key)
     routes = []
     middleware = []
+
+    normalized_mount_path = _normalize_http_path(mount_path)
+
+    async def root_endpoint(request):
+        public_base = _normalize_public_url(public_url, host, port)
+        return JSONResponse(
+            {
+                "service": "obsidian-rag-unified-mcp",
+                "status": "ok",
+                "transport": "streamable-http",
+                "path": normalized_mount_path,
+                "auth_mode": auth_mode,
+                "stateless": stateless,
+                "public_url": public_base,
+                "health": "/health",
+            }
+        )
+
+    async def health_endpoint(request):
+        return PlainTextResponse("ok", status_code=200)
+
+    routes.extend(
+        [
+            Route("/", endpoint=root_endpoint, methods=["GET"]),
+            Route("/health", endpoint=health_endpoint, methods=["GET"]),
+        ]
+    )
 
     if auth_mode == "oauth":
         from mcp.server.auth.middleware.bearer_auth import BearerAuthBackend, RequireAuthMiddleware
@@ -3292,7 +3312,7 @@ def build_streamable_http_app(
         resource_metadata_url = build_resource_metadata_url(resource_url)
         routes.append(
             Route(
-                _normalize_http_path(mount_path),
+                normalized_mount_path,
                 endpoint=RequireAuthMiddleware(http_app, [], resource_metadata_url),
             )
         )
@@ -3311,7 +3331,7 @@ def build_streamable_http_app(
             )
         )
     else:
-        routes.append(Route(_normalize_http_path(mount_path), http_app))
+        routes.append(Route(normalized_mount_path, http_app))
 
     return Starlette(routes=routes, middleware=middleware, lifespan=lambda _: session_manager.run())
 

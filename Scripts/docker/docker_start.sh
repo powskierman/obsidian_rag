@@ -68,16 +68,23 @@ else
     echo "⏳ Embedding Service (port 8000) - Starting..."
 fi
 
-# Check Claude Graph service
+# Check internal NetworkX graph service
 if curl -s http://localhost:8002/health > /dev/null 2>&1; then
     GRAPH_STATS=$(curl -s http://localhost:8002/health 2>/dev/null)
     if echo "$GRAPH_STATS" | grep -q '"graph_loaded":true'; then
-        echo "✅ Claude Graph Service (port 8002) - Graph loaded"
+        echo "✅ Internal Graph Service (port 8002) - Graph loaded"
     else
-        echo "⏳ Claude Graph Service (port 8002) - Starting (graph not loaded yet)"
+        echo "⏳ Internal Graph Service (port 8002) - Starting (graph not loaded yet)"
     fi
 else
-    echo "⏳ Claude Graph Service (port 8002) - Starting..."
+    echo "⏳ Internal Graph Service (port 8002) - Starting..."
+fi
+
+# Check internal LightRAG service
+if curl -s http://localhost:8001/health > /dev/null 2>&1; then
+    echo "✅ Internal LightRAG Service (port 8001)"
+else
+    echo "⏳ Internal LightRAG Service (port 8001) - Starting..."
 fi
 
 # Check Streamlit UI
@@ -100,7 +107,9 @@ echo ""
 echo "📝 Access points:"
 echo "  • Streamlit UI: http://localhost:8501"
 echo "  • Embedding API: http://localhost:8000"
-echo "  • Claude Graph API: http://localhost:8002"
+echo "  • Internal Graph API: http://localhost:8002"
+echo "  • Internal LightRAG API: http://localhost:8001"
+echo "    These graph endpoints are internal dependencies for cascading/deep-research."
 echo ""
 echo "📋 Useful commands:"
 echo "  • View logs:    docker-compose logs -f [service-name]"

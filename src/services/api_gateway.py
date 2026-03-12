@@ -31,23 +31,43 @@ except ImportError:
 try:
     from cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
+        build_comparison_insufficient_answer as _build_comparison_insufficient_answer_impl,
+        build_relationship_insufficient_answer as _build_relationship_insufficient_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        extract_query_facets as _extract_cascading_query_facets_impl,
+        has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_comparison_style_query as _is_comparison_style_query_impl,
+        is_personal_scope_query as _is_personal_scope_query_impl,
+        is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        should_require_vault_comparison_guardrail as _should_require_vault_comparison_guardrail_impl,
+        should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
+        source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
     )
 except ImportError:
     from src.services.cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
+        build_comparison_insufficient_answer as _build_comparison_insufficient_answer_impl,
+        build_relationship_insufficient_answer as _build_relationship_insufficient_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
+        extract_query_facets as _extract_cascading_query_facets_impl,
+        has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_comparison_style_query as _is_comparison_style_query_impl,
+        is_personal_scope_query as _is_personal_scope_query_impl,
+        is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        should_require_vault_comparison_guardrail as _should_require_vault_comparison_guardrail_impl,
+        should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
+        source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
     )
 
@@ -67,6 +87,30 @@ except ImportError:
         normalize_source_record,
         normalize_vault_path,
     )
+
+try:
+    from query_normalizer import (
+        deterministic_clean_query as _deterministic_clean_query_impl,
+        normalize_query_structure as _normalize_query_structure_impl,
+        query_terms as _query_normalizer_terms_impl,
+    )
+except ImportError:
+    try:
+        from src.services.query_normalizer import (
+            deterministic_clean_query as _deterministic_clean_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+            query_terms as _query_normalizer_terms_impl,
+        )
+    except ImportError:
+        base_path = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        sys.path.append(base_path)
+        from src.services.query_normalizer import (
+            deterministic_clean_query as _deterministic_clean_query_impl,
+            normalize_query_structure as _normalize_query_structure_impl,
+            query_terms as _query_normalizer_terms_impl,
+        )
 
 
 def _load_deep_thinking_rag():
@@ -804,6 +848,30 @@ def _select_cascading_evidence_set(
     )
 
 
+def _is_relation_style_query(query: str) -> bool:
+    return _is_relation_style_query_impl(query)
+
+
+def _extract_cascading_query_facets(query: str) -> List[set[str]]:
+    return _extract_cascading_query_facets_impl(query)
+
+
+def _has_multi_facet_query(query: str) -> bool:
+    return _has_multi_facet_query_impl(query)
+
+
+def _source_set_covers_query_facets(query: str, sources: List[Dict[str, Any]]) -> bool:
+    return _source_set_covers_query_facets_impl(query, sources)
+
+
+def _should_require_vault_relationship_guardrail(query: str, sources: List[Dict[str, Any]]) -> bool:
+    return _should_require_vault_relationship_guardrail_impl(query, sources)
+
+
+def _should_require_vault_comparison_guardrail(query: str, sources: List[Dict[str, Any]]) -> bool:
+    return _should_require_vault_comparison_guardrail_impl(query, sources)
+
+
 def _canonical_cascading_provider_name(provider: str) -> str:
     normalized = str(provider or "").strip().lower()
     aliases = {
@@ -859,6 +927,54 @@ def _cascading_provider_api_key(provider: str) -> Optional[str]:
     if provider == "perplexity":
         return _get_env_value("PERPLEXITY_API_KEY") or None
     return None
+
+
+def _deep_research_configured_provider() -> str:
+    for env_name in ("DEEP_THINKING_PROVIDER", "QUERY_LLM_PROVIDER", "LLM_PROVIDER"):
+        configured = _get_env_value(env_name)
+        if configured:
+            return _canonical_cascading_provider_name(configured)
+    return ""
+
+
+def _deep_research_auto_provider() -> Optional[str]:
+    candidates = [
+        _deep_research_configured_provider(),
+        "perplexity",
+        "openrouter",
+        "chatgpt",
+        "gemini",
+        "claude",
+        "lmstudio",
+        "ollama",
+    ]
+    seen = set()
+    for candidate in candidates:
+        provider = _canonical_cascading_provider_name(candidate)
+        if not provider or provider in seen:
+            continue
+        seen.add(provider)
+        if provider in {"ollama", "lmstudio"}:
+            if provider == "ollama" and os.getenv("OLLAMA_HOST"):
+                return provider
+            if provider == "lmstudio" and (
+                os.getenv("LMSTUDIO_BASE_URL")
+                or os.getenv("LMSTUDIO_MODEL")
+                or os.getenv("MLX_BASE_URL")
+                or os.getenv("MLX_MODEL")
+            ):
+                return provider
+            continue
+        if _cascading_provider_api_key(provider):
+            return provider
+    return None
+
+
+def _deep_research_default_model(provider: str) -> Optional[str]:
+    configured = _get_env_value("DEEP_THINKING_MODEL")
+    if configured:
+        return configured
+    return _default_cascading_model(provider)
 
 
 def _is_insufficient_answer(text: Any) -> bool:
@@ -1258,35 +1374,22 @@ def _should_normalize_query(query: str) -> bool:
 
 
 def _deterministic_normalize_query(query: str) -> str:
-    if not isinstance(query, str):
-        return ""
-    normalized = query.strip()
-    if not normalized:
-        return ""
+    return _deterministic_clean_query_impl(query)
 
-    direct_excerpt_patterns = (
-        r"^\s*show both linked-note context and direct note excerpts for\s+",
-        r"^\s*show linked-note context and direct note excerpts for\s+",
-        r"^\s*show direct note excerpts and linked-note context for\s+",
-        r"^\s*show both direct note excerpts and linked-note context for\s+",
-    )
-    for pattern in direct_excerpt_patterns:
-        normalized = re.sub(pattern, "", normalized, flags=re.IGNORECASE).strip()
 
-    relationships_match = re.match(
-        r"^\s*what relationships and treatments are associated with\s+(.+?)\s+in my notes\??\s*$",
-        normalized,
-        flags=re.IGNORECASE,
-    )
-    if relationships_match:
-        topic = relationships_match.group(1).strip()
-        return f"{topic} relationships treatments".strip()
-
-    normalized = re.sub(r"\bin my notes\b", "", normalized, flags=re.IGNORECASE)
-    normalized = re.sub(r"\bfrom my notes\b", "", normalized, flags=re.IGNORECASE)
-    normalized = re.sub(r"\bin the graph\b", "", normalized, flags=re.IGNORECASE)
-    normalized = re.sub(r"\s+", " ", normalized).strip(" ?")
-    return normalized or query.strip()
+def _normalize_query_object(query: str) -> Dict[str, Any]:
+    payload = _normalize_query_structure_impl(query)
+    if not isinstance(payload, dict):
+        return {
+            "original_query": str(query or "").strip(),
+            "clean_query": _deterministic_normalize_query(query),
+            "intent": "lookup",
+            "entities": [],
+            "relations": [],
+            "facets": [],
+            "must_terms": [],
+        }
+    return payload
 
 
 def _normalizer_cache_key(query: str, provider: str, model: Optional[str]) -> str:
@@ -1477,11 +1580,14 @@ async def _normalize_query_for_retrieval(
     if not query:
         return ""
 
-    deterministic = _deterministic_normalize_query(query)
+    normalized_payload = _normalize_query_object(query)
+    deterministic = str(normalized_payload.get("clean_query") or _deterministic_normalize_query(query)).strip()
+    if _has_multi_facet_query(query):
+        return deterministic
     if not _should_normalize_query(query):
         return deterministic
 
-    if len(_query_terms(deterministic)) <= 4:
+    if len(_query_normalizer_terms_impl(deterministic)) <= 4:
         return deterministic
 
     provider, resolved_model = _resolve_query_normalizer_provider(llm_provider, model)
@@ -1494,6 +1600,10 @@ async def _normalize_query_for_retrieval(
 
     candidate = await _call_query_normalizer_llm(deterministic, provider, resolved_model)
     normalized = candidate.strip() if isinstance(candidate, str) and candidate.strip() else deterministic
+    if _has_multi_facet_query(query) and not _source_set_covers_query_facets(query, [
+        {"filename": normalized, "filepath": normalized, "snippet": normalized, "content": normalized}
+    ]):
+        return deterministic
     _set_cached_normalized_query(query, provider, resolved_model, normalized)
     return normalized
 
@@ -2390,43 +2500,68 @@ async def health_check():
     except:
         emb_status = "unreachable"
 
-    try:
-        async with httpx.AsyncClient() as client:
-            graph_resp = await _get_json(
-                client, f"{GRAPH_SERVICE_URL}/health", timeout=2.0, service="graph"
-            )
-            if graph_resp and graph_resp.status_code == 200:
-                graph_data = graph_resp.json()
-                graph_status = "healthy"
-            else:
-                graph_status = "unhealthy"
-    except:
-        graph_status = "unreachable"
+    async def _fetch_graph_health_over_http() -> tuple[str, dict]:
+        try:
+            async with httpx.AsyncClient() as client:
+                graph_resp = await _get_json(
+                    client, f"{GRAPH_SERVICE_URL}/health", timeout=2.0, service="graph"
+                )
+                if graph_resp and graph_resp.status_code == 200:
+                    return "healthy", graph_resp.json()
+                return "unhealthy", {}
+        except:
+            return "unreachable", {}
 
     try:
-        async with httpx.AsyncClient() as client:
-            lightrag_resp = await _get_json(
-                client, f"{LIGHTRAG_SERVICE_URL}/health", timeout=2.0, service="lightrag"
-            )
-            if lightrag_resp and lightrag_resp.status_code == 200:
-                lightrag_data = lightrag_resp.json()
-                lightrag_status = "healthy"
-            else:
-                lightrag_status = "unhealthy"
-    except:
-        lightrag_status = "unreachable"
+        from src.services.internal_graph_transport import graph_health, lightrag_health, lightrag_stats
 
-    # Get LightRAG stats
-    try:
-        async with httpx.AsyncClient() as client:
-            stats_resp = await _get_json(
-                client, f"{LIGHTRAG_SERVICE_URL}/stats", timeout=2.0, service="lightrag"
-            )
-            if stats_resp and stats_resp.status_code == 200:
-                lightrag_stats = stats_resp.json()
-                lightrag_data.update(lightrag_stats)
+        graph_code, graph_payload = await asyncio.to_thread(graph_health)
+        graph_ready = bool(graph_payload.get("graph_loaded")) if isinstance(graph_payload, dict) else False
+        graph_nodes = int(graph_payload.get("nodes", 0) or 0) if isinstance(graph_payload, dict) else 0
+        graph_edges = int(graph_payload.get("edges", 0) or 0) if isinstance(graph_payload, dict) else 0
+        if graph_code == 200 and graph_ready and (graph_nodes > 0 or graph_edges > 0):
+            graph_data = graph_payload
+            graph_status = "healthy"
+        else:
+            graph_status, graph_data = await _fetch_graph_health_over_http()
     except:
-        pass
+        graph_status, graph_data = await _fetch_graph_health_over_http()
+
+    try:
+        lightrag_code, lightrag_payload = await asyncio.to_thread(lightrag_health)
+        if lightrag_code == 200:
+            lightrag_data = lightrag_payload
+            lightrag_status = "healthy"
+        else:
+            lightrag_status = "unhealthy"
+    except:
+        try:
+            async with httpx.AsyncClient() as client:
+                lightrag_resp = await _get_json(
+                    client, f"{LIGHTRAG_SERVICE_URL}/health", timeout=2.0, service="lightrag"
+                )
+                if lightrag_resp and lightrag_resp.status_code == 200:
+                    lightrag_data = lightrag_resp.json()
+                    lightrag_status = "healthy"
+                else:
+                    lightrag_status = "unhealthy"
+        except:
+            lightrag_status = "unreachable"
+
+    try:
+        stats_code, stats_payload = await asyncio.to_thread(lightrag_stats)
+        if stats_code == 200 and isinstance(stats_payload, dict):
+            lightrag_data.update(stats_payload)
+    except:
+        try:
+            async with httpx.AsyncClient() as client:
+                stats_resp = await _get_json(
+                    client, f"{LIGHTRAG_SERVICE_URL}/stats", timeout=2.0, service="lightrag"
+                )
+                if stats_resp and stats_resp.status_code == 200:
+                    lightrag_data.update(stats_resp.json())
+        except:
+            pass
 
     return {
         "success": True,
@@ -2586,24 +2721,17 @@ class UnifiedQueryRequest(BaseModel):
 @app.post("/api/v1/query")
 async def unified_query(request: UnifiedQueryRequest):
     """
-    Enhanced unified query endpoint with multiple knowledge source modes
+    Enhanced unified query endpoint for the currently supported retrieval modes.
 
-    Single-source modes:
-    - vector: Pure vector similarity (ChromaDB, 7k chunks)
-    - notes (or networkx): Note-centric graph with wiki-links (16k nodes)
-    - entities (or lightrag): Entity-centric semantic graph (2k notes)
+    REST modes:
+    - vector: Pure vector similarity search (ChromaDB)
+    - cascading: Staged retrieval and synthesis pipeline
 
-    Dual-source modes:
-    - notes+vector: NetworkX graph + ChromaDB vectors
-    - entities+vector: LightRAG graph + ChromaDB vectors
-    - dual-graph: Both graphs (NetworkX + LightRAG)
-
-    Ultimate mode:
-    - hybrid: All three sources (Vector + Notes + Entities) - RECOMMENDED
+    Deep research is exposed separately over WebSocket at /api/v1/deep-research.
     """
     mode = request.mode.lower()
 
-    # Normalize mode aliases (keep backward compatibility)
+    # Preserve legacy aliases so older clients fail with the normalized mode name.
     mode_aliases = {"graph": "notes", "networkx": "notes", "lightrag": "entities"}
     mode = mode_aliases.get(mode, mode)
     supported_modes = {
@@ -2620,13 +2748,7 @@ async def unified_query(request: UnifiedQueryRequest):
             ),
         )
 
-    if request.system_prompt and mode in {
-        "entities",
-        "entities+vector",
-        "dual-graph",
-        "hybrid",
-        "cascading",
-    }:
+    if request.system_prompt and mode == "cascading":
         invalid_placeholders = _invalid_system_prompt_placeholders(request.system_prompt)
         if invalid_placeholders:
             raise HTTPException(
@@ -2874,13 +2996,21 @@ async def unified_query(request: UnifiedQueryRequest):
             )
             if selected_sources:
                 sources = selected_sources
+            relationship_guardrail = _should_require_vault_relationship_guardrail(
+                request.query,
+                sources,
+            )
+            comparison_guardrail = _should_require_vault_comparison_guardrail(
+                request.query,
+                sources,
+            )
 
             if not answer and isinstance(result, dict):
                 answer = result.get("answer", "") or ""
 
             # Fetch supplemental web evidence before synthesis so the model can use it when requested.
             web_search_result = None
-            if request.web_search:
+            if request.web_search and not relationship_guardrail and not comparison_guardrail:
                 async with httpx.AsyncClient() as client:
                     web_search_result = await _perform_tavily_web_search(
                         client,
@@ -2918,12 +3048,19 @@ async def unified_query(request: UnifiedQueryRequest):
                         synthesis_citations = synthesis_result.get("citations")
                         if isinstance(synthesis_used_documents, list) and synthesis_used_documents:
                             sources = _hydrate_cascading_sources(sources, synthesis_used_documents)
+                        multi_facet_query = _has_multi_facet_query(request.query)
+                        relationship_query = _is_relation_style_query(request.query)
+                        synthesized_covers_facets = _source_set_covers_query_facets(
+                            request.query,
+                            synthesis_used_documents if isinstance(synthesis_used_documents, list) else [],
+                        )
                         if (
                             isinstance(synthesis_used_documents, list)
                             and synthesis_used_documents
                             and (
-                                len(sources) <= 2
+                                ((not relationship_query and not multi_facet_query) and len(sources) <= 2)
                                 or len(synthesis_used_documents) >= min(2, len(sources))
+                                or synthesized_covers_facets
                                 or _summary_query_targets_source(request.query, synthesis_used_documents[0])
                             )
                         ):
@@ -2940,6 +3077,8 @@ async def unified_query(request: UnifiedQueryRequest):
                             _is_generic_cascading_fallback_answer(synthesized_answer)
                             and anchor_answer
                             and not _is_insufficient_answer(anchor_answer)
+                            and not relationship_guardrail
+                            and not comparison_guardrail
                         ):
                             answer = _build_cascading_degraded_answer(
                                 anchor_answer,
@@ -2952,6 +3091,10 @@ async def unified_query(request: UnifiedQueryRequest):
                             answer = synthesized_answer
                             if fallback_reason:
                                 warnings.append(f"Cascading synthesis fallback: {fallback_reason}.")
+                            if relationship_guardrail and fallback_reason == "insufficient_vault_relationship_evidence":
+                                warnings.append("Vault relationship guardrail applied; no direct vault connection was established.")
+                            if comparison_guardrail and fallback_reason == "insufficient_vault_comparison_evidence":
+                                warnings.append("Vault comparison guardrail applied; the vault did not support a grounded comparison.")
                         if isinstance(result, dict):
                             result["citations"] = synthesis_citations if isinstance(synthesis_citations, list) else []
                             result["used_documents"] = (
@@ -3005,7 +3148,9 @@ async def unified_query(request: UnifiedQueryRequest):
             if isinstance(result, dict):
                 result["answer"] = answer
                 result["sources"] = sources
-                result["used_documents"] = result.get("used_documents") or sources
+                # Keep used_documents aligned with the final normalized source list
+                # returned to the client.
+                result["used_documents"] = sources
                 if warnings:
                     result["warnings"] = warnings
 
@@ -3240,8 +3385,10 @@ async def deep_research_websocket(websocket: WebSocket):
     try:
         data = await websocket.receive_json()
         query = data.get("query")
-        provider = data.get("provider", "claude").lower()
-        model = data.get("model")
+        requested_provider = data.get("provider")
+        provider = _canonical_cascading_provider_name(requested_provider or _deep_research_auto_provider() or "")
+        requested_model = str(data.get("model") or "").strip()
+        model = requested_model or _deep_research_default_model(provider)
         max_sources_raw = data.get("max_sources")
         try:
             max_sources = int(max_sources_raw) if max_sources_raw is not None else 12
@@ -3264,30 +3411,13 @@ async def deep_research_websocket(websocket: WebSocket):
             "perplexity",
         }
 
-        def _select_fallback_provider():
-            if os.getenv("PERPLEXITY_API_KEY"):
-                return "perplexity"
-            if os.getenv("OPENROUTER_API_KEY"):
-                return "openrouter"
-            if ANTHROPIC_API_KEY:
-                return "claude"
-            if _get_env_value("GEMINI_API_KEY"):
-                return "gemini"
-            if os.getenv("OPENAI_API_KEY"):
-                return "chatgpt"
-            if os.getenv("LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
-                return "lmstudio"
-            if os.getenv("OLLAMA_HOST"):  # Basic check for Ollama
-                return "ollama"
-            return None
-
         if not query:
             await websocket.send_json({"type": "error", "content": "No query provided"})
             return
 
         # Normalize provider for Deep Thinking
         if provider not in supported_providers:
-            fallback_provider = _select_fallback_provider()
+            fallback_provider = _deep_research_auto_provider()
             if not fallback_provider:
                 await websocket.send_json(
                     {
@@ -3300,11 +3430,11 @@ async def deep_research_websocket(websocket: WebSocket):
             await websocket.send_json(
                 {
                     "type": "log",
-                    "message": f"Deep Thinking does not support '{provider}'. Using '{fallback_provider}'.",
+                    "message": f"Deep Thinking does not support '{provider or requested_provider}'. Using '{fallback_provider}'.",
                 }
             )
             provider = fallback_provider
-            model = None
+            model = _deep_research_default_model(provider)
 
         # Determine API Key based on provider
         api_key = None
@@ -3361,12 +3491,21 @@ async def deep_research_websocket(websocket: WebSocket):
         # Initialize Agent with Universal Client
         # Note: We must use the INTERNAL Docker URLs here
         DeepThinkingRAG = _load_deep_thinking_rag()
+        deep_thinking_graph_transport = (
+            _get_env_value("DEEP_THINKING_GRAPH_TRANSPORT", "").strip().lower()
+        )
+        graph_service_url = (
+            "internal://graph"
+            if deep_thinking_graph_transport == "internal"
+            else GRAPH_SERVICE_URL
+        )
+
         rag = DeepThinkingRAG(
             provider=provider,
             api_key=api_key,
             model=model,
             vector_service_url=EMBEDDING_SERVICE_URL,
-            graph_service_url=GRAPH_SERVICE_URL,
+            graph_service_url=graph_service_url,
             enable_reranking=True,
         )
 

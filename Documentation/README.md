@@ -1,58 +1,74 @@
 # Obsidian RAG Documentation
 
-Use this as the entry point for active project documentation.
+Use this file as the canonical index for active documentation.
 
 ## Quick Start
-1. Configure environment: `./Setup/QUICKSTART.md`
-2. Start services: `./Scripts/setup/start_obsidian_rag.sh`
-3. Verify health endpoints:
-   - Gateway: `curl -s http://localhost:4000/api/v1/health`
-   - Embedding service: `curl -s http://localhost:8000/health`
-   - LightRAG service: `curl -s http://localhost:8001/health`
-   - Graph service: `curl -s http://localhost:8002/health`
-4. Run a query with canonical mode names (`vector`, `cascading`, `deep-research`)
+- `getting-started/API_GATEWAY_QUICKSTART.md`
+- `getting-started/SETUP_QUICKSTART.md`
+- `getting-started/README_CLI_SEARCH.md`
 
 ## Core References
-- System overview: `./SYSTEM_OVERVIEW_2025.md`
-- API quickstart: `./API_GATEWAY_QUICKSTART.md`
-- Unified API details: `./UNIFIED_API_IMPLEMENTATION.md`
-- Web search details: `./WEB_SEARCH_IMPLEMENTATION.md`
-- Search modes: `./Features/SEARCH_MODES_GUIDE.md`
-- Indexing scripts: `./Setup/INDEXING_SCRIPTS_GUIDE.md`
-- Canonical partial LightRAG indexing: `./Setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
-- Reindexing procedure: `./REINDEXING_PROCEDURE.md`
-- Database management: `./DATABASE_MANAGEMENT.md`
-- MCP setup: `./MCP/MCP_SETUP_INSTRUCTIONS.md`
+- `reference/search/SEARCH_ARCHITECTURE.md`
+- `reference/search/SEARCH_MODES_GUIDE.md`
+- `reference/search/CASCADING_FLOW.md`
+- `reference/search/COMBINED_SEARCH_WORKFLOW.md`
+- `reference/api/UNIFIED_API_IMPLEMENTATION.md`
+- `reference/streaming/STREAMING_IMPLEMENTATION.md`
 
-## Useful Commands
-```bash
-# Start / stop services
-./Scripts/setup/start_obsidian_rag.sh
-./Scripts/setup/stop_obsidian_rag.sh
+## Operations
+- `operations/indexing/INDEXING_STRATEGY.md`
+- `operations/indexing/REINDEXING_PROCEDURE.md`
+- `operations/indexing/INDEXING_BENCHMARK_PROCEDURE.md`
+- `operations/setup/INDEXING_SCRIPTS_GUIDE.md`
+- `operations/setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
+- `operations/setup/MLX_BULLETPROOF_INDEXING_IMPLEMENTATION.md`
+- `operations/setup/TESTING.md`
+- `operations/troubleshooting/TROUBLESHOOTING_QUERY.md`
+- `operations/troubleshooting/DOCKER_TROUBLESHOOTING.md`
+- `operations/vault/VAULT_STANDARDIZATION_GUIDE.md`
+- `operations/vault/VAULT_ORGANIZATION_GUIDE.md`
+- `operations/embeddings/EMBEDDING_MODEL_UPDATE_GUIDE.md`
+- `operations/notes/New Note Template.md`
+- `operations/quality/KNOWLEDGE_GRAPH_TEST_PROMPTS.md`
+- `operations/DATABASE_MANAGEMENT.md`
+- `operations/tuning/SOTA_TUNING_GUIDE.md`
+- `operations/graph/GRAPH_DATA_FLOW.md`
+- `operations/graph/GRAPH_DATA_README.md`
+- `operations/graph/GRAPH_QUALITY_GUIDE.md`
+- `operations/graph/IMPROVED_GRAPH_BUILDER_GUIDE.md`
+- `operations/graph/TRANSFER_BETWEEN_MACHINES.md`
 
-# Full indexing pipeline
-./Scripts/indexing/run_indexing.sh
+## Integrations
+- `integrations/mcp/MCP_SETUP_INSTRUCTIONS.md`
+- `integrations/mcp/CHATGPT_DEEP_SEARCH_GUIDE.md`
+- `integrations/web-search/WEB_SEARCH_IMPLEMENTATION.md`
 
-# Targeted indexing
-./Scripts/indexing/update_vector_db.sh --refresh
-./Scripts/indexing/update_knowledge_graph.sh
-./Scripts/indexing/index_with_lightrag.sh
-./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once
-```
+## Deployments
+- `deployments/mac-mini/MAC_MINI_QUICK_START.md`
+- `deployments/mac-mini/MAC_MINI_NETWORKING_FIX.md`
 
-## API Endpoints
-- `GET /api/v1/health`
-- `GET /api/v1/stats`
-- `POST /api/v1/query`
-- `POST /api/v1/query`
-- WebSocket: `ws://localhost:4000/api/v1/deep-research`
+## Reference
+- `reference/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md`
+- `reference/architecture/DEEP_THINKING_FLOW.md`
+- `reference/architecture/STREAMLIT_ARCHITECTURE.md`
+- `reference/architecture/SECOND_BRAIN_ARCHITECTURE.md`
+- `reference/spec.md`
+- `reference/agents/ANTIGRAVITY_SKILLS_MANUAL.md`
+- `reference/governance/PROJECT_CONSTITUTION.md`
+- `operations/models/README.md`
+- `operations/models/SETUP.md`
 
-Notes:
-- `POST /api/v1/query` currently supports `vector` and `cascading`.
-- Deep thinking uses `ws://localhost:4000/api/v1/deep-research`.
-- `lmstudio` is the supported local OpenAI-compatible provider label; `mlx` remains a compatibility alias in parts of the backend.
-- Enhanced search returns supplemental web-search results after vault sources in the webapp.
-- Active documentation intentionally excludes archived historical documents from navigation.
+## Archive
+- `archive/agents/AG_BACKLOG.md`
+- `archive/agents/AG_INTEGRATION_PLAN.md`
+- `archive/agents/implementation_plan.md`
+- `archive/search-docs/DEEP_THINKING_PROTOCOL.md`
+- `archive/graph-retrospectives/LIGHTRAG_MEMORY_CONTEXT_FAILURE_REMEDIATION.md`
+- `archive/graph-retrospectives/LIGHTRAG_RESPONSE_EQUIVALENCE_REMEDIATION.md`
+- `archive/graph-retrospectives/NETWORKX_RETRIEVAL_GAP_ASSESSMENT.md`
+- `archive/misc/README_SYNC_BUNDLE.txt`
 
-## Full Index
-- `./INDEX.md`
+## Notes on public API
+- `POST /api/v1/query` supports `mode: vector | cascading`.
+- `ws://localhost:4000/api/v1/deep-research` is the deep-thinking stream path.
+- `lmstudio` and `mlx` map to the same local provider behavior.

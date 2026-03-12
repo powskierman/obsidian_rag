@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parity benchmark: compare NetworkX (`notes`) and LightRAG (`entities`) response quality.
+Comparison benchmark: compare supported REST search modes (`vector` and `cascading`).
 
 Scoring dimensions:
 - reference_precision
@@ -25,13 +25,17 @@ QUERY_ENDPOINT = f"{GATEWAY_URL.rstrip('/')}/api/v1/query"
 REQUEST_TIMEOUT_SECONDS = float(os.getenv("RETRIEVAL_EVAL_TIMEOUT", "180"))
 MAX_RESULTS = int(os.getenv("RETRIEVAL_EVAL_MAX_RESULTS", "12"))
 
-PARITY_PRECISION_DELTA = float(os.getenv("PARITY_PRECISION_DELTA", "0.20"))
-PARITY_DEPTH_DELTA = float(os.getenv("PARITY_DEPTH_DELTA", "1.0"))
-FAIL_ON_PARITY_REGRESSION = os.getenv("FAIL_ON_PARITY_REGRESSION", "false").lower() in {
+MODE_PRECISION_DELTA = float(os.getenv("MODE_PRECISION_DELTA", "0.20"))
+MODE_DEPTH_DELTA = float(os.getenv("MODE_DEPTH_DELTA", "1.0"))
+FAIL_ON_MODE_REGRESSION = os.getenv("FAIL_ON_MODE_REGRESSION", "false").lower() in {
     "1",
     "true",
     "yes",
 }
+OUTPUT_PATH = os.getenv(
+    "OUT_PATH",
+    "Documentation/operations/quality/RETRIEVAL_MODE_COMPARISON.md",
+)
 
 BENCHMARK_QUERIES: List[Tuple[str, str]] = [
     ("clinical", "lymphoma and yescarta"),
@@ -211,7 +215,7 @@ def _p95(values: List[float]) -> float:
 def main() -> int:
     records: List[Dict[str, Any]] = []
     report_lines: List[str] = []
-    report_lines.append("# Search Mode Parity Evaluation")
+    report_lines.append("# Search Mode Comparison Evaluation")
     report_lines.append("")
     report_lines.append(f"- Gateway: `{QUERY_ENDPOINT}`")
     report_lines.append(f"- Queries: {len(BENCHMARK_QUERIES)}")
@@ -223,7 +227,7 @@ def main() -> int:
     report_lines.append("|---|---|---:|---:|---:|---:|---:|---:|")
 
     for domain, query in BENCHMARK_QUERIES:
-        for mode in ("notes", "entities"):
+        for mode in ("vector", "cascading"):
             payload = {
                 "query": query,
                 "mode": mode,
@@ -293,7 +297,7 @@ def main() -> int:
     report_lines.append("|---|---:|---:|---:|---:|---:|")
 
     aggregates: Dict[str, Dict[str, float]] = {}
-    for mode in ("notes", "entities"):
+    for mode in ("vector", "cascading"):
         rows = [r for r in records if r.get("mode") == mode]
         precision_values = [float(r.get("precision", 0.0)) for r in rows]
         depth_values = [float(r.get("depth", 0.0)) for r in rows]
@@ -312,35 +316,34 @@ def main() -> int:
         )
 
     report_lines.append("")
-    report_lines.append("## Parity Checks")
+    report_lines.append("## Comparison Checks")
     report_lines.append("")
-    notes_precision = aggregates.get("notes", {}).get("precision", 0.0)
-    entities_precision = aggregates.get("entities", {}).get("precision", 0.0)
-    notes_depth = aggregates.get("notes", {}).get("depth", 0.0)
-    entities_depth = aggregates.get("entities", {}).get("depth", 0.0)
+    vector_precision = aggregates.get("vector", {}).get("precision", 0.0)
+    cascading_precision = aggregates.get("cascading", {}).get("precision", 0.0)
+    vector_depth = aggregates.get("vector", {}).get("depth", 0.0)
+    cascading_depth = aggregates.get("cascading", {}).get("depth", 0.0)
 
-    precision_delta = notes_precision - entities_precision
-    depth_delta = notes_depth - entities_depth
-    precision_ok = precision_delta <= PARITY_PRECISION_DELTA
-    depth_ok = depth_delta <= PARITY_DEPTH_DELTA
+    precision_delta = vector_precision - cascading_precision
+    depth_delta = vector_depth - cascading_depth
+    precision_ok = precision_delta <= MODE_PRECISION_DELTA
+    depth_ok = depth_delta <= MODE_DEPTH_DELTA
     parity_ok = precision_ok and depth_ok
 
     report_lines.append(
-        f"- Precision parity: {'PASS' if precision_ok else 'FAIL'} (notes-entities={precision_delta:.2f}, allowed={PARITY_PRECISION_DELTA:.2f})"
+        f"- Precision comparison: {'PASS' if precision_ok else 'FAIL'} (vector-cascading={precision_delta:.2f}, allowed={MODE_PRECISION_DELTA:.2f})"
     )
     report_lines.append(
-        f"- Depth parity: {'PASS' if depth_ok else 'FAIL'} (notes-entities={depth_delta:.2f}, allowed={PARITY_DEPTH_DELTA:.2f})"
+        f"- Depth comparison: {'PASS' if depth_ok else 'FAIL'} (vector-cascading={depth_delta:.2f}, allowed={MODE_DEPTH_DELTA:.2f})"
     )
-    report_lines.append(f"- Overall parity: {'PASS' if parity_ok else 'FAIL'}")
+    report_lines.append(f"- Overall comparison: {'PASS' if parity_ok else 'FAIL'}")
 
     report = "\n".join(report_lines) + "\n"
-    out_path = os.getenv("OUT_PATH")
-    if out_path:
-        with open(out_path, "w", encoding="utf-8") as f:
+    if OUTPUT_PATH:
+        with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
             f.write(report)
     print(report)
 
-    if FAIL_ON_PARITY_REGRESSION and not parity_ok:
+    if FAIL_ON_MODE_REGRESSION and not parity_ok:
         return 1
     return 0
 

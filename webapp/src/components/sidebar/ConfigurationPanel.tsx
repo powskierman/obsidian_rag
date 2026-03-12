@@ -15,15 +15,8 @@ export default function ConfigurationPanel() {
   const getSearchModeLabel = () => {
     const labels: Record<string, string> = {
       'vector': 'Vector',
-      'knowledge-graph': 'Knowledge-Graph',
-      'hybrid': 'Hybrid',
       'cascading': 'Cascading',
       'deep-thinking': 'Deep Thinking',
-      'notes': 'Notes',
-      'entities': 'Entities',
-      'notes+vector': 'Notes+Vector',
-      'entities+vector': 'Entities+Vector',
-      'dual-graph': 'Dual-Graph'
     };
     return labels[searchMode] || searchMode;
   };

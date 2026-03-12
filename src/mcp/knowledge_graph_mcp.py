@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-MCP Server for Claude Knowledge Graph
-Enables Claude Desktop, Claude Code, and Cursor to query your knowledge graph
+Legacy/internal MCP server for direct knowledge-graph access.
+
+This server is intended for internal diagnostics and advanced graph inspection rather
+than the primary public search workflow.
 """
 
 import asyncio
@@ -100,7 +102,7 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="query_knowledge_graph",
-            description="Query your knowledge graph using Claude's reasoning. Ask questions about entities, relationships, and connections in your vault. Returns comprehensive answers based on graph structure.",
+            description="Advanced/internal graph query helper. Ask questions about entities, relationships, and connections in the internal knowledge graph.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -133,7 +135,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="find_entity_path",
-            description="Find connection paths between two entities in the knowledge graph. Shows how entities relate to each other.",
+            description="Advanced/internal helper: find connection paths between two entities in the internal knowledge graph.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -156,7 +158,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="search_entities",
-            description="Search for entities in the knowledge graph by name. Returns matching entities with their types and connection counts.",
+            description="Advanced/internal helper: search for entities in the internal knowledge graph by name.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -175,7 +177,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="get_graph_stats",
-            description="Get statistics about the knowledge graph including total entities, relationships, density, and top connected entities.",
+            description="Advanced/internal helper: get statistics about the internal knowledge graph.",
             inputSchema={
                 "type": "object",
                 "properties": {}

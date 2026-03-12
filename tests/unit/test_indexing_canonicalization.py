@@ -36,6 +36,26 @@ def test_build_canonical_metadata_extracts_timeline_date_from_path():
 
 
 @pytest.mark.unit
+def test_build_canonical_metadata_extracts_exam_date_from_medical_text():
+    meta = build_canonical_metadata(
+        file_path=Path("Medical/Lymphoma/media/CT Scan 04-25.pdf"),
+        metadata={},
+        text="CT CHEST ABDOMEN PELVIS ENHANCED\nDATE: 4/18/2025 11:40 AM\nReport Signed: 4/18/2025 2:40 PM",
+    )
+    assert meta["timeline_date"] == "2025-04-18"
+
+
+@pytest.mark.unit
+def test_build_canonical_metadata_extracts_dictated_date_when_no_exam_date_present():
+    meta = build_canonical_metadata(
+        file_path=Path("Medical/Lymphoma/media/CT Scan 01-26.pdf"),
+        metadata={},
+        text="CT MASS BIOPSY\nProcedure performed by: Dr. Bashir\nDictated using Voice Recognition Technology.\n12/5/2024 2:34 PM",
+    )
+    assert meta["timeline_date"] == "2024-12-05"
+
+
+@pytest.mark.unit
 def test_build_canonical_metadata_infers_treatment_phase_and_entity_type():
     meta = build_canonical_metadata(
         file_path=Path("Medical/Lymphoma/Yescarta Treatment Plan.md"),

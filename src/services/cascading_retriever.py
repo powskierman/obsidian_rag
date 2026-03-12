@@ -1,13 +1,24 @@
 import logging
 import os
 from typing import List, Dict, Any, Optional
+import asyncio
 import httpx
 import re
 
 try:
-    from cascading_pipeline import distance_to_relevance
+    from cascading_pipeline import (
+        distance_to_relevance,
+        has_multi_facet_query,
+        source_set_covers_query_facets,
+    )
+    from internal_graph_transport import query_networkx_graph, query_lightrag
 except ImportError:
-    from src.services.cascading_pipeline import distance_to_relevance
+    from src.services.cascading_pipeline import (
+        distance_to_relevance,
+        has_multi_facet_query,
+        source_set_covers_query_facets,
+    )
+    from src.services.internal_graph_transport import query_networkx_graph, query_lightrag
 
 logger = logging.getLogger(__name__)
 
@@ -28,13 +39,19 @@ class CascadingRetriever:
         graph_url: str = "http://localhost:8002",
         lightrag_url: str = "http://localhost:8001",
         llm_provider: str = "claude",  # Default, can be overridden per query
+        llm_model: str = "",
         api_key: Optional[str] = None,
     ):
         self.embed_url = embed_url
         self.graph_url = graph_url
         self.lightrag_url = lightrag_url
         self.llm_provider = llm_provider
+        self.llm_model = str(llm_model or "").strip()
         self.api_key = api_key
+        self.use_internal_graph_transport = (
+            os.getenv("OBSIDIAN_RAG_INTERNAL_GRAPH_TRANSPORT", "true").strip().lower()
+            in {"1", "true", "yes", "on"}
+        )
 
         # We might need a lightweight LLM client for entity extraction if not using regex
         # For now, we'll rely on the services or simple extraction
@@ -167,6 +184,33 @@ class CascadingRetriever:
             stage_info["error"] = self._summarize_failure(exc)
         return stage_info
 
+    async def _run_internal_stage(
+        self,
+        stage_name: str,
+        payload: Dict[str, Any],
+        handler,
+    ) -> Dict[str, Any]:
+        stage_info: Dict[str, Any] = {
+            "name": stage_name,
+            "transport": "internal",
+            "payload": payload,
+            "status": "pending",
+        }
+        try:
+            status_code, data = await asyncio.to_thread(handler, payload)
+            stage_info["http_status"] = status_code
+            if status_code == 200:
+                stage_info["status"] = "ok"
+                stage_info["data"] = data if isinstance(data, dict) else {}
+            else:
+                stage_info["status"] = "http_error"
+                stage_info["data"] = data if isinstance(data, dict) else {}
+        except Exception as exc:
+            stage_info["status"] = "exception"
+            stage_info["data"] = {}
+            stage_info["error"] = self._summarize_failure(exc)
+        return stage_info
+
     async def retrieve(self, query: str, max_results: int = 10, entities: Optional[List[str]] = None, mem0_context: str = "") -> Dict[str, Any]:
         """
         Orchestrates the staged retrieval pipeline with explicit stage diagnostics.
@@ -198,17 +242,38 @@ class CascadingRetriever:
                 "entities": entities,
                 "mem0_context": mem0_context,
             }
-            lr_payload = {"query": query, "mode": "hybrid"}
+            lr_payload = {
+                "query": query,
+                "mode": "hybrid",
+                "llm_provider": self.llm_provider,
+            }
+            if self.llm_model:
+                lr_payload["model"] = self.llm_model
 
             logger.info("Cascading Stage 1: Anchor retrieval for '%s'", query)
             stage_debug["stage_order"].append("anchors")
-            anchor_stage = await self._post_stage(
-                client,
-                "anchors",
-                f"{self.graph_url}/query",
-                notes_payload,
-                30.0,
-            )
+            if self.use_internal_graph_transport:
+                anchor_stage = await self._run_internal_stage(
+                    "anchors",
+                    notes_payload,
+                    query_networkx_graph,
+                )
+                if anchor_stage["status"] != "ok":
+                    anchor_stage = await self._post_stage(
+                        client,
+                        "anchors",
+                        f"{self.graph_url}/query",
+                        notes_payload,
+                        30.0,
+                    )
+            else:
+                anchor_stage = await self._post_stage(
+                    client,
+                    "anchors",
+                    f"{self.graph_url}/query",
+                    notes_payload,
+                    30.0,
+                )
             stage_debug["statuses"]["anchors"] = anchor_stage["status"]
             if anchor_stage["status"] == "exception":
                 stage_debug["failures"]["anchors"] = anchor_stage.get("error", {})
@@ -256,16 +321,35 @@ class CascadingRetriever:
             expansion_terms = set()
             expansion_query = query
             should_expand = not anchors or not self._looks_like_single_note_summary_query(query)
+            if should_expand and has_multi_facet_query(query) and source_set_covers_query_facets(query, anchors):
+                should_expand = False
+                stage_debug["summary_short_circuit"] = True
+                stage_debug["statuses"]["expansion"] = "skipped_anchor_facet_coverage"
             if should_expand:
                 logger.info("Cascading Stage 2: Expansion retrieval for '%s'", query)
                 stage_debug["stage_order"].append("expansion")
-                expansion_stage = await self._post_stage(
-                    client,
-                    "expansion",
-                    f"{self.lightrag_url}/query",
-                    lr_payload,
-                    60.0,
-                )
+                if self.use_internal_graph_transport:
+                    expansion_stage = await self._run_internal_stage(
+                        "expansion",
+                        lr_payload,
+                        query_lightrag,
+                    )
+                    if expansion_stage["status"] != "ok":
+                        expansion_stage = await self._post_stage(
+                            client,
+                            "expansion",
+                            f"{self.lightrag_url}/query",
+                            lr_payload,
+                            60.0,
+                        )
+                else:
+                    expansion_stage = await self._post_stage(
+                        client,
+                        "expansion",
+                        f"{self.lightrag_url}/query",
+                        lr_payload,
+                        60.0,
+                    )
                 stage_debug["statuses"]["expansion"] = expansion_stage["status"]
                 if expansion_stage["status"] == "exception":
                     stage_debug["failures"]["expansion"] = expansion_stage.get("error", {})
@@ -275,8 +359,9 @@ class CascadingRetriever:
                     expanded_text = expanded_context.get("result") or expanded_context.get("answer") or ""
                 expansion_terms = self._extract_terms(expanded_text)
             else:
-                stage_debug["summary_short_circuit"] = True
-                stage_debug["statuses"]["expansion"] = "skipped_summary_short_circuit"
+                if "expansion" not in stage_debug["statuses"]:
+                    stage_debug["summary_short_circuit"] = True
+                    stage_debug["statuses"]["expansion"] = "skipped_summary_short_circuit"
 
             # Stage 3: Context-Aware Vector Search
             combined_terms = []
