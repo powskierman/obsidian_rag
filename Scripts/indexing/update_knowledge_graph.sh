@@ -22,7 +22,7 @@ if ! docker ps | grep -q obsidian-graph-service; then
     exit 1
 fi
 
-if ! docker exec -it obsidian-graph-service python /app/src/services/networkx_graph_builder.py --output /app/graph_data/knowledge_graph_full.pkl; then
+if ! docker exec -it -w /app obsidian-graph-service python -m src.services.networkx_graph_builder --output /app/graph_data/knowledge_graph_full.pkl; then
     echo "❌ Error: NetworkX graph rebuild failed."
     exit 1
 fi

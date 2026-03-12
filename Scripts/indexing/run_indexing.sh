@@ -60,8 +60,8 @@ PYTHONPATH="$REPO_ROOT" "$PYTHON_CMD" "$REPO_ROOT/src/indexing/index_vault.py" -
 
 echo ""
 echo "🔹 Step 2/3: Indexing Knowledge Graph (NetworkX)..."
-# NetworkX graph builder runs inside the container
-docker exec -it obsidian-graph-service python /app/src/services/networkx_graph_builder.py || echo "⚠️ NetworkX graph indexing warning"
+# NetworkX graph builder runs inside the container with /app as the package root.
+docker exec -it -w /app obsidian-graph-service python -m src.services.networkx_graph_builder || echo "⚠️ NetworkX graph indexing warning"
 
 echo ""
 echo "🔹 Step 3/3: Indexing LightRAG (Entities)..."

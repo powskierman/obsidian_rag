@@ -1,7 +1,10 @@
 import os
 import logging
 import argparse
-from networkx_graph_builder import GraphBuilder
+try:
+    from src.services.networkx_graph_builder import GraphBuilder
+except ImportError:
+    from networkx_graph_builder import GraphBuilder
 
 # Configure logging
 logging.basicConfig(

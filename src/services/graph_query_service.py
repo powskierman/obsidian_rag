@@ -11,13 +11,22 @@ import os
 import re
 import requests
 import json
-from networkx_graph_builder import (
-    GraphBuilder,
-    GraphQuerier,
-    graph_storage_stats,
-    is_structural_graph,
-    select_graph_path,
-)
+try:
+    from src.services.networkx_graph_builder import (
+        GraphBuilder,
+        GraphQuerier,
+        graph_storage_stats,
+        is_structural_graph,
+        select_graph_path,
+    )
+except ImportError:
+    from networkx_graph_builder import (
+        GraphBuilder,
+        GraphQuerier,
+        graph_storage_stats,
+        is_structural_graph,
+        select_graph_path,
+    )
 import logging
 from openai import OpenAI
 import threading
@@ -749,32 +758,43 @@ def initialize_graph(graph_path: str = None):
         if graph_path is None:
             graph_path = os.environ.get('GRAPH_PATH')
 
-        possible_paths = []
+        # Honor an explicit graph path before falling back to best-effort discovery.
         if graph_path:
-            possible_paths.append(graph_path)
+            explicit_path = Path(graph_path).expanduser()
+            if explicit_path.is_file():
+                graph_file = explicit_path
+            elif explicit_path.is_dir():
+                graph_file = select_graph_path([explicit_path])
+            else:
+                graph_file = None
+        else:
+            graph_file = None
 
-        data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
-        if data_dir:
+        if graph_file is None:
+            possible_paths = []
+
+            data_dir = os.environ.get('OBSIDIAN_RAG_DATA_DIR', '').strip()
+            if data_dir:
+                possible_paths.extend([
+                    str(Path(data_dir) / 'graph_data'),
+                    str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl'),
+                    str(Path(data_dir) / 'graph_data' / 'knowledge_graph.pkl'),
+                    str(Path(data_dir) / 'graph_data' / 'knowledge_graph_test.pkl'),
+                    str(Path(data_dir) / 'knowledge_graph_full.pkl'),
+                    str(Path(data_dir) / 'knowledge_graph.pkl'),
+                ])
+
             possible_paths.extend([
-                str(Path(data_dir) / 'graph_data'),
-                str(Path(data_dir) / 'graph_data' / 'knowledge_graph_full.pkl'),
-                str(Path(data_dir) / 'graph_data' / 'knowledge_graph.pkl'),
-                str(Path(data_dir) / 'graph_data' / 'knowledge_graph_test.pkl'),
-                str(Path(data_dir) / 'knowledge_graph_full.pkl'),
-                str(Path(data_dir) / 'knowledge_graph.pkl'),
+                '/app/graph_data',
+                '/app/graph_data/knowledge_graph_full.pkl',
+                '/app/graph_data/knowledge_graph.pkl',
+                '/app/graph_data/knowledge_graph_test.pkl',
+                '/app/knowledge_graph_full.pkl',
+                '/app/knowledge_graph.pkl',
+                '/app/knowledge_graph_test.pkl',
             ])
 
-        possible_paths.extend([
-            '/app/graph_data',
-            '/app/graph_data/knowledge_graph_full.pkl',
-            '/app/graph_data/knowledge_graph.pkl',
-            '/app/graph_data/knowledge_graph_test.pkl',
-            '/app/knowledge_graph_full.pkl',
-            '/app/knowledge_graph.pkl',
-            '/app/knowledge_graph_test.pkl',
-        ])
-
-        graph_file = select_graph_path(possible_paths)
+            graph_file = select_graph_path(possible_paths)
 
         if graph_file:
             builder.load_graph(str(graph_file))

@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
 WORKDIR /app
+ENV PYTHONPATH=/app
 
 # Install curl first and clean up in same layer to save space
 RUN apt-get update && \
@@ -22,13 +23,12 @@ RUN pip install --no-cache-dir \
     cryptography \
     PyYAML
 
-# Copy service files
-COPY src/services/networkx_graph_builder.py /app/
-COPY src/services/graph_query_service.py /app/
-COPY src/utils/ /app/utils/
+# Copy the application package so service modules run with the same package root
+# in Docker and local development.
+COPY src /app/src
 
 # Expose port
 EXPOSE 8002
 
 # Run service
-CMD ["python", "graph_query_service.py"]
+CMD ["python", "-m", "src.services.graph_query_service"]
