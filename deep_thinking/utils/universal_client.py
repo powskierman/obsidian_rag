@@ -10,6 +10,7 @@ import requests
 import json
 import logging
 from typing import List, Dict, Any, Optional
+from urllib.parse import urlsplit, urlunsplit
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,38 @@ def _clean_env_value(value: Optional[str]) -> Optional[str]:
         return None
     cleaned = value.strip()
     return cleaned or None
+
+
+def _strip_trailing_url_noise(value: str) -> str:
+    cleaned = value.strip()
+    while cleaned and cleaned[-1] in {"`", ";", "'", '"'}:
+        cleaned = cleaned[:-1].rstrip()
+    return cleaned
+
+
+def _sanitize_base_url(value: Optional[str], default: str) -> str:
+    raw = _clean_env_value(value) or default
+    raw = _strip_trailing_url_noise(raw)
+    if raw and not raw.startswith(("http://", "https://")):
+        raw = f"http://{raw}"
+
+    try:
+        parsed = urlsplit(raw)
+    except ValueError:
+        fallback = _strip_trailing_url_noise(default)
+        if fallback and not fallback.startswith(("http://", "https://")):
+            fallback = f"http://{fallback}"
+        return fallback.rstrip("/")
+
+    netloc = parsed.netloc or parsed.path
+    path = parsed.path if parsed.netloc else ""
+    netloc = _strip_trailing_url_noise(netloc)
+    if "@" in netloc:
+        userinfo, hostport = netloc.rsplit("@", 1)
+        hostport = _strip_trailing_url_noise(hostport)
+        netloc = f"{userinfo}@{hostport}"
+    sanitized = urlunsplit((parsed.scheme or "http", netloc, path, parsed.query, parsed.fragment))
+    return sanitized.rstrip("/")
 
 
 def _stringify_message_content(value: Any) -> str:
@@ -453,22 +486,24 @@ class UniversalClient:
                          response_format: Optional[Dict[str, Any]] = None):
         provider = (self.provider or "lmstudio").lower()
         if provider == "mlx":
-            base_url = (
+            base_url = _sanitize_base_url(
                 os.getenv("QUERY_MLX_BASE_URL")
                 or os.getenv("MLX_BASE_URL")
                 or os.getenv("QUERY_LMSTUDIO_BASE_URL")
-                or os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1")
+                or os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1"),
+                "http://host.docker.internal:1234/v1",
             )
             api_key = self.api_key or os.getenv("QUERY_MLX_API_KEY") or os.getenv("MLX_API_KEY", "mlx")
             default_model = os.getenv("MLX_MODEL") or os.getenv("LLM_MODEL_PATH") or "LiquidAI/LFM2-24B-A2B"
             timeout_env = "MLX_TIMEOUT"
             display_name = "MLX"
         else:
-            base_url = (
+            base_url = _sanitize_base_url(
                 os.getenv("QUERY_LMSTUDIO_BASE_URL")
                 or os.getenv("LMSTUDIO_BASE_URL")
                 or os.getenv("QUERY_MLX_BASE_URL")
-                or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")
+                or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1"),
+                "http://host.docker.internal:1234/v1",
             )
             api_key = self.api_key or os.getenv("QUERY_LMSTUDIO_API_KEY") or os.getenv("LMSTUDIO_API_KEY", "lmstudio")
             default_model = os.getenv("LMSTUDIO_MODEL") or os.getenv("LLM_MODEL_PATH") or os.getenv("LLM_MODEL") or "local-model"
@@ -547,7 +582,10 @@ class UniversalClient:
     def _create_ollama(self, model: str, messages: List[Dict[str, str]],
                        max_tokens: int, temperature: float, system: str,
                        response_format: Optional[Dict[str, Any]] = None):
-        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        ollama_host = _sanitize_base_url(
+            os.getenv("OLLAMA_HOST", "http://localhost:11434"),
+            "http://localhost:11434",
+        )
         if "host.docker.internal" in ollama_host:
              # If running outside docker but env var is set for docker, try localhost fallback
              pass # Python request library handles DNS, but usually better to stick to what's given
@@ -588,10 +626,6 @@ class UniversalClient:
             payload["format"] = "json"
 
         try:
-            # Ensure host has protocol
-            if not ollama_host.startswith("http"):
-                ollama_host = f"http://{ollama_host}"
-                
             url = f"{ollama_host}/api/chat"
             response = requests.post(url, json=payload, timeout=120)
             

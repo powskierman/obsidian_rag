@@ -10,7 +10,7 @@ const DEFAULT_OLLAMA_HOSTS = [
 ];
 
 const normalizeHost = (value: string | undefined | null): string | null => {
-  const trimmed = (value || '').trim();
+  const trimmed = (value || '').trim().replace(/[`;'"]+$/g, '');
   if (!trimmed) {
     return null;
   }

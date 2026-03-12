@@ -98,6 +98,20 @@ def _provider_synthesis_timeout_seconds(provider: str) -> float:
         25.0,
         minimum=1.0,
     )
+    if resolved_provider == "openrouter":
+        openrouter_timeout_seconds = _get_env_float(
+            "CASCADING_SYNTHESIS_TIMEOUT_SECONDS_OPENROUTER",
+            _get_env_float("CASCADING_SYNTHESIS_TIMEOUT_SECONDS_REMOTE", 60.0, minimum=1.0),
+            minimum=1.0,
+        )
+        return max(base_timeout_seconds, openrouter_timeout_seconds)
+    if resolved_provider == "perplexity":
+        perplexity_timeout_seconds = _get_env_float(
+            "CASCADING_SYNTHESIS_TIMEOUT_SECONDS_PERPLEXITY",
+            _get_env_float("CASCADING_SYNTHESIS_TIMEOUT_SECONDS_REMOTE", 60.0, minimum=1.0),
+            minimum=1.0,
+        )
+        return max(base_timeout_seconds, perplexity_timeout_seconds)
     if resolved_provider == "lmstudio":
         lmstudio_timeout_seconds = _get_env_float(
             "CASCADING_SYNTHESIS_TIMEOUT_SECONDS_LMSTUDIO",
@@ -113,6 +127,51 @@ def _provider_synthesis_timeout_seconds(provider: str) -> float:
         )
         return max(base_timeout_seconds, ollama_timeout_seconds)
     return base_timeout_seconds
+
+
+def _provider_synthesis_max_tokens(provider: str, query: str, brief_concept_index: bool) -> int:
+    resolved_provider = canonical_cascading_provider_name(provider)
+    base_max_tokens = _get_env_int(
+        "CASCADING_SYNTHESIS_MAX_TOKENS",
+        1024,
+        minimum=64,
+    )
+    compact_query = (
+        brief_concept_index
+        or is_summary_style_query(query)
+        or is_comparison_style_query(query)
+        or is_relation_style_query(query)
+    )
+
+    if resolved_provider == "openrouter":
+        remote_max_tokens = _get_env_int(
+            "CASCADING_SYNTHESIS_MAX_TOKENS_OPENROUTER",
+            _get_env_int("CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE", 384, minimum=64),
+            minimum=64,
+        )
+        if compact_query:
+            return min(
+                base_max_tokens,
+                remote_max_tokens,
+                _get_env_int("CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE_COMPACT", 320, minimum=64),
+            )
+        return min(base_max_tokens, remote_max_tokens)
+
+    if resolved_provider == "perplexity":
+        remote_max_tokens = _get_env_int(
+            "CASCADING_SYNTHESIS_MAX_TOKENS_PERPLEXITY",
+            _get_env_int("CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE", 384, minimum=64),
+            minimum=64,
+        )
+        if compact_query:
+            return min(
+                base_max_tokens,
+                remote_max_tokens,
+                _get_env_int("CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE_COMPACT", 320, minimum=64),
+            )
+        return min(base_max_tokens, remote_max_tokens)
+
+    return base_max_tokens
 
 
 def _provider_prompt_source_caps(provider: str) -> tuple[Optional[int], Optional[int], int]:
@@ -1137,6 +1196,11 @@ async def synthesize_cascading_answer(
 ) -> Dict[str, Any]:
     resolved_provider = canonical_cascading_provider_name(llm_provider)
     synthesis_timeout_seconds = _provider_synthesis_timeout_seconds(resolved_provider)
+    synthesis_max_tokens = _provider_synthesis_max_tokens(
+        resolved_provider,
+        query,
+        brief_concept_index,
+    )
     max_prompt_sources, max_prompt_snippet_chars, max_context_sources = _provider_prompt_source_caps(
         resolved_provider
     )
@@ -1417,7 +1481,7 @@ async def synthesize_cascading_answer(
                         ).messages.create,
                         model=resolved_model,
                         messages=[{"role": "user", "content": active_prompt}],
-                        max_tokens=1024,
+                        max_tokens=synthesis_max_tokens,
                         temperature=synthesis_temperature,
                         system=sys_prompt,
                         response_format={"type": "json_object"},

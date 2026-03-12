@@ -139,6 +139,22 @@ def _get_env_value(name: str, default: str = "") -> str:
     return value.strip()
 
 
+def _sanitize_base_url(value: str, default: str) -> str:
+    cleaned = str(value or default).strip()
+    while cleaned and cleaned[-1] in {"`", ";", "'", '"'}:
+        cleaned = cleaned[:-1].rstrip()
+    if cleaned and not cleaned.startswith(("http://", "https://")):
+        cleaned = f"http://{cleaned}"
+    return cleaned.rstrip("/") or default.rstrip("/")
+
+
+def _safe_url_port(parsed) -> int | None:
+    try:
+        return parsed.port
+    except ValueError:
+        return None
+
+
 _LAST_MLX_RECOVERY_TS = 0.0
 
 
@@ -1490,8 +1506,12 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
                 "options": {"temperature": 0},
             }
             async with httpx.AsyncClient(timeout=_QUERY_NORMALIZER_TIMEOUT) as client:
+                ollama_host = _sanitize_base_url(
+                    os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434"),
+                    "http://host.docker.internal:11434",
+                )
                 resp = await client.post(
-                    f'{os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434").rstrip("/")}/api/chat',
+                    f"{ollama_host}/api/chat",
                     json=payload,
                 )
             if resp.status_code != 200:
@@ -1527,9 +1547,14 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
                     or os.getenv("QUERY_MLX_API_KEY")
                     or os.getenv("MLX_API_KEY", "mlx")
                 )
-                url = (
-                    f'{(os.getenv("QUERY_LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_BASE_URL") or os.getenv("QUERY_MLX_BASE_URL") or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1")).rstrip("/")}/chat/completions'
+                base_url = _sanitize_base_url(
+                    os.getenv("QUERY_LMSTUDIO_BASE_URL")
+                    or os.getenv("LMSTUDIO_BASE_URL")
+                    or os.getenv("QUERY_MLX_BASE_URL")
+                    or os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1"),
+                    "http://host.docker.internal:1234/v1",
                 )
+                url = f"{base_url}/chat/completions"
                 headers = {
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
@@ -2381,8 +2406,9 @@ def _candidate_service_urls(url: str) -> List[str]:
 
     candidates = [url]
     netloc_suffix = ""
-    if parsed.port:
-        netloc_suffix = f":{parsed.port}"
+    parsed_port = _safe_url_port(parsed)
+    if parsed_port:
+        netloc_suffix = f":{parsed_port}"
 
     for fallback_host in fallbacks:
         if fallback_host == hostname:

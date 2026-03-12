@@ -31,6 +31,11 @@ def canonicalize_web_url(value: str) -> str:
     if not raw:
         return ""
 
+    while raw and raw[-1] in {"`", ";", "'", '"'}:
+        raw = raw[:-1].rstrip()
+    if not raw:
+        return ""
+
     try:
         parsed = urlsplit(raw)
     except ValueError:
@@ -44,7 +49,10 @@ def canonicalize_web_url(value: str) -> str:
     if hostname.startswith("www."):
         hostname = hostname[4:]
 
-    port = parsed.port
+    try:
+        port = parsed.port
+    except ValueError:
+        port = None
     if port and not ((scheme == "http" and port == 80) or (scheme == "https" and port == 443)):
         netloc = f"{hostname}:{port}"
     else:
