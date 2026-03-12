@@ -31,17 +31,20 @@ except ImportError:
 try:
     from cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
+        build_comparison_insufficient_answer as _build_comparison_insufficient_answer_impl,
         build_relationship_insufficient_answer as _build_relationship_insufficient_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
         extract_query_facets as _extract_cascading_query_facets_impl,
         has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_comparison_style_query as _is_comparison_style_query_impl,
         is_personal_scope_query as _is_personal_scope_query_impl,
         is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        should_require_vault_comparison_guardrail as _should_require_vault_comparison_guardrail_impl,
         should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
         source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
@@ -49,17 +52,20 @@ try:
 except ImportError:
     from src.services.cascading_pipeline import (
         build_cascading_degraded_answer as _build_cascading_degraded_answer_impl,
+        build_comparison_insufficient_answer as _build_comparison_insufficient_answer_impl,
         build_relationship_insufficient_answer as _build_relationship_insufficient_answer_impl,
         distance_to_relevance as _distance_to_relevance_impl,
         extract_query_facets as _extract_cascading_query_facets_impl,
         has_multi_facet_query as _has_multi_facet_query_impl,
         hydrate_cascading_sources as _hydrate_cascading_sources_impl,
         is_generic_cascading_fallback_answer as _is_generic_cascading_fallback_answer_impl,
+        is_comparison_style_query as _is_comparison_style_query_impl,
         is_personal_scope_query as _is_personal_scope_query_impl,
         is_relation_style_query as _is_relation_style_query_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
+        should_require_vault_comparison_guardrail as _should_require_vault_comparison_guardrail_impl,
         should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
         source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
@@ -862,6 +868,10 @@ def _should_require_vault_relationship_guardrail(query: str, sources: List[Dict[
     return _should_require_vault_relationship_guardrail_impl(query, sources)
 
 
+def _should_require_vault_comparison_guardrail(query: str, sources: List[Dict[str, Any]]) -> bool:
+    return _should_require_vault_comparison_guardrail_impl(query, sources)
+
+
 def _canonical_cascading_provider_name(provider: str) -> str:
     normalized = str(provider or "").strip().lower()
     aliases = {
@@ -917,6 +927,54 @@ def _cascading_provider_api_key(provider: str) -> Optional[str]:
     if provider == "perplexity":
         return _get_env_value("PERPLEXITY_API_KEY") or None
     return None
+
+
+def _deep_research_configured_provider() -> str:
+    for env_name in ("DEEP_THINKING_PROVIDER", "QUERY_LLM_PROVIDER", "LLM_PROVIDER"):
+        configured = _get_env_value(env_name)
+        if configured:
+            return _canonical_cascading_provider_name(configured)
+    return ""
+
+
+def _deep_research_auto_provider() -> Optional[str]:
+    candidates = [
+        _deep_research_configured_provider(),
+        "perplexity",
+        "openrouter",
+        "chatgpt",
+        "gemini",
+        "claude",
+        "lmstudio",
+        "ollama",
+    ]
+    seen = set()
+    for candidate in candidates:
+        provider = _canonical_cascading_provider_name(candidate)
+        if not provider or provider in seen:
+            continue
+        seen.add(provider)
+        if provider in {"ollama", "lmstudio"}:
+            if provider == "ollama" and os.getenv("OLLAMA_HOST"):
+                return provider
+            if provider == "lmstudio" and (
+                os.getenv("LMSTUDIO_BASE_URL")
+                or os.getenv("LMSTUDIO_MODEL")
+                or os.getenv("MLX_BASE_URL")
+                or os.getenv("MLX_MODEL")
+            ):
+                return provider
+            continue
+        if _cascading_provider_api_key(provider):
+            return provider
+    return None
+
+
+def _deep_research_default_model(provider: str) -> Optional[str]:
+    configured = _get_env_value("DEEP_THINKING_MODEL")
+    if configured:
+        return configured
+    return _default_cascading_model(provider)
 
 
 def _is_insufficient_answer(text: Any) -> bool:
@@ -2942,13 +3000,17 @@ async def unified_query(request: UnifiedQueryRequest):
                 request.query,
                 sources,
             )
+            comparison_guardrail = _should_require_vault_comparison_guardrail(
+                request.query,
+                sources,
+            )
 
             if not answer and isinstance(result, dict):
                 answer = result.get("answer", "") or ""
 
             # Fetch supplemental web evidence before synthesis so the model can use it when requested.
             web_search_result = None
-            if request.web_search and not relationship_guardrail:
+            if request.web_search and not relationship_guardrail and not comparison_guardrail:
                 async with httpx.AsyncClient() as client:
                     web_search_result = await _perform_tavily_web_search(
                         client,
@@ -3016,6 +3078,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             and anchor_answer
                             and not _is_insufficient_answer(anchor_answer)
                             and not relationship_guardrail
+                            and not comparison_guardrail
                         ):
                             answer = _build_cascading_degraded_answer(
                                 anchor_answer,
@@ -3030,6 +3093,8 @@ async def unified_query(request: UnifiedQueryRequest):
                                 warnings.append(f"Cascading synthesis fallback: {fallback_reason}.")
                             if relationship_guardrail and fallback_reason == "insufficient_vault_relationship_evidence":
                                 warnings.append("Vault relationship guardrail applied; no direct vault connection was established.")
+                            if comparison_guardrail and fallback_reason == "insufficient_vault_comparison_evidence":
+                                warnings.append("Vault comparison guardrail applied; the vault did not support a grounded comparison.")
                         if isinstance(result, dict):
                             result["citations"] = synthesis_citations if isinstance(synthesis_citations, list) else []
                             result["used_documents"] = (
@@ -3320,8 +3385,10 @@ async def deep_research_websocket(websocket: WebSocket):
     try:
         data = await websocket.receive_json()
         query = data.get("query")
-        provider = data.get("provider", "claude").lower()
-        model = data.get("model")
+        requested_provider = data.get("provider")
+        provider = _canonical_cascading_provider_name(requested_provider or _deep_research_auto_provider() or "")
+        requested_model = str(data.get("model") or "").strip()
+        model = requested_model or _deep_research_default_model(provider)
         max_sources_raw = data.get("max_sources")
         try:
             max_sources = int(max_sources_raw) if max_sources_raw is not None else 12
@@ -3344,30 +3411,13 @@ async def deep_research_websocket(websocket: WebSocket):
             "perplexity",
         }
 
-        def _select_fallback_provider():
-            if os.getenv("PERPLEXITY_API_KEY"):
-                return "perplexity"
-            if os.getenv("OPENROUTER_API_KEY"):
-                return "openrouter"
-            if ANTHROPIC_API_KEY:
-                return "claude"
-            if _get_env_value("GEMINI_API_KEY"):
-                return "gemini"
-            if os.getenv("OPENAI_API_KEY"):
-                return "chatgpt"
-            if os.getenv("LMSTUDIO_BASE_URL") or os.getenv("LMSTUDIO_MODEL") or os.getenv("MLX_BASE_URL") or os.getenv("MLX_MODEL"):
-                return "lmstudio"
-            if os.getenv("OLLAMA_HOST"):  # Basic check for Ollama
-                return "ollama"
-            return None
-
         if not query:
             await websocket.send_json({"type": "error", "content": "No query provided"})
             return
 
         # Normalize provider for Deep Thinking
         if provider not in supported_providers:
-            fallback_provider = _select_fallback_provider()
+            fallback_provider = _deep_research_auto_provider()
             if not fallback_provider:
                 await websocket.send_json(
                     {
@@ -3380,11 +3430,11 @@ async def deep_research_websocket(websocket: WebSocket):
             await websocket.send_json(
                 {
                     "type": "log",
-                    "message": f"Deep Thinking does not support '{provider}'. Using '{fallback_provider}'.",
+                    "message": f"Deep Thinking does not support '{provider or requested_provider}'. Using '{fallback_provider}'.",
                 }
             )
             provider = fallback_provider
-            model = None
+            model = _deep_research_default_model(provider)
 
         # Determine API Key based on provider
         api_key = None

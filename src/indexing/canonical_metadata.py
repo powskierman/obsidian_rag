@@ -5,6 +5,7 @@ Canonical metadata helpers shared by indexing and graph build pipelines.
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -19,9 +20,37 @@ _DATE_KEYS = (
     "treatment_date",
     "event_date",
     "date",
-    "created",
-    "modified",
-    "updated",
+)
+
+_SLASH_DATE_PATTERN = re.compile(r"\b(\d{1,2}/\d{1,2}/\d{2,4})\b")
+_MONTH_NAME_DATE_PATTERN = re.compile(
+    r"\b("
+    r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*"
+    r"\s+\d{1,2}(?:,\s*|\s+)\d{4}"
+    r")\b",
+    re.IGNORECASE,
+)
+_LABELED_TEXT_DATE_PATTERNS = (
+    re.compile(
+        r"\b(?:exam/service|exam|service|study|procedure)\s*date\b\s*[:\-]?\s*"
+        r"(?P<date>\d{1,2}/\d{1,2}/\d{2,4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}(?:,\s*|\s+)\d{4})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"(?:^|\n)\s*date\s*[:\-]?\s*"
+        r"(?P<date>\d{1,2}/\d{1,2}/\d{2,4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}(?:,\s*|\s+)\d{4})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\breport signed\b\s*[:\-]?\s*"
+        r"(?P<date>\d{1,2}/\d{1,2}/\d{2,4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}(?:,\s*|\s+)\d{4})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\bdictated(?:\s+using[^\n]*)?[\s:.-]*"
+        r"(?P<date>\d{1,2}/\d{1,2}/\d{2,4}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}(?:,\s*|\s+)\d{4})",
+        re.IGNORECASE,
+    ),
 )
 
 
@@ -91,9 +120,20 @@ def _extract_date(value: Any) -> str:
     text = str(value).strip()
     if not text:
         return ""
-    match = _DATE_PATTERN.search(text)
-    if match:
-        return match.group(1)
+    for pattern, formats in (
+        (_DATE_PATTERN, ("%Y-%m-%d",)),
+        (_SLASH_DATE_PATTERN, ("%m/%d/%Y", "%m/%d/%y")),
+        (_MONTH_NAME_DATE_PATTERN, ("%B %d, %Y", "%b %d, %Y", "%B %d %Y", "%b %d %Y")),
+    ):
+        match = pattern.search(text)
+        if not match:
+            continue
+        raw = match.group(1)
+        for fmt in formats:
+            try:
+                return datetime.strptime(raw, fmt).date().isoformat()
+            except ValueError:
+                continue
     return ""
 
 
@@ -104,6 +144,22 @@ def _timeline_date_from_metadata(metadata: dict[str, Any]) -> str:
         candidate = _extract_date(metadata.get(key))
         if candidate:
             return candidate
+    return ""
+
+
+def _timeline_date_from_text(text: str) -> str:
+    haystack = str(text or "").strip()
+    if not haystack:
+        return ""
+
+    for pattern in _LABELED_TEXT_DATE_PATTERNS:
+        match = pattern.search(haystack)
+        if not match:
+            continue
+        candidate = _extract_date(match.group("date"))
+        if candidate:
+            return candidate
+
     return ""
 
 
@@ -182,6 +238,8 @@ def build_canonical_metadata(
         canonical_id = slugify_text(file_path.name)
 
     timeline_date = _timeline_date_from_metadata(source)
+    if not timeline_date:
+        timeline_date = _timeline_date_from_text(text)
     if not timeline_date:
         timeline_date = _timeline_date_from_path(file_path)
 

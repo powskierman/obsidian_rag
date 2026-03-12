@@ -6,6 +6,7 @@ Combines enhanced vault search with knowledge graph queries.
 
 import argparse
 import asyncio
+import importlib.util
 import json
 import logging
 import os
@@ -20,11 +21,6 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse, urlunparse
 
 import requests
-try:
-    import google.generativeai as genai
-    GENAI_AVAILABLE = True
-except ImportError:
-    GENAI_AVAILABLE = False
 
 try:
     import networkx as nx
@@ -189,6 +185,17 @@ def _slugify(text: str, fallback: str = "capture") -> str:
     lowered = (text or "").strip().lower()
     lowered = re.sub(r"[^a-z0-9]+", "-", lowered).strip("-")
     return lowered or fallback
+
+
+def _load_gemini_sdk():
+    try:
+        import google.generativeai as genai
+        return genai
+    except ImportError:
+        return None
+
+
+GENAI_AVAILABLE = importlib.util.find_spec("google.generativeai") is not None
 
 
 def _vault_relative_path(path: Path) -> str:
@@ -757,6 +764,9 @@ def _rewrite_points_with_openai(points: list[str], max_points: int) -> tuple[lis
 def _rewrite_points_with_gemini(points: list[str], max_points: int) -> tuple[list[str], str] | None:
     if not GENAI_AVAILABLE:
         return None
+    genai = _load_gemini_sdk()
+    if genai is None:
+        return None
     gemini_key = os.getenv("GEMINI_API_KEY")
     if not gemini_key:
         return None
@@ -1174,10 +1184,15 @@ class GraphQuerier:
         
         # Configure the selected provider
         if self.provider == "gemini":
+            genai = _load_gemini_sdk()
+            if genai is None:
+                raise ValueError("MCP_GRAPH_PROVIDER is 'gemini' but google-generativeai could not be imported.")
             genai.configure(api_key=self.gemini_key)
+            self._gemini_sdk = genai
             self.model = os.environ.get("GEMINI_MODEL", "gemini-1.5-pro-latest")
         else:
             # Default to OpenAI logic (or fallback)
+            self._gemini_sdk = None
             self.model = os.environ.get("OPENAI_MODEL", "gpt-4o")
 
         self.timeout = float(os.environ.get("OPENAI_TIMEOUT", "60"))
@@ -1324,7 +1339,9 @@ class GraphQuerier:
     def _call_llm(self, prompt: str):
         if self.provider == "gemini":
             try:
-                model = genai.GenerativeModel(self.model)
+                if self._gemini_sdk is None:
+                    raise ValueError("Gemini SDK is not available")
+                model = self._gemini_sdk.GenerativeModel(self.model)
                 response = model.generate_content(prompt)
                 return response.text
             except Exception as e:
@@ -3199,6 +3216,7 @@ def build_streamable_http_app(
     from starlette.applications import Starlette
     from starlette.middleware import Middleware
     from starlette.middleware.authentication import AuthenticationMiddleware
+    from starlette.responses import JSONResponse, PlainTextResponse
     from starlette.routing import Route
     from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 
@@ -3208,6 +3226,33 @@ def build_streamable_http_app(
     http_app = _StreamableHTTPASGIApp(session_manager, api_key=api_key)
     routes = []
     middleware = []
+
+    normalized_mount_path = _normalize_http_path(mount_path)
+
+    async def root_endpoint(request):
+        public_base = _normalize_public_url(public_url, host, port)
+        return JSONResponse(
+            {
+                "service": "obsidian-rag-unified-mcp",
+                "status": "ok",
+                "transport": "streamable-http",
+                "path": normalized_mount_path,
+                "auth_mode": auth_mode,
+                "stateless": stateless,
+                "public_url": public_base,
+                "health": "/health",
+            }
+        )
+
+    async def health_endpoint(request):
+        return PlainTextResponse("ok", status_code=200)
+
+    routes.extend(
+        [
+            Route("/", endpoint=root_endpoint, methods=["GET"]),
+            Route("/health", endpoint=health_endpoint, methods=["GET"]),
+        ]
+    )
 
     if auth_mode == "oauth":
         from mcp.server.auth.middleware.bearer_auth import BearerAuthBackend, RequireAuthMiddleware
@@ -3267,7 +3312,7 @@ def build_streamable_http_app(
         resource_metadata_url = build_resource_metadata_url(resource_url)
         routes.append(
             Route(
-                _normalize_http_path(mount_path),
+                normalized_mount_path,
                 endpoint=RequireAuthMiddleware(http_app, [], resource_metadata_url),
             )
         )
@@ -3286,7 +3331,7 @@ def build_streamable_http_app(
             )
         )
     else:
-        routes.append(Route(_normalize_http_path(mount_path), http_app))
+        routes.append(Route(normalized_mount_path, http_app))
 
     return Starlette(routes=routes, middleware=middleware, lifespan=lambda _: session_manager.run())
 

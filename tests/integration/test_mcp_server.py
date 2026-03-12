@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch, AsyncMock
 import asyncio
+from starlette.testclient import TestClient
 
 pytest.importorskip("mcp")
 
@@ -28,6 +29,7 @@ from src.mcp.obsidian_rag_unified_mcp import (
     summarize_youtube_to_capture,
     apply_existing_tags_frontmatter_only,
     obsidian_unified_query,
+    build_streamable_http_app,
 )
 
 
@@ -68,6 +70,47 @@ class TestMCPServerTools:
             # Schema should have type
             assert 'type' in tool.inputSchema
             assert tool.inputSchema['type'] == 'object'
+
+
+class TestMCPHttpSurface:
+    @pytest.mark.integration
+    def test_http_root_and_health_routes(self):
+        http_app = build_streamable_http_app(
+            mount_path="/mcp",
+            stateless=True,
+            auth_mode="none",
+            api_key=None,
+            public_url="https://example.ngrok-free.dev",
+            host="127.0.0.1",
+            port=8811,
+        )
+
+        with TestClient(http_app) as client:
+            root = client.get("/")
+            assert root.status_code == 200
+            assert root.json()["service"] == "obsidian-rag-unified-mcp"
+            assert root.json()["path"] == "/mcp"
+
+            health = client.get("/health")
+            assert health.status_code == 200
+            assert health.text == "ok"
+
+    @pytest.mark.integration
+    def test_http_mcp_requires_streamable_accept_headers(self):
+        http_app = build_streamable_http_app(
+            mount_path="/mcp",
+            stateless=True,
+            auth_mode="none",
+            api_key=None,
+            public_url="https://example.ngrok-free.dev",
+            host="127.0.0.1",
+            port=8811,
+        )
+
+        with TestClient(http_app) as client:
+            response = client.get("/mcp")
+            assert response.status_code == 406
+            assert "text/event-stream" in response.text
 
 
 class TestSemanticSearch:

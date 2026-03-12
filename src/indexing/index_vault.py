@@ -376,14 +376,20 @@ def process_file(
             if ' ' in modified_date: # Clean up ISO format for readability if possible
                 modified_date = modified_date.split('T')[0]
             
-            context_parts = [f"Source: {source_filename}", f"Date: {modified_date}"]
+            timeline_date = str(metadata.get("timeline_date") or "").strip()
+            context_parts = [f"Source: {source_filename}"]
+            if timeline_date:
+                context_parts.append(f"Date: {timeline_date}")
+                if modified_date and modified_date != timeline_date:
+                    context_parts.append(f"File Date: {modified_date}")
+            else:
+                context_parts.append(f"File Date: {modified_date}")
             canonical_id = metadata.get("canonical_id")
             if canonical_id:
                 context_parts.append(f"Canonical ID: {canonical_id}")
             entity_type = metadata.get("entity_type")
             if entity_type:
                 context_parts.append(f"Entity Type: {entity_type}")
-            timeline_date = metadata.get("timeline_date")
             if timeline_date:
                 context_parts.append(f"Timeline Date: {timeline_date}")
             treatment_phase = metadata.get("treatment_phase")

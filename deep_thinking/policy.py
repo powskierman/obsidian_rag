@@ -5,6 +5,16 @@ from typing import Literal
 from .state import RAGState
 from .supervisor import RetrievalSupervisor
 from .utils.universal_client import extract_response_text
+try:
+    from src.services.cascading_pipeline import (
+        should_require_vault_comparison_guardrail,
+        source_set_covers_query_facets,
+    )
+except ImportError:
+    def should_require_vault_comparison_guardrail(query: str, sources):
+        return False
+    def source_set_covers_query_facets(query: str, sources):
+        return False
 
 class PolicyAgent:
     def __init__(self, client):
@@ -88,6 +98,43 @@ class PolicyAgent:
             return True
         return False
 
+    @classmethod
+    def _citable_vault_documents(cls, state: RAGState):
+        docs = []
+        for doc in state.get("retrieved_documents", []) or []:
+            if not RetrievalSupervisor._is_citable_doc(doc):
+                continue
+            source_category = str(doc.get("source_category") or "").strip().lower()
+            locator = str(
+                doc.get("filepath")
+                or doc.get("source")
+                or doc.get("url")
+                or doc.get("filename")
+                or ""
+            ).strip()
+            if source_category == "web" or cls._is_web_locator(locator):
+                continue
+            docs.append(doc)
+        return docs
+
+    @staticmethod
+    def _has_explicit_comparison_gap_finding(state: RAGState) -> bool:
+        patterns = (
+            r"\bno\b.+\bevidence\b",
+            r"\black(?:s|ing)?\b.+\bevidence\b",
+            r"\bmissing\b.+\bevidence\b",
+            r"\bcannot\b.+\bcompare\b",
+            r"\bcannot be made\b.+\bcurrent data\b",
+            r"\bcomparison\b.+\bincomplete\b",
+        )
+        for step in state.get("past_steps", []) or []:
+            finding = str(step.get("key_findings") or "").strip().lower()
+            if not finding:
+                continue
+            if any(re.search(pattern, finding) for pattern in patterns):
+                return True
+        return False
+
     @staticmethod
     def _has_planned_vault_step(steps) -> bool:
         vault_strategies = {"vector", "hybrid", "graph", "graph-local", "graph-global"}
@@ -158,6 +205,20 @@ class PolicyAgent:
             has_vault_evidence = self._has_vault_evidence(state)
             has_substantive_vault_evidence = self._has_substantive_vault_evidence(state)
             has_planned_vault = self._has_planned_vault_step(remaining_steps)
+            citable_vault_docs = self._citable_vault_documents(state)
+            has_explicit_comparison_gap = self._has_explicit_comparison_gap_finding(state)
+            question_lower = str(state.get("original_question", "") or "").lower()
+            comparison_query = (
+                query_profile.get("intent") == "comparison"
+                or any(
+                    marker in question_lower
+                    for marker in ("difference between", "compare ", "comparison ", " vs ", " versus ")
+                )
+            )
+            comparison_guardrail = should_require_vault_comparison_guardrail(
+                state.get("original_question", ""),
+                citable_vault_docs,
+            ) if citable_vault_docs else False
 
             if (
                 query_profile.get("is_summary_request")
@@ -189,6 +250,19 @@ class PolicyAgent:
             ):
                 print("⚠️ Policy: External enrichment needed but no web search. Forcing REVISE_PLAN.")
                 return "REVISE_PLAN"
+
+            if (
+                prefers_vault_first
+                and comparison_query
+                and has_vault_evidence
+                and (has_substantive_vault_evidence or has_explicit_comparison_gap)
+                and comparison_guardrail
+            ):
+                if has_planned_vault:
+                    print("⚠️ Policy: Vault-scoped comparison still has a pending vault step. Forcing CONTINUE.")
+                    return "CONTINUE"
+                print("⚠️ Policy: Vault-scoped comparison lacks two-sided vault evidence. Forcing FINISH with insufficiency.")
+                return "FINISH"
 
             # Personal/vault-scoped questions must not finish on web-only evidence.
             if decision == "FINISH" and prefers_vault_first and (not has_vault_evidence or not has_substantive_vault_evidence):

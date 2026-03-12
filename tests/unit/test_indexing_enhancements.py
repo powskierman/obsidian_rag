@@ -88,8 +88,15 @@ def test_smart_chunking_context_logic_validation():
     
     source_filename = metadata.get('filename', 'Unknown')
     modified_date = metadata.get('modified', 'Unknown Date').split('T')[0]
-    
-    context_parts = [f"Source: {source_filename}", f"Date: {modified_date}"]
+    timeline_date = str(metadata.get('timeline_date') or '').strip()
+
+    context_parts = [f"Source: {source_filename}"]
+    if timeline_date:
+        context_parts.append(f"Date: {timeline_date}")
+        if modified_date and modified_date != timeline_date:
+            context_parts.append(f"File Date: {modified_date}")
+    else:
+        context_parts.append(f"File Date: {modified_date}")
     
     if 'tags' in metadata:
         context_parts.append(f"Tags: {metadata['tags']}")
@@ -99,7 +106,7 @@ def test_smart_chunking_context_logic_validation():
     context_str = "[" + "] [".join(context_parts) + "]"
     
     assert "Source: test.md" in context_str
-    assert "Date: 2023-01-01" in context_str
+    assert "File Date: 2023-01-01" in context_str
     assert "Tags: tag1, tag2" in context_str
     assert "Aliases: alias1" in context_str
-    assert context_str == "[Source: test.md] [Date: 2023-01-01] [Tags: tag1, tag2] [Aliases: alias1]"
+    assert context_str == "[Source: test.md] [File Date: 2023-01-01] [Tags: tag1, tag2] [Aliases: alias1]"

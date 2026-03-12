@@ -1125,6 +1125,87 @@ def test_vault_relationship_guardrail_does_not_apply_to_comparison_query():
 
 
 @pytest.mark.unit
+def test_should_require_vault_comparison_guardrail_for_one_sided_comparison_query():
+    query = "From my vault, What is the difference between the bambu p1s and the Creality CR-10"
+
+    assert cascading_pipeline.should_require_vault_comparison_guardrail(
+        query,
+        [
+            {
+                "filename": "3d Printing MoC.md",
+                "filepath": "Tech/3D-Printing/3d Printing MoC.md",
+                "snippet": "Overview of 3d printing notes including bambu and creality.",
+                "source_category": "vault",
+            },
+            {
+                "filename": "bambu-lab-P1S-tech-specs.pdf",
+                "filepath": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "snippet": "Bambu P1S technical specifications.",
+                "source_category": "vault",
+            },
+        ],
+    )
+
+    assert not cascading_pipeline.should_require_vault_comparison_guardrail(
+        query,
+        [
+            {
+                "filename": "bambu-lab-P1S-tech-specs.pdf",
+                "filepath": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "snippet": "Bambu P1S technical specifications.",
+                "source_category": "vault",
+            },
+            {
+                "filename": "Creality CR-10 Smart Specs.md",
+                "filepath": "Tech/3D-Printing/Creality CR-10 Smart Specs.md",
+                "snippet": "Creality CR-10 Smart build volume and key specs.",
+                "source_category": "vault",
+            },
+        ],
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_returns_insufficient_comparison_for_one_sided_vault_query(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "ollama", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            raise AssertionError("LLM synthesis should not run when comparison guardrail triggers")
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "From my vault, What is the difference between the bambu p1s and the Creality CR-10",
+        [
+            {
+                "filename": "3d Printing MoC.md",
+                "filepath": "Tech/3D-Printing/3d Printing MoC.md",
+                "relevance": 95.0,
+                "snippet": "Overview of 3d printing notes including bambu and creality.",
+                "source_category": "vault",
+            },
+            {
+                "filename": "bambu-lab-P1S-tech-specs.pdf",
+                "filepath": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "relevance": 90.0,
+                "snippet": "Bambu P1S technical specifications.",
+                "source_category": "vault",
+            },
+        ],
+        "ollama",
+        "qwen2.5:7b-instruct",
+    )
+
+    assert result["fallback_reason"] == "insufficient_vault_comparison_evidence"
+    assert "don’t have enough information" in result["answer"].lower() or "don't have enough information" in result["answer"].lower()
+    assert "bambu p1s" in result["answer"].lower()
+    assert "creality cr-10" in result["answer"].lower()
+
+
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_synthesize_cascading_answer_blocks_web_bridging_for_personal_scope_relationship_query(monkeypatch):
     class FakeClient:

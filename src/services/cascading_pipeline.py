@@ -417,6 +417,22 @@ def is_relation_style_query(query: str) -> bool:
     return _is_relation_style_query_impl(query)
 
 
+def _query_intent(query: str) -> str:
+    return str(_normalize_query_structure_impl(query).get("intent") or "lookup")
+
+
+def is_comparison_style_query(query: str) -> bool:
+    return _query_intent(query) == "comparison"
+
+
+def _is_generic_overview_source(source: Dict[str, Any]) -> bool:
+    haystack = " ".join(
+        str(source.get(key) or "")
+        for key in ("filename", "filepath", "canonical_id", "title", "snippet")
+    ).lower()
+    return any(marker in haystack for marker in ("moc", "map of content", "overview", "general"))
+
+
 def is_personal_scope_query(query: str) -> bool:
     lowered = str(query or "").strip().lower()
     if not lowered:
@@ -457,6 +473,42 @@ def should_require_vault_relationship_guardrail(
         is_relation_style_query(query)
         and is_personal_scope_query(query)
         and not source_set_covers_query_facets(query, sources)
+    )
+
+
+def _source_set_covers_query_facets_with_specificity(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> bool:
+    facets = extract_query_facets(query)
+    if len(facets) < 2:
+        return True
+    covered: set[int] = set()
+    for source in sources or []:
+        if not isinstance(source, Mapping) or _is_generic_overview_source(source):
+            continue
+        covered.update(source_facet_match_indexes(source, query))
+        if len(covered) >= len(facets):
+            return True
+    return False
+
+
+def build_comparison_insufficient_answer(query: str) -> str:
+    payload = _normalize_query_structure_impl(query)
+    entities = [str(entity or "").strip() for entity in payload.get("entities") or [] if str(entity or "").strip()]
+    if len(entities) >= 2:
+        return f"I’m sorry, but I don’t have enough information in the provided documents to compare {entities[0]} with {entities[1]}."
+    return "I’m sorry, but I don’t have enough information in the provided documents to make that comparison."
+
+
+def should_require_vault_comparison_guardrail(
+    query: str,
+    sources: List[Dict[str, Any]],
+) -> bool:
+    return (
+        is_comparison_style_query(query)
+        and is_personal_scope_query(query)
+        and not _source_set_covers_query_facets_with_specificity(query, sources)
     )
 
 
@@ -620,6 +672,50 @@ def select_cascading_evidence_set(
                 selected.append(source)
 
             return selected[:limit]
+
+    if is_comparison_style_query(query):
+        ranked_comparison_sources = sorted(
+            candidate_sources,
+            key=lambda source: (
+                -1 if _is_generic_overview_source(source) else 0,
+                len(source_facet_match_indexes(source, query)),
+                _relation_query_source_score(query, source),
+                float(source.get("relevance", 0.0) or 0.0),
+            ),
+            reverse=True,
+        )
+        specific_sources = [source for source in ranked_comparison_sources if not _is_generic_overview_source(source)]
+        if specific_sources:
+            selected: List[Dict[str, Any]] = []
+            covered_facets: set[int] = set()
+            limit = max(2, min(max_results, len(specific_sources)))
+
+            for source in specific_sources:
+                match_indexes = source_facet_match_indexes(source, query)
+                if len(match_indexes) >= 2:
+                    selected.append(source)
+                    covered_facets.update(match_indexes)
+                    break
+
+            for source in specific_sources:
+                if len(selected) >= limit:
+                    break
+                if source in selected:
+                    continue
+                match_indexes = source_facet_match_indexes(source, query)
+                if match_indexes - covered_facets:
+                    selected.append(source)
+                    covered_facets.update(match_indexes)
+
+            for source in specific_sources:
+                if len(selected) >= limit:
+                    break
+                if source in selected:
+                    continue
+                selected.append(source)
+
+            if selected:
+                return selected[:limit]
 
     try:
         from deep_thinking.supervisor import RetrievalSupervisor
@@ -1135,13 +1231,21 @@ async def synthesize_cascading_answer(
 
     procedural_query = is_procedural_style_query(query)
     relation_query = is_relation_style_query(query)
+    comparison_query = is_comparison_style_query(query)
     require_vault_relationship_guardrail = should_require_vault_relationship_guardrail(query, sources)
+    require_vault_comparison_guardrail = should_require_vault_comparison_guardrail(query, sources)
 
     if require_vault_relationship_guardrail:
         return fallback_payload(
             build_relationship_insufficient_answer(query),
             sources,
             reason="insufficient_vault_relationship_evidence",
+        )
+    if require_vault_comparison_guardrail:
+        return fallback_payload(
+            build_comparison_insufficient_answer(query),
+            sources,
+            reason="insufficient_vault_comparison_evidence",
         )
 
     if system_prompt:
@@ -1165,6 +1269,25 @@ async def synthesize_cascading_answer(
             "Include concrete ingredients, measurements, timings, temperatures, and ordered steps when they appear in the context. "
             "Do not stop at a one-line overview if the sources contain a fuller procedure. "
             "If an important detail is missing from the context, say that it is not specified in the vault evidence. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations."
+        )
+    elif comparison_query and not brief_concept_index:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Provide a grounded comparison of the queried items. "
+            "Describe the most relevant differences and similarities supported by the evidence. "
+            "If the vault evidence is one-sided or incomplete, say so plainly instead of inventing the missing side. "
+            "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
+            "Do not invent citations."
+        )
+    elif comparison_query:
+        sys_prompt = (
+            "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
+            "Return JSON only with keys: answer, citations. "
+            "Give a concise grounded comparison of the queried items. "
+            "If the provided evidence does not support a real comparison, say that clearly. "
             "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
             "Do not invent citations."
         )

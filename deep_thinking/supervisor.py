@@ -116,6 +116,13 @@ class RetrievalSupervisor:
         "diagnosis", "options", "overview", "general", "management", "guideline",
         "regimen", "r-chop", "treatment approach", "treatment options", "workup",
     )
+    COMPARISON_SPEC_HINTS = (
+        "spec", "specs", "specification", "specifications", "tech specs", "datasheet",
+        ".pdf", "technical",
+    )
+    COMPARISON_PERIPHERAL_HINTS = (
+        "firmware", "workflow", "guide", "template", "prompt", "status", "led status",
+    )
     OUTCOME_HINTS = (
         "trial", "study", "zuma", "survival", "outcome", "efficacy", "ash",
     )
@@ -480,7 +487,7 @@ class RetrievalSupervisor:
             "prefers_reasoning_first": prefers_reasoning_first,
             "allows_instruction_docs": cls._allows_instruction_docs(lower),
             "is_medical": is_medical,
-            "allows_generic_overview": compare_mode,
+            "allows_generic_overview": compare_mode and str(normalized_query.get("intent") or "") != "comparison",
             "needs_outcomes": needs_outcomes,
             "preferred_tags": cls._preferred_tags_for_query(lower, anchors),
             "max_sources": max_sources,
@@ -684,6 +691,10 @@ class RetrievalSupervisor:
         metadata = cls._effective_metadata(doc)
         metadata_matches = metadata["tags"] & set(profile.get("preferred_tags", set()))
         generic_overview = any(hint in title_text for hint in cls.GENERIC_OVERVIEW_HINTS)
+        comparison_spec = any(hint in title_text for hint in cls.COMPARISON_SPEC_HINTS) or (
+            metadata["entity_type"] in {"pdf_document", "specification"}
+        )
+        comparison_peripheral = any(hint in title_text for hint in cls.COMPARISON_PERIPHERAL_HINTS)
         trial_outcome = any(hint in full_text for hint in cls.OUTCOME_HINTS)
         relation_hint = any(hint in full_text for hint in cls.RELATIONSHIP_EVIDENCE_HINTS)
         summary_focus_title_match = bool(summary_focus and summary_focus in title_match_text)
@@ -703,6 +714,8 @@ class RetrievalSupervisor:
             "query_term_hits": query_term_hits,
             "metadata_matches": metadata_matches,
             "generic_overview": generic_overview,
+            "comparison_spec": comparison_spec,
+            "comparison_peripheral": comparison_peripheral,
             "trial_outcome": trial_outcome,
             "explicit_relation": relation_hint and (
                 len(set(anchor_hits_any)) >= max(1, min(2, len(profile.get("anchor_entities", [])) or 1))
@@ -753,6 +766,13 @@ class RetrievalSupervisor:
 
             if profile["is_relationship"] and signals["anchor_coverage"] == 0:
                 rank -= 2.5
+            if profile.get("intent") == "comparison":
+                if signals["comparison_spec"]:
+                    rank += 2.5
+                if signals["generic_overview"]:
+                    rank -= 4.0
+                if signals["comparison_peripheral"] and signals["anchor_coverage"] < 2:
+                    rank -= 2.5
             if profile.get("is_summary_request"):
                 if source_category == "vault":
                     rank += 2.0
@@ -823,6 +843,24 @@ class RetrievalSupervisor:
             if apply_relationship_limit:
                 limit = min(max_results or profile["max_sources"] or 5, 5, profile["max_sources"] or 5)
                 return deduped[:max(1, limit)]
+            if max_results is None:
+                return deduped
+            return deduped[:max_results]
+
+        if profile.get("intent") == "comparison":
+            useful = [
+                doc for doc in deduped
+                if (
+                    doc.get("_covers_all_anchors")
+                    or (
+                        doc.get("_anchor_entities_found")
+                        and not doc.get("_generic_overview")
+                        and float(doc.get("_query_rank_score", 0.0)) >= 1.5
+                    )
+                )
+            ]
+            if useful:
+                deduped = useful
             if max_results is None:
                 return deduped
             return deduped[:max_results]

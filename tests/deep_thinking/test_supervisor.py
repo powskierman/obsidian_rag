@@ -181,6 +181,57 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertEqual(profile["relations"], ["difference between"])
         self.assertEqual(profile["clean_query"], "compare bambu p1s and Creality CR-10")
         self.assertEqual(profile["facets"], [["bambu", "p1s"], ["cr-10", "creality"]])
+        self.assertFalse(profile["allows_generic_overview"])
+
+    def test_rank_sources_for_comparison_prefers_specs_over_mocs_and_firmware(self):
+        docs = [
+            {
+                "source": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "filepath": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                "filename": "bambu-lab-P1S-tech-specs.pdf",
+                "snippet": "Bambu P1S technical specifications and build volume.",
+                "content": "Bambu P1S technical specifications and build volume.",
+                "source_category": "vault",
+                "entity_type": "pdf_document",
+                "score": 0.72,
+            },
+            {
+                "source": "Tech/3D-Printing/Bambu Labs MoC.md",
+                "filepath": "Tech/3D-Printing/Bambu Labs MoC.md",
+                "filename": "Bambu Labs MoC.md",
+                "snippet": "Overview of bambu labs notes and references.",
+                "content": "Overview of bambu labs notes and references.",
+                "source_category": "vault",
+                "score": 0.78,
+            },
+            {
+                "source": "Tech/3D-Printing/Creality/Firmware.md",
+                "filepath": "Tech/3D-Printing/Creality/Firmware.md",
+                "filename": "Firmware.md",
+                "snippet": "Firmware configuration and setup for Creality printers.",
+                "content": "Firmware configuration and setup for Creality printers.",
+                "source_category": "vault",
+                "score": 0.76,
+            },
+            {
+                "source": "Tech/3D-Printing/Creality MoC.md",
+                "filepath": "Tech/3D-Printing/Creality MoC.md",
+                "filename": "Creality MoC.md",
+                "snippet": "Overview of Creality notes and resources.",
+                "content": "Overview of Creality notes and resources.",
+                "source_category": "vault",
+                "score": 0.74,
+            },
+        ]
+
+        ranked = RetrievalSupervisor.rank_sources_for_query(
+            "From my vault, What is the difference between the bambu p1s and the Creality CR-10",
+            docs,
+            max_results=4,
+        )
+
+        assert ranked[0]["filepath"] == "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf"
+        assert all("MoC" not in doc["filepath"] for doc in ranked[:2])
 
     def test_build_query_profile_marks_specs_query_as_authority_seeking(self):
         profile = RetrievalSupervisor.build_query_profile(

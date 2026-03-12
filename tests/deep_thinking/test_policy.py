@@ -234,5 +234,44 @@ class TestPolicyAgent(unittest.TestCase):
         decision = self.policy.decide(state)
         self.assertEqual(decision, "REVISE_PLAN")
 
+    def test_decide_vault_scoped_comparison_finishes_when_only_one_side_has_vault_evidence(self):
+        mock_response = MagicMock()
+        mock_response.content = [MagicMock(text='{"decision": "REVISE_PLAN", "reasoning": "need more data", "needs_external_enrichment": false}')]
+        self.mock_client.messages.create.return_value = mock_response
+
+        state = {
+            "original_question": "From my vault, what is the difference between the bambu p1s and the Creality CR-10",
+            "past_steps": [
+                {
+                    "step": {"step_number": 1, "sub_question": "Find P1S and CR-10 notes", "search_strategy": "vector", "keywords": [], "target_folders": [], "reasoning": ""},
+                    "confidence": 0.4,
+                    "key_findings": "The vault has detailed P1S specs but no CR-10 evidence.",
+                }
+            ],
+            "retrieved_documents": [
+                {
+                    "filepath": "Tech/3D-Printing/media/bambu-lab-P1S-tech-specs.pdf",
+                    "source_category": "vault",
+                    "source_type": "direct-excerpt",
+                    "snippet": "Build volume 256 x 256 x 256 mm. Hotend 300 C. Max toolhead speed 500 mm/s.",
+                },
+                {
+                    "filepath": "Tech/3D-Printing/Bambu Labs MoC.md",
+                    "source_category": "vault",
+                    "source_type": "direct-excerpt",
+                    "snippet": "Overview of Bambu printer notes and resources for the P1S.",
+                },
+            ],
+            "plan": [
+                {"step_number": 1, "search_strategy": "vector"},
+            ],
+            "current_step_index": 1,
+            "iteration_count": 1,
+            "max_iterations": 5,
+        }
+
+        decision = self.policy.decide(state)
+        self.assertEqual(decision, "FINISH")
+
 if __name__ == '__main__':
     unittest.main()
