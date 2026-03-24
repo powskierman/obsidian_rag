@@ -13,6 +13,25 @@ IMAGING_PHRASES = (
     "dlbcl",
 )
 
+FULL_ANSWER_PHRASES = (
+    "review ",
+    " assess",
+    "assessment",
+    "analy",
+    "interpret",
+    "what does this suggest",
+    "walk me through",
+    "timeline",
+    "trend",
+    "compare",
+    "comparison",
+    "difference between",
+    "relate",
+    "relationship",
+    "how do ",
+    "how does ",
+)
+
 
 def is_medical_imaging_query(query: str) -> bool:
     if not query:
@@ -46,6 +65,15 @@ def imaging_output_template() -> str:
         "## Questions for the Oncology Team\n"
         "- 3-6 concise, actionable questions"
     )
+
+
+def prefers_full_vault_answer(query: str) -> bool:
+    if not query:
+        return False
+    lowered = query.lower()
+    if is_medical_imaging_query(query):
+        return True
+    return any(marker in lowered for marker in FULL_ANSWER_PHRASES)
 
 
 def build_prompt_appendix(user_query: str, provider: str) -> str:

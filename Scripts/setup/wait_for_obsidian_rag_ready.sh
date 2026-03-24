@@ -13,12 +13,14 @@ mkdir -p "$LOG_DIR"
 STARTUP_TIMEOUT="${STARTUP_TIMEOUT:-300}"
 CHECK_INTERVAL="${CHECK_INTERVAL:-3}"
 MLX_URL="${MLX_URL:-http://127.0.0.1:8090/v1/models}"
+MCP_HTTP_HEALTH_URL="${MCP_HTTP_HEALTH_URL:-http://127.0.0.1:8811/health}"
 
 REQUIRED_CONTAINERS=(
   obsidian-embedding
   obsidian-lightrag
   obsidian-graph-service
   obsidian-api-gateway
+  obsidian-mcp-unified
   obsidian-ui
   obsidian-webapp
 )
@@ -52,6 +54,10 @@ is_mlx_ready() {
   curl -sf --max-time 3 "$MLX_URL" >/dev/null 2>&1
 }
 
+mcp_http_ready() {
+  curl -sf --max-time 3 "$MCP_HTTP_HEALTH_URL" >/dev/null 2>&1
+}
+
 wait_for_ready() {
   local deadline=$((SECONDS + STARTUP_TIMEOUT))
 
@@ -74,6 +80,13 @@ wait_for_ready() {
       all_ready=0
     fi
 
+    if mcp_http_ready; then
+      log "OK: MCP HTTP endpoint reachable at $MCP_HTTP_HEALTH_URL"
+    else
+      log "Waiting: MCP HTTP endpoint not reachable at $MCP_HTTP_HEALTH_URL"
+      all_ready=0
+    fi
+
     if [ "$all_ready" -eq 1 ]; then
       touch "$READY_FLAG_FILE"
       log "READY: all containers and MLX are healthy"
@@ -92,4 +105,3 @@ if ! wait_for_ready; then
   rm -f "$READY_FLAG_FILE" 2>/dev/null || true
   exit 1
 fi
-

@@ -34,6 +34,18 @@ except ImportError:
             normalize_query_structure as _normalize_query_structure_impl,
         )
 
+try:
+    from utils.prompt_builder import build_prompt_appendix, prefers_full_vault_answer
+except ImportError:
+    try:
+        from src.utils.prompt_builder import build_prompt_appendix, prefers_full_vault_answer
+    except ImportError:
+        def build_prompt_appendix(user_query: str, provider: str) -> str:
+            return ""
+
+        def prefers_full_vault_answer(query: str) -> bool:
+            return False
+
 
 def _project_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -1134,9 +1146,24 @@ def _looks_incomplete_answer(text: str) -> bool:
     answer_text = str(text or "").strip()
     if not answer_text:
         return True
+
+    lowered = answer_text.lower()
+    word_count = len(answer_text.split())
+    stub_prefixes = (
+        "based on your medical notes",
+        "based on your notes",
+        "based on the provided vault context",
+        "based on the provided context",
+        "from your medical notes",
+        "from your notes",
+        "according to your medical notes",
+        "according to your notes",
+    )
+    if word_count <= 8 and any(lowered.startswith(prefix) for prefix in stub_prefixes):
+        return True
+
     if answer_text.endswith((".", "!", "?", "]", ")", "\"")):
         return False
-    word_count = len(answer_text.split())
     if word_count < 8:
         return False
 
@@ -1195,11 +1222,12 @@ async def synthesize_cascading_answer(
     supplemental_context: Optional[str] = None,
 ) -> Dict[str, Any]:
     resolved_provider = canonical_cascading_provider_name(llm_provider)
+    effective_brief_concept_index = bool(brief_concept_index) and not prefers_full_vault_answer(query)
     synthesis_timeout_seconds = _provider_synthesis_timeout_seconds(resolved_provider)
     synthesis_max_tokens = _provider_synthesis_max_tokens(
         resolved_provider,
         query,
-        brief_concept_index,
+        effective_brief_concept_index,
     )
     max_prompt_sources, max_prompt_snippet_chars, max_context_sources = _provider_prompt_source_caps(
         resolved_provider
@@ -1286,7 +1314,7 @@ async def synthesize_cascading_answer(
         resolved_provider,
         resolved_model,
         len(sources),
-        brief_concept_index,
+        effective_brief_concept_index,
         synthesis_timeout_seconds,
         max_prompt_sources if max_prompt_sources is not None else "unbounded",
         max_prompt_snippet_chars if max_prompt_snippet_chars is not None else "unbounded",
@@ -1314,7 +1342,7 @@ async def synthesize_cascading_answer(
 
     if system_prompt:
         sys_prompt = system_prompt
-    elif procedural_query and not brief_concept_index:
+    elif procedural_query and not effective_brief_concept_index:
         sys_prompt = (
             "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
             "Return JSON only with keys: answer, citations. "
@@ -1336,7 +1364,7 @@ async def synthesize_cascading_answer(
             "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
             "Do not invent citations."
         )
-    elif comparison_query and not brief_concept_index:
+    elif comparison_query and not effective_brief_concept_index:
         sys_prompt = (
             "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
             "Return JSON only with keys: answer, citations. "
@@ -1355,7 +1383,7 @@ async def synthesize_cascading_answer(
             "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
             "Do not invent citations."
         )
-    elif relation_query and not brief_concept_index:
+    elif relation_query and not effective_brief_concept_index:
         sys_prompt = (
             "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
             "Return JSON only with keys: answer, citations. "
@@ -1374,7 +1402,7 @@ async def synthesize_cascading_answer(
             "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
             "Do not invent citations. If the context is insufficient, say so."
         )
-    elif not brief_concept_index:
+    elif not effective_brief_concept_index:
         sys_prompt = (
             "You are a helpful AI assistant. Answer the user's query using ONLY the provided vault context. "
             "Return JSON only with keys: answer, citations. "
@@ -1395,6 +1423,9 @@ async def synthesize_cascading_answer(
             "Citations must be an array of vault citations using exact paths like [[Folder/Note.md]]. "
             "Do not invent citations. If the context does not contain the answer, say so."
         )
+    prompt_appendix = build_prompt_appendix(query, resolved_provider)
+    if prompt_appendix:
+        sys_prompt = f"{sys_prompt}\n\n{prompt_appendix}"
     if has_web_supplemental_context:
         sys_prompt = (
             f"{sys_prompt} "

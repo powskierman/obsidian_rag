@@ -112,6 +112,15 @@ except ImportError:
             query_terms as _query_normalizer_terms_impl,
         )
 
+try:
+    from utils.prompt_builder import prefers_full_vault_answer as _prefers_full_vault_answer_impl
+except ImportError:
+    try:
+        from src.utils.prompt_builder import prefers_full_vault_answer as _prefers_full_vault_answer_impl
+    except ImportError:
+        def _prefers_full_vault_answer_impl(query: str) -> bool:
+            return False
+
 
 def _load_deep_thinking_rag():
     """Lazy-load DeepThinkingRAG to avoid heavy ML imports during test collection."""
@@ -2825,6 +2834,11 @@ async def unified_query(request: UnifiedQueryRequest):
     if mem0_context:
         print(f"🧠 Mem0 context loaded: {len(mem0_context)} chars")
 
+    effective_brief_concept_index = (
+        bool(request.brief_concept_index)
+        and not _prefers_full_vault_answer_impl(request.query)
+    )
+
     # ===== CASCADING RETRIEVAL MODE =====
     if mode == "cascading":
         try:
@@ -3063,7 +3077,7 @@ async def unified_query(request: UnifiedQueryRequest):
                         request.llm_provider,
                         request.model,
                         request.system_prompt,
-                        request.brief_concept_index,
+                        effective_brief_concept_index,
                         "\n\n".join(section for section in supplemental_sections if section) or None,
                     )
                     synthesis_elapsed_ms = int((time.perf_counter() - synthesis_started_at) * 1000)
@@ -3299,14 +3313,14 @@ async def unified_query(request: UnifiedQueryRequest):
                     "Create 3-5 bullet points that capture the key ideas in the provided evidence; "
                     "do not add information not present in that evidence."
                 )
-                if not request.brief_concept_index:
+                if not effective_brief_concept_index:
                     micro_compressor_prompt = (
                         "Answer the query using only the provided evidence. "
                         "Provide a fuller grounded response in complete sentences with concrete details from the evidence. "
                         "Be concise, but do not reduce the answer to a terse concept index or minimal bullets. "
                         "Do not add information not present in the evidence."
                     )
-                if summary_like and request.brief_concept_index:
+                if summary_like and effective_brief_concept_index:
                     micro_compressor_prompt = (
                         "Create 3-6 bullet points that faithfully summarize only the named note or book from the provided vault evidence. "
                         "Stay grounded in the retrieved vault evidence. "
@@ -3340,6 +3354,7 @@ async def unified_query(request: UnifiedQueryRequest):
                             llm_provider=request.llm_provider,
                             model=request.model,
                             system_prompt=micro_compressor_prompt,
+                            brief_concept_index=effective_brief_concept_index,
                             supplemental_context=supplemental_context,
                         )
                         if isinstance(compressor_result, dict):

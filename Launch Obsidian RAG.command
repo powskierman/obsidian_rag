@@ -13,7 +13,7 @@ if curl -s --head --fail http://localhost:8501 > /dev/null; then
 else
     echo "🚀 Services are offline. Starting Obsidian RAG..."
     # Run the existing start script in the background
-    ./Scripts/start_obsidian_rag.sh
+    ./Scripts/setup/start_obsidian_rag.sh
 fi
 
 echo "⏳ Waiting for UI to be ready..."

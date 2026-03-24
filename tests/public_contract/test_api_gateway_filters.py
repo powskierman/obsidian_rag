@@ -272,6 +272,12 @@ def test_looks_incomplete_answer_detects_gemini_style_cutoff():
 
 
 @pytest.mark.unit
+def test_looks_incomplete_answer_detects_medical_stub():
+    assert cascading_pipeline._looks_incomplete_answer("Based on your medical notes") is True
+    assert cascading_pipeline._looks_incomplete_answer("Based on your notes") is True
+
+
+@pytest.mark.unit
 def test_hydrate_cascading_sources_prefers_expanded_note_content():
     hydrated = cascading_pipeline.hydrate_cascading_sources(
         [
@@ -334,6 +340,40 @@ async def test_synthesize_cascading_answer_times_out_to_fallback(monkeypatch):
 
 @pytest.mark.unit
 @pytest.mark.asyncio
+async def test_synthesize_cascading_answer_replaces_medical_stub_answer(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "openrouter", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            return universal_client.UniversalMessage(
+                '{"answer":"Based on your medical notes","citations":["[[Medical/Lymphoma/Scans After Yescarta Treatment.md]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "Review my PET and CT scans, bloodwork and lymphoma notes and provide your assessment",
+        [
+            {
+                "filename": "Scans After Yescarta Treatment.md",
+                "filepath": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+                "relevance": 97.0,
+                "snippet": "After your CAR-T cell infusion, these two imaging tests will provide critical information about your response to treatment.",
+                "source_category": "vault",
+            }
+        ],
+        "openrouter",
+        "google/gemini-3.1-pro-preview",
+    )
+
+    assert result["fallback_reason"] == "incomplete_answer"
+    assert result["answer"].startswith("- ")
+    assert "critical information about your response to treatment" in result["answer"]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
 async def test_synthesize_cascading_answer_uses_longer_timeout_for_lmstudio(monkeypatch):
     class FakeClient:
         def __init__(self, provider: str = "lmstudio", api_key=None):
@@ -366,6 +406,43 @@ async def test_synthesize_cascading_answer_uses_longer_timeout_for_lmstudio(monk
 
     assert result["answer"] == "LM Studio completed with extended timeout"
     assert "fallback_reason" not in result
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_adds_medical_prompt_appendix(monkeypatch):
+    captured = {}
+
+    class FakeClient:
+        def __init__(self, provider: str = "openrouter", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            captured["system"] = kwargs["system"]
+            return universal_client.UniversalMessage(
+                '{"answer":"Structured assessment","citations":["[[Medical/Lymphoma/Scans After Yescarta Treatment.md]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "Review my PET and CT scans and provide your assessment",
+        [
+            {
+                "filename": "Scans After Yescarta Treatment.md",
+                "filepath": "Medical/Lymphoma/Scans After Yescarta Treatment.md",
+                "relevance": 97.0,
+                "snippet": "CT Scan (1 Month Post-CAR-T): assess size change and anatomy.",
+                "source_category": "vault",
+            }
+        ],
+        "openrouter",
+        "google/gemini-3.1-pro-preview",
+    )
+
+    assert result["answer"] == "Structured assessment"
+    assert "## Imaging Timeline" in captured["system"]
+    assert "## Interpretation" in captured["system"]
 
 
 @pytest.mark.unit

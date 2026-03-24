@@ -69,6 +69,10 @@ gateway_healthy() {
   curl -fsS --max-time 5 "http://127.0.0.1:4000/api/v1/health" >/dev/null 2>&1
 }
 
+mcp_http_healthy() {
+  curl -fsS --max-time 5 "http://127.0.0.1:8811/health" >/dev/null 2>&1
+}
+
 gateway_can_reach_mlx() {
   docker compose exec -T api-gateway sh -lc \
     'curl -fsS --max-time 3 http://host.docker.internal:8090/v1/models >/dev/null' \
@@ -94,6 +98,15 @@ recreate_api_gateway() {
   wait_for_url "http://127.0.0.1:4000/api/v1/health" "api-gateway" 45
 }
 
+recreate_mcp_unified() {
+  log "🔄 Recreating mcp-unified..."
+  (
+    cd "$PROJECT_ROOT"
+    docker compose up -d --force-recreate mcp-unified
+  ) >> "$RECOVERY_LOG" 2>&1
+  wait_for_url "http://127.0.0.1:8811/health" "mcp-unified" 45
+}
+
 report_recent_mlx_failure() {
   if [ -f "$MLX_LOG" ]; then
     tail -n 40 "$MLX_LOG" >> "$RECOVERY_LOG" 2>/dev/null || true
@@ -102,11 +115,13 @@ report_recent_mlx_failure() {
 
 main() {
   local need_gateway_recreate=0
+  local need_mcp_recreate=0
 
   if [ "$FORCE_MODE" -eq 1 ]; then
     log "⚙️ Forced recovery requested."
     restart_mlx
     recreate_api_gateway
+    recreate_mcp_unified
     return 0
   fi
 
@@ -124,6 +139,13 @@ main() {
   else
     log "⚠️ api-gateway health endpoint is down. Recreate required."
     need_gateway_recreate=1
+  fi
+
+  if mcp_http_healthy; then
+    log "✅ MCP HTTP endpoint is healthy."
+  else
+    log "⚠️ MCP HTTP endpoint is down. Recreate required."
+    need_mcp_recreate=1
   fi
 
   if gateway_healthy && mlx_host_healthy; then
@@ -145,6 +167,16 @@ main() {
     fi
   elif [ "$WATCHDOG_MODE" -eq 0 ]; then
     log "No recovery needed."
+  fi
+
+  if [ "$need_mcp_recreate" -eq 1 ]; then
+    recreate_mcp_unified
+    if mcp_http_healthy; then
+      log "✅ Recovery complete: MCP HTTP endpoint is healthy."
+    else
+      log "❌ Recovery incomplete: MCP HTTP endpoint is still down."
+      exit 1
+    fi
   fi
 }
 

@@ -25,7 +25,7 @@ docker compose up -d lightrag-service
 ### Step 2: Verify the MCP Server venv
 
 ```bash
-/Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
+/Users/michel/dev/obsidian_rag/venv/bin/python \
   -c "import requests, mcp; print('deps ok')"
 ```
 
@@ -39,14 +39,14 @@ Add or update the `obsidian-rag-unified` block:
 {
   "mcpServers": {
     "obsidian-rag-unified": {
-      "command": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python",
+      "command": "/Users/michel/dev/obsidian_rag/venv/bin/python",
       "args": [
         "-u",
-        "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py"
+        "/Users/michel/dev/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py"
       ],
       "env": {
         "EMBEDDING_SERVICE_URL": "http://localhost:8000",
-        "KNOWLEDGE_GRAPH_PATH": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/data/graph_data/knowledge_graph_full.pkl",
+        "KNOWLEDGE_GRAPH_PATH": "/Users/michel/dev/obsidian_rag/data/graph_data/knowledge_graph_full.pkl",
         "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
       }
     }
@@ -84,9 +84,9 @@ ChatGPT connectors require a public HTTPS `/mcp` endpoint. Run the server in HTT
 
 2. Start the HTTP MCP server:
    ```bash
-/Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
-  /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py \
-  --transport http --host 127.0.0.1 --port 8811 --path /mcp
+/Users/michel/dev/obsidian_rag/venv/bin/python \
+  /Users/michel/dev/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py \
+  --transport http --host 0.0.0.0 --port 8811 --path /mcp
    ```
 
 3. Expose it with ngrok:
@@ -104,6 +104,7 @@ ChatGPT connectors require a public HTTPS `/mcp` endpoint. Run the server in HTT
 Notes:
 - If the HTTP server fails to start, install `uvicorn` in the venv.
 - Keep the tunnel running while you use the connector.
+- Use `0.0.0.0` when you need access over Tailscale or another remote interface. Use `127.0.0.1` only for local-only testing.
 
 ### OAuth Mode (for ChatGPT connectors that require OAuth)
 
@@ -122,9 +123,9 @@ If the connector UI only offers OAuth, enable OAuth mode and restart the server 
 
 3. Start the server:
    ```bash
-/Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python \
-  /Users/michel/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py \
-  --transport http --host 127.0.0.1 --port 8811 --path /mcp
+/Users/michel/dev/obsidian_rag/venv/bin/python \
+  /Users/michel/dev/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py \
+  --transport http --host 0.0.0.0 --port 8811 --path /mcp
    ```
 
 4. In ChatGPT: Settings → Connectors → Create

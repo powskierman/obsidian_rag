@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
+    curl \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
@@ -20,8 +21,14 @@ COPY src/ /app/src/
 # Set environment variables (can be overridden)
 ENV EMBEDDING_SERVICE_URL=http://host.docker.internal:8000
 ENV CLAUDE_GRAPH_SERVICE_URL=http://host.docker.internal:8002
-ENV PYTHONPATH=/app/src
+ENV MCP_GATEWAY_URL=http://host.docker.internal:4000
+ENV MCP_TRANSPORT=http
+ENV MCP_HTTP_HOST=0.0.0.0
+ENV MCP_HTTP_PORT=8811
+ENV MCP_HTTP_PATH=/mcp
+ENV PYTHONPATH=/app
 
-# Run MCP server
-CMD ["python", "src/mcp/obsidian_rag_unified_mcp.py"]
+EXPOSE 8811
 
+# Run the streamable HTTP MCP server
+CMD ["python", "src/mcp/obsidian_rag_unified_mcp.py", "--transport", "http", "--host", "0.0.0.0", "--port", "8811", "--path", "/mcp"]

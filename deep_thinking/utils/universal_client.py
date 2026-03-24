@@ -350,6 +350,8 @@ class UniversalClient:
             "X-Title": "Obsidian RAG" # App Name
         }
 
+        timeout = float(os.getenv("OPENROUTER_TIMEOUT", "180"))
+
         retries = 3
         for attempt in range(retries):
             try:
@@ -357,7 +359,7 @@ class UniversalClient:
                     "https://openrouter.ai/api/v1/chat/completions",
                     headers=headers,
                     json=payload,
-                    timeout=60
+                    timeout=timeout
                 )
 
                 if response.status_code == 200:

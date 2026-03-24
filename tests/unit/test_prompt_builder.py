@@ -4,6 +4,7 @@ from src.utils.prompt_builder import (
     build_prompt_appendix,
     build_vault_system_prompt,
     is_medical_imaging_query,
+    prefers_full_vault_answer,
 )
 
 
@@ -27,3 +28,10 @@ def test_build_vault_system_prompt_includes_context():
         custom_prompt=None,
     )
     assert "Context from notes" in prompt
+
+
+@pytest.mark.unit
+def test_prefers_full_vault_answer_for_review_queries():
+    assert prefers_full_vault_answer("Review my PET and CT scans and provide your assessment")
+    assert prefers_full_vault_answer("Analyze the tradeoffs in my Docker setup")
+    assert not prefers_full_vault_answer("What is Yescarta")

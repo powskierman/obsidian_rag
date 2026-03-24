@@ -10,6 +10,12 @@ echo "📚 Indexing Obsidian Vault with LightRAG"
 echo "=========================================="
 echo ""
 
+if [ -f "${PROJECT_ROOT}/.env" ]; then
+    set -a
+    source "${PROJECT_ROOT}/.env"
+    set +a
+fi
+
 # Check if LightRAG service is running, try to start if not
 if ! curl -s http://localhost:8001/health > /dev/null 2>&1; then
     echo "⚠️  LightRAG service is not running"
@@ -43,7 +49,7 @@ LIGHTRAG_INCLUDE_EXTENSIONS="${LIGHTRAG_INCLUDE_EXTENSIONS:-.md}"
 LIGHTRAG_EXCLUDE_EXTENSIONS="${LIGHTRAG_EXCLUDE_EXTENSIONS:-.pdf}"
 LIGHTRAG_EXCLUDE_PATHS="${LIGHTRAG_EXCLUDE_PATHS:-${LIGHTRAG_EXCLUDE_PATH_PATTERNS:-}}"
 LIGHTRAG_BYPASS_REINDEX_GUARD="${LIGHTRAG_BYPASS_REINDEX_GUARD:-0}"
-EXPECTED_LLM_PROVIDER="${LLM_PROVIDER:-ollama}"
+EXPECTED_LLM_PROVIDER="${LLM_PROVIDER:-openrouter}"
 case "$EXPECTED_LLM_PROVIDER" in
     openrouter)
         EXPECTED_LLM_MODEL="${LIGHTRAG_MODEL:-${KIMI_MODEL:-openrouter/auto}}"

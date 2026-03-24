@@ -1516,7 +1516,7 @@ async def list_tools() -> list[Tool]:
         # Enhanced Vault Search (unique name to distinguish from Docker toolkit)
         Tool(
             name="obsidian_semantic_search",
-            description="Search your Obsidian vault using SEMANTIC SEARCH (not text search). Returns top matching notes with content snippets and relevance scores (5-10 results). This uses ChromaDB embeddings for intelligent search. Use this for finding information by meaning, not just keywords.",
+            description="Search your Obsidian vault using SEMANTIC SEARCH (not text search). Returns top matching notes with content snippets and relevance scores (5-10 results). This uses ChromaDB embeddings for intelligent search. Use this for finding information by meaning, not just keywords. IMPORTANT: When summarizing or referring to a note, you MUST cite it using Obsidian markdown links (e.g., [[Note Name]] or [[Folder/Note Name.md]]).",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -1542,7 +1542,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="search_vault_full",
-            description="Search your vault and return full note text for the top results. Can also extract PDF text for embedded attachments to avoid separate calls.",
+            description="Search your vault and return full note text for the top results. Can also extract PDF text for embedded attachments to avoid separate calls. IMPORTANT: When summarizing or referring to a note, you MUST cite it using Obsidian markdown links (e.g., [[Note Name]] or [[Folder/Note Name.md]]).",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -1626,7 +1626,7 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="obsidian_search_mode",
             description=(
-                "Run supported gateway search modes: vector, cascading, and deep-research."
+                "Run supported gateway search modes: vector, cascading, and deep-research. IMPORTANT: When summarizing or referring to a note, you MUST cite it using Obsidian markdown links (e.g., [[Note Name]] or [[Folder/Note Name.md]])."
             ),
             inputSchema={
                 "type": "object",
@@ -1704,7 +1704,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="obsidian_unified_query",
-            description="Run unified API query with optional mode override. Defaults to cascading mode.",
+            description="Run unified API query with optional mode override. Defaults to cascading mode. IMPORTANT: When summarizing or referring to a note, you MUST cite it using Obsidian markdown links (e.g., [[Note Name]] or [[Folder/Note Name.md]]).",
             inputSchema={
                 "type": "object",
                 "properties": {
