@@ -19,11 +19,12 @@ const resolveGatewayQueryTimeoutMs = (body: QueryRouteBody): number => {
   const defaultTimeoutMs = parseTimeoutMs(process.env.GATEWAY_QUERY_TIMEOUT_MS, 60000);
   const provider = String(body.llm_provider || '').trim().toLowerCase();
   const mode = String(body.mode || '').trim().toLowerCase();
+  const isRemoteProvider = provider === 'openrouter' || provider === 'chatgpt' || provider === 'gemini';
 
   if (mode === 'cascading') {
     const cascadingTimeoutMs = parseTimeoutMs(
       process.env.GATEWAY_QUERY_TIMEOUT_MS_CASCADING,
-      120000,
+      isRemoteProvider ? 300000 : 120000,
     );
 
     if (provider === 'lmstudio') {
@@ -34,6 +35,13 @@ const resolveGatewayQueryTimeoutMs = (body: QueryRouteBody): number => {
     }
 
     return cascadingTimeoutMs;
+  }
+
+  if (isRemoteProvider) {
+    return parseTimeoutMs(
+      process.env.GATEWAY_QUERY_TIMEOUT_MS_REMOTE,
+      Math.max(defaultTimeoutMs, 180000),
+    );
   }
 
   return defaultTimeoutMs;

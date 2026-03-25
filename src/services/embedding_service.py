@@ -436,12 +436,15 @@ def query_documents():
             
             # Process Tag Filters directly in ChromaDB
             required_tags = []
+            tag_mode = "any"
             if filters and 'tags' in filters:
                 required_tags = filters.pop('tags')
                 if isinstance(required_tags, str):
                     required_tags = [required_tags]
+            if filters and 'tag_mode' in filters:
+                tag_mode = str(filters.pop('tag_mode') or "any").strip().lower()
             
-            print(f"DEBUG: Filters received: {filters}, Required Tags: {required_tags}")
+            print(f"DEBUG: Filters received: {filters}, Required Tags: {required_tags}, Tag Mode: {tag_mode}")
             
             if filters or required_tags:
                 # Preserve advanced filters (e.g., $or/$and) as-is
@@ -464,8 +467,28 @@ def query_documents():
                     
                     # Add tag conditions using native ChromaDB $contains
                     if required_tags:
+                        tag_conditions = []
                         for req_tag in required_tags:
-                            conditions.append({"tags": {"$contains": req_tag}})
+                            raw_tag = str(req_tag or "").strip()
+                            if not raw_tag:
+                                continue
+                            bare_tag = raw_tag.lstrip("#")
+                            normalized_tag = f"#{bare_tag.lower()}" if bare_tag else ""
+                            per_tag_conditions = [{"tags": {"$contains": bare_tag}}]
+                            if normalized_tag:
+                                per_tag_conditions.append({"tags_normalized": {"$contains": normalized_tag}})
+                            tag_conditions.append(
+                                per_tag_conditions[0]
+                                if len(per_tag_conditions) == 1
+                                else {"$or": per_tag_conditions}
+                            )
+                        if tag_conditions:
+                            if tag_mode == "all":
+                                conditions.extend(tag_conditions)
+                            elif len(tag_conditions) == 1:
+                                conditions.append(tag_conditions[0])
+                            else:
+                                conditions.append({"$or": tag_conditions})
                     
                     if conditions:
                         where_clause = {"$and": conditions} if len(conditions) > 1 else conditions[0]

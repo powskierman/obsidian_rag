@@ -1186,6 +1186,43 @@ def _looks_incomplete_answer(text: str) -> bool:
     return False
 
 
+def _looks_refusal_answer(text: str) -> bool:
+    answer_text = str(text or "").strip()
+    if not answer_text:
+        return True
+
+    cleaned = re.sub(r"\s+", " ", answer_text).strip().lower()
+    refusal_prefixes = (
+        "i cannot provide",
+        "i can't provide",
+        "i can’t provide",
+        "i cannot assist",
+        "i can't assist",
+        "i can’t assist",
+        "i cannot help",
+        "i can't help",
+        "i can’t help",
+        "i am unable to provide",
+        "i'm unable to provide",
+        "i’m unable to provide",
+        "i am not able to provide",
+        "i'm not able to provide",
+        "i’m not able to provide",
+        "unable to provide",
+        "cannot provide",
+    )
+    if any(cleaned.startswith(prefix) for prefix in refusal_prefixes):
+        return True
+
+    if (
+        any(token in cleaned for token in ("medical advice", "professional advice", "diagnosis"))
+        and any(token in cleaned for token in ("cannot", "can't", "can’t", "unable", "not able"))
+    ):
+        return True
+
+    return False
+
+
 def _salvage_structured_response(text: str) -> Dict[str, Any]:
     citations: List[str] = []
     answer_text = ""
@@ -1586,6 +1623,30 @@ async def synthesize_cascading_answer(
                 answer_text = str(parsed.get("answer") or "").strip()
                 logger.warning(
                     "cascading_synthesis.incomplete_answer provider=%s model=%s attempt=%d fallback_reason=%s total_ms=%d",
+                    resolved_provider,
+                    resolved_model,
+                    attempt_index + 1,
+                    parsed.get("fallback_reason"),
+                    int((time.perf_counter() - attempt_started_at) * 1000),
+                )
+            if _looks_refusal_answer(answer_text):
+                if attempt_index < len(attempt_sources_list) - 1:
+                    logger.info(
+                        "cascading_synthesis.retry_reduced_evidence provider=%s model=%s attempt=%d reason=refusal_answer answer_chars=%d",
+                        resolved_provider,
+                        resolved_model,
+                        attempt_index + 1,
+                        len(answer_text),
+                    )
+                    continue
+                parsed = fallback_payload(
+                    _build_extractive_cascading_fallback_answer(query, prompt_sources),
+                    prompt_sources,
+                    reason="refusal_answer",
+                )
+                answer_text = str(parsed.get("answer") or "").strip()
+                logger.warning(
+                    "cascading_synthesis.refusal_answer provider=%s model=%s attempt=%d fallback_reason=%s total_ms=%d",
                     resolved_provider,
                     resolved_model,
                     attempt_index + 1,

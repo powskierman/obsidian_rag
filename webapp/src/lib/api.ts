@@ -64,7 +64,7 @@ export const api = {
     query: string,
     mode: 'vector' | 'cascading' = 'cascading',
     n_results = 10,
-    llm_provider = 'ollama',
+    llm_provider = 'openrouter',  // Default to openrouter (faster than ollama)
     model = '',
     temperature = 0.7,
     relevance_threshold = 0,  // 0-100%, 0 = show all results

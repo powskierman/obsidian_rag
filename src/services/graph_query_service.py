@@ -272,23 +272,27 @@ def count_term_matches(terms: set[str], text: str) -> int:
 def parse_query_tags(query: str) -> tuple[str, dict]:
     """
     Parse 'tag:value' or 'tag:"value"' syntax from query.
+    Supports optional leading '#' in the tag value.
     Returns (cleaned_query, filters_dict)
     """
     if not query:
         return "", {}
         
-    tag_pattern = re.compile(r'\btag:(?:"([^"]+)"|([a-zA-Z0-9_-]+))', re.IGNORECASE)
+    tag_pattern = re.compile(r'\btag:(?:"(#?[^"]+)"|(#?[a-zA-Z0-9_/-]+))', re.IGNORECASE)
     
     tags = []
     def replace_func(match):
         # Group 1 is quoted, Group 2 is simple
-        val = match.group(1) or match.group(2)
-        tags.append(val.lower())
+        val = (match.group(1) or match.group(2) or "").strip().lower().lstrip("#")
+        if val and val not in tags:
+            tags.append(val)
         return ""
         
     cleaned = tag_pattern.sub(replace_func, query)
     
     # Clean up extra spaces
+    cleaned = re.sub(r'^\s*(?:and|or)\b', '', cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r'\b(?:and|or)\s*$', '', cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     
     filters = {}

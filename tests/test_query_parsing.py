@@ -25,6 +25,8 @@ def test_parse_tags():
         ("tag:side-effect headache", "headache", ["side-effect"]),
         ("tag:drug tag:car-t yescarta", "yescarta", ["drug", "car-t"]),
         ('find notes tag:"immune system"', "find notes", ["immune system"]),
+        ("tag:#ct-scan review scan findings", "review scan findings", ["ct-scan"]),
+        ('tag:"#blood-work" tag:lymphoma compare results', "compare results", ["blood-work", "lymphoma"]),
         ("no tags here", "no tags here", []),
         ("", "", []),
         ("tag:foo", "", ["foo"]),

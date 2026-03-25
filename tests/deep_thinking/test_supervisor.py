@@ -16,7 +16,7 @@ from deep_thinking.supervisor import RetrievalSupervisor
 
 class TestRetrievalSupervisor(unittest.TestCase):
     def setUp(self):
-        self.supervisor = RetrievalSupervisor("http://vector", "http://graph")
+        self.supervisor = RetrievalSupervisor("http://vector", "http://graph", enable_reranking=False)
 
     def test_build_filters_single(self):
         filters = self.supervisor._build_filters(["Medical/"])
@@ -182,6 +182,18 @@ class TestRetrievalSupervisor(unittest.TestCase):
         self.assertEqual(profile["clean_query"], "compare bambu p1s and Creality CR-10")
         self.assertEqual(profile["facets"], [["bambu", "p1s"], ["cr-10", "creality"]])
         self.assertFalse(profile["allows_generic_overview"])
+
+    def test_build_query_profile_extracts_generic_multi_facet_queries(self):
+        profile = RetrievalSupervisor.build_query_profile(
+            "Review my PET and CT scans, bloodwork and lymphoma notes and provide your assessment"
+        )
+
+        self.assertFalse(profile["is_relationship"])
+        self.assertEqual(profile["intent"], "lookup")
+        self.assertGreaterEqual(len(profile["facets"]), 3)
+        self.assertIn(["pet"], profile["facets"])
+        self.assertIn(["bloodwork"], profile["facets"])
+        self.assertIn(["lymphoma"], profile["facets"])
 
     def test_rank_sources_for_comparison_prefers_specs_over_mocs_and_firmware(self):
         docs = [
@@ -635,6 +647,58 @@ class TestRetrievalSupervisor(unittest.TestCase):
 
         self.assertEqual(len(selected), 1)
         self.assertEqual(selected[0]["filepath"], "Books/Books/The Wisdom of Psychopaths.md")
+
+    def test_select_minimal_evidence_set_preserves_generic_multi_facet_coverage(self):
+        query = "Review my PET and CT scans, bloodwork and lymphoma notes and provide your assessment"
+        docs = [
+            {
+                "source": "Medical/Lymphoma/Imaging MoC.md",
+                "filepath": "Medical/Lymphoma/Imaging MoC.md",
+                "filename": "Imaging MoC.md",
+                "snippet": "Overview of scans, bloodwork, lymphoma, and follow-up notes.",
+                "content": "Overview of scans, bloodwork, lymphoma, and follow-up notes.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.98,
+            },
+            {
+                "source": "Medical/Lymphoma/4th PET Scan.md",
+                "filepath": "Medical/Lymphoma/4th PET Scan.md",
+                "filename": "4th PET Scan.md",
+                "snippet": "PET scan shows residual retroperitoneal mass activity.",
+                "content": "PET scan shows residual retroperitoneal mass activity.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.74,
+            },
+            {
+                "source": "Medical/Lymphoma/Historical Blood Tests.md",
+                "filepath": "Medical/Lymphoma/Historical Blood Tests.md",
+                "filename": "Historical Blood Tests.md",
+                "snippet": "Bloodwork includes LDH, CBC, and chemistry trends over time.",
+                "content": "Bloodwork includes LDH, CBC, and chemistry trends over time.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.72,
+            },
+            {
+                "source": "Medical/Lymphoma/Lymphoma Progress report 12-31-2025.md",
+                "filepath": "Medical/Lymphoma/Lymphoma Progress report 12-31-2025.md",
+                "filename": "Lymphoma Progress report 12-31-2025.md",
+                "snippet": "Lymphoma assessment and disease course summary.",
+                "content": "Lymphoma assessment and disease course summary.",
+                "source_category": "vault",
+                "source_type": "direct-excerpt",
+                "score": 0.71,
+            },
+        ]
+
+        selected = RetrievalSupervisor.select_minimal_evidence_set(query, docs, max_docs=3)
+
+        selected_paths = [doc["filepath"] for doc in selected]
+        self.assertEqual(len(selected_paths), 3)
+        self.assertIn("Medical/Lymphoma/4th PET Scan.md", selected_paths)
+        self.assertIn("Medical/Lymphoma/Historical Blood Tests.md", selected_paths)
 
     def test_resolve_expansion_target_uses_vault_relative_index_path(self):
         with tempfile.TemporaryDirectory() as tmpdir:

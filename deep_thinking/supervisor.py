@@ -703,6 +703,7 @@ class RetrievalSupervisor:
             or title_match_text.endswith(summary_focus)
             or title_match_text.startswith(summary_focus)
         ))
+        facet_match_indexes = source_facet_match_indexes(doc, profile.get("query", ""))
 
         return {
             "title_text": title_text,
@@ -722,6 +723,8 @@ class RetrievalSupervisor:
             ),
             "summary_focus_title_match": summary_focus_title_match,
             "summary_focus_exact_match": summary_focus_exact_match,
+            "facet_match_indexes": facet_match_indexes,
+            "facet_coverage": len(facet_match_indexes),
         }
 
     @classmethod
@@ -751,11 +754,14 @@ class RetrievalSupervisor:
             rank += len(signals["anchor_hits_title"]) * 2.5
             rank += signals["anchor_coverage"] * 1.25
             rank += min(signals["query_term_hits"], 6) * 0.35
+            rank += signals["facet_coverage"] * 0.9
             rank += min(len(signals["metadata_matches"]), 3) * 1.1
             if signals["covers_all_anchors"]:
                 rank += 3.0
             if signals["explicit_relation"]:
                 rank += 3.5
+            if profile.get("facets") and signals["facet_coverage"] >= len(profile["facets"]):
+                rank += 1.5
 
             source_category = str(doc.get("source_category") or "").strip().lower()
             source_type = str(doc.get("source_type") or "").strip().lower()
@@ -800,6 +806,7 @@ class RetrievalSupervisor:
             doc["_covers_all_anchors"] = bool(signals["covers_all_anchors"])
             doc["_summary_focus_title_match"] = bool(signals["summary_focus_title_match"])
             doc["_summary_focus_exact_match"] = bool(signals["summary_focus_exact_match"])
+            doc["_facet_match_indexes"] = sorted(signals["facet_match_indexes"])
             ranked.append(doc)
 
         ranked.sort(
@@ -951,7 +958,16 @@ class RetrievalSupervisor:
                 return selected[:limit]
             return ranked[:limit]
         if not profile["is_relationship"]:
-            return ranked[: max_docs or len(ranked)]
+            limit = max_docs or len(ranked)
+            selected = ranked[:limit]
+            if max_docs is None or len(selected) >= len(ranked):
+                return selected
+            return cls._preserve_multi_facet_query_coverage(
+                query,
+                selected,
+                ranked,
+                limit,
+            )
 
         limit = min(max_docs or profile["max_sources"] or 3, 5, profile["max_sources"] or 3)
         selected: List[Dict[str, Any]] = []

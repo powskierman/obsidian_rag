@@ -132,6 +132,39 @@ def test_vector_mode_routes_to_embedding(monkeypatch):
 
 
 @pytest.mark.integration
+def test_vector_mode_expands_multi_facet_queries_beyond_default_cap(monkeypatch):
+    docs = [f"Document {idx}" for idx in range(1, 9)]
+    metas = [
+        {"filename": f"Doc{idx}.md", "filepath": f"Medical/Lymphoma/Doc{idx}.md"}
+        for idx in range(1, 9)
+    ]
+    distances = [0.2 for _ in docs]
+    routes = {
+        f"{api_gateway.EMBEDDING_SERVICE_URL}/query": lambda _json: FakeResponse(
+            {
+                "documents": [docs],
+                "metadatas": [metas],
+                "distances": [distances],
+            }
+        ),
+    }
+    calls = _client_with_routes(monkeypatch, routes)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(
+        client,
+        "vector",
+        query="Review my PET and CT scans, bloodwork and lymphoma notes and provide your assessment",
+        max_results=8,
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert calls[0]["json"]["n_results"] > 15
+    assert len(data["sources"]) > 5
+
+
+@pytest.mark.integration
 def test_vector_mode_returns_web_search_results_when_enabled(monkeypatch):
     monkeypatch.setenv("TAVILY_API_KEY", "test-key")
     routes = {

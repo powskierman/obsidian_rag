@@ -56,6 +56,54 @@ SUMMARY_PATTERNS = (
     re.compile(r"\bsummary\s+of\s+(?P<topic>.+)$", re.IGNORECASE),
 )
 
+FACET_STOPWORDS = QUERY_STOPWORDS | RELATION_STOPWORDS | {
+    "all",
+    "analyse",
+    "analyze",
+    "assessment",
+    "assess",
+    "describe",
+    "detail",
+    "details",
+    "evaluate",
+    "evaluation",
+    "explain",
+    "give",
+    "include",
+    "interpret",
+    "interpretation",
+    "look",
+    "me",
+    "my",
+    "note",
+    "notes",
+    "our",
+    "overview",
+    "please",
+    "provide",
+    "review",
+    "show",
+    "summarize",
+    "summary",
+    "tell",
+    "through",
+    "vault",
+    "walk",
+    "your",
+}
+
+_FACET_SEPARATOR_PATTERN = re.compile(r"\s*(?:,|;|\n)\s*")
+_FACET_CONJUNCTION_PATTERN = re.compile(r"\s+\band\b\s+", re.IGNORECASE)
+_LEADING_FACET_WRAPPER_PATTERN = re.compile(
+    r"^\s*(?:please\s+)?(?:review|analy[sz]e|assess|evaluate|summarize|explain|show|give|provide|tell me about|walk me through)\s+",
+    re.IGNORECASE,
+)
+_TRAILING_FACET_WRAPPER_PATTERN = re.compile(
+    r"\s+(?:and\s+)?(?:give|provide|share|offer|include)\s+(?:your\s+)?"
+    r"(?:assessment|analysis|summary|overview|interpretation|view)\b.*$",
+    re.IGNORECASE,
+)
+
 
 def clean_entity_phrase(value: str) -> str:
     text = re.sub(r"\s+", " ", str(value or "").strip(" \t\r\n\"'`()[]{}.,;:!?"))
@@ -128,9 +176,76 @@ def _extract_relation_match(query: str) -> tuple[List[str], List[Set[str]], List
     return [], [], [], "lookup"
 
 
+def _facet_terms(text: str) -> list[str]:
+    terms = query_terms(text, stopwords=FACET_STOPWORDS)
+    expanded: list[str] = []
+    seen: set[str] = set()
+    for term in terms:
+        candidates = [term]
+        if len(term) > 4 and term.endswith("s"):
+            candidates.append(term[:-1])
+        for candidate in candidates:
+            cleaned = candidate.strip("._-")
+            if len(cleaned) < 2 or cleaned in seen:
+                continue
+            seen.add(cleaned)
+            expanded.append(cleaned)
+    return expanded
+
+
+def _extract_generic_query_facets(query: str) -> List[Set[str]]:
+    normalized = re.sub(r"\s+", " ", str(query or "").strip())
+    if not normalized:
+        return []
+
+    separator_count = normalized.count(",") + normalized.count(";")
+    conjunction_count = len(re.findall(r"\band\b", normalized, flags=re.IGNORECASE))
+    if separator_count == 0 and conjunction_count < 2:
+        return []
+
+    working = _LEADING_FACET_WRAPPER_PATTERN.sub("", normalized).strip()
+    working = _TRAILING_FACET_WRAPPER_PATTERN.sub("", working).strip(" ?.!,:;")
+    if not working:
+        return []
+
+    raw_fragments: list[str] = []
+    primary_fragments = [
+        fragment.strip()
+        for fragment in _FACET_SEPARATOR_PATTERN.split(working)
+        if fragment.strip()
+    ]
+    for fragment in primary_fragments or [working]:
+        sub_fragments = [
+            sub.strip()
+            for sub in _FACET_CONJUNCTION_PATTERN.split(fragment)
+            if sub.strip()
+        ]
+        if separator_count > 0 and len(sub_fragments) > 1:
+            raw_fragments.extend(sub_fragments)
+        else:
+            raw_fragments.append(fragment)
+
+    facets: List[Set[str]] = []
+    seen_keys: set[tuple[str, ...]] = set()
+    for fragment in raw_fragments:
+        terms = _facet_terms(fragment)
+        if not terms:
+            continue
+        facet = set(terms)
+        key = tuple(sorted(facet))
+        if not facet or key in seen_keys:
+            continue
+        seen_keys.add(key)
+        facets.append(facet)
+
+    return facets if len(facets) >= 2 else []
+
+
 def extract_query_facets(query: str) -> List[Set[str]]:
     _entities, facets, _relations, _intent = _extract_relation_match(query)
-    return facets
+    if facets:
+        return facets
+    return _extract_generic_query_facets(query)
 
 
 def has_multi_facet_query(query: str) -> bool:
@@ -166,13 +281,26 @@ def normalize_query_structure(query: str) -> Dict[str, Any]:
             clean_query = f"relationship between {entities[0]} and {entities[1]}"
         must_terms = [entity for entity in entities if entity]
     else:
+        facets = _extract_generic_query_facets(clean_query)
         summary_focus = _summary_focus_text(clean_query)
         intent = "summary" if summary_focus else "lookup"
         if summary_focus:
             entities = [clean_entity_phrase(summary_focus)] if clean_entity_phrase(summary_focus) else []
         else:
             entities = []
-        must_terms = list(entities) if entities else query_terms(clean_query)
+        if entities:
+            must_terms = list(entities)
+        elif facets:
+            must_terms = []
+            seen_terms: set[str] = set()
+            for facet in facets:
+                for term in sorted(facet):
+                    if term in seen_terms:
+                        continue
+                    seen_terms.add(term)
+                    must_terms.append(term)
+        else:
+            must_terms = query_terms(clean_query)
 
     return {
         "original_query": original_query,

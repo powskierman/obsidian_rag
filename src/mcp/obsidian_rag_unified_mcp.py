@@ -1029,6 +1029,84 @@ def _get_vault_root() -> Path | None:
     return Path(vault_root).expanduser().resolve()
 
 
+def _normalize_for_matching(text: str) -> str:
+    """Normalize text for fuzzy matching by removing special chars and extra spaces."""
+    # Replace hyphens, underscores with spaces
+    normalized = re.sub(r'[-_]+', ' ', text.lower())
+    # Remove multiple spaces
+    normalized = re.sub(r'\s+', ' ', normalized)
+    return normalized.strip()
+
+
+def _find_similar_files(vault_root: Path, target_name: str, search_dir: Path | None = None) -> list[str]:
+    """Find files with similar names (case-insensitive, partial match)."""
+    if search_dir is None:
+        search_dir = vault_root
+
+    target_lower = target_name.lower()
+    target_base = Path(target_name).stem.lower()
+    target_ext = Path(target_name).suffix.lower()
+    target_normalized = _normalize_for_matching(target_base)
+    matches = []
+
+    try:
+        # First check the immediate directory for case-insensitive matches
+        if search_dir.exists() and search_dir.is_dir():
+            for item in search_dir.iterdir():
+                if item.is_file() and item.name.lower() == target_lower:
+                    matches.append(str(item.relative_to(vault_root)))
+                    return matches  # Exact match found, return immediately
+
+        # If no exact match, do a broader search with partial matching
+        search_limit = 0
+        for item in search_dir.rglob("*"):
+            if search_limit >= 200:  # Increased limit for better coverage
+                break
+            search_limit += 1
+
+            if item.is_file():
+                item_name_lower = item.name.lower()
+                item_base_lower = item.stem.lower()
+                item_ext_lower = item.suffix.lower()
+                item_normalized = _normalize_for_matching(item_base_lower)
+
+                # Match same extension only
+                if item_ext_lower != target_ext:
+                    continue
+
+                # Scoring system for better matches
+                score = 0
+
+                # Exact normalized match (e.g., "1st PET-CT" matches "1st PET CT")
+                if target_normalized == item_normalized:
+                    score = 100
+                # One contains the other (normalized)
+                elif target_normalized in item_normalized or item_normalized in target_normalized:
+                    score = 50
+                # Original partial match
+                elif target_base in item_base_lower or item_base_lower in target_base:
+                    score = 30
+                # Word overlap (split on spaces and check common words)
+                else:
+                    target_words = set(target_normalized.split())
+                    item_words = set(item_normalized.split())
+                    common_words = target_words & item_words
+                    if len(common_words) >= 2:  # At least 2 words in common
+                        score = 20
+
+                if score > 0:
+                    matches.append((score, str(item.relative_to(vault_root))))
+
+                if len(matches) >= 10:  # Collect more candidates for sorting
+                    break
+    except Exception:
+        pass
+
+    # Sort by score (highest first) and return top 5
+    matches.sort(reverse=True, key=lambda x: x[0])
+    return [path for _, path in matches[:5]]
+
+
 def _resolve_vault_path(raw_path: str) -> tuple[Path | None, str | None]:
     if not raw_path:
         return None, "❌ Path is required"
@@ -1052,7 +1130,26 @@ def _resolve_vault_path(raw_path: str) -> tuple[Path | None, str | None]:
         return None, "❌ Path is outside the vault root"
 
     if not resolved.exists():
-        return None, "❌ File not found"
+        # Try to find similar files
+        # If the parent directory exists, search there first; otherwise search from vault root
+        search_dir = vault_root
+        if candidate.parent.exists() and candidate.parent != vault_root:
+            try:
+                candidate.parent.relative_to(vault_root)
+                search_dir = candidate.parent
+            except ValueError:
+                search_dir = vault_root
+
+        similar = _find_similar_files(vault_root, candidate.name, search_dir)
+
+        # If no matches in the specific directory, try vault-wide search
+        if not similar and search_dir != vault_root:
+            similar = _find_similar_files(vault_root, candidate.name, vault_root)
+
+        error_msg = f"❌ File not found: {raw_path}"
+        if similar:
+            error_msg += f"\n\nDid you mean one of these?\n" + "\n".join(f"  • {s}" for s in similar)
+        return None, error_msg
 
     return resolved, None
 
@@ -1135,16 +1232,25 @@ def _resolve_attachment_path(note_path: Path, attachment_ref: str) -> tuple[Path
         if resolved.exists():
             return resolved, None
 
+    # Fallback: search vault for exact case-insensitive match
     target_name = attachment_path.name
+    target_name_lower = target_name.lower()
     try:
         for root, _, files in os.walk(vault_root):
-            if target_name in files:
-                found = Path(root) / target_name
-                return found.resolve(), None
+            for file in files:
+                if file.lower() == target_name_lower:
+                    found = Path(root) / file
+                    return found.resolve(), None
     except Exception:
         pass
 
-    return None, "❌ Attachment not found"
+    # Final fallback: try fuzzy matching
+    similar = _find_similar_files(vault_root, target_name, vault_root)
+    error_msg = f"❌ Attachment not found: {attachment_ref}"
+    if similar:
+        error_msg += f"\n\nDid you mean one of these?\n" + "\n".join(f"  • {s}" for s in similar)
+
+    return None, error_msg
 
 # Initialize server
 app = Server("obsidian-rag-unified")

@@ -40,7 +40,7 @@ const normalizeProvider = (rawProvider: string | null | undefined): LLMProvider 
   ? 'lmstudio'
   : VALID_LLM_PROVIDERS.includes(rawProvider as LLMProvider)
     ? rawProvider as LLMProvider
-    : 'ollama';
+    : 'openrouter';  // Default to openrouter (faster than ollama)
 
 const resolveProviderModel = (
   settings: SettingsState,

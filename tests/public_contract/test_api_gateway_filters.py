@@ -58,6 +58,19 @@ def test_source_path_key_distinguishes_duplicate_basenames_across_folders():
 
 
 @pytest.mark.unit
+def test_parse_query_tag_filters_supports_hash_tags_and_or_mode():
+    cleaned, filters = api_gateway._parse_query_tag_filters(
+        'tag:pet OR tag:#ct-scan OR tag:"#blood-work" review my scans'
+    )
+
+    assert cleaned == "review my scans"
+    assert filters == {
+        "tags": ["pet", "ct-scan", "blood-work"],
+        "tag_mode": "any",
+    }
+
+
+@pytest.mark.unit
 def test_normalize_vector_sources_uses_file_path_when_present():
     result = {
         "sources": [
@@ -278,6 +291,17 @@ def test_looks_incomplete_answer_detects_medical_stub():
 
 
 @pytest.mark.unit
+def test_looks_refusal_answer_detects_provider_refusal_stub():
+    assert cascading_pipeline._looks_refusal_answer("I cannot provide") is True
+    assert cascading_pipeline._looks_refusal_answer(
+        "I'm unable to provide medical advice or diagnosis."
+    ) is True
+    assert cascading_pipeline._looks_refusal_answer(
+        "The notes suggest the Docker bridge is misconfigured."
+    ) is False
+
+
+@pytest.mark.unit
 def test_hydrate_cascading_sources_prefers_expanded_note_content():
     hydrated = cascading_pipeline.hydrate_cascading_sources(
         [
@@ -370,6 +394,40 @@ async def test_synthesize_cascading_answer_replaces_medical_stub_answer(monkeypa
     assert result["fallback_reason"] == "incomplete_answer"
     assert result["answer"].startswith("- ")
     assert "critical information about your response to treatment" in result["answer"]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_synthesize_cascading_answer_replaces_refusal_stub_answer(monkeypatch):
+    class FakeClient:
+        def __init__(self, provider: str = "openrouter", api_key=None):
+            self.messages = self
+
+        def create(self, **kwargs):
+            return universal_client.UniversalMessage(
+                '{"answer":"I cannot provide","citations":["[[Tech/Docker/Gateway Setup.md]]"]}'
+            )
+
+    monkeypatch.setattr(universal_client, "UniversalClient", FakeClient)
+
+    result = await api_gateway._synthesize_cascading_answer(
+        "Analyze my Docker gateway setup and provide your assessment",
+        [
+            {
+                "filename": "Gateway Setup.md",
+                "filepath": "Tech/Docker/Gateway Setup.md",
+                "relevance": 96.0,
+                "snippet": "The API gateway proxies requests to the graph service on port 8002 and the embedding service on port 8001.",
+                "source_category": "vault",
+            }
+        ],
+        "openrouter",
+        "google/gemini-3.1-pro-preview",
+    )
+
+    assert result["fallback_reason"] == "refusal_answer"
+    assert result["answer"].startswith("- ")
+    assert "API gateway proxies requests to the graph service" in result["answer"]
 
 
 @pytest.mark.unit

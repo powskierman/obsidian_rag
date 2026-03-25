@@ -1009,6 +1009,13 @@ def _is_insufficient_answer(text: Any) -> bool:
     if not cleaned:
         return True
     patterns = (
+        "i cannot provide",
+        "i can't provide",
+        "i can’t provide",
+        "i am unable to provide",
+        "i'm unable to provide",
+        "i’m unable to provide",
+        "unable to provide",
         "cannot provide the analysis",
         "cannot answer",
         "insufficient information",
@@ -1396,6 +1403,41 @@ def _should_normalize_query(query: str) -> bool:
     if any(phrase in text for phrase in instruction_phrases):
         return True
     return len(terms) >= 7
+
+
+_QUERY_TAG_PATTERN = re.compile(r'\btag:(?:"(#?[^"]+)"|(#?[A-Za-z0-9_/-]+))', re.IGNORECASE)
+
+
+def _parse_query_tag_filters(query: str) -> tuple[str, dict]:
+    if not isinstance(query, str) or not query.strip():
+        return "", {}
+
+    tags: List[str] = []
+    tag_mode = "all"
+    matches = list(_QUERY_TAG_PATTERN.finditer(query))
+    for match in matches:
+        value = (match.group(1) or match.group(2) or "").strip().lower()
+        value = value.lstrip("#").strip()
+        if value and value not in tags:
+            tags.append(value)
+
+    for left, right in zip(matches, matches[1:]):
+        between = query[left.end():right.start()]
+        if re.search(r"\bor\b", between, re.IGNORECASE):
+            tag_mode = "any"
+            break
+
+    cleaned = _QUERY_TAG_PATTERN.sub("", query)
+    cleaned = re.sub(r"^(?:\s*(?:or|and)\b)+", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"(?:\b(?:or|and)\s*)+$", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+    filters: Dict[str, Any] = {}
+    if tags:
+        filters["tags"] = tags
+        if tag_mode != "all":
+            filters["tag_mode"] = tag_mode
+    return cleaned, filters
 
 
 def _deterministic_normalize_query(query: str) -> str:
@@ -2739,7 +2781,10 @@ class UnifiedQueryRequest(BaseModel):
     query: str
     mode: str = "cascading"  # vector, cascading
     max_results: int = 10
-    llm_provider: str = "ollama"
+    llm_provider: str = _get_env_value(
+        "DEFAULT_LLM_PROVIDER",
+        _get_env_value("CASCADING_LLM_PROVIDER", "openrouter")
+    )
     model: Optional[str] = None
     temperature: float = 0.7
     relevance_threshold: float = 0  # 0-100%, 0 = show all results
@@ -2806,13 +2851,9 @@ async def unified_query(request: UnifiedQueryRequest):
     )
 
     print(f"DEBUG: Raw Query Input: '{request.query}'") # NEW DEBUG
-    # Parse tag:value syntax
-    tag_matches = re.findall(r'tag:([a-zA-Z0-9_\-]+)', request.query, re.IGNORECASE)
-    filters = {}
-    if tag_matches:
-        filters['tags'] = tag_matches
-        request.query = re.sub(r'tag:[a-zA-Z0-9_\-]+', '', request.query, flags=re.IGNORECASE).strip()
-        print(f"DEBUG: Parsed tags (UnifiedQuery): {tag_matches}, Cleaned Query: '{request.query}'")
+    request.query, filters = _parse_query_tag_filters(request.query)
+    if filters:
+        print(f"DEBUG: Parsed filters (UnifiedQuery): {filters}, Cleaned Query: '{request.query}'")
 
     retrieval_query = await _normalize_query_for_retrieval(
         request.query,
@@ -3235,14 +3276,19 @@ async def unified_query(request: UnifiedQueryRequest):
         # Pure vector search
         if mode == "vector":
             try:
-                # 1. Enforce strict top-K limit for UI vector queries to tighten retrieval
-                vector_limit = min(request.max_results, 5) # Cap at 5 for vector UI mode
+                facet_groups = _extract_cascading_query_facets(request.query)
+                facet_count = len(facet_groups)
+                multi_facet_query = facet_count >= 2
+                vector_limit_cap = 5
+                if multi_facet_query:
+                    vector_limit_cap = min(12, max(6, facet_count * 3))
+                vector_limit = min(request.max_results, vector_limit_cap)
                 summary_like = bool(re.search(r"\b(summary|summarize)\b", request.query.lower()))
                 web_search_result = None
                 
                 payload = {
                     "query": retrieval_query,
-                    "n_results": vector_limit * 3, # Retrieve more to allow for post-filtering
+                    "n_results": vector_limit * (4 if multi_facet_query else 3),
                     "relevance_threshold": effective_relevance_threshold
                 }
                 if filters:
@@ -3293,11 +3339,11 @@ async def unified_query(request: UnifiedQueryRequest):
                 # Sort by new relevance and enforce final limit
                 sources = sorted(sources, key=lambda s: s.get("relevance", 0), reverse=True)
                 sources = _apply_relevance_filter(sources, effective_relevance_threshold)[:vector_limit]
-                if summary_like and sources:
+                if (summary_like or multi_facet_query) and sources:
                     selected_sources = _select_cascading_evidence_set(
                         request.query,
                         sources,
-                        max_results=min(2, vector_limit),
+                        max_results=min(2, vector_limit) if summary_like else vector_limit,
                     )
                     if selected_sources:
                         sources = selected_sources
