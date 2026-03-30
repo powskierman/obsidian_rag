@@ -1,10 +1,6 @@
 # Obsidian RAG Constitution
 
-This document is mirrored in:
-- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/reference/governance/PROJECT_CONSTITUTION.md`
-- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/.specify/memory/constitution.md`
-
-Both files must remain aligned.
+This document is the authoritative copy. It is also mirrored in `.specify/memory/constitution.md` — both files must remain aligned.
 
 ## Purpose
 Obsidian RAG is a local-first retrieval system for a personal Obsidian vault. It combines vector search, staged cascading retrieval, and deep thinking behind a unified API gateway, with repeatable indexing workflows and strong privacy defaults.
@@ -92,11 +88,11 @@ Required for completion:
 This constitution supersedes ad-hoc practices. Changes must update both mirrored constitution files in the same change set.
 
 ## Canonical References
-- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/reference/api/UNIFIED_API_IMPLEMENTATION.md`
-- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/operations/indexing/INDEXING_STRATEGY.md`
-- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/archive/search-docs/DEEP_THINKING_PROTOCOL.md`
-- `/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/Documentation/reference/streaming/STREAMING_IMPLEMENTATION.md`
+- `Documentation/reference/api/UNIFIED_API_IMPLEMENTATION.md`
+- `Documentation/operations/indexing/INDEXING_STRATEGY.md`
+- `Documentation/archive/search-docs/DEEP_THINKING_PROTOCOL.md`
+- `Documentation/reference/streaming/STREAMING_IMPLEMENTATION.md`
 
-**Version**: 2.1.1  
-**Ratified**: 2025-01-01  
-**Last Amended**: 2026-03-06
+**Version**: 2.1.2
+**Ratified**: 2025-01-01
+**Last Amended**: 2026-03-30

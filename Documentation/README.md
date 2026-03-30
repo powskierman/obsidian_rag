@@ -3,8 +3,8 @@
 Use this file as the canonical index for active documentation.
 
 ## Quick Start
-- `getting-started/API_GATEWAY_QUICKSTART.md`
 - `getting-started/SETUP_QUICKSTART.md`
+- `getting-started/API_GATEWAY_QUICKSTART.md`
 - `getting-started/README_CLI_SEARCH.md`
 
 ## Core References
@@ -15,11 +15,21 @@ Use this file as the canonical index for active documentation.
 - `reference/api/UNIFIED_API_IMPLEMENTATION.md`
 - `reference/streaming/STREAMING_IMPLEMENTATION.md`
 
+## Architecture
+- `reference/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md`
+- `reference/architecture/DEEP_THINKING_FLOW.md`
+- `reference/architecture/STREAMLIT_ARCHITECTURE.md`
+- `reference/architecture/SECOND_BRAIN_ARCHITECTURE.md`
+- `reference/architecture/GRAPH_STACK_RETIREMENT_MAP.md`
+- `reference/spec.md`
+
 ## Operations
+- `operations/DATABASE_MANAGEMENT.md`
 - `operations/indexing/INDEXING_STRATEGY.md`
 - `operations/indexing/REINDEXING_PROCEDURE.md`
 - `operations/indexing/INDEXING_BENCHMARK_PROCEDURE.md`
 - `operations/setup/INDEXING_SCRIPTS_GUIDE.md`
+- `operations/setup/API_KEY_VALIDATION_GUIDE.md`
 - `operations/setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md`
 - `operations/setup/MLX_BULLETPROOF_INDEXING_IMPLEMENTATION.md`
 - `operations/setup/TESTING.md`
@@ -30,13 +40,16 @@ Use this file as the canonical index for active documentation.
 - `operations/embeddings/EMBEDDING_MODEL_UPDATE_GUIDE.md`
 - `operations/notes/New Note Template.md`
 - `operations/quality/KNOWLEDGE_GRAPH_TEST_PROMPTS.md`
-- `operations/DATABASE_MANAGEMENT.md`
+- `operations/quality/SEARCH_MODE_AUDIT.md`
+- `operations/quality/SEARCH_COMPARISON_RESULTS.md`
 - `operations/tuning/SOTA_TUNING_GUIDE.md`
 - `operations/graph/GRAPH_DATA_FLOW.md`
 - `operations/graph/GRAPH_DATA_README.md`
 - `operations/graph/GRAPH_QUALITY_GUIDE.md`
 - `operations/graph/IMPROVED_GRAPH_BUILDER_GUIDE.md`
 - `operations/graph/TRANSFER_BETWEEN_MACHINES.md`
+- `operations/models/README.md`
+- `operations/models/SETUP.md`
 
 ## Integrations
 - `integrations/mcp/MCP_SETUP_INSTRUCTIONS.md`
@@ -47,16 +60,9 @@ Use this file as the canonical index for active documentation.
 - `deployments/mac-mini/MAC_MINI_QUICK_START.md`
 - `deployments/mac-mini/MAC_MINI_NETWORKING_FIX.md`
 
-## Reference
-- `reference/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md`
-- `reference/architecture/DEEP_THINKING_FLOW.md`
-- `reference/architecture/STREAMLIT_ARCHITECTURE.md`
-- `reference/architecture/SECOND_BRAIN_ARCHITECTURE.md`
-- `reference/spec.md`
+## Agents
 - `reference/agents/ANTIGRAVITY_SKILLS_MANUAL.md`
 - `reference/governance/PROJECT_CONSTITUTION.md`
-- `operations/models/README.md`
-- `operations/models/SETUP.md`
 
 ## Archive
 - `archive/agents/AG_BACKLOG.md`
@@ -66,9 +72,19 @@ Use this file as the canonical index for active documentation.
 - `archive/graph-retrospectives/LIGHTRAG_MEMORY_CONTEXT_FAILURE_REMEDIATION.md`
 - `archive/graph-retrospectives/LIGHTRAG_RESPONSE_EQUIVALENCE_REMEDIATION.md`
 - `archive/graph-retrospectives/NETWORKX_RETRIEVAL_GAP_ASSESSMENT.md`
+- `archive/misc/MCP_IMPROVEMENTS_SUMMARY.md`
+- `archive/misc/PROVIDER_CONFIGURATION_FIX.md`
+- `archive/misc/QUICK_FIX_MCP_SSH.md`
 - `archive/misc/README_SYNC_BUNDLE.txt`
 
-## Notes on public API
-- `POST /api/v1/query` supports `mode: vector | cascading`.
-- `ws://localhost:4000/api/v1/deep-research` is the deep-thinking stream path.
-- `lmstudio` and `mlx` map to the same local provider behavior.
+## Public API Summary
+
+- `POST /api/v1/query` — HTTP search; `mode` is `vector` or `cascading`.
+- `GET /api/v1/health` — Health check for all services.
+- `GET /api/v1/stats` — System statistics.
+- `ws://localhost:4000/api/v1/deep-research` — Deep-thinking streaming WebSocket.
+- `GET /docs` — OpenAPI UI.
+
+`lmstudio` and `mlx` are accepted as equivalent aliases for the local LM Studio provider.
+
+See `getting-started/API_GATEWAY_QUICKSTART.md` for full request/response field reference.

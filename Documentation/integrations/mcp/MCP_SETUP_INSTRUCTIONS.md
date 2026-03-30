@@ -29,11 +29,13 @@ docker compose up -d lightrag-service
   -c "import requests, mcp; print('deps ok')"
 ```
 
-### Step 3: Update ChatGPT Desktop MCP Config
+### Step 3: Update Claude Desktop / ChatGPT Desktop MCP Config
 
-Open ChatGPT Desktop → **Settings → Developer → MCP** and open the config file.
+**For Claude Desktop** — edit `~/Library/Application Support/Claude/claude_desktop_config.json`.
 
-Add or update the `obsidian-rag-unified` block:
+**For ChatGPT Desktop** — open **Settings → Developer → MCP** and open the config file.
+
+Add or update the `obsidian-rag-unified` block. The complete recommended configuration with all service URLs is:
 
 ```json
 {
@@ -42,11 +44,24 @@ Add or update the `obsidian-rag-unified` block:
       "command": "/Users/michel/dev/obsidian_rag/venv/bin/python",
       "args": [
         "-u",
-        "/Users/michel/dev/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py"
+        "/Users/michel/dev/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py",
+        "--transport",
+        "stdio"
       ],
       "env": {
+        "PYTHONPATH": "/Users/michel/dev/obsidian_rag",
+        "OBSIDIAN_VAULT_PATH": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel",
         "EMBEDDING_SERVICE_URL": "http://localhost:8000",
-        "KNOWLEDGE_GRAPH_PATH": "/Users/michel/dev/obsidian_rag/data/graph_data/knowledge_graph_full.pkl",
+        "GRAPH_SERVICE_URL": "http://localhost:8002",
+        "CLAUDE_GRAPH_SERVICE_URL": "http://localhost:8002",
+        "LIGHTRAG_SERVICE_URL": "http://localhost:8001",
+        "MCP_GATEWAY_URL": "http://localhost:4000",
+        "OLLAMA_HOST": "http://localhost:11434",
+        "LMSTUDIO_BASE_URL": "http://localhost:1234/v1",
+        "MLX_BASE_URL": "http://localhost:8090/v1",
+        "GPT_OSS_HOST": "http://localhost:12434/engines/llama.cpp",
+        "MCP_GATEWAY_QUERY_TIMEOUT": "300",
+        "MCP_DEEP_RESEARCH_TIMEOUT": "240",
         "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
       }
     }
@@ -54,11 +69,14 @@ Add or update the `obsidian-rag-unified` block:
 }
 ```
 
-Notes:
-- The MCP server loads the repo `.env` automatically.
-- Graph tools require `OPENAI_API_KEY` (either in the MCP env block or in the repo `.env`).
-- Set `OPENAI_MODEL` in `.env` to choose the model (example: `gpt-5-mini`).
-- If you only need semantic search, omit `OPENAI_API_KEY` and graph tools will not load.
+Key points:
+- Use `--transport stdio` (required by Claude Desktop and ChatGPT Desktop).
+- All service URLs use `localhost` — Docker containers expose ports to the host.
+- `OBSIDIAN_VAULT_PATH` must point to the actual iCloud vault directory.
+- `MCP_GATEWAY_QUERY_TIMEOUT=300` (5 minutes) prevents timeouts on complex cascading queries.
+- The MCP server also loads the repo `.env` automatically; env block values take precedence.
+- Graph tools (`obsidian_graph_query`, `search_entities`, etc.) require the graph and LightRAG services to be running. They will degrade gracefully if unavailable.
+- If you only need semantic search, a minimal config with just `EMBEDDING_SERVICE_URL` and `OBSIDIAN_VAULT_PATH` is sufficient.
 
 ### Step 4: Restart ChatGPT Desktop
 
@@ -144,11 +162,24 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 ### Vault Search
 - **`obsidian_semantic_search`** - Semantic search with 1-10 results and snippets
 - **`search_vault_full`** - Semantic search + full note text (+ optional embedded PDF extraction)
+- **`search_vault_text`** - Direct disk search for literal text or regex, with optional grep-style context lines
 - **`obsidian_search_mode`** - Gateway mode tool supporting:
   - `vector`
   - `cascading`
   - `deep-research`
   - Legacy aliases may still be accepted for backward compatibility, but they are not part of the supported public mode contract.
+
+### Vault File Access
+- **`get_vault_path`** - Returns the active vault's absolute path and capture root
+- **`read_vault_note`** - Read a single vault note by vault-relative path
+- **`batch_read_vault_notes`** - Read multiple vault notes in a single tool call
+- **`update_vault_note`** - Replace the contents of an existing text note in the vault
+- **`read_attachment_text`** - Extract text from a PDF attachment in the vault
+
+### Vault Health / Hygiene
+- **`obsidian_vault_stats`** - Vault statistics, including the configured vault root path
+- **`obsidian_index_health`** - Reports stale and missing local index-cache entries that can explain bad search paths
+- **`scan_vault_content_warnings`** - Flags repeated large blocks in notes to catch duplicate or stale content
 
 ### Knowledge Graph
 - **`obsidian_graph_query`** - Advanced/internal graph query helper (tries graph service first, then local graph fallback)
@@ -157,10 +188,25 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 - **`search_entities`** - Search for entities
 - **`get_graph_stats`** - Graph statistics
 
-### Vault Stats
-- **`obsidian_vault_stats`** - Vault statistics
-
 Compatibility aliases still accepted by the server: `search_vault`, `get_vault_stats`, `query_knowledge_graph`.
+
+## Recommended Usage Patterns
+
+### Finding New or Non-Indexed Notes
+
+If a note exists on disk but has not been indexed yet, do not start with semantic search.
+
+Recommended flow:
+
+1. Use `search_vault_text` with a literal string or regex and, if possible, limit the search with a directory path.
+2. Use `batch_read_vault_notes` or `read_vault_note` to inspect the matching files.
+3. Use `update_vault_note` if you need to modify an existing note.
+4. Use `obsidian_index_health` if semantic search returns stale or missing paths.
+
+Notes:
+- `search_vault_text` reads directly from the vault on disk, so it can find notes that the embedding index has not seen yet.
+- `search_vault_full` still starts from the semantic index. It is better at full retrieval after semantic discovery, not for discovering brand-new notes.
+- `search_vault_full` now attempts a conservative path recovery when stored metadata points to a moved note and will warn when the indexed path appears stale.
 
 ## Troubleshooting
 

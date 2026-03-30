@@ -80,10 +80,25 @@ Search my Obsidian vault for "test"
 
 Claude should be able to:
 - ✅ Search the vector index
+- ✅ Search vault text directly from disk, even for non-indexed notes
 - ✅ Retrieve full note content
+- ✅ Batch-read multiple notes
+- ✅ Update existing text notes in the vault
 - ✅ Read PDF attachments
 - ✅ Create new notes
+- ✅ Report stale index/path issues
 - ✅ Query the knowledge graph
+
+### Recommended Tool Flow for New Notes
+
+When you know the directory or need to inspect notes that may not be indexed yet:
+
+1. Use `search_vault_text` with a directory path and either a literal string or regex.
+2. Use `batch_read_vault_notes` or `read_vault_note` to inspect the matches.
+3. Use `update_vault_note` if you need to modify an existing note.
+4. Use `obsidian_index_health` if semantic search returns a stale path or misses notes you know exist.
+
+`obsidian_semantic_search` and `search_vault_full` still depend on the embedding index for discovery. `search_vault_text` is the correct starting point for direct filesystem discovery.
 
 ## Alternative: SSH Transport
 
@@ -284,6 +299,43 @@ curl -X POST http://100.110.65.38:8811/mcp \
   }' | python3 -m json.tool
 ```
 
+### Test Direct Vault Text Search
+
+```bash
+curl -X POST http://100.110.65.38:8811/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "search_vault_text",
+      "arguments": {
+        "pattern": "```mermaid",
+        "regex": false,
+        "context_lines": 1,
+        "path": "Projects"
+      }
+    }
+  }' | python3 -m json.tool
+```
+
+### Test Index Health
+
+```bash
+curl -X POST http://100.110.65.38:8811/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 4,
+    "method": "tools/call",
+    "params": {
+      "name": "obsidian_index_health",
+      "arguments": {}
+    }
+  }' | python3 -m json.tool
+```
+
 ## Security Notes
 
 - MCP server is exposed on Tailscale network
@@ -323,5 +375,5 @@ If issues persist:
 ---
 
 **Created**: 2026-03-25
-**Last Updated**: 2026-03-25
+**Last Updated**: 2026-03-30
 **Canmore Tailscale IP**: 100.110.65.38

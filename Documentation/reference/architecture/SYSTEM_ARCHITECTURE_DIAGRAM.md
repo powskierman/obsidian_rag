@@ -10,7 +10,7 @@ graph TB
         Streamlit[Streamlit UI
 Port 8501]
         WebApp[Next.js WebApp
-Port 3000]
+Port 3030]
     end
 
     subgraph Services

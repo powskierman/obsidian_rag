@@ -52,6 +52,19 @@ Search my Obsidian vault for "test"
 
 Should work! ✨
 
+If you need to find notes that exist on disk but are not indexed yet, use the direct text-search tools instead of semantic search:
+
+```
+Search my vault text in Projects for "```mermaid" with 1 line of context
+```
+
+Useful new MCP tools:
+- `search_vault_text` for literal/regex filesystem search with context lines
+- `batch_read_vault_notes` to inspect multiple notes in one call
+- `update_vault_note` to modify an existing note
+- `get_vault_path` to confirm the active vault root
+- `obsidian_index_health` to diagnose stale search results or missing index entries
+
 ## 🆘 If It Doesn't Work
 
 ```bash
@@ -68,7 +81,8 @@ curl -X POST http://100.110.65.38:8811/mcp \
 
 - Complete setup: `Documentation/MCP_CLIENT_SETUP.md`
 - SSH alternative: `Documentation/SSH_MCP_SETUP.md`
-- Troubleshooting: `QUICK_FIX_MCP_SSH.md`
+- MCP tool reference: `Documentation/integrations/mcp/MCP_SETUP_INSTRUCTIONS.md`
+- Troubleshooting: `Documentation/operations/troubleshooting/DOCKER_TROUBLESHOOTING.md`
 
 ---
 

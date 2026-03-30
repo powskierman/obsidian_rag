@@ -45,13 +45,27 @@ Path:       /mcp
 ```
 
 ### Available Tools
-- `search_vault` - Search vault with embeddings
-- `search_vault_full` - Search and retrieve full notes
-- `read_note` - Read a specific note
-- `create_note` - Create a new note
-- `query_graph` - Query knowledge graph
-- `deep_research` - Deep research mode
-- And more...
+
+**Vault Search**
+- `obsidian_semantic_search` - Semantic search (1–10 results with snippets)
+- `search_vault_full` - Semantic search + full note text (+ optional PDF extraction)
+- `obsidian_search_mode` - Gateway mode: `vector`, `cascading`, or `deep-research`
+- `obsidian_unified_query` - Unified query with optional mode override
+
+**Knowledge Graph**
+- `obsidian_graph_query` - Advanced graph query helper (graph service → local fallback)
+- `get_entity_info` - Entity details and relationships
+- `find_entity_path` - Connections between two entities
+- `search_entities` - Search entities by name
+- `get_graph_stats` - Graph statistics (nodes, edges, density)
+
+**Vault Operations**
+- `read_vault_note` - Read a specific note by path
+- `read_attachment_text` - Extract text from PDF attachments
+- `obsidian_vault_stats` - Total docs, entities, relationships
+- `capture_note` - Create a new note in the inbox
+- `summarize_url_to_capture` - Fetch a URL and save a summary note
+- `summarize_youtube_to_capture` - Summarize a YouTube video to a note
 
 ## 📱 Web Interfaces
 
@@ -179,7 +193,7 @@ curl -X POST http://100.110.65.38:8811/mcp \
     "id":2,
     "method":"tools/call",
     "params":{
-      "name":"search_vault",
+      "name":"obsidian_semantic_search",
       "arguments":{"query":"test"}
     }
   }'
@@ -252,7 +266,7 @@ cd /Users/michel/dev/obsidian_rag
 - **MCP Setup**: `Documentation/MCP_CLIENT_SETUP.md`
 - **SSH Alternative**: `Documentation/SSH_MCP_SETUP.md`
 - **Quick Start**: `MCP_CONNECTION_QUICK_START.md`
-- **Troubleshooting**: `QUICK_FIX_MCP_SSH.md`
+- **Troubleshooting**: `Documentation/operations/troubleshooting/DOCKER_TROUBLESHOOTING.md`
 
 ## 🎯 Quick Actions
 
@@ -278,6 +292,6 @@ docker-compose logs -f
 
 ---
 
-**Last Updated**: 2026-03-25
+**Last Updated**: 2026-03-30
 **Canmore Hostname**: canmore
 **Canmore Tailscale IP**: 100.110.65.38

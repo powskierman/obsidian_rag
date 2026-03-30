@@ -15,20 +15,27 @@ pytest.importorskip("mcp")
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from src.mcp.obsidian_rag_unified_mcp import (
     app,
+    batch_read_vault_notes,
     list_tools,
     call_tool,
+    get_vault_path,
     search_vault,
+    search_vault_full,
+    search_vault_text,
     search_with_mode,
     get_vault_statistics,
+    obsidian_index_health,
     query_knowledge_graph,
     get_entity_info,
     find_entity_path,
     search_entities,
     get_graph_stats,
+    scan_vault_content_warnings,
     summarize_url_to_capture,
     summarize_youtube_to_capture,
     apply_existing_tags_frontmatter_only,
     obsidian_unified_query,
+    update_vault_note,
     build_streamable_http_app,
 )
 
@@ -48,6 +55,12 @@ class TestMCPServerTools:
         # Should always have these tools
         assert 'obsidian_semantic_search' in tool_names
         assert 'obsidian_vault_stats' in tool_names
+        assert 'search_vault_text' in tool_names
+        assert 'get_vault_path' in tool_names
+        assert 'batch_read_vault_notes' in tool_names
+        assert 'update_vault_note' in tool_names
+        assert 'scan_vault_content_warnings' in tool_names
+        assert 'obsidian_index_health' in tool_names
 
     @pytest.mark.integration
     @pytest.mark.asyncio
@@ -298,6 +311,198 @@ class TestVaultStatistics:
 
         assert len(result) == 1
         assert 'Unable to retrieve' in result[0].text
+
+
+class TestVaultTooling:
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_get_vault_path_returns_absolute_path(self, tmp_path, monkeypatch):
+        vault_root = tmp_path / "vault"
+        vault_root.mkdir()
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+
+        result = await get_vault_path({})
+
+        assert len(result) == 1
+        assert str(vault_root.resolve()) in result[0].text
+        assert "Capture Root" in result[0].text
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_search_vault_text_literal_with_context(self, tmp_path, monkeypatch):
+        vault_root = tmp_path / "vault"
+        note_dir = vault_root / "Diagrams"
+        note_dir.mkdir(parents=True)
+        (note_dir / "Flow.md").write_text(
+            "alpha\nbeta\n```mermaid\nA-->B\n```\nomega\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+
+        result = await search_vault_text(
+            {"pattern": "A-->B", "regex": False, "context_lines": 1}
+        )
+
+        assert len(result) == 1
+        assert "Diagrams/Flow.md" in result[0].text
+        assert "> 4: A-->B" in result[0].text
+        assert "3: ```mermaid" in result[0].text
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_search_vault_text_regex_supports_multiline_patterns(self, tmp_path, monkeypatch):
+        vault_root = tmp_path / "vault"
+        note_dir = vault_root / "Diagrams"
+        note_dir.mkdir(parents=True)
+        (note_dir / "Flow.md").write_text(
+            "```mermaid\nA-->B\nB-->C\n```\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+
+        result = await search_vault_text(
+            {"pattern": r"```mermaid\nA-->B", "regex": True, "context_lines": 0}
+        )
+
+        assert len(result) == 1
+        assert "Diagrams/Flow.md" in result[0].text
+        assert "Match 1" in result[0].text
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_batch_read_vault_notes_reports_partial_failures(self, tmp_path, monkeypatch):
+        vault_root = tmp_path / "vault"
+        note_dir = vault_root / "Notes"
+        note_dir.mkdir(parents=True)
+        (note_dir / "One.md").write_text("first note", encoding="utf-8")
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+
+        result = await batch_read_vault_notes(
+            {"paths": ["Notes/One.md", "Notes/Missing.md"]}
+        )
+
+        assert len(result) == 1
+        assert "--- Notes/One.md" in result[0].text
+        assert "first note" in result[0].text
+        assert "File not found: Notes/Missing.md" in result[0].text
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_update_vault_note_replaces_existing_content(self, tmp_path, monkeypatch):
+        vault_root = tmp_path / "vault"
+        note_dir = vault_root / "Notes"
+        note_dir.mkdir(parents=True)
+        note_path = note_dir / "Editable.md"
+        note_path.write_text("before", encoding="utf-8")
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+
+        result = await update_vault_note(
+            {"path": "Notes/Editable.md", "content": "after"}
+        )
+
+        assert len(result) == 1
+        assert "Updated" in result[0].text
+        assert note_path.read_text(encoding="utf-8") == "after"
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_scan_vault_content_warnings_flags_duplicate_blocks(self, tmp_path, monkeypatch):
+        vault_root = tmp_path / "vault"
+        note_dir = vault_root / "Notes"
+        note_dir.mkdir(parents=True)
+        repeated_block = (
+            "This is a repeated block with enough characters to trigger the warning.\n"
+            "It spans multiple lines for the duplicate detector.\n"
+            "The content is intentionally duplicated.\n"
+        )
+        (note_dir / "Duplicate.md").write_text(
+            f"{repeated_block}\n{repeated_block}\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+
+        result = await scan_vault_content_warnings(
+            {"path": "Notes", "min_block_chars": 50, "min_block_lines": 2}
+        )
+
+        assert len(result) == 1
+        assert "Duplicate.md" in result[0].text
+        assert "Repeated block 2x" in result[0].text
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    @patch("src.indexing.index_vault.should_process", return_value=True)
+    async def test_obsidian_index_health_reports_stale_and_missing_entries(
+        self,
+        _mock_should_process,
+        tmp_path,
+        monkeypatch,
+    ):
+        vault_root = tmp_path / "vault"
+        note_dir = vault_root / "Notes"
+        note_dir.mkdir(parents=True)
+        (note_dir / "Present.md").write_text("present", encoding="utf-8")
+        cache_path = tmp_path / "index_cache.json"
+        cache_path.write_text(json.dumps({"Notes/Missing.md": {"hash": "abc"}}), encoding="utf-8")
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+        monkeypatch.setenv("INDEX_VAULT_CACHE_PATH", str(cache_path))
+
+        result = await obsidian_index_health({})
+
+        assert len(result) == 1
+        assert "Stale Cache Entries: 1" in result[0].text
+        assert "Missing From Cache: 1" in result[0].text
+        assert "Notes/Missing.md" in result[0].text
+        assert "Notes/Present.md" in result[0].text
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    @patch("src.mcp.obsidian_rag_unified_mcp.requests.post")
+    async def test_search_vault_full_warns_when_indexed_path_is_stale(self, mock_post, tmp_path, monkeypatch):
+        vault_root = tmp_path / "vault"
+        note_dir = vault_root / "Notes"
+        note_dir.mkdir(parents=True)
+        (note_dir / "Shared.md").write_text("resolved content", encoding="utf-8")
+        monkeypatch.setenv("OBSIDIAN_VAULT_PATH", str(vault_root))
+
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "documents": [["resolved content"]],
+            "metadatas": [[{"filename": "Shared.md", "filepath": "Archive/Shared.md"}]],
+            "distances": [[0.1]],
+        }
+        mock_post.return_value = mock_response
+
+        result = await search_vault_full({"query": "shared", "n_results": 1})
+
+        assert len(result) == 1
+        assert "Stored path metadata may be stale" in result[0].text
+        assert "Recovered Path: Notes/Shared.md" in result[0].text
+        assert "resolved content" in result[0].text
+
+    @pytest.mark.integration
+    @pytest.mark.asyncio
+    async def test_call_tool_routes_new_handlers(self):
+        with patch("src.mcp.obsidian_rag_unified_mcp.get_vault_path", new_callable=AsyncMock) as mock_path, \
+            patch("src.mcp.obsidian_rag_unified_mcp.search_vault_text", new_callable=AsyncMock) as mock_text, \
+            patch("src.mcp.obsidian_rag_unified_mcp.batch_read_vault_notes", new_callable=AsyncMock) as mock_batch, \
+            patch("src.mcp.obsidian_rag_unified_mcp.update_vault_note", new_callable=AsyncMock) as mock_update, \
+            patch("src.mcp.obsidian_rag_unified_mcp.scan_vault_content_warnings", new_callable=AsyncMock) as mock_warn, \
+            patch("src.mcp.obsidian_rag_unified_mcp.obsidian_index_health", new_callable=AsyncMock) as mock_health:
+            await call_tool("get_vault_path", {})
+            await call_tool("search_vault_text", {"pattern": "x"})
+            await call_tool("batch_read_vault_notes", {"paths": ["a.md"]})
+            await call_tool("update_vault_note", {"path": "a.md", "content": "x"})
+            await call_tool("scan_vault_content_warnings", {})
+            await call_tool("obsidian_index_health", {})
+
+        assert mock_path.await_count == 1
+        assert mock_text.await_count == 1
+        assert mock_batch.await_count == 1
+        assert mock_update.await_count == 1
+        assert mock_warn.await_count == 1
+        assert mock_health.await_count == 1
 
 
 class TestKnowledgeGraphQueries:

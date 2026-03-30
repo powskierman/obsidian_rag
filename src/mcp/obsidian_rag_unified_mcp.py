@@ -6,6 +6,8 @@ Combines enhanced vault search with knowledge graph queries.
 
 import argparse
 import asyncio
+from bisect import bisect_right
+from collections import defaultdict
 import importlib.util
 import json
 import logging
@@ -78,6 +80,13 @@ DEEP_RESEARCH_TIMEOUT = float(os.getenv("MCP_DEEP_RESEARCH_TIMEOUT", "240"))
 MAX_NOTE_CHARS = int(os.getenv("MCP_MAX_NOTE_CHARS", "200000"))
 PDF_MAX_PAGES = int(os.getenv("MCP_PDF_MAX_PAGES", "25"))
 MAX_ATTACHMENTS_PER_NOTE = int(os.getenv("MCP_MAX_ATTACHMENTS_PER_NOTE", "3"))
+MAX_BATCH_READ_NOTES = int(os.getenv("MCP_MAX_BATCH_READ_NOTES", "25"))
+TEXT_SEARCH_MAX_FILE_BYTES = int(os.getenv("MCP_TEXT_SEARCH_MAX_FILE_BYTES", str(2 * 1024 * 1024)))
+TEXT_SEARCH_MAX_MATCHES = int(os.getenv("MCP_TEXT_SEARCH_MAX_MATCHES", "50"))
+TEXT_SEARCH_MAX_FILES = int(os.getenv("MCP_TEXT_SEARCH_MAX_FILES", "10000"))
+TEXT_SEARCH_MAX_CONTEXT_LINES = int(os.getenv("MCP_TEXT_SEARCH_MAX_CONTEXT_LINES", "8"))
+DUP_WARNING_MAX_FILES = int(os.getenv("MCP_DUP_WARNING_MAX_FILES", "5000"))
+DUP_WARNING_MAX_FINDINGS = int(os.getenv("MCP_DUP_WARNING_MAX_FINDINGS", "50"))
 
 MODE_TOOL_SUPPORTED_MODES = {
     "vector",
@@ -105,6 +114,16 @@ CAPTURE_TEMPLATE_PATH = os.getenv(
 TAG_SCAN_MAX_FILES = int(os.getenv("MCP_TAG_SCAN_MAX_FILES", "5000"))
 TAG_CACHE_TTL_SECONDS = int(os.getenv("MCP_TAG_CACHE_TTL_SECONDS", "300"))
 _TAG_CACHE = {"loaded_at": 0.0, "tags": set()}
+TEXT_BINARY_SUFFIXES = {
+    ".7z", ".avi", ".bin", ".bmp", ".db", ".dmg", ".doc", ".docx", ".epub", ".gif", ".gz",
+    ".heic", ".ico", ".jpeg", ".jpg", ".mov", ".mp3", ".mp4", ".odt", ".ogg", ".pages", ".pdf",
+    ".png", ".ppt", ".pptx", ".sqlite", ".tar", ".tiff", ".wav", ".webm", ".webp", ".xls",
+    ".xlsx", ".zip",
+}
+WRITABLE_TEXT_SUFFIXES = {
+    ".css", ".csv", ".html", ".js", ".json", ".md", ".mdx", ".mermaid", ".mmd", ".py", ".scss",
+    ".svg", ".toml", ".ts", ".tsx", ".txt", ".xml", ".yaml", ".yml",
+}
 
 FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---\s*\n?", re.DOTALL)
 INLINE_TAG_PATTERN = re.compile(r"(?:^|\s)#([a-zA-Z0-9_/-]+)")
@@ -1029,6 +1048,45 @@ def _get_vault_root() -> Path | None:
     return Path(vault_root).expanduser().resolve()
 
 
+def _normalize_relative_vault_key(raw_path: str, vault_root: Path | None = None) -> str:
+    text = str(raw_path or "").replace("\\", "/").strip()
+    if not text:
+        return ""
+    candidate = Path(text).expanduser()
+    if candidate.is_absolute():
+        try:
+            base = vault_root or _get_vault_root()
+            if base is not None and _is_path_within(base, candidate):
+                return candidate.resolve().relative_to(base).as_posix()
+        except Exception:
+            return candidate.as_posix()
+        return candidate.as_posix()
+    return text.lstrip("./")
+
+
+def _resolve_vault_scope(raw_path: str | None) -> tuple[Path | None, str | None]:
+    vault_root = _get_vault_root()
+    if vault_root is None:
+        return None, "❌ OBSIDIAN_VAULT_PATH is not set"
+    if not raw_path:
+        return vault_root, None
+
+    candidate = Path(str(raw_path).strip()).expanduser()
+    if not candidate.is_absolute():
+        candidate = vault_root / candidate
+
+    try:
+        resolved = candidate.resolve()
+    except Exception:
+        return None, "❌ Invalid path"
+
+    if not _is_path_within(vault_root, resolved):
+        return None, "❌ Path is outside the vault root"
+    if not resolved.exists():
+        return None, f"❌ Path not found: {raw_path}"
+    return resolved, None
+
+
 def _normalize_for_matching(text: str) -> str:
     """Normalize text for fuzzy matching by removing special chars and extra spaces."""
     # Replace hyphens, underscores with spaces
@@ -1107,13 +1165,67 @@ def _find_similar_files(vault_root: Path, target_name: str, search_dir: Path | N
     return [path for _, path in matches[:5]]
 
 
-def _resolve_vault_path(raw_path: str) -> tuple[Path | None, str | None]:
+def _search_vault_recovery_candidates(vault_root: Path, raw_path: str, max_candidates: int = 5) -> list[Path]:
+    target = _normalize_relative_vault_key(raw_path, vault_root).lower()
+    if not target:
+        return []
+
+    target_path = Path(target)
+    basename = target_path.name.lower()
+    stem = _normalize_for_matching(target_path.stem)
+    parts = [part for part in target.split("/") if part]
+    suffixes = ["/".join(parts[-width:]) for width in range(min(3, len(parts)), 0, -1)]
+    scored: dict[str, tuple[int, Path]] = {}
+    scanned = 0
+
+    for item in vault_root.rglob("*"):
+        if not item.is_file():
+            continue
+        scanned += 1
+        if scanned > TEXT_SEARCH_MAX_FILES:
+            break
+
+        rel = item.relative_to(vault_root).as_posix()
+        rel_lower = rel.lower()
+        item_name = item.name.lower()
+        item_stem = _normalize_for_matching(item.stem)
+        score = 0
+
+        if rel_lower == target:
+            score = 500
+        else:
+            for index, suffix in enumerate(suffixes):
+                if rel_lower.endswith(suffix):
+                    score = max(score, 350 - (index * 25))
+            if basename and item_name == basename:
+                score = max(score, 250)
+            if stem and item_stem == stem:
+                score = max(score, 200)
+            if basename and basename in item_name:
+                score = max(score, 120)
+
+        if score <= 0:
+            continue
+
+        existing = scored.get(rel)
+        if existing is None or score > existing[0]:
+            scored[rel] = (score, item)
+
+    ranked = sorted(scored.values(), key=lambda item: (-item[0], len(item[1].as_posix()), item[1].as_posix()))
+    return [item[1] for item in ranked[:max_candidates]]
+
+
+def _resolve_vault_path_detail(
+    raw_path: str,
+    *,
+    allow_recovery: bool = True,
+) -> tuple[Path | None, str | None, str | None, bool]:
     if not raw_path:
-        return None, "❌ Path is required"
+        return None, "❌ Path is required", None, False
 
     vault_root = _get_vault_root()
     if vault_root is None:
-        return None, "❌ OBSIDIAN_VAULT_PATH is not set"
+        return None, "❌ OBSIDIAN_VAULT_PATH is not set", None, False
 
     candidate = Path(raw_path).expanduser()
     if not candidate.is_absolute():
@@ -1122,36 +1234,44 @@ def _resolve_vault_path(raw_path: str) -> tuple[Path | None, str | None]:
     try:
         resolved = candidate.resolve()
     except Exception:
-        return None, "❌ Invalid path"
+        return None, "❌ Invalid path", None, False
 
-    try:
-        resolved.relative_to(vault_root)
-    except ValueError:
-        return None, "❌ Path is outside the vault root"
+    if not _is_path_within(vault_root, resolved):
+        return None, "❌ Path is outside the vault root", None, False
 
-    if not resolved.exists():
-        # Try to find similar files
-        # If the parent directory exists, search there first; otherwise search from vault root
-        search_dir = vault_root
-        if candidate.parent.exists() and candidate.parent != vault_root:
-            try:
-                candidate.parent.relative_to(vault_root)
-                search_dir = candidate.parent
-            except ValueError:
-                search_dir = vault_root
+    if resolved.exists():
+        return resolved, None, None, False
 
-        similar = _find_similar_files(vault_root, candidate.name, search_dir)
+    search_dir = vault_root
+    if candidate.parent.exists() and candidate.parent != vault_root and _is_path_within(vault_root, candidate.parent):
+        search_dir = candidate.parent
 
-        # If no matches in the specific directory, try vault-wide search
-        if not similar and search_dir != vault_root:
-            similar = _find_similar_files(vault_root, candidate.name, vault_root)
+    similar = _find_similar_files(vault_root, candidate.name, search_dir)
+    if not similar and search_dir != vault_root:
+        similar = _find_similar_files(vault_root, candidate.name, vault_root)
 
-        error_msg = f"❌ File not found: {raw_path}"
-        if similar:
-            error_msg += f"\n\nDid you mean one of these?\n" + "\n".join(f"  • {s}" for s in similar)
-        return None, error_msg
+    recovered_warning = None
+    if allow_recovery:
+        recovered_candidates = _search_vault_recovery_candidates(vault_root, raw_path)
+        if len(recovered_candidates) == 1:
+            recovered = recovered_candidates[0].resolve()
+            recovered_warning = (
+                f"⚠️ Resolved missing path `{raw_path}` to `{_vault_relative_path(recovered)}`. "
+                "Stored path metadata may be stale."
+            )
+            return recovered, None, recovered_warning, True
+        if recovered_candidates and not similar:
+            similar = [_vault_relative_path(path) for path in recovered_candidates]
 
-    return resolved, None
+    error_msg = f"❌ File not found: {raw_path}"
+    if similar:
+        error_msg += f"\n\nDid you mean one of these?\n" + "\n".join(f"  • {s}" for s in similar)
+    return None, error_msg, recovered_warning, False
+
+
+def _resolve_vault_path(raw_path: str) -> tuple[Path | None, str | None]:
+    resolved, error, _, _ = _resolve_vault_path_detail(raw_path)
+    return resolved, error
 
 
 def _read_text_file(resolved: Path, max_chars: int) -> str:
@@ -1160,6 +1280,200 @@ def _read_text_file(resolved: Path, max_chars: int) -> str:
     if len(content) > max_chars:
         content = content[:max_chars] + "\n\n[TRUNCATED]"
     return content
+
+
+def _is_probably_text_file(path: Path) -> bool:
+    if path.suffix.lower() in TEXT_BINARY_SUFFIXES:
+        return False
+    try:
+        if path.stat().st_size > TEXT_SEARCH_MAX_FILE_BYTES:
+            return False
+        with open(path, "rb") as handle:
+            sample = handle.read(4096)
+        if b"\x00" in sample:
+            return False
+    except Exception:
+        return False
+    return True
+
+
+def _is_writable_text_note(path: Path) -> bool:
+    return path.suffix.lower() in WRITABLE_TEXT_SUFFIXES
+
+
+def _iter_scope_files(scope: Path, max_files: int | None = None) -> tuple[list[Path], bool]:
+    files: list[Path] = []
+    truncated = False
+    if scope.is_file():
+        return [scope], False
+
+    for item in scope.rglob("*"):
+        if not item.is_file():
+            continue
+        files.append(item)
+        if max_files is not None and len(files) >= max_files:
+            truncated = True
+            break
+    return files, truncated
+
+
+def _build_line_starts(text: str) -> list[int]:
+    starts = [0]
+    for index, char in enumerate(text):
+        if char == "\n":
+            starts.append(index + 1)
+    return starts
+
+
+def _line_number_for_offset(line_starts: list[int], offset: int) -> int:
+    return max(1, bisect_right(line_starts, max(0, offset)))
+
+
+def _render_match_context(
+    text: str,
+    match_start: int,
+    match_end: int,
+    *,
+    context_lines: int,
+) -> tuple[int, int, str]:
+    lines = text.splitlines()
+    if not lines:
+        return 1, 1, ""
+
+    line_starts = _build_line_starts(text)
+    start_line = _line_number_for_offset(line_starts, match_start)
+    end_offset = match_start if match_end <= match_start else match_end - 1
+    end_line = _line_number_for_offset(line_starts, end_offset)
+    first_line = max(1, start_line - context_lines)
+    last_line = min(len(lines), end_line + context_lines)
+
+    rendered = []
+    for line_number in range(first_line, last_line + 1):
+        marker = ">" if start_line <= line_number <= end_line else " "
+        rendered.append(f"{marker} {line_number}: {lines[line_number - 1]}")
+    return start_line, end_line, "\n".join(rendered)
+
+
+def _compile_vault_text_pattern(pattern: str, regex: bool, case_sensitive: bool) -> re.Pattern:
+    flags = re.MULTILINE
+    if not case_sensitive:
+        flags |= re.IGNORECASE
+    source = pattern if regex else re.escape(pattern)
+    compiled = re.compile(source, flags)
+    empty_match = compiled.search("")
+    if empty_match and empty_match.start() == empty_match.end():
+        raise ValueError("pattern matches empty strings; provide a more specific pattern")
+    return compiled
+
+
+def _normalize_duplicate_block(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
+def _find_duplicate_blocks(
+    content: str,
+    *,
+    min_block_chars: int,
+    min_block_lines: int,
+) -> list[dict]:
+    blocks: dict[str, list[tuple[int, str]]] = defaultdict(list)
+    current_lines: list[str] = []
+    block_start = 1
+    lines = content.splitlines()
+
+    def flush() -> None:
+        if not current_lines:
+            return
+        raw_block = "\n".join(current_lines).strip()
+        normalized = _normalize_duplicate_block(raw_block)
+        if len(normalized) >= min_block_chars and len(current_lines) >= min_block_lines:
+            blocks[normalized].append((block_start, raw_block))
+
+    for line_number, line in enumerate(lines, start=1):
+        if line.strip():
+            if not current_lines:
+                block_start = line_number
+            current_lines.append(line)
+            continue
+        flush()
+        current_lines = []
+
+    flush()
+
+    duplicates = []
+    for normalized, occurrences in blocks.items():
+        if len(occurrences) < 2:
+            continue
+        preview = occurrences[0][1]
+        if len(preview) > 220:
+            preview = preview[:220] + "..."
+        duplicates.append(
+            {
+                "count": len(occurrences),
+                "lines": [line for line, _ in occurrences],
+                "preview": preview,
+            }
+        )
+    duplicates.sort(key=lambda item: (-item["count"], item["lines"][0]))
+    return duplicates
+
+
+def _normalize_index_cache_key(raw_key: str, vault_root: Path) -> str:
+    normalized = _normalize_relative_vault_key(raw_key, vault_root)
+    return normalized.replace("\\", "/").strip("/")
+
+
+def _collect_index_health_snapshot(limit: int = 10) -> tuple[dict | None, str | None]:
+    vault_root = _get_vault_root()
+    if vault_root is None:
+        return None, "❌ OBSIDIAN_VAULT_PATH is not set"
+
+    try:
+        from src.indexing.index_vault import get_cache_path, load_index_cache, should_process
+    except Exception as e:
+        return None, f"❌ Failed to load index helpers: {str(e)}"
+
+    cache_path = get_cache_path(vault_root)
+    cache = load_index_cache(cache_path)
+    if not cache_path.exists():
+        return {
+            "vault_root": str(vault_root),
+            "cache_path": str(cache_path),
+            "cache_entries": 0,
+            "tracked_files": 0,
+            "stale_entries": [],
+            "missing_from_cache": [],
+        }, None
+
+    tracked_files: set[str] = set()
+    for file_path in vault_root.rglob("*"):
+        if not file_path.is_file():
+            continue
+        try:
+            if not should_process(file_path):
+                continue
+        except Exception:
+            continue
+        tracked_files.add(file_path.relative_to(vault_root).as_posix())
+
+    cache_keys = {
+        _normalize_index_cache_key(str(key), vault_root)
+        for key in cache.keys()
+        if str(key).strip()
+    }
+    stale_entries = sorted(path for path in cache_keys if path and path not in tracked_files)
+    missing_from_cache = sorted(path for path in tracked_files if path not in cache_keys)
+
+    return {
+        "vault_root": str(vault_root),
+        "cache_path": str(cache_path),
+        "cache_entries": len(cache_keys),
+        "tracked_files": len(tracked_files),
+        "stale_entries": stale_entries[:limit],
+        "missing_from_cache": missing_from_cache[:limit],
+        "stale_count": len(stale_entries),
+        "missing_count": len(missing_from_cache),
+    }, None
 
 
 def _extract_pdf_text(resolved: Path, max_pages: int, max_chars: int) -> tuple[str, bool]:
@@ -1687,8 +2001,58 @@ async def list_tools() -> list[Tool]:
             }
         ),
         Tool(
+            name="search_vault_text",
+            description="Search vault text using literal matching or regex, with optional grep-style context lines. Use this for exact strings, code, syntax, or multiline patterns.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pattern": {
+                        "type": "string",
+                        "description": "Literal text or regex pattern to search for."
+                    },
+                    "regex": {
+                        "type": "boolean",
+                        "description": "Treat pattern as a regex (default: false).",
+                        "default": False
+                    },
+                    "case_sensitive": {
+                        "type": "boolean",
+                        "description": "Use case-sensitive matching (default: false).",
+                        "default": False
+                    },
+                    "context_lines": {
+                        "type": "integer",
+                        "description": "Number of context lines to include around each match (default: 2).",
+                        "default": 2,
+                        "minimum": 0,
+                        "maximum": 8
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Optional vault-relative file or directory to limit the search scope."
+                    },
+                    "max_matches": {
+                        "type": "integer",
+                        "description": "Maximum number of matches to return across the vault (default: 20).",
+                        "default": 20,
+                        "minimum": 1,
+                        "maximum": 50
+                    }
+                },
+                "required": ["pattern"]
+            }
+        ),
+        Tool(
             name="obsidian_vault_stats",
-            description="Get statistics about your vault including total documents, entities, and relationships.",
+            description="Get statistics about your vault including total documents, entities, relationships, and the vault root path.",
+            inputSchema={
+                "type": "object",
+                "properties": {}
+            }
+        ),
+        Tool(
+            name="get_vault_path",
+            description="Return the absolute path of the active Obsidian vault on disk.",
             inputSchema={
                 "type": "object",
                 "properties": {}
@@ -1706,6 +2070,39 @@ async def list_tools() -> list[Tool]:
                     }
                 },
                 "required": ["path"]
+            }
+        ),
+        Tool(
+            name="batch_read_vault_notes",
+            description="Read multiple vault notes in one call. Provide paths relative to OBSIDIAN_VAULT_PATH.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "paths": {
+                        "type": "array",
+                        "description": "Vault-relative note paths to read.",
+                        "items": {"type": "string"},
+                    }
+                },
+                "required": ["paths"]
+            }
+        ),
+        Tool(
+            name="update_vault_note",
+            description="Replace the contents of an existing text note in the vault.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Vault-relative path to an existing text note."
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "New full file content."
+                    }
+                },
+                "required": ["path", "content"]
             }
         ),
         Tool(
@@ -1966,6 +2363,48 @@ async def list_tools() -> list[Tool]:
             }
         ),
         Tool(
+            name="scan_vault_content_warnings",
+            description="Scan notes for duplicate large blocks that may indicate stale or repeated content.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Optional vault-relative note or directory to scan."
+                    },
+                    "min_block_chars": {
+                        "type": "integer",
+                        "description": "Minimum normalized block length to flag (default: 200).",
+                        "default": 200,
+                        "minimum": 50,
+                        "maximum": 5000
+                    },
+                    "min_block_lines": {
+                        "type": "integer",
+                        "description": "Minimum line count per repeated block (default: 3).",
+                        "default": 3,
+                        "minimum": 1,
+                        "maximum": 20
+                    },
+                    "max_findings": {
+                        "type": "integer",
+                        "description": "Maximum warnings to return (default: 20).",
+                        "default": 20,
+                        "minimum": 1,
+                        "maximum": 50
+                    }
+                }
+            }
+        ),
+        Tool(
+            name="obsidian_index_health",
+            description="Inspect local vault indexing cache health and report stale or missing entries that may affect search path resolution.",
+            inputSchema={
+                "type": "object",
+                "properties": {}
+            }
+        ),
+        Tool(
             name="apply_existing_tags_frontmatter_only",
             description=f"Apply existing vault tags to a note frontmatter. Writes are restricted to '{CAPTURE_SUBDIR}'.",
             inputSchema={
@@ -2099,14 +2538,22 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             return await search_vault(arguments)
         elif name == "search_vault_full":
             return await search_vault_full(arguments)
+        elif name == "search_vault_text":
+            return await search_vault_text(arguments)
         elif name == "get_vault_stats" or name == "obsidian_vault_stats":
             # Support both names for compatibility
             return await get_vault_statistics(arguments)
+        elif name == "get_vault_path":
+            return await get_vault_path(arguments)
         elif name == "obsidian_graph_query" or name == "query_knowledge_graph":
             # Support both names for compatibility
             return await query_knowledge_graph(arguments)
         elif name == "read_vault_note":
             return await read_vault_note(arguments)
+        elif name == "batch_read_vault_notes":
+            return await batch_read_vault_notes(arguments)
+        elif name == "update_vault_note":
+            return await update_vault_note(arguments)
         elif name == "read_attachment_text":
             return await read_attachment_text(arguments)
         elif name == "obsidian_search_mode" or name == "search_mode":
@@ -2119,6 +2566,10 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             return await summarize_url_to_capture(arguments)
         elif name == "summarize_youtube_to_capture":
             return await summarize_youtube_to_capture(arguments)
+        elif name == "scan_vault_content_warnings":
+            return await scan_vault_content_warnings(arguments)
+        elif name == "obsidian_index_health":
+            return await obsidian_index_health(arguments)
         elif name == "apply_existing_tags_frontmatter_only":
             return await apply_existing_tags_frontmatter_only(arguments)
         elif name == "get_entity_info":
@@ -2276,13 +2727,18 @@ async def search_vault_full(arguments: dict) -> list[TextContent]:
             note_path = None
             note_text = None
             if filepath and filepath != "unknown":
-                resolved, error = _resolve_vault_path(filepath)
+                resolved, error, warning, recovered = _resolve_vault_path_detail(filepath)
+                if warning:
+                    output.append(warning)
                 if error:
                     output.append(error)
+                    output.append("⚠️ Search result path could not be resolved. Run `obsidian_index_health` and reindex if needed.")
                 else:
                     note_path = resolved
                     try:
                         note_text = _read_text_file(resolved, MAX_NOTE_CHARS)
+                        if recovered:
+                            output.append(f"Recovered Path: {_vault_relative_path(resolved)}")
                         output.append("Note:")
                         output.append(note_text)
                     except Exception as e:
@@ -2323,9 +2779,116 @@ async def search_vault_full(arguments: dict) -> list[TextContent]:
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Search error: {str(e)}")]
 
+
+async def search_vault_text(arguments: dict) -> list[TextContent]:
+    args = arguments or {}
+    pattern = str(args.get("pattern") or "").strip()
+    regex = bool(args.get("regex", False))
+    case_sensitive = bool(args.get("case_sensitive", False))
+    context_lines = int(args.get("context_lines", 2))
+    context_lines = max(0, min(TEXT_SEARCH_MAX_CONTEXT_LINES, context_lines))
+    max_matches = int(args.get("max_matches", 20))
+    max_matches = max(1, min(TEXT_SEARCH_MAX_MATCHES, max_matches))
+
+    if not pattern:
+        return [TextContent(type="text", text="❌ pattern is required")]
+
+    scope, scope_error = _resolve_vault_scope(str(args.get("path") or "").strip() or None)
+    if scope_error:
+        return [TextContent(type="text", text=scope_error)]
+
+    try:
+        compiled = _compile_vault_text_pattern(pattern, regex=regex, case_sensitive=case_sensitive)
+    except re.error as e:
+        return [TextContent(type="text", text=f"❌ Invalid regex: {str(e)}")]
+    except ValueError as e:
+        return [TextContent(type="text", text=f"❌ {str(e)}")]
+
+    scope_files, scope_truncated = _iter_scope_files(scope, max_files=TEXT_SEARCH_MAX_FILES)
+    total_matches = 0
+    matched_files = 0
+    output = [
+        f"🔎 Vault text search for `{pattern}`",
+        f"Mode: {'regex' if regex else 'literal'} | Case-sensitive: {'yes' if case_sensitive else 'no'} | Context lines: {context_lines}",
+    ]
+
+    if scope_truncated:
+        output.append(f"⚠️ Scan stopped after {TEXT_SEARCH_MAX_FILES} files.")
+
+    for file_path in scope_files:
+        if total_matches >= max_matches:
+            break
+        if not _is_probably_text_file(file_path):
+            continue
+
+        try:
+            text = file_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+
+        file_matches = []
+        for match in compiled.finditer(text):
+            if total_matches >= max_matches:
+                break
+            start_line, end_line, snippet = _render_match_context(
+                text,
+                match.start(),
+                match.end(),
+                context_lines=context_lines,
+            )
+            file_matches.append(
+                {
+                    "start_line": start_line,
+                    "end_line": end_line,
+                    "snippet": snippet,
+                }
+            )
+            total_matches += 1
+
+        if not file_matches:
+            continue
+
+        matched_files += 1
+        output.append("")
+        output.append(f"--- {_vault_relative_path(file_path)} ({len(file_matches)} match{'es' if len(file_matches) != 1 else ''})")
+        for index, item in enumerate(file_matches, start=1):
+            if item["start_line"] == item["end_line"]:
+                line_label = f"line {item['start_line']}"
+            else:
+                line_label = f"lines {item['start_line']}-{item['end_line']}"
+            output.append(f"Match {index} ({line_label}):")
+            output.append(item["snippet"])
+
+    if total_matches == 0:
+        scope_label = _vault_relative_path(scope) if scope and scope != _get_vault_root() else "vault"
+        return [TextContent(type="text", text=f"🔎 No text matches found for `{pattern}` in {scope_label}.")]
+
+    output.insert(2, f"Files matched: {matched_files} | Matches returned: {total_matches}")
+    if total_matches >= max_matches:
+        output.append("")
+        output.append(f"⚠️ Match limit reached ({max_matches}). Narrow the scope or increase `max_matches`.")
+
+    return [TextContent(type="text", text="\n".join(output))]
+
+
+async def get_vault_path(arguments: dict) -> list[TextContent]:
+    vault_root = _get_vault_root()
+    if vault_root is None:
+        return [TextContent(type="text", text="❌ OBSIDIAN_VAULT_PATH is not set")]
+
+    capture_root, capture_error = _get_capture_root()
+    lines = [f"Vault Root: {vault_root}"]
+    if capture_error:
+        lines.append(capture_error)
+    elif capture_root is not None:
+        lines.append(f"Capture Root: {capture_root}")
+    return [TextContent(type="text", text="\n".join(lines))]
+
+
 async def get_vault_statistics(arguments: dict) -> list[TextContent]:
     """Get vault statistics"""
     try:
+        vault_root = _get_vault_root()
         # Try embedding service stats
         try:
             stats_response = requests.get(
@@ -2336,6 +2899,7 @@ async def get_vault_statistics(arguments: dict) -> list[TextContent]:
             if stats_response.status_code == 200:
                 stats = stats_response.json()
                 output = "📊 **Vault Statistics:**\n\n"
+                output += f"**Vault Root:** {vault_root or 'Unavailable'}\n"
                 output += f"**Total Documents:** {stats.get('total_documents', 0):,}\n"
                 output += f"**Total Chunks:** {stats.get('total_chunks', 0):,}\n"
                 return [TextContent(type="text", text=output)]
@@ -2346,6 +2910,7 @@ async def get_vault_statistics(arguments: dict) -> list[TextContent]:
         return [TextContent(
             type="text",
             text="📊 **Vault Statistics:**\n\n"
+                 f"**Vault Root:** {vault_root or 'Unavailable'}\n"
                  "Unable to retrieve statistics. Make sure the embedding service is running."
         )]
     
@@ -2995,15 +3560,80 @@ async def get_entity_info(arguments: dict) -> list[TextContent]:
 
 async def read_vault_note(arguments: dict) -> list[TextContent]:
     path = (arguments or {}).get("path", "")
-    resolved, error = _resolve_vault_path(path)
+    resolved, error, warning, _ = _resolve_vault_path_detail(path)
     if error:
         return [TextContent(type="text", text=error)]
 
     try:
         content = _read_text_file(resolved, MAX_NOTE_CHARS)
+        if warning:
+            content = f"{warning}\n\n{content}"
         return [TextContent(type="text", text=content)]
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Error reading note: {str(e)}")]
+
+
+async def batch_read_vault_notes(arguments: dict) -> list[TextContent]:
+    raw_paths = (arguments or {}).get("paths")
+    if not isinstance(raw_paths, list) or not raw_paths:
+        return [TextContent(type="text", text="❌ paths is required")]
+
+    trimmed_paths = [str(path).strip() for path in raw_paths if str(path).strip()]
+    if not trimmed_paths:
+        return [TextContent(type="text", text="❌ paths is required")]
+
+    limited_paths = trimmed_paths[:MAX_BATCH_READ_NOTES]
+    output = [f"📚 Batch read results ({len(limited_paths)} requested):"]
+    if len(trimmed_paths) > MAX_BATCH_READ_NOTES:
+        output.append(f"⚠️ Limited to first {MAX_BATCH_READ_NOTES} paths.")
+
+    for raw_path in limited_paths:
+        output.append("")
+        output.append(f"--- {raw_path}")
+        resolved, error, warning, _ = _resolve_vault_path_detail(raw_path)
+        if error:
+            output.append(error)
+            continue
+        if resolved is None:
+            output.append("❌ Invalid path")
+            continue
+        if not _is_probably_text_file(resolved):
+            output.append("❌ Only text notes are supported in batch reads")
+            continue
+        try:
+            content = _read_text_file(resolved, MAX_NOTE_CHARS)
+            if warning:
+                output.append(warning)
+            output.append(content)
+        except Exception as e:
+            output.append(f"❌ Error reading note: {str(e)}")
+
+    return [TextContent(type="text", text="\n".join(output))]
+
+
+async def update_vault_note(arguments: dict) -> list[TextContent]:
+    args = arguments or {}
+    raw_path = str(args.get("path") or "").strip()
+    content = args.get("content")
+    if not raw_path:
+        return [TextContent(type="text", text="❌ path is required")]
+    if content is None:
+        return [TextContent(type="text", text="❌ content is required")]
+
+    resolved, error, _, _ = _resolve_vault_path_detail(raw_path, allow_recovery=False)
+    if error or resolved is None:
+        return [TextContent(type="text", text=error or "❌ Invalid path")]
+    if not resolved.exists():
+        return [TextContent(type="text", text=f"❌ File not found: {raw_path}")]
+    if not _is_writable_text_note(resolved):
+        return [TextContent(type="text", text="❌ Only writable text notes are supported")]
+
+    try:
+        resolved.write_text(str(content), encoding="utf-8")
+        rel_path = _vault_relative_path(resolved)
+        return [TextContent(type="text", text=f"✅ Updated `{rel_path}` ({len(str(content))} chars)") ]
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Error updating note: {str(e)}")]
 
 
 async def read_attachment_text(arguments: dict) -> list[TextContent]:
@@ -3023,6 +3653,92 @@ async def read_attachment_text(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=f"❌ {str(e)}")]
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Error reading PDF: {str(e)}")]
+
+
+async def scan_vault_content_warnings(arguments: dict) -> list[TextContent]:
+    args = arguments or {}
+    scope, scope_error = _resolve_vault_scope(str(args.get("path") or "").strip() or None)
+    if scope_error:
+        return [TextContent(type="text", text=scope_error)]
+
+    min_block_chars = int(args.get("min_block_chars", 200))
+    min_block_chars = max(50, min(5000, min_block_chars))
+    min_block_lines = int(args.get("min_block_lines", 3))
+    min_block_lines = max(1, min(20, min_block_lines))
+    max_findings = int(args.get("max_findings", 20))
+    max_findings = max(1, min(DUP_WARNING_MAX_FINDINGS, max_findings))
+
+    scope_files, scope_truncated = _iter_scope_files(scope, max_files=DUP_WARNING_MAX_FILES)
+    findings = []
+    for file_path in scope_files:
+        if len(findings) >= max_findings:
+            break
+        if file_path.suffix.lower() != ".md":
+            continue
+        try:
+            content = file_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            continue
+        duplicates = _find_duplicate_blocks(
+            content,
+            min_block_chars=min_block_chars,
+            min_block_lines=min_block_lines,
+        )
+        if not duplicates:
+            continue
+        findings.append({"path": _vault_relative_path(file_path), "duplicates": duplicates})
+
+    if not findings:
+        scope_label = _vault_relative_path(scope) if scope and scope != _get_vault_root() else "vault"
+        message = f"✅ No duplicate large-block warnings found in {scope_label}."
+        if scope_truncated:
+            message += f"\n⚠️ Scan stopped after {DUP_WARNING_MAX_FILES} files."
+        return [TextContent(type="text", text=message)]
+
+    output = [f"⚠️ Duplicate/stale content warnings in {len(findings)} note(s):"]
+    if scope_truncated:
+        output.append(f"⚠️ Scan stopped after {DUP_WARNING_MAX_FILES} files.")
+    for finding in findings:
+        output.append("")
+        output.append(f"--- {finding['path']}")
+        for duplicate in finding["duplicates"][:3]:
+            line_list = ", ".join(str(line) for line in duplicate["lines"])
+            output.append(
+                f"Repeated block {duplicate['count']}x at lines {line_list}"
+            )
+            output.append(duplicate["preview"])
+    if len(findings) >= max_findings:
+        output.append("")
+        output.append(f"⚠️ Warning limit reached ({max_findings}). Narrow the scope for more detail.")
+    return [TextContent(type="text", text="\n".join(output))]
+
+
+async def obsidian_index_health(arguments: dict) -> list[TextContent]:
+    snapshot, error = _collect_index_health_snapshot(limit=10)
+    if error:
+        return [TextContent(type="text", text=error)]
+
+    lines = [
+        "🩺 Index Health",
+        f"Vault Root: {snapshot['vault_root']}",
+        f"Index Cache: {snapshot['cache_path']}",
+        f"Tracked Files: {snapshot['tracked_files']}",
+        f"Cache Entries: {snapshot['cache_entries']}",
+        f"Stale Cache Entries: {snapshot.get('stale_count', 0)}",
+        f"Missing From Cache: {snapshot.get('missing_count', 0)}",
+    ]
+
+    stale_entries = snapshot.get("stale_entries") or []
+    missing_entries = snapshot.get("missing_from_cache") or []
+    if stale_entries:
+        lines.extend(["", "Sample stale entries:", *[f"- {path}" for path in stale_entries]])
+    if missing_entries:
+        lines.extend(["", "Sample files missing from cache:", *[f"- {path}" for path in missing_entries]])
+    if not stale_entries and not missing_entries:
+        lines.extend(["", "✅ Local vault cache looks in sync."])
+    else:
+        lines.extend(["", "⚠️ Re-run indexing to refresh stale paths or uncached files."])
+    return [TextContent(type="text", text="\n".join(lines))]
 
 async def find_entity_path(arguments: dict) -> list[TextContent]:
     """Find path between entities"""
