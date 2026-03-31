@@ -142,8 +142,8 @@ def _default_openrouter_model() -> str:
 def _default_model_for_provider(provider: str, streaming: bool = False) -> str:
     if provider == "ollama":
         if streaming:
-            return os.getenv("OLLAMA_MODEL", "llama2")
-        return os.getenv("OLLAMA_MODEL") or os.getenv("LLM_MODEL") or "llama3.2"
+            return os.getenv("OLLAMA_MODEL", "qwen3.5:9b")
+        return os.getenv("OLLAMA_MODEL") or os.getenv("LLM_MODEL") or "qwen3.5:9b"
     if provider == "claude":
         return "claude-sonnet-4-5-20250929"
     if provider == "gemini":
@@ -162,7 +162,7 @@ def _default_model_for_provider(provider: str, streaming: bool = False) -> str:
             or os.getenv("LLM_MODEL")
             or "local-model"
         )
-    return "llama2" if streaming else "llama3.2"
+    return "qwen3.5:9b"
 def extract_entities_from_graph(graph_text: str) -> list:
     """Extract key entities from graph response text."""
     # Extract capitalized phrases (likely entities)

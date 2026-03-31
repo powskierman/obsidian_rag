@@ -250,7 +250,7 @@ async def _index_one(payload: dict) -> dict:
         lightrag_model=(os.getenv("LIGHTRAG_MODEL") or os.getenv("KIMI_MODEL")),
         lmstudio_base_url=os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1"),
         lmstudio_api_key=os.getenv("LMSTUDIO_API_KEY", "lmstudio"),
-        mlx_base_url=os.getenv("MLX_BASE_URL", "http://host.docker.internal:1234/v1"),
+        mlx_base_url=os.getenv("MLX_BASE_URL", "http://host.docker.internal:11434/v1"),
         mlx_api_key=os.getenv("MLX_API_KEY", "mlx"),
         mlx_model=os.getenv("MLX_MODEL"),
     )

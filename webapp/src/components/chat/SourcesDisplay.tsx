@@ -11,7 +11,7 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
   const [showRelatedConnectionSources, setShowRelatedConnectionSources] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const vaultName = 'Michel';
-  const vaultRoot = '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel';
+  const vaultRoot = '/Volumes/work/canmore-obsidian-rag-project/vaults/Michel';
   const hasUnsafeScheme = (value: string) => /^(javascript|data|vbscript):/i.test(value.trim());
   const hasWebScheme = (value: string) => /^https?:\/\//i.test(value.trim());
   const sourceTypeLabels: Record<string, string> = {

@@ -67,7 +67,7 @@ LIGHTRAG_MODEL = (
 )
 LMSTUDIO_BASE_URL = os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1")
 LMSTUDIO_API_KEY = os.getenv("LMSTUDIO_API_KEY", "lmstudio")
-MLX_BASE_URL = os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")
+MLX_BASE_URL = os.getenv("MLX_BASE_URL", "http://host.docker.internal:11434/v1")
 MLX_API_KEY = os.getenv("MLX_API_KEY", "mlx")
 MLX_MODEL = os.getenv("MLX_MODEL")
 LLM_MODEL_PATH = os.getenv("LLM_MODEL_PATH")

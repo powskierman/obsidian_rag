@@ -21,7 +21,7 @@ Supported LLM providers in `src/services/graph_query_service.py`:
 
 ## Default Models
 
-- `ollama`: `llama3.2`
+- `ollama`: `qwen3.5:9b`
 - `claude`: `claude-sonnet-4-5-20250929`
 - `gemini`: `gemini-3-pro-preview`
 - `gpt-oss`: `gpt-4`

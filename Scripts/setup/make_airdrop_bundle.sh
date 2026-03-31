@@ -21,6 +21,7 @@ FILES=(
   "webapp/src/app/page.tsx"
   "webapp/src/context/AppContext.tsx"
   "webapp/src/components/chat/SourcesDisplay.tsx"
+  "Scripts/setup/recover_local_llm_and_gateway.sh"
   "Scripts/setup/recover_api_gateway_and_mlx.sh"
   "Scripts/setup/install_recovery_launch_agent.sh"
 )
@@ -56,7 +57,7 @@ Apply steps on Canmore:
 2) Copy payload contents into repo root
    rsync -a payload/ "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/"
 3) Ensure recovery scripts are executable
-   chmod 755 Scripts/setup/recover_api_gateway_and_mlx.sh Scripts/setup/install_recovery_launch_agent.sh
+   chmod 755 Scripts/setup/recover_local_llm_and_gateway.sh Scripts/setup/recover_api_gateway_and_mlx.sh Scripts/setup/install_recovery_launch_agent.sh
 4) Rebuild/restart services
    docker compose build --no-cache api-gateway webapp
    docker compose up -d --force-recreate api-gateway webapp

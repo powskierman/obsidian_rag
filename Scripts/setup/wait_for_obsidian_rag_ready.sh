@@ -7,13 +7,22 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LOG_DIR="$SCRIPT_DIR/logs"
 READY_FLAG_FILE="$SCRIPT_DIR/obsidian-rag.ready"
 READY_LOG="$LOG_DIR/ready-check.log"
+source "$SCRIPT_DIR/runtime_profile.sh"
 
 mkdir -p "$LOG_DIR"
+: > "$READY_LOG"
 
 STARTUP_TIMEOUT="${STARTUP_TIMEOUT:-300}"
 CHECK_INTERVAL="${CHECK_INTERVAL:-3}"
 MLX_URL="${MLX_URL:-http://127.0.0.1:8090/v1/models}"
+OLLAMA_URL="${OLLAMA_URL:-http://127.0.0.1:11434/api/tags}"
 MCP_HTTP_HEALTH_URL="${MCP_HTTP_HEALTH_URL:-http://127.0.0.1:8811/health}"
+
+prepare_runtime_env "$(resolve_runtime_profile)"
+
+resolve_local_provider() {
+  canonical_provider_name
+}
 
 REQUIRED_CONTAINERS=(
   obsidian-embedding
@@ -50,6 +59,10 @@ is_container_ready() {
   return 1
 }
 
+is_ollama_ready() {
+  curl -sf --max-time 3 "$OLLAMA_URL" >/dev/null 2>&1
+}
+
 is_mlx_ready() {
   curl -sf --max-time 3 "$MLX_URL" >/dev/null 2>&1
 }
@@ -60,6 +73,8 @@ mcp_http_ready() {
 
 wait_for_ready() {
   local deadline=$((SECONDS + STARTUP_TIMEOUT))
+  local local_provider
+  local_provider="$(resolve_local_provider)"
 
   while [ "$SECONDS" -lt "$deadline" ]; do
     local all_ready=1
@@ -73,11 +88,22 @@ wait_for_ready() {
       fi
     done
 
-    if is_mlx_ready; then
-      log "OK: MLX endpoint reachable at $MLX_URL"
-    else
-      log "Waiting: MLX endpoint not reachable at $MLX_URL"
-      all_ready=0
+    if provider_needs_ollama "$local_provider"; then
+      if is_ollama_ready; then
+        log "OK: Ollama endpoint reachable at $OLLAMA_URL"
+      else
+        log "Waiting: Ollama endpoint not reachable at $OLLAMA_URL"
+        all_ready=0
+      fi
+    fi
+
+    if [ "$local_provider" = "lmstudio" ]; then
+      if is_mlx_ready; then
+        log "OK: LM Studio / MLX compatibility endpoint reachable at $MLX_URL"
+      else
+        log "Waiting: LM Studio / MLX compatibility endpoint not reachable at $MLX_URL"
+        all_ready=0
+      fi
     fi
 
     if mcp_http_ready; then
@@ -89,7 +115,7 @@ wait_for_ready() {
 
     if [ "$all_ready" -eq 1 ]; then
       touch "$READY_FLAG_FILE"
-      log "READY: all containers and MLX are healthy"
+      log "READY: all containers and profile-required services are healthy"
       return 0
     fi
 

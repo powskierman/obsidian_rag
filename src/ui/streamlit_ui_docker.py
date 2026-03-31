@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # In Docker, we use the internal hostname 'api-gateway' and port 3000
 API_GATEWAY_URL = os.getenv("API_GATEWAY_URL", "http://api-gateway:3000")
 WS_GATEWAY_URL = API_GATEWAY_URL.replace("http", "ws") + "/api/v1/deep-research"
+DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "openrouter").lower()
 
 st.set_page_config(
     page_title="Obsidian RAG",
@@ -64,7 +65,7 @@ with st.sidebar:
     llm_choice = st.selectbox(
         "Choose Backend LLM:",
         llm_options,
-        index=0
+        index=llm_options.index(DEFAULT_LLM_PROVIDER.capitalize()) if DEFAULT_LLM_PROVIDER.capitalize() in llm_options else 0
     )
     st.session_state.llm_provider = llm_choice.lower()
     

@@ -574,6 +574,9 @@ async def _perform_tavily_web_search(
 
 
 def _recovery_script_path() -> str:
+    preferred = os.path.join(_project_root(), "Scripts", "setup", "recover_local_llm_and_gateway.sh")
+    if os.path.exists(preferred):
+        return preferred
     return os.path.join(_project_root(), "Scripts", "setup", "recover_api_gateway_and_mlx.sh")
 
 
@@ -590,11 +593,13 @@ def _is_mlx_runtime_failure(
         "lfm2",
         "qwen2.5-7b-instruct-4bit",
     ]
-    points_to_local_mlx = "host.docker.internal:8090" in _get_env_value("OPENAI_BASE_URL").lower()
+    openai_base_url = _get_env_value("OPENAI_BASE_URL").lower()
+    points_to_local_mlx = "host.docker.internal:8090" in openai_base_url
+    points_to_local_ollama = "host.docker.internal:11434" in openai_base_url
     likely_mlx_route = (
-        provider_normalized == "mlx"
+        provider_normalized in {"mlx", "lmstudio", "ollama"}
         or any(marker in model_normalized for marker in mlx_route_markers)
-        or (provider_normalized == "chatgpt" and points_to_local_mlx)
+        or (provider_normalized == "chatgpt" and (points_to_local_mlx or points_to_local_ollama))
     )
     if not likely_mlx_route:
         return False
@@ -604,7 +609,10 @@ def _is_mlx_runtime_failure(
     failure_markers = [
         "host.docker.internal",
         "port=8090",
+        "port=11434",
         "/v1/chat/completions",
+        "/api/chat",
+        "/api/generate",
         "connection refused",
         "max retries exceeded",
         "newconnectionerror",
@@ -628,7 +636,10 @@ def _looks_like_mlx_transport_failure_text(message: Optional[str]) -> bool:
     failure_markers = [
         "host.docker.internal",
         "port=8090",
+        "port=11434",
         "/v1/chat/completions",
+        "/api/chat",
+        "/api/generate",
         "connection refused",
         "max retries exceeded",
         "newconnectionerror",
@@ -676,7 +687,7 @@ def _start_mlx_recovery() -> bool:
 
 def _mlx_recovery_error_payload(exc: Exception) -> Dict[str, Any]:
     recovery_started = _start_mlx_recovery()
-    message = "Local MLX crashed or ran out of GPU memory"
+    message = "Local LLM provider became unavailable"
     if recovery_started:
         message += "; recovery running. Retry in 15-30 seconds."
     else:
@@ -685,9 +696,9 @@ def _mlx_recovery_error_payload(exc: Exception) -> Dict[str, Any]:
     return {
         "type": "error",
         "content": message,
-        "code": "MLX_RECOVERING",
+        "code": "LOCAL_LLM_RECOVERING",
         "details": {
-            "provider": "mlx",
+            "provider": "local",
             "recovery_started": recovery_started,
             "raw_error": str(exc),
         },
@@ -922,7 +933,7 @@ def _default_cascading_model(provider: str) -> Optional[str]:
         "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-flash-preview"),
         "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o-mini"),
         "openrouter": _get_env_value("OPENROUTER_MODEL", "openrouter/auto"),
-        "ollama": _get_env_value("OLLAMA_MODEL", _get_env_value("LLM_MODEL", "qwen2.5:7b-instruct")),
+        "ollama": _get_env_value("OLLAMA_MODEL", _get_env_value("LLM_MODEL", "qwen3.5:9b")),
         "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         "perplexity": _get_env_value("PERPLEXITY_MODEL", "llama-3.1-sonar-large-128k-online"),
     }
@@ -1525,7 +1536,7 @@ def _resolve_query_normalizer_provider(provider: str, model: Optional[str]) -> t
             or os.getenv("MLX_MODEL"),
         )
     if os.getenv("OLLAMA_HOST"):
-        return "ollama", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("LLM_MODEL", "qwen2.5:7b-instruct")
+        return "ollama", os.getenv("QUERY_NORMALIZER_MODEL", "").strip() or os.getenv("LLM_MODEL", "qwen3.5:9b")
     return None, None
 
 
@@ -1548,7 +1559,7 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
     try:
         if provider == "ollama":
             payload = {
-                "model": model or os.getenv("LLM_MODEL", "qwen2.5:7b-instruct"),
+                "model": model or os.getenv("LLM_MODEL", "qwen3.5:9b"),
                 "messages": [
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
@@ -2705,7 +2716,7 @@ async def get_provider_status():
             ),
         },
         "models": {
-            "ollama": _get_env_value("OLLAMA_MODEL", "mistral"),
+            "ollama": _get_env_value("OLLAMA_MODEL", "qwen3.5:9b"),
             "openrouter": _get_env_value("OPENROUTER_MODEL", "google/gemini-2.0-flash-exp:free"),
             "chatgpt": _get_env_value("OPENAI_MODEL", "gpt-4o"),
             "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-pro-preview"),
@@ -3638,17 +3649,17 @@ async def deep_research_websocket(websocket: WebSocket):
         result = await asyncio.get_running_loop().run_in_executor(executor, run_agent)
 
         # Safety net: some deep-thinking paths may return transport errors in the
-        # synthesized answer instead of raising. Convert these into MLX recovery payloads.
+        # synthesized answer instead of raising. Convert these into local-LLM recovery payloads.
         result_answer = ""
         if isinstance(result, dict):
             raw_answer = result.get("answer")
             if isinstance(raw_answer, str):
                 result_answer = raw_answer
-        if provider == "mlx" and _looks_like_mlx_transport_failure_text(result_answer):
+        if provider in {"mlx", "lmstudio", "ollama"} and _looks_like_mlx_transport_failure_text(result_answer):
             await websocket.send_json(
                 {
                     "type": "log",
-                    "message": "Detected MLX transport failure in synthesized result; starting recovery.",
+                    "message": "Detected local LLM transport failure in synthesized result; starting recovery.",
                     "details": {"provider": provider},
                 }
             )
@@ -3681,12 +3692,12 @@ async def deep_research_websocket(websocket: WebSocket):
         print(f"Error: {e}")
         try:
             raw_error = str(e or "")
-            if _is_mlx_runtime_failure(provider, e, model=model) or (provider == "mlx" and _looks_like_mlx_transport_failure_text(raw_error)):
+            if _is_mlx_runtime_failure(provider, e, model=model) or (provider in {"mlx", "lmstudio", "ollama"} and _looks_like_mlx_transport_failure_text(raw_error)):
                 await websocket.send_json(
                     {
                         "type": "log",
-                        "message": "MLX local model became unavailable; starting recovery.",
-                        "details": {"provider": "mlx"},
+                        "message": "Local LLM provider became unavailable; starting recovery.",
+                        "details": {"provider": provider or "local"},
                     }
                 )
                 await websocket.send_json(_mlx_recovery_error_payload(e))

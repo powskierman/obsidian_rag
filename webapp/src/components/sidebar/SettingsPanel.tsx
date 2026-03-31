@@ -31,7 +31,7 @@ export default function SettingsPanel() {
                 </option>
               ))
             ) : (
-              <option value="llama3.2:latest">llama3.2:latest</option>
+              <option value="qwen3.5:9b">qwen3.5:9b</option>
             )}
           </select>
         </div>

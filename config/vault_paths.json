@@ -1,8 +1,8 @@
 {
-  "vault_path": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel",
+  "vault_path": "/Volumes/work/canmore-obsidian-rag-project/vaults/Michel",
   "templates": {
-    "moc_template": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel/Templates/MoC Template.md",
-    "new_note_template": "/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel/Templates/New Note Template.md"
+    "moc_template": "/Volumes/work/canmore-obsidian-rag-project/vaults/Michel/Templates/MoC Template.md",
+    "new_note_template": "/Volumes/work/canmore-obsidian-rag-project/vaults/Michel/Templates/New Note Template.md"
   },
   "graph_data": {
     "graph_path": "./graph_data/knowledge_graph_full.pkl",
@@ -16,4 +16,3 @@
     "folder_suggestions": "folder_suggestions.json"
   }
 }
-

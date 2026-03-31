@@ -26,6 +26,8 @@ Scripts for updating and maintaining the search index (vector DB and knowledge g
 ### `setup/`
 Installation, environment management, and service lifecycle.
 
+Runtime behavior is profile-driven via `OBSIDIAN_RAG_PROFILE` with overlays in `config/profiles/`.
+
 - `startup_scripts.sh` — Initializes the environment.
 - `start_obsidian_rag.sh` — Starts Docker services.
 - `stop_obsidian_rag.sh` — Stops Docker services.
@@ -43,7 +45,8 @@ Deployment and packaging utilities.
 - `deploy_from_local_volume.sh` — Deploys changes to Docker volume.
 - `package_for_airdrop.sh` / `make_airdrop_bundle.sh` — Packages the system for AirDrop transfer.
 - `pull.sh` / `push.sh` — Git pull/push helpers.
-- `recover_api_gateway_and_mlx.sh` — Recovery script for gateway + MLX.
+- `recover_local_llm_and_gateway.sh` — Recovery script for gateway + the configured local LLM path.
+- `recover_api_gateway_and_mlx.sh` — Backward-compatible wrapper for the provider-aware recovery helper.
 
 ### `docker/`
 Docker service management helpers.

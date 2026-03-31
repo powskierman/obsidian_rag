@@ -25,8 +25,13 @@ interface AppContextType extends AppState {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 const CURRENT_SETTINGS_VERSION = 4;
 const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'lmstudio'];
+const ENV_DEFAULT_PROVIDER = (() => {
+  const raw = (process.env.NEXT_PUBLIC_DEFAULT_LLM_PROVIDER || '').trim().toLowerCase();
+  if (raw === 'mlx') return 'lmstudio';
+  return VALID_LLM_PROVIDERS.includes(raw as LLMProvider) ? raw as LLMProvider : 'openrouter';
+})();
 const DEFAULT_PROVIDER_MODELS: Record<LLMProvider, string> = {
-  ollama: 'mistral',
+  ollama: process.env.OLLAMA_MODEL || 'qwen3.5:9b',
   gemini: 'gemini-1.5-pro',
   claude: 'claude-3-5-sonnet-latest',
   openrouter: 'google/gemini-2.0-flash-exp:free',
@@ -40,7 +45,7 @@ const normalizeProvider = (rawProvider: string | null | undefined): LLMProvider 
   ? 'lmstudio'
   : VALID_LLM_PROVIDERS.includes(rawProvider as LLMProvider)
     ? rawProvider as LLMProvider
-    : 'openrouter';  // Default to openrouter (faster than ollama)
+    : ENV_DEFAULT_PROVIDER;
 
 const resolveProviderModel = (
   settings: SettingsState,

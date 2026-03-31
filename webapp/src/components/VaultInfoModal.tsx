@@ -50,7 +50,7 @@ export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps)
                             <div className="flex justify-between flex-col gap-1">
                                 <span className="text-white/60">Location:</span>
                                 <span className="text-white/80 font-mono text-[10px] break-all">
-                                    /Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel
+                                    /Volumes/work/canmore-obsidian-rag-project/vaults/Michel
                                 </span>
                             </div>
                         </div>

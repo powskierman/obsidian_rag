@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install a LaunchAgent that periodically heals MLX and api-gateway on Canmore.
+# Install a LaunchAgent that periodically heals the local LLM path and api-gateway.
 
 set -euo pipefail
 
@@ -10,7 +10,7 @@ PLIST_PATH="$LAUNCH_AGENTS_DIR/$PLIST_NAME"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 LOG_DIR="$SCRIPT_DIR/logs"
-RECOVERY_SCRIPT="$SCRIPT_DIR/recover_api_gateway_and_mlx.sh"
+RECOVERY_SCRIPT="$SCRIPT_DIR/recover_local_llm_and_gateway.sh"
 INTERVAL_SECONDS="${1:-60}"
 
 mkdir -p "$LAUNCH_AGENTS_DIR" "$LOG_DIR"

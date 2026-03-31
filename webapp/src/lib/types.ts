@@ -104,7 +104,7 @@ export interface AppState {
 
 export const defaultSettings: SettingsState = {
   settingsVersion: 3,
-  model: 'llama3.2:latest',
+  model: 'qwen3.5:9b',
   providerModels: {},
   sources: 10,
   temperature: 0.3,

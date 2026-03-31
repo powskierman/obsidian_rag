@@ -53,14 +53,14 @@ services:
       - LIGHTRAG_MODEL=${LIGHTRAG_MODEL:-}
       - KIMI_MODEL=${KIMI_MODEL:-}
       - LIGHTRAG_DIR=${LIGHTRAG_DIR:-/app/lightrag_db}
-      - LLM_MODEL=${LLM_MODEL:-qwen2.5:7b-instruct}
-      - LLM_PROVIDER=${LLM_PROVIDER:-openrouter}
+      - LLM_MODEL=${LLM_MODEL:-qwen3.5:9b}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
       - LLM_MODEL_PATH=${LLM_MODEL_PATH:-}
-      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
       - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
       - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
-      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:1234/v1}
+      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:11434/v1}
       - MLX_API_KEY=${MLX_API_KEY:-mlx}
       - MLX_MODEL=${MLX_MODEL:-}
       - LIGHTRAG_EMBED_MODEL=${LIGHTRAG_EMBED_MODEL:-nomic-embed-text:latest}
@@ -99,7 +99,7 @@ services:
       - LIGHTRAG_SYNTHESIS_SOURCE_COUNT=${LIGHTRAG_SYNTHESIS_SOURCE_COUNT:-5}
       - LIGHTRAG_SYNTHESIS_SNIPPET_CHARS=${LIGHTRAG_SYNTHESIS_SNIPPET_CHARS:-1100}
       - LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS=${LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS:-75}
-      - QUERY_LLM_PROVIDER=${QUERY_LLM_PROVIDER:-openrouter}
+      - QUERY_LLM_PROVIDER=${QUERY_LLM_PROVIDER:-ollama}
       - QUERY_LLM_MODEL=${QUERY_LLM_MODEL:-}
       - QUERY_LLM_MAX_TOKENS=${QUERY_LLM_MAX_TOKENS:-2048}
       - QUERY_LLM_TEMPERATURE=${QUERY_LLM_TEMPERATURE:-0}
@@ -164,10 +164,10 @@ services:
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
       - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
       - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
-      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:8090/v1}
+      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:11434/v1}
       - MLX_API_KEY=${MLX_API_KEY:-mlx}
-      - MLX_MODEL=${MLX_MODEL:-LiquidAI/LFM2-24B-A2B-MLX-4bit}
-      - LLM_MODEL=${LLM_MODEL:-qwen3:latest}
+      - MLX_MODEL=${MLX_MODEL:-qwen3.5:9b}
+      - LLM_MODEL=${LLM_MODEL:-qwen3.5:9b}
       - GPT_OSS_HOST=${GPT_OSS_HOST:-http://host.docker.internal:12434/engines/llama.cpp}
     command: ["python", "-m", "src.services.graph_query_service"]
     extra_hosts:
@@ -217,8 +217,8 @@ services:
       - OPENROUTER_TIMEOUT=${OPENROUTER_TIMEOUT:-300}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-openrouter}
-      - CASCADING_LLM_PROVIDER=${CASCADING_LLM_PROVIDER:-openrouter}
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-ollama}
+      - CASCADING_LLM_PROVIDER=${CASCADING_LLM_PROVIDER:-ollama}
       - QUERY_NORMALIZER_TIMEOUT_SECONDS=${QUERY_NORMALIZER_TIMEOUT_SECONDS:-15}
       - CASCADING_SYNTHESIS_TIMEOUT_SECONDS=${CASCADING_SYNTHESIS_TIMEOUT_SECONDS:-25}
       - CASCADING_SYNTHESIS_TIMEOUT_SECONDS_REMOTE=${CASCADING_SYNTHESIS_TIMEOUT_SECONDS_REMOTE:-60}
@@ -233,10 +233,10 @@ services:
       - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
       - QUERY_LMSTUDIO_BASE_URL=${QUERY_LMSTUDIO_BASE_URL:-${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}}
       - QUERY_LMSTUDIO_API_KEY=${QUERY_LMSTUDIO_API_KEY:-${LMSTUDIO_API_KEY:-lmstudio}}
-      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:8090/v1}
+      - MLX_BASE_URL=${MLX_BASE_URL:-http://host.docker.internal:11434/v1}
       - MLX_API_KEY=${MLX_API_KEY:-mlx}
-      - MLX_MODEL=${MLX_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-LiquidAI/LFM2-24B-A2B-MLX-4bit}}}
-      - QUERY_MLX_BASE_URL=${QUERY_MLX_BASE_URL:-${MLX_BASE_URL:-http://host.docker.internal:8090/v1}}
+      - MLX_MODEL=${MLX_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-qwen3.5:9b}}}
+      - QUERY_MLX_BASE_URL=${QUERY_MLX_BASE_URL:-${MLX_BASE_URL:-http://host.docker.internal:11434/v1}}
       - QUERY_MLX_API_KEY=${QUERY_MLX_API_KEY:-${MLX_API_KEY:-mlx}}
     restart: unless-stopped
     healthcheck:
@@ -265,10 +265,10 @@ services:
     ports:
       - "8811:8811"
     volumes:
-      - ./.env:/app/.env:ro
+      - ${RUNTIME_ENV_FILE:-./.env}:/app/.env:ro
       - ./src:/app/src:ro
       - ./data:/app/data:ro
-      - ./graph_data:/app/graph_data:ro
+      - "${OBSIDIAN_RAG_DATA_DIR}/graph_data:/app/graph_data:ro"
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:rw"
     environment:
       - PYTHONUNBUFFERED=1
@@ -277,7 +277,7 @@ services:
       - CLAUDE_GRAPH_SERVICE_URL=http://graph-service:8002
       - MCP_GATEWAY_URL=http://api-gateway:3000
       - OBSIDIAN_VAULT_PATH=/app/vault
-      - KNOWLEDGE_GRAPH_PATH=/app/data/graph_data/knowledge_graph_full.pkl
+      - KNOWLEDGE_GRAPH_PATH=/app/graph_data/knowledge_graph_full.pkl
       - MCP_CAPTURE_TEMPLATE_PATH=/app/vault/Templates/New Note Template.md
       - MCP_TRANSPORT=http
       - MCP_HTTP_HOST=0.0.0.0
@@ -312,6 +312,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - API_GATEWAY_URL=http://api-gateway:3000
+      - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-openrouter}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
@@ -342,6 +343,9 @@ services:
       - NODE_ENV=development
       # Client-side (Browser) request URL - hits host port 4000
       - NEXT_PUBLIC_GATEWAY_URL=http://localhost:4000
+      - NEXT_PUBLIC_RUNTIME_PROFILE=${OBSIDIAN_RAG_PROFILE:-canmore}
+      - NEXT_PUBLIC_DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-openrouter}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen3.5:9b}
       # Server-side request URL - resolves over the internal docker network
       - GATEWAY_URL=http://api-gateway:3000
       - API_GATEWAY_URL=http://api-gateway:3000

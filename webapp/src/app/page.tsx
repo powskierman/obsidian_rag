@@ -143,8 +143,8 @@ const mapWebResultsToSources = (webSearch: any): Source[] => {
 };
 
 const formatDeepThinkingError = (data: any): string => {
-    if (data?.code === 'MLX_RECOVERING') {
-        return 'Error: Local LM Studio provider became unavailable; recovery running. Retry in 15-30 seconds.';
+    if (data?.code === 'MLX_RECOVERING' || data?.code === 'LOCAL_LLM_RECOVERING') {
+        return 'Error: Local LLM provider became unavailable; recovery running. Retry in 15-30 seconds.';
     }
 
     const rawContent = typeof data?.content === 'string' ? data.content : '';
@@ -161,7 +161,7 @@ const formatDeepThinkingError = (data: any): string => {
         '[metal]',
     ];
     if (mlxTransportMarkers.some((marker) => lowered.includes(marker))) {
-        return 'Error: Local LM Studio provider became unavailable; recovery running. Retry in 15-30 seconds.';
+        return 'Error: Local LLM provider became unavailable; recovery running. Retry in 15-30 seconds.';
     }
 
     if (typeof data?.content === 'string' && data.content.trim()) {
@@ -263,8 +263,8 @@ export default function Home() {
                             setThinkingLog('');
                         } else if (data.type === 'error') {
                             console.warn('Deep Thinking Error:', data.content);
-                            if (data.code === 'MLX_RECOVERING') {
-                                setThinkingLog('LM Studio local model became unavailable; recovery running.');
+                            if (data.code === 'MLX_RECOVERING' || data.code === 'LOCAL_LLM_RECOVERING') {
+                                setThinkingLog('Local LLM provider became unavailable; recovery running.');
                             }
                             addMessage({
                                 role: 'assistant',
