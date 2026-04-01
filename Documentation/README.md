@@ -2,6 +2,9 @@
 
 Use this file as the canonical index for active documentation.
 
+## Primary Manual
+- `USER_MANUAL.md`
+
 ## Quick Start
 - `getting-started/SETUP_QUICKSTART.md`
 - `getting-started/API_GATEWAY_QUICKSTART.md`
