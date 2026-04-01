@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Source } from '../../lib/types';
+import { api } from '../../lib/api';
 
 interface SourcesDisplayProps {
   sources: Source[];
@@ -9,8 +10,11 @@ interface SourcesDisplayProps {
 export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisplayProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showRelatedConnectionSources, setShowRelatedConnectionSources] = useState(false);
-  const vaultName = 'Michel';
-  const vaultRoot = '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel';
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [vaultConfig, setVaultConfig] = useState({
+    name: 'Michel',
+    root: '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel',
+  });
   const hasUnsafeScheme = (value: string) => /^(javascript|data|vbscript):/i.test(value.trim());
   const hasWebScheme = (value: string) => /^https?:\/\//i.test(value.trim());
   const sourceTypeLabels: Record<string, string> = {
@@ -19,6 +23,26 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
     'entity-context': 'Entity',
     'web-result': 'Web',
   };
+
+  useEffect(() => {
+    let active = true;
+
+    api.getEnvConfig()
+      .then((config) => {
+        if (!active || !config?.vault) {
+          return;
+        }
+        setVaultConfig((prev) => ({
+          name: typeof config.vault?.name === 'string' && config.vault.name.trim() ? config.vault.name.trim() : prev.name,
+          root: typeof config.vault?.root === 'string' && config.vault.root.trim() ? config.vault.root.trim() : prev.root,
+        }));
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   if (!sources || sources.length === 0) {
     return null;
@@ -98,15 +122,15 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
       }
       const looksAbsolute = filepath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(filepath);
       if (looksAbsolute) {
-        if (filepath.startsWith(vaultRoot)) {
-          const relPath = filepath.slice(vaultRoot.length).replace(/^\/+/, '');
+        if (filepath.startsWith(vaultConfig.root)) {
+          const relPath = filepath.slice(vaultConfig.root.length).replace(/^\/+/, '');
           if (relPath) {
-            return `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(relPath)}`;
+            return `obsidian://open?vault=${encodeURIComponent(vaultConfig.name)}&file=${encodeURIComponent(relPath)}`;
           }
         }
         return `obsidian://open?path=${encodeURIComponent(filepath)}`;
       }
-      return `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(filepath)}`;
+      return `obsidian://open?vault=${encodeURIComponent(vaultConfig.name)}&file=${encodeURIComponent(filepath)}`;
     }
     const filename = source.filename?.trim();
     if (filename) {
@@ -116,7 +140,7 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
       if (hasWebScheme(filename)) {
         return filename;
       }
-      return `obsidian://search?vault=${encodeURIComponent(vaultName)}&query=${encodeURIComponent(filename)}`;
+      return `obsidian://search?vault=${encodeURIComponent(vaultConfig.name)}&query=${encodeURIComponent(filename)}`;
     }
     return null;
   };
@@ -127,11 +151,15 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
     return 'Unknown';
   };
 
-  const renderSourceGroups = (items: Source[]) => {
+  const toggleSection = (key: string) => {
+    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const renderSourceGroups = (items: Source[], keyPrefix: string) => {
     const groups = partitionSources(items);
     const sections = [
-      { key: 'vault-sources', title: 'Vault Sources', items: groups.vault, offset: 0 },
-      { key: 'web-sources', title: 'Web Sources', items: groups.web, offset: groups.vault.length },
+      { key: `${keyPrefix}-vault-sources`, title: 'Vault Sources', items: groups.vault, offset: 0 },
+      { key: `${keyPrefix}-web-sources`, title: 'Web Sources', items: groups.web, offset: groups.vault.length },
     ].filter((section) => section.items.length > 0);
 
     if (sections.length === 0) {
@@ -142,8 +170,9 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
       <div className="space-y-4">
         {sections.map((section) => {
           const visibleLimit = 6;
-          const visibleItems = section.items.slice(0, visibleLimit);
-          const hiddenCount = section.items.length - visibleItems.length;
+          const sectionExpanded = Boolean(expandedSections[section.key]);
+          const visibleItems = sectionExpanded ? section.items : section.items.slice(0, visibleLimit);
+          const hiddenCount = Math.max(0, section.items.length - visibleLimit);
           return (
           <div key={section.key} className="space-y-3">
             <div className="flex items-center justify-between">
@@ -158,9 +187,13 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
               </div>
             ))}
             {hiddenCount > 0 && (
-              <div className="text-xs text-white/40 italic">
-                ... {hiddenCount} more
-              </div>
+              <button
+                type="button"
+                onClick={() => toggleSection(section.key)}
+                className="text-xs text-[#0A84FF] hover:text-[#6AB7FF] transition-colors"
+              >
+                {sectionExpanded ? 'Show fewer' : `Show ${hiddenCount} more`}
+              </button>
             )}
           </div>
         )})}
@@ -190,7 +223,7 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
 
       {isExpanded && (
         <div className="space-y-3">
-          {renderSourceGroups(primarySources)}
+          {renderSourceGroups(primarySources, 'primary')}
 
           {isConnectionView && secondarySources.length > 0 && (
             <div className="rounded-lg border border-[#2C2C2E] bg-[#14161A] overflow-hidden">
@@ -211,7 +244,7 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
 
               {showRelatedConnectionSources && (
                 <div className="border-t border-[#2C2C2E] p-3">
-                  {renderSourceGroups(secondarySources)}
+                  {renderSourceGroups(secondarySources, 'secondary')}
                 </div>
               )}
             </div>

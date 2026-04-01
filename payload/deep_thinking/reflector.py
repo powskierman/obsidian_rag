@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timezone
 from typing import List, Dict, Any
 from .state import Step, PastStep, RAGState
+from .utils.universal_client import extract_response_text
 
 class ReflectionAgent:
     def __init__(self, client):
@@ -12,11 +13,11 @@ class ReflectionAgent:
     @staticmethod
     def _provider_limits(provider: str) -> tuple[int, int, int]:
         provider = (provider or "").lower()
-        if provider == "mlx":
+        if provider in ("lmstudio", "mlx"):
             return (
-                int(os.getenv("DEEP_THINKING_MLX_REFLECT_DOCS", "3")),
-                int(os.getenv("DEEP_THINKING_MLX_REFLECT_DOC_CHARS", "2000")),
-                int(os.getenv("DEEP_THINKING_MLX_REFLECT_PAST_CHARS", "2500")),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_REFLECT_DOCS", os.getenv("DEEP_THINKING_MLX_REFLECT_DOCS", "3"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_REFLECT_DOC_CHARS", os.getenv("DEEP_THINKING_MLX_REFLECT_DOC_CHARS", "2000"))),
+                int(os.getenv("DEEP_THINKING_LMSTUDIO_REFLECT_PAST_CHARS", os.getenv("DEEP_THINKING_MLX_REFLECT_PAST_CHARS", "2500"))),
             )
         return (
             int(os.getenv("DEEP_THINKING_REFLECT_DOCS", "5")),
@@ -72,16 +73,14 @@ class ReflectionAgent:
         
         response = self.client.messages.create(
             model=self.model,
-            max_tokens=250 if provider == "mlx" else 500,
+            max_tokens=250 if provider in ("lmstudio", "mlx") else 500,
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
         
+        content = ""
         try:
-            if hasattr(response.content[0], 'text'):
-                content = response.content[0].text.strip()
-            else:
-                 content = str(response.content).strip()
+            content = extract_response_text(response)
             # Robust JSON extraction
             start_idx = content.find('{')
             end_idx = content.rfind('}')
@@ -142,3 +141,36 @@ class ReflectionAgent:
                 handle.write(json.dumps(payload) + "\n")
         except Exception:
             pass
+
+    def compress_context(self, context_text: str) -> str:
+        """
+        Hierarchical Memory: Compress early context into a dense summary.
+        """
+        if not context_text.strip():
+            return ""
+            
+        provider = getattr(self.client, "provider", "").lower()
+        
+        prompt = f"""
+        Compress the following research findings into a highly dense summary.
+        Retain EVERY specific entity, technical term, timeline detail, and concrete fact.
+        Strip out conversational filler and redundancies.
+        
+        Text to compress:
+        {context_text}
+        
+        Return ONLY the compressed text.
+        """
+        
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=600 if provider in ("lmstudio", "mlx") else 1500,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            
+            content = extract_response_text(response)
+            return f"[COMPRESSED EARLIER STEPS]\n{content}\n"
+        except Exception as e:
+            self._log_debug("Compression error", {"error": str(e)})
+            return f"... [earlier steps truncated] ...\n{context_text[-1000:]}"

@@ -206,7 +206,11 @@ export const api = {
     };
   },
 
-  getEnvConfig: async (): Promise<{ keys: { gemini: boolean; anthropic: boolean; openai: boolean; lmstudio: boolean }; models: Record<string, string> }> => {
+  getEnvConfig: async (): Promise<{
+    keys: { gemini: boolean; anthropic: boolean; openai: boolean; lmstudio: boolean };
+    models: Record<string, string>;
+    vault?: { name?: string; root?: string };
+  }> => {
     try {
       let response = await fetch('/api/provider-status');
       if (!response.ok) {
@@ -215,7 +219,8 @@ export const api = {
       if (!response.ok) {
         return {
           keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
-          models: {}
+          models: {},
+          vault: undefined,
         };
       }
       return await response.json();
@@ -223,7 +228,8 @@ export const api = {
       console.error('Failed to get env config:', error);
       return {
         keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
-        models: {}
+        models: {},
+        vault: undefined,
       };
     }
   },

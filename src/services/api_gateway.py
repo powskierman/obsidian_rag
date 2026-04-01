@@ -2692,6 +2692,7 @@ async def get_stats():
 @app.get("/api/v1/provider-status")
 async def get_provider_status():
     """Return provider key/model visibility from the gateway runtime, not the webapp runtime."""
+    vault_root = _vault_root()
     return {
         "keys": {
             "gemini": bool(_get_env_value("GEMINI_API_KEY")),
@@ -2711,6 +2712,10 @@ async def get_provider_status():
             "gemini": _get_env_value("GEMINI_MODEL", "gemini-3-pro-preview"),
             "claude": _get_env_value("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
             "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
+        },
+        "vault": {
+            "name": vault_root.name,
+            "root": str(vault_root),
         },
     }
 

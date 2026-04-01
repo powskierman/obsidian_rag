@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Source } from '../../lib/types';
+import { api } from '../../lib/api';
 
 interface SourcesDisplayProps {
   sources: Source[];
@@ -10,8 +11,10 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
   const [isExpanded, setIsExpanded] = useState(true);
   const [showRelatedConnectionSources, setShowRelatedConnectionSources] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-  const vaultName = 'Michel';
-  const vaultRoot = '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel';
+  const [vaultConfig, setVaultConfig] = useState({
+    name: 'Michel',
+    root: '/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel',
+  });
   const hasUnsafeScheme = (value: string) => /^(javascript|data|vbscript):/i.test(value.trim());
   const hasWebScheme = (value: string) => /^https?:\/\//i.test(value.trim());
   const sourceTypeLabels: Record<string, string> = {
@@ -20,6 +23,26 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
     'entity-context': 'Entity',
     'web-result': 'Web',
   };
+
+  useEffect(() => {
+    let active = true;
+
+    api.getEnvConfig()
+      .then((config) => {
+        if (!active || !config?.vault) {
+          return;
+        }
+        setVaultConfig((prev) => ({
+          name: typeof config.vault?.name === 'string' && config.vault.name.trim() ? config.vault.name.trim() : prev.name,
+          root: typeof config.vault?.root === 'string' && config.vault.root.trim() ? config.vault.root.trim() : prev.root,
+        }));
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   if (!sources || sources.length === 0) {
     return null;
@@ -99,15 +122,15 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
       }
       const looksAbsolute = filepath.startsWith('/') || /^[A-Za-z]:[\\/]/.test(filepath);
       if (looksAbsolute) {
-        if (filepath.startsWith(vaultRoot)) {
-          const relPath = filepath.slice(vaultRoot.length).replace(/^\/+/, '');
+        if (filepath.startsWith(vaultConfig.root)) {
+          const relPath = filepath.slice(vaultConfig.root.length).replace(/^\/+/, '');
           if (relPath) {
-            return `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(relPath)}`;
+            return `obsidian://open?vault=${encodeURIComponent(vaultConfig.name)}&file=${encodeURIComponent(relPath)}`;
           }
         }
         return `obsidian://open?path=${encodeURIComponent(filepath)}`;
       }
-      return `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(filepath)}`;
+      return `obsidian://open?vault=${encodeURIComponent(vaultConfig.name)}&file=${encodeURIComponent(filepath)}`;
     }
     const filename = source.filename?.trim();
     if (filename) {
@@ -117,7 +140,7 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
       if (hasWebScheme(filename)) {
         return filename;
       }
-      return `obsidian://search?vault=${encodeURIComponent(vaultName)}&query=${encodeURIComponent(filename)}`;
+      return `obsidian://search?vault=${encodeURIComponent(vaultConfig.name)}&query=${encodeURIComponent(filename)}`;
     }
     return null;
   };

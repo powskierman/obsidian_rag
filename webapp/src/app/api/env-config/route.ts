@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 
+const resolveVaultRoot = (): string => process.env.OBSIDIAN_VAULT_PATH || '/app/vault';
+
 export async function GET() {
+  const vaultRoot = resolveVaultRoot();
+  const vaultName = vaultRoot.split('/').filter(Boolean).pop() || 'Vault';
   const config = {
     keys: {
       gemini: !!process.env.GEMINI_API_KEY,
@@ -15,6 +19,10 @@ export async function GET() {
       gemini: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
       claude: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-latest',
       lmstudio: process.env.LMSTUDIO_MODEL || process.env.LLM_MODEL_PATH || 'local-model'
+    },
+    vault: {
+      name: vaultName,
+      root: vaultRoot,
     }
   };
 
