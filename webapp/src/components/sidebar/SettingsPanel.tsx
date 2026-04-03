@@ -5,6 +5,15 @@ export default function SettingsPanel() {
   const { settings, updateSettings, services, llmProvider } = useApp();
   const enhancedDisabled = settings.deepThinking;
   const modelSelectValue = settings.model;
+  const ensureCurrentModelOption = (models: string[]) => {
+    const currentModel = settings.model.trim();
+    if (!currentModel || models.includes(currentModel)) {
+      return models;
+    }
+    return [currentModel, ...models];
+  };
+  const ollamaModelOptions = ensureCurrentModelOption(services.ollama.models);
+  const lmstudioModelOptions = ensureCurrentModelOption(services.lmstudio.models);
 
   return (
     <div className="space-y-4">
@@ -24,8 +33,8 @@ export default function SettingsPanel() {
             onChange={(e) => updateSettings({ model: e.target.value })}
             className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
           >
-            {services.ollama.models.length > 0 ? (
-              services.ollama.models.map((model) => (
+            {ollamaModelOptions.length > 0 ? (
+              ollamaModelOptions.map((model) => (
                 <option key={model} value={model}>
                   {model}
                 </option>
@@ -64,12 +73,26 @@ export default function SettingsPanel() {
       {llmProvider === 'lmstudio' && (
         <div className="space-y-2">
           <label className="text-xs text-white/60">LM Studio Model</label>
-          <input
-            value={settings.model}
-            onChange={(e) => updateSettings({ model: e.target.value })}
-            placeholder="local-model"
-            className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
-          />
+          {lmstudioModelOptions.length > 0 ? (
+            <select
+              value={modelSelectValue}
+              onChange={(e) => updateSettings({ model: e.target.value })}
+              className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
+            >
+              {lmstudioModelOptions.map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={settings.model}
+              onChange={(e) => updateSettings({ model: e.target.value })}
+              placeholder="local-model"
+              className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-[#0A84FF] focus:ring-1 focus:ring-[#0A84FF]"
+            />
+          )}
         </div>
       )}
 
