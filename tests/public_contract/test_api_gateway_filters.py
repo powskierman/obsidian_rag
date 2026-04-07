@@ -605,7 +605,7 @@ async def test_synthesize_cascading_answer_limits_lmstudio_prompt_context(monkey
     )
 
     assert result["answer"] == "Condensed LM Studio answer"
-    assert captured["prompt"].count("Snippet ") == 2
+    assert captured["prompt"].count("Source ") == 2
     assert "A" * 41 not in captured["prompt"]
     assert "B" * 41 not in captured["prompt"]
     assert "Extra.md" not in captured["prompt"]
@@ -661,7 +661,7 @@ async def test_synthesize_cascading_answer_limits_ollama_prompt_context(monkeypa
     )
 
     assert result["answer"] == "Condensed Ollama answer"
-    assert captured["prompt"].count("Snippet ") == 2
+    assert captured["prompt"].count("Source ") == 2
     assert "A" * 41 not in captured["prompt"]
     assert "B" * 41 not in captured["prompt"]
     assert "Yescarta Journey.md" not in captured["prompt"]
