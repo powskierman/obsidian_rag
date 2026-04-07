@@ -190,6 +190,20 @@ export const api = {
     }
   },
 
+  getLmStudioModels: async (): Promise<string[]> => {
+    try {
+      const response = await fetch('/api/lmstudio/models');
+      if (!response.ok) {
+        return [];
+      }
+      const data = await response.json();
+      return Array.isArray(data?.models) ? data.models : [];
+    } catch (error) {
+      console.log('LM Studio model discovery failed via webapp proxy. Returning empty model list.');
+      return [];
+    }
+  },
+
   submitFeedback: async (feedback: any): Promise<void> => {
     // Placeholder: feedback endpoint logic not yet in unified gateway V1 spec shown in context.
     // Leaving as no-op or direct call if service available.

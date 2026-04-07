@@ -23,6 +23,13 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
+def _get_env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return float(default)
+
+
 class CascadingRetriever:
     """
     Implements a 5-stage 'Waterfall' retrieval pipeline:
@@ -98,6 +105,24 @@ class CascadingRetriever:
         # Remove overly aggressive stopword filtering for technical terms
         # Keep core English stopwords but allow technical terms like "ESPHome"
         self.vector_thresholds = [60, 40]
+
+    def _graph_stage_timeout_seconds(self) -> float:
+        provider = str(self.llm_provider or "").strip().lower()
+        if provider == "ollama":
+            return _get_env_float(
+                "CASCADING_GRAPH_STAGE_TIMEOUT_SECONDS_OLLAMA",
+                _get_env_float("OLLAMA_TIMEOUT", 240.0),
+            )
+        return _get_env_float("CASCADING_GRAPH_STAGE_TIMEOUT_SECONDS", 30.0)
+
+    def _expansion_stage_timeout_seconds(self) -> float:
+        provider = str(self.llm_provider or "").strip().lower()
+        if provider == "ollama":
+            return _get_env_float(
+                "CASCADING_EXPANSION_STAGE_TIMEOUT_SECONDS_OLLAMA",
+                _get_env_float("OLLAMA_TIMEOUT", 240.0),
+            )
+        return _get_env_float("CASCADING_EXPANSION_STAGE_TIMEOUT_SECONDS", 60.0)
 
     def _service_headers(self) -> Dict[str, str]:
         api_key = os.getenv("OBSIDIAN_RAG_API_KEY")
@@ -222,6 +247,8 @@ class CascadingRetriever:
             "statuses": {},
             "failures": {},
         }
+        graph_stage_timeout = self._graph_stage_timeout_seconds()
+        expansion_stage_timeout = self._expansion_stage_timeout_seconds()
         async with httpx.AsyncClient() as client:
             notes_payload = {
                 "query": query,
@@ -232,6 +259,8 @@ class CascadingRetriever:
                 "entities": entities,
                 "mem0_context": mem0_context,
             }
+            if self.llm_model:
+                notes_payload["model"] = self.llm_model
             fallback_threshold = min(self.vector_thresholds) if self.vector_thresholds else 0.0
             vec_payload = {
                 "query": query,
@@ -264,7 +293,7 @@ class CascadingRetriever:
                         "anchors",
                         f"{self.graph_url}/query",
                         notes_payload,
-                        30.0,
+                        graph_stage_timeout,
                     )
             else:
                 anchor_stage = await self._post_stage(
@@ -272,7 +301,7 @@ class CascadingRetriever:
                     "anchors",
                     f"{self.graph_url}/query",
                     notes_payload,
-                    30.0,
+                    graph_stage_timeout,
                 )
             stage_debug["statuses"]["anchors"] = anchor_stage["status"]
             if anchor_stage["status"] == "exception":
@@ -340,7 +369,7 @@ class CascadingRetriever:
                             "expansion",
                             f"{self.lightrag_url}/query",
                             lr_payload,
-                            60.0,
+                            expansion_stage_timeout,
                         )
                 else:
                     expansion_stage = await self._post_stage(
@@ -348,7 +377,7 @@ class CascadingRetriever:
                         "expansion",
                         f"{self.lightrag_url}/query",
                         lr_payload,
-                        60.0,
+                        expansion_stage_timeout,
                     )
                 stage_debug["statuses"]["expansion"] = expansion_stage["status"]
                 if expansion_stage["status"] == "exception":

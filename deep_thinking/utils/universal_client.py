@@ -14,6 +14,25 @@ from urllib.parse import urlsplit, urlunsplit
 
 logger = logging.getLogger(__name__)
 
+try:
+    from src.utils.ollama_runtime import iter_ollama_routes
+except ImportError:
+    iter_ollama_routes = None
+
+
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(str(os.getenv(name, default)).strip())
+    except (TypeError, ValueError):
+        return int(default)
+
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(str(os.getenv(name, default)).strip())
+    except (TypeError, ValueError):
+        return float(default)
+
 
 def _normalized_openrouter_model(value: str | None) -> str:
     model = str(value or "").strip().strip("\"'")
@@ -511,7 +530,9 @@ class UniversalClient:
             default_model = os.getenv("LMSTUDIO_MODEL") or os.getenv("LLM_MODEL_PATH") or os.getenv("LLM_MODEL") or "local-model"
             timeout_env = "LMSTUDIO_TIMEOUT"
             display_name = "LM Studio"
-        if not model or "claude" in model.lower() or "gpt" in model.lower():
+        # Local OpenAI-compatible servers can expose arbitrary model IDs, including
+        # names containing strings like "claude" or "gpt". Do not rewrite them.
+        if not model:
             model = default_model
 
         lmstudio_messages = list(messages)
@@ -584,17 +605,13 @@ class UniversalClient:
     def _create_ollama(self, model: str, messages: List[Dict[str, str]],
                        max_tokens: int, temperature: float, system: str,
                        response_format: Optional[Dict[str, Any]] = None):
-        ollama_host = _sanitize_base_url(
+        default_host = _sanitize_base_url(
             os.getenv("OLLAMA_HOST", "http://localhost:11434"),
             "http://localhost:11434",
         )
-        if "host.docker.internal" in ollama_host:
-             # If running outside docker but env var is set for docker, try localhost fallback
-             pass # Python request library handles DNS, but usually better to stick to what's given
 
         if not model or "claude" in model or "gpt" in model:
-            # Fallback to a common default or env var
-            model = os.getenv("OLLAMA_MODEL", "mistral") # Default fallback
+            model = os.getenv("OLLAMA_MODEL", "mistral")
 
         # Ollama API structure: POST /api/chat
         # Messages format: same as OpenAI
@@ -619,45 +636,52 @@ class UniversalClient:
             "stream": False,
             "options": {
                 "temperature": temperature,
-                "num_ctx": 32768, # Ensure large context for RAG
-                "num_predict": max_tokens
+                "num_ctx": _env_int("OLLAMA_LLM_NUM_CTX", 32768),
+                "num_predict": min(
+                    max_tokens,
+                    _env_int("OLLAMA_LLM_NUM_PREDICT", max_tokens),
+                ),
             }
         }
         
         if response_format and response_format.get("type") == "json_object":
             payload["format"] = "json"
 
-        try:
-            url = f"{ollama_host}/api/chat"
-            response = requests.post(url, json=payload, timeout=120)
-            
-            # If Ollama returns a 404 for model not found, try to auto-pull it.
-            if response.status_code == 404 and "not found" in response.text.lower():
-                logger.info(f"Ollama model '{model}' not found locally. Auto-pulling...")
-                pull_url = f"{ollama_host}/api/pull"
-                pull_response = requests.post(pull_url, json={"name": model}, timeout=600)
-                if pull_response.status_code == 200:
-                    logger.info(f"Successfully pulled '{model}'. Retrying chat request.")
-                    response = requests.post(url, json=payload, timeout=120)
-                else:
-                    logger.error(f"Failed to pull Ollama model: {pull_response.text}")
+        timeout = _env_float(
+            "QUERY_OLLAMA_TIMEOUT",
+            _env_float("OLLAMA_TIMEOUT", 120.0),
+        )
+        last_error: Exception | None = None
+        route_iter = (
+            iter_ollama_routes(model, default_host=default_host, fallback_default_model="mistral")
+            if iter_ollama_routes is not None
+            else [(default_host, model)]
+        )
 
-            if response.status_code != 200:
-                 error_msg = f"Ollama API Error {response.status_code}: {response.text}"
-                 logger.error(error_msg)
-                 raise ValueError(error_msg)
+        for ollama_host, candidate_model in route_iter:
+            payload["model"] = candidate_model
+            try:
+                url = f"{ollama_host}/api/chat"
+                response = requests.post(url, json=payload, timeout=timeout)
+                if response.status_code != 200:
+                    last_error = ValueError(f"Ollama API Error {response.status_code}: {response.text}")
+                    logger.warning(
+                        "Ollama route failed host=%s model=%s status=%s",
+                        ollama_host,
+                        candidate_model,
+                        response.status_code,
+                    )
+                    continue
 
-            data = response.json()
-            message = data.get("message", {})
-            content = message.get("content", "")
-            
-            # DeepSeek R1 <think> block handling
-            # If the model emits thought blocks, we might want to keep them or strip them.
-            # For "Deep Thinking" agent, keeping them in the logs/trace but returning clean answer is tricky.
-            # For now, we return full content. The Synthesizer might see extra text, but it usually handles it.
-            
-            return UniversalMessage(content)
+                data = response.json()
+                message = data.get("message", {})
+                content = message.get("content", "")
+                return UniversalMessage(content)
 
-        except Exception as e:
-            logger.error(f"Ollama request failed: {e}")
-            raise e
+            except Exception as e:
+                last_error = e
+                logger.warning("Ollama request failed host=%s model=%s error=%s", ollama_host, candidate_model, e)
+                continue
+
+        logger.error(f"Ollama request failed: {last_error}")
+        raise last_error or RuntimeError("No usable Ollama route was available")

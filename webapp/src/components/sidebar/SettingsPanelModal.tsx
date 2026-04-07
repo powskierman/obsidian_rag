@@ -8,7 +8,10 @@ interface SettingsPanelModalProps {
 
 export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps) {
   const { settings, updateSettings, llmProvider, setLLMProvider } = useApp();
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [availableModels, setAvailableModels] = useState<{ ollama: string[]; lmstudio: string[] }>({
+    ollama: [],
+    lmstudio: [],
+  });
   const [isLoadingModels, setIsLoadingModels] = useState(true);
   const enhancedDisabled = settings.deepThinking;
 
@@ -16,10 +19,14 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     const loadData = async () => {
       setIsLoadingModels(true);
       try {
-        const [models] = await Promise.all([
+        const [ollamaModels, lmstudioModels] = await Promise.all([
           api.getOllamaModels(),
+          api.getLmStudioModels(),
         ]);
-        setAvailableModels(models);
+        setAvailableModels({
+          ollama: ollamaModels,
+          lmstudio: lmstudioModels,
+        });
       } catch (error) {
         console.error('Failed to load settings data:', error);
       } finally {
@@ -49,6 +56,15 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
   };
 
   const modelSelectValue = settings.model;
+  const ensureCurrentModelOption = (models: string[]) => {
+    const currentModel = settings.model.trim();
+    if (!currentModel || models.includes(currentModel)) {
+      return models;
+    }
+    return [currentModel, ...models];
+  };
+  const ollamaModelOptions = ensureCurrentModelOption(availableModels.ollama);
+  const lmstudioModelOptions = ensureCurrentModelOption(availableModels.lmstudio);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
@@ -108,8 +124,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               >
                 {isLoadingModels ? (
                   <option>Loading models...</option>
-                ) : availableModels.length > 0 ? (
-                  availableModels.map((model) => (
+                ) : ollamaModelOptions.length > 0 ? (
+                  ollamaModelOptions.map((model) => (
                     <option key={model} value={model}>
                       {model}
                     </option>
@@ -164,14 +180,35 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               <label className="block text-sm font-medium text-white mb-2">
                 LM Studio Model
               </label>
-              <input
-                value={settings.model}
-                onChange={(e) => updateSettings({ ...settings, model: e.target.value })}
-                placeholder="local-model"
-                className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
-              />
+              {isLoadingModels || lmstudioModelOptions.length > 0 ? (
+                <select
+                  value={modelSelectValue}
+                  onChange={(e) => handleModelChange(e.target.value)}
+                  disabled={isLoadingModels}
+                  className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF] disabled:opacity-50 appearance-none cursor-pointer"
+                >
+                  {isLoadingModels ? (
+                    <option>Loading models...</option>
+                  ) : (
+                    lmstudioModelOptions.map((model) => (
+                      <option key={model} value={model}>
+                        {model}
+                      </option>
+                    ))
+                  )}
+                </select>
+              ) : (
+                <input
+                  value={settings.model}
+                  onChange={(e) => updateSettings({ ...settings, model: e.target.value })}
+                  placeholder="local-model"
+                  className="w-full bg-[#2C2C2E] text-white border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none focus:border-[#0A84FF]"
+                />
+              )}
               <p className="text-xs text-white/40 mt-1.5">
-                Use the model ID exposed by your local LM Studio server.
+                {lmstudioModelOptions.length > 0
+                  ? 'Choose a model exposed by your local LM Studio server.'
+                  : 'Use the model ID exposed by your local LM Studio server.'}
               </p>
             </div>
           )}

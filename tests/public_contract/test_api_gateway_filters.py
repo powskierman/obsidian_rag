@@ -363,6 +363,23 @@ async def test_synthesize_cascading_answer_times_out_to_fallback(monkeypatch):
 
 
 @pytest.mark.unit
+def test_structural_graph_path_answer_is_treated_as_generic_fallback():
+    text = (
+        "Explicit connection paths found in the structural graph:\n\n"
+        "1. Path: A -> B -> C\n"
+        "   Files:\n"
+        "   - Medical/Lymphoma/A.md\n\n"
+        "2. Path: A -> D -> E\n"
+        "   Files:\n"
+        "   - Medical/Lymphoma/B.md\n\n"
+        "Returned 2 explicit paths."
+    )
+
+    assert cascading_pipeline.looks_like_structural_graph_path_answer(text) is True
+    assert cascading_pipeline.is_generic_cascading_fallback_answer(text) is True
+
+
+@pytest.mark.unit
 @pytest.mark.asyncio
 async def test_synthesize_cascading_answer_replaces_medical_stub_answer(monkeypatch):
     class FakeClient:

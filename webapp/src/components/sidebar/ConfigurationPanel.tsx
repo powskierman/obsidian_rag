@@ -37,9 +37,10 @@ export default function ConfigurationPanel() {
     const activeCount = [
       services.vectorDB.available,
       services.knowledgeGraph.available,
-      services.ollama.available
+      services.ollama.available,
+      services.lmstudio.available,
     ].filter(Boolean).length;
-    return `${activeCount}/3 Online`;
+    return `${activeCount}/4 Online`;
   };
 
   return (

@@ -99,6 +99,24 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 try:
+    from utils.ollama_runtime import iter_ollama_routes
+except ImportError:
+    from src.utils.ollama_runtime import iter_ollama_routes
+
+
+def _resolve_ollama_timeout_seconds() -> float:
+    raw = (
+        os.getenv("GRAPH_QUERY_OLLAMA_TIMEOUT")
+        or os.getenv("QUERY_OLLAMA_TIMEOUT")
+        or os.getenv("OLLAMA_TIMEOUT")
+        or "180"
+    )
+    try:
+        return max(1.0, float(raw))
+    except (TypeError, ValueError):
+        return 180.0
+
+try:
     from utils.memory_manager import get_memory_manager
 except ImportError as e:
     logger.error(f"Critical Import Error: {e}")
@@ -534,29 +552,47 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
         return response.choices[0].message.content
 
     else:  # ollama (default)
-        ollama_host = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
+        ollama_timeout = _resolve_ollama_timeout_seconds()
+        last_error = None
+        for ollama_host, candidate_model in iter_ollama_routes(model, fallback_default_model="mistral"):
+            try:
+                ollama_response = requests.post(
+                    f"{ollama_host}/api/chat",
+                    json={
+                        "model": candidate_model,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_query},
+                        ],
+                        "stream": False,
+                        "options": {
+                            "temperature": temperature,
+                        },
+                    },
+                    timeout=ollama_timeout
+                )
+            except requests.RequestException as exc:
+                last_error = exc
+                logger.warning("Ollama route failed host=%s model=%s error=%s", ollama_host, candidate_model, exc)
+                continue
 
-        # Combine system prompt and user query for Ollama
-        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+            if ollama_response.status_code == 200:
+                result = ollama_response.json()
+                return result.get("message", {}).get("content", "")
 
-        ollama_response = requests.post(
-            f'{ollama_host}/api/generate',
-            json={
-                'model': model,
-                'prompt': full_prompt,
-                'stream': False,
-                'options': {
-                    'temperature': temperature
-                }
-            },
-            timeout=180
-        )
+            last_error = ValueError(
+                f"Ollama API error: {ollama_response.status_code} - {ollama_response.text}"
+            )
+            logger.warning(
+                "Ollama route returned error host=%s model=%s status=%s",
+                ollama_host,
+                candidate_model,
+                ollama_response.status_code,
+            )
 
-        if ollama_response.status_code != 200:
-            raise ValueError(f"Ollama API error: {ollama_response.status_code} - {ollama_response.text}")
-
-        result = ollama_response.json()
-        return result.get('response', '')
+        if last_error:
+            raise last_error
+        raise ValueError("No usable Ollama route was available")
 
 
 def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: str, temperature: float = 0.7):
@@ -633,33 +669,53 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
 
     elif provider == "ollama":
         # Use Ollama with streaming
-        ollama_host = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
-        full_prompt = f"{system_prompt}\n\nUser question: {user_query}\n\nAnswer:"
+        ollama_timeout = _resolve_ollama_timeout_seconds()
+        last_error = None
+        for ollama_host, candidate_model in iter_ollama_routes(model, fallback_default_model="mistral"):
+            try:
+                ollama_response = requests.post(
+                    f"{ollama_host}/api/chat",
+                    json={
+                        "model": candidate_model,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_query},
+                        ],
+                        "stream": True,
+                        "options": {"temperature": temperature},
+                    },
+                    timeout=ollama_timeout,
+                    stream=True
+                )
+            except requests.RequestException as exc:
+                last_error = exc
+                logger.warning("Ollama stream route failed host=%s model=%s error=%s", ollama_host, candidate_model, exc)
+                continue
 
-        ollama_response = requests.post(
-            f'{ollama_host}/api/generate',
-            json={
-                'model': model,
-                'prompt': full_prompt,
-                'stream': True,
-                'options': {'temperature': temperature}
-            },
-            timeout=180,
-            stream=True
-        )
+            if ollama_response.status_code != 200:
+                last_error = ValueError(f"Ollama API error: {ollama_response.status_code} - {ollama_response.text}")
+                logger.warning(
+                    "Ollama stream route returned error host=%s model=%s status=%s",
+                    ollama_host,
+                    candidate_model,
+                    ollama_response.status_code,
+                )
+                continue
 
-        if ollama_response.status_code != 200:
-            raise ValueError(f"Ollama API error: {ollama_response.status_code}")
+            for line in ollama_response.iter_lines():
+                if line:
+                    try:
+                        chunk = json.loads(line)
+                        content = chunk.get("message", {}).get("content")
+                        if content:
+                            yield content
+                    except json.JSONDecodeError:
+                        continue
+            return
 
-        # Stream the response
-        for line in ollama_response.iter_lines():
-            if line:
-                try:
-                    chunk = json.loads(line)
-                    if 'response' in chunk:
-                        yield chunk['response']
-                except json.JSONDecodeError:
-                    continue
+        if last_error:
+            raise last_error
+        raise ValueError("No usable Ollama route was available")
 
     elif provider == "gpt-oss":
         # Use OpenAI-compatible streaming

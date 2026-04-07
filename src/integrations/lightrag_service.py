@@ -31,6 +31,11 @@ import datetime
 import nest_asyncio
 nest_asyncio.apply()
 
+try:
+    from src.utils.ollama_runtime import iter_ollama_routes
+except ImportError:
+    from utils.ollama_runtime import iter_ollama_routes
+
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 # Aggressively suppress pypdf warnings
@@ -3603,6 +3608,14 @@ async def query_ollama_model_complete(
     model_name = get_effective_query_llm_model()
     timeout = 120.0
     try:
+        timeout = float(
+            os.getenv("QUERY_OLLAMA_TIMEOUT")
+            or os.getenv("OLLAMA_TIMEOUT")
+            or timeout
+        )
+    except (TypeError, ValueError):
+        timeout = 120.0
+    try:
         import ollama as ollama_pkg
     except Exception as e:
         logger.error(f"Failed to import ollama client for query model: {e}")
@@ -3630,21 +3643,33 @@ async def query_ollama_model_complete(
     if options:
         chat_kwargs["options"] = options
 
-    client = ollama_pkg.AsyncClient(host=OLLAMA_HOST, timeout=timeout)
-    try:
-        response = await asyncio.wait_for(client.chat(**chat_kwargs), timeout=timeout)
-        return response.get("message", {}).get("content", "")
-    except asyncio.TimeoutError:
+    last_error: Exception | None = None
+    for ollama_host, candidate_model in iter_ollama_routes(model_name, default_host=OLLAMA_HOST, fallback_default_model="qwen2.5:7b-instruct"):
+        client = ollama_pkg.AsyncClient(host=ollama_host, timeout=timeout)
+        attempt_kwargs = dict(chat_kwargs)
+        attempt_kwargs["model"] = candidate_model
+        try:
+            response = await asyncio.wait_for(client.chat(**attempt_kwargs), timeout=timeout)
+            return response.get("message", {}).get("content", "")
+        except asyncio.TimeoutError as e:
+            last_error = e
+            logger.warning("Query Ollama API timed out host=%s model=%s", ollama_host, candidate_model)
+            continue
+        except Exception as e:
+            last_error = e
+            logger.warning("Query Ollama API error host=%s model=%s error=%s", ollama_host, candidate_model, e)
+            continue
+        finally:
+            try:
+                await client._client.aclose()
+            except Exception:
+                pass
+
+    if isinstance(last_error, asyncio.TimeoutError):
         logger.error("Query Ollama API timed out")
         return "Error: Timeout waiting for LLM response"
-    except Exception as e:
-        logger.error(f"Query Ollama API error: {e}")
-        return f"Error: {str(e)}"
-    finally:
-        try:
-            await client._client.aclose()
-        except Exception:
-            pass
+    logger.error(f"Query Ollama API error: {last_error}")
+    return f"Error: {str(last_error)}"
 
 
 async def query_model_complete(

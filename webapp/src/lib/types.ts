@@ -80,6 +80,10 @@ export interface ServicesStatus {
     available: boolean;
     models: string[];
   };
+  lmstudio: {
+    available: boolean;
+    models: string[];
+  };
 }
 
 export interface ChatHistoryItem {
@@ -128,6 +132,10 @@ export const defaultServices: ServicesStatus = {
     relationships: 0,
   },
   ollama: {
+    available: false,
+    models: [],
+  },
+  lmstudio: {
     available: false,
     models: [],
   },

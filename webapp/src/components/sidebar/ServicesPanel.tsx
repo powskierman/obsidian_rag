@@ -19,7 +19,10 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
     setIsRefreshing(true);
     try {
       const stats = await api.getStats();
-      const ollamaModels = await api.getOllamaModels();
+      const [ollamaModels, lmstudioModels] = await Promise.all([
+        api.getOllamaModels(),
+        api.getLmStudioModels(),
+      ]);
       const vectorStatus = getVectorServiceState(stats.documents);
       const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
 
@@ -39,6 +42,10 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
           available: ollamaModels.length > 0,
           models: ollamaModels,
         },
+        lmstudio: {
+          available: lmstudioModels.length > 0,
+          models: lmstudioModels,
+        },
       });
     } catch (error) {
       console.error('Failed to check services:', error);
@@ -53,6 +60,14 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
           status: 'offline',
           entities: 0,
           relationships: 0,
+        },
+        ollama: {
+          available: false,
+          models: [],
+        },
+        lmstudio: {
+          available: false,
+          models: [],
         },
       });
     } finally {
@@ -176,6 +191,36 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
               <div className="text-sm text-white/40 mt-2">Service not available</div>
             )}
             <div className="text-xs text-white/40 mt-2">Port 11434 • Local LLMs</div>
+          </div>
+
+          <div className="bg-black/20 rounded-xl p-4 border border-[#2C2C2E]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${services.lmstudio.available ? 'bg-green-500' : 'bg-red-500'}`} />
+                <span className="text-white font-medium">LM Studio</span>
+              </div>
+              <span className={`text-xs px-2 py-1 rounded ${services.lmstudio.available ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                {services.lmstudio.available ? 'Online' : 'Offline'}
+              </span>
+            </div>
+            {services.lmstudio.available ? (
+              <>
+                <div className="text-2xl font-bold text-white font-mono">
+                  {services.lmstudio.models.length}
+                  <span className="text-sm text-white/40 ml-2">models</span>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {services.lmstudio.models.map((model) => (
+                    <span key={model} className="text-xs bg-white/5 text-white/60 px-2 py-1 rounded">
+                      {model}
+                    </span>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-sm text-white/40 mt-2">Service not available</div>
+            )}
+            <div className="text-xs text-white/40 mt-2">Port 1234 • OpenAI-compatible local server</div>
           </div>
         </div>
       </div>

@@ -361,7 +361,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const checkServices = async () => {
       try {
         const stats = await api.getStats();
-        const ollamaModels = await api.getOllamaModels();
+        const [ollamaModels, lmstudioModels] = await Promise.all([
+          api.getOllamaModels(),
+          api.getLmStudioModels(),
+        ]);
         const vectorStatus = getVectorServiceState(stats.documents);
         const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
         const lightragStatus = getLightRAGServiceState(stats.lightrag);
@@ -389,6 +392,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             available: ollamaModels.length > 0,
             models: ollamaModels,
           },
+          lmstudio: {
+            available: lmstudioModels.length > 0,
+            models: lmstudioModels,
+          },
         });
       } catch (error) {
         console.error('Failed to check services on mount:', error);
@@ -412,6 +419,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
             indexed_notes: 0,
           },
           ollama: {
+            available: false,
+            models: [],
+          },
+          lmstudio: {
             available: false,
             models: [],
           },

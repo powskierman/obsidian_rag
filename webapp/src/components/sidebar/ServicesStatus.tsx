@@ -19,8 +19,10 @@ export default function ServicesStatus() {
       const vectorStatus = getVectorServiceState(stats.documents);
       const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
 
-      // Get Ollama models
-      const ollamaModels = await api.getOllamaModels();
+      const [ollamaModels, lmstudioModels] = await Promise.all([
+        api.getOllamaModels(),
+        api.getLmStudioModels(),
+      ]);
 
       updateServices({
         vectorDB: {
@@ -38,6 +40,10 @@ export default function ServicesStatus() {
           available: ollamaModels.length > 0,
           models: ollamaModels,
         },
+        lmstudio: {
+          available: lmstudioModels.length > 0,
+          models: lmstudioModels,
+        },
       });
     } catch (error) {
       console.error('Failed to check services:', error);
@@ -52,6 +58,14 @@ export default function ServicesStatus() {
           status: 'offline',
           entities: 0,
           relationships: 0,
+        },
+        ollama: {
+          available: false,
+          models: [],
+        },
+        lmstudio: {
+          available: false,
+          models: [],
         },
       });
     } finally {
@@ -127,6 +141,20 @@ export default function ServicesStatus() {
           </span>
           <span className="text-white font-mono font-medium">
             {services.ollama.models.length} available
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-white/60 flex items-center gap-2">
+            <div
+              className={`w-1.5 h-1.5 rounded-full ${
+                services.lmstudio.available ? 'bg-green-500' : 'bg-red-500'
+              }`}
+            ></div>
+            LM Studio Models
+          </span>
+          <span className="text-white font-mono font-medium">
+            {services.lmstudio.models.length} available
           </span>
         </div>
       </div>

@@ -23,6 +23,19 @@ from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 
+try:
+    from utils.ollama_runtime import iter_ollama_routes
+except ImportError:
+    try:
+        from src.utils.ollama_runtime import iter_ollama_routes
+    except ImportError:
+        base_path = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
+        if base_path not in sys.path:
+            sys.path.append(base_path)
+        from src.utils.ollama_runtime import iter_ollama_routes
+
 # Import CascadingRetriever - handle both package and direct execution
 try:
     from cascading_retriever import CascadingRetriever
@@ -41,6 +54,7 @@ try:
         is_comparison_style_query as _is_comparison_style_query_impl,
         is_personal_scope_query as _is_personal_scope_query_impl,
         is_relation_style_query as _is_relation_style_query_impl,
+        looks_like_structural_graph_path_answer as _looks_like_structural_graph_path_answer_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
@@ -62,6 +76,7 @@ except ImportError:
         is_comparison_style_query as _is_comparison_style_query_impl,
         is_personal_scope_query as _is_personal_scope_query_impl,
         is_relation_style_query as _is_relation_style_query_impl,
+        looks_like_structural_graph_path_answer as _looks_like_structural_graph_path_answer_impl,
         normalize_cascading_source as _normalize_cascading_source_impl,
         relevance_threshold_from_distance_threshold as _relevance_threshold_from_distance_threshold_impl,
         select_cascading_evidence_set as _select_cascading_evidence_set_impl,
@@ -1037,6 +1052,10 @@ def _is_generic_cascading_fallback_answer(text: Any) -> bool:
     return _is_generic_cascading_fallback_answer_impl(text)
 
 
+def _looks_like_structural_graph_path_answer(text: Any) -> bool:
+    return _looks_like_structural_graph_path_answer_impl(text)
+
+
 def _build_cascading_degraded_answer(
     anchor_answer: str,
     sources: List[Dict[str, Any]],
@@ -1547,25 +1566,32 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
 
     try:
         if provider == "ollama":
-            payload = {
-                "model": model or os.getenv("LLM_MODEL", "qwen2.5:7b-instruct"),
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                "stream": False,
-                "options": {"temperature": 0},
-            }
             async with httpx.AsyncClient(timeout=_QUERY_NORMALIZER_TIMEOUT) as client:
-                ollama_host = _sanitize_base_url(
-                    os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434"),
-                    "http://host.docker.internal:11434",
-                )
-                resp = await client.post(
-                    f"{ollama_host}/api/chat",
-                    json=payload,
-                )
-            if resp.status_code != 200:
+                resp = None
+                for ollama_host, candidate_model in iter_ollama_routes(
+                    model or os.getenv("LLM_MODEL", "qwen2.5:7b-instruct"),
+                    default_host="http://host.docker.internal:11434",
+                    fallback_default_model="qwen2.5:7b-instruct",
+                ):
+                    payload = {
+                        "model": candidate_model,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt},
+                        ],
+                        "stream": False,
+                        "options": {"temperature": 0},
+                    }
+                    try:
+                        resp = await client.post(
+                            f"{ollama_host}/api/chat",
+                            json=payload,
+                        )
+                    except httpx.HTTPError:
+                        continue
+                    if resp.status_code == 200:
+                        break
+            if resp is None or resp.status_code != 200:
                 return None
             content = resp.json().get("message", {}).get("content", "")
         else:
@@ -3108,7 +3134,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 try:
                     synthesis_started_at = time.perf_counter()
                     supplemental_sections = []
-                    if answer:
+                    if answer and not _looks_like_structural_graph_path_answer(answer):
                         supplemental_sections.append(
                             "The following is a partial analytical answer derived from the knowledge graph. "
                             "Incorporate it into your final response only where it is consistent with the provided vault context.\n"
