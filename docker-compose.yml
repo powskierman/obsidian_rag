@@ -16,6 +16,9 @@ services:
       - CHROMA_COLLECTION=${CHROMA_COLLECTION:-obsidian_vault}
       - CHROMA_DB_PATH=/app/chroma_db
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_HOST=${OLLAMA_FALLBACK_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL:-}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:7b-instruct}
       - EMBED_MODEL=${EMBED_MODEL:-nomic-ai/nomic-embed-text-v1.5}
       - OBSIDIAN_VAULT_PATH=/app/vault
       - EMBEDDING_CLEAR_TOKEN=${EMBEDDING_CLEAR_TOKEN:-}
@@ -46,6 +49,7 @@ services:
       - ./src:/app/src:ro
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
@@ -56,7 +60,12 @@ services:
       - LLM_MODEL=${LLM_MODEL:-qwen2.5:7b-instruct}
       - LLM_PROVIDER=${LLM_PROVIDER:-openrouter}
       - LLM_MODEL_PATH=${LLM_MODEL_PATH:-}
-      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_HOST=${OLLAMA_FALLBACK_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL:-}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-${LLM_MODEL:-qwen2.5:7b-instruct}}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-240}
+      - GRAPH_QUERY_OLLAMA_TIMEOUT=${GRAPH_QUERY_OLLAMA_TIMEOUT:-240}
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
       - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
       - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
@@ -161,6 +170,9 @@ services:
       - OPENAI_TIMEOUT=${OPENAI_TIMEOUT:-60}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_HOST=${OLLAMA_FALLBACK_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL:-}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:7b-instruct}
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
       - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
       - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}
@@ -201,6 +213,7 @@ services:
     command: python src/services/api_gateway.py
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
       - OBSIDIAN_VAULT_PATH=/app/vault
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       # Internal-only graph subsystem dependencies. Do not expose as public user-selectable modes.
@@ -216,6 +229,13 @@ services:
       - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openrouter/auto}
       - OPENROUTER_TIMEOUT=${OPENROUTER_TIMEOUT:-300}
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_HOST=${OLLAMA_FALLBACK_HOST:-http://host.docker.internal:11434}
+      - OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL:-}
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:7b-instruct}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-240}
+      - QUERY_OLLAMA_TIMEOUT=${QUERY_OLLAMA_TIMEOUT:-240}
+      - OLLAMA_LLM_NUM_CTX=${OLLAMA_LLM_NUM_CTX:-32768}
+      - OLLAMA_LLM_NUM_PREDICT=${OLLAMA_LLM_NUM_PREDICT:-2048}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - DEFAULT_LLM_PROVIDER=${DEFAULT_LLM_PROVIDER:-openrouter}
       - CASCADING_LLM_PROVIDER=${CASCADING_LLM_PROVIDER:-openrouter}
@@ -228,6 +248,7 @@ services:
       - CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE=${CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE:-384}
       - CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE_COMPACT=${CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE_COMPACT:-320}
       - CASCADING_SYNTHESIS_MAX_TOKENS_OPENROUTER=${CASCADING_SYNTHESIS_MAX_TOKENS_OPENROUTER:-384}
+      - CASCADING_SYNTHESIS_MAX_TOKENS_OLLAMA=${CASCADING_SYNTHESIS_MAX_TOKENS_OLLAMA:-1024}
       - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}
       - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
       - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${LLM_MODEL_PATH:-${LLM_MODEL:-local-model}}}

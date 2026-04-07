@@ -180,8 +180,16 @@ def _provider_synthesis_max_tokens(provider: str, query: str, brief_concept_inde
                 base_max_tokens,
                 remote_max_tokens,
                 _get_env_int("CASCADING_SYNTHESIS_MAX_TOKENS_REMOTE_COMPACT", 320, minimum=64),
-            )
+        )
         return min(base_max_tokens, remote_max_tokens)
+
+    if resolved_provider == "ollama":
+        ollama_max_tokens = _get_env_int(
+            "CASCADING_SYNTHESIS_MAX_TOKENS_OLLAMA",
+            base_max_tokens,
+            minimum=64,
+        )
+        return min(base_max_tokens, ollama_max_tokens)
 
     return base_max_tokens
 
@@ -893,8 +901,31 @@ def is_generic_cascading_fallback_answer(text: Any) -> bool:
     return (
         ("matching snippets in your vault" in cleaned)
         or ("llm synthesis skipped" in cleaned)
+        or looks_like_structural_graph_path_answer(cleaned)
         or cleaned == "no results found"
     )
+
+
+def looks_like_structural_graph_path_answer(text: Any) -> bool:
+    if not isinstance(text, str):
+        return False
+
+    cleaned = text.strip()
+    if not cleaned:
+        return False
+
+    lowered = cleaned.lower()
+    if lowered.startswith("explicit connection paths found in the structural graph:"):
+        return True
+    if "returned " in lowered and " explicit paths" in lowered:
+        return True
+    if "structural graph" in lowered and re.search(r"(?im)^\s*\d+\.\s+path:", cleaned):
+        return True
+    if len(re.findall(r"(?im)^\s*\d+\.\s+path:", cleaned)) >= 2:
+        return True
+    if len(re.findall(r"(?im)^\s*files:\s*$", cleaned)) >= 2:
+        return True
+    return False
 
 
 def build_cascading_degraded_answer(
@@ -905,7 +936,11 @@ def build_cascading_degraded_answer(
     is_insufficient_answer_fn,
 ) -> str:
     stage_failures = len((diagnostics or {}).get("failures", {}) or {})
-    if anchor_answer and not is_insufficient_answer_fn(anchor_answer):
+    if (
+        anchor_answer
+        and not is_insufficient_answer_fn(anchor_answer)
+        and not looks_like_structural_graph_path_answer(anchor_answer)
+    ):
         if stage_failures:
             return f"{anchor_answer}\n\nNote: some retrieval stages failed, so this answer is based on partial vault evidence."
         return anchor_answer

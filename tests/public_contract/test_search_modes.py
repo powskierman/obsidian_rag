@@ -924,6 +924,71 @@ def test_cascading_preserves_anchor_answer_when_synthesis_degrades(monkeypatch):
 
 
 @pytest.mark.integration
+def test_cascading_does_not_preserve_structural_graph_path_dump_when_synthesis_degrades(monkeypatch):
+    class FakeRetriever:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def retrieve(self, query: str, max_results: int, entities: List[str], mem0_context: str):
+            return {
+                "query": query,
+                "stages": {
+                    "anchors": {
+                        "answer": (
+                            "Explicit connection paths found in the structural graph:\n\n"
+                            "1. Path: ASCT -> Lymphoma -> Complications\n"
+                            "   Files:\n"
+                            "   - Medical/Lymphoma/ASCT - Benefits-Risks-Side Effects.md\n"
+                            "   - Medical/Lymphoma/Complications.md\n\n"
+                            "Returned 1 explicit paths."
+                        ),
+                        "sources": [
+                            {
+                                "filename": "Lymphoma Treatment.md",
+                                "filepath": "Medical/Lymphoma/Lymphoma Treatment.md",
+                                "relevance": 90.0,
+                                "snippet": "Yescarta and ASCT are discussed in lymphoma treatment planning.",
+                            }
+                        ],
+                    },
+                    "vectors": {},
+                    "diagnostics": {
+                        "pipeline": "staged",
+                        "failures": {"expansion": {"error": "ReadTimeout", "message": ""}},
+                    },
+                },
+            }
+
+    async def _fake_synth(*_args, **_kwargs):
+        return {
+            "answer": "Found 1 matching snippets in your vault. (LLM synthesis skipped: unknown provider 'anthropic')",
+            "citations": [],
+            "used_documents": [
+                {
+                    "filename": "Lymphoma Treatment.md",
+                    "filepath": "Medical/Lymphoma/Lymphoma Treatment.md",
+                    "relevance": 90.0,
+                    "snippet": "Yescarta and ASCT are discussed in lymphoma treatment planning.",
+                    "source_type": "anchor",
+                }
+            ],
+            "fallback_reason": "unknown_provider",
+        }
+
+    monkeypatch.setattr(api_gateway, "CascadingRetriever", FakeRetriever)
+    monkeypatch.setattr(api_gateway, "_synthesize_cascading_answer", _fake_synth)
+    client = TestClient(api_gateway.app)
+
+    response = _post_query(client, "cascading", query="summarize my lymphoma treatment history")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "explicit connection paths found in the structural graph" not in data["answer"].lower()
+    assert "partial answer based on available vault evidence" in data["answer"].lower()
+    assert "preserved anchor answer" not in " ".join(data["metadata"]["warnings"]).lower()
+
+
+@pytest.mark.integration
 def test_cascading_surfaces_degraded_stage_warning_in_metadata(monkeypatch):
     class FakeRetriever:
         def __init__(self, *args, **kwargs):
