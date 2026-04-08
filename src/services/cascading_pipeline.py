@@ -1284,6 +1284,170 @@ def _salvage_structured_response(text: str) -> Dict[str, Any]:
     return {"answer": answer_text, "citations": citations}
 
 
+def _derive_source_citations(
+    active_sources: List[Dict[str, Any]],
+    query: str,
+    *,
+    limit: int = 8,
+) -> List[str]:
+    citations: List[str] = []
+    seen: set[str] = set()
+    for source in active_sources[: max(1, limit)]:
+        if not isinstance(source, Mapping):
+            continue
+        filepath = str(source.get("filepath") or "").strip()
+        url = str(source.get("url") or "").strip()
+        filename = str(source.get("filename") or "").strip()
+        if filepath:
+            citation = f"[[{filepath}]]"
+        elif url:
+            citation = url
+        elif filename:
+            citation = f"[[{filename}]]"
+        else:
+            citation = ""
+        if citation and citation not in seen:
+            seen.add(citation)
+            citations.append(citation)
+    return FinalAnswerGenerator._normalize_citations(
+        citations,
+        active_sources,
+        _extract_query_terms(query),
+    )
+
+
+def _strip_structured_wrapper(text: str) -> str:
+    raw_text = str(text or "").strip()
+    if not raw_text:
+        return ""
+    # Strip thinking-model tokens (qwen3, deepseek-r1, etc.) before any JSON parsing.
+    # These models emit <think>...</think> blocks before the actual answer.
+    raw_text = re.sub(r"<think>[\s\S]*?</think>", "", raw_text, flags=re.IGNORECASE).strip()
+    raw_text = re.sub(r"^```(?:json|JSON)?\s*", "", raw_text)
+    raw_text = re.sub(r"\s*```$", "", raw_text)
+    return raw_text.strip()
+
+
+def _synthesis_source_body(source: Mapping[str, Any]) -> str:
+    content = str(source.get("content") or "").strip()
+    snippet = str(source.get("snippet") or "").strip()
+    text = content or snippet
+    if not text:
+        return ""
+    cleaned_lines: List[str] = []
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        lowered = line.lower()
+        if lowered.startswith(
+            (
+                "canonical id:",
+                "entity type:",
+                "timeline date:",
+                "tags:",
+                "date:",
+                "source:",
+            )
+        ):
+            continue
+        cleaned_lines.append(line)
+    cleaned_text = "\n".join(cleaned_lines).strip()
+    return cleaned_text or text
+
+
+def _context_source_rank(source: Mapping[str, Any]) -> tuple[int, int, float, int]:
+    source_type = str(source.get("source_type") or "").strip().lower()
+    body = _synthesis_source_body(source)
+    snippet = str(source.get("snippet") or "").strip()
+    content = str(source.get("content") or "").strip()
+    try:
+        relevance = float(source.get("relevance", 0.0) or 0.0)
+    except (TypeError, ValueError):
+        relevance = 0.0
+    return (
+        1 if source.get("is_full_content") else 0,
+        0 if source_type in {"anchor", "lexical-confirmation", "direct-excerpt"} else -1,
+        relevance,
+        max(len(body), len(content), len(snippet)),
+    )
+
+
+def _select_context_sources_for_synthesis(
+    sources: List[Dict[str, Any]],
+    *,
+    max_context_sources: int,
+) -> List[Dict[str, Any]]:
+    prepared_sources = [dict(source) for source in (sources or []) if isinstance(source, Mapping)]
+    if not prepared_sources:
+        return []
+
+    ranked_sources = sorted(prepared_sources, key=_context_source_rank, reverse=True)
+    full_sources = [source for source in ranked_sources if source.get("is_full_content")]
+    if len(full_sources) >= max_context_sources:
+        return full_sources[:max_context_sources]
+
+    selected: List[Dict[str, Any]] = []
+    seen_identities: set[tuple[str, str]] = set()
+    for source in ranked_sources:
+        identity = canonical_source_identity(source, default_category="vault")
+        if identity in seen_identities:
+            continue
+        seen_identities.add(identity)
+        selected.append(source)
+        if len(selected) >= max_context_sources:
+            break
+    return selected
+
+
+def _format_synthesis_source_block(index: int, source: Mapping[str, Any]) -> str:
+    filepath = str(source.get("filepath") or source.get("filename") or f"Source {index}").strip()
+    source_type = str(source.get("source_type") or "retrieved").strip()
+    relevance = source.get("relevance")
+    metadata_bits = [f"path={filepath}", f"type={source_type}"]
+    if source.get("is_full_content"):
+        metadata_bits.append("content=full")
+    if relevance is not None:
+        try:
+            metadata_bits.append(f"relevance={float(relevance):.1f}")
+        except (TypeError, ValueError):
+            pass
+    body = _synthesis_source_body(source)
+    return (
+        f"Source {index}\n"
+        f"{'; '.join(metadata_bits)}\n"
+        f"{body}"
+    ).strip()
+
+
+def _build_synthesis_context(
+    query: str,
+    context_sources: List[Dict[str, Any]],
+    *,
+    provider: str,
+) -> str:
+    source_blocks = [
+        _format_synthesis_source_block(index + 1, source)
+        for index, source in enumerate(context_sources)
+        if isinstance(source, Mapping)
+    ]
+    if not source_blocks:
+        return ""
+
+    intro = (
+        "Use only the evidence in these sources. "
+        "Prefer note body content over titles, tags, or filenames when they conflict. "
+        "A note title alone does not confirm that an event happened. "
+        "If a claim is implied only by a title or tag, label it as inference or unsupported."
+    )
+    if provider == "ollama":
+        intro = (
+            f"{intro} "
+            "If exact citations are difficult, focus on a grounded answer first. The pipeline will attach citations from the source paths."
+        )
+    return f"{intro}\n\n" + "\n\n---\n\n".join(source_blocks)
+
+
 async def synthesize_cascading_answer(
     query: str,
     sources: List[Dict[str, Any]],
@@ -1314,29 +1478,7 @@ async def synthesize_cascading_answer(
         synthesis_temperature = 0.0
 
     def fallback_payload(answer_text: str, active_sources: List[Dict[str, Any]], reason: str = "fallback") -> Dict[str, Any]:
-        citations = []
-        seen = set()
-        for source in active_sources[: min(len(active_sources), 8)]:
-            if not isinstance(source, Mapping):
-                continue
-            filepath = str(source.get("filepath") or "").strip()
-            url = str(source.get("url") or "").strip()
-            if filepath:
-                citation = f"[[{filepath}]]"
-            elif url:
-                citation = url
-            else:
-                filename = str(source.get("filename") or "").strip()
-                citation = f"[[{filename}]]" if filename else ""
-            if citation and citation not in seen:
-                seen.add(citation)
-                citations.append(citation)
-        query_entities = _extract_query_terms(query)
-        normalized_citations = FinalAnswerGenerator._normalize_citations(
-            citations,
-            active_sources,
-            query_entities,
-        )
+        normalized_citations = _derive_source_citations(active_sources, query)
         used_documents = FinalAnswerGenerator._resolve_used_documents(normalized_citations, active_sources)
         return {
             "answer": answer_text,
@@ -1346,17 +1488,21 @@ async def synthesize_cascading_answer(
         }
 
     def parse_structured_response(text: str, active_sources: List[Dict[str, Any]]) -> Dict[str, Any]:
-        parsed = _extract_json_object(text)
+        cleaned_text = _strip_structured_wrapper(text)
+        parsed = _extract_json_object(cleaned_text)
         if not parsed:
-            parsed = _salvage_structured_response(text)
+            parsed = _salvage_structured_response(cleaned_text)
         answer_text = _coerce_answer_text(parsed.get("answer"), query)
         citations_raw = parsed.get("citations")
         citations = citations_raw if isinstance(citations_raw, list) else []
-        query_entities = _extract_query_terms(query)
-        normalized_citations = FinalAnswerGenerator._normalize_citations(
-            citations,
-            active_sources,
-            query_entities,
+        normalized_citations = (
+            FinalAnswerGenerator._normalize_citations(
+                citations,
+                active_sources,
+                _extract_query_terms(query),
+            )
+            if citations
+            else _derive_source_citations(active_sources, query)
         )
         used_documents = FinalAnswerGenerator._resolve_used_documents(normalized_citations, active_sources)
         if answer_text:
@@ -1365,7 +1511,7 @@ async def synthesize_cascading_answer(
                 "citations": normalized_citations,
                 "used_documents": used_documents or active_sources,
             }
-        raw_text = str(text or "").strip()
+        raw_text = cleaned_text
         if raw_text:
             return fallback_payload(raw_text, active_sources, reason="empty_answer")
         return fallback_payload(
@@ -1505,6 +1651,12 @@ async def synthesize_cascading_answer(
             "Prioritize vault evidence. If the vault is insufficient but the supplemental web evidence is relevant, you may use it carefully to answer the question. "
             "When you do so, say clearly that the specific point comes from supplemental web evidence rather than the vault."
         )
+    if resolved_provider == "ollama":
+        sys_prompt = (
+            f"{sys_prompt} "
+            "For Ollama-backed models, prioritize a grounded answer over perfect JSON formatting. "
+            "If JSON is difficult, plain text is acceptable, and citations may be omitted because the pipeline can derive them from the provided source paths."
+        )
     if resolved_provider not in {"claude", "gemini", "openrouter", "chatgpt", "ollama", "lmstudio", "perplexity"}:
         return fallback_payload(
             f"Found {len(sources)} matching snippets in your vault. (LLM synthesis skipped: unknown provider '{llm_provider}')",
@@ -1548,20 +1700,41 @@ async def synthesize_cascading_answer(
                 prompt_sources,
             )
             hydrated_active_sources = hydrate_cascading_sources(active_sources, prompt_sources)
-            context_sources = prompt_sources[:max_context_sources]
-            active_context = "\n\n".join([
-                f"Snippet {i+1} from {s.get('filename', 'Unknown')}:\n{s.get('snippet', '')}"
-                for i, s in enumerate(context_sources)
-            ])
+            context_sources = _select_context_sources_for_synthesis(
+                prompt_sources,
+                max_context_sources=max_context_sources,
+            )
+            active_context = _build_synthesis_context(
+                query,
+                context_sources,
+                provider=resolved_provider,
+            )
             active_sections = []
             if supplemental_context_text:
                 active_sections.append(f"Supplemental context:\n{supplemental_context_text}")
             active_sections.append(f"Context:\n{active_context}")
-            active_prompt = (
-                f"{'\n\n'.join(active_sections)}\n\n"
-                f"Query: {query}\n\n"
+            response_contract = (
                 "Return JSON only in the form "
                 '{"answer": "concise grounded answer", "citations": ["[[Exact/Path.md]]"]}.'
+            )
+            response_format = {"type": "json_object"}
+            if resolved_provider == "ollama":
+                response_contract = (
+                    "Answer directly from the provided sources. "
+                    "JSON is preferred in the form "
+                    '{"answer": "concise grounded answer", "citations": ["[[Exact/Path.md]]"]}, '
+                    "but if that is difficult, return plain text only. "
+                    "Do not invent citations."
+                )
+                response_format = None
+            # qwen3 and other thinking models output only <think>...</think> with no answer
+            # unless instructed otherwise. /no_think disables the thinking loop and forces
+            # a direct response, which is what we want for JSON synthesis.
+            no_think_prefix = "/no_think\n\n" if resolved_provider == "ollama" else ""
+            active_prompt = (
+                f"{no_think_prefix}{'\n\n'.join(active_sections)}\n\n"
+                f"Query: {query}\n\n"
+                f"{response_contract}"
             )
             prompt_prep_elapsed_ms = int((time.perf_counter() - prompt_prep_started_at) * 1000)
             logger.info(
@@ -1587,7 +1760,7 @@ async def synthesize_cascading_answer(
                         max_tokens=synthesis_max_tokens,
                         temperature=synthesis_temperature,
                         system=sys_prompt,
-                        response_format={"type": "json_object"},
+                        response_format=response_format,
                     ),
                     timeout=synthesis_timeout_seconds,
                 )

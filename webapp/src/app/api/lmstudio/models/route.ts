@@ -37,6 +37,8 @@ const buildBaseCandidates = (): string[] => {
   return [...new Set(candidates)];
 };
 
+const toServerRoot = (baseUrl: string): string => baseUrl.replace(/\/v1$/i, '');
+
 const getApiKey = (): string =>
   (process.env.QUERY_LMSTUDIO_API_KEY
     || process.env.LMSTUDIO_API_KEY
@@ -50,7 +52,8 @@ export async function GET() {
 
   for (const base of bases) {
     try {
-      const response = await fetch(`${base}/models`, {
+      const serverRoot = toServerRoot(base);
+      const response = await fetch(`${serverRoot}/api/v0/models`, {
         cache: 'no-store',
         headers: {
           Authorization: `Bearer ${apiKey}`,
@@ -64,13 +67,27 @@ export async function GET() {
 
       const data = await response.json();
       const models = Array.isArray(data?.data) ? data.data : [];
-      const names = models
+      const installedModels = models
+        .filter((model: { type?: unknown }) => String(model?.type || '').trim() !== 'embeddings')
+        .map((model: { id?: unknown; name?: unknown }) => String(model?.id || model?.name || '').trim())
+        .filter((name: string) => Boolean(name));
+      const loadedModels = models
+        .filter((model: { state?: unknown; type?: unknown }) => {
+          const state = String(model?.state || '').trim().toLowerCase();
+          const type = String(model?.type || '').trim().toLowerCase();
+          return type !== 'embeddings' && (state === 'loaded' || state === 'loading');
+        })
         .map((model: { id?: unknown; name?: unknown }) => String(model?.id || model?.name || '').trim())
         .filter((name: string) => Boolean(name));
 
       return NextResponse.json({
-        models: [...new Set(names)],
+        models: [...new Set(loadedModels)],
+        installedModels: [...new Set(installedModels)],
         base,
+        reachable: true,
+        warning: loadedModels.length === 0 && installedModels.length > 0
+          ? 'LM Studio is reachable, but no models are currently loaded.'
+          : null,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -81,7 +98,9 @@ export async function GET() {
   return NextResponse.json(
     {
       models: [],
+      installedModels: [],
       base: null,
+      reachable: false,
       error: errors.join(' | ') || 'Unable to reach LM Studio',
     },
     { status: 502 }

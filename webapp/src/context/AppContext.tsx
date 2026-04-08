@@ -361,9 +361,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const checkServices = async () => {
       try {
         const stats = await api.getStats();
-        const [ollamaModels, lmstudioModels] = await Promise.all([
+        const [ollamaModels, lmstudioStatus] = await Promise.all([
           api.getOllamaModels(),
-          api.getLmStudioModels(),
+          api.getLmStudioModelStatus(),
         ]);
         const vectorStatus = getVectorServiceState(stats.documents);
         const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
@@ -393,8 +393,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
             models: ollamaModels,
           },
           lmstudio: {
-            available: lmstudioModels.length > 0,
-            models: lmstudioModels,
+            available: lmstudioStatus.reachable,
+            models: lmstudioStatus.models,
           },
         });
       } catch (error) {

@@ -60,11 +60,10 @@ FACET_STOPWORDS = QUERY_STOPWORDS | RELATION_STOPWORDS | {
     "all",
     "analyse",
     "analyze",
-    "assessment",
+    # "assessment" intentionally omitted — carries meaning in facets like "risk assessment"
     "assess",
     "describe",
-    "detail",
-    "details",
+    # "detail" / "details" intentionally omitted — "detail" distinguishes facets in structured queries
     "evaluate",
     "evaluation",
     "explain",

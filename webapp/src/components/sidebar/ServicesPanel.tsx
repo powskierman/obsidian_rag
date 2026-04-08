@@ -19,9 +19,9 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
     setIsRefreshing(true);
     try {
       const stats = await api.getStats();
-      const [ollamaModels, lmstudioModels] = await Promise.all([
+      const [ollamaModels, lmstudioStatus] = await Promise.all([
         api.getOllamaModels(),
-        api.getLmStudioModels(),
+        api.getLmStudioModelStatus(),
       ]);
       const vectorStatus = getVectorServiceState(stats.documents);
       const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
@@ -43,8 +43,8 @@ export default function ServicesPanel({ onClose }: ServicesPanelProps) {
           models: ollamaModels,
         },
         lmstudio: {
-          available: lmstudioModels.length > 0,
-          models: lmstudioModels,
+          available: lmstudioStatus.reachable,
+          models: lmstudioStatus.models,
         },
       });
     } catch (error) {

@@ -95,3 +95,7 @@ Current skills:
 - `rag-eval-runner`: Evaluate search quality using the knowledge graph and test prompts. Goal: Quantitatively and qualitatively assess if search improvements are working by comparing Vector vs. Hybrid results.
 
 Antigravity and compatible agents can load these skills automatically from `.agent/skills/` when relevant to a task.
+
+## Git Workflow
+
+For safe multi‑Mac sync (Canmore ↔ MacBook) use the Git workflow in `Documentation/git-sync-macs.md`; do not use iCloud Drive as the primary project workspace.

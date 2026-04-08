@@ -85,6 +85,13 @@ export default function SettingsPanel() {
                 </option>
               ))}
             </select>
+          ) : services.lmstudio.available ? (
+            <input
+              value="No loaded models"
+              disabled
+              readOnly
+              className="w-full bg-[#000000]/50 border border-[#2C2C2E] rounded-xl p-2.5 text-sm text-white/60 focus:outline-none"
+            />
           ) : (
             <input
               value={settings.model}

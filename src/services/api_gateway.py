@@ -1671,6 +1671,82 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
         return None
 
 
+_SUMMARY_INSTRUCTION_SIGNALS = (
+    re.compile(r"\bsummariz(?:e|ing)\b", re.IGNORECASE),
+    re.compile(r"\bin\s+\d+\s+(?:short\s+)?(?:sections?|parts?|bullets?|paragraphs?)\b", re.IGNORECASE),
+    re.compile(r"\bcite\s+(?:note\s+)?titles?\b", re.IGNORECASE),
+    re.compile(r"\busing only (?:evidence from )?(?:my )?(?:vault|notes?)\b", re.IGNORECASE),
+    re.compile(r"\bsay when (?:a claim|it) is not supported\b", re.IGNORECASE),
+)
+
+
+def _is_instructional_summary_query(query: str) -> bool:
+    """Return True if query is a complex instructional query with formatting requirements.
+
+    These queries mix a core retrieval topic ("lymphoma treatment history") with
+    structural instructions ("in 3 sections", "cite note titles") that confuse
+    graph entity extraction and vector search.
+    """
+    if not isinstance(query, str) or len(query.strip()) < 60:
+        return False
+    matches = sum(1 for p in _SUMMARY_INSTRUCTION_SIGNALS if p.search(query))
+    return matches >= 2
+
+
+_LEADING_VAULT_INSTRUCTION_RE = re.compile(
+    r"^(?:using only (?:evidence from )?(?:my )?(?:vault|notes?)|"
+    r"based on (?:my )?(?:notes?|vault|evidence)|"
+    r"from (?:my )?(?:notes?|vault)|"
+    r"only using (?:my )?(?:notes?|vault))"
+    r"[,;.\s]+",
+    re.IGNORECASE,
+)
+
+_SUMMARIZE_SUBJECT_RE = re.compile(
+    r"^summarize\s+(?:my\s+|the\s+)?(.+?)"
+    r"(?:\s+in\s+\d+\s|\s*[;:]\s|\s*\.\s+|\s+and\s+cite\b|\s+with\s+(?:citations?|sources?)|\s*$)",
+    re.IGNORECASE,
+)
+
+
+def _extract_core_retrieval_topic(query: str) -> str:
+    """Extract the core retrieval topic from an instructional summary query.
+
+    Example:
+        "Using only evidence from my vault, summarize my lymphoma treatment history
+         in 3 short sections: confirmed treatments, complications or side effects..."
+        → "lymphoma treatment history"
+
+    Returns the original query unchanged if no instructional pattern is found.
+    """
+    text = query.strip()
+
+    # Strip leading vault/note context instructions
+    text = _LEADING_VAULT_INSTRUCTION_RE.sub("", text).strip()
+
+    # Extract subject from "summarize [my/the] TOPIC in N sections: ..."
+    m = _SUMMARIZE_SUBJECT_RE.match(text)
+    if m:
+        topic = m.group(1).strip().rstrip(".,;:")
+        if topic and 3 <= len(topic) <= 100:
+            return topic
+
+    # Fallback: strip trailing formatting instructions if present
+    text = re.sub(
+        r"\s+in\s+\d+\s+(?:short\s+)?(?:sections?|parts?|bullets?)[;:,\s].*$",
+        "",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    ).strip()
+    text = re.sub(r"\s*\.\s*(?:Cite|Include|Say|Use)\s+.*$", "", text, flags=re.IGNORECASE).strip()
+
+    result = text.strip(".,;:")
+    # Only return the stripped version if it's meaningfully shorter than the original
+    if result and len(result) < len(query) * 0.7:
+        return result
+    return query.strip()
+
+
 async def _normalize_query_for_retrieval(
     query: str,
     llm_provider: str,
@@ -1685,6 +1761,20 @@ async def _normalize_query_for_retrieval(
     normalized_payload = _normalize_query_object(query)
     deterministic = str(normalized_payload.get("clean_query") or _deterministic_normalize_query(query)).strip()
     if _has_multi_facet_query(query):
+        # For instructional summary queries (e.g. "summarize my lymphoma treatment history
+        # in 3 sections: confirmed treatments, complications..."), the multi-facet signal
+        # fires on the *enumerated sections*, not the core topic.  Extract just the topic
+        # so that graph entity extraction and vector search target the right documents.
+        if _is_instructional_summary_query(query):
+            topic = _extract_core_retrieval_topic(deterministic)
+            if topic and topic != deterministic:
+                logger.info(
+                    "normalize_query.instructional_summary_simplification "
+                    "original=%r simplified=%r",
+                    query[:120],
+                    topic,
+                )
+                return topic
         return deterministic
     if not _should_normalize_query(query):
         return deterministic
@@ -2813,8 +2903,8 @@ class UnifiedQueryRequest(BaseModel):
     mode: str = "cascading"  # vector, cascading
     max_results: int = 10
     llm_provider: str = _get_env_value(
-        "DEFAULT_LLM_PROVIDER",
-        _get_env_value("CASCADING_LLM_PROVIDER", "openrouter")
+        "CASCADING_LLM_PROVIDER",
+        _get_env_value("DEFAULT_LLM_PROVIDER", "openrouter")
     )
     model: Optional[str] = None
     temperature: float = 0.7
@@ -3270,6 +3360,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 "query": request.query,
                 "mode": "cascading",
                 "answer": answer,
+                "citations": result.get("citations", []) if isinstance(result, dict) else [],
                 "sources": sources,
                 "web_search": web_search_result,
                 "llm_knowledge": mem0_context if request.llm_knowledge and mem0_context else None,

@@ -12,6 +12,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     ollama: [],
     lmstudio: [],
   });
+  const [isLmStudioReachable, setIsLmStudioReachable] = useState(false);
+  const [lmStudioInstalledCount, setLmStudioInstalledCount] = useState(0);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
   const enhancedDisabled = settings.deepThinking;
 
@@ -19,14 +21,16 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     const loadData = async () => {
       setIsLoadingModels(true);
       try {
-        const [ollamaModels, lmstudioModels] = await Promise.all([
+        const [ollamaModels, lmstudioStatus] = await Promise.all([
           api.getOllamaModels(),
-          api.getLmStudioModels(),
+          api.getLmStudioModelStatus(),
         ]);
         setAvailableModels({
           ollama: ollamaModels,
-          lmstudio: lmstudioModels,
+          lmstudio: lmstudioStatus.models,
         });
+        setIsLmStudioReachable(lmstudioStatus.reachable);
+        setLmStudioInstalledCount(lmstudioStatus.installedModels.length);
       } catch (error) {
         console.error('Failed to load settings data:', error);
       } finally {
@@ -197,6 +201,13 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
                     ))
                   )}
                 </select>
+              ) : isLmStudioReachable ? (
+                <input
+                  value="No loaded models"
+                  disabled
+                  readOnly
+                  className="w-full bg-[#2C2C2E] text-white/60 border border-[#3C3C3E] rounded-lg px-4 py-2 focus:outline-none disabled:opacity-100"
+                />
               ) : (
                 <input
                   value={settings.model}
@@ -207,8 +218,10 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               )}
               <p className="text-xs text-white/40 mt-1.5">
                 {lmstudioModelOptions.length > 0
-                  ? 'Choose a model exposed by your local LM Studio server.'
-                  : 'Use the model ID exposed by your local LM Studio server.'}
+                  ? 'Choose a loaded model exposed by your local LM Studio server.'
+                  : isLmStudioReachable
+                    ? `LM Studio is reachable, but no model is loaded. Load one in the Developer page or run \`lms load <model>\`. ${lmStudioInstalledCount > 0 ? `${lmStudioInstalledCount} installed model(s) detected.` : ''}`.trim()
+                    : 'Use the model ID exposed by your local LM Studio server.'}
               </p>
             </div>
           )}

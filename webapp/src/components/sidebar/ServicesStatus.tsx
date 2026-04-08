@@ -19,9 +19,9 @@ export default function ServicesStatus() {
       const vectorStatus = getVectorServiceState(stats.documents);
       const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
 
-      const [ollamaModels, lmstudioModels] = await Promise.all([
+      const [ollamaModels, lmstudioStatus] = await Promise.all([
         api.getOllamaModels(),
-        api.getLmStudioModels(),
+        api.getLmStudioModelStatus(),
       ]);
 
       updateServices({
@@ -41,8 +41,8 @@ export default function ServicesStatus() {
           models: ollamaModels,
         },
         lmstudio: {
-          available: lmstudioModels.length > 0,
-          models: lmstudioModels,
+          available: lmstudioStatus.reachable,
+          models: lmstudioStatus.models,
         },
       });
     } catch (error) {
