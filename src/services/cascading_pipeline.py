@@ -1292,6 +1292,7 @@ async def synthesize_cascading_answer(
     system_prompt: Optional[str],
     brief_concept_index: bool = True,
     supplemental_context: Optional[str] = None,
+    _disable_local_fallback: bool = False,
 ) -> Dict[str, Any]:
     resolved_provider = canonical_cascading_provider_name(llm_provider)
     effective_brief_concept_index = bool(brief_concept_index) and not prefers_full_vault_answer(query)
@@ -1606,6 +1607,32 @@ async def synthesize_cascading_answer(
                     total_elapsed_ms,
                     synthesis_timeout_seconds,
                 )
+                # Timeout on a local provider likely means the Mac is offline.
+                # Transparently retry with the configured fallback (e.g. openrouter).
+                fallback_provider_name = _get_env_value("LOCAL_LLM_FALLBACK_PROVIDER", "").strip().lower()
+                if (
+                    resolved_provider in {"ollama", "lmstudio"}
+                    and fallback_provider_name
+                    and fallback_provider_name != resolved_provider
+                    and not _disable_local_fallback
+                ):
+                    fb_provider = canonical_cascading_provider_name(fallback_provider_name)
+                    fb_model = default_cascading_model(fb_provider) or ""
+                    logger.warning(
+                        "cascading_synthesis.timeout_fallback "
+                        "original_provider=%s fallback_provider=%s fallback_model=%s",
+                        resolved_provider, fb_provider, fb_model,
+                    )
+                    return await synthesize_cascading_answer(
+                        query=query,
+                        sources=sources,
+                        llm_provider=fb_provider,
+                        model=fb_model,
+                        system_prompt=system_prompt,
+                        brief_concept_index=brief_concept_index,
+                        supplemental_context=supplemental_context,
+                        _disable_local_fallback=True,
+                    )
                 return fallback_payload(
                     "I found relevant vault evidence, but the synthesis step timed out. Review the attached sources.",
                     hydrated_active_sources,
@@ -1713,6 +1740,40 @@ async def synthesize_cascading_answer(
                 )
                 return parsed
     except Exception as exc:
+        error_text = str(exc).lower()
+        is_connection_error = any(
+            phrase in error_text
+            for phrase in ("unreachable", "connection", "refused", "connect", "no usable")
+        )
+        fallback_provider_name = _get_env_value("LOCAL_LLM_FALLBACK_PROVIDER", "").strip().lower()
+        if (
+            is_connection_error
+            and resolved_provider in {"ollama", "lmstudio"}
+            and fallback_provider_name
+            and fallback_provider_name != resolved_provider
+            and not _disable_local_fallback
+        ):
+            fallback_provider = canonical_cascading_provider_name(fallback_provider_name)
+            fallback_model = default_cascading_model(fallback_provider) or ""
+            logger.warning(
+                "cascading_synthesis.local_unreachable_fallback "
+                "original_provider=%s fallback_provider=%s fallback_model=%s error=%s",
+                resolved_provider,
+                fallback_provider,
+                fallback_model,
+                str(exc)[:120],
+            )
+            # Tail-call: retry with the fallback provider (no further fallback to avoid loops)
+            return await synthesize_cascading_answer(
+                query=query,
+                sources=sources,
+                llm_provider=fallback_provider,
+                model=fallback_model,
+                system_prompt=system_prompt,
+                brief_concept_index=brief_concept_index,
+                supplemental_context=supplemental_context,
+                _disable_local_fallback=True,
+            )
         logger.exception(
             "cascading_synthesis.provider_exception provider=%s model=%s total_ms=%d",
             resolved_provider,

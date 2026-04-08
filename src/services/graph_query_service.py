@@ -805,14 +805,12 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
 def initialize_graph(graph_path: str = None):
     """Initialize the knowledge graph"""
     global builder, querier, graph_loaded
-    
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-    if not api_key:
-        logger.error("OPENROUTER_API_KEY not set")
-        return False
-    
+
+    # NOTE: GraphBuilder does not use api_key at runtime (structural PKL build only).
+    # The OPENROUTER_API_KEY guard that previously lived here was vestigial — removed so
+    # the graph loads from disk regardless of which cloud provider is configured.
     try:
-        builder = GraphBuilder(api_key=api_key)
+        builder = GraphBuilder()
         
         # If no explicit path provided, resolve from env with centralized data-dir fallback.
         if graph_path is None:

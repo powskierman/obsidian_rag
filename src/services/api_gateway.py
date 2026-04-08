@@ -1671,6 +1671,82 @@ async def _call_query_normalizer_llm(query: str, provider: str, model: Optional[
         return None
 
 
+_SUMMARY_INSTRUCTION_SIGNALS = (
+    re.compile(r"\bsummariz(?:e|ing)\b", re.IGNORECASE),
+    re.compile(r"\bin\s+\d+\s+(?:short\s+)?(?:sections?|parts?|bullets?|paragraphs?)\b", re.IGNORECASE),
+    re.compile(r"\bcite\s+(?:note\s+)?titles?\b", re.IGNORECASE),
+    re.compile(r"\busing only (?:evidence from )?(?:my )?(?:vault|notes?)\b", re.IGNORECASE),
+    re.compile(r"\bsay when (?:a claim|it) is not supported\b", re.IGNORECASE),
+)
+
+
+def _is_instructional_summary_query(query: str) -> bool:
+    """Return True if query is a complex instructional query with formatting requirements.
+
+    These queries mix a core retrieval topic ("lymphoma treatment history") with
+    structural instructions ("in 3 sections", "cite note titles") that confuse
+    graph entity extraction and vector search.
+    """
+    if not isinstance(query, str) or len(query.strip()) < 60:
+        return False
+    matches = sum(1 for p in _SUMMARY_INSTRUCTION_SIGNALS if p.search(query))
+    return matches >= 2
+
+
+_LEADING_VAULT_INSTRUCTION_RE = re.compile(
+    r"^(?:using only (?:evidence from )?(?:my )?(?:vault|notes?)|"
+    r"based on (?:my )?(?:notes?|vault|evidence)|"
+    r"from (?:my )?(?:notes?|vault)|"
+    r"only using (?:my )?(?:notes?|vault))"
+    r"[,;.\s]+",
+    re.IGNORECASE,
+)
+
+_SUMMARIZE_SUBJECT_RE = re.compile(
+    r"^summarize\s+(?:my\s+|the\s+)?(.+?)"
+    r"(?:\s+in\s+\d+\s|\s*[;:]\s|\s*\.\s+|\s+and\s+cite\b|\s+with\s+(?:citations?|sources?)|\s*$)",
+    re.IGNORECASE,
+)
+
+
+def _extract_core_retrieval_topic(query: str) -> str:
+    """Extract the core retrieval topic from an instructional summary query.
+
+    Example:
+        "Using only evidence from my vault, summarize my lymphoma treatment history
+         in 3 short sections: confirmed treatments, complications or side effects..."
+        → "lymphoma treatment history"
+
+    Returns the original query unchanged if no instructional pattern is found.
+    """
+    text = query.strip()
+
+    # Strip leading vault/note context instructions
+    text = _LEADING_VAULT_INSTRUCTION_RE.sub("", text).strip()
+
+    # Extract subject from "summarize [my/the] TOPIC in N sections: ..."
+    m = _SUMMARIZE_SUBJECT_RE.match(text)
+    if m:
+        topic = m.group(1).strip().rstrip(".,;:")
+        if topic and 3 <= len(topic) <= 100:
+            return topic
+
+    # Fallback: strip trailing formatting instructions if present
+    text = re.sub(
+        r"\s+in\s+\d+\s+(?:short\s+)?(?:sections?|parts?|bullets?)[;:,\s].*$",
+        "",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    ).strip()
+    text = re.sub(r"\s*\.\s*(?:Cite|Include|Say|Use)\s+.*$", "", text, flags=re.IGNORECASE).strip()
+
+    result = text.strip(".,;:")
+    # Only return the stripped version if it's meaningfully shorter than the original
+    if result and len(result) < len(query) * 0.7:
+        return result
+    return query.strip()
+
+
 async def _normalize_query_for_retrieval(
     query: str,
     llm_provider: str,
@@ -1685,6 +1761,20 @@ async def _normalize_query_for_retrieval(
     normalized_payload = _normalize_query_object(query)
     deterministic = str(normalized_payload.get("clean_query") or _deterministic_normalize_query(query)).strip()
     if _has_multi_facet_query(query):
+        # For instructional summary queries (e.g. "summarize my lymphoma treatment history
+        # in 3 sections: confirmed treatments, complications..."), the multi-facet signal
+        # fires on the *enumerated sections*, not the core topic.  Extract just the topic
+        # so that graph entity extraction and vector search target the right documents.
+        if _is_instructional_summary_query(query):
+            topic = _extract_core_retrieval_topic(deterministic)
+            if topic and topic != deterministic:
+                logger.info(
+                    "normalize_query.instructional_summary_simplification "
+                    "original=%r simplified=%r",
+                    query[:120],
+                    topic,
+                )
+                return topic
         return deterministic
     if not _should_normalize_query(query):
         return deterministic
@@ -2711,6 +2801,138 @@ async def get_stats():
             "nodes": services.get("lightrag", {}).get("nodes", 0),
             "edges": services.get("lightrag", {}).get("edges", 0),
             "indexed_notes": services.get("lightrag", {}).get("indexed_notes", 0),
+        },
+    }
+
+
+async def _probe_local_provider(provider: str, timeout: float = 3.0) -> bool:
+    """Return True if the local inference server for *provider* responds within *timeout* seconds."""
+    try:
+        if provider == "ollama":
+            from utils.ollama_runtime import resolve_ollama_host  # type: ignore
+            host = resolve_ollama_host()
+            url = f"{host}/api/tags"
+        elif provider in {"lmstudio", "mlx"}:
+            base = (
+                _get_env_value("LMSTUDIO_BASE_URL")
+                or _get_env_value("MLX_BASE_URL")
+                or "http://host.docker.internal:1234/v1"
+            ).rstrip("/")
+            url = f"{base}/models"
+        else:
+            return False
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(url)
+            return resp.status_code < 500
+    except Exception:
+        return False
+
+
+async def _list_ollama_models(timeout: float = 3.0) -> list:
+    try:
+        from utils.ollama_runtime import resolve_ollama_host  # type: ignore
+        host = resolve_ollama_host()
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(f"{host}/api/tags")
+            if resp.status_code == 200:
+                data = resp.json()
+                return [m["name"] for m in data.get("models", []) if "embed" not in m.get("name", "").lower()]
+    except Exception:
+        pass
+    return []
+
+
+async def _list_lmstudio_models(timeout: float = 3.0) -> list:
+    try:
+        base = (
+            _get_env_value("LMSTUDIO_BASE_URL")
+            or _get_env_value("MLX_BASE_URL")
+            or "http://host.docker.internal:1234/v1"
+        ).rstrip("/")
+        api_key = _get_env_value("LMSTUDIO_API_KEY") or _get_env_value("MLX_API_KEY") or "lmstudio"
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            resp = await client.get(
+                f"{base}/models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                return [m["id"] for m in data.get("data", [])]
+    except Exception:
+        pass
+    return []
+
+
+@app.get("/api/v1/providers")
+async def get_providers():
+    """
+    Live capability report: which providers are configured, reachable, and what models they expose.
+
+    - available: server actually responded within 3 s
+    - configured: API key / URL is set in the environment
+    - models: list (local providers) or single string (remote providers)
+
+    Use this endpoint from UI and MCP callers to populate provider/model selectors and
+    to know which fallback is active.
+    """
+    ollama_up, lmstudio_up, ollama_models, lmstudio_models = await asyncio.gather(
+        _probe_local_provider("ollama"),
+        _probe_local_provider("lmstudio"),
+        _list_ollama_models(),
+        _list_lmstudio_models(),
+    )
+
+    default_provider = _get_env_value("DEFAULT_LLM_PROVIDER", "ollama")
+    fallback_provider = _get_env_value("LOCAL_LLM_FALLBACK_PROVIDER", "")
+
+    return {
+        "default": default_provider,
+        "fallback": fallback_provider or None,
+        "providers": {
+            "ollama": {
+                "available": ollama_up,
+                "configured": bool(_get_env_value("OLLAMA_HOST") or _get_env_value("OLLAMA_MODEL")),
+                "host": _get_env_value("OLLAMA_HOST", "http://host.docker.internal:11434"),
+                "model": _get_env_value("OLLAMA_MODEL", "qwen2.5:7b-instruct"),
+                "models": ollama_models,
+                "note": "Local inference — Ollama 0.19+ serves MLX natively",
+            },
+            "lmstudio": {
+                "available": lmstudio_up,
+                "configured": bool(
+                    _get_env_value("LMSTUDIO_BASE_URL")
+                    or _get_env_value("MLX_BASE_URL")
+                    or _get_env_value("LMSTUDIO_MODEL")
+                ),
+                "host": _get_env_value("LMSTUDIO_BASE_URL") or _get_env_value("MLX_BASE_URL"),
+                "model": _get_env_value("LMSTUDIO_MODEL") or _get_env_value("MLX_MODEL"),
+                "models": lmstudio_models,
+                "note": "Local inference — LM Studio / MLX server",
+            },
+            "openrouter": {
+                "available": bool(_get_env_value("OPENROUTER_API_KEY")),
+                "configured": bool(_get_env_value("OPENROUTER_API_KEY")),
+                "model": _get_env_value("OPENROUTER_MODEL", "openrouter/auto"),
+                "note": "Cloud routing — model set via OPENROUTER_MODEL in .env",
+            },
+            "claude": {
+                "available": bool(_get_env_value("ANTHROPIC_API_KEY")),
+                "configured": bool(_get_env_value("ANTHROPIC_API_KEY")),
+                "model": _get_env_value("CLAUDE_MODEL") or "claude-sonnet-4-5-20250929",
+                "note": "Anthropic API — uses CLAUDE_MODEL or latest sonnet",
+            },
+            "gemini": {
+                "available": bool(_get_env_value("GEMINI_API_KEY") or _get_env_value("GOOGLE_API_KEY")),
+                "configured": bool(_get_env_value("GEMINI_API_KEY") or _get_env_value("GOOGLE_API_KEY")),
+                "model": _get_env_value("GEMINI_MODEL") or "gemini-2.5-flash",
+                "note": "Google Gemini API — uses GEMINI_MODEL",
+            },
+            "chatgpt": {
+                "available": bool(_get_env_value("OPENAI_API_KEY")),
+                "configured": bool(_get_env_value("OPENAI_API_KEY")),
+                "model": _get_env_value("OPENAI_MODEL", "gpt-4o"),
+                "note": "OpenAI API — uses OPENAI_MODEL",
+            },
         },
     }
 
