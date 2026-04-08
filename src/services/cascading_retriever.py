@@ -8,6 +8,7 @@ import re
 try:
     from cascading_pipeline import (
         distance_to_relevance,
+        extract_query_facets,
         has_multi_facet_query,
         source_set_covers_query_facets,
     )
@@ -15,6 +16,7 @@ try:
 except ImportError:
     from src.services.cascading_pipeline import (
         distance_to_relevance,
+        extract_query_facets,
         has_multi_facet_query,
         source_set_covers_query_facets,
     )
@@ -113,6 +115,8 @@ class CascadingRetriever:
                 "CASCADING_GRAPH_STAGE_TIMEOUT_SECONDS_OLLAMA",
                 _get_env_float("OLLAMA_TIMEOUT", 240.0),
             )
+        if provider == "lmstudio":
+            return _get_env_float("CASCADING_GRAPH_STAGE_TIMEOUT_SECONDS_LMSTUDIO", 20.0)
         return _get_env_float("CASCADING_GRAPH_STAGE_TIMEOUT_SECONDS", 30.0)
 
     def _expansion_stage_timeout_seconds(self) -> float:
@@ -122,6 +126,8 @@ class CascadingRetriever:
                 "CASCADING_EXPANSION_STAGE_TIMEOUT_SECONDS_OLLAMA",
                 _get_env_float("OLLAMA_TIMEOUT", 240.0),
             )
+        if provider == "lmstudio":
+            return _get_env_float("CASCADING_EXPANSION_STAGE_TIMEOUT_SECONDS_LMSTUDIO", 20.0)
         return _get_env_float("CASCADING_EXPANSION_STAGE_TIMEOUT_SECONDS", 60.0)
 
     def _service_headers(self) -> Dict[str, str]:
@@ -134,11 +140,45 @@ class CascadingRetriever:
         tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", text.lower())
         return {t for t in tokens if t not in self.stopwords and not t.isdigit()}
 
+    def _extract_named_phrases(self, text: str) -> set:
+        """Extract multi-word capitalized sequences (likely proper nouns / domain terms)."""
+        phrases: set = set()
+        # Match runs of 2-3 consecutive Title-Case or ALL-CAPS words
+        for match in re.finditer(
+            r"\b([A-Z][a-zA-Z0-9-]*(?:\s+[A-Z][a-zA-Z0-9-]*){1,2})\b", text
+        ):
+            phrase = match.group(1).lower().strip()
+            # Filter generic single-word capitals (sentence starters etc.)
+            if len(phrase) > 4 and phrase not in self.stopwords:
+                phrases.add(phrase)
+        return phrases
+
+    def _is_temporal_query(self, query: str) -> bool:
+        """Return True when the query is oriented toward recency or future steps."""
+        lowered = query.strip().lower()
+        temporal_markers = (
+            "next steps",
+            "planned",
+            "upcoming",
+            "latest",
+            "most recent",
+            "current status",
+            "what's next",
+            "whats next",
+            "going forward",
+            "after that",
+            "follow-up",
+            "follow up",
+        )
+        return any(marker in lowered for marker in temporal_markers)
+
     def _extract_from_sources(self, sources: List[Dict[str, Any]]) -> set:
         terms = set()
         for src in sources:
             terms.update(self._extract_terms(src.get("filename", "")))
-            terms.update(self._extract_terms(src.get("snippet", "")))
+            snippet = src.get("snippet", "")
+            terms.update(self._extract_terms(snippet))
+            terms.update(self._extract_named_phrases(snippet))
         return terms
 
     def _vector_has_docs(self, vector_data: Any) -> bool:
@@ -249,11 +289,17 @@ class CascadingRetriever:
         }
         graph_stage_timeout = self._graph_stage_timeout_seconds()
         expansion_stage_timeout = self._expansion_stage_timeout_seconds()
+        is_multi_facet = has_multi_facet_query(query)
+        facets = extract_query_facets(query) if is_multi_facet else []
+        facet_count = len(facets)
+        # Scale anchor retrieval with detected facet count so each section has coverage
+        anchor_n_results = max(5, facet_count * 3) if facet_count > 1 else 5
+
         async with httpx.AsyncClient() as client:
             notes_payload = {
                 "query": query,
                 "mode": "graph",
-                "n_results": 5,
+                "n_results": anchor_n_results,
                 "max_entities": 15,
                 "llm_provider": self.llm_provider,
                 "entities": entities,
@@ -279,30 +325,58 @@ class CascadingRetriever:
             if self.llm_model:
                 lr_payload["model"] = self.llm_model
 
-            logger.info("Cascading Stage 1: Anchor retrieval for '%s'", query)
-            stage_debug["stage_order"].append("anchors")
-            if self.use_internal_graph_transport:
-                anchor_stage = await self._run_internal_stage(
-                    "anchors",
-                    notes_payload,
-                    query_networkx_graph,
-                )
-                if anchor_stage["status"] != "ok":
-                    anchor_stage = await self._post_stage(
-                        client,
-                        "anchors",
-                        f"{self.graph_url}/query",
-                        notes_payload,
-                        graph_stage_timeout,
+            # Stage 1 + 2 run concurrently: anchor and expansion are independent.
+            # Expansion only needs the original query (not anchor results), so parallelising
+            # cuts the combined wait time from (anchor + expansion) down to max(anchor, expansion).
+            logger.info(
+                "Cascading Stage 1+2 parallel: anchor + expansion for '%s'", query
+            )
+            stage_debug["stage_order"].extend(["anchors", "expansion"])
+
+            async def _run_anchor() -> Dict[str, Any]:
+                if self.use_internal_graph_transport:
+                    stage = await self._run_internal_stage(
+                        "anchors", notes_payload, query_networkx_graph
                     )
-            else:
-                anchor_stage = await self._post_stage(
-                    client,
-                    "anchors",
-                    f"{self.graph_url}/query",
-                    notes_payload,
-                    graph_stage_timeout,
-                )
+                    if stage["status"] != "ok":
+                        stage = await self._post_stage(
+                            client, "anchors",
+                            f"{self.graph_url}/query",
+                            notes_payload, graph_stage_timeout,
+                        )
+                else:
+                    stage = await self._post_stage(
+                        client, "anchors",
+                        f"{self.graph_url}/query",
+                        notes_payload, graph_stage_timeout,
+                    )
+                return stage
+
+            async def _run_expansion() -> Dict[str, Any]:
+                if not self._looks_like_single_note_summary_query(query):
+                    if self.use_internal_graph_transport:
+                        stage = await self._run_internal_stage(
+                            "expansion", lr_payload, query_lightrag
+                        )
+                        if stage["status"] != "ok":
+                            stage = await self._post_stage(
+                                client, "expansion",
+                                f"{self.lightrag_url}/query",
+                                lr_payload, expansion_stage_timeout,
+                            )
+                    else:
+                        stage = await self._post_stage(
+                            client, "expansion",
+                            f"{self.lightrag_url}/query",
+                            lr_payload, expansion_stage_timeout,
+                        )
+                    return stage
+                return {"name": "expansion", "status": "skipped_single_note_summary", "data": {}}
+
+            anchor_stage, pre_expansion_stage = await asyncio.gather(
+                _run_anchor(), _run_expansion()
+            )
+
             stage_debug["statuses"]["anchors"] = anchor_stage["status"]
             if anchor_stage["status"] == "exception":
                 stage_debug["failures"]["anchors"] = anchor_stage.get("error", {})
@@ -339,84 +413,111 @@ class CascadingRetriever:
                             "snippet": (doc[:300] + "...") if len(doc) > 300 else doc,
                         })
 
-            # Stage 2: Entity Extraction from Anchors
+            # Entity Extraction from Anchors (after parallel stages complete)
             extracted_entities = set()
             if anchors:
                 extracted_entities = self._extract_from_sources(anchors)
             if not extracted_entities:
                 extracted_entities = self._extract_terms(query)
 
+            # Process pre-expansion result, applying facet-coverage short-circuit check now
+            # that we have anchor results. Because expansion ran in parallel we already have the
+            # result — we simply decide whether to use it or discard it.
             expanded_context = {}
             expansion_terms = set()
             expansion_query = query
-            should_expand = not anchors or not self._looks_like_single_note_summary_query(query)
-            if should_expand and has_multi_facet_query(query) and source_set_covers_query_facets(query, anchors):
-                should_expand = False
-                stage_debug["summary_short_circuit"] = True
-                stage_debug["statuses"]["expansion"] = "skipped_anchor_facet_coverage"
-            if should_expand:
-                logger.info("Cascading Stage 2: Expansion retrieval for '%s'", query)
-                stage_debug["stage_order"].append("expansion")
-                if self.use_internal_graph_transport:
-                    expansion_stage = await self._run_internal_stage(
-                        "expansion",
-                        lr_payload,
-                        query_lightrag,
+            expansion_was_skipped = pre_expansion_stage.get("status", "").startswith("skipped")
+
+            if not expansion_was_skipped:
+                should_use_expansion = True
+                if is_multi_facet and source_set_covers_query_facets(query, anchors):
+                    avg_snippet_len = (
+                        sum(len(a.get("snippet", "")) for a in anchors) / len(anchors)
+                        if anchors else 0
                     )
-                    if expansion_stage["status"] != "ok":
-                        expansion_stage = await self._post_stage(
-                            client,
-                            "expansion",
-                            f"{self.lightrag_url}/query",
-                            lr_payload,
-                            expansion_stage_timeout,
+                    if len(anchors) >= facet_count and avg_snippet_len >= 150:
+                        should_use_expansion = False
+                        stage_debug["summary_short_circuit"] = True
+                        pre_expansion_stage["status"] = "skipped_anchor_facet_coverage"
+
+                stage_debug["statuses"]["expansion"] = pre_expansion_stage["status"]
+                if pre_expansion_stage["status"] == "exception":
+                    stage_debug["failures"]["expansion"] = pre_expansion_stage.get("error", {})
+
+                if should_use_expansion and pre_expansion_stage.get("status") == "ok":
+                    expanded_context = pre_expansion_stage.get("data", {})
+                    expanded_text = ""
+                    if isinstance(expanded_context, dict):
+                        expanded_text = (
+                            expanded_context.get("result")
+                            or expanded_context.get("answer")
+                            or ""
                         )
-                else:
-                    expansion_stage = await self._post_stage(
-                        client,
-                        "expansion",
-                        f"{self.lightrag_url}/query",
-                        lr_payload,
-                        expansion_stage_timeout,
-                    )
-                stage_debug["statuses"]["expansion"] = expansion_stage["status"]
-                if expansion_stage["status"] == "exception":
-                    stage_debug["failures"]["expansion"] = expansion_stage.get("error", {})
-                expanded_context = expansion_stage.get("data", {})
-                expanded_text = ""
-                if isinstance(expanded_context, dict):
-                    expanded_text = expanded_context.get("result") or expanded_context.get("answer") or ""
-                expansion_terms = self._extract_terms(expanded_text)
+                    # Ignore LightRAG refusals / no-context responses — they contain only
+                    # meta-words (sorry, unable, no-context) that would poison the enhanced query.
+                    if expanded_text and not re.search(
+                        r"\b(?:sorry|unable|cannot|no[- ]context|don'?t have|not able)\b",
+                        expanded_text,
+                        re.IGNORECASE,
+                    ):
+                        expansion_terms = self._extract_terms(expanded_text)
             else:
-                if "expansion" not in stage_debug["statuses"]:
-                    stage_debug["summary_short_circuit"] = True
-                    stage_debug["statuses"]["expansion"] = "skipped_summary_short_circuit"
+                stage_debug["summary_short_circuit"] = True
+                stage_debug["statuses"]["expansion"] = pre_expansion_stage.get(
+                    "status", "skipped"
+                )
 
             # Stage 3: Context-Aware Vector Search
-            combined_terms = []
-            for term in list(extracted_entities | expansion_terms):
-                if term not in combined_terms:
-                    combined_terms.append(term)
-            combined_terms = combined_terms[:12]
-            enhanced_query = query if not combined_terms else f"{query} " + " ".join(combined_terms)
+            #
+            # Query candidates strategy:
+            #  1. A short "entity query" distilled from anchor filenames/entities — best for
+            #     long instructional queries where the full text embeds poorly against content chunks.
+            #  2. The original query (with expand_query=True to generate 6 semantic variations).
+            #  3. If expansion terms are available, an enriched version of the entity query.
+            #
+            # This ordering ensures the short semantic query is tried first, which avoids the
+            # common failure mode where a multi-sentence instructional query embeds too far from
+            # concise content chunks to clear even the 40% relevance threshold.
+
+            # Build entity query: concise noun phrase from anchor terms
+            entity_terms_for_query = sorted(extracted_entities)[:10] if extracted_entities else []
+            entity_query = " ".join(entity_terms_for_query) if entity_terms_for_query else query
+
+            # Enhanced query: entity base + expansion hints
+            if expansion_terms:
+                top_expansion = sorted(expansion_terms)[:5]
+                enhanced_query = f"{entity_query} (related: {', '.join(top_expansion)})"
+            else:
+                enhanced_query = entity_query
+
+            # Enable reranking for multi-facet queries (precision matters) or large result sets
+            use_reranking = is_multi_facet or max_results > 7
+
+            # Extended thresholds: fall back to very low threshold if standard ones yield nothing
+            extended_thresholds = list(self.vector_thresholds) + [20]
 
             logger.info("Cascading Stage 3: Vector Search for '%s'", query)
             vector_chunks = {}
             vector_query = None
             attempted_vector_queries: List[Dict[str, Any]] = []
             try:
-                query_candidates = [query]
-                if enhanced_query != query:
+                # Candidate order: entity query first (short, semantic), then original,
+                # then enhanced. This way a long instructional original query doesn't
+                # block the short entity query from running first.
+                query_candidates = [entity_query]
+                if query != entity_query:
+                    query_candidates.append(query)
+                if enhanced_query not in query_candidates:
                     query_candidates.append(enhanced_query)
                 for candidate in query_candidates:
-                    for threshold in self.vector_thresholds:
+                    for threshold in extended_thresholds:
                         vec_payload_final = {
                             "query": candidate,
                             "n_results": max_results,
-                            "reranking": False,
+                            "reranking": use_reranking,
                             "deduplicate": True,
                             "relevance_threshold": threshold,
-                            "expand_query": candidate == query,
+                            "expand_query": True,
                         }
                         attempted_vector_queries.append(
                             {"query": candidate, "relevance_threshold": threshold}
@@ -463,12 +564,17 @@ class CascadingRetriever:
                     },
                     "vectors": vector_chunks,
                     "vector_query": vector_query,
+                    "entity_query": entity_query,
                     "enhanced_query": enhanced_query,
                     "diagnostics": {
                         **stage_debug,
                         "attempted_vector_queries": attempted_vector_queries,
                         "anchor_count": len(anchors),
+                        "anchor_n_results": anchor_n_results,
                         "entity_count": len(extracted_entities),
+                        "facet_count": facet_count,
+                        "is_multi_facet": is_multi_facet,
+                        "reranking_enabled": use_reranking,
                     },
                 },
                 # We return raw data, the API gateway or UI can choose to synthesize it via LLM

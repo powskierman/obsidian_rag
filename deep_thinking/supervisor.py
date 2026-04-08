@@ -946,7 +946,11 @@ class RetrievalSupervisor:
         filtered_docs = cls.filter_vault_docs_by_domain_and_entities(docs, profile)
         ranked = cls.rank_sources_for_query(query, filtered_docs, max_results=max_docs or len(filtered_docs or []))
         if profile.get("is_summary_request"):
-            limit = max(1, min(max_docs or profile.get("max_sources") or 2, profile.get("max_sources") or 2))
+            # For single-note summaries the profile caps at max_sources=2.
+            # When the caller explicitly requests more results (multi-section queries like
+            # "summarize in 3 sections…"), honour max_docs so each section has evidence.
+            profile_limit = profile.get("max_sources") or 2
+            limit = max_docs if max_docs is not None else max(1, profile_limit)
             vault_docs = [doc for doc in ranked if str(doc.get("source_category") or "").strip().lower() == "vault"]
             selected: List[Dict[str, Any]] = []
             for doc in vault_docs:

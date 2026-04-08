@@ -3035,8 +3035,8 @@ class UnifiedQueryRequest(BaseModel):
     mode: str = "cascading"  # vector, cascading
     max_results: int = 10
     llm_provider: str = _get_env_value(
-        "DEFAULT_LLM_PROVIDER",
-        _get_env_value("CASCADING_LLM_PROVIDER", "openrouter")
+        "CASCADING_LLM_PROVIDER",
+        _get_env_value("DEFAULT_LLM_PROVIDER", "openrouter")
     )
     model: Optional[str] = None
     temperature: float = 0.7
@@ -3492,6 +3492,7 @@ async def unified_query(request: UnifiedQueryRequest):
                 "query": request.query,
                 "mode": "cascading",
                 "answer": answer,
+                "citations": result.get("citations", []) if isinstance(result, dict) else [],
                 "sources": sources,
                 "web_search": web_search_result,
                 "llm_knowledge": mem0_context if request.llm_knowledge and mem0_context else None,

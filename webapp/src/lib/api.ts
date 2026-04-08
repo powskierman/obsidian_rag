@@ -37,6 +37,14 @@ export interface GraphResponse {
   query: string;
 }
 
+export interface LmStudioModelStatus {
+  reachable: boolean;
+  models: string[];
+  installedModels: string[];
+  warning?: string | null;
+  error?: string | null;
+}
+
 const normalizeSource = (source: any): SearchResult => {
   const filepath = source?.filepath || source?.file_path || 'unknown';
   const filename = source?.filename || (typeof filepath === 'string' ? filepath.split('/').pop() : 'unknown') || 'unknown';
@@ -191,16 +199,39 @@ export const api = {
   },
 
   getLmStudioModels: async (): Promise<string[]> => {
+    const status = await api.getLmStudioModelStatus();
+    return status.models;
+  },
+
+  getLmStudioModelStatus: async (): Promise<LmStudioModelStatus> => {
     try {
       const response = await fetch('/api/lmstudio/models');
       if (!response.ok) {
-        return [];
+        return {
+          reachable: false,
+          models: [],
+          installedModels: [],
+          error: null,
+          warning: null,
+        };
       }
       const data = await response.json();
-      return Array.isArray(data?.models) ? data.models : [];
+      return {
+        reachable: Boolean(data?.reachable),
+        models: Array.isArray(data?.models) ? data.models : [],
+        installedModels: Array.isArray(data?.installedModels) ? data.installedModels : [],
+        warning: typeof data?.warning === 'string' ? data.warning : null,
+        error: typeof data?.error === 'string' ? data.error : null,
+      };
     } catch (error) {
       console.log('LM Studio model discovery failed via webapp proxy. Returning empty model list.');
-      return [];
+      return {
+        reachable: false,
+        models: [],
+        installedModels: [],
+        error: null,
+        warning: null,
+      };
     }
   },
 

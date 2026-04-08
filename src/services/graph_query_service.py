@@ -553,6 +553,9 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
 
     else:  # ollama (default)
         ollama_timeout = _resolve_ollama_timeout_seconds()
+        # Disable thinking mode — qwen3 and similar models produce only <think> blocks
+        # when thinking is enabled, leaving the actual content empty.
+        ollama_think = str(os.getenv("OLLAMA_THINK_ENABLED", "false")).strip().lower() in ("1", "true", "yes")
         last_error = None
         for ollama_host, candidate_model in iter_ollama_routes(model, fallback_default_model="mistral"):
             try:
@@ -565,6 +568,7 @@ def call_llm(provider: str, model: str, system_prompt: str, user_query: str, tem
                             {"role": "user", "content": user_query},
                         ],
                         "stream": False,
+                        "think": ollama_think,
                         "options": {
                             "temperature": temperature,
                         },
@@ -670,6 +674,7 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
     elif provider == "ollama":
         # Use Ollama with streaming
         ollama_timeout = _resolve_ollama_timeout_seconds()
+        ollama_think = str(os.getenv("OLLAMA_THINK_ENABLED", "false")).strip().lower() in ("1", "true", "yes")
         last_error = None
         for ollama_host, candidate_model in iter_ollama_routes(model, fallback_default_model="mistral"):
             try:
@@ -682,6 +687,7 @@ def call_llm_stream(provider: str, model: str, system_prompt: str, user_query: s
                             {"role": "user", "content": user_query},
                         ],
                         "stream": True,
+                        "think": ollama_think,
                         "options": {"temperature": temperature},
                     },
                     timeout=ollama_timeout,

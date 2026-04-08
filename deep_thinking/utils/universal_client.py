@@ -630,10 +630,15 @@ class UniversalClient:
             if ollama_messages:
                  ollama_messages[0]["content"] = f"{system}\n\n{ollama_messages[0]['content']}"
 
+        # Disable thinking mode for qwen3 and other thinking-capable models by default.
+        # When think=True, these models emit only <think>...</think> with no answer after.
+        # Set OLLAMA_THINK_ENABLED=true to re-enable (e.g. for deep-research tasks).
+        ollama_think = str(os.getenv("OLLAMA_THINK_ENABLED", "false")).strip().lower() in ("1", "true", "yes")
         payload = {
             "model": model,
             "messages": ollama_messages,
             "stream": False,
+            "think": ollama_think,
             "options": {
                 "temperature": temperature,
                 "num_ctx": _env_int("OLLAMA_LLM_NUM_CTX", 32768),
