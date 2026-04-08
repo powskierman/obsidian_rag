@@ -418,7 +418,10 @@ class RetrievalSupervisor:
             return False
         if any(pattern.search(normalized) for pattern in cls.RELATIONSHIP_PATTERNS):
             return True
-        return any(hint in lower for hint in cls.RELATIONSHIP_HINTS)
+        return any(
+            re.search(r"\b" + re.escape(hint) + r"\b", lower)
+            for hint in cls.RELATIONSHIP_HINTS
+        )
 
     @classmethod
     def is_medical_query(cls, query: str, anchors: List[str] | None = None) -> bool:
@@ -571,8 +574,10 @@ class RetrievalSupervisor:
             if in_suspicious and not cls._doc_contains_all_anchors(doc, anchors):
                 continue
 
-            if not in_allowed and suspicious_prefixes and not cls._doc_contains_all_anchors(doc, anchors):
+            if not in_allowed and suspicious_prefixes and anchors and not cls._doc_contains_all_anchors(doc, anchors):
                 # Medical queries should stay in medical areas unless the note explicitly contains the anchors.
+                # When anchors is empty (lookup-style query), we cannot filter by anchor presence —
+                # root-level notes (e.g. "Lymphoma Treatment Log.md") must pass through.
                 continue
 
             filtered.append(doc)
