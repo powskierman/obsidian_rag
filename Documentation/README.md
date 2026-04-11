@@ -18,6 +18,12 @@ Use this file as the canonical index for active documentation.
 - `reference/api/UNIFIED_API_IMPLEMENTATION.md`
 - `reference/streaming/STREAMING_IMPLEMENTATION.md`
 
+## Specifications
+- `specs/movie-catalog/spec.md`
+- `specs/movie-catalog/plan.md`
+- `specs/movie-catalog/tasks.md`
+- `compliance/movie-subsystem-compliance-matrix.md`
+
 ## Architecture
 - `reference/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md`
 - `reference/architecture/DEEP_THINKING_FLOW.md`
@@ -53,6 +59,7 @@ Use this file as the canonical index for active documentation.
 - `operations/graph/TRANSFER_BETWEEN_MACHINES.md`
 - `operations/models/README.md`
 - `operations/models/SETUP.md`
+- `operations/movies/MOVIE_SUBSYSTEM_OPERATOR_GUIDE.md`
 
 ## Integrations
 - `integrations/mcp/MCP_SETUP_INSTRUCTIONS.md`

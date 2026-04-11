@@ -23,6 +23,11 @@ Scripts for updating and maintaining the search index (vector DB and knowledge g
 - `list_remaining_missing_files.sh` — Audit missing files in current index.
 - `subsets/` — Scripts for indexing vault subsets.
 
+### `movies/`
+Movie-catalog ingestion and projection utilities.
+
+- `sync_movies.py` — Canonical movie sync entry point for Apple CSV + NAS TXT -> SQLite store -> Obsidian notes.
+
 ### `setup/`
 Installation, environment management, and service lifecycle.
 
