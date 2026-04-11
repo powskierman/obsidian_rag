@@ -64,8 +64,35 @@ try:
     from mcp.types import Tool, TextContent
     MCP_AVAILABLE = True
 except ImportError as e:
-    print(f"MCP import error: {e}", file=sys.stderr)
-    sys.exit(1)
+    MCP_AVAILABLE = False
+    _MCP_IMPORT_ERROR = e
+
+    class TextContent:
+        def __init__(self, *, type: str, text: str):
+            self.type = type
+            self.text = text
+
+    class Tool(dict):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            self.__dict__.update(kwargs)
+
+    class Server:  # type: ignore[override]
+        def __init__(self, _name: str):
+            self.name = _name
+
+        def list_tools(self):
+            def decorator(func):
+                return func
+            return decorator
+
+        def call_tool(self):
+            def decorator(func):
+                return func
+            return decorator
+
+    async def stdio_server(*args, **kwargs):  # type: ignore[override]
+        raise RuntimeError(f"MCP import error: {_MCP_IMPORT_ERROR}")
 
 # Graph availability
 GRAPH_AVAILABLE = NETWORKX_AVAILABLE
@@ -91,6 +118,7 @@ DUP_WARNING_MAX_FINDINGS = int(os.getenv("MCP_DUP_WARNING_MAX_FINDINGS", "50"))
 MODE_TOOL_SUPPORTED_MODES = {
     "vector",
     "cascading",
+    "vault_review",
     "deep-research",
 }
 MODE_PASSTHROUGH_FIELDS = [

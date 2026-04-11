@@ -192,7 +192,7 @@ export default function SettingsPanel() {
             className="w-4 h-4 rounded border-[#2C2C2E] bg-[#1C1C1E] text-[#0A84FF] focus:ring-[#0A84FF] focus:ring-offset-0"
           />
           <span className="text-sm text-white/80 group-hover:text-white transition-colors">
-            {enhancedDisabled ? 'Enhanced Search (Deep Thinking)' : 'Enhanced Search'}
+            {enhancedDisabled ? 'Web Search (Deep Thinking)' : 'Web Search'}
           </span>
         </label>
 

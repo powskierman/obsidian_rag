@@ -16,6 +16,7 @@ export default function ConfigurationPanel() {
     const labels: Record<string, string> = {
       'vector': 'Vector',
       'cascading': 'Cascading',
+      'vault_review': 'Deep Review',
       'deep-thinking': 'Deep Thinking',
     };
     return labels[searchMode] || searchMode;

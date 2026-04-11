@@ -16,6 +16,12 @@ const searchModes = [
     icon: '🌊'
   },
   {
+    id: 'vault_review' as SearchMode,
+    label: 'Deep Review',
+    description: 'Full-note vault review with MCP reads',
+    icon: '📚'
+  },
+  {
     id: 'deep-thinking' as SearchMode,
     label: 'Deep Thinking',
     description: 'Agentic reasoning over retrieved evidence',

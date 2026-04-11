@@ -39,6 +39,7 @@ export default function ChatSidebar() {
         const searchModeLabel = ({
             'vector': 'Vector',
             'cascading': 'Cascading',
+            'vault_review': 'Deep Review',
             'deep-thinking': 'Deep Thinking'
         } as Record<string, string>)[searchMode] || searchMode;
 

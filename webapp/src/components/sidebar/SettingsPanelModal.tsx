@@ -88,7 +88,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
           </button>
         </div>
 
-        <p className="text-sm text-white/60 mb-6">Configure search and response parameters</p>
+        <p className="text-sm text-white/60 mb-6">Configure search, web supplementation, and response parameters</p>
 
         <div className="space-y-6">
           {/* LLM Provider Selection */}
@@ -328,12 +328,12 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             </button>
           </div>
 
-          {/* Enhanced Search Toggle */}
+          {/* Web Search Toggle */}
           <div className={`flex items-center justify-between p-3 bg-[#2C2C2E] rounded-lg border border-[#3C3C3E] ${enhancedDisabled ? 'opacity-60' : ''}`}>
             <div>
-              <div className="text-sm font-medium text-white">Enhanced Search</div>
+              <div className="text-sm font-medium text-white">Web Search</div>
               <div className="text-xs text-white/40 mt-1">
-                {enhancedDisabled ? 'Disabled while Deep Thinking is enabled' : 'Add web search and memory context'}
+                {enhancedDisabled ? 'Disabled while Deep Thinking is enabled' : 'Add a clearly separated web findings section'}
               </div>
             </div>
             <button

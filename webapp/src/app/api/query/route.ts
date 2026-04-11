@@ -21,7 +21,7 @@ const resolveGatewayQueryTimeoutMs = (body: QueryRouteBody): number => {
   const mode = String(body.mode || '').trim().toLowerCase();
   const isRemoteProvider = provider === 'openrouter' || provider === 'chatgpt' || provider === 'gemini';
 
-  if (mode === 'cascading') {
+  if (mode === 'cascading' || mode === 'vault_review') {
     const cascadingTimeoutMs = parseTimeoutMs(
       process.env.GATEWAY_QUERY_TIMEOUT_MS_CASCADING,
       isRemoteProvider ? 300000 : 120000,

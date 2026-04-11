@@ -22,6 +22,7 @@ export default function ActionsPanel({ onClose }: ActionsPanelProps) {
     const searchModeLabel = ({
       'vector': 'Vector',
       'cascading': 'Cascading',
+      'vault_review': 'Deep Review',
       'deep-thinking': 'Deep Thinking',
     } as Record<string, string>)[searchMode] || searchMode;
 

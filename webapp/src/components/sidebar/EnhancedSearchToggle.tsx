@@ -23,13 +23,13 @@ export default function EnhancedSearchToggle() {
         <span className="text-xl">🌐</span>
         <div className="text-left">
           <div className="text-[10px] text-white/40 uppercase tracking-wider font-semibold">
-            Enhanced Search
+            Web Search
           </div>
           <div className="text-sm text-white font-medium">
             {isDisabled ? 'Disabled (Deep Thinking)' : settings.enhancedSearch ? 'Enabled' : 'Disabled'}
           </div>
           <div className="text-xs text-white/50">
-            Web search + memory context
+            Add a separate web findings section
           </div>
         </div>
       </div>

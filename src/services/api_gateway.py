@@ -62,6 +62,7 @@ try:
         should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
         source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
+        synthesize_vault_review_answer as _synthesize_vault_review_answer_impl,
     )
 except ImportError:
     from src.services.cascading_pipeline import (
@@ -84,6 +85,7 @@ except ImportError:
         should_require_vault_relationship_guardrail as _should_require_vault_relationship_guardrail_impl,
         source_set_covers_query_facets as _source_set_covers_query_facets_impl,
         synthesize_cascading_answer as _synthesize_cascading_answer_impl,
+        synthesize_vault_review_answer as _synthesize_vault_review_answer_impl,
     )
 
 try:
@@ -2669,6 +2671,502 @@ async def _get_json(
         return None
 
 
+_MCP_VAULT_TOOL_IMPLS: Optional[tuple[Any, Any, Any]] = None
+_REVIEW_QUERY_LEADING_RE = re.compile(
+    r"^\s*(?:please\s+)?(?:(?:deep|comprehensive)\s+)?"
+    r"(?:review|analy[sz]e|assess|evaluate|summari[sz]e)\s+",
+    re.IGNORECASE,
+)
+_REVIEW_QUERY_TRAILING_RE = re.compile(
+    r"\s+(?:using|with|from)\s+(?:only\s+)?(?:evidence|information|context)\s+from\s+(?:my\s+)?vault\b.*$",
+    re.IGNORECASE,
+)
+_REVIEW_COMPOUND_PATTERNS = (
+    (re.compile(r"\bpet\s*(?:/|\band\b)?\s*ct\b", re.IGNORECASE), "pet_ct"),
+    (re.compile(r"\bblood\s+work\b", re.IGNORECASE), "bloodwork"),
+)
+
+
+def _load_mcp_vault_tool_impls() -> tuple[Any, Any, Any]:
+    global _MCP_VAULT_TOOL_IMPLS
+    if _MCP_VAULT_TOOL_IMPLS is not None:
+        return _MCP_VAULT_TOOL_IMPLS
+
+    try:
+        from src.mcp.obsidian_rag_unified_mcp import (
+            batch_read_vault_notes as _mcp_batch_read_vault_notes_impl,
+            read_attachment_text as _mcp_read_attachment_text_impl,
+            search_vault as _mcp_search_vault_impl,
+        )
+    except Exception:
+        base_path = _project_root()
+        if base_path not in sys.path:
+            sys.path.append(base_path)
+        from src.mcp.obsidian_rag_unified_mcp import (
+            batch_read_vault_notes as _mcp_batch_read_vault_notes_impl,
+            read_attachment_text as _mcp_read_attachment_text_impl,
+            search_vault as _mcp_search_vault_impl,
+        )
+
+    _MCP_VAULT_TOOL_IMPLS = (
+        _mcp_search_vault_impl,
+        _mcp_batch_read_vault_notes_impl,
+        _mcp_read_attachment_text_impl,
+    )
+    return _MCP_VAULT_TOOL_IMPLS
+
+
+def _extract_mcp_text_payload(items: Any) -> str:
+    if not isinstance(items, list):
+        return ""
+    parts: List[str] = []
+    for item in items:
+        text = getattr(item, "text", None)
+        if text is None and isinstance(item, dict):
+            text = item.get("text")
+        if isinstance(text, str) and text.strip():
+            parts.append(text)
+    return "\n".join(parts).strip()
+
+
+def _clean_review_fragment(text: str) -> str:
+    cleaned = re.sub(r"\s+", " ", str(text or "").strip(" \t\r\n,;:.!?"))
+    cleaned = re.sub(r"^(?:my|the|all\s+my)\s+", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+(?:from|in)\s+(?:my\s+)?vault$", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+(?:documents?|docs?|files?)$", "", cleaned, flags=re.IGNORECASE)
+    return cleaned.strip()
+
+
+def _extract_review_facets(query: str) -> List[str]:
+    normalized = re.sub(r"\s+", " ", str(query or "").strip())
+    if not normalized:
+        return []
+
+    working = _REVIEW_QUERY_LEADING_RE.sub("", normalized)
+    working = _REVIEW_QUERY_TRAILING_RE.sub("", working)
+    working = re.sub(r"\b(?:from|in)\s+(?:my\s+)?vault\b", "", working, flags=re.IGNORECASE)
+    working = re.sub(r"\b(?:notes?|documents?|docs?|files?)\s+about\b", "", working, flags=re.IGNORECASE)
+    working = working.strip(" ?!.,;:")
+    if not working:
+        return []
+
+    protected = working
+    for pattern, replacement in _REVIEW_COMPOUND_PATTERNS:
+        protected = pattern.sub(replacement, protected)
+
+    primary_fragments = [
+        fragment.strip()
+        for fragment in re.split(r"\s*(?:,|;|\n)\s*", protected)
+        if fragment.strip()
+    ] or [protected]
+
+    fragments: List[str] = []
+    for fragment in primary_fragments:
+        parts = [
+            part.strip()
+            for part in re.split(r"\s+\band\b\s+", fragment, flags=re.IGNORECASE)
+            if part.strip()
+        ]
+        fragments.extend(parts or [fragment])
+
+    restored: List[str] = []
+    seen: set[str] = set()
+    for fragment in fragments:
+        restored_fragment = fragment.replace("pet_ct", "pet ct")
+        cleaned = _clean_review_fragment(restored_fragment)
+        if not cleaned:
+            continue
+        lowered = cleaned.lower()
+        if lowered in seen:
+            continue
+        seen.add(lowered)
+        restored.append(cleaned)
+
+    return restored
+
+
+def _is_comprehensive_vault_review_query(query: str) -> bool:
+    normalized = re.sub(r"\s+", " ", str(query or "").strip()).lower()
+    if not normalized:
+        return False
+
+    has_review_signal = any(
+        signal in normalized
+        for signal in (
+            "review ",
+            "review my",
+            "deep review",
+            "comprehensive review",
+            "assess ",
+            "analyze ",
+            "analyse ",
+            "evaluate ",
+        )
+    )
+    if not has_review_signal:
+        return False
+
+    facets = _extract_review_facets(query)
+    has_personal_scope = any(
+        marker in normalized
+        for marker in (
+            " my ",
+            "my vault",
+            "my notes",
+            "from my vault",
+            "using only evidence from my vault",
+            "all my",
+            "entire vault",
+        )
+    )
+    has_comprehensive_scope = any(
+        marker in normalized
+        for marker in (
+            "all my",
+            "entire vault",
+            "full vault",
+            "comprehensive",
+            "deep review",
+        )
+    )
+    return bool((has_personal_scope and len(facets) >= 1) or len(facets) >= 2 or has_comprehensive_scope)
+
+
+def _parse_mcp_semantic_search_results(payload_text: str) -> List[Dict[str, Any]]:
+    if not payload_text or "❌" in payload_text:
+        return []
+
+    entry_pattern = re.compile(
+        r"\*\*(?P<index>\d+)\.\s+(?P<filename>.*?)\*\*\s+\((?P<relevance>\d+)% relevant\)\s*\n"
+        r"\s*📁\s+(?P<filepath>[^\n]+)"
+        r"(?:\n\s*📄\s+(?P<snippet>.*?))?"
+        r"(?=\n\*\*\d+\.|\Z)",
+        re.DOTALL,
+    )
+    results: List[Dict[str, Any]] = []
+    for match in entry_pattern.finditer(payload_text):
+        filepath = normalize_vault_path(match.group("filepath").strip())
+        filename = match.group("filename").strip() or os.path.basename(filepath)
+        snippet = str(match.group("snippet") or "").strip()
+        try:
+            relevance = float(match.group("relevance"))
+        except (TypeError, ValueError):
+            relevance = 50.0
+        results.append(
+            {
+                "filename": filename,
+                "filepath": filepath,
+                "relevance": relevance,
+                "snippet": snippet,
+                "source_type": "direct-excerpt",
+                "source_category": "vault",
+            }
+        )
+    return results
+
+
+async def _multi_facet_vault_search(
+    facets: List[str],
+    *,
+    n_per_facet: int,
+) -> tuple[List[Dict[str, Any]], List[str]]:
+    search_vault_impl, _batch_read_impl, _read_attachment_impl = _load_mcp_vault_tool_impls()
+    warnings: List[str] = []
+    if not facets:
+        return [], warnings
+
+    responses = await asyncio.gather(
+        *[
+            search_vault_impl(
+                {
+                    "query": facet,
+                    "n_results": max(1, min(10, n_per_facet)),
+                    "include_content": True,
+                }
+            )
+            for facet in facets
+        ],
+        return_exceptions=True,
+    )
+
+    deduped: Dict[tuple[str, str], Dict[str, Any]] = {}
+    for facet, response in zip(facets, responses):
+        if isinstance(response, Exception):
+            warnings.append(f"Semantic search failed for '{facet}': {response}")
+            continue
+
+        payload_text = _extract_mcp_text_payload(response)
+        facet_results = _parse_mcp_semantic_search_results(payload_text)
+        for result in facet_results:
+            identity = canonical_source_identity(result, default_category="vault")
+            current = deduped.get(identity)
+            facet_hits = set(current.get("matched_facets", [])) if current else set()
+            facet_hits.add(facet)
+            candidate = {
+                **result,
+                "matched_facets": sorted(facet_hits),
+            }
+            candidate_score = float(candidate.get("relevance", 0.0) or 0.0) + (len(facet_hits) * 8.0)
+            existing_score = -1.0
+            if current:
+                existing_score = float(current.get("relevance", 0.0) or 0.0) + (len(current.get("matched_facets", [])) * 8.0)
+            if current is None or candidate_score >= existing_score:
+                deduped[identity] = candidate
+
+    ranked = sorted(
+        deduped.values(),
+        key=lambda item: (
+            len(item.get("matched_facets", [])),
+            float(item.get("relevance", 0.0) or 0.0),
+        ),
+        reverse=True,
+    )
+    return ranked, warnings
+
+
+def _parse_mcp_batch_read_results(payload_text: str) -> tuple[OrderedDict[str, str], List[str]]:
+    notes: OrderedDict[str, str] = OrderedDict()
+    warnings: List[str] = []
+    if not payload_text:
+        return notes, warnings
+
+    section_pattern = re.compile(r"^--- (?P<path>.+)$", re.MULTILINE)
+    matches = list(section_pattern.finditer(payload_text))
+    if not matches:
+        return notes, warnings
+
+    for index, match in enumerate(matches):
+        raw_path = match.group("path").strip()
+        start = match.end()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(payload_text)
+        content = payload_text[start:end].strip()
+        normalized_path = normalize_vault_path(raw_path)
+        if not content:
+            warnings.append(f"No content returned for {normalized_path}.")
+            continue
+        if content.startswith("❌"):
+            warnings.append(f"{normalized_path}: {content}")
+            continue
+        notes[normalized_path] = content
+
+    return notes, warnings
+
+
+def _read_note_from_vault(path: str) -> Optional[str]:
+    normalized_path = normalize_vault_path(path)
+    try:
+        resolved = (_vault_root() / normalized_path).resolve()
+        resolved.relative_to(_vault_root())
+    except Exception:
+        return None
+    if not resolved.exists() or not resolved.is_file():
+        return None
+
+    max_chars = 200000
+    raw_limit = _get_env_value("MCP_MAX_NOTE_CHARS", "200000")
+    try:
+        max_chars = max(1000, int(raw_limit))
+    except (TypeError, ValueError):
+        pass
+
+    try:
+        text = resolved.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return None
+    return text[:max_chars]
+
+
+async def _read_vault_notes(paths: List[str]) -> tuple[OrderedDict[str, str], List[str]]:
+    _search_vault_impl, batch_read_impl, read_attachment_impl = _load_mcp_vault_tool_impls()
+    requested_paths = [normalize_vault_path(path) for path in paths if str(path or "").strip()]
+    if not requested_paths:
+        return OrderedDict(), []
+
+    batch_result = await batch_read_impl({"paths": requested_paths})
+    payload_text = _extract_mcp_text_payload(batch_result)
+    notes, warnings = _parse_mcp_batch_read_results(payload_text)
+
+    for path in requested_paths:
+        if path in notes:
+            continue
+        if path.lower().endswith(".pdf"):
+            attachment_result = await read_attachment_impl({"path": path})
+            attachment_text = _extract_mcp_text_payload(attachment_result)
+            if attachment_text and not attachment_text.startswith("❌"):
+                notes[path] = attachment_text
+                warnings = [
+                    warning for warning in warnings
+                    if not str(warning).startswith(f"{path}:")
+                ]
+                continue
+        fallback_content = _read_note_from_vault(path)
+        if fallback_content is not None:
+            notes[path] = fallback_content
+        else:
+            warnings.append(f"Unable to read note content for {path}.")
+
+    ordered_notes: OrderedDict[str, str] = OrderedDict()
+    for path in requested_paths:
+        if path in notes:
+            ordered_notes[path] = notes[path]
+    return ordered_notes, warnings
+
+
+async def _vault_review_query(
+    request: "UnifiedQueryRequest",
+    retrieval_query: str,
+    effective_relevance_threshold: float,
+    client: httpx.AsyncClient,
+    *,
+    requested_mode: str,
+    auto_routed: bool,
+) -> Dict[str, Any]:
+    review_query = retrieval_query or request.query
+    facets = _extract_review_facets(review_query)
+    if not facets:
+        facets = [review_query]
+
+    n_per_facet = min(6, max(3, math.ceil(request.max_results / max(1, len(facets)))))
+    retrieval_sources, warnings = await _multi_facet_vault_search(facets, n_per_facet=n_per_facet)
+    retrieval_sources = _apply_relevance_filter(retrieval_sources, effective_relevance_threshold)
+
+    max_note_count = min(18, max(request.max_results, len(facets) * n_per_facet))
+    selected_retrieval_sources = retrieval_sources[:max_note_count]
+    if not selected_retrieval_sources and review_query != request.query:
+        selected_retrieval_sources, extra_warnings = await _multi_facet_vault_search(
+            [request.query],
+            n_per_facet=min(8, max(4, request.max_results)),
+        )
+        warnings.extend(extra_warnings)
+        selected_retrieval_sources = _apply_relevance_filter(
+            selected_retrieval_sources,
+            effective_relevance_threshold,
+        )[:max_note_count]
+
+    if not selected_retrieval_sources:
+        answer = "No vault notes were found for this review query."
+        if request.web_search:
+            web_search_result = await _perform_tavily_web_search(client, review_query or request.query)
+        else:
+            web_search_result = None
+        return {
+            "query": request.query,
+            "mode": "vault_review",
+            "answer": answer,
+            "citations": [],
+            "sources": [],
+            "web_search": web_search_result,
+            "results": {
+                "facets": facets,
+                "used_documents": [],
+                "warnings": warnings,
+            },
+            "metadata": {
+                "description": "Deep Review full-note pipeline (MCP semantic search + batch note reads).",
+                "facets": facets,
+                "requested_mode": requested_mode,
+                "auto_routed": auto_routed,
+                "web_search_enabled": bool(request.web_search),
+                "warnings": warnings,
+            },
+        }
+
+    note_paths = [str(source.get("filepath") or "") for source in selected_retrieval_sources if source.get("filepath")]
+    notes, read_warnings = await _read_vault_notes(note_paths)
+    warnings.extend(read_warnings)
+
+    web_search_result = None
+    if request.web_search:
+        web_search_result = await _perform_tavily_web_search(
+            client,
+            review_query or request.query,
+        )
+
+    synthesis_result = await _synthesize_vault_review_answer_impl(
+        request.query,
+        notes,
+        request.llm_provider,
+        request.model,
+        web_search_result,
+        request.system_prompt,
+    )
+
+    source_by_path = {
+        normalize_vault_path(str(source.get("filepath") or source.get("path") or "")): source
+        for source in selected_retrieval_sources
+        if source.get("filepath") or source.get("path")
+    }
+    synthesis_documents = synthesis_result.get("used_documents")
+    response_sources: List[Dict[str, Any]] = []
+    if isinstance(synthesis_documents, list) and synthesis_documents:
+        for document in synthesis_documents:
+            if not isinstance(document, dict):
+                continue
+            normalized_path = normalize_vault_path(
+                str(document.get("filepath") or document.get("path") or "")
+            )
+            retrieval_source = source_by_path.get(normalized_path, {})
+            merged_source = {
+                **retrieval_source,
+                **document,
+                "filepath": normalized_path or retrieval_source.get("filepath") or document.get("filepath"),
+                "filename": document.get("filename") or retrieval_source.get("filename") or Path(normalized_path).name,
+                "source_category": "vault",
+            }
+            response_sources.append(
+                _normalize_cascading_source(
+                    merged_source,
+                    source_type=str(merged_source.get("source_type") or "direct-excerpt"),
+                    default_relevance=float(
+                        retrieval_source.get("relevance", merged_source.get("relevance", 50.0)) or 50.0
+                    ),
+                )
+            )
+    else:
+        response_sources = [
+            _normalize_cascading_source(
+                source,
+                source_type=str(source.get("source_type") or "direct-excerpt"),
+                default_relevance=float(source.get("relevance", 50.0) or 50.0),
+            )
+            for source in selected_retrieval_sources
+        ]
+
+    fallback_reason = str(synthesis_result.get("fallback_reason") or "").strip()
+    if fallback_reason:
+        warnings.append(f"Deep Review synthesis fallback: {fallback_reason}.")
+
+    return {
+        "query": request.query,
+        "mode": "vault_review",
+        "answer": str(synthesis_result.get("answer") or "").strip() or "No review answer was generated.",
+        "citations": synthesis_result.get("citations", []),
+        "sources": response_sources,
+        "web_search": web_search_result,
+        "results": {
+            "facets": facets,
+            "used_documents": response_sources,
+            "candidate_sources": selected_retrieval_sources,
+            "notes_loaded": len(notes),
+            "warnings": warnings,
+            "fallback_reason": fallback_reason,
+        },
+        "metadata": {
+            "description": "Deep Review full-note pipeline (MCP semantic search + batch note reads).",
+            "facets": facets,
+            "requested_mode": requested_mode,
+            "auto_routed": auto_routed,
+            "evidence": {
+                "candidate_source_count": len(selected_retrieval_sources),
+                "selected_source_count": len(response_sources),
+                "notes_loaded": len(notes),
+            },
+            "web_search_enabled": bool(request.web_search),
+            "warnings": warnings,
+        },
+    }
+
+
 # thread pool for running synchronous Deep Thinking agents
 executor = ThreadPoolExecutor(max_workers=5)
 
@@ -3032,7 +3530,7 @@ async def _synthesize_cascading_answer(
 
 class UnifiedQueryRequest(BaseModel):
     query: str
-    mode: str = "cascading"  # vector, cascading
+    mode: str = "cascading"  # vector, cascading, vault_review
     max_results: int = 10
     llm_provider: str = _get_env_value(
         "CASCADING_LLM_PROVIDER",
@@ -3059,10 +3557,12 @@ async def unified_query(request: UnifiedQueryRequest):
     REST modes:
     - vector: Pure vector similarity search (ChromaDB)
     - cascading: Staged retrieval and synthesis pipeline
+    - vault_review: Full-note review pipeline via MCP vault tools
 
     Deep research is exposed separately over WebSocket at /api/v1/deep-research.
     """
     mode = request.mode.lower()
+    requested_mode = mode
 
     # Preserve legacy aliases so older clients fail with the normalized mode name.
     mode_aliases = {"graph": "notes", "networkx": "notes", "lightrag": "entities"}
@@ -3070,18 +3570,24 @@ async def unified_query(request: UnifiedQueryRequest):
     supported_modes = {
         "vector",
         "cascading",
+        "vault_review",
     }
     if mode not in supported_modes:
         raise HTTPException(
             status_code=400,
             detail=(
                 f"Unsupported mode '{request.mode}'. "
-                "Use one of: vector, cascading. "
+                "Use one of: vector, cascading, vault_review. "
                 "For deep research, use WebSocket /api/v1/deep-research."
             ),
         )
 
-    if request.system_prompt and mode == "cascading":
+    auto_routed_to_vault_review = False
+    if mode == "cascading" and _is_comprehensive_vault_review_query(request.query):
+        mode = "vault_review"
+        auto_routed_to_vault_review = True
+
+    if request.system_prompt and mode in {"cascading", "vault_review"}:
         invalid_placeholders = _invalid_system_prompt_placeholders(request.system_prompt)
         if invalid_placeholders:
             raise HTTPException(
@@ -3526,6 +4032,27 @@ async def unified_query(request: UnifiedQueryRequest):
 
     async with httpx.AsyncClient() as client:
         # ===== SINGLE-SOURCE MODES =====
+
+        if mode == "vault_review":
+            try:
+                return await _vault_review_query(
+                    request,
+                    retrieval_query,
+                    effective_relevance_threshold,
+                    client,
+                    requested_mode=requested_mode,
+                    auto_routed=auto_routed_to_vault_review,
+                )
+            except HTTPException:
+                raise
+            except Exception as e:
+                import traceback
+
+                traceback.print_exc()
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Vault review error: {str(e)}",
+                )
 
         # Pure vector search
         if mode == "vector":

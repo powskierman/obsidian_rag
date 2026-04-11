@@ -70,7 +70,7 @@ const normalizeSource = (source: any): SearchResult => {
 export const api = {
   unifiedSearch: async (
     query: string,
-    mode: 'vector' | 'cascading' = 'cascading',
+    mode: 'vector' | 'cascading' | 'vault_review' = 'cascading',
     n_results = 10,
     llm_provider = 'openrouter',  // Default to openrouter (faster than ollama)
     model = '',
@@ -154,7 +154,7 @@ export const api = {
           web_search: data.web_search,
           llm_knowledge: data.llm_knowledge,
         };
-      } else if (mode === 'cascading') {
+      } else if (mode === 'cascading' || mode === 'vault_review') {
         return {
           answer: data.answer || 'No results found',
           sources: (data.sources || []).map(normalizeSource),

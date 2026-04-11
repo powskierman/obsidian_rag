@@ -12,6 +12,7 @@ const searchModeGroups = [
     modes: [
       { id: 'vector' as SearchMode, label: 'Vector', description: 'ChromaDB semantic search', icon: '🔍' },
       { id: 'cascading' as SearchMode, label: 'Cascading', description: 'Waterfall retrieval', icon: '🌊' },
+      { id: 'vault_review' as SearchMode, label: 'Deep Review', description: 'MCP semantic search + full note reads', icon: '📚' },
       { id: 'deep-thinking' as SearchMode, label: 'Deep Thinking', description: 'Agentic reasoning', icon: '🧠' }
     ]
   }

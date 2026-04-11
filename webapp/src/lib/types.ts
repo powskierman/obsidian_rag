@@ -7,6 +7,7 @@ export type SearchMode =
   | 'vector'          // Pure vector similarity (ChromaDB)
   // Agentic and pipeline modes
   | 'cascading'       // 5-Stage Waterfall
+  | 'vault_review'    // Full-note MCP review pipeline
   | 'deep-thinking';  // Agentic reasoning mode
 
 export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'lmstudio';

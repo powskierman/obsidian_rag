@@ -16,6 +16,8 @@ export default function ChatHistory() {
         return '🔍';
       case 'cascading':
         return '🔗';
+      case 'vault_review':
+        return '📚';
       case 'deep-thinking':
         return '🧠';
       default:

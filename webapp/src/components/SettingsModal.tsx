@@ -14,7 +14,7 @@ export default function SettingsModal({ isOpen, onClose, currentModel, onModelCh
     const [isLoadingStats, setIsLoadingStats] = useState(false);
 
     // Legacy Controls State
-    const [searchMode, setSearchMode] = useState<'vector' | 'cascading' | 'deep-thinking'>('cascading');
+    const [searchMode, setSearchMode] = useState<'vector' | 'cascading' | 'vault_review' | 'deep-thinking'>('cascading');
     const [llmProvider, setLlmProvider] = useState<'ollama' | 'gemini' | 'claude' | 'chatgpt'>('gemini');
 
     useEffect(() => {
@@ -56,12 +56,12 @@ export default function SettingsModal({ isOpen, onClose, currentModel, onModelCh
                             Search Mode
                         </label>
                         <div className="grid grid-cols-1 gap-2">
-                             {(['vector', 'cascading', 'deep-thinking'] as const).map(mode => (
+                             {(['vector', 'cascading', 'vault_review', 'deep-thinking'] as const).map(mode => (
                                 <label key={mode} className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${searchMode === mode ? 'bg-[#0A84FF]/10 border-[#0A84FF]' : 'bg-[#1C1C1E] border-[#2C2C2E] hover:border-white/20'}`}>
                                     <input type="radio" name="searchMode" checked={searchMode === mode} onChange={() => setSearchMode(mode)} className="hidden"/>
                                     <div className="flex-1">
-                                        <div className="text-sm font-medium text-white capitalize">{mode}</div>
-                                        <div className="text-xs text-white/50">{mode === 'vector' ? 'Fast retrieval' : mode === 'cascading' ? 'Multi-stage retrieval' : 'Agentic reasoning'}</div>
+                                        <div className="text-sm font-medium text-white capitalize">{mode === 'vault_review' ? 'Deep Review' : mode}</div>
+                                        <div className="text-xs text-white/50">{mode === 'vector' ? 'Fast retrieval' : mode === 'cascading' ? 'Multi-stage retrieval' : mode === 'vault_review' ? 'Full-note MCP review' : 'Agentic reasoning'}</div>
                                     </div>
                                     <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${searchMode === mode ? 'border-[#0A84FF]' : 'border-white/20'}`}>
                                         {searchMode === mode && <div className="w-2 h-2 rounded-full bg-[#0A84FF]" />}

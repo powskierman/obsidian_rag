@@ -1968,3 +1968,256 @@ async def synthesize_cascading_answer(
         payload.get("fallback_reason"),
     )
     return payload
+
+
+# ---------------------------------------------------------------------------
+# Vault Review Synthesis
+# ---------------------------------------------------------------------------
+
+async def synthesize_vault_review_answer(
+    query: str,
+    notes: Dict[str, str],          # {relative_path: full_content}
+    llm_provider: str,
+    model: str,
+    web_result: Optional[Dict[str, Any]] = None,
+    system_prompt: Optional[str] = None,
+    ) -> Dict[str, Any]:
+    """
+    Synthesize a comprehensive answer from *full* vault note content.
+
+    Unlike the snippet-based cascading synthesis this function receives complete
+    note text so the LLM can reason across the entire corpus — bloodwork trends,
+    all scan dates, treatment logs — rather than 700-char excerpts of 4 documents.
+
+    web_result: output of _perform_tavily_web_search, appended as a clearly
+    labelled supplemental section when present.
+    """
+    resolved_provider = canonical_cascading_provider_name(llm_provider)
+    resolved_model = model or default_cascading_model(resolved_provider) or ""
+    timeout_s = _provider_synthesis_timeout_seconds(resolved_provider)
+    max_tokens = _get_env_value("VAULT_REVIEW_MAX_TOKENS") or _get_env_value("CASCADING_SYNTHESIS_MAX_TOKENS") or "2048"
+    try:
+        max_tokens_int = int(max_tokens)
+    except (TypeError, ValueError):
+        max_tokens_int = 2048
+
+    if not notes:
+        return {"answer": "No vault notes found for this query.", "citations": [], "used_documents": [], "fallback_reason": "no_notes"}
+
+    def _vault_review_limits(provider_name: str) -> tuple[int, int]:
+        total_chars = _get_env_int("VAULT_REVIEW_MAX_CONTEXT_CHARS", 120000, minimum=12000)
+        per_note_chars = _get_env_int("VAULT_REVIEW_MAX_NOTE_CHARS", 24000, minimum=2000)
+        if provider_name == "ollama":
+            total_chars = min(
+                total_chars,
+                _get_env_int("VAULT_REVIEW_MAX_CONTEXT_CHARS_OLLAMA", 90000, minimum=12000),
+            )
+            per_note_chars = min(
+                per_note_chars,
+                _get_env_int("VAULT_REVIEW_MAX_NOTE_CHARS_OLLAMA", 18000, minimum=2000),
+            )
+        elif provider_name == "lmstudio":
+            total_chars = min(
+                total_chars,
+                _get_env_int("VAULT_REVIEW_MAX_CONTEXT_CHARS_LMSTUDIO", 80000, minimum=12000),
+            )
+            per_note_chars = min(
+                per_note_chars,
+                _get_env_int("VAULT_REVIEW_MAX_NOTE_CHARS_LMSTUDIO", 16000, minimum=2000),
+            )
+        elif provider_name == "openrouter":
+            total_chars = min(
+                total_chars,
+                _get_env_int("VAULT_REVIEW_MAX_CONTEXT_CHARS_OPENROUTER", 110000, minimum=12000),
+            )
+        return total_chars, per_note_chars
+
+    def _truncate_for_context(text: str, limit: int) -> str:
+        compact = str(text or "").strip()
+        if len(compact) <= limit:
+            return compact
+        marker = "\n\n[Truncated for synthesis context budget]"
+        available = max(0, limit - len(marker))
+        return compact[:available].rstrip() + marker
+
+    total_context_limit, per_note_limit = _vault_review_limits(resolved_provider)
+    prepared_notes: Dict[str, str] = {}
+    omitted_notes: List[str] = []
+    remaining_chars = total_context_limit
+    for path, content in notes.items():
+        if remaining_chars <= 0:
+            omitted_notes.append(path)
+            continue
+        allowed_chars = min(per_note_limit, remaining_chars)
+        prepared_content = _truncate_for_context(content, allowed_chars)
+        if not prepared_content:
+            omitted_notes.append(path)
+            continue
+        prepared_notes[path] = prepared_content
+        remaining_chars -= len(prepared_content)
+
+    if not prepared_notes:
+        first_path, first_content = next(iter(notes.items()))
+        prepared_notes[first_path] = _truncate_for_context(first_content, total_context_limit)
+        omitted_notes = [path for path in notes.keys() if path != first_path]
+
+    # Build context block — full note content, clearly separated
+    note_sections = []
+    citations = []
+    for path, content in prepared_notes.items():
+        note_sections.append(f"### Note: {path}\n\n{content}")
+        citations.append(f"[[{path}]]")
+    vault_context = "\n\n---\n\n".join(note_sections)
+
+    # Web supplement block
+    web_section = ""
+    web_sources: List[Dict[str, Any]] = []
+    if web_result and isinstance(web_result, dict):
+        results = web_result.get("results") or []
+        if results:
+            web_lines = [
+                "\n\n---\n\n## Supplemental Web Findings\n"
+                "_The following comes from web search, not your vault. "
+                "Treat it as context, not personal evidence._\n"
+            ]
+            for r in results:
+                title = r.get("title", "")
+                url = r.get("url", "")
+                snippet = r.get("content") or r.get("snippet") or ""
+                web_lines.append(f"**{title}** ({url})\n{snippet}")
+                web_sources.append({"title": title, "url": url, "snippet": snippet, "source_category": "web"})
+            web_section = "\n\n".join(web_lines)
+
+    sys_prompt = system_prompt or (
+        "You are a knowledgeable assistant helping a user understand their personal vault notes. "
+        "You have been given the COMPLETE content of relevant notes — not excerpts. "
+        "Synthesize a thorough, well-organised answer grounded entirely in the provided note content. "
+        "Cite the note title (e.g. [[Medical/Lymphoma/1st PET-CT scan.md]]) whenever you reference it. "
+        "If supplemental web findings are provided, incorporate them only where they add meaningful context "
+        "beyond what the vault contains, and clearly label any claim sourced from the web with '(web)'."
+    )
+
+    user_prompt = (
+        f"Vault Notes:\n\n{vault_context}"
+        f"{web_section}\n\n"
+        f"Query: {query}\n\n"
+        "Provide a comprehensive assessment. Structure your answer with clear sections. "
+        "Cite each vault note you reference."
+    )
+    if omitted_notes:
+        omitted_block = "\n".join(f"- [[{path}]]" for path in omitted_notes[:12])
+        user_prompt += (
+            "\n\nAdditional matched notes were omitted from the prompt due to context limits. "
+            "Do not infer details from them, but you may mention that additional matching notes existed:\n"
+            f"{omitted_block}"
+        )
+
+    logger.info(
+        "vault_review_synthesis.start provider=%s model=%s notes=%d context_chars=%d web_results=%d timeout_s=%.1f query=%s",
+        resolved_provider, resolved_model, len(prepared_notes), len(vault_context),
+        len(web_sources), timeout_s, query[:80],
+    )
+
+    started_at = time.perf_counter()
+    try:
+        response = await asyncio.wait_for(
+            asyncio.to_thread(
+                universal_client.UniversalClient(
+                    provider=resolved_provider,
+                    api_key=cascading_provider_api_key(resolved_provider),
+                ).messages.create,
+                model=resolved_model,
+                messages=[{"role": "user", "content": user_prompt}],
+                max_tokens=max_tokens_int,
+                temperature=0,
+                system=sys_prompt,
+            ),
+            timeout=timeout_s,
+        )
+        elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+        answer = universal_client.extract_response_text(response) or ""
+        logger.info(
+            "vault_review_synthesis.complete provider=%s model=%s elapsed_ms=%d answer_chars=%d",
+            resolved_provider, resolved_model, elapsed_ms, len(answer),
+        )
+    except asyncio.TimeoutError:
+        elapsed_ms = int((time.perf_counter() - started_at) * 1000)
+        # Fallback to OpenRouter if local timed out
+        fb_name = _get_env_value("LOCAL_LLM_FALLBACK_PROVIDER", "").strip().lower()
+        if resolved_provider in {"ollama", "lmstudio"} and fb_name and not getattr(synthesize_vault_review_answer, "_in_fallback", False):
+            fb_provider = canonical_cascading_provider_name(fb_name)
+            fb_model = default_cascading_model(fb_provider) or ""
+            logger.warning("vault_review_synthesis.timeout_fallback original=%s fallback=%s", resolved_provider, fb_provider)
+            synthesize_vault_review_answer._in_fallback = True
+            try:
+                return await synthesize_vault_review_answer(query, notes, fb_provider, fb_model, web_result, system_prompt)
+            finally:
+                synthesize_vault_review_answer._in_fallback = False
+        answer = "Synthesis timed out. The vault notes are attached as sources — review them directly."
+        logger.warning("vault_review_synthesis.timeout provider=%s elapsed_ms=%d", resolved_provider, elapsed_ms)
+        return {
+            "answer": answer,
+            "citations": citations,
+            "used_documents": [
+                {
+                    "filepath": path,
+                    "filename": Path(path).name,
+                    "source_category": "vault",
+                    "snippet": content[:200] + "..." if len(content) > 200 else content,
+                }
+                for path, content in prepared_notes.items()
+            ],
+            "web_sources": web_sources,
+            "fallback_reason": "timeout",
+        }
+    except Exception as exc:
+        fb_name = _get_env_value("LOCAL_LLM_FALLBACK_PROVIDER", "").strip().lower()
+        if resolved_provider in {"ollama", "lmstudio"} and fb_name and not getattr(synthesize_vault_review_answer, "_in_fallback", False):
+            fb_provider = canonical_cascading_provider_name(fb_name)
+            fb_model = default_cascading_model(fb_provider) or ""
+            logger.warning(
+                "vault_review_synthesis.exception_fallback original=%s fallback=%s error=%s",
+                resolved_provider,
+                fb_provider,
+                exc,
+            )
+            synthesize_vault_review_answer._in_fallback = True
+            try:
+                return await synthesize_vault_review_answer(query, notes, fb_provider, fb_model, web_result, system_prompt)
+            finally:
+                synthesize_vault_review_answer._in_fallback = False
+        logger.warning("vault_review_synthesis.failed provider=%s error=%s", resolved_provider, exc)
+        answer = (
+            "Deep Review gathered the relevant vault notes, but synthesis failed before a final answer was produced. "
+            "Review the attached sources directly."
+        )
+        return {
+            "answer": answer,
+            "citations": citations,
+            "used_documents": [
+                {
+                    "filepath": path,
+                    "filename": Path(path).name,
+                    "source_category": "vault",
+                    "snippet": content[:200] + "..." if len(content) > 200 else content,
+                }
+                for path, content in prepared_notes.items()
+            ],
+            "web_sources": web_sources,
+            "fallback_reason": "provider_exception",
+        }
+
+    # Build source records for the response
+    vault_sources = [
+        {"filepath": path, "filename": Path(path).name, "source_category": "vault",
+         "snippet": content[:200] + "..." if len(content) > 200 else content}
+        for path, content in prepared_notes.items()
+    ]
+
+    return {
+        "answer": answer,
+        "citations": citations,
+        "used_documents": vault_sources,
+        "web_sources": web_sources,
+        "fallback_reason": "",
+    }
