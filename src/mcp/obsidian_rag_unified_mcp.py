@@ -114,6 +114,7 @@ TEXT_SEARCH_MAX_FILES = int(os.getenv("MCP_TEXT_SEARCH_MAX_FILES", "10000"))
 TEXT_SEARCH_MAX_CONTEXT_LINES = int(os.getenv("MCP_TEXT_SEARCH_MAX_CONTEXT_LINES", "8"))
 DUP_WARNING_MAX_FILES = int(os.getenv("MCP_DUP_WARNING_MAX_FILES", "5000"))
 DUP_WARNING_MAX_FINDINGS = int(os.getenv("MCP_DUP_WARNING_MAX_FINDINGS", "50"))
+MCP_SERVER_VERSION = os.getenv("OBSIDIAN_RAG_MCP_VERSION", "1.26.1")
 
 MODE_TOOL_SUPPORTED_MODES = {
     "vector",
@@ -1595,7 +1596,7 @@ def _resolve_attachment_path(note_path: Path, attachment_ref: str) -> tuple[Path
     return None, error_msg
 
 # Initialize server
-app = Server("obsidian-rag-unified")
+app = Server("obsidian-rag-unified", version=MCP_SERVER_VERSION)
 
 class GraphQuerier:
     """Query the knowledge graph using OpenAI or Gemini for synthesis."""
@@ -2134,6 +2135,33 @@ async def list_tools() -> list[Tool]:
             }
         ),
         Tool(
+            name="create_vault_note",
+            description=(
+                "Create a new text note at any vault-relative path, including inside new folders. "
+                "Fails if the note already exists unless overwrite=true. "
+                "Parent directories are created automatically."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "description": "Vault-relative path for the new note (e.g. 'Media/Movies/1917.md')."
+                    },
+                    "content": {
+                        "type": "string",
+                        "description": "Full file content to write."
+                    },
+                    "overwrite": {
+                        "type": "boolean",
+                        "description": "If true, replace an existing note. Defaults to false.",
+                        "default": False
+                    }
+                },
+                "required": ["path", "content"]
+            }
+        ),
+        Tool(
             name="read_attachment_text",
             description="Extract text from a PDF attachment inside the vault. Provide a relative path to a .pdf.",
             inputSchema={
@@ -2582,6 +2610,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             return await batch_read_vault_notes(arguments)
         elif name == "update_vault_note":
             return await update_vault_note(arguments)
+        elif name == "create_vault_note":
+            return await create_vault_note(arguments)
         elif name == "read_attachment_text":
             return await read_attachment_text(arguments)
         elif name == "obsidian_search_mode" or name == "search_mode":
@@ -3662,6 +3692,54 @@ async def update_vault_note(arguments: dict) -> list[TextContent]:
         return [TextContent(type="text", text=f"✅ Updated `{rel_path}` ({len(str(content))} chars)") ]
     except Exception as e:
         return [TextContent(type="text", text=f"❌ Error updating note: {str(e)}")]
+
+
+async def create_vault_note(arguments: dict) -> list[TextContent]:
+    """Create a new note at any vault-relative path; parent dirs are made automatically."""
+    args = arguments or {}
+    raw_path = str(args.get("path") or "").strip()
+    content = args.get("content")
+    overwrite = bool(args.get("overwrite", False))
+
+    if not raw_path:
+        return [TextContent(type="text", text="❌ path is required")]
+    if content is None:
+        return [TextContent(type="text", text="❌ content is required")]
+
+    vault_root = _get_vault_root()
+    if vault_root is None:
+        return [TextContent(type="text", text="❌ OBSIDIAN_VAULT_PATH is not set")]
+
+    # Resolve without requiring the file to exist
+    candidate = Path(raw_path).expanduser()
+    if not candidate.is_absolute():
+        candidate = vault_root / candidate
+
+    try:
+        # resolve() requires parent to exist; resolve the parent then append the filename
+        resolved = candidate.parent.resolve() / candidate.name
+    except Exception:
+        return [TextContent(type="text", text="❌ Invalid path")]
+
+    if not _is_path_within(vault_root, resolved):
+        return [TextContent(type="text", text="❌ Path is outside the vault root")]
+
+    if not _is_writable_text_note(resolved):
+        return [TextContent(type="text", text="❌ Only text note extensions are supported (.md, .txt, etc.)")]
+
+    existed = resolved.exists()
+    if existed and not overwrite:
+        rel = _vault_relative_path(resolved)
+        return [TextContent(type="text", text=f"❌ Note already exists: {rel}  (pass overwrite=true to replace)")]
+
+    try:
+        resolved.parent.mkdir(parents=True, exist_ok=True)
+        resolved.write_text(str(content), encoding="utf-8")
+        rel = _vault_relative_path(resolved)
+        action = "Overwrote" if existed else "Created"
+        return [TextContent(type="text", text=f"✅ {action} `{rel}` ({len(str(content))} chars)")]
+    except Exception as e:
+        return [TextContent(type="text", text=f"❌ Error creating note: {str(e)}")]
 
 
 async def read_attachment_text(arguments: dict) -> list[TextContent]:

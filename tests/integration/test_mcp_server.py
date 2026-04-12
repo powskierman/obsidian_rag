@@ -59,6 +59,7 @@ class TestMCPServerTools:
         assert 'get_vault_path' in tool_names
         assert 'batch_read_vault_notes' in tool_names
         assert 'update_vault_note' in tool_names
+        assert 'create_vault_note' in tool_names
         assert 'scan_vault_content_warnings' in tool_names
         assert 'obsidian_index_health' in tool_names
 

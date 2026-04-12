@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # deploy_sample_notes.sh
-# Copies sample movie notes from staging into the vault's Media/Movies/ folder.
+# Copies sample movie notes + Movie Template into the vault.
 # Usage: bash Scripts/movies/deploy_sample_notes.sh [VAULT_PATH]
 #
 # Default vault path: /Volumes/work/vault
@@ -9,12 +9,13 @@
 set -euo pipefail
 
 VAULT="${1:-/Volumes/work/vault}"
-DEST="$VAULT/Media/Movies"
-SRC="$(dirname "$0")/sample_notes"
+MOVIES_DEST="$VAULT/Media/Movies"
+TMPL_DEST="$VAULT/Templates"
+SRC="$(cd "$(dirname "$0")/sample_notes" && pwd)"
 
-echo "Vault : $VAULT"
-echo "Dest  : $DEST"
-echo "Source: $SRC"
+echo "Vault      : $VAULT"
+echo "Movies dest: $MOVIES_DEST"
+echo "Template   : $TMPL_DEST"
 echo
 
 if [[ ! -d "$VAULT" ]]; then
@@ -22,13 +23,25 @@ if [[ ! -d "$VAULT" ]]; then
   exit 1
 fi
 
-mkdir -p "$DEST"
-
+# ── Movie notes ───────────────────────────────────────────────────────
+mkdir -p "$MOVIES_DEST"
+count=0
 for f in "$SRC"/*.md; do
   name="$(basename "$f")"
-  echo "  → $name"
-  cp "$f" "$DEST/$name"
+  [[ "$name" == "Movie Template.md" ]] && continue   # handled separately
+  echo "  [note]     $name"
+  cp "$f" "$MOVIES_DEST/$name"
+  (( count++ )) || true
 done
 
+# ── Templater template ────────────────────────────────────────────────
+if [[ -d "$TMPL_DEST" ]]; then
+  echo "  [template] Movie Template.md → Templates/"
+  cp "$SRC/Movie Template.md" "$TMPL_DEST/Movie Template.md"
+else
+  echo "  ⚠️  Templates folder not found at $TMPL_DEST — copy Movie Template.md manually."
+fi
+
 echo
-echo "✅  $(ls "$SRC"/*.md | wc -l | tr -d ' ') notes deployed to $DEST"
+echo "✅  $count movie notes → $MOVIES_DEST"
+echo "✅  Template → $TMPL_DEST/Movie Template.md"
