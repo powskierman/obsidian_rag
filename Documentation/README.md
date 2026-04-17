@@ -13,8 +13,7 @@ Use this file as the canonical index for active documentation.
 ## Core References
 - `reference/search/SEARCH_ARCHITECTURE.md`
 - `reference/search/SEARCH_MODES_GUIDE.md`
-- `reference/search/CASCADING_FLOW.md`
-- `reference/search/COMBINED_SEARCH_WORKFLOW.md`
+- `reference/search/RESEARCH_MODE_FLOW.md`
 - `reference/api/UNIFIED_API_IMPLEMENTATION.md`
 - `reference/streaming/STREAMING_IMPLEMENTATION.md`
 
@@ -27,7 +26,6 @@ Use this file as the canonical index for active documentation.
 ## Architecture
 - `reference/architecture/SYSTEM_ARCHITECTURE_DIAGRAM.md`
 - `reference/architecture/DEEP_THINKING_FLOW.md`
-- `reference/architecture/STREAMLIT_ARCHITECTURE.md`
 - `reference/architecture/SECOND_BRAIN_ARCHITECTURE.md`
 - `reference/architecture/GRAPH_STACK_RETIREMENT_MAP.md`
 - `reference/spec.md`
@@ -49,7 +47,6 @@ Use this file as the canonical index for active documentation.
 - `operations/embeddings/EMBEDDING_MODEL_UPDATE_GUIDE.md`
 - `operations/notes/New Note Template.md`
 - `operations/quality/KNOWLEDGE_GRAPH_TEST_PROMPTS.md`
-- `operations/quality/SEARCH_MODE_AUDIT.md`
 - `operations/quality/SEARCH_COMPARISON_RESULTS.md`
 - `operations/tuning/SOTA_TUNING_GUIDE.md`
 - `operations/graph/GRAPH_DATA_FLOW.md`
@@ -75,6 +72,7 @@ Use this file as the canonical index for active documentation.
 - `reference/governance/PROJECT_CONSTITUTION.md`
 
 ## Archive
+- `archive/design/deep-thinking-remediation-phase1.md`
 - `archive/agents/AG_BACKLOG.md`
 - `archive/agents/AG_INTEGRATION_PLAN.md`
 - `archive/agents/implementation_plan.md`
@@ -89,11 +87,13 @@ Use this file as the canonical index for active documentation.
 
 ## Public API Summary
 
-- `POST /api/v1/query` — HTTP search; `mode` is `vector` or `cascading`.
+- `POST /api/v1/query` — HTTP search; `mode` is `ask` or `research`. Legacy strings `vector`, `cascading`, `vault_review` still accepted.
 - `GET /api/v1/health` — Health check for all services.
 - `GET /api/v1/stats` — System statistics.
-- `ws://localhost:4000/api/v1/deep-research` — Deep-thinking streaming WebSocket.
+- `ws://localhost:4000/api/v1/deep-research` — Investigate (agentic deep research) streaming WebSocket.
 - `GET /docs` — OpenAPI UI.
+
+New fields: `depth` (`auto`|`shallow`|`staged`|`full`) and `sources` (`vault`|`mempalace`|`web`) are accepted on `POST /api/v1/query`.
 
 `lmstudio` and `mlx` are accepted as equivalent aliases for the local LM Studio provider.
 

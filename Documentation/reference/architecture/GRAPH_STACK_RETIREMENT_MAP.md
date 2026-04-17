@@ -6,8 +6,8 @@ This document defines what must change before the legacy graph stack can be full
 
 The public product contract is:
 
-- REST: `vector`, `cascading`
-- WebSocket: `deep-research`
+- REST: `ask`, `research` (legacy: `vector`, `cascading` still accepted)
+- WebSocket: `investigate` (endpoint: `/api/v1/deep-research`)
 
 The legacy graph stack is no longer a public mode surface, but it is still a live internal dependency:
 

@@ -1,23 +1,55 @@
 # Search Mode Comparison
 
-| Mode | Best For | Dependencies | Notes |
+| Mode | Best For | Entry Point | Notes |
 | --- | --- | --- | --- |
-| vector | fast retrieval, exact topic lookup | embedding service | can optionally attach supplemental web search |
-| cascading | targeted research with progressive expansion | graph + LightRAG + embedding | anchors → entities → expansion → vector → synthesis |
-| deep thinking | agentic multi-step research | deep thinking orchestrator + vector/graph/web tools | use `ws://localhost:4000/api/v1/deep-research` |
+| `ask` | Fast single-pass answer | `POST /api/v1/query` mode=ask | Vector retrieval + compact synthesis |
+| `research` | Staged, grounded answers | `POST /api/v1/query` mode=research | Graph → LightRAG → vector → synthesis; supports depth and source overrides |
+| `investigate` | Agentic multi-step research | `WS /api/v1/deep-research` | Plan → search → reflect; streaming |
 
 ## Guidance
 
-- NetworkX and LightRAG remain part of the internal retrieval stack, but they are not exposed as separate public search modes.
-- Start with **vector** for recall and speed.
-- Use **cascading** when you want a synthesized answer backed by staged retrieval across graph, LightRAG, and vector search.
-- In the webapp, **Enhanced Search** adds supplemental web search and memory context to `vector` and `cascading`.
-- In the webapp, **Brief Concept Index** controls answer style for `vector` and `cascading`:
-  - `on`: terse overview / concept-index style
-  - `off`: fuller grounded answer
-- Use **deep thinking** for longer-running, agentic analysis and research workflows.
-- For simple note summaries in deep thinking, the system now stays vault-first and keeps the evidence set intentionally small unless you explicitly ask for outside context.
-- Deep thinking excludes prompt-template and instruction notes from normal evidence ranking, so helper files should not appear as answer sources.
-- Cascading now uses query-aware synthesis prompts for procedural and relation-style questions and falls back to extractive answers when the model returns incomplete or unsupported-grounded output.
-- Cascading also applies provider-specific synthesis caps for local backends. Ollama can use a longer timeout plus tighter prompt-source limits than the shared default, which reduces synthesis timeouts on large note clusters without changing the request contract.
-- When diagnosing slow cascading searches, check the `cascading_query.*` and `cascading_synthesis.*` timing logs before changing retrieval logic. They show whether latency came from retrieval, prompt preparation, or the model call itself.
+- Start with **ask** for fast recall and topic lookup.
+- Use **research** when you want a synthesized, evidence-backed answer. Auto-depth routes most queries through a staged pipeline; override with `depth` if needed.
+- Use **investigate** for open-ended or multi-hop analysis where the system needs several retrieval passes.
+- NetworkX and LightRAG are internal retrieval subsystems behind `research` and `investigate`; they are not user-selectable modes.
+
+## Research Depth
+
+`research` mode accepts an optional `depth` field:
+
+| Depth | Behaviour |
+| --- | --- |
+| `auto` (default) | Classifier picks shallow or staged based on query complexity |
+| `shallow` | Single-pass vector search only |
+| `staged` | Graph → LightRAG → vector (full pipeline) |
+| `full` | Staged pipeline + full-note MCP reads |
+
+## Data Sources
+
+All modes accept an optional `sources` array:
+
+| Source | Description |
+| --- | --- |
+| `vault` | Obsidian vault (always on) |
+| `mempalace` | MemPalace long-term memory sidecar |
+| `web` | Tavily web search (requires `TAVILY_API_KEY`) |
+
+## Legacy Mode Compatibility
+
+Legacy mode strings are still accepted and normalised at the API boundary. A `X-Deprecated-Mode` response header is emitted when a legacy string is used.
+
+| Legacy mode | Maps to | Notes |
+| --- | --- | --- |
+| `vector` | `ask` + depth=shallow | |
+| `mempalace` | `ask` + source=mempalace | |
+| `cascading` | `research` + depth=auto | |
+| `vault_review` | `research` + depth=full | |
+| `deep-thinking` | `investigate` | |
+
+## Enhanced Search
+
+In the webapp, the Enhanced Search toggle adds supplemental web search and memory context when available. The underlying `sources` field controls this at the API level.
+
+## Diagnosing Slow Research Queries
+
+Check `cascading_query.*` and `cascading_synthesis.*` timing logs before changing retrieval logic. They show whether latency came from retrieval, prompt preparation, or the model call.

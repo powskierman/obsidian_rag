@@ -7,8 +7,6 @@ graph TB
     User[User]
 
     subgraph UI
-        Streamlit[Streamlit UI
-Port 8501]
         WebApp[Next.js WebApp
 Port 3030]
     end
@@ -22,6 +20,8 @@ Port 8000]
 Port 8002]
         LightRAG[LightRAG Service
 Port 8001]
+        MemPalace[MemPalace Sidecar
+Port 7788]
     end
 
     subgraph Data
@@ -34,11 +34,12 @@ lightrag_db/]
         Vault[Obsidian Vault]
     end
 
-    User --> Streamlit --> Gateway
     User --> WebApp --> Gateway
-    Gateway --> Vector
-    Gateway --> Graph
-    Gateway --> LightRAG
+    Gateway -->|Ask| Vector
+    Gateway -->|Research| Graph
+    Gateway -->|Research| LightRAG
+    Gateway -->|Investigate WS| Graph
+    Gateway -->|sources=mempalace| MemPalace
 
     Vector --> Chroma
     Vector --> Vault
@@ -46,6 +47,7 @@ lightrag_db/]
     Graph --> Vault
     LightRAG --> LightData
     LightRAG --> Vault
+    MemPalace --> Vault
 ```
 
 See `Documentation/reference/governance/PROJECT_CONSTITUTION.md` for the current authoritative service roles and ports.

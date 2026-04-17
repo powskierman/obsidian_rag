@@ -1,12 +1,12 @@
-# Deep Thinking Flow
+# Investigate Mode Flow
 
-The API gateway exposes a WebSocket endpoint for the deep thinking agent:
+The canonical public name for this mode is **investigate**. The underlying implementation is the deep-thinking agent, accessible via WebSocket:
 
 - `ws://localhost:4000/api/v1/deep-research`
 
 The agent orchestrates calls to vector, graph-backed retrieval, and optional web services for multi-step reasoning.
 
-Use this only if you need long-form, multi-hop analysis; standard search modes are faster.
+Use this only if you need long-form, multi-hop analysis; `ask` and `research` modes are faster.
 
 ## Current Runtime Notes
 

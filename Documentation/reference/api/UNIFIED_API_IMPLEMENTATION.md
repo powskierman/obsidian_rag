@@ -1,6 +1,6 @@
 # Unified API Implementation
 
-The API gateway in `src/services/api_gateway.py` provides a single entry point for all search modes.
+The API gateway in `src/services/api_gateway.py` provides a single entry point for all search modes. Mode normalisation is handled by `src/services/query_dispatch.py`.
 
 ## Base URL
 
@@ -18,7 +18,9 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 ```json
 {
   "query": "...",
-  "mode": "vector|cascading",
+  "mode": "ask|research|investigate",
+  "depth": "auto|shallow|staged|full",
+  "sources": ["vault", "mempalace", "web"],
   "max_results": 10,
   "llm_provider": "ollama|claude|gemini|openrouter|chatgpt|lmstudio|perplexity",
   "model": "optional-model-id",
@@ -31,26 +33,29 @@ The API gateway in `src/services/api_gateway.py` provides a single entry point f
 }
 ```
 
-The HTTP gateway proxies to the embedding service or cascading retriever based on mode. Deep thinking uses the dedicated WebSocket endpoint.
-NetworkX and LightRAG remain internal retrieval dependencies behind cascading and deep thinking; they are not public HTTP modes.
+Legacy mode strings (`vector`, `cascading`, `vault_review`, `deep-thinking`) are still accepted and normalised at the boundary. A `X-Deprecated-Mode` response header is emitted when a legacy string is used.
 
-Provider note:
+The HTTP gateway dispatches based on canonical mode. NetworkX and LightRAG remain internal retrieval dependencies behind `research` and `investigate`; they are not public HTTP modes.
+
+Provider notes:
 - `mlx` is a backward-compatible alias for `lmstudio`.
-- OpenRouter and LM Studio model choice should be passed via `model` (request) or env defaults.
-- LM Studio uses an OpenAI-compatible endpoint and currently expects `response_format.type` values compatible with LM Studio (`text` rather than `json_object`).
+- OpenRouter and LM Studio model choice should be passed via `model` or env defaults.
+- LM Studio uses an OpenAI-compatible endpoint and expects `response_format.type` values compatible with LM Studio (`text` rather than `json_object`).
 
-HTTP query behavior:
-- `vector` performs vault retrieval from the embedding service, then runs a compact synthesis step.
-- `cascading` performs staged retrieval (anchors, entities, expansion, vectors) and then synthesizes a final answer from the selected evidence set.
+HTTP query behaviour:
+- `ask` performs vault retrieval from the embedding service, then runs a compact synthesis step.
+- `research` performs staged retrieval (anchors, entities, expansion, vectors) and then synthesizes a final answer from the selected evidence set.
+- `depth` controls pipeline depth for `research` mode: `auto` (default), `shallow`, `staged`, `full`.
+- `sources` controls which data sources are queried: `vault` (always on), `mempalace`, `web`.
 - `brief_concept_index=false` asks the synthesizer for a fuller grounded answer.
-- Query-aware prompting is used for procedural queries and relation/comparison queries.
-- Incomplete or unsupported-grounded synthesis results degrade to extractive vault-based fallbacks instead of being returned as-is.
+- Query-aware prompting is used for procedural and relation/comparison queries.
+- Incomplete or unsupported-grounded synthesis results degrade to extractive vault-based fallbacks.
 
-Enhanced search behavior:
-- `web_search=true` enables a supplemental Tavily lookup when `TAVILY_API_KEY` is configured.
+Enhanced search behaviour:
+- `web_search=true` is shorthand for adding `web` to sources. Requires `TAVILY_API_KEY`.
 - `llm_knowledge=true` enables memory-context injection where available.
 - Web search results are returned separately from vault sources so clients can render them with lower priority.
 
-Deep thinking behavior:
+Investigate behaviour:
 - Use `ws://localhost:4000/api/v1/deep-research` for long-running agentic research.
-- Deep thinking is not a valid HTTP `mode` on `POST /api/v1/query`.
+- `investigate` is not a valid HTTP `mode` on `POST /api/v1/query`.

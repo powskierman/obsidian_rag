@@ -2,10 +2,10 @@
 
 ## Metadata
 - **Owner**: API & Search Implementation Track
-- **Last Updated**: 2026-01-23
-- **Related Scripts**: `src/services/graph_query_service.py`
+- **Last Updated**: 2026-04-17
+- **Related Scripts**: `src/services/graph_query_service.py`, `Scripts/debug/eval_comprehensive_classifier.py`
 - **Related Documents**: `Documentation/operations/quality/KNOWLEDGE_GRAPH_TEST_PROMPTS.md`, `Documentation/operations/quality/SEARCH_COMPARISON_RESULTS.md`
-- **Version**: 1.0.0
+- **Version**: 2.0.0
 
 ## Contract
 
@@ -14,13 +14,13 @@ Evaluate the quality of retrieval by comparing supported search modes against kn
 
 ### Inputs
 - **queries** (list of strings, optional): Specific queries to test. If omitted, select from `KNOWLEDGE_GRAPH_TEST_PROMPTS.md`.
-- **modes** (list of strings, optional): Modes to test. Defaults to `["vector", "cascading"]`.
+- **modes** (list of strings, optional): Modes to test. Defaults to `["ask", "research"]`.
 
 ### Outputs
 - **comparison_log** (markdown string): A qualified comparison of results.
 - **metrics** (object):
-  - **vector_relevance**: Qualitative score (High/Medium/Low).
-  - **cascading_relevance**: Qualitative score (High/Medium/Low).
+  - **ask_relevance**: Qualitative score (High/Medium/Low).
+  - **research_relevance**: Qualitative score (High/Medium/Low).
 
 ### Preconditions
 - Graph Service must be running (`docker compose ps`).
@@ -36,18 +36,22 @@ Evaluate the quality of retrieval by comparing supported search modes against kn
 
 2.  **Execution**
     - For each query:
-      - Run with `mode="vector"`.
-      - Run with `mode="cascading"`.
+      - Run with `mode="ask"`.
+      - Run with `mode="research"`.
       - Use the API gateway `POST /api/v1/query`.
 
 3.  **Analysis**
-    - **Compare Sources**: Did Cascading find supporting sources that Vector missed?
+    - **Compare Sources**: Did Research find supporting sources that Ask missed?
     - **Compare Answer**: Is the synthesis more accurate?
-    - **Determine Winner**: Vector, Cascading, or Tie.
+    - **Determine Winner**: Ask, Research, or Tie.
 
 4.  **Reporting**
-    - Format output as a Markdown table row: `| Query | Vector Sources | Cascading Sources | Winner |`
+    - Format output as a Markdown table row: `| Query | Ask Sources | Research Sources | Winner |`
     - Append to `Documentation/operations/quality/SEARCH_COMPARISON_RESULTS.md`.
+
+## Auto-Depth Classifier Eval
+
+Run `Scripts/debug/eval_comprehensive_classifier.py` to evaluate the `_is_comprehensive_vault_review_query()` auto-depth classifier separately. The classifier determines whether a research query gets `depth=shallow` or `depth=staged`. Target hit rate is ≥80%.
 
 ## Error Handling
 

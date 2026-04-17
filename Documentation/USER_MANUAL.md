@@ -15,9 +15,9 @@ Use this document as the primary entry point. Use the linked docs for deeper ref
 
 The system combines:
 
-- **Vector search** through ChromaDB for fast semantic retrieval
-- **Cascading retrieval** through staged retrieval and synthesis
-- **Deep research / deep thinking** for longer-running, agentic analysis
+- **Ask** — fast single-pass vector retrieval and compact synthesis
+- **Research** — staged retrieval (graph → LightRAG → vector) with auto-depth routing
+- **Investigate** — agentic, multi-step research over a streaming WebSocket
 - **Direct vault file access** through MCP tools for exact text search and note editing workflows
 
 ## 2. Core Components
@@ -49,9 +49,9 @@ Choose the interface based on the task:
 
 Rule of thumb:
 
-- Use **vector** for speed and broad semantic recall.
-- Use **cascading** when you want a stronger synthesized answer.
-- Use **deep research** when the task is open-ended or multi-step.
+- Use **ask** for speed and broad semantic recall.
+- Use **research** when you want a stronger, grounded synthesized answer.
+- Use **investigate** when the task is open-ended or multi-step.
 - Use **direct vault text search** when the note may be new, unindexed, code-heavy, or sensitive to literal text.
 
 ## 4. Before You Start
@@ -118,7 +118,7 @@ Legacy Streamlit UI:
 ```bash
 curl -s -X POST http://localhost:4000/api/v1/query \
   -H "Content-Type: application/json" \
-  -d '{"query":"nextion esp32","mode":"vector","max_results":5}'
+  -d '{"query":"nextion esp32","mode":"ask","max_results":5}'
 ```
 
 If you get thin or empty results, you probably need indexing.
@@ -189,9 +189,9 @@ Typical use:
 
 General guidance:
 
-- Start with **vector** for fast lookup.
-- Switch to **cascading** for more grounded synthesis.
-- Use **deep research** for longer, broader analysis.
+- Start with **ask** for fast lookup.
+- Switch to **research** for more grounded synthesis.
+- Use **investigate** for longer, broader analysis.
 - If a result feels wrong, inspect sources before changing providers or prompts.
 
 The UI distinguishes service state from data state:
@@ -223,7 +223,7 @@ curl -s -X POST http://localhost:4000/api/v1/query \
   -H "Content-Type: application/json" \
   -d '{
     "query": "What have I written about ESPHome dashboards?",
-    "mode": "cascading",
+    "mode": "research",
     "max_results": 8
   }'
 ```
@@ -231,7 +231,9 @@ curl -s -X POST http://localhost:4000/api/v1/query \
 ### 8.2 Main request fields
 
 - `query`
-- `mode`: `vector` or `cascading`
+- `mode`: `ask`, `research`, or `investigate` (legacy strings `vector`, `cascading`, `vault_review`, `deep-thinking` still accepted)
+- `depth`: `auto` | `shallow` | `staged` | `full` — research pipeline depth (research mode only)
+- `sources`: array of `vault`, `mempalace`, `web`
 - `max_results`
 - `llm_provider`
 - `model`
@@ -243,12 +245,12 @@ curl -s -X POST http://localhost:4000/api/v1/query \
 
 Important:
 
-- Deep research is not a normal HTTP `mode` on `POST /api/v1/query`.
-- Use the WebSocket endpoint for deep research workflows.
+- `investigate` is not a valid HTTP `mode` on `POST /api/v1/query`.
+- Use the WebSocket endpoint `ws://localhost:4000/api/v1/deep-research` for agentic investigate workflows.
 
 ## 9. Search Modes Explained
 
-### 9.1 Vector
+### 9.1 Ask
 
 Best for:
 
@@ -262,7 +264,7 @@ Use it when:
 - You already know the topic area
 - You want to verify whether the vault contains something at all
 
-### 9.2 Cascading
+### 9.2 Research
 
 Best for:
 
@@ -272,10 +274,15 @@ Best for:
 
 Use it when:
 
-- A plain vector answer is too thin
+- An ask answer is too thin
 - You want a stronger final answer with better evidence aggregation
 
-### 9.3 Deep Research / Deep Thinking
+Optional controls:
+- `depth=shallow` for a faster single-pass result
+- `depth=staged` or `depth=full` to force the full pipeline
+- `depth=auto` (default) lets the classifier decide
+
+### 9.3 Investigate
 
 Best for:
 
@@ -287,6 +294,8 @@ Use it when:
 
 - You want a more deliberate research workflow
 - Speed matters less than depth
+
+Access via WebSocket: `ws://localhost:4000/api/v1/deep-research`
 
 ## 10. Using MCP With ChatGPT or Claude
 
@@ -399,8 +408,8 @@ Use CLI search when:
 Use:
 
 - Webapp on `http://localhost:3030`
-- `vector` first
-- `cascading` if the first answer is weak
+- `ask` first
+- `research` if the first answer is weak
 
 ### 12.2 "I added notes and search cannot find them"
 
@@ -438,8 +447,8 @@ This is better than capture-only workflows when you need read-modify-write on an
 
 Use:
 
-- API or webapp with `cascading`
-- Deep research when the task is broader or multi-step
+- API or webapp with `research` (try `depth=staged` or `depth=full` for deeper results)
+- `investigate` when the task is broader or multi-step
 
 ### 12.6 "I want to create quick captures"
 
@@ -556,9 +565,9 @@ Actions:
 2. Refresh the relevant index
 3. If using multi-machine sync, re-run pull/push workflow
 
-### 15.5 Graph or cascading issues
+### 15.5 Graph or research issues
 
-If vector works but cascading is weak or slow:
+If ask works but research is weak or slow:
 
 1. Check graph and LightRAG health
 2. Run timing diagnostics
@@ -633,8 +642,8 @@ Remember:
 
 - **Semantic search** is for indexed meaning-based retrieval
 - **Direct vault text search** is for exact text and non-indexed notes
-- **Cascading** is for stronger grounded synthesis
-- **Deep research** is for long-form, agentic analysis
+- **Research** is for stronger grounded synthesis
+- **Investigate** is for long-form, agentic analysis
 - **Index health tools** are for diagnosing stale metadata and path drift
 
 When in doubt:
