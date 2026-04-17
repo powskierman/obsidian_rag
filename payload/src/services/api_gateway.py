@@ -2822,13 +2822,14 @@ async def unified_query(request: UnifiedQueryRequest):
     supported_modes = {
         "vector",
         "cascading",
+        "mempalace",
     }
     if mode not in supported_modes:
         raise HTTPException(
             status_code=400,
             detail=(
                 f"Unsupported mode '{request.mode}'. "
-                "Use one of: vector, cascading. "
+                "Use one of: vector, cascading, mempalace. "
                 "For deep research, use WebSocket /api/v1/deep-research."
             ),
         )
@@ -3277,6 +3278,86 @@ async def unified_query(request: UnifiedQueryRequest):
 
     async with httpx.AsyncClient() as client:
         # ===== SINGLE-SOURCE MODES =====
+
+        # MemPalace search
+        if mode == "mempalace":
+            try:
+                import subprocess, asyncio as _asyncio
+                args = [
+                    "mempalace", "search", request.query,
+                    "--results", str(max(1, request.max_results)),
+                ]
+                proc = await _asyncio.to_thread(
+                    subprocess.run,
+                    args,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                raw = proc.stdout or ""
+
+                sources = []
+                separator = "────────────────────────────────────────────────────────"
+                blocks = raw.split(separator)
+                for rank, block in enumerate(blocks):
+                    src_m = re.search(r"Source:\s*(.+)", block)
+                    if not src_m:
+                        continue
+                    filename = src_m.group(1).strip()
+                    room_m = re.search(r"\[\d+\]\s*\w+\s*/\s*(\w+)", block)
+                    room = room_m.group(1).strip() if room_m else ""
+                    match_m = re.search(r"Match:\s*([\d.]+)", block)
+                    try:
+                        dist = float(match_m.group(1)) if match_m else float(rank)
+                        relevance = max(0.0, 100.0 - dist * 100.0) if dist < 1.0 else max(0.0, 100.0 - rank * 10.0)
+                    except Exception:
+                        relevance = max(0.0, 100.0 - rank * 10.0)
+
+                    after_match = re.split(r"Match:\s*[\d.]+\s*\n", block, maxsplit=1)
+                    content = after_match[1].strip() if len(after_match) > 1 else block.strip()
+                    snippet = (content[:400] + "...") if len(content) > 400 else content
+
+                    sources.append({
+                        "filename": filename,
+                        "filepath": f"{room}/{filename}" if room else filename,
+                        "relevance": relevance,
+                        "snippet": snippet,
+                    })
+
+                synthesized_answer = ""
+                if sources:
+                    try:
+                        compressor_result = await _synthesize_cascading_answer(
+                            query=request.query,
+                            sources=sources,
+                            llm_provider=request.llm_provider,
+                            model=request.model,
+                            brief_concept_index=False,
+                        )
+                        if isinstance(compressor_result, dict):
+                            synthesized_answer = compressor_result.get("answer", "")
+                        else:
+                            synthesized_answer = str(compressor_result)
+                    except Exception:
+                        pass
+
+                if not synthesized_answer or _is_generic_cascading_fallback_answer(synthesized_answer):
+                    synthesized_answer = _build_extractive_vector_fallback_answer(request.query, sources)
+
+                return {
+                    "query": request.query,
+                    "mode": "mempalace",
+                    "answer": synthesized_answer,
+                    "sources": sources,
+                    "metadata": {
+                        "source": "MemPalace",
+                        "description": "Memory palace indexed search across drawers.",
+                    },
+                }
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(status_code=503, detail=f"MemPalace error: {str(e)}")
 
         # Pure vector search
         if mode == "vector":

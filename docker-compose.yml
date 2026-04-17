@@ -218,6 +218,7 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - OBSIDIAN_VAULT_PATH=/app/vault
+      - OBSIDIAN_VAULT_NAME=${OBSIDIAN_VAULT_NAME:-vault}
       - EMBEDDING_SERVICE_URL=http://embedding-service:8000
       # Internal-only graph subsystem dependencies. Do not expose as public user-selectable modes.
       # Force HTTP graph-service (internal transport has poorer results than the dedicated service).

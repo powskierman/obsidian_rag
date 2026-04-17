@@ -67,6 +67,12 @@ class CanonicalMovie:
     top_250: bool = False
     your_rating: str = ""
     watched: bool = False
+    shortlist: bool = False
+    mood: str = ""
+    energy: str = ""
+    watch_context: str = ""
+    rewatchable: bool = False
+    avoid_if: str = ""
     directors: list[str] = field(default_factory=list)
     cast: list[str] = field(default_factory=list)
     genres: list[str] = field(default_factory=list)

@@ -45,18 +45,55 @@ def _extract_frontmatter_fields(existing_text: str) -> dict[str, str]:
     return fields
 
 
+def _coerce_bool(value: str) -> bool | None:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"1", "true", "yes"}:
+        return True
+    if normalized in {"0", "false", "no"}:
+        return False
+    return None
+
+
 def _preserve_curation(movie: CanonicalMovie, existing_text: str) -> CanonicalMovie:
     metadata = _extract_frontmatter_fields(existing_text)
     preserved_rating = movie.your_rating
     preserved_watched = movie.watched
+    preserved_shortlist = movie.shortlist
+    preserved_mood = movie.mood
+    preserved_energy = movie.energy
+    preserved_watch_context = movie.watch_context
+    preserved_rewatchable = movie.rewatchable
+    preserved_avoid_if = movie.avoid_if
     if "your_rating" in metadata and str(metadata.get("your_rating") or "").strip():
         preserved_rating = str(metadata.get("your_rating") or "").strip()
-    watched_value = str(metadata.get("watched") or "").strip().lower()
-    if watched_value in {"1", "true", "yes"}:
-        preserved_watched = True
-    elif watched_value in {"0", "false", "no"}:
-        preserved_watched = False
-    return replace(movie, your_rating=preserved_rating, watched=preserved_watched)
+    watched_value = _coerce_bool(str(metadata.get("watched") or ""))
+    if watched_value is not None:
+        preserved_watched = watched_value
+    shortlist_value = _coerce_bool(str(metadata.get("shortlist") or ""))
+    if shortlist_value is not None:
+        preserved_shortlist = shortlist_value
+    rewatchable_value = _coerce_bool(str(metadata.get("rewatchable") or ""))
+    if rewatchable_value is not None:
+        preserved_rewatchable = rewatchable_value
+    if "mood" in metadata and str(metadata.get("mood") or "").strip():
+        preserved_mood = str(metadata.get("mood") or "").strip()
+    if "energy" in metadata and str(metadata.get("energy") or "").strip():
+        preserved_energy = str(metadata.get("energy") or "").strip()
+    if "watch_context" in metadata and str(metadata.get("watch_context") or "").strip():
+        preserved_watch_context = str(metadata.get("watch_context") or "").strip()
+    if "avoid_if" in metadata and str(metadata.get("avoid_if") or "").strip():
+        preserved_avoid_if = str(metadata.get("avoid_if") or "").strip()
+    return replace(
+        movie,
+        your_rating=preserved_rating,
+        watched=preserved_watched,
+        shortlist=preserved_shortlist,
+        mood=preserved_mood,
+        energy=preserved_energy,
+        watch_context=preserved_watch_context,
+        rewatchable=preserved_rewatchable,
+        avoid_if=preserved_avoid_if,
+    )
 
 
 def _frontmatter(movie: CanonicalMovie) -> dict:
@@ -74,6 +111,12 @@ def _frontmatter(movie: CanonicalMovie) -> dict:
         "top_250": movie.top_250,
         "your_rating": movie.your_rating,
         "watched": movie.watched,
+        "shortlist": movie.shortlist,
+        "mood": movie.mood,
+        "energy": movie.energy,
+        "watch_context": movie.watch_context,
+        "rewatchable": movie.rewatchable,
+        "avoid_if": movie.avoid_if,
         "match_status": movie.match_status,
         "version_notes": movie.version_notes,
         "duplicate_group": movie.duplicate_group,
