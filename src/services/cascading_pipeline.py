@@ -1214,8 +1214,15 @@ def _looks_incomplete_answer(text: str) -> bool:
         return True
     if answer_text.count("(") > answer_text.count(")"):
         return True
-    if re.search(r"\b(however|but|therefore|thus|additionally|moreover|because|which means)\b", answer_text.lower()):
+    # Only flag as incomplete if a connective word appears at the very end (last 40 chars)
+    # without a closing sentence. Mid-text connectives are normal prose.
+    tail = answer_text[-40:].lower()
+    if re.search(r"\b(however|but|therefore|thus|additionally|moreover|because|which means)\s*$", tail):
         return True
+    # Responses without terminal punctuation that have >= 12 words are likely
+    # mid-sentence cutoffs (e.g. Gemini context-window truncation). The tail
+    # connective check above already handles the most common case; this catches
+    # truncations that end on a non-connective word (e.g. "...supplemental web evidence").
     if word_count >= 12:
         return True
     return False

@@ -872,7 +872,7 @@ def initialize_graph(graph_path: str = None):
                     stats.get("tuple_nodes", 0),
                     stats.get("string_nodes", 0),
                 )
-            querier = GraphQuerier(builder, api_key=api_key)
+            querier = GraphQuerier(builder)
             graph_loaded = True
             logger.info(
                 "Graph loaded from %s: %s nodes, %s edges (structural=%s)",

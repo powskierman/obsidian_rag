@@ -1,14 +1,16 @@
 // Type definitions for Obsidian RAG webapp
 import { DataServiceState } from './serviceStatus';
 
-// Search modes matching backend API
-export type SearchMode =
-  // Single-source modes
-  | 'vector'          // Pure vector similarity (ChromaDB)
-  // Agentic and pipeline modes
-  | 'cascading'       // 5-Stage Waterfall
-  | 'vault_review'    // Full-note MCP review pipeline
-  | 'deep-thinking';  // Agentic reasoning mode
+// Canonical search modes — Ask / Research / Investigate
+// Legacy names (vector, cascading, vault_review, mempalace) accepted by the
+// backend during the deprecation window but no longer surfaced in the UI.
+export type SearchMode = 'ask' | 'research' | 'investigate';
+
+// Research depth — only relevant when mode === 'research'.
+export type ResearchDepth = 'auto' | 'shallow' | 'staged' | 'full';
+
+// Data sources queried in parallel per request.
+export type DataSource = 'vault' | 'mempalace' | 'web';
 
 export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'lmstudio';
 
@@ -49,13 +51,15 @@ export interface SettingsState {
   settingsVersion?: number;
   model: string;
   providerModels?: Partial<Record<LLMProvider, string>>;
-  sources: number;
+  sources: number;            // max results (n_results)
+  dataSources: DataSource[];  // which indexes to query
+  researchDepth: ResearchDepth;
   temperature: number;
   relevanceThreshold: number;  // 0-100%, 0 = show all
   showSources: boolean;
   enhancedSearch: boolean;
   briefConceptIndex: boolean;
-  deepThinking: boolean;
+  deepThinking: boolean;       // kept for compat; derived from searchMode === 'investigate'
 }
 
 export interface ServicesStatus {
@@ -108,12 +112,14 @@ export interface AppState {
 }
 
 export const defaultSettings: SettingsState = {
-  settingsVersion: 3,
+  settingsVersion: 5,
   model: 'llama3.2:latest',
   providerModels: {},
   sources: 10,
+  dataSources: ['vault'],
+  researchDepth: 'auto',
   temperature: 0.3,
-  relevanceThreshold: 0,  // 0-100%, 0 = show all results
+  relevanceThreshold: 0,
   showSources: true,
   enhancedSearch: false,
   briefConceptIndex: true,
@@ -140,4 +146,15 @@ export const defaultServices: ServicesStatus = {
     available: false,
     models: [],
   },
+};
+
+// Migration helper — maps stored legacy mode names to canonical.
+export const LEGACY_SEARCH_MODE_MAP: Record<string, SearchMode> = {
+  vector: 'ask',
+  mempalace: 'ask',
+  cascading: 'research',
+  vault_review: 'research',
+  hybrid: 'research',
+  'deep-thinking': 'investigate',
+  'deep-research': 'investigate',
 };

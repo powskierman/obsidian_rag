@@ -18,37 +18,13 @@ import { useApp } from '../context/AppContext';
 import { EnhancedSearchData, SearchMode, Source } from '../lib/types';
 
 const SEARCH_MODE_LABELS: Record<SearchMode, string> = {
-    vector: 'vector',
-    cascading: 'cascading',
-    vault_review: 'deep review',
-    'deep-thinking': 'deep thinking',
+    ask:        'Ask',
+    research:   'Research',
+    investigate:'Investigate',
 };
 
-const REVIEW_QUERY_SIGNAL_RE = /\b(?:review|analy[sz]e|assess|evaluate)\b/i;
-const REVIEW_SCOPE_SIGNAL_RE = /\b(?:my|vault|notes|scans|bloodwork|labs|results)\b/i;
-const REVIEW_BROAD_SIGNAL_RE = /\b(?:deep review|comprehensive|all my|entire vault|full vault)\b/i;
-const REVIEW_PROTECTED_PHRASE_RE = /\bpet\s*(?:\/|\band\b)?\s*ct\b/i;
-
-const isComprehensiveReviewQuery = (query: string): boolean => {
-    const normalized = query.trim();
-    if (!normalized || !REVIEW_QUERY_SIGNAL_RE.test(normalized)) {
-        return false;
-    }
-    const protectedText = normalized.replace(REVIEW_PROTECTED_PHRASE_RE, 'pet_ct');
-    const commaCount = (protectedText.match(/[,;]/g) || []).length;
-    const andCount = (protectedText.match(/\band\b/gi) || []).length;
-    return (
-        (REVIEW_SCOPE_SIGNAL_RE.test(normalized) && (commaCount > 0 || andCount > 0))
-        || REVIEW_BROAD_SIGNAL_RE.test(normalized)
-    );
-};
-
-const resolveBackendMode = (selectedMode: SearchMode, query: string): SearchMode => {
-    if (selectedMode === 'cascading' && isComprehensiveReviewQuery(query)) {
-        return 'vault_review';
-    }
-    return selectedMode;
-};
+// Auto-routing to vault_review is now handled backend-side (depth='auto').
+// The frontend no longer needs to classify queries or resolve backend modes.
 
 const normalizeDeepThinkingSource = (source: any): Source => {
     const filepath = source?.filepath || source?.file_path || source?.url || '';
@@ -230,8 +206,7 @@ export default function Home() {
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
     const [showGraph, setShowGraph] = useState(false);
     const modeLabel = SEARCH_MODE_LABELS[searchMode] || searchMode;
-    const isDeepThinkingMode = searchMode === 'deep-thinking';
-    const deepReviewAvailable = isComprehensiveReviewQuery(input);
+    const isDeepThinkingMode = searchMode === 'investigate';
     const handleSendMessage = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -331,21 +306,19 @@ export default function Home() {
                 }, 300000);
 
             } else {
-                // Standard Unified Search (HTTP)
-                const backendMode = resolveBackendMode(searchMode, userMsg);
-
-                // Use empty model for non-Ollama providers to let backend choose defaults
+                // Standard Unified Search (HTTP) — canonical mode names
                 const modelToUse = llmProvider === 'ollama' || llmProvider === 'openrouter' || llmProvider === 'chatgpt' || llmProvider === 'lmstudio' ? settings.model : '';
 
-                // Unified Search Call
                 console.log('📡 Sending query settings:', {
-                    mode: backendMode,
+                    mode: searchMode,
+                    depth: settings.researchDepth,
+                    dataSources: settings.dataSources,
                     sources: settings.sources,
-                    relevanceThreshold: settings.relevanceThreshold
+                    relevanceThreshold: settings.relevanceThreshold,
                 });
                 const result = await api.unifiedSearch(
                     userMsg,
-                    backendMode as any,
+                    searchMode === 'ask' ? 'ask' : 'research',
                     settings.sources,
                     llmProvider,
                     modelToUse,
@@ -353,7 +326,9 @@ export default function Home() {
                     settings.relevanceThreshold,
                     settings.enhancedSearch,
                     settings.briefConceptIndex,
-                    systemPrompt
+                    systemPrompt,
+                    settings.researchDepth ?? 'auto',
+                    settings.dataSources ?? ['vault'],
                 );
 
                 let answer = result.answer;
@@ -553,35 +528,16 @@ export default function Home() {
                                                         {/* Mode Selector */}
                                                         <select
                                                             value={searchMode}
-                                                            onChange={(e) => setSearchMode(e.target.value as any)}
+                                                            onChange={(e) => setSearchMode(e.target.value as SearchMode)}
                                                             className="bg-accent-gold text-black px-4 py-2 rounded-lg text-xs font-medium shadow-lg shadow-yellow-500/20 border-none focus:ring-2 focus:ring-yellow-500/50 cursor-pointer"
                                                         >
-                                                            <option value="vector">Vector (ChromaDB)</option>
-                                                            <option value="cascading">Cascading (Waterfall)</option>
-                                                            <option value="vault_review">Deep Review (Full Notes)</option>
-                                                            <option value="deep-thinking">Deep Thinking (Agentic)</option>
+                                                            <option value="ask">Ask</option>
+                                                            <option value="research">Research</option>
+                                                            <option value="investigate">Investigate</option>
                                                         </select>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            {deepReviewAvailable && searchMode !== 'deep-thinking' && (
-                                                <div className="mt-3 flex items-center justify-between rounded-xl border border-[#FFD60A]/25 bg-[#FFD60A]/8 px-4 py-3 text-sm">
-                                                    <div className="text-white/75">
-                                                        Comprehensive vault review detected. Use full-note Deep Review instead of snippet RAG.
-                                                    </div>
-                                                    <button
-                                                        onClick={() => setSearchMode('vault_review')}
-                                                        className={`ml-4 shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                                                            searchMode === 'vault_review'
-                                                                ? 'bg-[#FFD60A] text-black'
-                                                                : 'bg-white/10 text-white hover:bg-white/15'
-                                                        }`}
-                                                    >
-                                                        {searchMode === 'vault_review' ? 'Deep Review On' : 'Deep Review'}
-                                                    </button>
-                                                </div>
-                                            )}
                                         </div>
 
                                         {/* Status Pills */}

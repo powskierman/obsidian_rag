@@ -9,7 +9,7 @@ import EnhancedSearchToggle from './EnhancedSearchToggle';
 import ActionsPanel from './ActionsPanel';
 
 export default function ConfigurationPanel() {
-  const { searchMode, setSearchMode, llmProvider, setLLMProvider, services } = useApp();
+  const { searchMode, setSearchMode, setResearchDepth, setDataSources, settings, llmProvider, setLLMProvider, services } = useApp();
   const [activePanel, setActivePanel] = useState<'search' | 'llm' | 'services' | 'settings' | 'actions' | null>(null);
 
   const getSearchModeLabel = () => {
@@ -93,7 +93,15 @@ export default function ConfigurationPanel() {
       {activePanel === 'search' && (
         <SearchModePanel
           currentMode={searchMode}
-          onSelect={setSearchMode}
+          currentDepth={settings.researchDepth ?? 'auto'}
+          currentSources={settings.dataSources ?? ['vault']}
+          onSelectMode={setSearchMode}
+          onSelectDepth={setResearchDepth}
+          onToggleSource={(src) => {
+            const current = settings.dataSources ?? ['vault'];
+            const next = current.includes(src) ? current.filter(s => s !== src) : [...current, src];
+            setDataSources(next.length ? next : ['vault']);
+          }}
           onClose={() => setActivePanel(null)}
         />
       )}

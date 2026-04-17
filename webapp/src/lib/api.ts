@@ -70,15 +70,17 @@ const normalizeSource = (source: any): SearchResult => {
 export const api = {
   unifiedSearch: async (
     query: string,
-    mode: 'vector' | 'cascading' | 'vault_review' = 'cascading',
+    mode: 'ask' | 'research' = 'research',
     n_results = 10,
-    llm_provider = 'openrouter',  // Default to openrouter (faster than ollama)
+    llm_provider = 'openrouter',
     model = '',
     temperature = 0.7,
-    relevance_threshold = 0,  // 0-100%, 0 = show all results
+    relevance_threshold = 0,
     enhanced_search = false,
     brief_concept_index = true,
-    system_prompt = ''
+    system_prompt = '',
+    depth: 'auto' | 'shallow' | 'staged' | 'full' = 'auto',
+    dataSources: ('vault' | 'mempalace' | 'web')[] = ['vault'],
   ): Promise<{
     answer: string;
     sources?: SearchResult[];
@@ -90,11 +92,16 @@ export const api = {
     llm_knowledge?: any;
   }> => {
     try {
-      const enableWebSearch = enhanced_search;
+      // Web in dataSources replaces the legacy enhanced_search web toggle.
+      const webFromSources = dataSources.includes('web');
+      const enableWebSearch = enhanced_search || webFromSources;
       const enableLlmKnowledge = enhanced_search;
-      const requestBody = {
+
+      const requestBody: Record<string, unknown> = {
         query,
         mode,
+        depth,
+        sources: dataSources,
         max_results: n_results,
         llm_provider,
         model,
@@ -103,17 +110,14 @@ export const api = {
         web_search: enableWebSearch,
         llm_knowledge: enableLlmKnowledge,
         brief_concept_index,
-        system_prompt: system_prompt || null
+        system_prompt: system_prompt || null,
       };
       console.log('🌐 API request body:', requestBody);
 
-      // Use the new unified query endpoint
       const response = await fetch('/api/query', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -124,51 +128,44 @@ export const api = {
 
       const data = await response.json();
 
-      if (mode === 'vector') {
-        const vectorData = data.results || data;
-        let sources: SearchResult[] = Array.isArray(data.sources)
-          ? data.sources.map(normalizeSource)
-          : [];
+      // Unified response shape for all REST modes (ask + research).
+      // The backend normalizes sources regardless of internal dispatch.
+      const sources: SearchResult[] = Array.isArray(data.sources)
+        ? data.sources.map(normalizeSource)
+        : (() => {
+            // Legacy vector-mode raw ChromaDB response shape fallback.
+            const vectorData = data.results || data;
+            if (vectorData.documents && vectorData.documents[0]) {
+              return vectorData.documents[0].map((doc: string, i: number) => {
+                const dist = vectorData.distances?.[0]?.[i];
+                const relevance = dist !== undefined
+                  ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
+                  : 50;
+                return {
+                  filename: vectorData.metadatas?.[0]?.[i]?.filename || 'unknown',
+                  filepath: vectorData.metadatas?.[0]?.[i]?.filepath || 'unknown',
+                  relevance,
+                  snippet: doc,
+                };
+              });
+            }
+            return [];
+          })();
 
-        if (sources.length === 0 && vectorData.documents && vectorData.documents[0]) {
-          sources = vectorData.documents[0].map((doc: string, i: number) => {
-            const dist = vectorData.distances[0][i];
-            const relevance = dist !== undefined
-              ? Math.max(0, Math.min(100, 100 / (1 + Math.exp(dist / 2))))
-              : 50;
+      const answer = typeof data.answer === 'string' && data.answer.trim()
+        ? data.answer
+        : sources.length > 0
+          ? `Found ${sources.length} matching snippets.`
+          : 'No results found';
 
-            return {
-              filename: vectorData.metadatas[0][i]?.filename || 'unknown',
-              filepath: vectorData.metadatas[0][i]?.filepath || 'unknown',
-              relevance,
-              snippet: doc
-            };
-          });
-        }
-
-        return {
-          answer: typeof data.answer === 'string' && data.answer.trim()
-            ? data.answer
-            : (sources.length > 0 ? `Found ${sources.length} matching snippets in your vault.` : 'No results found'),
-          sources,
-          web_search: data.web_search,
-          llm_knowledge: data.llm_knowledge,
-        };
-      } else if (mode === 'cascading' || mode === 'vault_review') {
-        return {
-          answer: data.answer || 'No results found',
-          sources: (data.sources || []).map(normalizeSource),
-          extracted_entities: data.results?.entities || [],
-          retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent,
-          web_search: data.web_search,
-          llm_knowledge: data.llm_knowledge,
-        };
-      } else {
-        return {
-          answer: 'Unsupported mode.',
-          sources: []
-        };
-      }
+      return {
+        answer,
+        sources,
+        extracted_entities: data.results?.entities || [],
+        retrievalIntent: data.retrieval_intent || data.results?.retrieval_intent,
+        web_search: data.web_search,
+        llm_knowledge: data.llm_knowledge,
+      };
     } catch (error) {
       console.error('Unified search error:', error);
       throw error;

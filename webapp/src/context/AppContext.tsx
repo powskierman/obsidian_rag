@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AppState, SearchMode, LLMProvider, SettingsState, ServicesStatus, Message, ChatHistoryItem, defaultSettings, defaultServices } from '../lib/types';
+import { AppState, SearchMode, ResearchDepth, DataSource, LLMProvider, SettingsState, ServicesStatus, Message, ChatHistoryItem, defaultSettings, defaultServices, LEGACY_SEARCH_MODE_MAP } from '../lib/types';
 import { api } from '../lib/api';
 import {
   getKnowledgeGraphServiceState,
@@ -11,6 +11,8 @@ import {
 
 interface AppContextType extends AppState {
   setSearchMode: (mode: SearchMode) => void;
+  setResearchDepth: (depth: ResearchDepth) => void;
+  setDataSources: (sources: DataSource[]) => void;
   setLLMProvider: (provider: LLMProvider) => void;
   updateSettings: (settings: Partial<SettingsState>) => void;
   updateServices: (services: Partial<ServicesStatus>) => void;
@@ -23,7 +25,16 @@ interface AppContextType extends AppState {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-const CURRENT_SETTINGS_VERSION = 4;
+const CURRENT_SETTINGS_VERSION = 5;
+
+// Migrate a stored mode string (legacy or canonical) to a canonical SearchMode.
+const migrateSearchMode = (raw: string | null | undefined): SearchMode | null => {
+  if (!raw) return null;
+  const mapped = LEGACY_SEARCH_MODE_MAP[raw];
+  if (mapped) return mapped;
+  if (raw === 'ask' || raw === 'research' || raw === 'investigate') return raw;
+  return null;
+};
 const VALID_LLM_PROVIDERS: LLMProvider[] = ['ollama', 'gemini', 'claude', 'openrouter', 'chatgpt', 'lmstudio'];
 const DEFAULT_PROVIDER_MODELS: Record<LLMProvider, string> = {
   ollama: 'mistral',
@@ -98,6 +109,15 @@ const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsS
     ? defaultSettings.briefConceptIndex
     : Boolean(next.briefConceptIndex);
   next.deepThinking = Boolean(next.deepThinking);
+
+  // Migrate dataSources and researchDepth (added in settings version 5).
+  if (!Array.isArray(next.dataSources) || next.dataSources.length === 0) {
+    next.dataSources = defaultSettings.dataSources;
+  }
+  const validDepths = ['auto', 'shallow', 'staged', 'full'];
+  if (!validDepths.includes(next.researchDepth as string)) {
+    next.researchDepth = defaultSettings.researchDepth;
+  }
   const parsedProviderModels = parsed.providerModels && typeof parsed.providerModels === 'object'
     ? parsed.providerModels as Record<string, unknown>
     : {};
@@ -130,7 +150,9 @@ const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsS
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [searchMode, setSearchModeState] = useState<SearchMode>('cascading');
+  const [searchMode, setSearchModeState] = useState<SearchMode>('research');
+  const [researchDepth, setResearchDepthState] = useState<ResearchDepth>('auto');
+  const [dataSources, setDataSourcesState] = useState<DataSource[]>(['vault']);
   const [llmProvider, setLLMProviderState] = useState<LLMProvider>('ollama');
   const [settings, setSettings] = useState<SettingsState>(defaultSettings);
   const [services, setServices] = useState<ServicesStatus>(defaultServices);
@@ -203,11 +225,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    const savedMode = (
-      savedSearchMode === 'hybrid' ? 'cascading' : savedSearchMode
-    ) as SearchMode | null;
-    if (parsedSettings?.deepThinking || savedMode === 'deep-thinking') {
-      setSearchModeState('deep-thinking');
+    // Migrate stored mode (may be legacy name) to canonical.
+    const canonicalMode = migrateSearchMode(savedSearchMode);
+    if (parsedSettings?.deepThinking || canonicalMode === 'investigate') {
+      setSearchModeState('investigate');
       if (!parsedSettings?.deepThinking) {
         setSettings((prev) => ({
           ...prev,
@@ -216,8 +237,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
           settingsVersion: CURRENT_SETTINGS_VERSION,
         }));
       }
-    } else if (savedMode) {
-      setSearchModeState(savedMode);
+    } else if (canonicalMode) {
+      setSearchModeState(canonicalMode);
+    }
+
+    // Restore persisted depth and dataSources from settings.
+    if (parsedSettings?.researchDepth) {
+      setResearchDepthState(parsedSettings.researchDepth);
+    }
+    if (parsedSettings?.dataSources?.length) {
+      setDataSourcesState(parsedSettings.dataSources);
     }
 
     setLLMProviderState(initialProvider);
@@ -330,11 +359,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setSearchMode = (mode: SearchMode) => {
     setSearchModeState(mode);
-    if (mode === 'deep-thinking') {
+    if (mode === 'investigate') {
       setSettings((prev) => ({ ...prev, deepThinking: true, enhancedSearch: false }));
     } else {
       setSettings((prev) => ({ ...prev, deepThinking: false }));
     }
+  };
+
+  const setResearchDepth = (depth: ResearchDepth) => {
+    setResearchDepthState(depth);
+    setSettings((prev) => ({ ...prev, researchDepth: depth }));
+  };
+
+  const setDataSources = (sources: DataSource[]) => {
+    setDataSourcesState(sources.length ? sources : ['vault']);
+    setSettings((prev) => ({ ...prev, dataSources: sources.length ? sources : ['vault'] }));
   };
 
   const setLLMProvider = (provider: LLMProvider) => {
@@ -481,6 +520,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     chatHistory,
     systemPrompt,
     setSearchMode,
+    setResearchDepth,
+    setDataSources,
     setLLMProvider,
     updateSettings,
     updateServices,

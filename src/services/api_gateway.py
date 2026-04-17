@@ -14,7 +14,7 @@ import inspect
 from collections import OrderedDict
 from pathlib import Path
 from urllib.parse import urlparse, urlunparse
-from fastapi import FastAPI, WebSocket, Request, HTTPException, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, Request, Response, HTTPException, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
@@ -3460,7 +3460,7 @@ async def get_provider_status():
             "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         },
         "vault": {
-            "name": vault_root.name,
+            "name": os.getenv("OBSIDIAN_VAULT_NAME") or vault_root.name,
             "root": str(vault_root),
         },
     }
@@ -3530,7 +3530,14 @@ async def _synthesize_cascading_answer(
 
 class UnifiedQueryRequest(BaseModel):
     query: str
-    mode: str = "cascading"  # vector, cascading, vault_review
+    # Legacy names (vector, cascading, vault_review, mempalace) and canonical
+    # names (ask, research, investigate) both accepted. Normalized via
+    # src.services.query_dispatch.normalize_legacy_request() at handler entry.
+    mode: str = "cascading"
+    # Canonical fields — optional. When absent, values are derived from the
+    # legacy mode string via LEGACY_MODE_MAP.
+    depth: Optional[str] = None   # auto | shallow | staged | full  (research only)
+    sources: Optional[List[str]] = None  # vault | mempalace | web
     max_results: int = 10
     llm_provider: str = _get_env_value(
         "CASCADING_LLM_PROVIDER",
@@ -3549,41 +3556,110 @@ class UnifiedQueryRequest(BaseModel):
     require_llm: bool = False
 
 
+def _canonical_to_legacy_dispatch_key(
+    canonical_mode: str,
+    canonical_depth: str,
+    canonical_sources: tuple,
+) -> str:
+    """Map a canonical (mode, depth, sources) triple onto the legacy dispatch
+    key consumed by the if-chain below (`vector`, `cascading`, `vault_review`,
+    `mempalace`).
+
+    Phase 1 migration: dispatch code itself is unchanged; this adapter exists
+    so the handler can accept canonical names without a full rewrite. Phase 2
+    removes the if-chain and this function.
+
+    Multi-source `ask` is not yet supported — we fall back to the first
+    source in priority order (vault > mempalace).
+    """
+    if canonical_mode == "ask":
+        if canonical_sources == ("mempalace",):
+            return "mempalace"
+        # Default (vault-only or multi-source with vault present).
+        if "vault" in canonical_sources:
+            return "vector"
+        if "mempalace" in canonical_sources:
+            return "mempalace"
+        return "vector"
+
+    if canonical_mode == "research":
+        if canonical_depth == "full":
+            return "vault_review"
+        if canonical_depth == "shallow":
+            return "vector"
+        # "staged" and "auto" both land on cascading — the existing
+        # auto-routing below (line ~3595) promotes to vault_review when
+        # the classifier fires for depth="auto". For explicit depth="staged"
+        # we skip the auto-routing to honor the user's override.
+        return "cascading"
+
+    raise HTTPException(
+        status_code=400,
+        detail=f"Mode '{canonical_mode}' is not served on this REST endpoint.",
+    )
+
+
 @app.post("/api/v1/query")
-async def unified_query(request: UnifiedQueryRequest):
+async def unified_query(request: UnifiedQueryRequest, response: Response):
     """
     Enhanced unified query endpoint for the currently supported retrieval modes.
 
-    REST modes:
-    - vector: Pure vector similarity search (ChromaDB)
-    - cascading: Staged retrieval and synthesis pipeline
-    - vault_review: Full-note review pipeline via MCP vault tools
+    REST modes (canonical):
+    - ask:      Fast single-pass retrieval (replaces: vector, mempalace)
+    - research: Staged retrieval + synthesis   (replaces: cascading, vault_review)
+                depth ∈ {auto, shallow, staged, full}; auto defaults on.
 
-    Deep research is exposed separately over WebSocket at /api/v1/deep-research.
+    Legacy mode names (vector, cascading, vault_review, mempalace) remain
+    accepted. Responses for legacy names carry `X-Deprecated-Mode: <legacy>`
+    so migration progress is visible in access logs.
+
+    Deep research (`investigate`) is served separately over WebSocket at
+    /api/v1/deep-research.
     """
-    mode = request.mode.lower()
-    requested_mode = mode
+    from src.services.query_dispatch import (
+        UnsupportedMode,
+        normalize_legacy_request,
+    )
 
-    # Preserve legacy aliases so older clients fail with the normalized mode name.
-    mode_aliases = {"graph": "notes", "networkx": "notes", "lightrag": "entities"}
-    mode = mode_aliases.get(mode, mode)
-    supported_modes = {
-        "vector",
-        "cascading",
-        "vault_review",
-    }
-    if mode not in supported_modes:
+    raw_mode = (request.mode or "").strip()
+    explicit_depth = (request.depth or "").strip().lower() or None
+    explicit_sources = tuple(s.strip().lower() for s in (request.sources or []) if s and s.strip()) or None
+
+    try:
+        canonical_mode, canonical_depth, canonical_sources, deprecated = normalize_legacy_request(
+            raw_mode,
+            explicit_depth=explicit_depth,  # type: ignore[arg-type]
+            explicit_sources=explicit_sources,  # type: ignore[arg-type]
+            web_search_toggle=bool(request.web_search),
+        )
+    except UnsupportedMode as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+    if canonical_mode == "investigate":
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Unsupported mode '{request.mode}'. "
-                "Use one of: vector, cascading, vault_review. "
-                "For deep research, use WebSocket /api/v1/deep-research."
+                "Mode 'investigate' is served via WebSocket /api/v1/deep-research; "
+                "this REST endpoint accepts 'ask' or 'research'."
             ),
         )
 
+    if deprecated is not None:
+        response.headers["X-Deprecated-Mode"] = deprecated
+
+    # Project canonical shape onto the legacy dispatch key. Phase 2 deletes
+    # this adapter along with the if-chain below.
+    mode = _canonical_to_legacy_dispatch_key(
+        canonical_mode, canonical_depth, canonical_sources
+    )
+    requested_mode = mode
+
     auto_routed_to_vault_review = False
-    if mode == "cascading" and _is_comprehensive_vault_review_query(request.query):
+    # Honor explicit depth="staged" by skipping auto-routing; depth="auto"
+    # (the default for legacy `cascading` and for canonical `research` w/o
+    # explicit depth) keeps current behavior.
+    allow_auto_route = (canonical_mode != "research") or (canonical_depth != "staged")
+    if mode == "cascading" and allow_auto_route and _is_comprehensive_vault_review_query(request.query):
         mode = "vault_review"
         auto_routed_to_vault_review = True
 
@@ -4032,6 +4108,56 @@ async def unified_query(request: UnifiedQueryRequest):
 
     async with httpx.AsyncClient() as client:
         # ===== SINGLE-SOURCE MODES =====
+
+        # MemPalace search — calls the host sidecar (mempalace_server.py on port 7788)
+        if mode == "mempalace":
+            try:
+                import urllib.parse as _urlparse
+                sidecar_url = (
+                    "http://host.docker.internal:7788/search?"
+                    + _urlparse.urlencode({"q": request.query, "results": max(1, request.max_results)})
+                )
+                sidecar_resp = await client.get(sidecar_url, timeout=70.0)
+                if sidecar_resp.status_code != 200:
+                    raise HTTPException(status_code=502, detail=f"MemPalace sidecar error: {sidecar_resp.text}")
+                sources = sidecar_resp.json().get("sources", [])
+
+                synthesized_answer = ""
+                if sources:
+                    try:
+                        compressor_result = await _synthesize_cascading_answer(
+                            query=request.query,
+                            sources=sources,
+                            llm_provider=request.llm_provider,
+                            model=request.model,
+                            brief_concept_index=False,
+                        )
+                        if isinstance(compressor_result, dict):
+                            synthesized_answer = compressor_result.get("answer", "")
+                        else:
+                            synthesized_answer = str(compressor_result)
+                    except Exception:
+                        pass
+
+                if not synthesized_answer or _is_generic_cascading_fallback_answer(synthesized_answer):
+                    synthesized_answer = _build_extractive_vector_fallback_answer(request.query, sources)
+
+                return {
+                    "query": request.query,
+                    "mode": "mempalace",
+                    "answer": synthesized_answer,
+                    "sources": sources,
+                    "metadata": {
+                        "source": "MemPalace",
+                        "description": "Memory palace indexed search across drawers.",
+                    },
+                }
+            except HTTPException:
+                raise
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                raise HTTPException(status_code=503, detail=f"MemPalace error: {str(e)}")
 
         if mode == "vault_review":
             try:
