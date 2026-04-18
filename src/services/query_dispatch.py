@@ -115,11 +115,34 @@ def normalize_legacy_request(
     """
     normalized_raw = (raw_mode or "").strip().lower()
 
+    # Validate explicit_depth if provided
+    if explicit_depth is not None and explicit_depth not in ("auto", "shallow", "staged", "full"):
+        raise UnsupportedMode(
+            f"Invalid depth '{explicit_depth}'. "
+            "Valid values: auto, shallow, staged, full."
+        )
+
+    # Validate explicit_sources if provided
+    if explicit_sources is not None:
+        valid_sources = {"vault", "mempalace", "web"}
+        for source in explicit_sources:
+            if source not in valid_sources:
+                raise UnsupportedMode(
+                    f"Invalid source '{source}'. "
+                    "Valid values: vault, mempalace, web."
+                )
+
     # Already canonical? honor explicit overrides, skip deprecation header.
     if normalized_raw in ("ask", "research", "investigate"):
         mode: Mode = normalized_raw  # type: ignore[assignment]
         depth: Depth = explicit_depth or ("auto" if mode == "research" else "shallow")
         sources = explicit_sources or (("vault", "web") if web_search_toggle else ("vault",))
+        # Ask mode requires vault or mempalace; web-only is not supported
+        if mode == "ask" and sources and all(s == "web" for s in sources):
+            raise UnsupportedMode(
+                f"Ask mode requires at least one of: vault, mempalace. "
+                f"Web-only search is not supported for ask mode."
+            )
         return mode, depth, sources, None
 
     # Legacy path.
@@ -130,7 +153,7 @@ def normalize_legacy_request(
         raise UnsupportedMode(
             f"Unsupported mode '{raw_mode}'. "
             "Use one of: ask, research (canonical) or vector, cascading, vault_review, mempalace (legacy). "
-            "For investigate / deep research, use WS /api/v1/deep-research."
+            "For deep-thinking / deep-research, use WS /api/v1/deep-research."
         )
 
     mode = spec["mode"]

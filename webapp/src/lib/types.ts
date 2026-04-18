@@ -157,4 +157,10 @@ export const LEGACY_SEARCH_MODE_MAP: Record<string, SearchMode> = {
   hybrid: 'research',
   'deep-thinking': 'investigate',
   'deep-research': 'investigate',
+  'knowledge-graph': 'research',
+  notes: 'research',
+  entities: 'research',
+  'notes+vector': 'research',
+  'entities+vector': 'research',
+  'dual-graph': 'research',
 };

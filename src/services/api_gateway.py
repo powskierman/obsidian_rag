@@ -3552,8 +3552,6 @@ class UnifiedQueryRequest(BaseModel):
     llm_knowledge: bool = False
     brief_concept_index: bool = True
     entities_mode: Optional[str] = None  # naive, local, global, hybrid
-    force_mode: bool = False
-    require_llm: bool = False
 
 
 def _canonical_to_legacy_dispatch_key(

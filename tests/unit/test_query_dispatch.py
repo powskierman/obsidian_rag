@@ -114,3 +114,73 @@ def test_legacy_map_covers_every_production_mode_from_api_gateway():
     # every mode api_gateway.py declares in supported_modes.
     must_cover = {"vector", "cascading", "vault_review", "mempalace"}
     assert must_cover.issubset(LEGACY_MODE_MAP.keys())
+
+
+# ---------------------------------------------------------------------------
+# Validation tests for #1 (sources), #2 (depth), and null-safety
+# ---------------------------------------------------------------------------
+
+def test_none_mode_normalizes_to_empty_string():
+    # null-safety contract: None mode is coerced to "" and then raises.
+    with pytest.raises(UnsupportedMode):
+        normalize_legacy_request(None)
+
+
+def test_empty_string_mode_raises():
+    # Empty string after strip should raise, not fall through to legacy map.
+    with pytest.raises(UnsupportedMode) as ei:
+        normalize_legacy_request("")
+    assert "Unsupported mode" in str(ei.value)
+
+
+@pytest.mark.parametrize(
+    "invalid_depth",
+    ["evil", "deep", "comprehensive", "thorough", "max", "invalid"],
+)
+def test_invalid_explicit_depth_raises(invalid_depth):
+    # Any explicit_depth not in {auto,shallow,staged,full} should raise.
+    with pytest.raises(UnsupportedMode) as ei:
+        normalize_legacy_request("research", explicit_depth=invalid_depth)
+    msg = str(ei.value)
+    assert "Invalid depth" in msg
+    assert invalid_depth in msg
+
+
+@pytest.mark.parametrize(
+    "invalid_source",
+    ["web-only", "graph", "api", "unknown", "database"],
+)
+def test_invalid_explicit_sources_raises(invalid_source):
+    # Any source not in {vault,mempalace,web} should raise.
+    with pytest.raises(UnsupportedMode) as ei:
+        normalize_legacy_request("research", explicit_sources=(invalid_source,))
+    msg = str(ei.value)
+    assert "Invalid source" in msg
+    assert invalid_source in msg
+
+
+def test_web_only_ask_raises():
+    # Ask mode with only web sources is unsupported — should raise.
+    # (Previously fell through silently to "vector" / vault results.)
+    with pytest.raises(UnsupportedMode):
+        normalize_legacy_request("ask", explicit_sources=("web",))
+
+
+@pytest.mark.parametrize(
+    "valid_depth",
+    ["auto", "shallow", "staged", "full"],
+)
+def test_valid_explicit_depth_accepted(valid_depth):
+    # Valid depths should be accepted without error.
+    mode, depth, _, _ = normalize_legacy_request("research", explicit_depth=valid_depth)
+    assert depth == valid_depth
+
+
+@pytest.mark.parametrize(
+    "valid_sources",
+    [("vault",), ("mempalace",), ("web",), ("vault", "web"), ("vault", "mempalace", "web")],
+)
+def test_valid_explicit_sources_accepted(valid_sources):
+    # Valid source combinations should be accepted.
+    _, _, sources, _ = normalize_legacy_request("research", explicit_sources=valid_sources)
+    assert sources == valid_sources

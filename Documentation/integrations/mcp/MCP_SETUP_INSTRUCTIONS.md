@@ -74,6 +74,7 @@ Key points:
 - All service URLs use `localhost` — Docker containers expose ports to the host.
 - `OBSIDIAN_VAULT_PATH` must point to the actual iCloud vault directory.
 - `MCP_GATEWAY_QUERY_TIMEOUT=300` (5 minutes) prevents timeouts on complex cascading queries.
+- `GATEWAY_QUERY_TIMEOUT_MS_LOCAL` (milliseconds, default 180000) adjusts timeout for local providers (Ollama, LM Studio, MLX). Increase if synthesis on large models exceeds 3 minutes.
 - The MCP server also loads the repo `.env` automatically; env block values take precedence.
 - Graph tools (`obsidian_graph_query`, `search_entities`, etc.) require the graph and LightRAG services to be running. They will degrade gracefully if unavailable.
 - If you only need semantic search, a minimal config with just `EMBEDDING_SERVICE_URL` and `OBSIDIAN_VAULT_PATH` is sufficient.
