@@ -84,8 +84,53 @@ test comment explicitly acknowledges this. Legacy-mode 4xx/5xx responses
 have no deprecation signal, degrading migration telemetry for exactly the
 calls most likely to need attention.
 
-**Fix:** populate `X-Deprecated-Mode` via middleware keyed on the raw `mode`
-field, or wrap raises in a helper that re-applies the header.
+**Design choice — middleware vs. exception handler:**
+
+*Option A — `@app.exception_handler(HTTPException)`:* intercept every
+`HTTPException`, copy `X-Deprecated-Mode` from `request.state` if present.
+Requires storing the value on `request.state` in `unified_query` before any
+raise, and rewriting the default JSON error body (which you have to do anyway
+to preserve existing error shape). Fragile: a second exception handler or
+`HTTPException` subclass can bypass it.
+
+*Option B — `@app.middleware("http")` (recommended):* read the raw `mode`
+field from the JSON body in middleware, classify it once (just the legacy-name
+check, not the full normalize call), stash the deprecated name on
+`request.state.deprecated_mode`. After `await call_next(request)`, if
+`request.state.deprecated_mode` is set, add the header to the response
+unconditionally — it works for both 2xx and 4xx because middleware wraps the
+full response object Starlette ultimately sends.
+
+Starlette's request body can only be consumed once, so cache it:
+
+```python
+@app.middleware("http")
+async def _tag_deprecated_mode(request: Request, call_next):
+    deprecated = None
+    if request.method == "POST" and request.url.path == "/api/v1/query":
+        try:
+            body = await request.body()          # caches bytes on request._body
+            import json as _json
+            raw_mode = _json.loads(body).get("mode", "")
+            if raw_mode in _LEGACY_MODE_NAMES:   # existing frozenset
+                deprecated = raw_mode
+        except Exception:
+            pass
+    response = await call_next(request)
+    if deprecated:
+        response.headers["X-Deprecated-Mode"] = deprecated
+    return response
+```
+
+Register it **after** `CORSMiddleware` (Starlette middleware runs in
+registration-reverse order, so registering last means it executes outermost —
+headers set here survive the full lifecycle including error responses). Remove
+the `response.headers["X-Deprecated-Mode"] = deprecated` line in
+`unified_query`; it becomes redundant and confusing.
+
+**Success-path header stays correct** because the middleware writes to the
+same `response` object regardless of status code — the existing
+success-path test passes unchanged.
 
 ## Low
 
@@ -97,8 +142,55 @@ runs. React state setters are safe, but last-response-wins ordering means an
 earlier-issued call that resolves later will clobber fresher data. Not a
 data-corruption bug, just a flicker risk under flaky gateways.
 
-**Fix:** add a `useRef<Promise<void> | null>` guard so re-entrant calls
-return the in-flight promise. Also consider debouncing to 500 ms.
+**Fix — ref + promise dedup with unmount safety:**
+
+```tsx
+const inflightRef = useRef<Promise<void> | null>(null);
+const mountedRef = useRef(true);
+
+useEffect(() => {
+  mountedRef.current = true;
+  return () => { mountedRef.current = false; };
+}, []);
+
+const refreshServices = (): Promise<void> => {
+  if (inflightRef.current) return inflightRef.current;   // deduplicate
+
+  const run = (async () => {
+    try {
+      const stats = await api.getStats();
+      const [ollamaModels, lmstudioStatus] = await Promise.all([
+        api.getOllamaModels(),
+        api.getLmStudioModelStatus(),
+      ]);
+      if (!mountedRef.current) return;                   // unmount guard
+      // ... existing updateServices(...) call unchanged ...
+    } catch (error) {
+      console.error('Failed to check services:', error);
+      if (!mountedRef.current) return;
+      // ... existing error updateServices(...) unchanged ...
+    } finally {
+      inflightRef.current = null;
+    }
+  })();
+
+  inflightRef.current = run;
+  return run;
+};
+```
+
+**Why `useRef` instead of `useState`:** storing the promise in state would
+trigger a re-render on every start/finish; a ref holds it stably without
+causing renders. The `mountedRef` check after the awaits prevents
+`updateServices` from flushing into an unmounted context (React 18 batching
+makes this unlikely to crash, but it still logs a noisy warning in dev mode).
+
+**Correctness note on dedup:** returning the in-flight promise means both
+callers await the same resolution — they see the same data snapshot, which is
+correct for concurrent UI panels. A debounce of 500 ms is an alternative but
+deduplication is strictly better here: it avoids the extra delay on the
+*first* call (which users feel on panel open) while still collapsing
+concurrent triggers.
 
 ---
 
