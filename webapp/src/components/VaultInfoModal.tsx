@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getServiceTone } from '../lib/serviceStatus';
 
@@ -7,7 +8,12 @@ interface VaultInfoModalProps {
 }
 
 export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps) {
-    const { services } = useApp();
+    const { services, refreshServices } = useApp();
+
+    useEffect(() => {
+        if (isOpen) refreshServices();
+    }, [isOpen]);
+
     const vectorTone = getServiceTone(services.vectorDB.status);
     const lightragTone = getServiceTone(services.lightrag?.status || 'offline');
     const knowledgeGraphTone = getServiceTone(services.knowledgeGraph.status);

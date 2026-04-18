@@ -44,6 +44,15 @@ const resolveGatewayQueryTimeoutMs = (body: QueryRouteBody): number => {
     );
   }
 
+  // Local providers (LM Studio, Ollama) need headroom even on ask mode —
+  // large models can take 2–3 min for a synthesis pass.
+  if (provider === 'lmstudio' || provider === 'mlx' || provider === 'ollama') {
+    return parseTimeoutMs(
+      process.env.GATEWAY_QUERY_TIMEOUT_MS_LOCAL,
+      Math.max(defaultTimeoutMs, 180000),
+    );
+  }
+
   return defaultTimeoutMs;
 };
 

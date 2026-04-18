@@ -16,6 +16,7 @@ interface AppContextType extends AppState {
   setLLMProvider: (provider: LLMProvider) => void;
   updateSettings: (settings: Partial<SettingsState>) => void;
   updateServices: (services: Partial<ServicesStatus>) => void;
+  refreshServices: () => Promise<void>;
   addMessage: (message: Message) => void;
   clearMessages: () => void;
   setIsLoading: (loading: boolean) => void;
@@ -395,82 +396,59 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const refreshServices = async () => {
+    try {
+      const stats = await api.getStats();
+      const [ollamaModels, lmstudioStatus] = await Promise.all([
+        api.getOllamaModels(),
+        api.getLmStudioModelStatus(),
+      ]);
+      const vectorStatus = getVectorServiceState(stats.documents);
+      const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
+      const lightragStatus = getLightRAGServiceState(stats.lightrag);
+
+      updateServices({
+        vectorDB: {
+          available: vectorStatus === 'online',
+          status: vectorStatus,
+          chunks: stats.documents,
+        },
+        knowledgeGraph: {
+          available: knowledgeGraphStatus === 'online',
+          status: knowledgeGraphStatus,
+          entities: stats.graph?.nodes || 0,
+          relationships: stats.graph?.edges || 0,
+        },
+        lightrag: {
+          available: lightragStatus === 'online',
+          status: lightragStatus,
+          nodes: stats.lightrag?.nodes || 0,
+          edges: stats.lightrag?.edges || 0,
+          indexed_notes: stats.lightrag?.indexed_notes || 0,
+        },
+        ollama: {
+          available: ollamaModels.length > 0,
+          models: ollamaModels,
+        },
+        lmstudio: {
+          available: lmstudioStatus.reachable,
+          models: lmstudioStatus.models,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to check services:', error);
+      updateServices({
+        vectorDB: { available: false, status: 'offline', chunks: 0 },
+        knowledgeGraph: { available: false, status: 'offline', entities: 0, relationships: 0 },
+        lightrag: { available: false, status: 'offline', nodes: 0, edges: 0, indexed_notes: 0 },
+        ollama: { available: false, models: [] },
+        lmstudio: { available: false, models: [] },
+      });
+    }
+  };
+
   // Check services on mount
-  useEffect(() => {
-    const checkServices = async () => {
-      try {
-        const stats = await api.getStats();
-        const [ollamaModels, lmstudioStatus] = await Promise.all([
-          api.getOllamaModels(),
-          api.getLmStudioModelStatus(),
-        ]);
-        const vectorStatus = getVectorServiceState(stats.documents);
-        const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
-        const lightragStatus = getLightRAGServiceState(stats.lightrag);
-
-        updateServices({
-          vectorDB: {
-            available: vectorStatus === 'online',
-            status: vectorStatus,
-            chunks: stats.documents,
-          },
-          knowledgeGraph: {
-            available: knowledgeGraphStatus === 'online',
-            status: knowledgeGraphStatus,
-            entities: stats.graph?.nodes || 0,
-            relationships: stats.graph?.edges || 0,
-          },
-          lightrag: {
-            available: lightragStatus === 'online',
-            status: lightragStatus,
-            nodes: stats.lightrag?.nodes || 0,
-            edges: stats.lightrag?.edges || 0,
-            indexed_notes: stats.lightrag?.indexed_notes || 0,
-          },
-          ollama: {
-            available: ollamaModels.length > 0,
-            models: ollamaModels,
-          },
-          lmstudio: {
-            available: lmstudioStatus.reachable,
-            models: lmstudioStatus.models,
-          },
-        });
-      } catch (error) {
-        console.error('Failed to check services on mount:', error);
-        updateServices({
-          vectorDB: {
-            available: false,
-            status: 'offline',
-            chunks: 0,
-          },
-          knowledgeGraph: {
-            available: false,
-            status: 'offline',
-            entities: 0,
-            relationships: 0,
-          },
-          lightrag: {
-            available: false,
-            status: 'offline',
-            nodes: 0,
-            edges: 0,
-            indexed_notes: 0,
-          },
-          ollama: {
-            available: false,
-            models: [],
-          },
-          lmstudio: {
-            available: false,
-            models: [],
-          },
-        });
-      }
-    };
-
-    checkServices();
-  }, []);
+  useEffect(() => { refreshServices(); }, []);
 
   const addMessage = (message: Message) => {
     setMessages(prev => [...prev, message]);
@@ -525,6 +503,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLLMProvider,
     updateSettings,
     updateServices,
+    refreshServices,
     addMessage,
     clearMessages,
     setIsLoading,

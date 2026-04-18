@@ -1,78 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { api } from '../../lib/api';
-import {
-  getKnowledgeGraphServiceState,
-  getServiceTone,
-  getVectorServiceState,
-} from '../../lib/serviceStatus';
+import { getServiceTone } from '../../lib/serviceStatus';
 
 interface ServicesPanelProps {
   onClose: () => void;
 }
 
 export default function ServicesPanel({ onClose }: ServicesPanelProps) {
-  const { services, updateServices } = useApp();
+  const { services, refreshServices } = useApp();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const checkServices = async () => {
     setIsRefreshing(true);
-    try {
-      const stats = await api.getStats();
-      const [ollamaModels, lmstudioStatus] = await Promise.all([
-        api.getOllamaModels(),
-        api.getLmStudioModelStatus(),
-      ]);
-      const vectorStatus = getVectorServiceState(stats.documents);
-      const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
-
-      updateServices({
-        vectorDB: {
-          available: vectorStatus === 'online',
-          status: vectorStatus,
-          chunks: stats.documents,
-        },
-        knowledgeGraph: {
-          available: knowledgeGraphStatus === 'online',
-          status: knowledgeGraphStatus,
-          entities: stats.graph?.nodes || 0,
-          relationships: stats.graph?.edges || 0,
-        },
-        ollama: {
-          available: ollamaModels.length > 0,
-          models: ollamaModels,
-        },
-        lmstudio: {
-          available: lmstudioStatus.reachable,
-          models: lmstudioStatus.models,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to check services:', error);
-      updateServices({
-        vectorDB: {
-          available: false,
-          status: 'offline',
-          chunks: 0,
-        },
-        knowledgeGraph: {
-          available: false,
-          status: 'offline',
-          entities: 0,
-          relationships: 0,
-        },
-        ollama: {
-          available: false,
-          models: [],
-        },
-        lmstudio: {
-          available: false,
-          models: [],
-        },
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
+    await refreshServices();
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
