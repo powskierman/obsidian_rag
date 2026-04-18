@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { AppState, SearchMode, ResearchDepth, DataSource, LLMProvider, SettingsState, ServicesStatus, Message, ChatHistoryItem, defaultSettings, defaultServices, LEGACY_SEARCH_MODE_MAP } from '../lib/types';
 import { api } from '../lib/api';
 import {
@@ -163,6 +163,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
   const [systemPrompt, setSystemPrompt] = useState('');
   const [providerModelDefaults, setProviderModelDefaults] = useState<Record<LLMProvider, string>>(DEFAULT_PROVIDER_MODELS);
+
+  // Concurrent-call dedup and unmount safety for refreshServices.
+  // A ref avoids re-renders on start/finish; mountedRef skips the flush when
+  // the provider has torn down (React 18 dev strict-mode remounts).
+  const inflightRef = useRef<Promise<void> | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -396,55 +409,69 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const refreshServices = async () => {
-    try {
-      const stats = await api.getStats();
-      const [ollamaModels, lmstudioStatus] = await Promise.all([
-        api.getOllamaModels(),
-        api.getLmStudioModelStatus(),
-      ]);
-      const vectorStatus = getVectorServiceState(stats.documents);
-      const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
-      const lightragStatus = getLightRAGServiceState(stats.lightrag);
+  const refreshServices = (): Promise<void> => {
+    // Dedup concurrent calls (VaultInfoModal + ServicesPanel opening together
+    // would otherwise fire two parallel requests with last-response-wins).
+    if (inflightRef.current) return inflightRef.current;
 
-      updateServices({
-        vectorDB: {
-          available: vectorStatus === 'online',
-          status: vectorStatus,
-          chunks: stats.documents,
-        },
-        knowledgeGraph: {
-          available: knowledgeGraphStatus === 'online',
-          status: knowledgeGraphStatus,
-          entities: stats.graph?.nodes || 0,
-          relationships: stats.graph?.edges || 0,
-        },
-        lightrag: {
-          available: lightragStatus === 'online',
-          status: lightragStatus,
-          nodes: stats.lightrag?.nodes || 0,
-          edges: stats.lightrag?.edges || 0,
-          indexed_notes: stats.lightrag?.indexed_notes || 0,
-        },
-        ollama: {
-          available: ollamaModels.length > 0,
-          models: ollamaModels,
-        },
-        lmstudio: {
-          available: lmstudioStatus.reachable,
-          models: lmstudioStatus.models,
-        },
-      });
-    } catch (error) {
-      console.error('Failed to check services:', error);
-      updateServices({
-        vectorDB: { available: false, status: 'offline', chunks: 0 },
-        knowledgeGraph: { available: false, status: 'offline', entities: 0, relationships: 0 },
-        lightrag: { available: false, status: 'offline', nodes: 0, edges: 0, indexed_notes: 0 },
-        ollama: { available: false, models: [] },
-        lmstudio: { available: false, models: [] },
-      });
-    }
+    const run = (async () => {
+      try {
+        const stats = await api.getStats();
+        const [ollamaModels, lmstudioStatus] = await Promise.all([
+          api.getOllamaModels(),
+          api.getLmStudioModelStatus(),
+        ]);
+        if (!mountedRef.current) return;
+
+        const vectorStatus = getVectorServiceState(stats.documents);
+        const knowledgeGraphStatus = getKnowledgeGraphServiceState(stats.graph);
+        const lightragStatus = getLightRAGServiceState(stats.lightrag);
+
+        updateServices({
+          vectorDB: {
+            available: vectorStatus === 'online',
+            status: vectorStatus,
+            chunks: stats.documents,
+          },
+          knowledgeGraph: {
+            available: knowledgeGraphStatus === 'online',
+            status: knowledgeGraphStatus,
+            entities: stats.graph?.nodes || 0,
+            relationships: stats.graph?.edges || 0,
+          },
+          lightrag: {
+            available: lightragStatus === 'online',
+            status: lightragStatus,
+            nodes: stats.lightrag?.nodes || 0,
+            edges: stats.lightrag?.edges || 0,
+            indexed_notes: stats.lightrag?.indexed_notes || 0,
+          },
+          ollama: {
+            available: ollamaModels.length > 0,
+            models: ollamaModels,
+          },
+          lmstudio: {
+            available: lmstudioStatus.reachable,
+            models: lmstudioStatus.models,
+          },
+        });
+      } catch (error) {
+        console.error('Failed to check services:', error);
+        if (!mountedRef.current) return;
+        updateServices({
+          vectorDB: { available: false, status: 'offline', chunks: 0 },
+          knowledgeGraph: { available: false, status: 'offline', entities: 0, relationships: 0 },
+          lightrag: { available: false, status: 'offline', nodes: 0, edges: 0, indexed_notes: 0 },
+          ollama: { available: false, models: [] },
+          lmstudio: { available: false, models: [] },
+        });
+      } finally {
+        inflightRef.current = null;
+      }
+    })();
+
+    inflightRef.current = run;
+    return run;
   };
 
   // Check services on mount

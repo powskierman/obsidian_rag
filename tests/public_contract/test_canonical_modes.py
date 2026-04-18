@@ -205,9 +205,11 @@ def test_legacy_vector_mode_emits_deprecation_header(monkeypatch):
 
 
 @pytest.mark.integration
-def test_legacy_cascading_mode_emits_deprecation_header(monkeypatch):
-    # Short-circuit at dispatch key resolution so we don't need the full
-    # cascading stack here — only the header matters.
+def test_legacy_cascading_mode_emits_deprecation_header_on_error(monkeypatch):
+    # The _tag_deprecated_mode middleware stamps the header from the request
+    # body BEFORE the handler runs, so the header survives HTTPException paths.
+    # This is the observability case we care about: 4xx responses to legacy
+    # clients must still carry the deprecation signal.
     from fastapi import HTTPException as _HE
 
     def _spy(mode, depth, sources):
@@ -217,11 +219,24 @@ def test_legacy_cascading_mode_emits_deprecation_header(monkeypatch):
     client = TestClient(api_gateway.app)
     response = _post_query(client, "cascading", query="q")
 
-    # Deprecation header is set BEFORE the short-circuit raise, so we should
-    # see it on the 599 response too... but HTTPException discards pre-set
-    # headers on Response. Assert on the status instead to confirm the path
-    # at least reached the adapter.
     assert response.status_code == 599
+    assert response.headers.get("X-Deprecated-Mode") == "cascading"
+
+
+@pytest.mark.integration
+def test_canonical_research_does_not_emit_deprecation_header(monkeypatch):
+    # Canonical mode names must NOT trigger the middleware.
+    from fastapi import HTTPException as _HE
+
+    def _spy(mode, depth, sources):
+        raise _HE(status_code=599, detail="short-circuit")
+
+    monkeypatch.setattr(api_gateway, "_canonical_to_legacy_dispatch_key", _spy)
+    client = TestClient(api_gateway.app)
+    response = _post_query(client, "research", query="q")
+
+    assert response.status_code == 599
+    assert "x-deprecated-mode" not in {k.lower() for k in response.headers.keys()}
 
 
 # ---------------------------------------------------------------------------

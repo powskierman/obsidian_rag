@@ -2536,6 +2536,33 @@ async def _require_api_key(request: Request, call_next):
     return await call_next(request)
 
 
+@app.middleware("http")
+async def _tag_deprecated_mode(request: Request, call_next):
+    # Stamp X-Deprecated-Mode on every /api/v1/query response whose body carries
+    # a legacy mode name. Runs as the outermost middleware so the header
+    # survives HTTPException paths (Starlette discards pre-set headers when a
+    # handler raises). Body is consumed here once and cached on
+    # request._body so the downstream handler re-reads from cache.
+    deprecated: Optional[str] = None
+    if request.method == "POST" and request.url.path == "/api/v1/query":
+        try:
+            from src.services.query_dispatch import LEGACY_MODE_MAP
+            body_bytes = await request.body()
+            if body_bytes:
+                raw_mode = str(json.loads(body_bytes).get("mode") or "").strip().lower()
+                if raw_mode in LEGACY_MODE_MAP:
+                    deprecated = raw_mode
+        except Exception:
+            # Malformed body / non-JSON / missing field — fall through; the
+            # handler will produce its own 4xx and no header is needed.
+            pass
+
+    response = await call_next(request)
+    if deprecated:
+        response.headers["X-Deprecated-Mode"] = deprecated
+    return response
+
+
 class CircuitOpenError(RuntimeError):
     pass
 
@@ -3642,8 +3669,9 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
             ),
         )
 
-    if deprecated is not None:
-        response.headers["X-Deprecated-Mode"] = deprecated
+    # X-Deprecated-Mode is set by `_tag_deprecated_mode` middleware so it
+    # survives HTTPException paths — no per-handler header work here.
+    _ = deprecated  # kept in the tuple for future telemetry hooks; silence linters
 
     # Project canonical shape onto the legacy dispatch key. Phase 2 deletes
     # this adapter along with the if-chain below.
