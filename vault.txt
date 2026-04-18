@@ -1,0 +1,60 @@
+/Volumes/work/vault:
+00_Inbox
+00-homepage.md
+active-projects.base
+App Links
+Automating Obsidian with LLM.md
+Book Notes
+Books
+Canmore
+Canvases
+Clippings
+copilot
+Cresnet
+Cycling
+drm
+entities.json
+Excalidraw
+folder-navigation.base
+Fonts
+iCloud Drive
+Icon list.epub
+Important Documents
+Instapaper Notes
+Library
+Maps of Content.md
+Math
+MCP
+media
+Medical
+mempalace.yaml
+Michel
+Mobile
+MoCs.base
+Movie Recommendations.base
+Movies
+Movies.base
+Needs Metadata.base
+NH
+Notes
+Obsidian
+Pasted image 20251225173415.png
+Photography
+Pictures
+Readwise
+recent-notes.base
+Recipes
+Rocketbook
+Shortlist.base
+single-tag-files-test.csv
+single-tag-files.csv
+smart-chats
+tag-overview.base
+Tags.md
+Tech
+Templates
+Untitled 1.md
+Untitled.base
+Untitled.md
+Users
+vault_tree.txt

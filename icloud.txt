@@ -1,0 +1,153 @@
+🏥 Clinical Dashboard.md
+00_Inbox
+00-homepage.md
+active-projects.base
+App Links
+AppleTV MoC.md
+Automating Obsidian with LLM.md
+Bone Density.md
+Book Notes
+Books
+Building a Local Obsidian RAG System.md
+Canmore
+Canvases
+Chats
+Claude + obsidian_rag RAG flow.md
+Clippings
+Cobra 5G Router.md
+Codex house rules.md
+Codex MoC.md
+Codex Multiagent Implementation.md
+Codex Skills.md
+CONFIG_MODULES.md
+connect data sources.md
+CONSTITUTION 1.md
+CONSTITUTION.md
+copilot
+copilot-custom-prompts
+Coq-au-Vin Recipe.md
+Cresnet
+CT Scan Biopsy.md
+Cycling
+Deep Thinking Flowchart.md
+Docker Troubleshooting.md
+DOCUMENTATION_INDEX.md
+drm
+Einstein and Self.md
+Einstein Philosophy MoC.md
+entities.json
+Esphome GazeboStove.md
+Evaluation Rubric.md
+Excalidraw
+FEATURE_MAPPING.md
+find_target_tags.py
+Firearms License Possession and Aquisition.md
+folder-navigation.base
+Fonts
+Forklift.md
+Fusion Projection.md
+GazeboStove_Vault_Note.md
+Gemini MoC.md
+Google Opal AI.md
+GPTs Scripts and Skills.md
+Grandstream Setup.md
+Graph Databases.md
+Historical Blood Tests.md
+Home Connect.md
+Hosting AI in VM.md
+iCloud Drive
+Icon list.epub
+image.jpg
+Imaging MoC.md
+Immune System Health.md
+Important Documents
+Indexing Models.md
+Instapaper Notes
+Library
+LightRAG Indexing Test.md
+Lymphoma Progession Assessment.md
+MacOS Troubleshooting.md
+Main orchestrator diagram.md
+Maple Baby Back Ribs.md
+Maps of Content.md
+Maps of Content.md.backup
+Maps of Content.md.before_restore
+Math
+MCP
+media
+Medical
+Medical MoC.md
+Mempalace Install Procedure.md
+Mempalace MoC.md
+mempalace.yaml
+Michel
+MLX LLM.md
+MLX Obsidian_RAG Openclaw Architecture.md
+Mobile
+MoCs.base
+Movie Recommendations.base
+Movies
+Movies.base
+Needs Metadata.base
+NEXTION_DISPLAY.md
+NH
+Notes
+notes without frontmatter.md
+notes without frontmatter.md.backup
+Obsidian
+Obsidian_RAG Databases.md
+Obsidian_RAG Documentation Map.md
+Obsidian_RAG Github Procedure.md
+Obsidian_RAG Indexing.md
+Obsidian_Rag Prompt.md
+Obsidian_RAG Repo Sync.md
+Obsidian_RAG Search Modes.md
+Obsidian_RAG Shortcuts.md
+Openclaw Architecture.md
+Openclaw Directory.md
+Openclaw Memory System.md
+OPENMETEO_API_REFERENCE.md
+Pasted image 20251225173415.png
+Pathology Report.md
+Periodically prune non-note junk.md
+Perplexity and Obsidian_RAG.md
+Perplexity focused research flow.md
+Phase 2 Execution Complete - Final Report.md
+Phase 2 Implementation Status.md
+Philosophy
+Photography
+Pictures
+PLAN.md
+PROJECT_STATUS.md
+Prompt Codex CLI for multiagents.md
+QUICK_REFERENCE.md
+QUICK_START.md
+RAG Graph Indexing.md
+Readwise
+recent-notes.base
+Recipes
+remove_frontmatter_tags.py
+Retroperitonial Mass Persistence.md
+Rocketbook
+Rogers Cobra Agreements.md
+Rust Shell Commands.md
+SCHEDULE_IMPLEMENTATION.md
+Search Modes.md
+Shortlist.base
+single-tag-files-test.csv
+single-tag-files.csv
+smart-chats
+SPECIFICATION 1.md
+Specification Tools MoC.md
+SPECIFICATION.md
+tag-overview.base
+tags 2 notes.md
+Tags.md
+Tech
+Templates
+Untitled 1.md
+Untitled.base
+Untitled.md
+Users
+vault_tree.txt
+venv
