@@ -59,17 +59,13 @@ WORKING_DIR = os.getenv("LIGHTRAG_DIR", "./lightrag_db")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:32b")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
-EMBED_MODEL = os.getenv("LIGHTRAG_EMBED_MODEL", os.getenv("EMBED_MODEL", "nomic-embed-text"))
+EMBED_MODEL = os.getenv("LIGHTRAG_EMBED_MODEL", os.getenv("EMBED_MODEL", "nomic-embed-text:latest"))
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/auto")
-LIGHTRAG_MODEL = (
-    os.getenv("LIGHTRAG_MODEL")
-    or os.getenv("KIMI_MODEL")
-    or "moonshotai/kimi-k2-0905"
-)
+LIGHTRAG_MODEL = os.getenv("LIGHTRAG_MODEL") or os.getenv("KIMI_MODEL") or ""
 LMSTUDIO_BASE_URL = os.getenv("LMSTUDIO_BASE_URL", "http://host.docker.internal:1234/v1")
 LMSTUDIO_API_KEY = os.getenv("LMSTUDIO_API_KEY", "lmstudio")
 MLX_BASE_URL = os.getenv("MLX_BASE_URL", "http://host.docker.internal:8090/v1")
@@ -1604,28 +1600,6 @@ def _resolve_embed_model_name(
             return candidate
 
     return preferred_model
-
-    if not available_models:
-        return preferred_model
-    if preferred_model in available_models:
-        return preferred_model
-
-    preferred_normalized = _normalize_mlx_model_name(preferred_model)
-    for candidate in available_models:
-        if _normalize_mlx_model_name(candidate) == preferred_normalized:
-            logger.warning("Resolved MLX model alias '%s' -> '%s'", preferred_model, candidate)
-            return candidate
-
-    preferred_basename = preferred_model.split("/")[-1].lower()
-    for candidate in available_models:
-        candidate_basename = candidate.split("/")[-1].lower()
-        if preferred_basename in candidate_basename or candidate_basename in preferred_basename:
-            logger.warning("Falling back MLX model '%s' -> '%s'", preferred_model, candidate)
-            return candidate
-
-    fallback_model = available_models[0]
-    logger.warning("MLX model '%s' unavailable; using '%s'", preferred_model, fallback_model)
-    return fallback_model
 
 
 def _validate_indexing_provider_readiness() -> tuple[bool, str]:
@@ -3301,7 +3275,7 @@ Output in plain text with bullet points."""
 
 def get_effective_llm_model():
     if LLM_PROVIDER == "openrouter":
-        return LIGHTRAG_MODEL or "openrouter"
+        return LIGHTRAG_MODEL or LLM_MODEL or "moonshotai/kimi-k2-0905"
     if LLM_PROVIDER == "lmstudio":
         return LLM_MODEL_PATH or LLM_MODEL
     if LLM_PROVIDER == "mlx":
@@ -3789,7 +3763,7 @@ async def openrouter_model_complete(
         f.write(f"Using DEFAULT_SYSTEM_PROMPT: {effective_system_prompt == DEFAULT_SYSTEM_PROMPT}\n")
         f.write(f"Effective system prompt:\n{effective_system_prompt}\n")
         f.write(f"User prompt (first 200 chars): {prompt[:200]}\n")
-        f.write(f"Model: {LIGHTRAG_MODEL}\n")
+        f.write(f"Model: {get_effective_llm_model()}\n")
         f.write(f"{'='*80}\n")
 
     messages = []
@@ -3800,22 +3774,46 @@ async def openrouter_model_complete(
         messages.extend(history_messages)
 
     messages.append({"role": "user", "content": prompt})
-    
+
     # Filter kwargs to only include supported ones
     allowed_kwargs = ['temperature', 'max_tokens', 'top_p', 'response_format']
     filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed_kwargs}
-    
+
+    effective_model = get_effective_llm_model()
+    openrouter_timeout = float(os.getenv("OPENROUTER_TIMEOUT", "480"))
+
+    # Disable reasoning tokens for thinking models (grok, o-series, etc.) — structured
+    # extraction doesn't benefit from chain-of-thought and reasoning tokens waste budget.
+    # Set OPENROUTER_REASONING_EFFORT=low/medium/high to re-enable; default is disabled.
+    reasoning_effort = os.getenv("OPENROUTER_REASONING_EFFORT", "none").lower()
+    extra_body: dict = {}
+    if reasoning_effort != "enabled":  # "enabled" means let the model decide freely
+        effort_map = {"none": {"exclude": True}, "low": {"effort": "low"},
+                      "medium": {"effort": "medium"}, "high": {"effort": "high"}}
+        reasoning_param = effort_map.get(reasoning_effort, {"exclude": True})
+        extra_body["reasoning"] = reasoning_param
+
     try:
         # Add timeout to OpenRouter calls to prevent hanging
         response = await asyncio.wait_for(
             client.chat.completions.create(
-                model=LIGHTRAG_MODEL,
+                model=effective_model,
                 messages=messages,
+                extra_body=extra_body or None,
                 **filtered_kwargs
             ),
-            timeout=120.0 # 2 minute timeout for generation
+            timeout=openrouter_timeout
         )
-        return response.choices[0].message.content
+        content = response.choices[0].message.content
+        if content is None:
+            # Reasoning model returned None content — log for diagnosis and return empty
+            finish = response.choices[0].finish_reason if response.choices else "unknown"
+            rtokens = getattr(getattr(response, 'usage', None), 'completion_tokens_details', None)
+            logger.warning(f"OpenRouter returned null content (finish={finish}, usage={rtokens}). Returning empty string.")
+            with open("/app/lightrag_db/prompt_debug.log", "a") as f:
+                f.write(f"\n[NULL_CONTENT] finish={finish} model={effective_model}\n")
+            return ""
+        return content
     except asyncio.TimeoutError:
         logger.error("OpenRouter API timed out")
         return "Error: Timeout waiting for LLM response"
@@ -3847,6 +3845,7 @@ async def lmstudio_model_complete(
     allowed_kwargs = ['temperature', 'max_tokens', 'top_p', 'response_format']
     filtered_kwargs = {k: v for k, v in kwargs.items() if k in allowed_kwargs}
 
+    llm_timeout = float(os.getenv("LLM_TIMEOUT", "480"))
     try:
         response = await asyncio.wait_for(
             client.chat.completions.create(
@@ -3854,7 +3853,7 @@ async def lmstudio_model_complete(
                 messages=messages,
                 **filtered_kwargs
             ),
-            timeout=120.0
+            timeout=llm_timeout
         )
         return response.choices[0].message.content
     except asyncio.TimeoutError:
@@ -3915,48 +3914,28 @@ async def initialize_rag():
         logger.info(f"Initializing LightRAG at startup (Working Dir: {WORKING_DIR})...")
         try:
             logger.info("Step 1: Constructing LightRAG instance...")
-            resolved_embed_model = _resolve_embed_model_name(
-                EMBED_MODEL,
-                OLLAMA_HOST,
-                force_refresh=True,
-            )
-            if resolved_embed_model != EMBED_MODEL:
-                logger.info(
-                    "Using resolved LightRAG embed model '%s' for requested '%s'",
-                    resolved_embed_model,
-                    EMBED_MODEL,
-                )
             def wrapped_embed(texts):
                 # Pre-truncate to avoid Ollama context-length errors.
                 safe_texts = [t[:8000] if isinstance(t, str) else t for t in texts]
-                embed_model_name = resolved_embed_model
                 try:
                     return ollama_embed.func(
                         safe_texts,
-                        embed_model=embed_model_name,
+                        embed_model=EMBED_MODEL,
                         host=OLLAMA_HOST,
-                        options={"num_ctx": 8192} 
+                        options={"num_ctx": 8192}
                     )
                 except Exception as e:
-                    # Fallback for "context length exceeded" or other errors
                     logger.warning(f"Embedding failed (likely context length): {e}. Retrying with truncation...")
-                    truncated_texts = [t[:8000] for t in texts] # Truncate more aggressively for safety
+                    truncated_texts = [t[:8000] for t in texts]
                     try:
-                         embed_model_name_retry = _resolve_embed_model_name(
-                            EMBED_MODEL,
-                            OLLAMA_HOST,
-                            force_refresh=True,
-                        )
-                         return ollama_embed.func(
+                        return ollama_embed.func(
                             truncated_texts,
-                            embed_model=embed_model_name_retry,
+                            embed_model=EMBED_MODEL,
                             host=OLLAMA_HOST,
                             options={"num_ctx": 8192}
                         )
                     except Exception as e2:
                         logger.error(f"Embedding failed even after truncation: {e2}")
-                        # Return zero vectors or raise? 
-                        # LightRAG expects a list of numpy arrays. We'll let it raise to avoid silent data corruption.
                         raise e2
 
             ef = EmbeddingFunc(
@@ -5256,7 +5235,9 @@ def index_vault():
         successful_state_entries: list[tuple[str, float]] = []
         failed_docs: list[dict] = []
         warning_docs: list[dict] = []
+        doc_stats: list[dict] = []
         relation_complete_docs = 0
+        batch_started = time.monotonic()
 
         with index_progress_lock:
             index_progress["batch_size"] = 1
@@ -5359,6 +5340,17 @@ def index_vault():
                     stdout_tail[-300:] if stdout_tail else "",
                 )
 
+            doc_stats.append({
+                "file_path": file_path,
+                "doc_id": doc_id,
+                "status": final_status,
+                "elapsed_seconds": round(attempt_elapsed, 2),
+                "relations_extracted": int(worker_metrics.get("relations_extracted", 0) or 0),
+                "chunks_persisted": int(worker_metrics.get("chunks_persisted_count", 0) or 0),
+                "relation_complete": relation_complete,
+                "reason": last_reason if final_status not in {"processed", "processed_with_warnings"} else None,
+            })
+
             if final_status in {"processed", "processed_with_warnings"}:
                 successful_state_entries.append(state_entry)
                 with index_progress_lock:
@@ -5435,6 +5427,11 @@ def index_vault():
         if LIGHTRAG_PURGE_QUERY_CACHE_ON_INDEX and successful_state_entries:
             cache_purge_stats = _purge_llm_cache_entries({"query", "keywords"}, dry_run=False)
 
+        batch_elapsed = round(time.monotonic() - batch_started, 2)
+        successful_stats = [d for d in doc_stats if d["status"] in {"processed", "processed_with_warnings"}]
+        avg_elapsed = round(sum(d["elapsed_seconds"] for d in successful_stats) / len(successful_stats), 2) if successful_stats else 0
+        avg_relations = round(sum(d["relations_extracted"] for d in successful_stats) / len(successful_stats), 1) if successful_stats else 0
+
         return jsonify({
             "status": response_status,
             "total_files": len(all_files),
@@ -5455,6 +5452,10 @@ def index_vault():
             "failed_docs": failed_docs[:50],
             "warning_docs": warning_docs[:50],
             "query_cache_purge": cache_purge_stats,
+            "batch_elapsed_seconds": batch_elapsed,
+            "avg_seconds_per_doc": avg_elapsed,
+            "avg_relations_per_doc": avg_relations,
+            "doc_stats": doc_stats,
         }), 200
 
     except Exception as e:

@@ -6,6 +6,7 @@ import asyncio
 import json
 import json_repair
 import os
+import re
 from typing import Any, AsyncIterator, overload, Literal
 from collections import Counter, defaultdict
 
@@ -72,6 +73,18 @@ from lightrag.constants import (
     DEFAULT_MAX_FILE_PATHS,
     DEFAULT_ENTITY_NAME_MAX_LENGTH,
 )
+# --- Vault-specific prompt + entity-type overrides (idempotent) ---
+# Draws from src/lightrag_overrides/lightrag/prompt_overrides.py, which is
+# deployed by Dockerfile.lightrag as lightrag/prompt_overrides.py. If the
+# module is absent (e.g. upstream dev environment), fall back silently to
+# stock LightRAG behavior.
+try:
+    from lightrag import prompt_overrides as _vault_overrides
+    _vault_overrides.apply_overrides(PROMPTS)
+    DEFAULT_ENTITY_TYPES = _vault_overrides.VAULT_ENTITY_TYPES
+except ImportError:
+    pass
+
 from lightrag.kg.shared_storage import get_storage_keyed_lock
 import time
 from dotenv import load_dotenv
@@ -80,6 +93,108 @@ from dotenv import load_dotenv
 # allows to use different .env file for each lightrag instance
 # the OS environment variables take precedence over the .env file
 load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env", override=False)
+
+LIGHTRAG_DEBUG_TARGET_FILE = os.getenv("LIGHTRAG_DEBUG_TARGET_FILE", "").strip()
+LIGHTRAG_DEBUG_LOG_PATH = os.getenv(
+    "LIGHTRAG_DEBUG_LOG_PATH", "/app/lightrag_db/extraction_debug.log"
+).strip()
+
+
+def _normalize_debug_target(path: str) -> str:
+    value = str(path or "").strip().replace("\\", "/")
+    if value.startswith("/app/vault/"):
+        value = value[len("/app/vault/") :]
+    return value.lstrip("/")
+
+
+def _should_debug_extraction(file_path: str) -> bool:
+    if not LIGHTRAG_DEBUG_TARGET_FILE:
+        return False
+    target = _normalize_debug_target(LIGHTRAG_DEBUG_TARGET_FILE)
+    current = _normalize_debug_target(file_path)
+    return bool(target) and current == target
+
+
+def _write_extraction_debug(
+    *,
+    file_path: str,
+    chunk_key: str,
+    stage: str,
+    raw_result: str,
+    parsed_entities: int,
+    parsed_relations: int,
+    completion_delimiter: str,
+) -> None:
+    if not _should_debug_extraction(file_path):
+        return
+
+    debug_path = Path(LIGHTRAG_DEBUG_LOG_PATH)
+    debug_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_text = raw_result if isinstance(raw_result, str) else str(raw_result)
+    relationship_marker_count = len(
+        re.findall(r"\(\s*\"(?:relationship|relation)\"", raw_text, re.IGNORECASE)
+    )
+    payload = {
+        "file_path": file_path,
+        "chunk_key": chunk_key,
+        "stage": stage,
+        "completion_delimiter_present": completion_delimiter in raw_text,
+        "raw_relationship_marker_count": relationship_marker_count,
+        "parsed_entity_count": parsed_entities,
+        "parsed_relation_count": parsed_relations,
+        "raw_result": raw_text,
+    }
+    with debug_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, ensure_ascii=False))
+        fh.write("\n")
+
+
+def _write_extraction_debug_event(
+    *,
+    file_path: str,
+    chunk_key: str,
+    stage: str,
+    event: str,
+    details: dict[str, Any] | None = None,
+) -> None:
+    if not _should_debug_extraction(file_path):
+        return
+
+    debug_path = Path(LIGHTRAG_DEBUG_LOG_PATH)
+    debug_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "file_path": file_path,
+        "chunk_key": chunk_key,
+        "stage": stage,
+        "event": event,
+        "ts": time.time(),
+    }
+    if details:
+        payload["details"] = details
+    with debug_path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, ensure_ascii=False))
+        fh.write("\n")
+
+
+def _normalize_record_type_token(value: str) -> str:
+    token = str(value or "").strip().lower()
+    return (
+        token.replace('"', "")
+        .replace("'", "")
+        .replace("(", "")
+        .replace(")", "")
+        .strip()
+    )
+
+
+def _normalize_leading_record_type(record: str) -> str:
+    text = str(record or "").strip()
+    return re.sub(
+        r'^\(\s*["\']?(entity|relationship|relation)["\']?',
+        lambda match: match.group(1).lower(),
+        text,
+        flags=re.IGNORECASE,
+    )
 
 
 def _truncate_entity_identifier(
@@ -389,22 +504,24 @@ async def _handle_single_entity_extraction(
     timestamp: int,
     file_path: str = "unknown_source",
 ):
+    record_type = _normalize_record_type_token(record_attributes[0] if record_attributes else "")
+
     # Repair common malformed outputs where extra tuple delimiters split description
     # into additional fields.
-    if len(record_attributes) > 4 and "entity" in record_attributes[0]:
+    if len(record_attributes) > 4 and record_type == "entity":
         record_attributes = record_attributes[:3] + [
             PROMPTS["DEFAULT_TUPLE_DELIMITER"].join(record_attributes[3:])
         ]
 
     # Repair truncated entity rows with missing description by deriving a minimal
     # fallback description from the available fields.
-    if len(record_attributes) == 3 and "entity" in record_attributes[0]:
+    if len(record_attributes) == 3 and record_type == "entity":
         record_attributes = record_attributes + [
             f"Entity {record_attributes[1]} of type {record_attributes[2]}"
         ]
 
-    if len(record_attributes) != 4 or "entity" not in record_attributes[0]:
-        if len(record_attributes) > 1 and "entity" in record_attributes[0]:
+    if len(record_attributes) != 4 or record_type != "entity":
+        if len(record_attributes) > 1 and record_type == "entity":
             logger.warning(
                 f"{chunk_key}: LLM output format error; found {len(record_attributes)}/4 feilds on ENTITY `{record_attributes[1]}` @ `{record_attributes[2] if len(record_attributes) > 2 else 'N/A'}`"
             )
@@ -475,25 +592,28 @@ async def _handle_single_relationship_extraction(
     timestamp: int,
     file_path: str = "unknown_source",
 ):
+    record_type = _normalize_record_type_token(record_attributes[0] if record_attributes else "")
+    is_relation_record = record_type in {"relation", "relationship"}
+
     # Repair common malformed outputs where extra tuple delimiters split relation
     # description into additional fields.
-    if len(record_attributes) > 5 and "relation" in record_attributes[0]:
+    if len(record_attributes) > 5 and is_relation_record:
         record_attributes = record_attributes[:4] + [
             PROMPTS["DEFAULT_TUPLE_DELIMITER"].join(record_attributes[4:])
         ]
 
     # Repair 4-field relation rows by reusing the final field as both keywords
     # and description when the model omits one field.
-    if len(record_attributes) == 4 and "relation" in record_attributes[0]:
+    if len(record_attributes) == 4 and is_relation_record:
         record_attributes = (
             record_attributes[:3]
             + [record_attributes[3], record_attributes[3]]
         )
 
-    if (
-        len(record_attributes) != 5 or "relation" not in record_attributes[0]
-    ):  # treat "relationship" and "relation" interchangeable
-        if len(record_attributes) > 1 and "relation" in record_attributes[0]:
+    if len(record_attributes) != 5 or not is_relation_record:
+        if len(record_attributes) > 1 and (
+            "relation" in record_type or "relationship" in record_type
+        ):
             logger.warning(
                 f"{chunk_key}: LLM output format error; found {len(record_attributes)}/5 fields on REALTION `{record_attributes[1]}`~`{record_attributes[2] if len(record_attributes) > 2 else 'N/A'}`"
             )
@@ -979,17 +1099,19 @@ async def _process_extraction_result(
     # Fix LLM output format error which use tuple_delimiter to seperate record instead of "\n"
     fixed_records = []
     for record in records:
-        record = record.strip()
+        record = _normalize_leading_record_type(record)
         if record is None:
             continue
         entity_records = split_string_by_multi_markers(
             record, [f"{tuple_delimiter}entity{tuple_delimiter}"]
         )
         for entity_record in entity_records:
-            if not entity_record.startswith("entity") and not entity_record.startswith(
-                "relation"
-            ):
-                entity_record = f"entity<|{entity_record}"
+            entity_record = _normalize_leading_record_type(entity_record)
+            entity_record_type = _normalize_record_type_token(
+                entity_record.split(tuple_delimiter, 1)[0]
+            )
+            if entity_record_type not in {"entity", "relation", "relationship"}:
+                entity_record = f"entity{tuple_delimiter}{entity_record}"
             entity_relation_records = split_string_by_multi_markers(
                 # treat "relationship" and "relation" interchangeable
                 entity_record,
@@ -999,9 +1121,17 @@ async def _process_extraction_result(
                 ],
             )
             for entity_relation_record in entity_relation_records:
-                if not entity_relation_record.startswith(
-                    "entity"
-                ) and not entity_relation_record.startswith("relation"):
+                entity_relation_record = _normalize_leading_record_type(
+                    entity_relation_record
+                )
+                entity_relation_record_type = _normalize_record_type_token(
+                    entity_relation_record.split(tuple_delimiter, 1)[0]
+                )
+                if entity_relation_record_type not in {
+                    "entity",
+                    "relation",
+                    "relationship",
+                }:
                     entity_relation_record = (
                         f"relation{tuple_delimiter}{entity_relation_record}"
                     )
@@ -1028,6 +1158,8 @@ async def _process_extraction_result(
             )
 
         record_attributes = split_string_by_multi_markers(record, [tuple_delimiter])
+        if record_attributes:
+            record_attributes[0] = _normalize_record_type_token(record_attributes[0])
 
         # Try to parse as entity
         entity_data = await _handle_single_entity_extraction(
@@ -1048,6 +1180,17 @@ async def _process_extraction_result(
         relationship_data = await _handle_single_relationship_extraction(
             record_attributes, chunk_key, timestamp, file_path
         )
+        if relationship_data is None and _should_debug_extraction(file_path):
+            _write_extraction_debug_event(
+                file_path=file_path,
+                chunk_key=chunk_key,
+                stage="record_parse",
+                event="unparsed_record",
+                details={
+                    "record": record,
+                    "record_attributes": record_attributes,
+                },
+            )
         if relationship_data is not None:
             truncated_source = _truncate_entity_identifier(
                 relationship_data["src_id"],
@@ -2929,6 +3072,17 @@ async def extract_entities(
             "entity_continue_extraction_user_prompt"
         ].format(**{**context_base, "input_text": content})
 
+        _write_extraction_debug_event(
+            file_path=file_path,
+            chunk_key=chunk_key,
+            stage="initial",
+            event="before_llm_call",
+            details={
+                "content_chars": len(content),
+                "system_prompt_chars": len(entity_extraction_system_prompt),
+                "user_prompt_chars": len(entity_extraction_user_prompt),
+            },
+        )
         final_result, timestamp = await use_llm_func_with_cache(
             entity_extraction_user_prompt,
             use_llm_func,
@@ -2937,6 +3091,16 @@ async def extract_entities(
             cache_type="extract",
             chunk_id=chunk_key,
             cache_keys_collector=cache_keys_collector,
+        )
+        _write_extraction_debug_event(
+            file_path=file_path,
+            chunk_key=chunk_key,
+            stage="initial",
+            event="after_llm_call",
+            details={
+                "result_chars": len(final_result or ""),
+                "timestamp": timestamp,
+            },
         )
 
         history = pack_user_ass_to_openai_messages(
@@ -2950,6 +3114,15 @@ async def extract_entities(
             timestamp,
             file_path,
             tuple_delimiter=context_base["tuple_delimiter"],
+            completion_delimiter=context_base["completion_delimiter"],
+        )
+        _write_extraction_debug(
+            file_path=file_path,
+            chunk_key=chunk_key,
+            stage="initial",
+            raw_result=final_result,
+            parsed_entities=len(maybe_nodes),
+            parsed_relations=len(maybe_edges),
             completion_delimiter=context_base["completion_delimiter"],
         )
 
@@ -2969,12 +3142,42 @@ async def extract_entities(
                 + entity_continue_extraction_user_prompt
             )
             token_count = len(tokenizer.encode(full_context_str))
+            _write_extraction_debug_event(
+                file_path=file_path,
+                chunk_key=chunk_key,
+                stage="glean",
+                event="before_glean_guard",
+                details={
+                    "token_count": token_count,
+                    "max_input_tokens": max_input_tokens,
+                },
+            )
 
             if token_count > max_input_tokens:
                 logger.warning(
                     f"Gleaning stopped for chunk {chunk_key}: Input tokens ({token_count}) exceeded limit ({max_input_tokens})."
                 )
+                _write_extraction_debug_event(
+                    file_path=file_path,
+                    chunk_key=chunk_key,
+                    stage="glean",
+                    event="skipped_due_to_token_limit",
+                    details={
+                        "token_count": token_count,
+                        "max_input_tokens": max_input_tokens,
+                    },
+                )
             else:
+                _write_extraction_debug_event(
+                    file_path=file_path,
+                    chunk_key=chunk_key,
+                    stage="glean",
+                    event="before_llm_call",
+                    details={
+                        "history_chars": len(history_str),
+                        "user_prompt_chars": len(entity_continue_extraction_user_prompt),
+                    },
+                )
                 glean_result, timestamp = await use_llm_func_with_cache(
                     entity_continue_extraction_user_prompt,
                     use_llm_func,
@@ -2985,6 +3188,16 @@ async def extract_entities(
                     chunk_id=chunk_key,
                     cache_keys_collector=cache_keys_collector,
                 )
+                _write_extraction_debug_event(
+                    file_path=file_path,
+                    chunk_key=chunk_key,
+                    stage="glean",
+                    event="after_llm_call",
+                    details={
+                        "result_chars": len(glean_result or ""),
+                        "timestamp": timestamp,
+                    },
+                )
 
                 # Process gleaning result separately with file path
                 glean_nodes, glean_edges = await _process_extraction_result(
@@ -2993,6 +3206,15 @@ async def extract_entities(
                     timestamp,
                     file_path,
                     tuple_delimiter=context_base["tuple_delimiter"],
+                    completion_delimiter=context_base["completion_delimiter"],
+                )
+                _write_extraction_debug(
+                    file_path=file_path,
+                    chunk_key=chunk_key,
+                    stage="glean",
+                    raw_result=glean_result,
+                    parsed_entities=len(glean_nodes),
+                    parsed_relations=len(glean_edges),
                     completion_delimiter=context_base["completion_delimiter"],
                 )
 

@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "obsidian-rag-http": {
+      "baseUrl": "http://127.0.0.1:8811/mcp"
+    },
+    "obsidian-rag-stdio": {
+      "command": "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/venv/bin/python",
+      "args": [
+        "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/src/mcp/obsidian_rag_unified_mcp.py"
+      ],
+      "env": {
+        "MCP_GATEWAY_URL": "http://127.0.0.1:4000"
+      }
+    }
+  },
+  "imports": []
+}

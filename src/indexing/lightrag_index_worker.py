@@ -26,9 +26,46 @@ from openai import AsyncOpenAI
 
 logger = logging.getLogger(__name__)
 
+LIGHTRAG_DEBUG_TARGET_FILE = os.getenv("LIGHTRAG_DEBUG_TARGET_FILE", "").strip()
+LIGHTRAG_WORKER_DEBUG_LOG_PATH = os.getenv(
+    "LIGHTRAG_WORKER_DEBUG_LOG_PATH", "/app/lightrag_db/worker_debug.log"
+).strip()
+
 
 def _now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+def _normalize_debug_target(path: str) -> str:
+    value = str(path or "").strip().replace("\\", "/")
+    if value.startswith("/app/vault/"):
+        value = value[len("/app/vault/") :]
+    return value.lstrip("/")
+
+
+def _should_debug_file(file_path: str) -> bool:
+    if not LIGHTRAG_DEBUG_TARGET_FILE:
+        return False
+    return _normalize_debug_target(file_path) == _normalize_debug_target(
+        LIGHTRAG_DEBUG_TARGET_FILE
+    )
+
+
+def _write_worker_debug(file_path: str, event: str, details: dict | None = None) -> None:
+    if not _should_debug_file(file_path):
+        return
+    path = Path(LIGHTRAG_WORKER_DEBUG_LOG_PATH)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "ts": time.time(),
+        "file_path": file_path,
+        "event": event,
+    }
+    if details:
+        payload["details"] = details
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, ensure_ascii=False))
+        fh.write("\n")
 
 
 def _load_json_store(path: Path) -> dict:
@@ -196,9 +233,9 @@ def _build_llm_completion(
 
 
 def _build_embedding_func(embed_model: str, ollama_host: str) -> EmbeddingFunc:
-    def wrapped_embed(texts):
+    async def wrapped_embed(texts):
         safe_texts = [t[:8000] if isinstance(t, str) else t for t in texts]
-        return ollama_embed.func(
+        return await ollama_embed.func(
             safe_texts,
             embed_model=embed_model,
             host=ollama_host,
@@ -240,6 +277,11 @@ async def _index_one(payload: dict) -> dict:
     doc_id = str(payload["doc_id"])
     file_path = str(payload["file_path"])
     content = str(payload["content"])
+    _write_worker_debug(
+        file_path,
+        "start_index_one",
+        {"doc_id": doc_id, "content_chars": len(content), "working_dir": str(working_dir)},
+    )
 
     llm_provider = os.getenv("LLM_PROVIDER", "ollama").lower()
     llm_model = os.getenv("LLM_MODEL_PATH") or os.getenv("LLM_MODEL", "qwen2.5-coder:32b")
@@ -270,6 +312,11 @@ async def _index_one(payload: dict) -> dict:
             except ValueError:
                 pass
 
+    _write_worker_debug(
+        file_path,
+        "before_lightrag_construct",
+        {"llm_provider": llm_provider, "llm_model_name": llm_model_name, "llm_kwargs": llm_kwargs},
+    )
     rag = LightRAG(
         working_dir=str(working_dir),
         llm_model_func=llm_func,
@@ -289,9 +336,16 @@ async def _index_one(payload: dict) -> dict:
         chunk_token_size=int(os.getenv("LIGHTRAG_CHUNK_TOKENS", "128")),
         chunk_overlap_token_size=int(os.getenv("LIGHTRAG_CHUNK_OVERLAP", "32")),
     )
+    _write_worker_debug(file_path, "after_lightrag_construct")
+    _write_worker_debug(file_path, "before_initialize_storages")
     await rag.initialize_storages()
+    _write_worker_debug(file_path, "after_initialize_storages")
+    _write_worker_debug(file_path, "before_initialize_pipeline_status")
     await initialize_pipeline_status()
+    _write_worker_debug(file_path, "after_initialize_pipeline_status")
+    _write_worker_debug(file_path, "before_ainsert")
     await rag.ainsert([content], ids=[doc_id], file_paths=[file_path])
+    _write_worker_debug(file_path, "after_ainsert")
 
     full_doc_store = _load_json_store(working_dir / "kv_store_full_docs.json")
     status_entry = _doc_status_entry_for_doc(working_dir, doc_id, file_path)

@@ -253,3 +253,14 @@ Proceed in two steps:
 
 1. Ship the env-only remote Gemma 4 integration first, because the backend already supports it.
 2. Immediately follow with the UI discovery and remote-aware recovery fixes, because those are the main gaps between "works" and "operationally correct."
+
+
+
+
+
+
+
+
+
+
+

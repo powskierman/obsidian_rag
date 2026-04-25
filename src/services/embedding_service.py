@@ -304,6 +304,30 @@ def stats():
         print(f"❌ Stats error: {e}\n{error_trace}")
         return jsonify({"error": str(e)}), 500
 
+@app.route('/embed', methods=['POST'])
+def embed_texts():
+    """Return embeddings for raw texts without touching Chroma."""
+    try:
+        data = request.json or {}
+        texts = data.get('texts')
+        is_query = bool(data.get('is_query', False))
+
+        if not isinstance(texts, list) or not texts:
+            return jsonify({"error": "Missing texts list"}), 400
+
+        embeddings = []
+        for text in texts:
+            if not isinstance(text, str):
+                return jsonify({"error": "All texts must be strings"}), 400
+            embeddings.append(get_embedding(text, is_query=is_query))
+
+        return jsonify({"embeddings": embeddings}), 200
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"❌ Embed error: {e}\n{error_trace}")
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/add', methods=['POST'])
 def add_document():
     """Add document to collection"""

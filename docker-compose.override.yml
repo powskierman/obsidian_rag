@@ -7,20 +7,20 @@ services:
   embedding-service:
     volumes:
       - ./src:/app/src:ro
-      - ${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/chroma_db:/app/chroma_db
+      - ${CHROMA_HOST_DIR:-${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/chroma_db}:/app/chroma_db
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
 
   graph-service:
     volumes:
       - ./src:/app/src:ro
-      - ${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/graph_data:/app/graph_data
+      - ${GRAPH_HOST_DIR:-${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/graph_data}:/app/graph_data
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
 
   # LightRAG
   # Default uses internal volume. We override to use the synced folder.
   lightrag-service:
-    command: ["gunicorn", "-w", "1", "-k", "gthread", "--threads", "2", "-b", "0.0.0.0:8001", "lightrag_service:app"]
+    command: ["gunicorn", "-w", "1", "-k", "gthread", "--threads", "2", "-b", "0.0.0.0:8001", "src.integrations.lightrag_service:app"]
     volumes:
-      - ${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/lightrag_db:/app/lightrag_db
+      - ${LIGHTRAG_HOST_DIR:-${OBSIDIAN_RAG_DATA_DIR:-/Users/michel/obsidian_rag_local_data}/lightrag_db}:/app/lightrag_db
     environment:
       - LIGHTRAG_DIR=/app/lightrag_db

@@ -4,12 +4,14 @@ import traceback
 import asyncio
 import configparser
 import inspect
+import json
 import os
 import time
 import warnings
 from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from functools import partial
+from pathlib import Path
 from typing import (
     Any,
     AsyncIterator,
@@ -121,6 +123,37 @@ from dotenv import load_dotenv
 # allows to use different .env file for each lightrag instance
 # the OS environment variables take precedence over the .env file
 load_dotenv(dotenv_path=".env", override=False)
+
+LIGHTRAG_DEBUG_TARGET_FILE = os.getenv("LIGHTRAG_DEBUG_TARGET_FILE", "").strip()
+LIGHTRAG_WORKER_DEBUG_LOG_PATH = os.getenv(
+    "LIGHTRAG_WORKER_DEBUG_LOG_PATH", "/app/lightrag_db/worker_debug.log"
+).strip()
+
+
+def _normalize_debug_target(path: str) -> str:
+    value = str(path or "").strip().replace("\\", "/")
+    if value.startswith("/app/vault/"):
+        value = value[len("/app/vault/") :]
+    return value.lstrip("/")
+
+
+def _should_debug_paths(file_paths: str | list[str] | None) -> bool:
+    if not LIGHTRAG_DEBUG_TARGET_FILE:
+        return False
+    target = _normalize_debug_target(LIGHTRAG_DEBUG_TARGET_FILE)
+    values = [file_paths] if isinstance(file_paths, str) else list(file_paths or [])
+    return any(_normalize_debug_target(value) == target for value in values)
+
+
+def _write_worker_debug(event: str, details: dict[str, Any] | None = None) -> None:
+    path = Path(LIGHTRAG_WORKER_DEBUG_LOG_PATH)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"ts": time.time(), "event": event}
+    if details:
+        payload["details"] = details
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, ensure_ascii=False))
+        fh.write("\n")
 
 # TODO: TO REMOVE @Yannick
 config = configparser.ConfigParser()
@@ -1189,10 +1222,30 @@ class LightRAG:
         if track_id is None:
             track_id = generate_track_id("insert")
 
+        debug_enabled = _should_debug_paths(file_paths)
+        if debug_enabled:
+            _write_worker_debug(
+                "lightrag_before_enqueue",
+                {"track_id": track_id, "file_paths": file_paths},
+            )
         await self.apipeline_enqueue_documents(input, ids, file_paths, track_id)
+        if debug_enabled:
+            _write_worker_debug(
+                "lightrag_after_enqueue",
+                {"track_id": track_id},
+            )
+            _write_worker_debug(
+                "lightrag_before_process_enqueue",
+                {"track_id": track_id},
+            )
         await self.apipeline_process_enqueue_documents(
             split_by_character, split_by_character_only
         )
+        if debug_enabled:
+            _write_worker_debug(
+                "lightrag_after_process_enqueue",
+                {"track_id": track_id},
+            )
 
         return track_id
 
@@ -1673,23 +1726,55 @@ class LightRAG:
         pipeline_status_lock = get_namespace_lock(
             "pipeline_status", workspace=self.workspace
         )
+        if LIGHTRAG_DEBUG_TARGET_FILE:
+            _write_worker_debug(
+                "apipeline_process_enqueue_documents_enter",
+                {
+                    "workspace": self.workspace,
+                    "split_by_character": split_by_character,
+                    "split_by_character_only": split_by_character_only,
+                },
+            )
 
         # Check if another process is already processing the queue
         async with pipeline_status_lock:
+            if LIGHTRAG_DEBUG_TARGET_FILE:
+                _write_worker_debug(
+                    "apipeline_after_lock_acquire",
+                    {"busy": pipeline_status.get("busy", False)},
+                )
             # Ensure only one worker is processing documents
             if not pipeline_status.get("busy", False):
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug("apipeline_before_status_fetch")
                 processing_docs, failed_docs, pending_docs = await asyncio.gather(
                     self.doc_status.get_docs_by_status(DocStatus.PROCESSING),
                     self.doc_status.get_docs_by_status(DocStatus.FAILED),
                     self.doc_status.get_docs_by_status(DocStatus.PENDING),
                 )
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug(
+                        "apipeline_after_status_fetch",
+                        {
+                            "processing_docs": len(processing_docs),
+                            "failed_docs": len(failed_docs),
+                            "pending_docs": len(pending_docs),
+                        },
+                    )
 
                 to_process_docs: dict[str, DocProcessingStatus] = {}
                 to_process_docs.update(processing_docs)
                 to_process_docs.update(failed_docs)
                 to_process_docs.update(pending_docs)
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug(
+                        "apipeline_after_to_process_build",
+                        {"to_process_docs": len(to_process_docs)},
+                    )
 
                 if not to_process_docs:
+                    if LIGHTRAG_DEBUG_TARGET_FILE:
+                        _write_worker_debug("apipeline_no_docs_to_process")
                     logger.info("No documents to process")
                     return
 
@@ -1711,6 +1796,8 @@ class LightRAG:
             else:
                 # Another process is busy, just set request flag and return
                 pipeline_status["request_pending"] = True
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug("apipeline_busy_request_queued")
                 logger.info(
                     "Another process is already processing the document queue. Request queued."
                 )
@@ -1719,6 +1806,11 @@ class LightRAG:
         try:
             # Process documents until no more documents or requests
             while True:
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug(
+                        "apipeline_loop_start",
+                        {"to_process_docs": len(to_process_docs)},
+                    )
                 # Check for cancellation request at the start of main loop
                 async with pipeline_status_lock:
                     if pipeline_status.get("cancellation_requested", False):
@@ -1736,6 +1828,8 @@ class LightRAG:
                         return
 
                 if not to_process_docs:
+                    if LIGHTRAG_DEBUG_TARGET_FILE:
+                        _write_worker_debug("apipeline_all_docs_processed")
                     log_message = "All enqueued documents have been processed"
                     logger.info(log_message)
                     pipeline_status["latest_message"] = log_message
@@ -1743,11 +1837,23 @@ class LightRAG:
                     break
 
                 # Validate document data consistency and fix any issues as part of the pipeline
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug(
+                        "apipeline_before_consistency_check",
+                        {"to_process_docs": len(to_process_docs)},
+                    )
                 to_process_docs = await self._validate_and_fix_document_consistency(
                     to_process_docs, pipeline_status, pipeline_status_lock
                 )
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug(
+                        "apipeline_after_consistency_check",
+                        {"to_process_docs": len(to_process_docs)},
+                    )
 
                 if not to_process_docs:
+                    if LIGHTRAG_DEBUG_TARGET_FILE:
+                        _write_worker_debug("apipeline_no_valid_docs_after_consistency")
                     log_message = (
                         "No valid documents to process after consistency check"
                     )
@@ -1757,6 +1863,11 @@ class LightRAG:
                     break
 
                 log_message = f"Processing {len(to_process_docs)} document(s)"
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug(
+                        "apipeline_before_processing_docs_log",
+                        {"to_process_docs": len(to_process_docs)},
+                    )
                 logger.info(log_message)
 
                 # Update pipeline_status, batchs now represents the total number of files to be processed
@@ -1781,6 +1892,11 @@ class LightRAG:
                 total_files = len(to_process_docs)
                 job_name = f"{path_prefix}[{total_files} files]"
                 pipeline_status["job_name"] = job_name
+                if LIGHTRAG_DEBUG_TARGET_FILE:
+                    _write_worker_debug(
+                        "apipeline_after_job_name",
+                        {"job_name": job_name, "total_files": total_files},
+                    )
 
                 # Create a counter to track the number of processed files
                 processed_count = 0
@@ -1805,7 +1921,17 @@ class LightRAG:
                     first_stage_tasks = []
                     entity_relation_task = None
 
+                    if LIGHTRAG_DEBUG_TARGET_FILE:
+                        _write_worker_debug(
+                            "process_document_enter",
+                            {"doc_id": doc_id},
+                        )
                     async with semaphore:
+                        if LIGHTRAG_DEBUG_TARGET_FILE:
+                            _write_worker_debug(
+                                "process_document_after_semaphore",
+                                {"doc_id": doc_id},
+                            )
                         nonlocal processed_count
                         # Initialize to prevent UnboundLocalError in error handling
                         first_stage_tasks = []
@@ -1822,6 +1948,11 @@ class LightRAG:
                             )
 
                             async with pipeline_status_lock:
+                                if LIGHTRAG_DEBUG_TARGET_FILE:
+                                    _write_worker_debug(
+                                        "process_document_after_status_lock",
+                                        {"doc_id": doc_id},
+                                    )
                                 # Update processed file count and save current file number
                                 processed_count += 1
                                 current_file_number = (
@@ -1847,7 +1978,20 @@ class LightRAG:
                                     )
 
                             # Get document content from full_docs
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_before_get_full_doc",
+                                    {"doc_id": doc_id},
+                                )
                             content_data = await self.full_docs.get_by_id(doc_id)
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_after_get_full_doc",
+                                    {
+                                        "doc_id": doc_id,
+                                        "content_found": bool(content_data),
+                                    },
+                                )
                             if not content_data:
                                 raise Exception(
                                     f"Document content not found in full_docs for doc_id: {doc_id}"
@@ -1855,6 +1999,14 @@ class LightRAG:
                             content = content_data["content"]
 
                             # Call chunking function, supporting both sync and async implementations
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_before_chunking",
+                                    {
+                                        "doc_id": doc_id,
+                                        "content_chars": len(content),
+                                    },
+                                )
                             chunking_result = self.chunking_func(
                                 self.tokenizer,
                                 content,
@@ -1868,6 +2020,21 @@ class LightRAG:
                             if inspect.isawaitable(chunking_result):
                                 chunking_result = await chunking_result
 
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_after_chunking",
+                                    {
+                                        "doc_id": doc_id,
+                                        "chunk_count": (
+                                            len(chunking_result)
+                                            if isinstance(
+                                                chunking_result, (list, tuple)
+                                            )
+                                            else None
+                                        ),
+                                        "chunk_type": type(chunking_result).__name__,
+                                    },
+                                )
                             # Validate return type
                             if not isinstance(chunking_result, (list, tuple)):
                                 raise TypeError(
@@ -1939,15 +2106,47 @@ class LightRAG:
                             entity_relation_task = None
 
                             # Execute first stage tasks
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_before_first_stage_gather",
+                                    {
+                                        "doc_id": doc_id,
+                                        "chunks_count": len(chunks),
+                                    },
+                                )
                             await asyncio.gather(*first_stage_tasks)
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_after_first_stage_gather",
+                                    {
+                                        "doc_id": doc_id,
+                                        "chunks_count": len(chunks),
+                                    },
+                                )
 
                             # Stage 2: Process entity relation graph (after text_chunks are saved)
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_before_extract_entities",
+                                    {
+                                        "doc_id": doc_id,
+                                        "chunks_count": len(chunks),
+                                    },
+                                )
                             entity_relation_task = asyncio.create_task(
                                 self._process_extract_entities(
                                     chunks, pipeline_status, pipeline_status_lock
                                 )
                             )
                             chunk_results = await entity_relation_task
+                            if LIGHTRAG_DEBUG_TARGET_FILE:
+                                _write_worker_debug(
+                                    "process_document_after_extract_entities",
+                                    {
+                                        "doc_id": doc_id,
+                                        "chunk_results_count": len(chunk_results),
+                                    },
+                                )
                             file_extraction_stage_ok = True
 
                         except Exception as e:

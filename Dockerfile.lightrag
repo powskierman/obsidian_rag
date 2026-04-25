@@ -40,6 +40,8 @@ COPY src/lightrag_overrides/lightrag/lightrag.py ./LightRAG/lightrag/lightrag.py
 COPY src/lightrag_overrides/lightrag/operate.py ./LightRAG/lightrag/operate.py
 COPY src/lightrag_overrides/lightrag/utils.py ./LightRAG/lightrag/utils.py
 COPY src/lightrag_overrides/lightrag/llm/ollama.py ./LightRAG/lightrag/llm/ollama.py
+# Vault-specific prompt + entity-type overrides for Gemma-class local indexing
+COPY src/lightrag_overrides/lightrag/prompt_overrides.py ./LightRAG/lightrag/prompt_overrides.py
 
 # Create database directory
 RUN mkdir -p /app/lightrag_db /app/vault

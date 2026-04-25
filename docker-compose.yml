@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     volumes:
       - ./src:/app/src:ro
-      - ./chroma_db:/app/chroma_db:rw,cached
+      - "${CHROMA_HOST_DIR:-${OBSIDIAN_RAG_DATA_DIR}/chroma_db}:/app/chroma_db:rw,cached"
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
@@ -40,11 +40,11 @@ services:
       context: .
       dockerfile: Dockerfile.lightrag
     container_name: obsidian-lightrag
-    command: [ "gunicorn", "-w", "2", "-k", "gthread", "--threads", "2", "-b", "0.0.0.0:8001", "src.integrations.lightrag_service:app" ]
+    command: [ "gunicorn", "-w", "2", "-k", "gthread", "--threads", "2", "-b", "0.0.0.0:8001", "lightrag_service:app" ]
     ports:
       - "8001:8001"
     volumes:
-      - "${OBSIDIAN_RAG_DATA_DIR}/lightrag_db:/app/lightrag_db"
+      - "${LIGHTRAG_HOST_DIR:-${OBSIDIAN_RAG_DATA_DIR}/lightrag_db}:/app/lightrag_db"
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
       - ./src:/app/src:ro
     environment:
@@ -56,7 +56,7 @@ services:
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
       - LIGHTRAG_MODEL=${LIGHTRAG_MODEL:-}
       - KIMI_MODEL=${KIMI_MODEL:-}
-      - LIGHTRAG_DIR=${LIGHTRAG_DIR:-/app/lightrag_db}
+      - LIGHTRAG_DIR=/app/lightrag_db
       - LLM_MODEL=${LLM_MODEL:-qwen2.5:7b-instruct}
       - LLM_PROVIDER=${LLM_PROVIDER:-openrouter}
       - LLM_MODEL_PATH=${LLM_MODEL_PATH:-}
@@ -95,6 +95,11 @@ services:
       - LIGHTRAG_HEARTBEAT_INTERVAL=${LIGHTRAG_HEARTBEAT_INTERVAL:-5}
       - LIGHTRAG_HEARTBEAT_STALL_SECONDS=${LIGHTRAG_HEARTBEAT_STALL_SECONDS:-60}
       - LIGHTRAG_DOC_EXECUTION_MODE=${LIGHTRAG_DOC_EXECUTION_MODE:-inprocess}
+      - LIGHTRAG_REQUIRE_RELATIONS=${LIGHTRAG_REQUIRE_RELATIONS:-false}
+      - LIGHTRAG_MIN_RELATIONS_PER_DOC=${LIGHTRAG_MIN_RELATIONS_PER_DOC:-1}
+      - LIGHTRAG_DEBUG_TARGET_FILE=${LIGHTRAG_DEBUG_TARGET_FILE:-}
+      - LIGHTRAG_DEBUG_LOG_PATH=${LIGHTRAG_DEBUG_LOG_PATH:-/app/lightrag_db/extraction_debug.log}
+      - LIGHTRAG_WORKER_DEBUG_LOG_PATH=${LIGHTRAG_WORKER_DEBUG_LOG_PATH:-/app/lightrag_db/worker_debug.log}
       - LIGHTRAG_QUERY_TOP_K=${LIGHTRAG_QUERY_TOP_K:-40}
       - LIGHTRAG_QUERY_CHUNK_TOP_K=${LIGHTRAG_QUERY_CHUNK_TOP_K:-40}
       - LIGHTRAG_QUERY_MAX_TOTAL_TOKENS=${LIGHTRAG_QUERY_MAX_TOTAL_TOKENS:-20000}
@@ -155,7 +160,7 @@ services:
       - "8002:8002"
     volumes:
       - ./src:/app/src:ro
-      - "${OBSIDIAN_RAG_DATA_DIR}/graph_data:/app/graph_data"
+      - "${GRAPH_HOST_DIR:-${OBSIDIAN_RAG_DATA_DIR}/graph_data}:/app/graph_data"
       - "${OBSIDIAN_VAULT_PATH}:/app/vault:ro"
     environment:
       - PYTHONUNBUFFERED=1
