@@ -1,61 +1,64 @@
 # Indexing Strategy & Maintenance SOP
 
-## Overview
-This document defines the strategy for keeping the Obsidian RAG Index (Vector + Graph) synchronized across devices (MacBook + Mac Mini).
+> Day-to-day commands live in `Documentation/operations/setup/INDEXING_SCRIPTS_GUIDE.md`. This file documents the *strategy* — when and why to run each path.
 
-### The Challenge
-*   **Editing:** Happens on MacBook (via Obsidian).
-*   **Indexing/Serving:** Happens on Mac Mini (via Docker).
-*   **Sync:** iCloud Drive handles file propagation.
-*   **Lag:** The Index on the Mac Mini becomes **stale** until `index_vault.py` is run locally on the Mini.
+## Why Sync Matters
 
-## 1. Incremental Indexing (Vector)
-The script `src/indexing/index_vault.py` is designed for safety and speed.
-*   **Mechanism:** Checks MD5 hash of every file.
-*   **Behavior:** Only updates chunks for files that have changed (e.g., added Frontmatter).
-*   **Cost:** Low (seconds/minutes).
+Editing happens on the MacBook (via Obsidian); the canonical query stack runs on Canmore (Mac Mini). The vault is mirrored across both machines, but the **derived indexes** (ChromaDB, NetworkX graph, LightRAG entity store) live only on the indexer and are stale until they are rebuilt or synced.
 
-### SOP: Refreshing the Index
-**On the Mac Mini:**
-1.  Navigate to the project root:
-    ```bash
-    cd ~/Library/Mobile\ Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag
-    ```
-2.  Run the incremental indexer:
-    ```bash
-    python src/indexing/index_vault.py --refresh
-    ```
-    *(The `--refresh` flag ensures metadata updates like Tags/Aliases are properly propagated even if the body text didn't change drastically, though explicit MD5 checks should catch it. Use `--refresh` to be safe if fixing metadata issues).*
+Three independent stores need to stay current:
 
-## 2. Graph Indexing (NetworkX/LightRAG)
-The Graph is built from the Index or Raw Files.
-*   If Vector Index changes, the Graph might need updates to point to correct chunks.
-*   **However**, `networkx_graph_builder.py` usually runs as a batch process.
+| Store | Path inside `${OBSIDIAN_RAG_DATA_DIR}/` | What goes stale when |
+| --- | --- | --- |
+| ChromaDB (vector) | `chroma_db/` | A note's body text or frontmatter changed, or new notes were added |
+| NetworkX graph | `graph_data/` | Wikilinks, headings, or folder structure changed |
+| LightRAG entity store | `lightrag_db/` | New entities/relations exist (or notes were deleted) |
 
-### SOP: Updating the Graph
-If significant structure changes (new MOCs):
-1.  Restart the graph service to flush caches:
-    ```bash
-    docker compose restart graph-service
-    ```
-2.  (Optional) Rebuild Graph layer if needed (Long process):
-    ```bash
-    # Only run if you need to extract NEW entities from NEW notes
-    # python src/services/build_graph.py
-    ```
+## 1. Vector — Incremental by Default
 
-## 3. Remote Triggering (Recommended Future Workflow)
-To avoid switching physical machines, we can implement a "Watch Mode" or a remote trigger.
+`src/indexing/index_vault.py` upserts chunks. It hashes file bytes (MD5) so unchanged files are skipped. Useful flags:
 
-**Option A: Watch Dog on Mini**
-Run a script on the Mini that watches for file changes (using `fswatch` or python `watchdog`) and auto-runs indexer.
-*   *Pros:* Zero friction.
-*   *Cons:* Can burn CPU if syncing many files.
+| Flag | When to use |
+| --- | --- |
+| (none) | Daily incremental — only changed/new files are processed |
+| `--refresh` | Delete existing chunks per file before re-upserting (use after metadata-only edits) |
+| `--full` | Ignore the incremental cache and walk every note |
+| `--reset-cache` | Reset the cache file then run a clean incremental pass |
+| `--clear` (+ `--clear-token`) | Drop the entire embedding collection before reindexing (destructive) |
 
-**Option B: Manual Trigger via SSH**
-`ssh mini "cd ... && python src/indexing/index_vault.py"`
+Wrapper: `./Scripts/indexing/update_vector_db.sh`.
 
-## 4. Immediate Fix for "Bread" Frontmatter Issue
-1.  **Wait** for iCloud to sync `Authentic-Baguettes.md` to the Mini.
-2.  **Run** `python src/indexing/index_vault.py` on the Mini.
-3.  **Verify**: The Vector search should now find "bread" in the Tags context.
+## 2. NetworkX Graph — Fast Structural Rebuild
+
+The NetworkX graph is built from a structural scan and does not need append logic — a rebuild is cheap. Use:
+
+```bash
+./Scripts/indexing/update_knowledge_graph.sh
+```
+
+If the in-process service caches feel stale: `docker compose restart graph-service`.
+
+## 3. LightRAG — Partial Gap Indexing for Daily Runs
+
+For routine updates, prefer the partial gap indexer over a full LightRAG rebuild — it walks only files missing from `indexed_files.txt`:
+
+```bash
+./Scripts/indexing/partial_index_lightrag.sh --batch-size 5 --retry-failed-once --purge-deleted
+```
+
+See `Documentation/operations/setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md` for the full option matrix. A `--force` flag on the full pipeline (`./Scripts/indexing/index_with_lightrag.sh --force`) is reserved for major reindexes.
+
+## 4. End-to-End Reindex
+
+`./Scripts/indexing/run_indexing.sh` runs all three stores in sequence and is the right entry point for a fresh machine, after a corruption, or after large vault reorganization.
+
+## 5. Cross-Machine Snapshot Sync
+
+Editing on the MacBook and serving on the Mac Mini is handled via snapshot push/pull (`Scripts/sync/push.sh` on the indexer, `Scripts/sync/pull.sh` on the consumer) — this avoids running indexing twice. See `Documentation/operations/setup/INDEXING_SCRIPTS_GUIDE.md` for the full procedure.
+
+## 6. Verifying Freshness
+
+- `python Scripts/debug/check_graph_status.py` — graph mtime vs latest note mtime.
+- `obsidian_index_health` MCP tool — surfaces stale/missing index-cache entries (see `Documentation/operations/quality/INDEX_HEALTH_PROCEDURE.md`).
+- `curl -s http://localhost:8000/stats` — ChromaDB document count.
+- `curl -s http://localhost:8001/stats` — LightRAG entity/relation count.

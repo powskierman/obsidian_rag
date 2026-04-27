@@ -202,7 +202,7 @@ flowchart TD
         CloudStore -->|Pull Snapshot| PullScript(["sync/pull.sh"])
         PullScript --> MBLocal[("Local DataDir<br>~/obsidian_rag_local_data")]
         MBLocal --> Streamlit["Streamlit UI<br>Port 8501"]
-        MBLocal --> WebApp["Next.js WebApp<br>Port 3000"]
+        MBLocal --> WebApp["Next.js WebApp<br>Host port 3030"]
     end
 ```
 

@@ -1,7 +1,30 @@
 # Second Brain Architecture for Obsidian RAG
 
+> **Status: PROPOSAL / DRAFT (not yet implemented).**
+> This document captures the target design for an automated inbox→formatted-note loop. As of 2026-04-26, the implemented surface is the partial set listed under "Current Implementation Status" below; the full AI loop is not yet wired up.
+>
+> If you are looking for what the system does today, start with `Documentation/USER_MANUAL.md` and `Documentation/reference/architecture/CAPTURE_AND_INBOX.md`.
+
 ## Overview
 This document outlines the architecture for a "Second Brain" system within the Obsidian RAG environment, inspired by Nate Jones's "Active vs. Passive Systems" concept. The goal is to move from a passive storage system to an active "AI Loop" that processes frictionless inputs into structured, valuable knowledge.
+
+## Current Implementation Status
+
+Implemented today:
+
+- **Capture entry points** via the unified MCP server (`src/mcp/obsidian_rag_unified_mcp.py`):
+  - `capture_note` — append a quick capture into the configured `00_Inbox` capture root.
+  - `summarize_url_to_capture` — fetch a URL, point-form-summarize it, save into the inbox.
+  - `summarize_youtube_to_capture` — pull a YouTube transcript, summarize it, save into the inbox.
+  - `apply_existing_tags_frontmatter_only` — add only already-known vault tags to frontmatter (no body edits).
+- **Capture template** — `Documentation/operations/notes/New Note Template.md` is loaded by the capture tools.
+
+Not yet implemented (the rest of this document):
+
+- A persistent `process_inbox.py` background watcher.
+- An LLM "factory" that auto-classifies, auto-tags, auto-routes, and auto-renames inbox notes.
+- A "Quick Capture" page in the Next.js webapp.
+- File-drop / Obsidian-mobile / voice ingestion lanes feeding `00_Inbox`.
 
 ## Core Philosophy
 1.  **Frictionless Capture:** Capture thoughts, web clips, and data without deciding where they go or how to format them.

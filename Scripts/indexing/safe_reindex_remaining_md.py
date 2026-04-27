@@ -19,7 +19,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path("/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag")
-DEFAULT_VAULT = Path("/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel")
+DEFAULT_VAULT = Path(os.environ.get("OBSIDIAN_VAULT_PATH", Path.home() / "vault"))
 DEFAULT_DB = Path("/Users/michel/obsidian_rag_local_data/lightrag_db")
 
 DEFAULT_EXCLUDES = {

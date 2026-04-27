@@ -16,8 +16,11 @@ logger = logging.getLogger(__name__)
 VAULT_PATH = "/app/vault"
 # Handle local dev paths if /app/vault doesn't exist
 if not os.path.exists(VAULT_PATH):
-    # Try finding vault relative to this script or use env var
-    VAULT_PATH = os.environ.get("VAULT_PATH", "/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/vault_data") # Default fallback
+    VAULT_PATH = (
+        os.environ.get("VAULT_PATH")
+        or os.environ.get("OBSIDIAN_VAULT_PATH")
+        or os.path.expanduser("~/vault")
+    )
 
 GRAPH_PATH = os.environ.get("GRAPH_PATH", "").strip()
 if not GRAPH_PATH:

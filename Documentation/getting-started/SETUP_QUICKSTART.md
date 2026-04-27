@@ -29,22 +29,20 @@ curl -s http://localhost:4000/api/v1/health
 ```bash
 curl -s -X POST http://localhost:4000/api/v1/query \
   -H "Content-Type: application/json" \
-  -d '{"query":"nextion esp32","mode":"vector","max_results":5}'
+  -d '{"query":"nextion esp32","mode":"ask","max_results":5}'
 ```
+
+Modes: `ask` (fast vector + synthesis), `research` (staged anchor → expand → vector → synthesis), and the WebSocket `investigate` agent at `ws://localhost:4000/api/v1/deep-research`. The legacy strings `vector`, `cascading`, `vault_review`, `deep-thinking` are still accepted (the gateway returns a `X-Deprecated-Mode` header).
 
 ## 5) Indexing (if empty results)
 
-Run the appropriate script from `Scripts/`:
+Run the unified indexer when the vector or graph stores are empty:
 
 ```bash
 ./Scripts/indexing/run_indexing.sh
 ```
 
-To force a full rebuild:
-
-```bash
-./Scripts/indexing/run_indexing.sh
-```
+For day-to-day incremental work, prefer the targeted scripts (`update_vector_db.sh`, `update_knowledge_graph.sh`, `partial_index_lightrag.sh`). See `Documentation/operations/setup/INDEXING_SCRIPTS_GUIDE.md`.
 
 See `Documentation/operations/setup/INDEXING_SCRIPTS_GUIDE.md` for options.
 

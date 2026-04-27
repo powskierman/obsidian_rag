@@ -54,6 +54,22 @@ def _env_flag(name: str, default: bool = False) -> bool:
     return str(raw).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _request_flag(value: object, default: bool = False) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _positive_int(value: object, default: int = 0) -> int:
+    try:
+        parsed = int(value or 0)
+    except (TypeError, ValueError):
+        return default
+    return parsed if parsed > 0 else default
+
+
 # Configuration
 WORKING_DIR = os.getenv("LIGHTRAG_DIR", "./lightrag_db")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://host.docker.internal:11434")
@@ -118,7 +134,9 @@ LIGHTRAG_STRICT_GROUNDING = _env_flag("LIGHTRAG_STRICT_GROUNDING", True)
 LIGHTRAG_NOISE_FILTER = _env_flag("LIGHTRAG_NOISE_FILTER", True)
 LIGHTRAG_RERANK = _env_flag("LIGHTRAG_RERANK", True)
 LIGHTRAG_QUERY_ENABLE_RERANK = _env_flag("LIGHTRAG_QUERY_ENABLE_RERANK", False)
+LIGHTRAG_DATA_QUERY_MODE = _env_flag("LIGHTRAG_DATA_QUERY_MODE", False)
 LIGHTRAG_MIN_SYNTHESIS_CHARS = max(0, int(os.getenv("LIGHTRAG_MIN_SYNTHESIS_CHARS", "220")))
+LIGHTRAG_ENABLE_BOUNDED_SYNTHESIS = _env_flag("LIGHTRAG_ENABLE_BOUNDED_SYNTHESIS", True)
 LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS = _env_flag("LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS", True)
 LIGHTRAG_SYNTHESIS_SOURCE_COUNT = max(2, int(os.getenv("LIGHTRAG_SYNTHESIS_SOURCE_COUNT", "6")))
 LIGHTRAG_SYNTHESIS_SNIPPET_CHARS = max(300, int(os.getenv("LIGHTRAG_SYNTHESIS_SNIPPET_CHARS", "900")))
@@ -3104,6 +3122,61 @@ Do not add preambles or safety disclaimers.
 Never invent note names or claims not present in evidence."""
 
 
+async def _bounded_synthesis_async(
+    query_text: str,
+    sources: list[dict],
+    draft_answer: str = "",
+    requested_sections: list[str] | None = None,
+) -> str:
+    evidence = _build_synthesis_evidence_bundle(query_text, sources)
+    if not evidence:
+        return ""
+
+    default_sections = [
+        "Summary",
+        "Direct Connections",
+        "Indirect Connections",
+        "Supporting Notes",
+        "Unknowns / Gaps",
+    ]
+    section_order = [section for section in (requested_sections or []) if section] or default_sections
+    if "Summary" not in section_order:
+        section_order = ["Summary"] + section_order
+    ordered_section_text = "\n".join(section_order)
+
+    prompt = f"""Task: Answer the user from the retrieved note evidence.
+
+Use this exact section order:
+{ordered_section_text}
+
+Rules:
+- Start directly with "Summary".
+- Use only the evidence blocks below.
+- Keep bullets concise and specific.
+- Include source IDs like [1] or [2] on factual bullets.
+- In "Unknowns / Gaps", say what was not explicit in retrieved notes.
+- If the evidence does not answer the query, say "Not found in notes."
+- No preamble, no disclaimer text, no invented citations.
+
+Evidence:
+{evidence}
+
+Optional draft answer:
+{str(draft_answer or "").strip()}
+"""
+
+    model_func = get_query_model_func()
+    answer = await model_func(
+        prompt,
+        system_prompt=_synthesis_system_prompt(),
+        history_messages=[],
+        temperature=0,
+    )
+    if not isinstance(answer, str):
+        return ""
+    return _sanitize_synthesis_preamble(answer).strip()
+
+
 async def _two_pass_synthesis_async(
     query_text: str,
     sources: list[dict],
@@ -3186,6 +3259,26 @@ Optional draft answer:
         return ""
     cleaned = _sanitize_synthesis_preamble(final_answer)
     return cleaned.strip()
+
+
+def _run_bounded_synthesis(
+    query_text: str,
+    sources: list[dict],
+    draft_answer: str = "",
+    requested_sections: list[str] | None = None,
+) -> str:
+    async def _runner():
+        return await asyncio.wait_for(
+            _bounded_synthesis_async(
+                query_text,
+                sources,
+                draft_answer=draft_answer,
+                requested_sections=requested_sections,
+            ),
+            timeout=min(LIGHTRAG_SYNTHESIS_TIMEOUT_SECONDS, 45.0),
+        )
+
+    return asyncio.run(_runner())
 
 
 
@@ -4090,6 +4183,8 @@ def health():
         "llm_provider": get_effective_llm_provider(),
         "query_llm_model": get_effective_query_llm_model(),
         "query_llm_provider": get_effective_query_llm_provider(),
+        "data_query_mode": LIGHTRAG_DATA_QUERY_MODE,
+        "bounded_synthesis": LIGHTRAG_ENABLE_BOUNDED_SYNTHESIS,
         "two_pass_synthesis": LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS,
         "synthesis_source_count": LIGHTRAG_SYNTHESIS_SOURCE_COUNT,
         "synthesis_snippet_chars": LIGHTRAG_SYNTHESIS_SNIPPET_CHARS,
@@ -4200,17 +4295,17 @@ def insert_documents():
         return jsonify({"error": str(e)}), 500
 
 
-async def _do_query_async(query_text, mode, max_results: int | None = None):
+async def _do_query_async(query_text, mode, query_options: dict | None = None):
     """Helper async method for querying"""
+    query_options = query_options or {}
     rag = get_rag()
     await _ensure_storages_ready(rag)
     query_model_func, bound_query_model_name = build_bound_query_model_func()
     query_system_prompt = get_effective_query_system_prompt()
-    requested_top_k = 0
-    try:
-        requested_top_k = int(max_results or 0)
-    except (TypeError, ValueError):
-        requested_top_k = 0
+    requested_top_k = _positive_int(query_options.get("top_k"))
+    requested_chunk_top_k = _positive_int(query_options.get("chunk_top_k"))
+    requested_max_total_tokens = _positive_int(query_options.get("max_total_tokens"))
+    only_need_context = _request_flag(query_options.get("only_need_context"), False)
 
     cache_store = getattr(rag, "llm_response_cache", None)
     cache_global_config = getattr(cache_store, "global_config", None)
@@ -4224,36 +4319,39 @@ async def _do_query_async(query_text, mode, max_results: int | None = None):
         cache_global_config["enable_llm_cache"] = False
 
     if mode in ['global', 'hybrid']:
-        top_k = max(LIGHTRAG_QUERY_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_QUERY_TOP_K
-        chunk_top_k = max(LIGHTRAG_QUERY_CHUNK_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_QUERY_CHUNK_TOP_K
+        top_k = requested_top_k or LIGHTRAG_QUERY_TOP_K
+        chunk_top_k = requested_chunk_top_k or requested_top_k or LIGHTRAG_QUERY_CHUNK_TOP_K
+        max_total_tokens = requested_max_total_tokens or LIGHTRAG_QUERY_MAX_TOTAL_TOKENS
         param = QueryParam(
             mode=mode,
             chunk_top_k=chunk_top_k,
             top_k=top_k,
-            max_total_tokens=LIGHTRAG_QUERY_MAX_TOTAL_TOKENS,
+            max_total_tokens=max_total_tokens,
             model_func=query_model_func,
             enable_rerank=LIGHTRAG_QUERY_ENABLE_RERANK
         )
     elif mode == 'naive':
-         top_k = max(LIGHTRAG_NAIVE_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_NAIVE_TOP_K
-         chunk_top_k = max(LIGHTRAG_NAIVE_CHUNK_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_NAIVE_CHUNK_TOP_K
+         top_k = requested_top_k or LIGHTRAG_NAIVE_TOP_K
+         chunk_top_k = requested_chunk_top_k or requested_top_k or LIGHTRAG_NAIVE_CHUNK_TOP_K
+         max_total_tokens = requested_max_total_tokens or LIGHTRAG_NAIVE_MAX_TOTAL_TOKENS
          param = QueryParam(
             mode=mode,
             chunk_top_k=chunk_top_k,
             top_k=top_k,
-            max_total_tokens=LIGHTRAG_NAIVE_MAX_TOTAL_TOKENS, # Limit naive cost
+            max_total_tokens=max_total_tokens,
             model_func=query_model_func,
             enable_rerank=LIGHTRAG_QUERY_ENABLE_RERANK
         )
     else:
         # Local: use vector chunks for better note-text grounding
-        top_k = max(LIGHTRAG_LOCAL_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_LOCAL_TOP_K
-        chunk_top_k = max(LIGHTRAG_LOCAL_CHUNK_TOP_K, requested_top_k) if requested_top_k > 0 else LIGHTRAG_LOCAL_CHUNK_TOP_K
+        top_k = requested_top_k or LIGHTRAG_LOCAL_TOP_K
+        chunk_top_k = requested_chunk_top_k or requested_top_k or LIGHTRAG_LOCAL_CHUNK_TOP_K
+        max_total_tokens = requested_max_total_tokens or LIGHTRAG_LOCAL_MAX_TOTAL_TOKENS
         param = QueryParam(
             mode="naive",
             chunk_top_k=chunk_top_k,
             top_k=top_k,
-            max_total_tokens=LIGHTRAG_LOCAL_MAX_TOTAL_TOKENS,
+            max_total_tokens=max_total_tokens,
             model_func=query_model_func,
             enable_rerank=LIGHTRAG_QUERY_ENABLE_RERANK
         )
@@ -4265,6 +4363,46 @@ async def _do_query_async(query_text, mode, max_results: int | None = None):
         rag.llm_model_name = bound_query_model_name
 
         logger.info(f"[DEBUG] query_system_prompt before aquery: {query_system_prompt}")
+        logger.info(
+            "QUERY_PARAMS: mode=%s effective_mode=%s top_k=%s chunk_top_k=%s max_total_tokens=%s only_need_context=%s",
+            mode,
+            param.mode,
+            param.top_k,
+            param.chunk_top_k,
+            param.max_total_tokens,
+            only_need_context,
+        )
+        if (only_need_context or LIGHTRAG_DATA_QUERY_MODE) and hasattr(rag, "aquery_data"):
+            data_payload = await rag.aquery_data(query_text, param=param)
+            data_block = (
+                data_payload.get("data", {})
+                if isinstance(data_payload, dict) and isinstance(data_payload.get("data", {}), dict)
+                else {}
+            )
+            metadata = (
+                data_payload.get("metadata", {})
+                if isinstance(data_payload, dict) and isinstance(data_payload.get("metadata", {}), dict)
+                else {}
+            )
+            counts = {
+                "entities": len(data_block.get("entities", [])) if isinstance(data_block.get("entities"), list) else 0,
+                "relationships": len(data_block.get("relationships", [])) if isinstance(data_block.get("relationships"), list) else 0,
+                "chunks": len(data_block.get("chunks", [])) if isinstance(data_block.get("chunks"), list) else 0,
+                "references": len(data_block.get("references", [])) if isinstance(data_block.get("references"), list) else 0,
+            }
+            return {
+                "llm_response": {
+                    "content": f"Retrieved context only: {counts}",
+                    "is_streaming": False,
+                },
+                "data": data_block,
+                "metadata": {
+                    **metadata,
+                    "only_need_context": only_need_context,
+                    "data_query_mode": LIGHTRAG_DATA_QUERY_MODE,
+                    "retrieval_counts": counts,
+                },
+            }
         if hasattr(rag, "aquery_llm"):
             result = await rag.aquery_llm(
                 query_text, param=param, system_prompt=query_system_prompt
@@ -4290,7 +4428,17 @@ def _run_query_with_timeout(query_text: str, mode: str, max_results: int | None 
     """Run async query with a hard timeout to avoid blocking the server."""
     async def _runner():
         return await asyncio.wait_for(
-            _do_query_async(query_text, mode, max_results=max_results),
+            _do_query_async(query_text, mode, query_options={"top_k": max_results, "chunk_top_k": max_results}),
+            timeout=QUERY_TIMEOUT_SECONDS,
+        )
+    return asyncio.run(_runner())
+
+
+def _run_query_with_options_timeout(query_text: str, mode: str, query_options: dict):
+    """Run async query with explicit query options and a hard timeout."""
+    async def _runner():
+        return await asyncio.wait_for(
+            _do_query_async(query_text, mode, query_options=query_options),
             timeout=QUERY_TIMEOUT_SECONDS,
         )
     return asyncio.run(_runner())
@@ -4318,6 +4466,180 @@ def _extract_query_data_block(payload: dict | str) -> dict:
         return {}
     data_block = payload.get("data", {})
     return data_block if isinstance(data_block, dict) else {}
+
+
+def _source_ids_from_graph_item(item: dict) -> list[str]:
+    raw = item.get("source_id") or item.get("chunk_id") or item.get("chunk_ids") or ""
+    values = raw if isinstance(raw, list) else re.split(r"[,;\s]+", str(raw or ""))
+    source_ids: list[str] = []
+    for value in values:
+        source_id = str(value or "").strip()
+        if source_id and source_id not in source_ids:
+            source_ids.append(source_id)
+    return source_ids
+
+
+def _graph_item_label(item: dict, source_type: str) -> str:
+    if source_type == "relationship":
+        src_id = str(item.get("src_id") or item.get("source") or "").strip()
+        tgt_id = str(item.get("tgt_id") or item.get("target") or "").strip()
+        keywords = str(item.get("keywords") or item.get("relation") or "").strip()
+        if src_id and tgt_id and keywords:
+            return f"{src_id} --{keywords}--> {tgt_id}"
+        if src_id and tgt_id:
+            return f"{src_id} -> {tgt_id}"
+    return str(item.get("entity_name") or item.get("name") or item.get("id") or "").strip()
+
+
+def _select_graph_file_path(raw_file_path: str, query_terms: list[str]) -> str:
+    candidates = [
+        str(part or "").strip()
+        for part in re.split(r"<SEP>|\s*\|\s*", str(raw_file_path or ""))
+        if str(part or "").strip()
+    ]
+    if not candidates:
+        return ""
+    if len(candidates) == 1:
+        return candidates[0]
+
+    def _candidate_score(path: str) -> tuple[int, int]:
+        normalized = _normalize_file_path(path)
+        hay = _normalize_for_match(normalized)
+        term_hits = sum(1 for term in query_terms if _term_matches_hay(term, hay, hay))
+        archive_penalty = 1 if "/archive/" in f"/{normalized.lower()}/" else 0
+        return term_hits - archive_penalty, -len(normalized)
+
+    return max(candidates, key=_candidate_score)
+
+
+def _source_from_graph_item(
+    item: dict,
+    *,
+    query_text: str,
+    query_terms: list[str],
+    source_type: str,
+    chunks_by_id: dict,
+) -> dict | None:
+    if not isinstance(item, dict):
+        return None
+
+    source_ids = _source_ids_from_graph_item(item)
+    chunk = None
+    for source_id in source_ids:
+        candidate = chunks_by_id.get(source_id)
+        if isinstance(candidate, dict):
+            chunk = candidate
+            break
+
+    raw_file_path = str(
+        (chunk or {}).get("file_path")
+        or item.get("file_path")
+        or item.get("filepath")
+        or ""
+    ).strip()
+    file_path = _select_graph_file_path(raw_file_path, query_terms)
+    if not file_path or file_path == "unknown_source":
+        return None
+
+    title = _title_from_filepath(file_path)
+    graph_label = _graph_item_label(item, source_type)
+    description = str(item.get("description") or "").strip()
+    chunk_content = str((chunk or {}).get("content") or "").strip()
+    raw_snippet_parts = []
+    if graph_label:
+        raw_snippet_parts.append(graph_label)
+    if description:
+        raw_snippet_parts.append(description)
+    if chunk_content:
+        raw_snippet_parts.append(chunk_content)
+    raw_snippet = "\n\n".join(raw_snippet_parts).strip()
+
+    cleaned_snippet = _clean_source_snippet_for_query(
+        raw_snippet,
+        query_text=query_text,
+        title=title,
+        file_path=file_path,
+    )
+    snippet_for_score = cleaned_snippet or description or chunk_content or graph_label
+    features = _score_source_features(
+        query_text,
+        query_terms,
+        title,
+        file_path,
+        snippet_for_score,
+        source_type=source_type,
+    )
+    if graph_label and _matches_any_terms(query_terms, graph_label):
+        features["score"] = int(features.get("score", 0) or 0) + 8
+    if source_ids:
+        features["score"] = int(features.get("score", 0) or 0) + 3
+
+    if LIGHTRAG_NOISE_FILTER and (
+        _is_noise_payload(f"{title} {file_path} {snippet_for_score}")
+        or float(features.get("meta_penalty", 0.0) or 0.0) >= 0.82
+        or float(features.get("template_penalty", 0.0) or 0.0) >= 0.88
+    ):
+        return None
+
+    score = int(features.get("score", 0) or 0)
+    source = {
+        "title": title,
+        "filename": title,
+        "filepath": _normalize_file_path(file_path),
+        "file_path": file_path,
+        "snippet": snippet_for_score,
+        "relevance": _relevance_from_score(score, query_terms),
+        "term_coverage": float(features.get("term_coverage", 0.0) or 0.0),
+        "score": score,
+        "source_type": source_type,
+    }
+    if graph_label:
+        source["graph_label"] = graph_label
+    if source_ids:
+        source["source_id"] = source_ids[0]
+    return source
+
+
+def _extract_graph_query_sources(data_block: dict, query_text: str, query_terms: list[str]) -> list[dict]:
+    chunks_by_id = _load_chunks_cache() or {}
+    graph_sources: list[dict] = []
+    for source_type, key in (("entity", "entities"), ("relationship", "relationships")):
+        items = data_block.get(key, [])
+        if not isinstance(items, list):
+            continue
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            source = _source_from_graph_item(
+                item,
+                query_text=query_text,
+                query_terms=query_terms,
+                source_type=source_type,
+                chunks_by_id=chunks_by_id,
+            )
+            if source:
+                graph_sources.append(source)
+    return graph_sources
+
+
+def _dedupe_query_sources(sources: list[dict]) -> list[dict]:
+    best_by_key: dict[str, dict] = {}
+    for source in sources:
+        if not isinstance(source, dict):
+            continue
+        key = str(source.get("source_id") or "").strip()
+        if not key:
+            key = f"{source.get('filepath', '')}|{str(source.get('snippet', ''))[:160]}"
+        current = best_by_key.get(key)
+        if current is None or (
+            int(source.get("score", 0) or 0),
+            len(str(source.get("snippet", ""))),
+        ) > (
+            int(current.get("score", 0) or 0),
+            len(str(current.get("snippet", ""))),
+        ):
+            best_by_key[key] = source
+    return list(best_by_key.values())
 
 
 def _extract_query_sources(data_block: dict, query_text: str = "") -> list[dict]:
@@ -4404,6 +4726,12 @@ def _extract_query_sources(data_block: dict, query_text: str = "") -> list[dict]
 
     if not sources:
         sources = list(scored_chunks_by_ref.values())
+
+    graph_sources = _extract_graph_query_sources(data_block, query_text, query_terms)
+    if graph_sources:
+        sources.extend(graph_sources)
+
+    sources = _dedupe_query_sources(sources)
 
     if not sources:
         return []
@@ -4566,10 +4894,13 @@ def query_graph():
         system_prompt_override = str(data.get("system_prompt", "") or "").strip()
         mem0_context = str(data.get("mem0_context", "") or "").strip()
         max_results_raw = data.get("max_results", data.get("n_results", 0))
-        try:
-            max_results = int(max_results_raw or 0)
-        except (TypeError, ValueError):
-            max_results = 0
+        max_results = _positive_int(max_results_raw)
+        query_options = {
+            "top_k": _positive_int(data.get("top_k"), max_results),
+            "chunk_top_k": _positive_int(data.get("chunk_top_k"), max_results),
+            "max_total_tokens": _positive_int(data.get("max_total_tokens")),
+            "only_need_context": _request_flag(data.get("only_need_context"), False),
+        }
         
         if not query_text:
             return jsonify({"error": "No query provided"}), 400
@@ -4623,9 +4954,7 @@ def query_graph():
         sources = []
         data_block = {}
         try:
-            raw_payload = _run_query_with_timeout(
-                query_text, mode, max_results=max_results or None
-            )
+            raw_payload = _run_query_with_options_timeout(query_text, mode, query_options)
             answer = _extract_query_answer(raw_payload)
             data_block = _extract_query_data_block(raw_payload)
             logger.info(
@@ -4657,36 +4986,45 @@ def query_graph():
         elif _answer_needs_fallback(result, retrieval_ok):
             logger.warning("LightRAG answer lacked substantive grounded content; applying fallback synthesis")
             refined = ""
+            fallback_sections = [
+                "Summary",
+                "Direct Connections",
+                "Indirect Connections",
+                "Supporting Notes",
+                "Unknowns / Gaps",
+            ]
             if retrieval_ok and sources and LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS:
                 try:
                     refined = _run_two_pass_synthesis(
                         query_text,
                         sources,
                         result,
-                        requested_sections=[
-                            "Summary",
-                            "Direct Connections",
-                            "Indirect Connections",
-                            "Supporting Notes",
-                            "Unknowns / Gaps",
-                        ],
+                        requested_sections=fallback_sections,
                     )
                 except Exception as exc:
                     logger.warning("Two-pass synthesis fallback failed: %s", exc)
+            elif retrieval_ok and sources and LIGHTRAG_ENABLE_BOUNDED_SYNTHESIS:
+                try:
+                    refined = _run_bounded_synthesis(
+                        query_text,
+                        sources,
+                        result,
+                        requested_sections=fallback_sections,
+                    )
+                except Exception as exc:
+                    logger.warning("Bounded synthesis fallback failed: %s", exc)
             if refined and not _answer_needs_fallback(refined, retrieval_ok=False):
                 result = refined
-                answer_fallback = "two_pass_synthesis"
+                answer_fallback = (
+                    "two_pass_synthesis"
+                    if LIGHTRAG_ENABLE_TWO_PASS_SYNTHESIS
+                    else "bounded_synthesis"
+                )
             else:
                 result = _deterministic_contract_answer(
                     query_text,
                     sources,
-                    [
-                        "Summary",
-                        "Direct Connections",
-                        "Indirect Connections",
-                        "Supporting Notes",
-                        "Unknowns / Gaps",
-                    ],
+                    fallback_sections,
                 )
                 answer_fallback = "deterministic_contract"
             
@@ -4711,6 +5049,7 @@ def query_graph():
                 "retrieval_succeeded": retrieval_ok,
                 "llm_error": answer if partial_success else None,
                 "answer_fallback": answer_fallback,
+                "query_options": query_options,
             },
             "raw_data": data_block,
             "latency": elapsed,

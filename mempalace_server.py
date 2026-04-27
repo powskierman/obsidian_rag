@@ -45,6 +45,13 @@ def _run_search(query: str, n_results: int) -> list[dict]:
         filename = src_m.group(1).strip()
         room_m = re.search(r"\[\d+\]\s*\w+\s*/\s*(\w+)", block)
         room = room_m.group(1).strip() if room_m else ""
+        match_m = re.search(r"Match:\s*([\d.]+)", block)
+        try:
+            match_score = float(match_m.group(1)) if match_m else 0.0
+        except ValueError:
+            match_score = 0.0
+        if match_score <= 0.0:
+            continue
 
         after_match = re.split(r"Match:\s*[\d.]+\s*\n", block, maxsplit=1)
         content = after_match[1].strip() if len(after_match) > 1 else block.strip()

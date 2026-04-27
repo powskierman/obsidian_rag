@@ -18,17 +18,20 @@ This repo keeps generated data out of Git. These directories are expected to be 
 # Start services
 docker compose up -d
 
-# Index your vault (choose the script that matches your graph mode)
-# Index your vault (Unified script)
+# Run the unified indexer (vector + NetworkX graph + LightRAG)
 ./Scripts/indexing/run_indexing.sh
 ```
 
-If you use a different indexing path, pick the relevant script from `Scripts/`.
+For partial / targeted rebuilds, prefer the per-store scripts under `Scripts/indexing/` — see `Documentation/operations/setup/INDEXING_SCRIPTS_GUIDE.md`.
 
-Force a full rebuild:
+To force a clean ChromaDB drop+rebuild specifically (destructive, requires `EMBEDDING_CLEAR_TOKEN`):
 
 ```bash
-./Scripts/indexing/run_indexing.sh
+python src/indexing/index_vault.py /path/to/vault \
+  --url http://localhost:8000 \
+  --full \
+  --clear \
+  --clear-token "$EMBEDDING_CLEAR_TOKEN"
 ```
 
 ## Reindex Embeddings (Clear + Rebuild)

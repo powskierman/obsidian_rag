@@ -9,8 +9,14 @@ import hashlib
 from pathlib import Path
 import requests
 import time
+import warnings
 from datetime import datetime
 import re
+
+# pypdf emits "Ignoring wrong pointing object" for PDFs with minor structural
+# issues (bad xref offsets). The file still parses correctly — suppress the noise.
+warnings.filterwarnings("ignore", message=".*wrong pointing object.*")
+warnings.filterwarnings("ignore", category=UserWarning, module="pypdf")
 
 # Try to import tqdm for progress bar, fallback to simple iteration
 try:

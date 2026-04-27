@@ -164,11 +164,12 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 - **`obsidian_semantic_search`** - Semantic search with 1-10 results and snippets
 - **`search_vault_full`** - Semantic search + full note text (+ optional embedded PDF extraction)
 - **`search_vault_text`** - Direct disk search for literal text or regex, with optional grep-style context lines
-- **`obsidian_search_mode`** - Gateway mode tool supporting:
-  - `vector`
-  - `cascading`
-  - `deep-research`
-  - Legacy aliases may still be accepted for backward compatibility, but they are not part of the supported public mode contract.
+- **`obsidian_search_mode`** - Gateway mode tool. Canonical mode names:
+  - `ask` — fast vector + compact synthesis (legacy alias: `vector`)
+  - `research` — staged retrieval + grounded synthesis (legacy alias: `cascading`)
+  - `investigate` — agentic multi-step deep research; routed through the WebSocket internally (legacy aliases: `deep-research`, `deep-thinking`)
+  Legacy mode strings remain accepted for backward compatibility and emit a `X-Deprecated-Mode` response header at the gateway.
+- **`obsidian_unified_query`** - Higher-level query tool that picks the mode automatically based on the question shape.
 
 ### Vault File Access
 - **`get_vault_path`** - Returns the active vault's absolute path and capture root
@@ -188,6 +189,13 @@ export MCP_OAUTH_REDIRECT_URIS="https://example.com/oauth/callback"
 - **`find_entity_path`** - Find connections between entities
 - **`search_entities`** - Search for entities
 - **`get_graph_stats`** - Graph statistics
+
+### Capture & Note Creation
+- **`capture_note`** - Append a quick capture to the configured `00_Inbox` capture root
+- **`create_vault_note`** - Create a new note at a specified vault-relative path
+- **`summarize_url_to_capture`** - Fetch a URL, summarize, and save to the inbox
+- **`summarize_youtube_to_capture`** - Pull a YouTube transcript, summarize, and save to the inbox
+- **`apply_existing_tags_frontmatter_only`** - Add already-known vault tags to a note's frontmatter without touching its body
 
 Compatibility aliases still accepted by the server: `search_vault`, `get_vault_stats`, `query_knowledge_graph`.
 
@@ -258,27 +266,10 @@ Notes:
    - In Claude Desktop config env section
    - Or ensure file is in default location
 
-## Migration from Old Setup
+## Server Layout
 
-If you're using the old `obsidian_rag_mcp_fixed.py`:
-
-1. **Replace in config:**
-   - Old: `obsidian_rag_mcp_fixed.py`
-   - New: `obsidian_rag_unified_mcp.py`
-
-2. **Update server name:**
-   - Old: `"obsidian-rag"`
-   - New: `"obsidian-rag-unified"`
-
-3. **Add environment variables:**
-   - `EMBEDDING_SERVICE_URL`
-   - `OPENAI_API_KEY` (optional, only for graph tools)
-
-## Benefits of Unified Server
-
-✅ **One server** instead of two
-✅ **Better vault search** (5-10 results vs 3)
-✅ **Content snippets** included
-✅ **All tools** in one place
-✅ **Easier maintenance** - single file
-✅ **Better error messages**
+The active MCP server is `src/mcp/obsidian_rag_unified_mcp.py` (~4400 lines).
+It exposes a single unified tool surface combining vault search, note
+read/write, capture/inbox helpers, and graph queries. Older split servers
+(`obsidian_rag_mcp_fixed.py`, etc.) have been retired — only this unified
+server is supported.

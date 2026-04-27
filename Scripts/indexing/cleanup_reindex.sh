@@ -21,7 +21,7 @@
 set -euo pipefail
 
 ### ---- Paths --------------------------------------------------------------
-VAULT="/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel"
+VAULT="${OBSIDIAN_VAULT_PATH:-$HOME/vault}"
 REPO="/Users/michel/dev/obsidian_rag"
 LIGHTRAG_DIR="/Users/michel/obsidian_rag_local_data/lightrag_db"
 HASH_CACHE="$REPO/data/indexing/index_vault_hashes_97a8ed17ea03.json"

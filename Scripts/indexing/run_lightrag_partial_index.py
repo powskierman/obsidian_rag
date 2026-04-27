@@ -21,7 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-DEFAULT_VAULT = Path("/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel")
+DEFAULT_VAULT = Path(os.environ.get("OBSIDIAN_VAULT_PATH", Path.home() / "vault"))
 DEFAULT_DATA_DIR = Path("/Users/michel/obsidian_rag_local_data")
 DEFAULT_EXCLUDE_PATTERNS = "venv/*,.venv/*,**/site-packages/*,.trash/*,.obsidian/*"
 
