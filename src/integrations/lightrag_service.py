@@ -28,8 +28,7 @@ from lightrag.kg.shared_storage import initialize_pipeline_status
 from openai import AsyncOpenAI
 import logging
 import datetime
-import nest_asyncio
-nest_asyncio.apply()
+import concurrent.futures
 
 try:
     from src.utils.ollama_runtime import iter_ollama_routes
@@ -156,6 +155,8 @@ QUERY_LMSTUDIO_API_KEY = os.getenv("QUERY_LMSTUDIO_API_KEY", LMSTUDIO_API_KEY)
 QUERY_MLX_BASE_URL = os.getenv("QUERY_MLX_BASE_URL", MLX_BASE_URL)
 QUERY_MLX_API_KEY = os.getenv("QUERY_MLX_API_KEY", MLX_API_KEY)
 LIGHTRAG_INDEX_TEXT_MODE = os.getenv("LIGHTRAG_INDEX_TEXT_MODE", "enriched").strip().lower()
+LIGHTRAG_PDF_MIN_CHARS = max(0, int(os.getenv("LIGHTRAG_PDF_MIN_CHARS", "300")))
+LIGHTRAG_PDF_MIN_PAGE_TEXT_RATIO = max(0.0, float(os.getenv("LIGHTRAG_PDF_MIN_PAGE_TEXT_RATIO", "0.4")))
 
 # Request-scoped query overrides (per /query call).
 REQUEST_QUERY_LLM_PROVIDER = contextvars.ContextVar("REQUEST_QUERY_LLM_PROVIDER", default="")
@@ -211,6 +212,43 @@ index_job_lock = threading.Lock()
 index_job_threads: dict[str, threading.Thread] = {}
 active_index_job_id: str | None = None
 
+# ---------------------------------------------------------------------------
+# Dedicated indexer event loop — one long-lived loop for all LightRAG async
+# work (initialization + per-doc ainsert).  Keeps asyncio.Lock objects bound
+# to the same loop across the process lifetime.
+# ---------------------------------------------------------------------------
+_indexer_loop: asyncio.AbstractEventLoop | None = None
+_indexer_thread: threading.Thread | None = None
+_indexer_loop_lock = threading.Lock()
+
+
+def _ensure_indexer_loop() -> asyncio.AbstractEventLoop:
+    """Start (or return) the dedicated indexer event loop."""
+    global _indexer_loop, _indexer_thread
+    with _indexer_loop_lock:
+        if _indexer_loop is not None and _indexer_loop.is_running():
+            return _indexer_loop
+        ready = threading.Event()
+
+        def _run():
+            global _indexer_loop
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            _indexer_loop = loop
+            ready.set()
+            try:
+                loop.run_forever()
+            finally:
+                loop.close()
+
+        _indexer_thread = threading.Thread(
+            target=_run, name="lightrag-indexer", daemon=True
+        )
+        _indexer_thread.start()
+        if not ready.wait(timeout=5):
+            raise RuntimeError("indexer loop failed to start")
+        return _indexer_loop
+
 
 def _now_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -256,6 +294,52 @@ def _append_jsonl(path: Path, payload: dict) -> None:
     line = json.dumps(payload, ensure_ascii=False)
     with open(path, "a", encoding="utf-8") as f:
         f.write(line + "\n")
+
+
+def _failed_files_cache_path() -> Path:
+    return Path(WORKING_DIR) / "failed_files.json"
+
+
+def _load_failed_files_cache() -> dict:
+    """Load the permafail cache keyed by canonical relative path."""
+    path = _failed_files_cache_path()
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        return raw if isinstance(raw, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_failed_files_cache(cache: dict) -> None:
+    """Atomically persist the permafail cache."""
+    _write_json_atomic(_failed_files_cache_path(), cache)
+
+
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    try:
+        with path.open("rb") as fh:
+            for chunk in iter(lambda: fh.read(65536), b""):
+                h.update(chunk)
+    except Exception:
+        return ""
+    return h.hexdigest()
+
+
+def _record_permafail(cache: dict, canonical_key: str, vault_file: Path, reason: str) -> None:
+    """Write/update a permafail entry.  Caller must persist the cache afterwards."""
+    try:
+        mtime = vault_file.stat().st_mtime
+    except Exception:
+        mtime = 0.0
+    cache[canonical_key] = {
+        "reason": reason,
+        "sha256": _sha256_file(vault_file),
+        "mtime": mtime,
+        "ts": _now_iso(),
+    }
 
 
 def _llm_cache_file_path() -> Path:
@@ -700,20 +784,23 @@ async def _index_one_doc_inprocess(*, doc_id: str, file_path: str, content: str)
 
 
 def _run_doc_worker_inprocess(*, doc_id: str, file_path: str, content: str) -> dict:
+    loop = _ensure_indexer_loop()
+    fut = asyncio.run_coroutine_threadsafe(
+        _index_one_doc_inprocess(doc_id=doc_id, file_path=file_path, content=content),
+        loop,
+    )
     try:
-        async def _runner():
-            return await asyncio.wait_for(
-                _index_one_doc_inprocess(doc_id=doc_id, file_path=file_path, content=content),
-                timeout=LIGHTRAG_DOC_TIMEOUT,
-            )
-
-        return asyncio.run(_runner())
-    except asyncio.TimeoutError:
+        return fut.result(timeout=LIGHTRAG_DOC_TIMEOUT)
+    except concurrent.futures.TimeoutError:
+        fut.cancel()
+        status_entry = _doc_status_entry_for_doc(Path(WORKING_DIR), doc_id, file_path)
         return {
             "ok": False,
             "failure_reason": "timeout",
             "error": f"In-process indexing timed out after {LIGHTRAG_DOC_TIMEOUT:.0f}s",
-            "metrics": {},
+            "metrics": {
+                "parser_error": _has_parser_error(status_entry, ""),
+            },
         }
     except Exception as e:
         status_entry = _doc_status_entry_for_doc(Path(WORKING_DIR), doc_id, file_path)
@@ -747,7 +834,8 @@ def _classify_doc_terminal_state(result: dict) -> tuple[str, str | None, bool]:
     if not full_doc_persisted:
         return "failed", "missing_full_doc_persist", False
     if not chunks_persisted:
-        return "failed", "missing_chunk_persist", False
+        # Very short content: full_doc persisted but produced zero chunks — corner case, not a failure.
+        return "processed_with_warnings", "missing_chunk_persist", False
     if not doc_status:
         return "failed", "missing_doc_status", False
     if doc_status == "failed":
@@ -1032,20 +1120,26 @@ COSINE_BETTER_THAN_THRESHOLD = 0.5
 # def get_or_create_loop(): ...
 
 
-def extract_pdf_text(pdf_path: Path) -> str:
-    """Extract text from a PDF file using pypdf."""
+def extract_pdf_text(pdf_path: Path) -> tuple[str, int, int]:
+    """Extract text from a PDF file using pypdf.
+
+    Returns:
+        (text, pages_with_text, total_pages)
+    """
     try:
         from pypdf import PdfReader
     except ImportError:
         logger.warning(f"pypdf not installed; skipping PDF: {pdf_path}")
-        return ""
+        return "", 0, 0
 
     try:
         reader = PdfReader(str(pdf_path))
     except Exception as e:
         logger.warning(f"Failed to read PDF {pdf_path}: {e}")
-        return ""
+        return "", 0, 0
 
+    total_pages = len(reader.pages)
+    pages_with_text = 0
     pages_text = []
     for page_index, page in enumerate(reader.pages, start=1):
         try:
@@ -1053,12 +1147,13 @@ def extract_pdf_text(pdf_path: Path) -> str:
         except Exception:
             page_text = ""
         if page_text.strip():
+            pages_with_text += 1
             pages_text.append(f"[Page {page_index}]\n{page_text}")
 
     text = "\n\n".join(pages_text).strip()
     # Basic cleanup
     text = re.sub(r'\bPage \d+ of \d+\b', '', text)
-    return text
+    return text, pages_with_text, total_pages
 
 from src.indexing.frontmatter import extract_frontmatter, sanitize_content, _dedupe_keep_order
 from src.indexing.canonical_metadata import build_canonical_metadata
@@ -4140,12 +4235,16 @@ def _start_background_init():
         if init_started:
             return
         init_started = True
+
         def _runner():
             global init_error
             try:
-                asyncio.run(initialize_rag())
+                loop = _ensure_indexer_loop()
+                fut = asyncio.run_coroutine_threadsafe(initialize_rag(), loop)
+                fut.result()  # propagate exceptions; blocks until init completes
             except Exception as e:
                 init_error = e
+
         thread = threading.Thread(target=_runner, daemon=True)
         thread.start()
 
@@ -4276,14 +4375,14 @@ def insert_documents():
         if not texts:
             return jsonify({"error": "No texts provided"}), 400
         
-        # Run async insert using the initialized RAG
+        # Run async insert on the shared indexer loop so locks stay on one loop
         async def do_insert():
             rag = get_rag()
             await _ensure_storages_ready(rag)
             await initialize_pipeline_status()
             await rag.ainsert(texts)
-        
-        asyncio.run(do_insert())
+
+        asyncio.run_coroutine_threadsafe(do_insert(), _ensure_indexer_loop()).result()
         
         return jsonify({
             "status": "success",
@@ -5154,7 +5253,9 @@ def purge_deleted_notes():
                     )
             return deleted, failed
 
-        deleted_docs, failed_docs = asyncio.run(_run_purge())
+        deleted_docs, failed_docs = asyncio.run_coroutine_threadsafe(
+            _run_purge(), _ensure_indexer_loop()
+        ).result()
 
         cache_purge_stats = {}
         if LIGHTRAG_PURGE_QUERY_CACHE_ON_PURGE and deleted_docs:
@@ -5259,6 +5360,7 @@ def index_vault():
         vault_path = data.get('vault_path', './vault')
         force_reindex = bool(data.get('force', False))
         bypass_reindex_guard = bool(data.get("bypass_reindex_guard", False))
+        bypass_failed_cache = _request_flag(data.get("bypass_failed_cache"), default=False)
         max_files = data.get('max_files', 0) # 0 means unlimited
         include_extensions = _normalize_extensions(data.get("include_extensions"))
         exclude_extensions = _normalize_extensions(data.get("exclude_extensions")) or set()
@@ -5278,7 +5380,7 @@ def index_vault():
             }), 400
 
         Path(WORKING_DIR).mkdir(parents=True, exist_ok=True)
-        
+
         vault_dir = Path(vault_path)
         if not vault_dir.exists():
             return jsonify({"error": f"Vault path not found: {vault_path}"}), 400
@@ -5288,6 +5390,9 @@ def index_vault():
         key_root = Path("/app/vault") if (
             vault_posix == "/app/vault" or vault_posix.startswith("/app/vault/")
         ) else vault_dir
+
+        # Permafail cache — persists across runs; skips known-bad files.
+        failed_files_cache = _load_failed_files_cache() if not force_reindex else {}
 
         # Load indexed files tracking: canonical_relative_path|mtime
         indexed_files_path = Path(WORKING_DIR) / "indexed_files.txt"
@@ -5390,12 +5495,14 @@ def index_vault():
         notes_file_paths = []
         new_state_entries = []
         tracked_keys_found = 0
+        permafail_skipped: list[str] = []
+        scanned_pdfs_skipped: list[str] = []
 
         count = 0
         for vault_file in all_files:
             if max_files > 0 and count >= max_files:
                 break
-                
+
             abs_path = vault_file.as_posix()
             index_key = _canonical_index_key(vault_file, key_root)
             try:
@@ -5408,12 +5515,43 @@ def index_vault():
             stored_mtime = indexed_files_state.get(index_key)
             if stored_mtime is not None:
                 tracked_keys_found += 1
-            
+
             if force_reindex or stored_mtime is None or current_mtime > stored_mtime:
+                # Permafail cache check: skip files that repeatedly fail UNLESS
+                # force=True, bypass_failed_cache=True, or the file content changed.
+                if not force_reindex and not bypass_failed_cache and index_key in failed_files_cache:
+                    cached = failed_files_cache[index_key]
+                    current_sha = _sha256_file(vault_file)
+                    if current_sha == cached.get("sha256", ""):
+                        logger.debug(
+                            "Permafail cache skip: %s (reason=%s)", abs_path, cached.get("reason")
+                        )
+                        permafail_skipped.append(abs_path)
+                        continue
+
                 try:
                     # Process Content
                     if vault_file.suffix.lower() == ".pdf":
-                        raw_text = extract_pdf_text(vault_file)
+                        raw_text, pages_with_text, total_pages = extract_pdf_text(vault_file)
+
+                        # PDF pre-flight gate: skip scanned/image-only PDFs
+                        non_ws_chars = len(raw_text.replace(" ", "").replace("\n", "").replace("\t", ""))
+                        page_text_ratio = pages_with_text / max(1, total_pages)
+                        if (
+                            non_ws_chars < LIGHTRAG_PDF_MIN_CHARS
+                            or page_text_ratio < LIGHTRAG_PDF_MIN_PAGE_TEXT_RATIO
+                        ):
+                            logger.info(
+                                "PDF pre-flight gate skipped %s (non_ws_chars=%d, pages_with_text=%d/%d, ratio=%.2f)",
+                                abs_path,
+                                non_ws_chars,
+                                pages_with_text,
+                                total_pages,
+                                page_text_ratio,
+                            )
+                            scanned_pdfs_skipped.append(abs_path)
+                            continue
+
                         # PDFs don't have frontmatter, so we construct synthetic structure
                         # Use file path for folder structure
                         tags = ["#pdf"]
@@ -5475,7 +5613,7 @@ def index_vault():
                         notes_to_index.append(content)
                         notes_ids.append(doc_id)
                         notes_file_paths.append(abs_path)
-                        new_state_entries.append((index_key, current_mtime))
+                        new_state_entries.append((index_key, current_mtime, vault_file))
                         count += 1
                 except Exception as e:
                     logger.warning(f"Failed to process {vault_file}: {e}")
@@ -5571,7 +5709,7 @@ def index_vault():
             }), 200
 
         total_to_index = len(notes_to_index)
-        successful_state_entries: list[tuple[str, float]] = []
+        successful_state_entries: list[tuple[str, float, Path]] = []
         failed_docs: list[dict] = []
         warning_docs: list[dict] = []
         doc_stats: list[dict] = []
@@ -5588,7 +5726,7 @@ def index_vault():
             if internal_job_id:
                 snapshot = _get_index_job_snapshot(internal_job_id)
                 if snapshot and bool(snapshot.get("cancel_requested", False)):
-                    for path, mtime in successful_state_entries:
+                    for path, mtime, _vf in successful_state_entries:
                         indexed_files_state[path] = mtime
                     _atomic_write_indexed_files_state(indexed_files_path, indexed_files_state)
 
@@ -5690,8 +5828,13 @@ def index_vault():
                 "reason": last_reason if final_status not in {"processed", "processed_with_warnings"} else None,
             })
 
+            # state_entry is (index_key, current_mtime, vault_file)
+            entry_key, entry_mtime, entry_vf = state_entry
+
             if final_status in {"processed", "processed_with_warnings"}:
                 successful_state_entries.append(state_entry)
+                # Clear permafail cache on success (content may have changed)
+                failed_files_cache.pop(entry_key, None)
                 with index_progress_lock:
                     index_progress["indexed"] += 1
                     if final_status == "processed_with_warnings":
@@ -5729,14 +5872,17 @@ def index_vault():
                     file_path,
                     last_reason,
                 )
+                # Persist permafail entry so this file is skipped on future runs
+                _record_permafail(failed_files_cache, entry_key, entry_vf, last_reason)
 
         # Update persistent state
         # Only mark files indexed when they reached a terminal-success state.
-        for path, mtime in successful_state_entries:
+        for path, mtime, _vf in successful_state_entries:
             indexed_files_state[path] = mtime
-            
-        # Write back full state
+
+        # Write back full state and updated permafail cache
         _atomic_write_indexed_files_state(indexed_files_path, indexed_files_state)
+        _save_failed_files_cache(failed_files_cache)
 
         with index_progress_lock:
             index_progress.update({
@@ -5795,6 +5941,8 @@ def index_vault():
             "avg_seconds_per_doc": avg_elapsed,
             "avg_relations_per_doc": avg_relations,
             "doc_stats": doc_stats,
+            "scanned_pdfs_skipped": scanned_pdfs_skipped,
+            "permafail_skipped": permafail_skipped,
         }), 200
 
     except Exception as e:
@@ -5933,10 +6081,11 @@ Endpoints:
   GET  /index-jobs/<id> - Get index job status
   POST /index-jobs/<id>/cancel - Cancel queued/running job (best effort)
 """)
-    # Initialize RAG before starting the server
+    # Initialize RAG before starting the server (on the shared indexer loop)
     try:
-        # Initialize global RAG instance
-        asyncio.run(initialize_rag())
+        asyncio.run_coroutine_threadsafe(
+            initialize_rag(), _ensure_indexer_loop()
+        ).result()
     except Exception as e:
         logger.error(f"Startup initialization failed: {e}")
         # Continue to start server so health checks can report error

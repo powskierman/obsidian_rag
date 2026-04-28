@@ -333,8 +333,8 @@ async def _index_one(payload: dict) -> dict:
         max_total_tokens=60000,
         embedding_func_max_async=int(os.getenv("EMBED_ASYNC", "4")),
         llm_model_max_async=int(os.getenv("LLM_ASYNC", "4")),
-        chunk_token_size=int(os.getenv("LIGHTRAG_CHUNK_TOKENS", "128")),
-        chunk_overlap_token_size=int(os.getenv("LIGHTRAG_CHUNK_OVERLAP", "32")),
+        chunk_token_size=int(os.getenv("LIGHTRAG_CHUNK_TOKENS", "900")),
+        chunk_overlap_token_size=int(os.getenv("LIGHTRAG_CHUNK_OVERLAP", "120")),
     )
     _write_worker_debug(file_path, "after_lightrag_construct")
     _write_worker_debug(file_path, "before_initialize_storages")
