@@ -820,7 +820,15 @@ def _classify_doc_terminal_state(result: dict) -> tuple[str, str | None, bool]:
         return "failed", "invalid_worker_result", False
 
     if not bool(result.get("ok", False)):
-        reason = str(result.get("failure_reason") or result.get("error") or "worker_failed")
+        error_text = str(result.get("error", "") or "")
+        # Safety net: LightRAG dedup rejection on a file that was already fully indexed
+        # means this doc is actually "processed" — treat it as a non-fatal warning so
+        # it doesn't get queued for re-indexing on the next run.
+        if "Content already exists" in error_text and (
+            "Status: processed" in error_text or "Status: processed_with_warnings" in error_text
+        ):
+            return "processed_with_warnings", "content_already_indexed", True
+        reason = str(result.get("failure_reason") or error_text or "worker_failed")
         return "failed", reason, False
 
     metrics = result.get("metrics", {}) if isinstance(result.get("metrics"), dict) else {}
@@ -1420,85 +1428,144 @@ def _load_indexed_files_state(indexed_files_path: Path, key_root: Path) -> tuple
     return state, bad_rows
 
 
-def _load_doc_status_state(vault_dir: Path, key_root: Path) -> dict[str, float]:
-    """Recover index state from doc_status file paths when indexed_files is sparse/corrupt."""
+def _load_doc_status_state(
+    vault_dir: Path, key_root: Path
+) -> tuple[dict[str, float], int, int]:
+    """Load terminal-success entries from kv_store_doc_status.json.
+
+    Returns (recovered, processed_count, not_found_count) where:
+      - recovered:        canonical_key -> on-disk mtime for files that exist
+      - processed_count:  total entries with terminal-success status seen
+      - not_found_count:  entries whose resolved path does not exist on disk
+    """
     status_path = Path(WORKING_DIR) / "kv_store_doc_status.json"
     if not status_path.exists():
-        return {}
+        return {}, 0, 0
 
     try:
         raw = json.loads(status_path.read_text(encoding="utf-8"))
     except Exception as e:
         logger.warning(f"Failed to parse doc status for reconciliation: {e}")
-        return {}
+        return {}, 0, 0
 
     if isinstance(raw, dict) and isinstance(raw.get("data"), dict):
         status_data = raw.get("data", {})
     elif isinstance(raw, dict):
         status_data = raw
     else:
-        return {}
+        return {}, 0, 0
+
+    # Terminal-success statuses we want to reconcile.
+    terminal_ok = {"processed", "processed_with_warnings"}
 
     recovered: dict[str, float] = {}
+    processed_count = 0
+    not_found_count = 0
+
     for value in status_data.values():
         if not isinstance(value, dict):
             continue
         status = str(value.get("status", "")).strip().lower()
-        if status not in {"processed", "processed_with_warnings", "preprocessed"}:
+        if status not in terminal_ok:
             continue
+        processed_count += 1
 
         raw_path = value.get("file_path")
         if not isinstance(raw_path, str) or not raw_path:
-            continue
-        key = _canonical_index_key(Path(raw_path), key_root)
-        if not key:
+            not_found_count += 1
             continue
 
-        file_on_disk = vault_dir / key
-        if not file_on_disk.is_file():
+        # Normalize path before resolution to handle all three forms:
+        #   1. Absolute rooted at key_root:   /app/vault/Foo/Bar.pdf
+        #   2. Plain relative:                Foo/Bar.pdf
+        #   3. Relative with vault-folder prefix:  vault/Foo/Bar.pdf
+        #      (where "vault" is key_root.name or the literal "vault")
+        # _resolve_status_file_candidate already handles forms 1 and 2 but not 3.
+        # Strip any leading first segment that equals key_root.name or "vault".
+        normalized_path = raw_path.replace("\\", "/").strip()
+        if not normalized_path.startswith("/"):
+            leading_seg = normalized_path.split("/", 1)[0]
+            if leading_seg in (key_root.name, "vault") and "/" in normalized_path:
+                normalized_path = normalized_path[len(leading_seg) + 1:]
+
+        # Use _resolve_status_file_candidate which handles forms 1 and 2.
+        candidate_path, canonical_key = _resolve_status_file_candidate(normalized_path, vault_dir, key_root)
+        if not canonical_key:
+            not_found_count += 1
             continue
+
+        if not candidate_path.is_file():
+            # File was deleted from vault — skip, don't add to recovered.
+            logger.debug(
+                "doc_status reconcile: file not found on disk, skipping — %s (resolved: %s)",
+                raw_path,
+                candidate_path,
+            )
+            not_found_count += 1
+            continue
+
         try:
-            mtime = float(file_on_disk.stat().st_mtime)
+            mtime = float(candidate_path.stat().st_mtime)
         except Exception:
             mtime = 0.0
 
-        previous = recovered.get(key)
+        previous = recovered.get(canonical_key)
         if previous is None or mtime > previous:
-            recovered[key] = mtime
+            recovered[canonical_key] = mtime
 
-    return recovered
+    return recovered, processed_count, not_found_count
 
 
 def _reconcile_indexed_state_with_doc_status(
     indexed_state: dict[str, float], vault_dir: Path, key_root: Path
 ) -> tuple[dict[str, float], int, int]:
-    """Backfill tracked files from doc_status when indexed_files is unexpectedly sparse."""
-    doc_status_state = _load_doc_status_state(vault_dir, key_root)
-    processed_count = len(doc_status_state)
+    """Backfill indexed_files_state from kv_store_doc_status.json.
+
+    Every entry in doc_status with a terminal-success status whose file currently
+    exists on disk is merged into indexed_state, regardless of how many entries
+    are already tracked.  This closes the drift between indexed_files.txt (used by
+    the orchestrator as a skip-cache) and LightRAG's own per-doc lifecycle table.
+
+    Rules applied per entry:
+      - File not on disk → skip, log at DEBUG.
+      - Key not yet in indexed_state → add with on-disk mtime (new entry).
+      - Key already in indexed_state with an older stored mtime → keep the larger
+        mtime (never decrease a stored mtime, which would cause spurious re-indexing).
+      - Key already in indexed_state with an equal-or-fresher stored mtime → leave
+        unchanged (skipped).
+
+    Returns (merged_state, reconciled_count, processed_count) where
+      - merged_state:      updated copy of indexed_state (original is not mutated)
+      - reconciled_count:  number of NEW keys added during this call
+      - processed_count:   total doc_status entries with terminal-success status seen
+    """
+    doc_status_state, processed_count, not_found_count = _load_doc_status_state(vault_dir, key_root)
     if not processed_count:
         return indexed_state, 0, 0
 
-    should_merge = False
-    if not indexed_state:
-        should_merge = True
-    else:
-        ratio = len(indexed_state) / max(1, processed_count)
-        if ratio < LIGHTRAG_INDEX_RECONCILE_MIN_RATIO:
-            should_merge = True
-
-    if not should_merge:
-        return indexed_state, 0, processed_count
-
     merged = dict(indexed_state)
     added = 0
+    skipped_fresher = 0
+
     for key, mtime in doc_status_state.items():
         previous = merged.get(key)
         if previous is None:
             merged[key] = mtime
             added += 1
         elif mtime > previous:
+            # On-disk mtime is fresher than what we stored — update.
             merged[key] = mtime
+        else:
+            # Existing stored mtime is already equal-or-fresher; leave it alone.
+            skipped_fresher += 1
 
+    logger.info(
+        "doc_status reconcile: processed_entries=%d new_added=%d not_found=%d skipped_fresher=%d",
+        processed_count,
+        added,
+        not_found_count,
+        skipped_fresher,
+    )
     return merged, added, processed_count
 
 
@@ -5816,6 +5883,17 @@ def index_vault():
                     stderr_tail[-300:] if stderr_tail else "",
                     stdout_tail[-300:] if stdout_tail else "",
                 )
+
+                if attempt < LIGHTRAG_DOC_RETRY_ATTEMPTS:
+                    backoff = min(2 ** attempt, 10)
+                    logger.info(
+                        "Sleeping %ss before retry attempt %s/%s for doc_id=%s",
+                        backoff,
+                        attempt + 1,
+                        LIGHTRAG_DOC_RETRY_ATTEMPTS,
+                        doc_id,
+                    )
+                    time.sleep(backoff)
 
             doc_stats.append({
                 "file_path": file_path,
