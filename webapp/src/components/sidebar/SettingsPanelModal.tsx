@@ -12,8 +12,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     ollama: [],
     lmstudio: [],
   });
+  const [installedLmStudioModels, setInstalledLmStudioModels] = useState<string[]>([]);
   const [isLmStudioReachable, setIsLmStudioReachable] = useState(false);
-  const [lmStudioInstalledCount, setLmStudioInstalledCount] = useState(0);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
   const enhancedDisabled = settings.deepThinking;
 
@@ -32,6 +32,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
   const [indexError, setIndexError] = useState<string | null>(null);
   const [indexExitCode, setIndexExitCode] = useState<number | null>(null);
   const [indexExpanded, setIndexExpanded] = useState(false);
+  const [lightragContentPickerOpen, setLightragContentPickerOpen] = useState(false);
+  const [lightragContentTypes, setLightragContentTypes] = useState<Set<'md' | 'pdf'>>(new Set(['md']));
   const outputRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -47,8 +49,8 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
           ollama: ollamaModels,
           lmstudio: lmstudioStatus.models,
         });
+        setInstalledLmStudioModels(lmstudioStatus.installedModels);
         setIsLmStudioReachable(lmstudioStatus.reachable);
-        setLmStudioInstalledCount(lmstudioStatus.installedModels.length);
       } catch (error) {
         console.error('Failed to load settings data:', error);
       } finally {
@@ -88,11 +90,19 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     setIndexOutput([]);
     setIndexError(null);
     setIndexExitCode(null);
+    const lightragIncludeExtensions = [
+      ...(lightragContentTypes.has('md') ? ['.md'] : []),
+      ...(lightragContentTypes.has('pdf') ? ['.pdf'] : []),
+    ];
     try {
       const res = await fetch('/api/index', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ databases: Array.from(indexDatabases), mode: indexMode }),
+        body: JSON.stringify({
+          databases: Array.from(indexDatabases),
+          mode: indexMode,
+          lightragIncludeExtensions,
+        }),
       });
       if (res.status === 409) {
         setIndexError('An indexing job is already running.');
@@ -112,7 +122,23 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     }
     stopPolling();
     pollRef.current = setInterval(pollIndexStatus, 1500);
-  }, [indexDatabases, indexMode, pollIndexStatus, stopPolling]);
+  }, [indexDatabases, indexMode, lightragContentTypes, pollIndexStatus, stopPolling]);
+
+  const handleStartIndexing = useCallback(() => {
+    if (indexDatabases.has('lightrag')) {
+      setLightragContentPickerOpen(true);
+      return;
+    }
+    void startIndexing();
+  }, [indexDatabases, startIndexing]);
+
+  const toggleLightragContentType = (type: 'md' | 'pdf') => {
+    setLightragContentTypes(current => {
+      const next = new Set(current);
+      next.has(type) ? next.delete(type) : next.add(type);
+      return next;
+    });
+  };
 
   useEffect(() => () => stopPolling(), [stopPolling]);
 
@@ -153,7 +179,11 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
     return [currentModel, ...models];
   };
   const ollamaModelOptions = ensureCurrentModelOption(availableModels.ollama);
-  const lmstudioModelOptions = ensureCurrentModelOption(availableModels.lmstudio);
+  const lmstudioDiscoveredModels = availableModels.lmstudio.length > 0
+    ? availableModels.lmstudio
+    : installedLmStudioModels;
+  const lmstudioModelOptions = ensureCurrentModelOption(lmstudioDiscoveredModels);
+  const isUsingInstalledLmStudioFallback = availableModels.lmstudio.length === 0 && installedLmStudioModels.length > 0;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
@@ -303,9 +333,11 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
               )}
               <p className="text-xs text-white/40 mt-1.5">
                 {lmstudioModelOptions.length > 0
-                  ? 'Choose a loaded model exposed by your local LM Studio server.'
+                  ? isUsingInstalledLmStudioFallback
+                    ? 'Choose an installed LM Studio model. Load it in LM Studio before sending a query.'
+                    : 'Choose a model exposed by your local LM Studio or OpenAI-compatible server.'
                   : isLmStudioReachable
-                    ? `LM Studio is reachable, but no model is loaded. Load one in the Developer page or run \`lms load <model>\`. ${lmStudioInstalledCount > 0 ? `${lmStudioInstalledCount} installed model(s) detected.` : ''}`.trim()
+                    ? 'LM Studio is reachable, but no models were reported by its model endpoint.'
                     : 'Use the model ID exposed by your local LM Studio server.'}
               </p>
             </div>
@@ -515,7 +547,14 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
                       />
                       <div className="min-w-0">
                         <div className="text-xs font-medium text-white">{meta.label}</div>
-                        <div className="text-[10px] text-white/40">{meta.desc}</div>
+                        <div className="text-[10px] text-white/40">
+                          {key === 'lightrag'
+                            ? `${meta.desc} — ${[
+                                lightragContentTypes.has('md') ? 'notes' : null,
+                                lightragContentTypes.has('pdf') ? 'PDFs' : null,
+                              ].filter(Boolean).join(' + ') || 'nothing selected'}`
+                            : meta.desc}
+                        </div>
                       </div>
                     </label>
                   ))}
@@ -560,7 +599,7 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
                 </button>
               )}
               <button
-                onClick={startIndexing}
+                onClick={handleStartIndexing}
                 disabled={indexRunning || indexDatabases.size === 0}
                 className="w-full flex items-center justify-center gap-2 bg-[#1C3A5E] hover:bg-[#1C4A7E] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 px-4 rounded-lg border border-[#0A84FF]/40 transition-colors"
               >
@@ -615,6 +654,87 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
             </div>
           )}
         </div>
+
+        {lightragContentPickerOpen && (
+          <div
+            className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center px-4"
+            onClick={() => setLightragContentPickerOpen(false)}
+          >
+            <div
+              className="w-full max-w-sm rounded-2xl border border-[#3C3C3E] bg-[#1C1C1E] p-5 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-white">LightRAG Content</h3>
+                  <p className="text-xs text-white/45 mt-1">
+                    Choose what LightRAG should index for this {indexMode} run.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setLightragContentPickerOpen(false)}
+                  className="text-white/40 hover:text-white transition-colors"
+                  aria-label="Close LightRAG content picker"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                {([
+                  { key: 'md' as const, label: 'Markdown notes', desc: 'Index Obsidian note files', ext: '.md' },
+                  { key: 'pdf' as const, label: 'PDF attachments', desc: 'Extract and index PDF text', ext: '.pdf' },
+                ]).map((item) => (
+                  <label
+                    key={item.key}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      lightragContentTypes.has(item.key)
+                        ? 'border-[#0A84FF]/40 bg-[#0A84FF]/10'
+                        : 'border-[#3C3C3E] bg-[#2C2C2E] hover:border-[#4C4C4E]'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={lightragContentTypes.has(item.key)}
+                      onChange={() => toggleLightragContentType(item.key)}
+                      className="w-4 h-4 rounded accent-[#0A84FF]"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-medium text-white">{item.label}</div>
+                      <div className="text-[10px] text-white/40">{item.desc}</div>
+                    </div>
+                    <span className="text-[10px] font-mono text-white/35">{item.ext}</span>
+                  </label>
+                ))}
+              </div>
+
+              {lightragContentTypes.size === 0 && (
+                <div className="mt-3 text-xs text-red-400">Select at least one content type.</div>
+              )}
+
+              <div className="flex gap-2 mt-5">
+                <button
+                  onClick={() => setLightragContentPickerOpen(false)}
+                  className="px-3 py-2.5 rounded-lg border border-[#3C3C3E] bg-[#2C2C2E] hover:bg-[#3C3C3E] text-white/70 text-xs font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setLightragContentPickerOpen(false);
+                    void startIndexing();
+                  }}
+                  disabled={lightragContentTypes.size === 0}
+                  className="flex-1 bg-[#1C3A5E] hover:bg-[#1C4A7E] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-medium py-2.5 px-4 rounded-lg border border-[#0A84FF]/40 transition-colors"
+                >
+                  Start Indexing
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 pt-4 border-t border-[#2C2C2E]">
           <button

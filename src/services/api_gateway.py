@@ -4019,6 +4019,7 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
                             _is_generic_cascading_fallback_answer(synthesized_answer)
                             and anchor_answer
                             and not _is_insufficient_answer(anchor_answer)
+                            and not _looks_like_structural_graph_path_answer(anchor_answer)
                             and not relationship_guardrail
                             and not comparison_guardrail
                         ):
@@ -4029,6 +4030,19 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
                                 fallback_reason or "weak_answer",
                             )
                             warnings.append(f"Cascading synthesis degraded; preserved anchor answer ({fallback_reason or 'weak_answer'}).")
+                        elif (
+                            _is_generic_cascading_fallback_answer(synthesized_answer)
+                            and anchor_answer
+                            and _looks_like_structural_graph_path_answer(anchor_answer)
+                        ):
+                            answer = _build_cascading_degraded_answer(
+                                anchor_answer,
+                                sources,
+                                diagnostics,
+                                fallback_reason or "weak_answer",
+                            )
+                            if fallback_reason:
+                                warnings.append(f"Cascading synthesis fallback: {fallback_reason}.")
                         else:
                             answer = synthesized_answer
                             if fallback_reason:

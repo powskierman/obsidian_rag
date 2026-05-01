@@ -45,6 +45,11 @@ const getApiKey = (): string =>
     || process.env.MLX_API_KEY
     || 'lmstudio').trim();
 
+const unique = (values: string[]): string[] => [...new Set(values.filter(Boolean))];
+
+const readModelId = (model: { id?: unknown; name?: unknown; path?: unknown }): string =>
+  String(model?.id || model?.name || model?.path || '').trim();
+
 export async function GET() {
   const bases = buildBaseCandidates();
   const errors: string[] = [];
@@ -53,40 +58,75 @@ export async function GET() {
   for (const base of bases) {
     try {
       const serverRoot = toServerRoot(base);
-      const response = await fetch(`${serverRoot}/api/v0/models`, {
+      const nativeResponse = await fetch(`${serverRoot}/api/v0/models`, {
         cache: 'no-store',
         headers: {
           Authorization: `Bearer ${apiKey}`,
         },
         signal: AbortSignal.timeout(1500),
       });
-      if (!response.ok) {
-        errors.push(`${base}: HTTP ${response.status}`);
+
+      if (nativeResponse.ok) {
+        const data = await nativeResponse.json();
+        const models = Array.isArray(data?.data) ? data.data : [];
+        const installedModels = models
+          .filter((model: { type?: unknown }) => String(model?.type || '').trim().toLowerCase() !== 'embeddings')
+          .map(readModelId);
+        const loadedModels = models
+          .filter((model: { state?: unknown; type?: unknown }) => {
+            const state = String(model?.state || '').trim().toLowerCase();
+            const type = String(model?.type || '').trim().toLowerCase();
+            return type !== 'embeddings' && (state === 'loaded' || state === 'loading');
+          })
+          .map(readModelId);
+
+        return NextResponse.json({
+          models: unique(loadedModels),
+          installedModels: unique(installedModels),
+          base,
+          reachable: true,
+          source: 'lmstudio',
+          warning: loadedModels.length === 0 && installedModels.length > 0
+            ? 'LM Studio is reachable, but no models are currently loaded.'
+            : null,
+        });
+      }
+
+      errors.push(`${base}/api/v0/models: HTTP ${nativeResponse.status}`);
+
+      const openAiResponse = await fetch(`${base}/models`, {
+        cache: 'no-store',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+        },
+        signal: AbortSignal.timeout(1500),
+      });
+
+      if (!openAiResponse.ok) {
+        errors.push(`${base}/models: HTTP ${openAiResponse.status}`);
         continue;
       }
 
-      const data = await response.json();
-      const models = Array.isArray(data?.data) ? data.data : [];
-      const installedModels = models
-        .filter((model: { type?: unknown }) => String(model?.type || '').trim() !== 'embeddings')
-        .map((model: { id?: unknown; name?: unknown }) => String(model?.id || model?.name || '').trim())
-        .filter((name: string) => Boolean(name));
-      const loadedModels = models
-        .filter((model: { state?: unknown; type?: unknown }) => {
-          const state = String(model?.state || '').trim().toLowerCase();
-          const type = String(model?.type || '').trim().toLowerCase();
-          return type !== 'embeddings' && (state === 'loaded' || state === 'loading');
-        })
-        .map((model: { id?: unknown; name?: unknown }) => String(model?.id || model?.name || '').trim())
-        .filter((name: string) => Boolean(name));
+      const openAiData = await openAiResponse.json();
+      const openAiModels = Array.isArray(openAiData?.data) ? openAiData.data : [];
+      const modelIds = unique(
+        openAiModels
+          .filter((model: { object?: unknown; type?: unknown }) => {
+            const objectType = String(model?.object || '').trim().toLowerCase();
+            const type = String(model?.type || '').trim().toLowerCase();
+            return type !== 'embeddings' && objectType !== 'embedding';
+          })
+          .map(readModelId)
+      );
 
       return NextResponse.json({
-        models: [...new Set(loadedModels)],
-        installedModels: [...new Set(installedModels)],
+        models: modelIds,
+        installedModels: modelIds,
         base,
         reachable: true,
-        warning: loadedModels.length === 0 && installedModels.length > 0
-          ? 'LM Studio is reachable, but no models are currently loaded.'
+        source: 'openai-compatible',
+        warning: modelIds.length === 0
+          ? 'Server is reachable, but /v1/models returned no chat model IDs.'
           : null,
       });
     } catch (error) {

@@ -72,44 +72,61 @@ export default function SourcesDisplay({ sources, retrievalIntent }: SourcesDisp
   const sourceCardKey = (source: Source, idx: number) =>
     `${categorizeSource(source)}:${source.sourceType || 'unknown'}:${source.filepath || source.filename || 'unknown'}:${idx}`;
 
-  const renderSourceCard = (source: Source, idx: number) => (
-    <div className="bg-[#1C1C1E] border border-[#2C2C2E] rounded-lg p-3 text-sm">
-      <div className="flex items-start justify-between mb-2">
-        <div className="font-medium text-white flex items-center gap-2 flex-wrap">
-          <span className="text-white/40">{idx + 1}.</span>
-          {(() => {
-            const link = buildSourceLink(source);
-            if (!link) return <span>{source.filename}</span>;
-            return (
-              <a
-                href={link}
-                className="text-[#0A84FF] hover:text-[#6AB7FF] underline underline-offset-2"
-                title={categorizeSource(source) === 'web' ? 'Open web source' : 'Open in Obsidian'}
-                target={categorizeSource(source) === 'web' ? '_blank' : undefined}
-                rel={categorizeSource(source) === 'web' ? 'noreferrer' : undefined}
-              >
-                {safeFilename(source)}
-              </a>
-            );
-          })()}
-          {source.sourceType && sourceTypeLabels[source.sourceType] && (
-            <span className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] uppercase tracking-[0.12em] text-white/45">
-              {sourceTypeLabels[source.sourceType]}
-            </span>
-          )}
+  const renderSourceCard = (source: Source, idx: number) => {
+    const cardKey = sourceCardKey(source, idx);
+    const isSnippetExpanded = Boolean(expandedSections[`${cardKey}:snippet`]);
+    const snippet = source.snippet || '';
+    const canExpandSnippet = snippet.length > 180;
+
+    return (
+      <div className="bg-[#1C1C1E] border border-[#2C2C2E] rounded-lg p-3 text-sm">
+        <div className="flex items-start justify-between mb-2">
+          <div className="font-medium text-white flex items-center gap-2 flex-wrap">
+            <span className="text-white/40">{idx + 1}.</span>
+            {(() => {
+              const link = buildSourceLink(source);
+              if (!link) return <span>{source.filename}</span>;
+              return (
+                <a
+                  href={link}
+                  className="text-[#0A84FF] hover:text-[#6AB7FF] underline underline-offset-2"
+                  title={categorizeSource(source) === 'web' ? 'Open web source' : 'Open in Obsidian'}
+                  target={categorizeSource(source) === 'web' ? '_blank' : undefined}
+                  rel={categorizeSource(source) === 'web' ? 'noreferrer' : undefined}
+                >
+                  {safeFilename(source)}
+                </a>
+              );
+            })()}
+            {source.sourceType && sourceTypeLabels[source.sourceType] && (
+              <span className="px-2 py-0.5 rounded-full border border-white/10 text-[10px] uppercase tracking-[0.12em] text-white/45">
+                {sourceTypeLabels[source.sourceType]}
+              </span>
+            )}
+          </div>
+          <span className="text-[#0A84FF] font-mono text-xs">
+            {(Number.isFinite(source.relevance) ? source.relevance : 50).toFixed(0)}%
+          </span>
         </div>
-        <span className="text-[#0A84FF] font-mono text-xs">
-          {(Number.isFinite(source.relevance) ? source.relevance : 50).toFixed(0)}%
-        </span>
+        {source.filepath && (
+          <div className="text-xs text-white/40 mb-2 font-mono truncate">
+            {source.filepath}
+          </div>
+        )}
+        <div className={`text-xs text-white/60 whitespace-pre-wrap ${isSnippetExpanded ? '' : 'line-clamp-3'}`}>
+          {snippet}
+        </div>
+        {canExpandSnippet && (
+          <button
+            onClick={() => toggleSection(`${cardKey}:snippet`)}
+            className="mt-2 text-[11px] font-medium text-[#0A84FF] hover:text-[#6AB7FF]"
+          >
+            {isSnippetExpanded ? 'Show less' : 'Show more'}
+          </button>
+        )}
       </div>
-      {source.filepath && (
-        <div className="text-xs text-white/40 mb-2 font-mono truncate">
-          {source.filepath}
-        </div>
-      )}
-      <div className="text-xs text-white/60 line-clamp-3">{source.snippet}</div>
-    </div>
-  );
+    );
+  };
 
   const buildSourceLink = (source: Source) => {
     const filepath = source.filepath?.trim();

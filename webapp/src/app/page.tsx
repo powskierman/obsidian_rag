@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Settings } from 'lucide-react';
+import { RefreshCw, Search, Sparkles } from 'lucide-react';
 import ChatSidebar from '../components/ChatSidebar';
 import ThinkingIndicator from '../components/ThinkingIndicator';
 import PromptModal from '../components/PromptModal';
@@ -12,7 +12,6 @@ import SettingsPanelModal from '../components/sidebar/SettingsPanelModal';
 import ForceGraph from '../components/ForceGraph';
 import SourcesDisplay from '../components/chat/SourcesDisplay';
 import RatingButtons from '../components/chat/RatingButtons';
-import StaticHexBackground from '../components/StaticHexBackground';
 import { api } from '../lib/api';
 import { useApp } from '../context/AppContext';
 import { EnhancedSearchData, SearchMode, Source } from '../lib/types';
@@ -21,6 +20,28 @@ const SEARCH_MODE_LABELS: Record<SearchMode, string> = {
     ask:        'Ask',
     research:   'Research',
     investigate:'Investigate',
+};
+
+const VAULT_PROMPT_POOL = [
+    'Summarize my lymphoma treatment timeline',
+    'Connect Yescarta, CAR-T therapy, and lymphoma in my notes',
+    'Find my notes about Apple Watch and Home Assistant',
+    'What do my notes say about PET scan results and SUV changes?',
+    'Summarize my LightRAG indexing and search quality notes',
+    'Find notes about LM Studio, MLX, and local model setup',
+    'Show my movie catalog notes from Apple and NAS sources',
+    'Find recipes involving carbonated water',
+    'What troubleshooting notes mention memory_context?',
+    'Summarize my Obsidian vault architecture notes',
+    'Find notes about MCP path resolution and vault access',
+    'Connect lymphoma prognosis, novel agents, and treatment logs',
+];
+
+const rotateSuggestedPrompts = (current: string[] = []): string[] => {
+    const available = VAULT_PROMPT_POOL.filter((prompt) => !current.includes(prompt));
+    const source = available.length >= 3 ? available : VAULT_PROMPT_POOL;
+    const shuffled = [...source].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
 };
 
 // Auto-routing to vault_review is now handled backend-side (depth='auto').
@@ -194,6 +215,7 @@ export default function Home() {
         systemPrompt,
         setSystemPrompt,
         setSearchMode,
+        services,
     } = useApp();
 
     console.log('Home component state:', { messages, isLoading, searchMode });
@@ -205,6 +227,7 @@ export default function Home() {
     const [thinkingLog, setThinkingLog] = useState<string>('');
     const [graphData, setGraphData] = useState<{ nodes: any[], links: any[] } | null>(null);
     const [showGraph, setShowGraph] = useState(false);
+    const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>(() => VAULT_PROMPT_POOL.slice(0, 3));
     const modeLabel = SEARCH_MODE_LABELS[searchMode] || searchMode;
     const isDeepThinkingMode = searchMode === 'investigate';
     const handleSendMessage = async () => {
@@ -427,290 +450,303 @@ export default function Home() {
         }
     };
 
+    const lightragNodeLabel = services.lightrag?.nodes
+        ? (services.lightrag.nodes >= 1000
+            ? `~${Math.round(services.lightrag.nodes / 1000)}k`
+            : String(services.lightrag.nodes))
+        : '—';
+
     return (
-        <>
-            {/* Lightweight Static Hex Background */}
-            <StaticHexBackground />
+        <div
+            className="app-shell flex h-screen flex-col text-white font-sans overflow-hidden selection:bg-[#FFD60A] selection:text-black"
+            style={{ position: 'relative' }}
+        >
+            <header className="titlebar-glass h-14 grid grid-cols-[1fr_auto_1fr] items-center px-6 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                    <span className="h-4 w-4 rounded-full bg-[#ff5f57]" />
+                    <span className="h-4 w-4 rounded-full bg-[#ffbd2e]" />
+                    <span className="h-4 w-4 rounded-full bg-[#28c840]" />
+                </div>
+                <div className="text-[20px] font-semibold tracking-normal text-white/75">
+                    Obsidian.Brain
+                </div>
+                <div />
+            </header>
 
-            {/* Main UI - positioned above background */}
-            <div className="flex h-screen bg-transparent text-white font-sans overflow-hidden selection:bg-[#FFD60A] selection:text-black relative">
-                <ChatSidebar />
+            <div className="flex min-h-0 flex-1">
+                <ChatSidebar
+                    onVaultInfo={() => setIsVaultModalOpen(true)}
+                    onSettings={() => setIsSettingsModalOpen(true)}
+                    onPrompt={() => setIsPromptModalOpen(true)}
+                    systemPromptActive={!!systemPrompt}
+                />
 
-                <div className="flex-1 flex flex-col h-full relative min-w-0">
-                    {/* Header */}
-                    <header className="h-32 border-b border-[#1C1C1E] flex items-center justify-between px-6 bg-[#0B0D12]/90 sticky top-0 z-30">
-                        <div className="flex items-center pt-6">
-                            <img src="/logo.png" alt="Obsidian RAG" className="w-[150px] h-auto object-contain" />
-                        </div>
+                <div className="flex-1 flex flex-col h-full relative min-w-0" style={{ zIndex: 1 }}>
 
-                        <div className="flex items-center gap-1 bg-[#1C1C1E] p-1 rounded-lg border border-[#2C2C2E]">
-                            <button
-                                onClick={() => setIsVaultModalOpen(true)}
-                                className="px-3 py-1.5 rounded-md text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"
-                            >
-                                Vault
-                            </button>
-                            <div className="w-[1px] h-4 bg-white/10" />
-                            <button
-                                onClick={() => setIsPromptModalOpen(true)}
-                                className="px-3 py-1.5 rounded-md text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
-                            >
-                                <span>Prompt</span>
-                                {systemPrompt && <div className="w-1.5 h-1.5 rounded-full bg-[#0A84FF]" />}
-                            </button>
-                            <div className="w-[1px] h-4 bg-white/10" />
-                            <button
-                                onClick={() => setIsSettingsModalOpen(true)}
-                                className="px-2 py-1.5 rounded-md text-white/60 hover:text-white hover:bg-white/5 transition-all"
-                                title="Settings"
-                            >
-                                <Settings size={18} />
-                            </button>
-                        </div>
-                    </header>
-
-                    {/* Chat Area */}
-                    <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
-                        <div className="max-w-3xl mx-auto space-y-6">
-                            {graphData && (
-                                <div className="mb-6">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="text-xs text-white/50">Graph preview</div>
-                                        <button
-                                            onClick={() => setShowGraph(!showGraph)}
-                                            className="text-xs text-white/60 hover:text-white underline underline-offset-2"
-                                        >
-                                            {showGraph ? 'Hide Graph' : 'Show Graph'}
-                                        </button>
+                {/* Chat Area */}
+                <div className="flex-1 overflow-y-auto scroll-smooth">
+                    {messages.length === 0 ? (
+                        /* ── Hero ─────────────────────────────────────── */
+                        <div className="flex items-center justify-center min-h-full py-12">
+                            <div className="flex w-full max-w-[960px] flex-col items-center gap-8 px-12 py-10" style={{ zIndex: 1 }}>
+                                {/* 1. Status pills */}
+                                <div className="flex items-center justify-center gap-3 flex-wrap">
+                                    <div className="status-pill">
+                                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e', flexShrink: 0, display: 'inline-block' }} />
+                                        V: {services.vectorDB.chunks.toLocaleString()} chunks
                                     </div>
-                                    {showGraph ? (
-                                        <ForceGraph
-                                            data={graphData}
-                                            width={700}
-                                            height={350}
-                                            onNodeClick={(node) => {
-                                                setInput(node.name);
-                                                // Optional: Auto-search
-                                                // handleSendMessage(); 
-                                            }}
-                                        />
-                                    ) : (
-                                        <div className="text-xs text-white/40 border border-white/10 rounded-xl p-4 bg-black/30">
-                                            Graph rendering is off to reduce CPU/GPU usage. Click "Show Graph" to render.
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {messages.length === 0 && (
-                                <div className="flex items-center justify-center h-[70vh] w-full relative">
-                                    <div className="z-10 w-full max-w-2xl space-y-8 px-4">
-                                        <div className="text-center space-y-2">
-                                            <h1 className="text-4xl font-bold text-white tracking-tight">Welcome back, Michel</h1>
-                                            <p className="text-white/40">Your Obsidian Brain is online and ready.</p>
-                                        </div>
-
-                                        {/* Spotlight Search Bar */}
-                                        <div className="relative">
-                                            <div className="rounded-2xl p-[1px] bg-gradient-to-r from-[#FFD60A]/50 via-[#6B8CFF]/35 to-[#00D1C1]/35">
-                                                <div className="rounded-[16px] p-[1px] bg-white/10">
-                                                    <div className="relative bg-[#0B0D12]/80 border border-white/10 rounded-[15px] flex items-center p-2 shadow-lg">
-                                                        <input
-                                                            autoFocus
-                                                            type="text"
-                                                            value={input}
-                                                            onChange={(e) => setInput(e.target.value)}
-                                                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                            placeholder={`Search (${modeLabel})...`}
-                                                            className="flex-1 bg-transparent border-none text-white placeholder-white/30 px-4 py-2 text-lg focus:ring-0 focus:outline-none"
-                                                        />
-
-                                                        {/* Mode Selector */}
-                                                        <select
-                                                            value={searchMode}
-                                                            onChange={(e) => setSearchMode(e.target.value as SearchMode)}
-                                                            className="bg-accent-gold text-black px-4 py-2 rounded-lg text-xs font-medium shadow-lg shadow-yellow-500/20 border-none focus:ring-2 focus:ring-yellow-500/50 cursor-pointer"
-                                                        >
-                                                            <option value="ask">Ask</option>
-                                                            <option value="research">Research</option>
-                                                            <option value="investigate">Investigate</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Status Pills */}
-                                        <div className="flex items-center justify-center gap-4">
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                                                <span className="text-xs font-mono text-purple-200">V: 7,055 chunks</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                                                <span className="text-xs font-mono text-indigo-200">G: Online</span>
-                                            </div>
-                                        </div>
+                                    <div className="status-pill">
+                                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: services.knowledgeGraph.status === 'online' ? '#22c55e' : '#f87171', boxShadow: `0 0 8px ${services.knowledgeGraph.status === 'online' ? '#22c55e' : '#f87171'}`, flexShrink: 0, display: 'inline-block' }} />
+                                        G: {services.knowledgeGraph.status === 'online' ? 'Online' : 'Offline'}
+                                    </div>
+                                    <div className="status-pill">
+                                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e', flexShrink: 0, display: 'inline-block' }} />
+                                        L: {lightragNodeLabel} nodes
                                     </div>
                                 </div>
-                            )}
 
-                            {messages.map((msg, i) => (
-                                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                    <div
-                                        className={`max-w-[85%] rounded-2xl p-4 ${msg.role === 'user'
-                                            ? 'bg-[#FFD60A] text-black shadow-lg shadow-yellow-500/10 rounded-br-none font-medium'
-                                            : 'bg-[#1C1C1E] border border-[#2C2C2E] text-white/90 rounded-bl-none shadow-md'
-                                            }`}
-                                    >
-                                        <div className={`prose max-w-none ${msg.role === 'assistant' ? 'prose-invert' : 'prose-neutral'}`}>
-                                            <ReactMarkdown
-                                                remarkPlugins={[remarkGfm]}
-                                                components={{
-                                                    h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 first:mt-0" {...props} />,
-                                                    h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 first:mt-0" {...props} />,
-                                                    h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4 first:mt-0" {...props} />,
-                                                    p: ({ node, ...props }) => <p className="mb-3 leading-relaxed" {...props} />,
-                                                    ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-3 space-y-1" {...props} />,
-                                                    ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-3 space-y-1" {...props} />,
-                                                    li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
-                                                    a: ({ node, ...props }) => <a className="text-purple-400 hover:text-purple-300 underline" {...props} />,
-                                                    code: ({ node, inline, ...props }: any) =>
-                                                        inline
-                                                            ? <code className="bg-black/30 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
-                                                            : <code className="block bg-black/30 p-3 rounded-lg text-sm font-mono overflow-x-auto mb-3" {...props} />,
-                                                    strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
-                                                    em: ({ node, ...props }) => <em className="italic" {...props} />,
-                                                }}
-                                            >
-                                                {typeof msg.content === 'string' ? msg.content : String(msg.content || '')}
-                                            </ReactMarkdown>
-                                        </div>
+                                {/* 2. H1 */}
+                                <h1 className="text-center text-[52px] font-bold leading-none text-white" style={{ margin: 0, textShadow: 'none' }}>
+                                    Welcome back, Michel
+                                </h1>
 
-                                        {/* Sources Display */}
-                                        {msg.role === 'assistant' && msg.sources && (
-                                            <SourcesDisplay
-                                                sources={msg.sources}
-                                                retrievalIntent={msg.retrievalIntent}
-                                            />
-                                        )}
+                                {/* 3. Subtitle */}
+                                <p style={{ fontSize: '25px', fontWeight: 400, color: 'rgba(255,255,255,0.60)', margin: 0, textAlign: 'center' }}>
+                                    Your Obsidian Brain is online and ready.
+                                </p>
 
-                                        {msg.role === 'assistant' && msg.enhancedSearch && (
-                                            <div className="mt-4 pt-4 border-t border-[#2C2C2E] space-y-3 text-sm">
-                                                {msg.enhancedSearch.llmKnowledge && (
-                                                    <div>
-                                                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45 mb-2">
-                                                            LLM Knowledge
-                                                        </div>
-                                                        <div className="text-white/70 leading-relaxed">
-                                                            {msg.enhancedSearch.llmKnowledge}
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {msg.enhancedSearch.webStatus && (!msg.enhancedSearch.webResults || msg.enhancedSearch.webResults.length === 0) && (
-                                                    <div>
-                                                        <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45 mb-2">
-                                                            Web Search
-                                                        </div>
-                                                        {msg.enhancedSearch.webSearchTerms && (
-                                                            <div className="text-xs text-white/40 mb-1">
-                                                                Terms: {msg.enhancedSearch.webSearchTerms}
-                                                            </div>
-                                                        )}
-                                                        <div className="text-white/55 italic">
-                                                            {msg.enhancedSearch.webStatus}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {/* Rating Buttons */}
-                                        {msg.role === 'assistant' && msg.queryId && (
-                                            <RatingButtons
-                                                queryId={msg.queryId}
-                                                query={messages[i - 1]?.content || ''}
-                                                searchMode={searchMode}
-                                                model={settings.model}
-                                                initialRating={msg.rating}
-                                                onRated={(rating) => {
-                                                    // Update message with rating
-                                                    msg.rating = rating;
-                                                }}
-                                            />
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-
-                            {isLoading && (
-                                <div className="flex justify-start">
-                                    <ThinkingIndicator message={thinkingLog} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Input Area (Only show when chatting) */}
-                    {messages.length > 0 && (
-                        <div className="p-6 bg-gradient-to-t from-black via-black/95 to-transparent">
-                            <div className="max-w-3xl mx-auto relative">
-                                <div className="rounded-2xl p-[1px] bg-gradient-to-r from-[#FFD60A]/45 via-[#6B8CFF]/30 to-[#00D1C1]/30">
-                                    <div className="rounded-[16px] p-[1px] bg-white/10">
-                                        <div className="relative">
+                                {/* 4. Spotlight */}
+                                <div style={{ width: '100%', maxWidth: '960px', boxShadow: '0 0 60px rgba(176,38,255,0.25), 0 8px 32px rgba(0,0,0,0.4)', borderRadius: '24px' }}>
+                                    <div style={{ padding: '1px', background: 'linear-gradient(135deg, rgba(255,214,10,0.55) 0%, rgba(176,38,255,0.40) 50%, rgba(0,209,193,0.40) 100%)', borderRadius: '16px' }}>
+                                        <div style={{ background: 'rgba(11,13,18,0.92)', borderRadius: '15px', minHeight: '84px', display: 'flex', alignItems: 'center', paddingLeft: '24px', paddingRight: '10px', gap: '16px' }}>
+                                            <Search size={29} className="text-white/55" strokeWidth={2} />
                                             <input
+                                                autoFocus
                                                 type="text"
                                                 value={input}
-                                                autoFocus
                                                 onChange={(e) => setInput(e.target.value)}
                                                 onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                                                placeholder={`Ask about your vault (${modeLabel} mode)...`}
-                                                className="w-full bg-[#121418] border border-[#2C2C2E] rounded-[15px] py-4 px-5 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-[#FFD60A]/50 focus:ring-1 focus:ring-[#FFD60A]/50 transition-colors shadow-lg"
+                                                placeholder="Ask anything about your vault..."
+                                                style={{ flex: 1, background: 'transparent', border: 'none', color: 'white', fontSize: '24px', outline: 'none', caretColor: '#FFD60A', minWidth: 0 }}
+                                                className="placeholder-white/30"
                                             />
                                             <button
                                                 onClick={handleSendMessage}
                                                 disabled={isLoading || !input.trim()}
-                                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-[#FFD60A] text-black hover:bg-[#FFC600] disabled:opacity-50 disabled:hover:bg-[#FFD60A] transition-colors shadow-lg hover:shadow-yellow-500/20"
+                                                style={{ background: '#FFD60A', color: '#1a1500', height: '48px', padding: '0 24px', borderRadius: '17px', fontSize: '19px', fontWeight: 700, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: (isLoading || !input.trim()) ? 0.5 : 1 }}
                                             >
-                                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
-                                                </svg>
+                                                Ask
                                             </button>
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* 5. Mode segmented control */}
+                                <div className="mode-track">
+                                    {(['ask', 'research', 'investigate'] as SearchMode[]).map((mode) => (
+                                        <button
+                                            key={mode}
+                                            onClick={() => setSearchMode(mode)}
+                                            className={`mode-pill${searchMode === mode ? ' active' : ''}`}
+                                        >
+                                            {SEARCH_MODE_LABELS[mode]}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex w-full max-w-[960px] flex-col gap-3">
+                                    <div className="flex items-center justify-between px-1">
+                                        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/30">
+                                            Vault suggestions
+                                        </span>
+                                        <button
+                                            onClick={() => setSuggestedPrompts((current) => rotateSuggestedPrompts(current))}
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-white/55 transition-colors hover:border-white/20 hover:bg-white/[0.06] hover:text-white/75"
+                                            title="Refresh suggested queries"
+                                        >
+                                            <RefreshCw size={12} />
+                                            Refresh
+                                        </button>
+                                    </div>
+                                    {suggestedPrompts.map((prompt) => (
+                                        <button
+                                            key={prompt}
+                                            onClick={() => setInput(prompt)}
+                                            className="suggestion-row"
+                                        >
+                                            <Sparkles size={21} strokeWidth={1.8} className="text-white/80" />
+                                            <span>{prompt}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="text-center mt-3">
-                                <span className="text-[10px] text-white/20 font-medium tracking-wide uppercase">
-                                    Mode: {modeLabel} • Model: {settings.model}
-                                </span>
+                        </div>
+                    ) : (
+                        /* ── Chat messages ────────────────────────────── */
+                        <div className="p-6">
+                            <div className="max-w-3xl mx-auto space-y-6">
+                                {graphData && (
+                                    <div className="mb-6">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <div className="text-xs text-white/50">Graph preview</div>
+                                            <button
+                                                onClick={() => setShowGraph(!showGraph)}
+                                                className="text-xs text-white/60 hover:text-white underline underline-offset-2"
+                                            >
+                                                {showGraph ? 'Hide Graph' : 'Show Graph'}
+                                            </button>
+                                        </div>
+                                        {showGraph ? (
+                                            <ForceGraph
+                                                data={graphData}
+                                                width={700}
+                                                height={350}
+                                                onNodeClick={(node) => setInput(node.name)}
+                                            />
+                                        ) : (
+                                            <div className="text-xs text-white/40 border border-white/10 rounded-xl p-4 bg-black/30">
+                                                Graph rendering is off to reduce CPU/GPU usage. Click "Show Graph" to render.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {messages.map((msg, i) => (
+                                    <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                        <div
+                                            className={`max-w-[85%] rounded-2xl p-4 ${msg.role === 'user'
+                                                ? 'bg-[#FFD60A] text-black shadow-lg shadow-yellow-500/10 rounded-br-none font-medium'
+                                                : 'bg-[#1C1C1E] border border-[#2C2C2E] text-white/90 rounded-bl-none shadow-md'
+                                                }`}
+                                        >
+                                            <div className={`prose max-w-none ${msg.role === 'assistant' ? 'prose-invert' : 'prose-neutral'}`}>
+                                                <ReactMarkdown
+                                                    remarkPlugins={[remarkGfm]}
+                                                    components={{
+                                                        h1: ({ node, ...props }) => <h1 className="text-2xl font-bold mb-4 mt-6 first:mt-0" {...props} />,
+                                                        h2: ({ node, ...props }) => <h2 className="text-xl font-bold mb-3 mt-5 first:mt-0" {...props} />,
+                                                        h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mb-2 mt-4 first:mt-0" {...props} />,
+                                                        p: ({ node, ...props }) => <p className="mb-3 leading-relaxed" {...props} />,
+                                                        ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-3 space-y-1" {...props} />,
+                                                        ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-3 space-y-1" {...props} />,
+                                                        li: ({ node, ...props }) => <li className="leading-relaxed" {...props} />,
+                                                        a: ({ node, ...props }) => <a className="text-purple-400 hover:text-purple-300 underline" {...props} />,
+                                                        code: ({ node, inline, ...props }: any) =>
+                                                            inline
+                                                                ? <code className="bg-black/30 px-1.5 py-0.5 rounded text-sm font-mono" {...props} />
+                                                                : <code className="block bg-black/30 p-3 rounded-lg text-sm font-mono overflow-x-auto mb-3" {...props} />,
+                                                        strong: ({ node, ...props }) => <strong className="font-bold" {...props} />,
+                                                        em: ({ node, ...props }) => <em className="italic" {...props} />,
+                                                    }}
+                                                >
+                                                    {typeof msg.content === 'string' ? msg.content : String(msg.content || '')}
+                                                </ReactMarkdown>
+                                            </div>
+
+                                            {msg.role === 'assistant' && msg.sources && (
+                                                <SourcesDisplay sources={msg.sources} retrievalIntent={msg.retrievalIntent} />
+                                            )}
+
+                                            {msg.role === 'assistant' && msg.enhancedSearch && (
+                                                <div className="mt-4 pt-4 border-t border-[#2C2C2E] space-y-3 text-sm">
+                                                    {msg.enhancedSearch.llmKnowledge && (
+                                                        <div>
+                                                            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45 mb-2">LLM Knowledge</div>
+                                                            <div className="text-white/70 leading-relaxed">{msg.enhancedSearch.llmKnowledge}</div>
+                                                        </div>
+                                                    )}
+                                                    {msg.enhancedSearch.webStatus && (!msg.enhancedSearch.webResults || msg.enhancedSearch.webResults.length === 0) && (
+                                                        <div>
+                                                            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45 mb-2">Web Search</div>
+                                                            {msg.enhancedSearch.webSearchTerms && (
+                                                                <div className="text-xs text-white/40 mb-1">Terms: {msg.enhancedSearch.webSearchTerms}</div>
+                                                            )}
+                                                            <div className="text-white/55 italic">{msg.enhancedSearch.webStatus}</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {msg.role === 'assistant' && msg.queryId && (
+                                                <RatingButtons
+                                                    queryId={msg.queryId}
+                                                    query={messages[i - 1]?.content || ''}
+                                                    searchMode={searchMode}
+                                                    model={settings.model}
+                                                    initialRating={msg.rating}
+                                                    onRated={(rating) => { msg.rating = rating; }}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {isLoading && (
+                                    <div className="flex justify-start">
+                                        <ThinkingIndicator message={thinkingLog} />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
                 </div>
 
-                <PromptModal
-                    isOpen={isPromptModalOpen}
-                    onClose={() => setIsPromptModalOpen(false)}
-                    currentPrompt={systemPrompt}
-                    onSave={(newPrompt) => {
-                        setSystemPrompt(newPrompt);
-                        setIsPromptModalOpen(false);
-                    }}
-                />
-
-                <VaultInfoModal
-                    isOpen={isVaultModalOpen}
-                    onClose={() => setIsVaultModalOpen(false)}
-                />
-
-                {isSettingsModalOpen && (
-                    <SettingsPanelModal
-                        onClose={() => setIsSettingsModalOpen(false)}
-                    />
+                {/* Input bar — chat mode only */}
+                {messages.length > 0 && (
+                    <div className="p-6 bg-gradient-to-t from-black via-black/95 to-transparent flex-shrink-0">
+                        <div className="max-w-3xl mx-auto">
+                            <div style={{ boxShadow: '0 0 60px rgba(176,38,255,0.25), 0 8px 32px rgba(0,0,0,0.4)', borderRadius: '16px' }}>
+                                <div style={{ padding: '1px', background: 'linear-gradient(135deg, rgba(255,214,10,0.55) 0%, rgba(176,38,255,0.40) 50%, rgba(0,209,193,0.40) 100%)', borderRadius: '16px' }}>
+                                    <div style={{ background: 'rgba(11,13,18,0.92)', borderRadius: '15px', height: '56px', display: 'flex', alignItems: 'center', paddingLeft: '16px', paddingRight: '8px', gap: '8px' }}>
+                                        <input
+                                            type="text"
+                                            value={input}
+                                            autoFocus
+                                            onChange={(e) => setInput(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                                            placeholder={`Ask about your vault (${modeLabel} mode)...`}
+                                            style={{ flex: 1, background: 'transparent', border: 'none', color: 'white', fontSize: '15px', outline: 'none', caretColor: '#FFD60A' }}
+                                            className="placeholder-white/30"
+                                        />
+                                        <button
+                                            onClick={handleSendMessage}
+                                            disabled={isLoading || !input.trim()}
+                                            style={{ background: '#FFD60A', color: '#1a1500', height: '40px', padding: '0 22px', borderRadius: '14px', fontSize: '14px', fontWeight: 600, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, opacity: (isLoading || !input.trim()) ? 0.5 : 1 }}
+                                        >
+                                            Ask
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="text-center mt-2">
+                                <span className="text-[10px] text-white/20 font-medium tracking-wide uppercase">
+                                    {modeLabel} mode · {settings.model}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 )}
             </div>
-        </>
+            </div>
+
+            <PromptModal
+                isOpen={isPromptModalOpen}
+                onClose={() => setIsPromptModalOpen(false)}
+                currentPrompt={systemPrompt}
+                onSave={(newPrompt) => {
+                    setSystemPrompt(newPrompt);
+                    setIsPromptModalOpen(false);
+                }}
+            />
+
+            <VaultInfoModal
+                isOpen={isVaultModalOpen}
+                onClose={() => setIsVaultModalOpen(false)}
+            />
+
+            {isSettingsModalOpen && (
+                <SettingsPanelModal onClose={() => setIsSettingsModalOpen(false)} />
+            )}
+        </div>
     );
 }

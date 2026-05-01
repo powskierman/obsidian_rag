@@ -1008,6 +1008,44 @@ def _looks_like_boilerplate_source_snippet(text: str) -> bool:
     )
 
 
+def _strip_markdown_frontmatter(text: str) -> str:
+    return re.sub(r"^\s*---\s*\n.*?\n---\s*\n", "", text or "", flags=re.DOTALL).strip()
+
+
+def _query_focused_excerpt(text: str, query_terms: set[str], limit: int) -> str:
+    body = _strip_markdown_frontmatter(text)
+    collapsed = re.sub(r"\n{3,}", "\n\n", body).strip()
+    if not collapsed or len(collapsed) <= limit:
+        return collapsed
+
+    lowered = collapsed.lower()
+    match_positions = [
+        lowered.find(term)
+        for term in query_terms
+        if len(term) >= 3 and lowered.find(term) >= 0
+    ]
+    if not match_positions:
+        return collapsed[:limit].rstrip()
+
+    anchor = min(match_positions)
+    start = max(0, anchor - limit // 3)
+    if start > 0:
+        boundary = max(collapsed.rfind("\n\n", 0, start), collapsed.rfind(". ", 0, start))
+        if boundary > max(0, start - 500):
+            start = boundary + (2 if collapsed[boundary:boundary + 2] == "\n\n" else 1)
+    end = min(len(collapsed), start + limit)
+    if end < len(collapsed):
+        boundary = max(collapsed.rfind("\n\n", start, end), collapsed.rfind(". ", start, end))
+        if boundary > start + limit // 2:
+            end = boundary + 1
+    excerpt = collapsed[start:end].strip()
+    if start > 0:
+        excerpt = f"...{excerpt}"
+    if end < len(collapsed):
+        excerpt = f"{excerpt}..."
+    return excerpt
+
+
 def _expand_sources_for_synthesis(
     query: str,
     sources: List[Dict[str, Any]],
@@ -1051,9 +1089,10 @@ def _expand_sources_for_synthesis(
             expanded_sources.append(prepared)
             continue
 
-        if content and len(content) > len(str(prepared.get("snippet") or "")):
-            prepared["content"] = content
-            prepared["snippet"] = content
+        excerpt = _query_focused_excerpt(content, query_terms, expansion_limit)
+        if excerpt and len(excerpt) > len(str(prepared.get("snippet") or "")):
+            prepared["content"] = excerpt
+            prepared["snippet"] = excerpt
             prepared["is_full_content"] = True
         expanded_sources.append(prepared)
 
