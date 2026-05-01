@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { getServiceTone } from '../lib/serviceStatus';
+import { api } from '../lib/api';
 
 interface VaultInfoModalProps {
     isOpen: boolean;
@@ -9,9 +10,15 @@ interface VaultInfoModalProps {
 
 export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps) {
     const { services, refreshServices } = useApp();
+    const [vaultInfo, setVaultInfo] = useState<{ name?: string; root?: string }>({});
 
     useEffect(() => {
-        if (isOpen) refreshServices();
+        if (isOpen) {
+            refreshServices();
+            api.getEnvConfig().then((cfg) => {
+                if (cfg.vault) setVaultInfo(cfg.vault);
+            }).catch(() => {});
+        }
     }, [isOpen]);
 
     const vectorTone = getServiceTone(services.vectorDB.status);
@@ -51,12 +58,12 @@ export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps)
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-white/60">Name:</span>
-                                <span className="text-white font-medium">Michel</span>
+                                <span className="text-white font-medium">{vaultInfo.name || 'Michel'}</span>
                             </div>
                             <div className="flex justify-between flex-col gap-1">
                                 <span className="text-white/60">Location:</span>
                                 <span className="text-white/80 font-mono text-[10px] break-all">
-                                    /Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel
+                                    {vaultInfo.root || '—'}
                                 </span>
                             </div>
                         </div>
@@ -91,7 +98,11 @@ export default function VaultInfoModal({ isOpen, onClose }: VaultInfoModalProps)
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-white/60">Graph Nodes:</span>
-                                <span className="text-purple-400 font-semibold">{services.lightrag?.nodes ? services.lightrag.nodes.toLocaleString() : '~2,000'}</span>
+                                <span className="text-purple-400 font-semibold">{(services.lightrag?.nodes ?? 0).toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-white/60">Indexed Notes:</span>
+                                <span className="text-purple-400 font-semibold">{(services.lightrag?.indexed_notes ?? 0).toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-white/60">Graph Type:</span>

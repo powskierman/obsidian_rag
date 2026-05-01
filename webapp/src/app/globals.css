@@ -10,104 +10,171 @@
     --color-obsidian-slate: #1a1a2e;
 }
 
-/* Base styles for the dark theme */
+/* ── App shell: aurora + dot-grid ─────────────────────────────────── */
 body {
-    @apply bg-[#0a0a0a] text-gray-200;
+    background-color: #0b0d12;
+    color: #e5e5e5;
+    margin: 0;
 }
 
-/* Reusable Glass Class */
+.app-shell {
+    background-color: #0b0d12;
+    background-image:
+        radial-gradient(ellipse at 20% 10%,  rgba(176, 38, 255, 0.22) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 90%,  rgba(0, 209, 193, 0.16) 0%, transparent 60%);
+    position: relative;
+}
+
+.app-shell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(176, 38, 255, 0.30) 1px, transparent 1.5px);
+    background-size: 18px 18px;
+    opacity: 0.30;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 75%);
+    mask-image:         radial-gradient(ellipse at 50% 30%, #000 0%, transparent 75%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Liquid Glass: sidebar ─────────────────────────────────────────── */
+.sidebar-glass {
+    background: rgba(20, 18, 28, 0.72);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-right: 0.5px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 2;
+}
+
+/* ── Liquid Glass: titlebar / header ──────────────────────────────── */
+.titlebar-glass {
+    background: rgba(11, 13, 18, 0.65);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 2;
+}
+
+/* ── Status pill ──────────────────────────────────────────────────── */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    height: 38px;
+    background: rgba(20, 18, 28, 0.60);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 100px;
+    white-space: nowrap;
+    font-family: ui-monospace, 'SF Mono', monospace;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Mode segmented control ───────────────────────────────────────── */
+.mode-track {
+    display: inline-flex;
+    background: rgba(20, 18, 28, 0.60);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 0.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 100px;
+    padding: 4px;
+    gap: 2px;
+}
+
+.mode-pill {
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 17px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.60);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, font-weight 0.15s ease;
+}
+
+.mode-pill.active {
+    background: #0A84FF;
+    color: #fff;
+    font-weight: 600;
+}
+
+.suggestion-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    min-height: 56px;
+    padding: 0 22px;
+    border-radius: 14px;
+    border: 0.5px solid rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 20px;
+    text-align: left;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.suggestion-row:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* ── Reusable Glass Class (kept for modals) ───────────────────────── */
 .glass-panel {
-    @apply bg-glass-bg border border-glass-border;
     background: linear-gradient(135deg, rgba(10, 10, 20, 0.6), rgba(20, 10, 30, 0.4));
     transition: background 0.2s ease;
 }
 
-.glass-panel:hover {
-    background: linear-gradient(135deg, rgba(10, 10, 20, 0.7), rgba(20, 10, 30, 0.5));
-}
-
-/* --- CUSTOM RANGE SLIDER STYLES --- */
-/* The slider itself */
+/* ── Custom range slider ──────────────────────────────────────────── */
 .slider {
     -webkit-appearance: none;
-    /* Override default CSS styles */
     appearance: none;
     width: 100%;
     height: 4px;
-    /* Specified height */
     background: rgba(255, 255, 255, 0.1);
-    /* Dark track */
     border-radius: 5px;
     outline: none;
-    /* Remove outline */
     opacity: 0.7;
-    /* Set transparency (for mouse-over effects on hover) */
-    -webkit-transition: .2s;
-    /* 0.2 seconds transition on hover */
-    transition: opacity .2s;
+    transition: opacity 0.2s;
 }
 
-/* Mouse-over effects */
-.slider:hover {
-    opacity: 1;
-    /* Fully shown on mouse-over */
-}
+.slider:hover { opacity: 1; }
 
-/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    /* Override default look */
     appearance: none;
     width: 16px;
-    /* Set a specific slider handle width */
     height: 16px;
-    /* Slider handle height */
     background: #a855f7;
-    /* Accent purple color */
     border-radius: 50%;
     cursor: pointer;
-    /* Cursor on hover */
     box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
-    /* Glowing effect */
 }
 
 .slider::-moz-range-thumb {
     width: 16px;
-    /* Set a specific slider handle width */
     height: 16px;
-    /* Slider handle height */
     background: #a855f7;
-    /* Accent purple color */
     border-radius: 50%;
     cursor: pointer;
-    /* Cursor on hover */
     box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
-    /* Glowing effect */
 }
 
-/* Obsidian Theme Enhancements */
-h1 {
-    text-shadow: 0 0 8px rgba(176, 38, 255, 0.2);
-}
+/* ── Scrollbar ────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+::-webkit-scrollbar-thumb { background: rgba(176, 38, 255, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(176, 38, 255, 0.5); }
 
-input[type="text"]:focus {
-    box-shadow: 0 0 12px rgba(176, 38, 255, 0.2);
-}
-
-/* Smooth scrollbar styling */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(176, 38, 255, 0.3);
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(176, 38, 255, 0.5);
-}
+/* ── Typography ───────────────────────────────────────────────────── */
+h1 { text-shadow: 0 0 8px rgba(176, 38, 255, 0.2); }
+input[type="text"]:focus { box-shadow: 0 0 12px rgba(176, 38, 255, 0.2); }
