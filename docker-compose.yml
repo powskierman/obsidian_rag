@@ -394,6 +394,13 @@ services:
       - GATEWAY_URL=http://api-gateway:3000
       - API_GATEWAY_URL=http://api-gateway:3000
       - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openrouter/auto}
+      - LMSTUDIO_BASE_URL=${LMSTUDIO_BASE_URL:-${MLX_BASE_URL:-http://host.docker.internal:1234/v1}}
+      - LMSTUDIO_API_KEY=${LMSTUDIO_API_KEY:-lmstudio}
+      - LMSTUDIO_MODEL=${LMSTUDIO_MODEL:-${MLX_MODEL:-${LLM_MODEL_PATH:-local-model}}}
+      - MLX_BASE_URL=${MLX_BASE_URL:-${LMSTUDIO_BASE_URL:-http://host.docker.internal:1234/v1}}
+      - MLX_API_KEY=${MLX_API_KEY:-${LMSTUDIO_API_KEY:-mlx}}
+      - QUERY_LMSTUDIO_BASE_URL=${QUERY_LMSTUDIO_BASE_URL:-${LMSTUDIO_BASE_URL:-${MLX_BASE_URL:-http://host.docker.internal:1234/v1}}}
+      - QUERY_LMSTUDIO_API_KEY=${QUERY_LMSTUDIO_API_KEY:-${LMSTUDIO_API_KEY:-lmstudio}}
       # Ollama hosts — all are queried for model discovery; labels shown in UI
       - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - OLLAMA_HOST_LABEL=${OLLAMA_HOST_LABEL:-MacBook}

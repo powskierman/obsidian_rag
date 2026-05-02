@@ -81,8 +81,9 @@ export async function GET() {
           .map(readModelId);
 
         return NextResponse.json({
-          models: unique(loadedModels),
+          models: unique([...loadedModels, ...installedModels]),
           installedModels: unique(installedModels),
+          loadedModels: unique(loadedModels),
           base,
           reachable: true,
           source: 'lmstudio',

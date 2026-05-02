@@ -41,6 +41,7 @@ export interface LmStudioModelStatus {
   reachable: boolean;
   models: string[];
   installedModels: string[];
+  loadedModels?: string[];
   warning?: string | null;
   error?: string | null;
 }
@@ -208,6 +209,7 @@ export const api = {
           reachable: false,
           models: [],
           installedModels: [],
+          loadedModels: [],
           error: null,
           warning: null,
         };
@@ -217,6 +219,7 @@ export const api = {
         reachable: Boolean(data?.reachable),
         models: Array.isArray(data?.models) ? data.models : [],
         installedModels: Array.isArray(data?.installedModels) ? data.installedModels : [],
+        loadedModels: Array.isArray(data?.loadedModels) ? data.loadedModels : [],
         warning: typeof data?.warning === 'string' ? data.warning : null,
         error: typeof data?.error === 'string' ? data.error : null,
       };
@@ -226,6 +229,7 @@ export const api = {
         reachable: false,
         models: [],
         installedModels: [],
+        loadedModels: [],
         error: null,
         warning: null,
       };
