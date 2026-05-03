@@ -42,6 +42,7 @@ Each JSONL row supports:
 - `id`
 - `query`
 - `expected_source`
+- `candidate_paths`
 - `expected_page`
 - `expected_answer_contains`
 - `mode`
@@ -53,13 +54,25 @@ Each JSONL row supports:
 
 ## Baseline Command
 
-Run against the existing API gateway:
+Run against the existing API gateway with the current retrieval stack:
 
 ```bash
 python Scripts/benchmarks/run_pdf_retrieval_baseline.py \
   --cases evals/pdf_retrieval_cases.local.jsonl \
   --gateway-url http://localhost:4000 \
   --output Documentation/specs/pdf_retrieval_baseline_results.local.json
+```
+
+Compare current retrieval, direct PDF tree retrieval, and hybrid unified search with PDF tree evidence enabled:
+
+```bash
+python Scripts/benchmarks/run_pdf_retrieval_baseline.py \
+  --cases evals/pdf_retrieval_cases.local.jsonl \
+  --gateway-url http://localhost:4000 \
+  --mode current \
+  --mode pdf-tree \
+  --mode hybrid \
+  --output Documentation/specs/pdf_retrieval_comparison_results.local.json
 ```
 
 ## Metrics
@@ -72,6 +85,8 @@ The baseline script records:
 - latency per query
 - returned source paths
 - answer preview
+
+For PDF tree modes, page accuracy also checks structured `page_start` and `page_end` source metadata, not only `[Page N]` text in the answer payload.
 
 ## Expected Phase 0 Outcome
 
