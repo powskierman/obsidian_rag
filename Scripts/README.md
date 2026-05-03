@@ -16,7 +16,7 @@ Scripts for updating and maintaining the search index (vector DB and knowledge g
 - `verify_index_with_lightrag.sh` — Post-indexing verification.
 - `reindex_missing_folders.sh` — Re-index specific missing folders.
 - `reindex_remaining_md_only.sh` — Re-index remaining markdown files.
-- `reindex_remaining_pdf_only.sh` — Re-index remaining PDF files.
+- `reindex_remaining_pdf_only.sh` — Deprecated guard; LightRAG PDF indexing is decommissioned.
 - `safe_reindex_remaining_md.py` — Safe incremental markdown re-indexer.
 - `repair_lightrag_index_metadata.py` — Repair metadata in LightRAG index.
 - `clear_lightrag_pdf_queue.py` — Clear stuck PDF entries from LightRAG queue.

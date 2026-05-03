@@ -7,7 +7,8 @@ Objective: establish current PDF behavior and create a measurable target.
 Tasks:
 
 - Identify the current PDF ingestion path.
-- Identify where text extraction, chunking, embeddings, LightRAG insertion, and API query synthesis occur.
+- Identify where text extraction, chunking, embeddings, deprecated LightRAG PDF insertion, and API query synthesis occur.
+- Decommission LightRAG PDF insertion so PDFs are owned by the PDF tree pipeline.
 - Document current citation behavior for PDF-derived results.
 - Select representative PDFs from the vault.
 - Create a small eval file with queries, expected source PDFs, expected pages, and expected answers.
@@ -18,12 +19,14 @@ Deliverables:
 - `Documentation/specs/pdf_retrieval_baseline.md`
 - `evals/pdf_retrieval_cases.jsonl`
 - Baseline metrics for source accuracy, page accuracy, answer quality, and latency.
+- LightRAG accepts Markdown only and rejects or ignores `.pdf` indexing requests.
 
 Exit Criteria:
 
 - There is a repeatable baseline command or script.
 - At least 25 PDF questions are represented.
 - Current failure modes are documented.
+- LightRAG PDF indexing paths are disabled before later PDF tree implementation starts.
 
 ## Phase 1: Provider Abstraction
 
@@ -185,7 +188,7 @@ Tasks:
 - Add rule-based query routing.
 - Use existing retrieval first to identify candidate PDFs when no file is named.
 - Add hybrid retrieval mode:
-  - LightRAG retrieves broad context.
+  - LightRAG retrieves broad Markdown-note context.
   - PDF tree retriever refines page-specific evidence.
   - answer synthesis receives both evidence sets.
 - Normalize PDF tree evidence into existing result schema.

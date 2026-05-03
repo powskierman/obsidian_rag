@@ -11,7 +11,7 @@ The feature must support user-selectable LLM providers:
 - OpenRouter
 - Any OpenAI-compatible endpoint configured by base URL and API key
 
-This should complement the existing LightRAG/embedding retrieval path, not replace it.
+This should complement the existing LightRAG/embedding retrieval path, not replace it. LightRAG PDF indexing is decommissioned; LightRAG remains for Markdown notes and graph-style vault retrieval.
 
 ## Goals
 
@@ -26,6 +26,7 @@ This should complement the existing LightRAG/embedding retrieval path, not repla
 ## Non-Goals
 
 - Replace LightRAG as the default retriever.
+- Re-enable PDF indexing inside LightRAG.
 - Replace the existing embedding service.
 - Build a general-purpose vector database.
 - Guarantee perfect table extraction from all PDFs.
@@ -53,6 +54,8 @@ Recommended components:
 - `query-router`: decides whether to use LightRAG, PDF tree retrieval, or both.
 - `answer-synthesizer`: merges retrieved PDF evidence with existing RAG context.
 
+LightRAG must not index PDFs. Markdown notes continue through LightRAG; PDFs are handled by the PDF tree service.
+
 ## Retrieval Flow
 
 1. User sends a query through the existing API gateway or MCP surface.
@@ -70,7 +73,7 @@ Recommended components:
 
 ## Indexing Flow
 
-1. PDF files are discovered during vault indexing.
+1. PDF files are discovered during PDF tree indexing, not LightRAG indexing.
 2. Eligible PDFs are sent to `pdf-tree-service`.
 3. The service extracts:
    - page text

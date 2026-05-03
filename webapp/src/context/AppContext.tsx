@@ -26,7 +26,7 @@ interface AppContextType extends AppState {
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-const CURRENT_SETTINGS_VERSION = 5;
+const CURRENT_SETTINGS_VERSION = 6;
 
 // Migrate a stored mode string (legacy or canonical) to a canonical SearchMode.
 const migrateSearchMode = (raw: string | null | undefined): SearchMode | null => {
@@ -109,6 +109,19 @@ const normalizeSettings = (raw: unknown, activeProvider: LLMProvider): SettingsS
   next.briefConceptIndex = parsed.briefConceptIndex === undefined
     ? defaultSettings.briefConceptIndex
     : Boolean(next.briefConceptIndex);
+  const parsedPdfTree = parsed.pdfTree && typeof parsed.pdfTree === 'object'
+    ? parsed.pdfTree as Record<string, unknown>
+    : {};
+  const pdfTreeProvider = ['ollama', 'lmstudio', 'openrouter', 'openai_compatible'].includes(String(parsedPdfTree.provider))
+    ? parsedPdfTree.provider as SettingsState['pdfTree']['provider']
+    : defaultSettings.pdfTree.provider;
+  next.pdfTree = {
+    enabled: Boolean(parsedPdfTree.enabled),
+    provider: pdfTreeProvider,
+    model: typeof parsedPdfTree.model === 'string' && parsedPdfTree.model.trim()
+      ? parsedPdfTree.model.trim()
+      : defaultSettings.pdfTree.model,
+  };
   next.deepThinking = Boolean(next.deepThinking);
 
   // Migrate dataSources and researchDepth (added in settings version 5).

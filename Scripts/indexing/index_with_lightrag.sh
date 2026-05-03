@@ -82,6 +82,24 @@ for arg in "$@"; do
 done
 
 echo "📂 Vault path: $VAULT_PATH"
+if echo ",$LIGHTRAG_INCLUDE_EXTENSIONS," | tr '[:upper:]' '[:lower:]' | grep -Eq '(^|,)\.?pdf(,|$)'; then
+    echo "⚠️  LightRAG PDF indexing is decommissioned; removing .pdf from include extensions."
+    LIGHTRAG_INCLUDE_EXTENSIONS="$(python3 - "$LIGHTRAG_INCLUDE_EXTENSIONS" <<'PY'
+import sys
+
+items = []
+for token in sys.argv[1].split(","):
+    token = token.strip().lower()
+    if not token:
+        continue
+    if not token.startswith("."):
+        token = f".{token}"
+    if token != ".pdf":
+        items.append(token)
+print(",".join(dict.fromkeys(items)) or ".md")
+PY
+)"
+fi
 echo "🧩 Include extensions: $LIGHTRAG_INCLUDE_EXTENSIONS"
 echo "🚫 Exclude extensions: $LIGHTRAG_EXCLUDE_EXTENSIONS"
 echo "🚫 Exclude paths: ${LIGHTRAG_EXCLUDE_PATHS:-<none>}"

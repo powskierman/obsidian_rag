@@ -56,7 +56,7 @@ interface Command {
   url?: string;
 }
 
-const SUPPORTED_LIGHTRAG_EXTENSIONS = ['.md', '.pdf'];
+const SUPPORTED_LIGHTRAG_EXTENSIONS = ['.md'];
 
 function normalizeExtensions(value: unknown): string[] {
   if (!Array.isArray(value)) {
@@ -126,7 +126,7 @@ function buildCommands(databases: string[], mode: string, options: IndexOptions 
         vault_path: process.env.LIGHTRAG_VAULT_PATH ?? '/app/vault',
         force: full,
         include_extensions: includeExtensions,
-        exclude_extensions: excludeExtensions,
+        exclude_extensions: Array.from(new Set([...excludeExtensions, '.pdf'])),
         bypass_reindex_guard: false,
       },
     });

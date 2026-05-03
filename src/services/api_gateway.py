@@ -3466,11 +3466,17 @@ async def get_providers():
 async def get_provider_status():
     """Return provider key/model visibility from the gateway runtime, not the webapp runtime."""
     vault_root = _vault_root()
+    try:
+        from src.services.pdf_tree_config import load_pdf_tree_provider_config
+    except ImportError:
+        from pdf_tree_config import load_pdf_tree_provider_config
+    pdf_tree_config = load_pdf_tree_provider_config()
     return {
         "keys": {
             "gemini": bool(_get_env_value("GEMINI_API_KEY")),
             "anthropic": bool(_get_env_value("ANTHROPIC_API_KEY")),
             "openai": bool(_get_env_value("OPENAI_API_KEY")),
+            "openrouter": bool(_get_env_value("OPENROUTER_API_KEY")),
             "lmstudio": bool(
                 _get_env_value("LMSTUDIO_BASE_URL")
                 or _get_env_value("LMSTUDIO_MODEL")
@@ -3486,10 +3492,53 @@ async def get_provider_status():
             "claude": _get_env_value("CLAUDE_MODEL", "claude-3-5-sonnet-latest"),
             "lmstudio": _get_env_value("LMSTUDIO_MODEL", _get_env_value("MLX_MODEL", _get_env_value("LLM_MODEL_PATH", "local-model"))),
         },
+        "pdfTree": {
+            "enabled": pdf_tree_config.enabled,
+            "provider": pdf_tree_config.provider,
+            "configured": bool(pdf_tree_config.base_url and (pdf_tree_config.provider != "openrouter" or pdf_tree_config.api_key)),
+            "reachable": False,
+            "hosted": pdf_tree_config.is_hosted,
+            "model": pdf_tree_config.model,
+            "baseUrl": pdf_tree_config.base_url,
+            "models": [],
+            "error": None,
+        },
         "vault": {
             "name": os.getenv("OBSIDIAN_VAULT_NAME") or vault_root.name,
             "root": str(vault_root),
         },
+    }
+
+
+@app.get("/api/v1/pdf-tree/provider-status")
+async def get_pdf_tree_provider_status():
+    """Return status for the optional PDF tree retrieval LLM provider."""
+    try:
+        from src.services.pdf_tree_chat_providers import build_chat_provider
+        from src.services.pdf_tree_config import load_pdf_tree_provider_config
+    except ImportError:
+        from pdf_tree_chat_providers import build_chat_provider
+        from pdf_tree_config import load_pdf_tree_provider_config
+
+    config = load_pdf_tree_provider_config()
+    provider = build_chat_provider(config)
+    try:
+        health = await provider.health()
+    finally:
+        close = getattr(provider, "aclose", None)
+        if callable(close):
+            await close()
+
+    return {
+        "enabled": config.enabled,
+        "provider": health.provider,
+        "configured": health.configured,
+        "reachable": health.reachable,
+        "hosted": health.hosted,
+        "model": health.model,
+        "baseUrl": health.base_url,
+        "models": health.models,
+        "error": health.error,
     }
 
 

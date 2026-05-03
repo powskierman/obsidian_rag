@@ -13,6 +13,13 @@ export type ResearchDepth = 'auto' | 'shallow' | 'staged' | 'full';
 export type DataSource = 'vault' | 'mempalace' | 'web';
 
 export type LLMProvider = 'ollama' | 'gemini' | 'claude' | 'openrouter' | 'chatgpt' | 'lmstudio';
+export type PdfTreeProvider = 'ollama' | 'lmstudio' | 'openrouter' | 'openai_compatible';
+
+export interface PdfTreeSettings {
+  enabled: boolean;
+  provider: PdfTreeProvider;
+  model: string;
+}
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -59,6 +66,7 @@ export interface SettingsState {
   showSources: boolean;
   enhancedSearch: boolean;
   briefConceptIndex: boolean;
+  pdfTree: PdfTreeSettings;
   deepThinking: boolean;       // kept for compat; derived from searchMode === 'investigate'
 }
 
@@ -112,7 +120,7 @@ export interface AppState {
 }
 
 export const defaultSettings: SettingsState = {
-  settingsVersion: 5,
+  settingsVersion: 6,
   model: 'llama3.2:latest',
   providerModels: {},
   sources: 10,
@@ -123,6 +131,11 @@ export const defaultSettings: SettingsState = {
   showSources: true,
   enhancedSearch: false,
   briefConceptIndex: true,
+  pdfTree: {
+    enabled: false,
+    provider: 'ollama',
+    model: 'llama3.1:8b',
+  },
   deepThinking: false,
 };
 
