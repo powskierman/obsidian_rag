@@ -94,6 +94,12 @@ export const api = {
     system_prompt = '',
     depth: 'auto' | 'shallow' | 'staged' | 'full' = 'auto',
     dataSources: ('vault' | 'mempalace' | 'web')[] = ['vault'],
+    pdfTree?: {
+      enabled: boolean;
+      provider?: string;
+      model?: string;
+      candidatePaths?: string[];
+    },
   ): Promise<{
     answer: string;
     sources?: SearchResult[];
@@ -124,6 +130,10 @@ export const api = {
         llm_knowledge: enableLlmKnowledge,
         brief_concept_index,
         system_prompt: system_prompt || null,
+        pdf_tree_enabled: Boolean(pdfTree?.enabled),
+        pdf_tree_provider: pdfTree?.provider || null,
+        pdf_tree_model: pdfTree?.model || null,
+        pdf_tree_candidate_paths: pdfTree?.candidatePaths || null,
       };
       console.log('🌐 API request body:', requestBody);
 

@@ -764,6 +764,18 @@ def _tag_sources(sources: Any, source_type: str) -> List[Dict[str, Any]]:
     return tagged
 
 
+def _dedupe_sources(sources: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    seen: set[str] = set()
+    deduped: List[Dict[str, Any]] = []
+    for source in sources:
+        key = str(source.get("filepath") or source.get("source") or source.get("filename") or id(source))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(source)
+    return deduped
+
+
 def _normalize_vector_sources(result: Any, source_type: str = "direct-excerpt") -> List[Dict[str, Any]]:
     if not isinstance(result, dict):
         return []
@@ -3462,6 +3474,21 @@ async def get_providers():
     }
 
 
+class PdfTreeQueryRequest(BaseModel):
+    query: str
+    candidate_paths: Optional[List[str]] = None
+    document_ids: Optional[List[str]] = None
+    max_documents: int = 3
+    include_trace: bool = False
+    provider: Optional[str] = None
+    model: Optional[str] = None
+
+
+class PdfTreeIndexRequest(BaseModel):
+    pdf_path: str
+    force: bool = False
+
+
 @app.get("/api/v1/provider-status")
 async def get_provider_status():
     """Return provider key/model visibility from the gateway runtime, not the webapp runtime."""
@@ -3539,6 +3566,78 @@ async def get_pdf_tree_provider_status():
         "baseUrl": health.base_url,
         "models": health.models,
         "error": health.error,
+    }
+
+
+@app.post("/api/v1/pdf-tree/index")
+async def index_pdf_tree(request: PdfTreeIndexRequest):
+    """Index one PDF into the PDF tree store."""
+    from src.services.pdf_tree_builder import build_pdf_tree_index
+    from src.services.pdf_tree_extractor import PDF_TREE_EXTRACTION_VERSION, extract_pdf_pages
+    from src.services.pdf_tree_store import DEFAULT_TREE_BUILDER_VERSION, PdfTreeStore
+
+    vault_root = _vault_root()
+    requested = Path(request.pdf_path).expanduser()
+    candidate = requested if requested.is_absolute() else vault_root / requested
+    try:
+        resolved = candidate.resolve()
+        resolved.relative_to(vault_root)
+    except Exception:
+        raise HTTPException(status_code=400, detail="pdf_path must resolve inside the configured vault")
+    if not resolved.exists() or resolved.suffix.lower() != ".pdf":
+        raise HTTPException(status_code=404, detail=f"PDF not found: {request.pdf_path}")
+
+    store = PdfTreeStore.from_env()
+    document_id = store.document_id_for_path(resolved)
+    if not request.force and not store.is_stale(
+        resolved,
+        document_id=document_id,
+        extraction_version=PDF_TREE_EXTRACTION_VERSION,
+        tree_builder_version=DEFAULT_TREE_BUILDER_VERSION,
+    ):
+        entry = store.load_manifest()[document_id]
+        return {"status": "fresh", **entry.to_dict()}
+
+    pages, extraction_metadata = extract_pdf_pages(resolved)
+    index = build_pdf_tree_index(
+        source_path=resolved,
+        pages=pages,
+        document_id=document_id,
+        metadata=extraction_metadata,
+    )
+    entry = store.write_index(
+        index,
+        source_file=resolved,
+        extraction_version=PDF_TREE_EXTRACTION_VERSION,
+        tree_builder_version=DEFAULT_TREE_BUILDER_VERSION,
+    )
+    return {"status": "indexed", **entry.to_dict()}
+
+
+@app.post("/api/v1/pdf-tree/query")
+async def query_pdf_tree(request: PdfTreeQueryRequest):
+    """Query persisted PDF tree indexes and return page-aware evidence."""
+    try:
+        sources = await _retrieve_pdf_tree_sources(
+            query=request.query,
+            candidate_paths=request.candidate_paths,
+            document_ids=request.document_ids,
+            max_documents=request.max_documents,
+            include_trace=request.include_trace,
+            provider_name=request.provider,
+            model=request.model,
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"PDF tree retrieval failed: {exc}") from exc
+
+    return {
+        "query": request.query,
+        "answer_context": sources,
+        "sources": sources,
+        "metadata": {
+            "retriever": "pdf_tree",
+            "source_count": len(sources),
+        },
     }
 
 
@@ -3628,6 +3727,80 @@ class UnifiedQueryRequest(BaseModel):
     llm_knowledge: bool = False
     brief_concept_index: bool = True
     entities_mode: Optional[str] = None  # naive, local, global, hybrid
+    pdf_tree_enabled: bool = False
+    pdf_tree_candidate_paths: Optional[List[str]] = None
+    pdf_tree_max_documents: int = 3
+    pdf_tree_include_trace: bool = False
+    pdf_tree_provider: Optional[str] = None
+    pdf_tree_model: Optional[str] = None
+
+
+def _query_likely_needs_pdf_tree(query: str, candidate_paths: Optional[List[str]]) -> bool:
+    if candidate_paths:
+        return True
+    lowered = str(query or "").lower()
+    return any(
+        marker in lowered
+        for marker in (
+            ".pdf",
+            " pdf",
+            "page ",
+            "section",
+            "table",
+            "figure",
+            "appendix",
+            "manual",
+            "report",
+            "paper",
+        )
+    )
+
+
+def _pdf_tree_config_with_overrides(provider: Optional[str], model: Optional[str]):
+    from src.services.pdf_tree_config import load_pdf_tree_provider_config
+
+    return load_pdf_tree_provider_config(
+        provider_override=provider,
+        model_override=str(model or "").strip() or None,
+    )
+
+
+async def _retrieve_pdf_tree_sources(
+    *,
+    query: str,
+    candidate_paths: Optional[List[str]] = None,
+    document_ids: Optional[List[str]] = None,
+    max_documents: int = 3,
+    include_trace: bool = False,
+    provider_name: Optional[str] = None,
+    model: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    from src.services.pdf_tree_chat_providers import build_chat_provider
+    from src.services.pdf_tree_retriever import PdfTreeRetriever
+    from src.services.pdf_tree_store import PdfTreeStore
+
+    config = _pdf_tree_config_with_overrides(provider_name, model)
+    provider = build_chat_provider(config)
+    try:
+        store = PdfTreeStore.from_env()
+        candidate_ids = list(document_ids or [])[: max(1, max_documents)]
+        candidate_source_paths = list(candidate_paths or [])[: max(1, max_documents)]
+        retriever = PdfTreeRetriever(
+            store,
+            provider=provider,
+            max_evidence=max(1, max_documents),
+            include_trace=include_trace,
+        )
+        evidence = await retriever.retrieve(
+            query,
+            document_ids=candidate_ids or None,
+            source_paths=candidate_source_paths or None,
+        )
+        return [item.to_source() for item in evidence]
+    finally:
+        close = getattr(provider, "aclose", None)
+        if callable(close):
+            await close()
 
 
 def _canonical_to_legacy_dispatch_key(
@@ -3987,6 +4160,22 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
             )
             if selected_sources:
                 sources = selected_sources
+            if request.pdf_tree_enabled and _query_likely_needs_pdf_tree(request.query, request.pdf_tree_candidate_paths):
+                try:
+                    pdf_tree_sources = await _retrieve_pdf_tree_sources(
+                        query=request.query,
+                        candidate_paths=request.pdf_tree_candidate_paths,
+                        max_documents=request.pdf_tree_max_documents,
+                        include_trace=request.pdf_tree_include_trace,
+                        provider_name=request.pdf_tree_provider,
+                        model=request.pdf_tree_model,
+                    )
+                    if pdf_tree_sources:
+                        sources = _dedupe_sources(pdf_tree_sources + sources)
+                        warnings.append("PDF tree retrieval added page-aware PDF evidence.")
+                except Exception as exc:
+                    logger.warning("PDF tree retrieval failed during cascading query: %s", exc)
+                    warnings.append("PDF tree retrieval failed; answer used non-PDF-tree evidence.")
             relationship_guardrail = _should_require_vault_relationship_guardrail(
                 request.query,
                 sources,
@@ -4343,6 +4532,23 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
                     )
                     if selected_sources:
                         sources = selected_sources
+                pdf_tree_warnings: List[str] = []
+                if request.pdf_tree_enabled and _query_likely_needs_pdf_tree(request.query, request.pdf_tree_candidate_paths):
+                    try:
+                        pdf_tree_sources = await _retrieve_pdf_tree_sources(
+                            query=request.query,
+                            candidate_paths=request.pdf_tree_candidate_paths,
+                            max_documents=request.pdf_tree_max_documents,
+                            include_trace=request.pdf_tree_include_trace,
+                            provider_name=request.pdf_tree_provider,
+                            model=request.pdf_tree_model,
+                        )
+                        if pdf_tree_sources:
+                            sources = _dedupe_sources(pdf_tree_sources + sources)
+                            pdf_tree_warnings.append("PDF tree retrieval added page-aware PDF evidence.")
+                    except Exception as exc:
+                        logger.warning("PDF tree retrieval failed during vector query: %s", exc)
+                        pdf_tree_warnings.append("PDF tree retrieval failed; answer used non-PDF-tree evidence.")
 
                 if request.web_search:
                     web_search_result = await _perform_tavily_web_search(
@@ -4438,6 +4644,7 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
                         "source": "ChromaDB Vectors",
                         "description": "Pure vector similarity search with micro-compression.",
                         "web_search_enabled": bool(request.web_search),
+                        "warnings": pdf_tree_warnings,
                     },
                 }
             except Exception as e:

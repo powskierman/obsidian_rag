@@ -58,19 +58,22 @@ class PdfTreeProviderConfig:
         return self.provider == "openrouter"
 
 
-def load_pdf_tree_provider_config() -> PdfTreeProviderConfig:
-    provider = normalize_pdf_tree_provider(_env("PDF_TREE_PROVIDER", "ollama"))
+def load_pdf_tree_provider_config(
+    provider_override: str | None = None,
+    model_override: str | None = None,
+) -> PdfTreeProviderConfig:
+    provider = normalize_pdf_tree_provider(provider_override or _env("PDF_TREE_PROVIDER", "ollama"))
     enabled = _env("PDF_TREE_RETRIEVAL_ENABLED", "false").lower() in {"1", "true", "yes", "on"}
     timeout = float(_env("PDF_TREE_TIMEOUT_SECONDS", "120") or "120")
     max_tokens_raw = _env("PDF_TREE_MAX_TOKENS")
     max_tokens = int(max_tokens_raw) if max_tokens_raw.isdigit() else None
 
     if provider == "ollama":
-        model = _env("PDF_TREE_MODEL") or _env("OLLAMA_MODEL", "llama3.1:8b")
+        model = model_override or _env("PDF_TREE_MODEL") or _env("OLLAMA_MODEL", "llama3.1:8b")
         base_url = normalize_base_url(_env("OLLAMA_BASE_URL") or _env("OLLAMA_HOST", "http://localhost:11434"))
         api_key = None
     elif provider == "lmstudio":
-        model = _env("PDF_TREE_MODEL") or _env("LMSTUDIO_MODEL") or _env("MLX_MODEL") or "local-model"
+        model = model_override or _env("PDF_TREE_MODEL") or _env("LMSTUDIO_MODEL") or _env("MLX_MODEL") or "local-model"
         base_url = normalize_base_url(
             _env("OPENAI_COMPATIBLE_BASE_URL")
             or _env("QUERY_LMSTUDIO_BASE_URL")
@@ -81,11 +84,11 @@ def load_pdf_tree_provider_config() -> PdfTreeProviderConfig:
         )
         api_key = _env("OPENAI_COMPATIBLE_API_KEY") or _env("QUERY_LMSTUDIO_API_KEY") or _env("LMSTUDIO_API_KEY") or "lmstudio"
     elif provider == "openrouter":
-        model = _env("PDF_TREE_MODEL") or _env("OPENROUTER_MODEL", "openrouter/auto")
+        model = model_override or _env("PDF_TREE_MODEL") or _env("OPENROUTER_MODEL", "openrouter/auto")
         base_url = normalize_base_url(_env("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"), append_v1=True)
         api_key = _env("OPENROUTER_API_KEY") or None
     else:
-        model = _env("PDF_TREE_MODEL") or _env("OPENAI_COMPATIBLE_MODEL", "local-model")
+        model = model_override or _env("PDF_TREE_MODEL") or _env("OPENAI_COMPATIBLE_MODEL", "local-model")
         base_url = normalize_base_url(_env("OPENAI_COMPATIBLE_BASE_URL", "http://localhost:1234/v1"), append_v1=True)
         api_key = _env("OPENAI_COMPATIBLE_API_KEY") or None
 

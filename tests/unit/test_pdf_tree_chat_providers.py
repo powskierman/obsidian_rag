@@ -2,7 +2,12 @@ import httpx
 import pytest
 
 from src.services.pdf_tree_chat_providers import build_chat_provider
-from src.services.pdf_tree_config import PdfTreeProviderConfig, normalize_base_url, normalize_pdf_tree_provider
+from src.services.pdf_tree_config import (
+    PdfTreeProviderConfig,
+    load_pdf_tree_provider_config,
+    normalize_base_url,
+    normalize_pdf_tree_provider,
+)
 
 
 def test_normalize_pdf_tree_provider_aliases():
@@ -15,6 +20,19 @@ def test_normalize_pdf_tree_provider_aliases():
 def test_normalize_base_url_appends_v1_when_requested():
     assert normalize_base_url("localhost:1234", append_v1=True) == "http://localhost:1234/v1"
     assert normalize_base_url("http://localhost:1234/v1/", append_v1=True) == "http://localhost:1234/v1"
+
+
+def test_load_pdf_tree_provider_config_uses_provider_and_model_overrides(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "secret")
+    monkeypatch.setenv("OPENROUTER_MODEL", "openrouter/default")
+    monkeypatch.setenv("OLLAMA_MODEL", "ollama/default")
+
+    config = load_pdf_tree_provider_config(provider_override="openrouter", model_override="anthropic/claude")
+
+    assert config.provider == "openrouter"
+    assert config.model == "anthropic/claude"
+    assert config.api_key == "secret"
+    assert config.base_url == "https://openrouter.ai/api/v1"
 
 
 @pytest.mark.asyncio
