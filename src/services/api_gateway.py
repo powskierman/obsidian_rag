@@ -3776,19 +3776,25 @@ async def _retrieve_pdf_tree_sources(
     model: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     from src.services.pdf_tree_chat_providers import build_chat_provider
+    from src.services.pdf_tree_config import load_pdf_tree_retrieval_limits
     from src.services.pdf_tree_retriever import PdfTreeRetriever
     from src.services.pdf_tree_store import PdfTreeStore
 
     config = _pdf_tree_config_with_overrides(provider_name, model)
+    limits = load_pdf_tree_retrieval_limits()
+    effective_max_documents = min(max(1, max_documents), limits.max_documents_per_query)
     provider = build_chat_provider(config)
     try:
         store = PdfTreeStore.from_env()
-        candidate_ids = list(document_ids or [])[: max(1, max_documents)]
-        candidate_source_paths = list(candidate_paths or [])[: max(1, max_documents)]
+        candidate_ids = list(document_ids or [])[: effective_max_documents]
+        candidate_source_paths = list(candidate_paths or [])[: effective_max_documents]
         retriever = PdfTreeRetriever(
             store,
             provider=provider,
-            max_evidence=max(1, max_documents),
+            max_documents=effective_max_documents,
+            max_nodes_inspected=limits.max_nodes_inspected,
+            max_evidence=min(max(1, max_documents), limits.max_evidence),
+            max_chars_per_evidence=limits.max_chars_per_evidence,
             include_trace=include_trace,
         )
         evidence = await retriever.retrieve(

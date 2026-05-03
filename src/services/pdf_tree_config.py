@@ -58,6 +58,32 @@ class PdfTreeProviderConfig:
         return self.provider == "openrouter"
 
 
+@dataclass(frozen=True)
+class PdfTreeRetrievalLimits:
+    max_documents_per_query: int = 3
+    max_nodes_inspected: int = 12
+    max_evidence: int = 5
+    max_chars_per_evidence: int = 1800
+
+
+def _env_int(name: str, default: int, *, minimum: int) -> int:
+    raw = _env(name)
+    try:
+        value = int(raw) if raw else default
+    except ValueError:
+        value = default
+    return max(minimum, value)
+
+
+def load_pdf_tree_retrieval_limits() -> PdfTreeRetrievalLimits:
+    return PdfTreeRetrievalLimits(
+        max_documents_per_query=_env_int("PDF_TREE_MAX_DOCUMENTS_PER_QUERY", 3, minimum=1),
+        max_nodes_inspected=_env_int("PDF_TREE_MAX_NODES_INSPECTED", 12, minimum=1),
+        max_evidence=_env_int("PDF_TREE_MAX_EVIDENCE", 5, minimum=1),
+        max_chars_per_evidence=_env_int("PDF_TREE_MAX_CHARS_PER_EVIDENCE", 1800, minimum=200),
+    )
+
+
 def load_pdf_tree_provider_config(
     provider_override: str | None = None,
     model_override: str | None = None,

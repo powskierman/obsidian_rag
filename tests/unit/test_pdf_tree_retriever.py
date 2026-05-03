@@ -34,6 +34,19 @@ def _write_sample(store: PdfTreeStore, source_file):
     return index
 
 
+def test_pdf_tree_retriever_caps_loaded_documents(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    first = tmp_path / "first.pdf"
+    second = tmp_path / "second.pdf"
+    _write_sample(store, first)
+    _write_sample(store, second)
+    retriever = PdfTreeRetriever(store, max_documents=1)
+
+    indexes = retriever._load_candidates(document_ids=None, source_paths=None)
+
+    assert len(indexes) == 1
+
+
 def test_pdf_tree_retriever_lexical_fallback_returns_page_evidence(tmp_path):
     store = PdfTreeStore(tmp_path / "index")
     source = tmp_path / "Yescarta.pdf"

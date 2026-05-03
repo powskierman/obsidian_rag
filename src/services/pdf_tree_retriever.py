@@ -71,6 +71,7 @@ class PdfTreeRetriever:
         store: PdfTreeStore,
         *,
         provider: ChatProvider | None = None,
+        max_documents: int = 3,
         max_nodes_inspected: int = 12,
         max_evidence: int = 5,
         max_chars_per_evidence: int = 1800,
@@ -78,6 +79,7 @@ class PdfTreeRetriever:
     ) -> None:
         self.store = store
         self.provider = provider
+        self.max_documents = max(1, max_documents)
         self.max_nodes_inspected = max(1, max_nodes_inspected)
         self.max_evidence = max(1, max_evidence)
         self.max_chars_per_evidence = max(200, max_chars_per_evidence)
@@ -118,6 +120,8 @@ class PdfTreeRetriever:
         seen: set[str] = set()
         indexes: list[PdfTreeIndex] = []
         for document_id in ids:
+            if len(indexes) >= self.max_documents:
+                break
             if document_id in seen:
                 continue
             seen.add(document_id)

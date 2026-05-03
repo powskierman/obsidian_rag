@@ -5,6 +5,7 @@ from src.services.pdf_tree_chat_providers import build_chat_provider
 from src.services.pdf_tree_config import (
     PdfTreeProviderConfig,
     load_pdf_tree_provider_config,
+    load_pdf_tree_retrieval_limits,
     normalize_base_url,
     normalize_pdf_tree_provider,
 )
@@ -33,6 +34,20 @@ def test_load_pdf_tree_provider_config_uses_provider_and_model_overrides(monkeyp
     assert config.model == "anthropic/claude"
     assert config.api_key == "secret"
     assert config.base_url == "https://openrouter.ai/api/v1"
+
+
+def test_load_pdf_tree_retrieval_limits_clamps_invalid_env(monkeypatch):
+    monkeypatch.setenv("PDF_TREE_MAX_DOCUMENTS_PER_QUERY", "0")
+    monkeypatch.setenv("PDF_TREE_MAX_NODES_INSPECTED", "-4")
+    monkeypatch.setenv("PDF_TREE_MAX_EVIDENCE", "bad")
+    monkeypatch.setenv("PDF_TREE_MAX_CHARS_PER_EVIDENCE", "40")
+
+    limits = load_pdf_tree_retrieval_limits()
+
+    assert limits.max_documents_per_query == 1
+    assert limits.max_nodes_inspected == 1
+    assert limits.max_evidence == 5
+    assert limits.max_chars_per_evidence == 200
 
 
 @pytest.mark.asyncio

@@ -87,3 +87,16 @@ Expected checks:
 - Rebuild a stale index with `force=true` on `/api/v1/pdf-tree/index`.
 - Remove obsolete document directories from `PDF_TREE_INDEX_HOST_DIR` only when the matching source PDF is no longer used.
 - Keep `manifest.json` with the document directories; it records source SHA, page count, and index versions.
+
+## Runtime Limits
+
+Use these limits to keep PDF tree retrieval predictable on long PDFs or broad queries:
+
+```env
+PDF_TREE_MAX_DOCUMENTS_PER_QUERY=3
+PDF_TREE_MAX_NODES_INSPECTED=12
+PDF_TREE_MAX_EVIDENCE=5
+PDF_TREE_MAX_CHARS_PER_EVIDENCE=1800
+```
+
+`PDF_TREE_MAX_DOCUMENTS_PER_QUERY` caps both explicit candidate paths and manifest-wide fallback queries. `PDF_TREE_MAX_NODES_INSPECTED` limits how many ranked tree nodes can be offered to the selector model per document. `PDF_TREE_MAX_EVIDENCE` caps returned source snippets. `PDF_TREE_MAX_CHARS_PER_EVIDENCE` caps each evidence snippet before it enters answer synthesis.
