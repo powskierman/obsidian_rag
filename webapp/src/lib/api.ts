@@ -46,6 +46,18 @@ export interface LmStudioModelStatus {
   error?: string | null;
 }
 
+export interface PdfTreeProviderStatus {
+  enabled: boolean;
+  provider: 'ollama' | 'lmstudio' | 'openrouter' | 'openai_compatible';
+  configured: boolean;
+  reachable: boolean;
+  hosted: boolean;
+  model: string;
+  baseUrl: string;
+  models: string[];
+  error?: string | null;
+}
+
 const normalizeSource = (source: any): SearchResult => {
   const filepath = source?.filepath || source?.file_path || 'unknown';
   const filename = source?.filename || (typeof filepath === 'string' ? filepath.split('/').pop() : 'unknown') || 'unknown';
@@ -82,6 +94,12 @@ export const api = {
     system_prompt = '',
     depth: 'auto' | 'shallow' | 'staged' | 'full' = 'auto',
     dataSources: ('vault' | 'mempalace' | 'web')[] = ['vault'],
+    pdfTree?: {
+      enabled: boolean;
+      provider?: string;
+      model?: string;
+      candidatePaths?: string[];
+    },
   ): Promise<{
     answer: string;
     sources?: SearchResult[];
@@ -112,6 +130,10 @@ export const api = {
         llm_knowledge: enableLlmKnowledge,
         brief_concept_index,
         system_prompt: system_prompt || null,
+        pdf_tree_enabled: Boolean(pdfTree?.enabled),
+        pdf_tree_provider: pdfTree?.provider || null,
+        pdf_tree_model: pdfTree?.model || null,
+        pdf_tree_candidate_paths: pdfTree?.candidatePaths || null,
       };
       console.log('🌐 API request body:', requestBody);
 
@@ -243,18 +265,20 @@ export const api = {
     console.log("Feedback not yet implemented in V1 Gateway", feedback);
   },
 
-  checkApiKeys: async (): Promise<{ gemini: boolean; anthropic: boolean; openai: boolean }> => {
+  checkApiKeys: async (): Promise<{ gemini: boolean; anthropic: boolean; openai: boolean; openrouter: boolean }> => {
     const config = await api.getEnvConfig();
     return {
       gemini: config.keys.gemini,
       anthropic: config.keys.anthropic,
       openai: config.keys.openai,
+      openrouter: config.keys.openrouter,
     };
   },
 
   getEnvConfig: async (): Promise<{
-    keys: { gemini: boolean; anthropic: boolean; openai: boolean; lmstudio: boolean };
+    keys: { gemini: boolean; anthropic: boolean; openai: boolean; openrouter: boolean; lmstudio: boolean };
     models: Record<string, string>;
+    pdfTree?: PdfTreeProviderStatus;
     vault?: { name?: string; root?: string };
   }> => {
     try {
@@ -264,7 +288,7 @@ export const api = {
       }
       if (!response.ok) {
         return {
-          keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
+          keys: { gemini: false, anthropic: false, openai: false, openrouter: false, lmstudio: false },
           models: {},
           vault: undefined,
         };
@@ -273,9 +297,42 @@ export const api = {
     } catch (error) {
       console.error('Failed to get env config:', error);
       return {
-        keys: { gemini: false, anthropic: false, openai: false, lmstudio: false },
+        keys: { gemini: false, anthropic: false, openai: false, openrouter: false, lmstudio: false },
         models: {},
         vault: undefined,
+      };
+    }
+  },
+
+  getPdfTreeProviderStatus: async (): Promise<PdfTreeProviderStatus> => {
+    try {
+      const response = await fetch('/api/pdf-tree/provider-status');
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      const data = await response.json();
+      return {
+        enabled: Boolean(data?.enabled),
+        provider: data?.provider || 'ollama',
+        configured: Boolean(data?.configured),
+        reachable: Boolean(data?.reachable),
+        hosted: Boolean(data?.hosted),
+        model: String(data?.model || ''),
+        baseUrl: String(data?.baseUrl || ''),
+        models: Array.isArray(data?.models) ? data.models : [],
+        error: typeof data?.error === 'string' ? data.error : null,
+      };
+    } catch (error) {
+      return {
+        enabled: false,
+        provider: 'ollama',
+        configured: false,
+        reachable: false,
+        hosted: false,
+        model: '',
+        baseUrl: '',
+        models: [],
+        error: error instanceof Error ? error.message : String(error),
       };
     }
   },

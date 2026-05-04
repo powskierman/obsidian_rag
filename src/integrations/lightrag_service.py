@@ -974,13 +974,17 @@ def _parse_supported_extensions_env(raw_value: str) -> set[str]:
         if not token.startswith("."):
             token = f".{token}"
         exts.add(token)
-    # Safe default: markdown-only indexing unless explicitly expanded.
+    # PDF indexing in LightRAG is intentionally decommissioned. Long PDFs are
+    # routed to the PDF tree retriever because LightRAG PDF insertion is not
+    # operationally viable for this project.
+    exts.discard(".pdf")
     return exts or {".md"}
 
 
 SUPPORTED_EXTENSIONS = _parse_supported_extensions_env(
     os.getenv("LIGHTRAG_SUPPORTED_EXTENSIONS", ".md")
 )
+DECOMMISSIONED_LIGHTRAG_EXTENSIONS = {".pdf"}
 EXCLUDE_PATH_PATTERNS = []
 INLINE_TAG_PATTERN = re.compile(r"(?<!\\w)#([A-Za-z0-9][A-Za-z0-9/_-]*)")
 
@@ -5364,8 +5368,9 @@ def index_vault():
     """Index vault files from a directory (INCREMENTAL with mtime).
 
     Optional payload fields:
-    - include_extensions: [".md"] or ".md,.pdf"
-    - exclude_extensions: [".pdf"] or ".pdf"
+    - include_extensions: [".md"]
+    - exclude_extensions: extension filters
+    - .pdf is intentionally decommissioned for LightRAG indexing
     - exclude_paths: ["SPECIFICATION.md", "Books/Books/*.md"] or comma-separated string
     """
     try:
@@ -5440,11 +5445,21 @@ def index_vault():
         else:
             effective_extensions = include_extensions & SUPPORTED_EXTENSIONS
         effective_extensions -= exclude_extensions
+        decommissioned_requested = sorted(
+            ((include_extensions or set()) | exclude_extensions) & DECOMMISSIONED_LIGHTRAG_EXTENSIONS
+        )
         if not effective_extensions:
             return jsonify({
                 "error": "No valid extensions to index",
                 "supported_extensions": sorted(SUPPORTED_EXTENSIONS),
+                "decommissioned_extensions": sorted(DECOMMISSIONED_LIGHTRAG_EXTENSIONS),
+                "message": "PDF indexing in LightRAG is decommissioned. Use the PDF tree retrieval pipeline for PDFs.",
             }), 400
+        if decommissioned_requested:
+            logger.info(
+                "Ignoring decommissioned LightRAG extension request(s): %s",
+                decommissioned_requested,
+            )
 
         Path(WORKING_DIR).mkdir(parents=True, exist_ok=True)
 
@@ -5737,6 +5752,7 @@ def index_vault():
                     "total_files": len(all_files),
                     "to_index": len(notes_to_index),
                     "extensions": sorted(effective_extensions),
+                    "decommissioned_extensions_ignored": decommissioned_requested,
                     "excluded_by_path": excluded_path_count,
                     "exclude_paths": effective_exclude_paths,
                 }), 409
@@ -5771,6 +5787,7 @@ def index_vault():
                 "tracked_files": len(indexed_files_state),
                 "tracked_keys_found": tracked_keys_found,
                 "extensions": sorted(effective_extensions),
+                "decommissioned_extensions_ignored": decommissioned_requested,
                 "excluded_by_path": excluded_path_count,
                 "exclude_paths": effective_exclude_paths,
             }), 200
@@ -6010,6 +6027,7 @@ def index_vault():
             "tracked_keys_found": tracked_keys_found,
             "vault_path": vault_path,
             "extensions": sorted(effective_extensions),
+            "decommissioned_extensions_ignored": decommissioned_requested,
             "excluded_by_path": excluded_path_count,
             "exclude_paths": effective_exclude_paths,
             "failed_docs": failed_docs[:50],

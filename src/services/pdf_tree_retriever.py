@@ -1,0 +1,240 @@
+"""Retriever over persisted PDF tree indexes."""
+
+from __future__ import annotations
+
+import json
+import re
+from dataclasses import dataclass, field
+from typing import Any, Sequence
+
+from src.models.pdf_tree import PdfTreeIndex, PdfTreeNode
+from src.services.pdf_tree_chat_providers import ChatProvider
+from src.services.pdf_tree_store import PdfTreeStore
+
+
+@dataclass
+class PdfTreeEvidence:
+    source_type: str
+    path: str
+    title: str
+    section: str
+    page_start: int
+    page_end: int
+    text: str
+    score: float
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_source(self) -> dict[str, Any]:
+        return {
+            "source_type": self.source_type,
+            "sourceType": "direct-excerpt",
+            "sourceCategory": "vault",
+            "filename": self.path.split("/")[-1] if self.path else self.title,
+            "filepath": self.path,
+            "relevance": max(0.0, min(100.0, self.score * 100.0)),
+            "snippet": self.text,
+            "page_start": self.page_start,
+            "page_end": self.page_end,
+            "section": self.section,
+            "metadata": self.metadata,
+        }
+
+
+def _terms(value: str) -> set[str]:
+    return {
+        token.lower()
+        for token in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]{2,}", str(value or ""))
+        if token.lower() not in {"the", "and", "for", "with", "from", "that", "this", "what", "where", "when"}
+    }
+
+
+def _node_text(index: PdfTreeIndex, node: PdfTreeNode, *, max_chars: int) -> str:
+    chunks = [
+        page.text
+        for page in index.pages
+        if node.page_start <= page.page_number <= node.page_end and page.text.strip()
+    ]
+    text = "\n\n".join(chunks).strip() or node.text_preview
+    return text[:max_chars].rstrip()
+
+
+def _walk_nodes(node: PdfTreeNode) -> list[PdfTreeNode]:
+    out = [node]
+    for child in node.children:
+        out.extend(_walk_nodes(child))
+    return out
+
+
+class PdfTreeRetriever:
+    def __init__(
+        self,
+        store: PdfTreeStore,
+        *,
+        provider: ChatProvider | None = None,
+        max_documents: int = 3,
+        max_nodes_inspected: int = 12,
+        max_evidence: int = 5,
+        max_chars_per_evidence: int = 1800,
+        include_trace: bool = False,
+    ) -> None:
+        self.store = store
+        self.provider = provider
+        self.max_documents = max(1, max_documents)
+        self.max_nodes_inspected = max(1, max_nodes_inspected)
+        self.max_evidence = max(1, max_evidence)
+        self.max_chars_per_evidence = max(200, max_chars_per_evidence)
+        self.include_trace = include_trace
+
+    async def retrieve(
+        self,
+        query: str,
+        *,
+        document_ids: Sequence[str] | None = None,
+        source_paths: Sequence[str] | None = None,
+    ) -> list[PdfTreeEvidence]:
+        candidates = self._load_candidates(document_ids=document_ids, source_paths=source_paths)
+        all_evidence: list[PdfTreeEvidence] = []
+        for index in candidates:
+            selected_nodes = await self._select_nodes(query, index)
+            all_evidence.extend(self._nodes_to_evidence(query, index, selected_nodes))
+        all_evidence.sort(key=lambda item: item.score, reverse=True)
+        return all_evidence[: self.max_evidence]
+
+    def _load_candidates(
+        self,
+        *,
+        document_ids: Sequence[str] | None,
+        source_paths: Sequence[str] | None,
+    ) -> list[PdfTreeIndex]:
+        ids: list[str] = []
+        if document_ids:
+            ids.extend(str(document_id) for document_id in document_ids)
+        if source_paths:
+            for path in source_paths:
+                entry = self.store.find_by_source_path(path)
+                if entry:
+                    ids.append(entry.document_id)
+        if not ids:
+            ids.extend(self.store.load_manifest().keys())
+
+        seen: set[str] = set()
+        indexes: list[PdfTreeIndex] = []
+        for document_id in ids:
+            if len(indexes) >= self.max_documents:
+                break
+            if document_id in seen:
+                continue
+            seen.add(document_id)
+            try:
+                indexes.append(self.store.read_index(document_id))
+            except FileNotFoundError:
+                continue
+        return indexes
+
+    async def _select_nodes(self, query: str, index: PdfTreeIndex) -> list[PdfTreeNode]:
+        nodes = [node for node in _walk_nodes(index.root) if node.id != "root"]
+        ranked = self._rank_nodes(query, nodes)
+        shortlist = [node for _, node in ranked[: self.max_nodes_inspected]]
+        if not self.provider or not shortlist:
+            return shortlist[: self.max_evidence]
+
+        prompt = {
+            "query": query,
+            "document": index.title,
+            "nodes": [
+                {
+                    "id": node.id,
+                    "title": node.title,
+                    "page_start": node.page_start,
+                    "page_end": node.page_end,
+                    "preview": node.text_preview[:500],
+                }
+                for node in shortlist
+            ],
+            "instruction": "Return JSON only: {\"node_ids\":[\"...\"]} for the most relevant nodes.",
+        }
+        try:
+            response = await self.provider.complete(
+                [
+                    {"role": "system", "content": "Select relevant PDF tree nodes. Return strict JSON only."},
+                    {"role": "user", "content": json.dumps(prompt, ensure_ascii=False)},
+                ],
+                temperature=0,
+            )
+            selected_ids = self._parse_selected_ids(response)
+        except Exception:
+            selected_ids = []
+        if not selected_ids:
+            return shortlist[: self.max_evidence]
+        by_id = {node.id: node for node in shortlist}
+        selected = [by_id[node_id] for node_id in selected_ids if node_id in by_id]
+        return selected[: self.max_evidence] or shortlist[: self.max_evidence]
+
+    def _rank_nodes(self, query: str, nodes: list[PdfTreeNode]) -> list[tuple[float, PdfTreeNode]]:
+        query_terms = _terms(query)
+        ranked: list[tuple[float, PdfTreeNode]] = []
+        for node in nodes:
+            haystack = f"{node.title} {node.text_preview}"
+            node_terms = _terms(haystack)
+            overlap = len(query_terms & node_terms)
+            phrase_bonus = 0.0
+            lowered = haystack.lower()
+            for term in query_terms:
+                if term in lowered:
+                    phrase_bonus += 0.05
+            score = overlap + phrase_bonus
+            ranked.append((score, node))
+        ranked.sort(key=lambda item: (item[0], -item[1].page_start), reverse=True)
+        return ranked
+
+    def _nodes_to_evidence(
+        self,
+        query: str,
+        index: PdfTreeIndex,
+        nodes: list[PdfTreeNode],
+    ) -> list[PdfTreeEvidence]:
+        ranked = self._rank_nodes(query, nodes)
+        max_score = max((score for score, _ in ranked), default=1.0) or 1.0
+        evidence: list[PdfTreeEvidence] = []
+        for raw_score, node in ranked[: self.max_evidence]:
+            metadata = {
+                "tree_node_id": node.id,
+                "document_id": index.document_id,
+                "retriever": "pdf_tree",
+            }
+            if self.include_trace:
+                metadata["node_metadata"] = node.metadata
+            evidence.append(
+                PdfTreeEvidence(
+                    source_type="pdf_tree",
+                    path=index.source_path,
+                    title=index.title,
+                    section=node.title,
+                    page_start=node.page_start,
+                    page_end=node.page_end,
+                    text=_node_text(index, node, max_chars=self.max_chars_per_evidence),
+                    score=max(0.01, min(1.0, raw_score / max_score)),
+                    metadata=metadata,
+                )
+            )
+        return evidence
+
+    @staticmethod
+    def _parse_selected_ids(response: str) -> list[str]:
+        text = str(response or "").strip()
+        if not text:
+            return []
+        try:
+            data = json.loads(text)
+        except json.JSONDecodeError:
+            match = re.search(r"\{.*\}", text, flags=re.DOTALL)
+            if not match:
+                return []
+            try:
+                data = json.loads(match.group(0))
+            except json.JSONDecodeError:
+                return []
+        ids = data.get("node_ids") if isinstance(data, dict) else None
+        if not isinstance(ids, list):
+            return []
+        return [str(node_id) for node_id in ids if str(node_id).strip()]

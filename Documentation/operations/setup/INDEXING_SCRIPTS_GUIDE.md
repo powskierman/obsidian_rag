@@ -92,9 +92,7 @@ If you only need to update **one** specific index without running the full pipel
     ./Scripts/indexing/index_with_lightrag.sh
     ```
     *   **Note:** Incremental by default (checks file timestamps). Use `--force` to rebuild from scratch.
-    *   **Default policy:** Markdown-only indexing (`.md`). PDFs are excluded unless you explicitly opt in.
-        * Opt-in for PDFs (if ever needed):
-          `LIGHTRAG_SUPPORTED_EXTENSIONS=.md,.pdf ./Scripts/indexing/index_with_lightrag.sh`
+    *   **Default policy:** Markdown-only indexing (`.md`). LightRAG PDF indexing is decommissioned; use the PDF tree retrieval pipeline for PDFs.
     *   **Exclude heavy files (recommended):** set
         `LIGHTRAG_EXCLUDE_PATH_PATTERNS` in `.env` as comma-separated glob patterns
         (for example: `SPECIFICATION.md,PLAN.md,Books/Books/*.md`).

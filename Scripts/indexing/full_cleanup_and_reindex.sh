@@ -201,11 +201,6 @@ echo "=========================================="
 echo "Done. Verify with:"
 echo "  curl -s http://localhost:8001/stats | python3 -m json.tool"
 echo ""
-echo "SECOND PASS — PDFs (~249 files) — run AFTER the .md pass succeeds:"
-echo ""
-echo "  cd $REPO"
-echo "  # Flip scope back on"
-echo '  sed -i.bak "s|^LIGHTRAG_INCLUDE_EXTENSIONS=.*|LIGHTRAG_INCLUDE_EXTENSIONS=.md,.pdf|" .env'
-echo '  sed -i.bak "s|^LIGHTRAG_EXCLUDE_EXTENSIONS=.*|LIGHTRAG_EXCLUDE_EXTENSIONS=|" .env'
-echo "  ./Scripts/indexing/reindex_remaining_pdf_only.sh"
+echo "PDF pass skipped: LightRAG PDF indexing is decommissioned."
+echo "Use the PDF tree retrieval/indexing pipeline for PDFs instead."
 echo "=========================================="

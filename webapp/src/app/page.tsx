@@ -352,6 +352,7 @@ export default function Home() {
                     systemPrompt,
                     settings.researchDepth ?? 'auto',
                     settings.dataSources ?? ['vault'],
+                    settings.pdfTree,
                 );
 
                 let answer = result.answer;

@@ -48,10 +48,11 @@ const llmProviders = [
 
 export default function LLMProviderSelector() {
   const { llmProvider, setLLMProvider } = useApp();
-  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean; openai: boolean }>({
+  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean; openai: boolean; openrouter: boolean }>({
     gemini: false,
     anthropic: false,
-    openai: false
+    openai: false,
+    openrouter: false
   });
 
   useEffect(() => {
@@ -96,8 +97,10 @@ export default function LLMProviderSelector() {
                     ? apiKeys.anthropic
                     : provider.id === 'chatgpt'
                       ? apiKeys.openai
-                      : true;
-                if (!hasKey && !['openrouter', 'chatgpt'].includes(provider.id)) {
+                      : provider.id === 'openrouter'
+                        ? apiKeys.openrouter
+                        : true;
+                if (!hasKey) {
                   return (
                     <div className="text-xs text-yellow-500/70 mt-1 flex items-center gap-1">
                       <span>⚠️</span>

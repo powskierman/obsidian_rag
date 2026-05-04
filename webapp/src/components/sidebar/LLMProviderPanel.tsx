@@ -58,10 +58,11 @@ const llmProviders = [
 ];
 
 export default function LLMProviderPanel({ currentProvider, onSelect, onClose }: LLMProviderPanelProps) {
-  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean; openai: boolean }>({
+  const [apiKeys, setApiKeys] = useState<{ gemini: boolean; anthropic: boolean; openai: boolean; openrouter: boolean }>({
     gemini: false,
     anthropic: false,
-    openai: false
+    openai: false,
+    openrouter: false
   });
 
   useEffect(() => {
@@ -105,7 +106,9 @@ export default function LLMProviderPanel({ currentProvider, onSelect, onClose }:
                 ? apiKeys.anthropic
                 : provider.id === 'chatgpt'
                   ? apiKeys.openai
-                  : true;
+                  : provider.id === 'openrouter'
+                    ? apiKeys.openrouter
+                    : true;
             const showWarning = provider.requiresApiKey && !hasKey;
 
             return (
@@ -144,7 +147,7 @@ export default function LLMProviderPanel({ currentProvider, onSelect, onClose }:
                       <span>Set OPENAI_API_KEY</span>
                     </p>
                   )}
-                  {showWarning && !['openrouter', 'chatgpt'].includes(provider.id) && (
+                  {showWarning && (
                     <p className="text-xs text-yellow-500/70 flex items-center gap-1 mt-1">
                       <span>⚠️</span>
                       <span>API key required</span>
