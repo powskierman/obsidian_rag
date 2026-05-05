@@ -172,7 +172,66 @@ class PdfTreeRetriever:
             return shortlist[: self.max_evidence]
         by_id = {node.id: node for node in shortlist}
         selected = [by_id[node_id] for node_id in selected_ids if node_id in by_id]
-        return selected[: self.max_evidence] or shortlist[: self.max_evidence]
+        if not selected:
+            return shortlist[: self.max_evidence]
+        return self._expand_with_adjacent_ranked_nodes(selected, shortlist, ranked)
+
+    def _expand_with_adjacent_ranked_nodes(
+        self,
+        selected: list[PdfTreeNode],
+        shortlist: list[PdfTreeNode],
+        ranked: list[tuple[float, PdfTreeNode]],
+    ) -> list[PdfTreeNode]:
+        expanded: list[PdfTreeNode] = []
+        seen: set[str] = set()
+
+        def add(node: PdfTreeNode) -> None:
+            if len(expanded) < self.max_evidence and node.id not in seen:
+                expanded.append(node)
+                seen.add(node.id)
+
+        for node in selected:
+            add(node)
+
+        selected_pages = {
+            page
+            for node in selected
+            for page in range(node.page_start, node.page_end + 1)
+        }
+        top_score = max((score for score, _ in ranked), default=0.0)
+        min_score = top_score * 0.35 if top_score > 0 else 0.0
+        ranked_by_id = {node.id: score for score, node in ranked}
+
+        adjacent = sorted(
+            (
+                node for node in shortlist
+                if node.id not in seen
+                and any(
+                    abs(page - selected_page) <= 2
+                    for page in range(node.page_start, node.page_end + 1)
+                    for selected_page in selected_pages
+                )
+                and ranked_by_id.get(node.id, 0.0) >= min_score
+            ),
+            key=lambda node: (
+                min(
+                    abs(page - selected_page)
+                    for page in range(node.page_start, node.page_end + 1)
+                    for selected_page in selected_pages
+                ),
+                node.page_start,
+            ),
+        )
+        for node in adjacent:
+            add(node)
+
+        for score, node in ranked:
+            if score >= min_score:
+                add(node)
+            if len(expanded) >= self.max_evidence:
+                break
+
+        return expanded[: self.max_evidence]
 
     def _rank_nodes(self, query: str, index: PdfTreeIndex, nodes: list[PdfTreeNode]) -> list[tuple[float, PdfTreeNode]]:
         query_terms = _terms(query)

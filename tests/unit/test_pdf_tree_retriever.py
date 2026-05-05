@@ -8,6 +8,11 @@ class SelectingProvider:
         return '{"node_ids":["eligibility"]}'
 
 
+class SelectingProcedureProvider:
+    async def complete(self, messages, **kwargs):
+        return '{"node_ids":["before"]}'
+
+
 def _write_sample(store: PdfTreeStore, source_file):
     source_file.write_bytes(b"sample pdf")
     index = PdfTreeIndex(
@@ -151,3 +156,46 @@ async def test_pdf_tree_retriever_uses_provider_selection(tmp_path):
 
     assert len(evidence) == 1
     assert evidence[0].metadata["tree_node_id"] == "eligibility"
+
+
+async def test_pdf_tree_retriever_preserves_adjacent_nodes_after_provider_selection(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source = tmp_path / "guide-pacemaker-implantation.pdf"
+    source.write_bytes(b"sample pdf")
+    index = PdfTreeIndex(
+        document_id=store.document_id_for_path(source),
+        source_path=source.as_posix(),
+        title="guide-pacemaker-implantation",
+        pages=[
+            PdfPageArtifact(page_number=9, text="Before your procedure patients prepare for admission.", char_count=54),
+            PdfPageArtifact(page_number=10, text="During the procedure the implant occurs in the electrophysiology lab.", char_count=70),
+            PdfPageArtifact(page_number=11, text="After your procedure discharge and follow-up care are reviewed.", char_count=62),
+        ],
+        root=PdfTreeNode(
+            id="root",
+            title="guide-pacemaker-implantation",
+            level=0,
+            page_start=9,
+            page_end=11,
+            children=[
+                PdfTreeNode(id="before", title="Before Your Procedure", level=1, page_start=9, page_end=9, text_preview="Before your procedure patients prepare."),
+                PdfTreeNode(id="during", title="During the Procedure", level=1, page_start=10, page_end=10, text_preview="During the procedure the implant occurs."),
+                PdfTreeNode(id="after", title="After Your Procedure", level=1, page_start=11, page_end=11, text_preview="After your procedure discharge care."),
+            ],
+        ),
+    )
+    store.write_index(index, source_file=source)
+    retriever = PdfTreeRetriever(
+        store,
+        provider=SelectingProcedureProvider(),
+        max_documents=1,
+        max_nodes_inspected=3,
+        max_evidence=3,
+    )
+
+    evidence = await retriever.retrieve(
+        "What should patients expect before, during, and after pacemaker implantation?",
+        source_paths=[source.as_posix()],
+    )
+
+    assert [item.metadata["tree_node_id"] for item in evidence] == ["before", "during", "after"]

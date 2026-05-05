@@ -3479,6 +3479,7 @@ class PdfTreeQueryRequest(BaseModel):
     candidate_paths: Optional[List[str]] = None
     document_ids: Optional[List[str]] = None
     max_documents: int = 3
+    max_evidence: Optional[int] = None
     include_trace: bool = False
     provider: Optional[str] = None
     model: Optional[str] = None
@@ -3659,6 +3660,7 @@ async def query_pdf_tree(request: PdfTreeQueryRequest):
             candidate_paths=request.candidate_paths,
             document_ids=request.document_ids,
             max_documents=request.max_documents,
+            max_evidence=request.max_evidence,
             include_trace=request.include_trace,
             provider_name=request.provider,
             model=request.model,
@@ -3766,6 +3768,7 @@ class UnifiedQueryRequest(BaseModel):
     pdf_tree_enabled: bool = False
     pdf_tree_candidate_paths: Optional[List[str]] = None
     pdf_tree_max_documents: int = 3
+    pdf_tree_max_evidence: Optional[int] = None
     pdf_tree_include_trace: bool = False
     pdf_tree_provider: Optional[str] = None
     pdf_tree_model: Optional[str] = None
@@ -3807,6 +3810,7 @@ async def _retrieve_pdf_tree_sources(
     candidate_paths: Optional[List[str]] = None,
     document_ids: Optional[List[str]] = None,
     max_documents: int = 3,
+    max_evidence: Optional[int] = None,
     include_trace: bool = False,
     provider_name: Optional[str] = None,
     model: Optional[str] = None,
@@ -3819,6 +3823,10 @@ async def _retrieve_pdf_tree_sources(
     config = _pdf_tree_config_with_overrides(provider_name, model)
     limits = load_pdf_tree_retrieval_limits()
     effective_max_documents = min(max(1, max_documents), limits.max_documents_per_query)
+    effective_max_evidence = min(
+        max(1, max_evidence if max_evidence is not None else limits.max_evidence),
+        limits.max_evidence,
+    )
     provider = build_chat_provider(config)
     try:
         store = PdfTreeStore.from_env()
@@ -3829,7 +3837,7 @@ async def _retrieve_pdf_tree_sources(
             provider=provider,
             max_documents=effective_max_documents,
             max_nodes_inspected=limits.max_nodes_inspected,
-            max_evidence=min(max(1, max_documents), limits.max_evidence),
+            max_evidence=effective_max_evidence,
             max_chars_per_evidence=limits.max_chars_per_evidence,
             include_trace=include_trace,
         )
@@ -4208,6 +4216,7 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
                         query=request.query,
                         candidate_paths=request.pdf_tree_candidate_paths,
                         max_documents=request.pdf_tree_max_documents,
+                        max_evidence=request.pdf_tree_max_evidence,
                         include_trace=request.pdf_tree_include_trace,
                         provider_name=request.pdf_tree_provider,
                         model=request.pdf_tree_model,
@@ -4581,6 +4590,7 @@ async def unified_query(request: UnifiedQueryRequest, response: Response):
                             query=request.query,
                             candidate_paths=request.pdf_tree_candidate_paths,
                             max_documents=request.pdf_tree_max_documents,
+                            max_evidence=request.pdf_tree_max_evidence,
                             include_trace=request.pdf_tree_include_trace,
                             provider_name=request.pdf_tree_provider,
                             model=request.pdf_tree_model,
