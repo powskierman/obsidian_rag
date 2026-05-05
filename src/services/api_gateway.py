@@ -3485,7 +3485,7 @@ class PdfTreeQueryRequest(BaseModel):
 
 
 class PdfTreeIndexRequest(BaseModel):
-    pdf_path: str
+    pdf_path: Optional[str] = None
     force: bool = False
 
 
@@ -3571,47 +3571,83 @@ async def get_pdf_tree_provider_status():
 
 @app.post("/api/v1/pdf-tree/index")
 async def index_pdf_tree(request: PdfTreeIndexRequest):
-    """Index one PDF into the PDF tree store."""
+    """Index one PDF, or all PDFs in the vault when pdf_path is omitted."""
     from src.services.pdf_tree_builder import build_pdf_tree_index
     from src.services.pdf_tree_extractor import PDF_TREE_EXTRACTION_VERSION, extract_pdf_pages
     from src.services.pdf_tree_store import DEFAULT_TREE_BUILDER_VERSION, PdfTreeStore
 
     vault_root = _vault_root()
-    requested = Path(request.pdf_path).expanduser()
-    candidate = requested if requested.is_absolute() else vault_root / requested
-    try:
-        resolved = candidate.resolve()
-        resolved.relative_to(vault_root)
-    except Exception:
-        raise HTTPException(status_code=400, detail="pdf_path must resolve inside the configured vault")
-    if not resolved.exists() or resolved.suffix.lower() != ".pdf":
-        raise HTTPException(status_code=404, detail=f"PDF not found: {request.pdf_path}")
-
     store = PdfTreeStore.from_env()
-    document_id = store.document_id_for_path(resolved)
-    if not request.force and not store.is_stale(
-        resolved,
-        document_id=document_id,
-        extraction_version=PDF_TREE_EXTRACTION_VERSION,
-        tree_builder_version=DEFAULT_TREE_BUILDER_VERSION,
-    ):
-        entry = store.load_manifest()[document_id]
-        return {"status": "fresh", **entry.to_dict()}
 
-    pages, extraction_metadata = extract_pdf_pages(resolved)
-    index = build_pdf_tree_index(
-        source_path=resolved,
-        pages=pages,
-        document_id=document_id,
-        metadata=extraction_metadata,
+    def resolve_pdf_path(raw_path: str) -> Path:
+        requested = Path(raw_path).expanduser()
+        candidate = requested if requested.is_absolute() else vault_root / requested
+        try:
+            resolved = candidate.resolve()
+            resolved.relative_to(vault_root)
+        except Exception:
+            raise HTTPException(status_code=400, detail="pdf_path must resolve inside the configured vault")
+        if not resolved.exists() or resolved.suffix.lower() != ".pdf":
+            raise HTTPException(status_code=404, detail=f"PDF not found: {raw_path}")
+        return resolved
+
+    def index_one_pdf(pdf_path: Path) -> Dict[str, Any]:
+        document_id = store.document_id_for_path(pdf_path)
+        if not request.force and not store.is_stale(
+            pdf_path,
+            document_id=document_id,
+            extraction_version=PDF_TREE_EXTRACTION_VERSION,
+            tree_builder_version=DEFAULT_TREE_BUILDER_VERSION,
+        ):
+            entry = store.load_manifest()[document_id]
+            return {"status": "fresh", **entry.to_dict()}
+
+        pages, extraction_metadata = extract_pdf_pages(pdf_path)
+        index = build_pdf_tree_index(
+            source_path=pdf_path,
+            pages=pages,
+            document_id=document_id,
+            metadata=extraction_metadata,
+        )
+        entry = store.write_index(
+            index,
+            source_file=pdf_path,
+            extraction_version=PDF_TREE_EXTRACTION_VERSION,
+            tree_builder_version=DEFAULT_TREE_BUILDER_VERSION,
+        )
+        return {"status": "indexed", **entry.to_dict()}
+
+    if request.pdf_path:
+        return index_one_pdf(resolve_pdf_path(request.pdf_path))
+
+    pdf_paths = sorted(
+        path for path in vault_root.rglob("*.pdf")
+        if path.is_file() and not any(part.startswith(".") for part in path.relative_to(vault_root).parts)
     )
-    entry = store.write_index(
-        index,
-        source_file=resolved,
-        extraction_version=PDF_TREE_EXTRACTION_VERSION,
-        tree_builder_version=DEFAULT_TREE_BUILDER_VERSION,
-    )
-    return {"status": "indexed", **entry.to_dict()}
+    results: List[Dict[str, Any]] = []
+    failed_docs: List[Dict[str, str]] = []
+    for pdf_path in pdf_paths:
+        try:
+            result = index_one_pdf(pdf_path)
+            result["source_path"] = pdf_path.relative_to(vault_root).as_posix()
+            results.append(result)
+        except Exception as exc:
+            failed_docs.append({
+                "pdf_path": pdf_path.relative_to(vault_root).as_posix(),
+                "error": str(exc),
+            })
+
+    indexed_count = sum(1 for result in results if result.get("status") == "indexed")
+    fresh_count = sum(1 for result in results if result.get("status") == "fresh")
+    return {
+        "status": "indexed_vault",
+        "force": request.force,
+        "total_pdf_files": len(pdf_paths),
+        "indexed_count": indexed_count,
+        "fresh_count": fresh_count,
+        "failed_count": len(failed_docs),
+        "failed_docs": failed_docs[:20],
+    }
 
 
 @app.post("/api/v1/pdf-tree/query")

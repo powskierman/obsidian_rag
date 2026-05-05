@@ -2,6 +2,8 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
+import { proxyGatewayJson } from '../_lib/gateway';
+
 // OBSIDIAN_PROJECT_ROOT is required when the server runs via launchd or Docker
 // (stripped environment where process.cwd() may not resolve to the project root).
 // Set it in .env.local: OBSIDIAN_PROJECT_ROOT=/Users/michel/dev/obsidian_rag
@@ -51,7 +53,7 @@ interface Command {
   args: string[];
   env?: Record<string, string>;
   label: string;
-  kind?: 'process' | 'lightrag-api';
+  kind?: 'process' | 'lightrag-api' | 'pdf-tree-api';
   payload?: Record<string, unknown>;
   url?: string;
 }
@@ -140,6 +142,18 @@ function buildCommands(databases: string[], mode: string, options: IndexOptions 
     });
   }
 
+  if (databases.includes('pdf-tree')) {
+    commands.push({
+      cmd: 'POST',
+      args: ['/api/v1/pdf-tree/index'],
+      label: `PDF Tree (${mode})`,
+      kind: 'pdf-tree-api',
+      payload: {
+        force: full,
+      },
+    });
+  }
+
   return commands;
 }
 
@@ -165,6 +179,10 @@ function runCommands(commands: Command[]): void {
 
     if (commands[index].kind === 'lightrag-api') {
       void runLightRagCommand(commands[index], () => runNext(index + 1), push);
+      return;
+    }
+    if (commands[index].kind === 'pdf-tree-api') {
+      void runPdfTreeCommand(commands[index], () => runNext(index + 1), push);
       return;
     }
 
@@ -287,7 +305,78 @@ async function runLightRagCommand(
   }
 }
 
-const VALID_DATABASES = new Set(['vector', 'graph', 'lightrag', 'mempalace']);
+async function runPdfTreeCommand(
+  command: Command,
+  onComplete: () => void,
+  push: (...lines: string[]) => void,
+): Promise<void> {
+  push(`  endpoint: /api/v1/pdf-tree/index`, `  payload: ${JSON.stringify(command.payload)}`);
+
+  try {
+    const response = await proxyGatewayJson(
+      '/api/v1/pdf-tree/index',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(command.payload ?? {}),
+      },
+      4 * 60 * 60 * 1000,
+    );
+    const text = await response.text();
+    let parsed: Record<string, unknown> | null = null;
+    try {
+      parsed = text ? JSON.parse(text) : {};
+    } catch {
+      parsed = null;
+    }
+
+    if (!response.ok) {
+      state.running = false;
+      state.exitCode = response.status;
+      state.error = `"${command.label}" failed with HTTP ${response.status}`;
+      push(text || state.error);
+      return;
+    }
+
+    if (parsed) {
+      const status = String(parsed.status ?? 'unknown');
+      const total = parsed.total_pdf_files;
+      const indexed = parsed.indexed_count;
+      const fresh = parsed.fresh_count;
+      const failed = parsed.failed_count;
+      push(
+        `status=${status}`,
+        `total_pdf_files=${total ?? '<unknown>'}`,
+        `indexed_count=${indexed ?? '<unknown>'}`,
+        `fresh_count=${fresh ?? '<unknown>'}`,
+        `failed_count=${failed ?? '<unknown>'}`,
+      );
+
+      const failedCount = Number(failed ?? 0);
+      if (failedCount > 0) {
+        const failedDocs = Array.isArray(parsed.failed_docs) ? parsed.failed_docs.slice(0, 5) : [];
+        for (const item of failedDocs) {
+          push(`failed: ${JSON.stringify(item)}`);
+        }
+        state.running = false;
+        state.exitCode = 1;
+        state.error = `"${command.label}" finished with ${failedCount} failed PDF${failedCount === 1 ? '' : 's'}`;
+        return;
+      }
+    } else if (text) {
+      push(text);
+    }
+
+    push(`✓ ${command.label} complete`);
+    onComplete();
+  } catch (error) {
+    state.running = false;
+    state.exitCode = 1;
+    state.error = `"${command.label}" failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
+  }
+}
+
+const VALID_DATABASES = new Set(['vector', 'graph', 'lightrag', 'mempalace', 'pdf-tree']);
 const VALID_MODES = new Set(['partial', 'full']);
 
 export async function POST(request: Request) {

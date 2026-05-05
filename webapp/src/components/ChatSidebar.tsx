@@ -11,7 +11,7 @@ interface ChatSidebarProps {
     systemPromptActive?: boolean;
 }
 
-type DbKey = 'vector' | 'graph' | 'lightrag' | 'mempalace';
+type DbKey = 'vector' | 'graph' | 'lightrag' | 'pdf-tree' | 'mempalace';
 type IndexMode = 'partial' | 'full';
 
 interface MaintenanceService {
@@ -28,6 +28,7 @@ const INDEX_DATABASES: Array<{ key: DbKey; label: string }> = [
     { key: 'vector', label: 'Vector' },
     { key: 'graph', label: 'NetworkX' },
     { key: 'lightrag', label: 'LightRAG' },
+    { key: 'pdf-tree', label: 'PDF Tree' },
     { key: 'mempalace', label: 'MemPalace' },
 ];
 
@@ -50,6 +51,8 @@ export default function ChatSidebar({ onVaultInfo, onSettings, onPrompt, systemP
     const [maintenanceLoading, setMaintenanceLoading] = useState(false);
     const [maintenanceError, setMaintenanceError] = useState<string | null>(null);
     const [maintenanceServices, setMaintenanceServices] = useState<MaintenanceService[]>([]);
+    const [maintenanceCanStart, setMaintenanceCanStart] = useState(false);
+    const [maintenanceNotice, setMaintenanceNotice] = useState<string | null>(null);
     const [startingServices, setStartingServices] = useState(false);
     const [indexDatabases, setIndexDatabases] = useState<Set<DbKey>>(new Set(['vector']));
     const [indexMode, setIndexMode] = useState<IndexMode>('partial');
@@ -106,6 +109,8 @@ export default function ChatSidebar({ onVaultInfo, onSettings, onPrompt, systemP
             const res = await fetch('/api/maintenance');
             const data = await res.json();
             setMaintenanceServices(Array.isArray(data.services) ? data.services : []);
+            setMaintenanceCanStart(Boolean(data.canStart));
+            setMaintenanceNotice(typeof data.notice === 'string' ? data.notice : null);
             if (!data.available && data.error) {
                 setMaintenanceError(data.error);
             }
@@ -124,6 +129,10 @@ export default function ChatSidebar({ onVaultInfo, onSettings, onPrompt, systemP
         const targets = maintenanceServices
             .filter((service) => !service.running)
             .map((service) => service.service);
+        if (!maintenanceCanStart) {
+            setMaintenanceError('Service start requires Docker CLI access from the webapp runtime.');
+            return;
+        }
         setStartingServices(true);
         setMaintenanceError(null);
         try {
@@ -143,7 +152,7 @@ export default function ChatSidebar({ onVaultInfo, onSettings, onPrompt, systemP
         } finally {
             setStartingServices(false);
         }
-    }, [maintenanceServices, refreshServices]);
+    }, [maintenanceCanStart, maintenanceServices, refreshServices]);
 
     const stopIndexPolling = useCallback(() => {
         if (indexPollRef.current) {
@@ -337,18 +346,26 @@ export default function ChatSidebar({ onVaultInfo, onSettings, onPrompt, systemP
                                 </button>
                                 <button
                                     onClick={handleStartServices}
-                                    disabled={startingServices}
+                                    disabled={startingServices || !maintenanceCanStart}
                                     className="flex-1 flex items-center justify-center gap-1.5 rounded-md border border-green-500/20 bg-green-500/10 px-2 py-2 text-[11px] font-medium text-green-200 transition-colors hover:bg-green-500/15 disabled:opacity-50"
+                                    title={maintenanceCanStart ? 'Start stopped Docker services' : 'Docker CLI is unavailable from this webapp runtime'}
                                 >
                                     <Play size={13} />
                                     {stoppedServices > 0 ? `Start ${stoppedServices}` : 'Start all'}
                                 </button>
                             </div>
 
-                            {maintenanceError && (
-                                <div className="flex gap-2 rounded-md border border-red-500/20 bg-red-500/10 px-2 py-2 text-[10px] leading-snug text-red-200">
+                                    {maintenanceError && (
+                                        <div className="flex gap-2 rounded-md border border-red-500/20 bg-red-500/10 px-2 py-2 text-[10px] leading-snug text-red-200">
+                                            <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
+                                            <span className="line-clamp-3">{maintenanceError}</span>
+                                        </div>
+                                    )}
+
+                            {maintenanceNotice && !maintenanceError && (
+                                <div className="flex gap-2 rounded-md border border-yellow-500/20 bg-yellow-500/10 px-2 py-2 text-[10px] leading-snug text-yellow-100/80">
                                     <AlertCircle size={13} className="mt-0.5 flex-shrink-0" />
-                                    <span className="line-clamp-3">{maintenanceError}</span>
+                                    <span className="line-clamp-3">{maintenanceNotice}</span>
                                 </div>
                             )}
 

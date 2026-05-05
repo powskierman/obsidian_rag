@@ -20,11 +20,12 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
   const enhancedDisabled = settings.deepThinking;
 
   // Indexing state
-  type DbKey = 'vector' | 'graph' | 'lightrag' | 'mempalace';
+  type DbKey = 'vector' | 'graph' | 'lightrag' | 'pdf-tree' | 'mempalace';
   const DB_META: Record<DbKey, { label: string; desc: string }> = {
     vector:    { label: 'Vector DB',   desc: 'ChromaDB — semantic search' },
     graph:     { label: 'Graph DB',    desc: 'NetworkX — structural links' },
     lightrag:  { label: 'LightRAG',   desc: 'LightRAG — knowledge graph' },
+    'pdf-tree': { label: 'PDF Tree', desc: 'Page-aware PDF retrieval index' },
     mempalace: { label: 'MemPalace',  desc: 'MemPalace — compressed memory' },
   };
   const [indexDatabases, setIndexDatabases] = useState<Set<DbKey>>(new Set(['vector']));
@@ -578,14 +579,14 @@ export default function SettingsPanelModal({ onClose }: SettingsPanelModalProps)
                   </label>
                   <button
                     onClick={() => setIndexDatabases(
-                      indexDatabases.size === 4
+                      indexDatabases.size === 5
                         ? new Set()
-                        : new Set(['vector', 'graph', 'lightrag', 'mempalace'] as DbKey[])
+                        : new Set(['vector', 'graph', 'lightrag', 'pdf-tree', 'mempalace'] as DbKey[])
                     )}
                     disabled={indexRunning}
                     className="text-[10px] text-[#0A84FF] hover:text-[#0A84FF]/80 disabled:opacity-50"
                   >
-                    {indexDatabases.size === 4 ? 'deselect all' : 'select all'}
+                    {indexDatabases.size === 5 ? 'deselect all' : 'select all'}
                   </button>
                 </div>
                 <div className="space-y-1.5">
