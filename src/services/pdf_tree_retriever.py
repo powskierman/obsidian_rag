@@ -88,6 +88,17 @@ def _needs_adjacent_context(query: str) -> bool:
     return sum(1 for marker in sequence_markers if marker in lowered) >= 2
 
 
+def _prefers_forward_sequence_context(query: str) -> bool:
+    lowered = str(query or "").lower()
+    return (
+        "after" in lowered
+        or "recovery" in lowered
+        or "follow-up" in lowered
+        or "follow up" in lowered
+        or "discharge" in lowered
+    ) and ("before" in lowered or "during" in lowered or "procedure" in lowered)
+
+
 class PdfTreeRetriever:
     def __init__(
         self,
@@ -232,8 +243,20 @@ class PdfTreeRetriever:
         top_score = max((score for score, _ in ranked), default=0.0)
         min_score = top_score * 0.35 if top_score > 0 else 0.0
         include_low_scoring_adjacent = _needs_adjacent_context(query)
+        prefer_forward_adjacent = _prefers_forward_sequence_context(query)
         ranked_by_id = {node.id: score for score, node in ranked}
         ranked_nodes = [node for _, node in ranked]
+        anchor_page = min(selected_pages) if selected_pages else 1
+
+        def adjacency_sort_key(node: PdfTreeNode) -> tuple[int, int, int, int]:
+            distance = min(
+                abs(page - selected_page)
+                for page in range(node.page_start, node.page_end + 1)
+                for selected_page in selected_pages
+            )
+            backward_penalty = 1 if prefer_forward_adjacent and node.page_start < anchor_page else 0
+            forward_distance = max(0, node.page_start - anchor_page)
+            return (backward_penalty, forward_distance if prefer_forward_adjacent else distance, distance, node.page_start)
 
         adjacent = sorted(
             (
@@ -247,14 +270,7 @@ class PdfTreeRetriever:
                 )
                 and (include_low_scoring_adjacent or ranked_by_id.get(node.id, 0.0) >= min_score)
             ),
-            key=lambda node: (
-                min(
-                    abs(page - selected_page)
-                    for page in range(node.page_start, node.page_end + 1)
-                    for selected_page in selected_pages
-                ),
-                node.page_start,
-            ),
+            key=adjacency_sort_key,
         )
         for node in adjacent:
             add(node)

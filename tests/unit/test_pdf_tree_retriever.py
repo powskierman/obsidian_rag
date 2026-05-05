@@ -1,3 +1,5 @@
+import asyncio
+
 from src.models.pdf_tree import PdfPageArtifact, PdfTreeIndex, PdfTreeNode
 from src.services.pdf_tree_retriever import PdfTreeRetriever
 from src.services.pdf_tree_store import PdfTreeStore
@@ -184,19 +186,19 @@ def test_pdf_tree_retriever_dedupes_same_page_headings(tmp_path):
     assert len(evidence) == 2
 
 
-async def test_pdf_tree_retriever_uses_provider_selection(tmp_path):
+def test_pdf_tree_retriever_uses_provider_selection(tmp_path):
     store = PdfTreeStore(tmp_path / "index")
     source = tmp_path / "Yescarta.pdf"
     _write_sample(store, source)
     retriever = PdfTreeRetriever(store, provider=SelectingProvider(), max_evidence=2)
 
-    evidence = await retriever.retrieve("who is eligible?", source_paths=[source.as_posix()])
+    evidence = asyncio.run(retriever.retrieve("who is eligible?", source_paths=[source.as_posix()]))
 
     assert len(evidence) == 1
     assert evidence[0].metadata["tree_node_id"] == "eligibility"
 
 
-async def test_pdf_tree_retriever_preserves_adjacent_nodes_after_provider_selection(tmp_path):
+def test_pdf_tree_retriever_preserves_adjacent_nodes_after_provider_selection(tmp_path):
     store = PdfTreeStore(tmp_path / "index")
     source = tmp_path / "guide-pacemaker-implantation.pdf"
     source.write_bytes(b"sample pdf")
@@ -231,15 +233,17 @@ async def test_pdf_tree_retriever_preserves_adjacent_nodes_after_provider_select
         max_evidence=3,
     )
 
-    evidence = await retriever.retrieve(
-        "What should patients expect before, during, and after pacemaker implantation?",
-        source_paths=[source.as_posix()],
+    evidence = asyncio.run(
+        retriever.retrieve(
+            "What should patients expect before, during, and after pacemaker implantation?",
+            source_paths=[source.as_posix()],
+        )
     )
 
     assert [item.metadata["tree_node_id"] for item in evidence] == ["before", "during", "after"]
 
 
-async def test_pdf_tree_retriever_adds_adjacent_pages_beyond_shortlist_for_sequence_queries(tmp_path):
+def test_pdf_tree_retriever_adds_adjacent_pages_beyond_shortlist_for_sequence_queries(tmp_path):
     store = PdfTreeStore(tmp_path / "index")
     source = tmp_path / "guide-pacemaker-implantation.pdf"
     source.write_bytes(b"sample pdf")
@@ -275,9 +279,57 @@ async def test_pdf_tree_retriever_adds_adjacent_pages_beyond_shortlist_for_seque
         max_evidence=3,
     )
 
-    evidence = await retriever.retrieve(
-        "What should patients expect before, during, and after pacemaker implantation?",
-        source_paths=[source.as_posix()],
+    evidence = asyncio.run(
+        retriever.retrieve(
+            "What should patients expect before, during, and after pacemaker implantation?",
+            source_paths=[source.as_posix()],
+        )
+    )
+
+    assert [item.page_start for item in evidence] == [9, 10, 11]
+
+
+def test_pdf_tree_retriever_prefers_forward_pages_for_before_during_after_queries(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source = tmp_path / "guide-pacemaker-implantation.pdf"
+    source.write_bytes(b"sample pdf")
+    index = PdfTreeIndex(
+        document_id=store.document_id_for_path(source),
+        source_path=source.as_posix(),
+        title="guide-pacemaker-implantation",
+        pages=[
+            PdfPageArtifact(page_number=8, text="General pacemaker background and electrical leads.", char_count=50),
+            PdfPageArtifact(page_number=9, text="Before your procedure patients prepare for admission.", char_count=54),
+            PdfPageArtifact(page_number=10, text="During the procedure the implant occurs in the electrophysiology lab.", char_count=70),
+            PdfPageArtifact(page_number=11, text="After your procedure discharge and follow-up care are reviewed.", char_count=62),
+        ],
+        root=PdfTreeNode(
+            id="root",
+            title="guide-pacemaker-implantation",
+            level=0,
+            page_start=8,
+            page_end=11,
+            children=[
+                PdfTreeNode(id="background", title="Electrical Leads", level=1, page_start=8, page_end=8, text_preview="General pacemaker background and electrical leads."),
+                PdfTreeNode(id="before", title="Preparing for a Pacemaker Implant", level=1, page_start=9, page_end=9, text_preview="Before your procedure patients prepare."),
+                PdfTreeNode(id="during", title="In the Electrophysiology Lab", level=1, page_start=10, page_end=10, text_preview="During the procedure."),
+                PdfTreeNode(id="after", title="After Your Procedure", level=1, page_start=11, page_end=11, text_preview="After your procedure discharge care."),
+            ],
+        ),
+    )
+    store.write_index(index, source_file=source)
+    retriever = PdfTreeRetriever(
+        store,
+        max_documents=1,
+        max_nodes_inspected=2,
+        max_evidence=3,
+    )
+
+    evidence = asyncio.run(
+        retriever.retrieve(
+            "What should patients expect before, during, and after pacemaker implantation?",
+            source_paths=[source.as_posix()],
+        )
     )
 
     assert [item.page_start for item in evidence] == [9, 10, 11]
