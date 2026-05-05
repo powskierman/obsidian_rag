@@ -69,6 +69,25 @@ def _walk_nodes(node: PdfTreeNode) -> list[PdfTreeNode]:
     return out
 
 
+def _needs_adjacent_context(query: str) -> bool:
+    lowered = str(query or "").lower()
+    sequence_markers = (
+        "before",
+        "during",
+        "after",
+        "procedure",
+        "process",
+        "steps",
+        "timeline",
+        "expect",
+        "recovery",
+        "follow-up",
+        "follow up",
+        "discharge",
+    )
+    return sum(1 for marker in sequence_markers if marker in lowered) >= 2
+
+
 class PdfTreeRetriever:
     def __init__(
         self,
@@ -101,7 +120,10 @@ class PdfTreeRetriever:
         for index in candidates:
             selected_nodes = await self._select_nodes(query, index)
             all_evidence.extend(self._nodes_to_evidence(query, index, selected_nodes))
-        all_evidence.sort(key=lambda item: item.score, reverse=True)
+        if _needs_adjacent_context(query):
+            all_evidence.sort(key=lambda item: (item.path, item.page_start, item.page_end, item.section))
+        else:
+            all_evidence.sort(key=lambda item: item.score, reverse=True)
         return all_evidence[: self.max_evidence]
 
     def _load_candidates(
@@ -140,7 +162,9 @@ class PdfTreeRetriever:
         ranked = self._rank_nodes(query, index, nodes)
         shortlist = [node for _, node in ranked[: self.max_nodes_inspected]]
         if not self.provider or not shortlist:
-            return shortlist[: self.max_evidence]
+            if not shortlist:
+                return []
+            return self._expand_with_adjacent_ranked_nodes(query, [shortlist[0]], ranked)
 
         prompt = {
             "query": query,
@@ -169,26 +193,33 @@ class PdfTreeRetriever:
         except Exception:
             selected_ids = []
         if not selected_ids:
-            return shortlist[: self.max_evidence]
+            return self._expand_with_adjacent_ranked_nodes(query, [shortlist[0]], ranked)
         by_id = {node.id: node for node in shortlist}
         selected = [by_id[node_id] for node_id in selected_ids if node_id in by_id]
         if not selected:
-            return shortlist[: self.max_evidence]
-        return self._expand_with_adjacent_ranked_nodes(selected, shortlist, ranked)
+            return self._expand_with_adjacent_ranked_nodes(query, [shortlist[0]], ranked)
+        return self._expand_with_adjacent_ranked_nodes(query, selected, ranked)
 
     def _expand_with_adjacent_ranked_nodes(
         self,
+        query: str,
         selected: list[PdfTreeNode],
-        shortlist: list[PdfTreeNode],
         ranked: list[tuple[float, PdfTreeNode]],
     ) -> list[PdfTreeNode]:
         expanded: list[PdfTreeNode] = []
-        seen: set[str] = set()
+        seen_ids: set[str] = set()
+        seen_page_ranges: set[tuple[int, int]] = set()
 
         def add(node: PdfTreeNode) -> None:
-            if len(expanded) < self.max_evidence and node.id not in seen:
+            page_range = (node.page_start, node.page_end)
+            if (
+                len(expanded) < self.max_evidence
+                and node.id not in seen_ids
+                and page_range not in seen_page_ranges
+            ):
                 expanded.append(node)
-                seen.add(node.id)
+                seen_ids.add(node.id)
+                seen_page_ranges.add(page_range)
 
         for node in selected:
             add(node)
@@ -200,18 +231,21 @@ class PdfTreeRetriever:
         }
         top_score = max((score for score, _ in ranked), default=0.0)
         min_score = top_score * 0.35 if top_score > 0 else 0.0
+        include_low_scoring_adjacent = _needs_adjacent_context(query)
         ranked_by_id = {node.id: score for score, node in ranked}
+        ranked_nodes = [node for _, node in ranked]
 
         adjacent = sorted(
             (
-                node for node in shortlist
-                if node.id not in seen
+                node for node in ranked_nodes
+                if node.id not in seen_ids
+                and (node.page_start, node.page_end) not in seen_page_ranges
                 and any(
                     abs(page - selected_page) <= 2
                     for page in range(node.page_start, node.page_end + 1)
                     for selected_page in selected_pages
                 )
-                and ranked_by_id.get(node.id, 0.0) >= min_score
+                and (include_low_scoring_adjacent or ranked_by_id.get(node.id, 0.0) >= min_score)
             ),
             key=lambda node: (
                 min(
@@ -284,7 +318,12 @@ class PdfTreeRetriever:
         ranked = self._rank_nodes(query, index, nodes)
         max_score = max((score for score, _ in ranked), default=1.0) or 1.0
         evidence: list[PdfTreeEvidence] = []
-        for raw_score, node in ranked[: self.max_evidence]:
+        seen_page_ranges: set[tuple[int, int]] = set()
+        for raw_score, node in ranked:
+            page_range = (node.page_start, node.page_end)
+            if page_range in seen_page_ranges:
+                continue
+            seen_page_ranges.add(page_range)
             metadata = {
                 "tree_node_id": node.id,
                 "document_id": index.document_id,
@@ -305,6 +344,10 @@ class PdfTreeRetriever:
                     metadata=metadata,
                 )
             )
+            if len(evidence) >= self.max_evidence:
+                break
+        if _needs_adjacent_context(query):
+            evidence.sort(key=lambda item: (item.page_start, item.page_end, item.section))
         return evidence
 
     @staticmethod

@@ -146,6 +146,44 @@ def test_pdf_tree_retriever_penalizes_title_only_cover_for_broad_questions(tmp_p
     assert {item.metadata["tree_node_id"] for item in evidence} == {"before", "during-after"}
 
 
+def test_pdf_tree_retriever_dedupes_same_page_headings(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source = tmp_path / "guide-pacemaker-implantation.pdf"
+    source.write_bytes(b"sample pdf")
+    page_text = "Preparing for a Pacemaker Implant. Before your procedure and day of procedure details."
+    index = PdfTreeIndex(
+        document_id=store.document_id_for_path(source),
+        source_path=source.as_posix(),
+        title="guide-pacemaker-implantation",
+        pages=[
+            PdfPageArtifact(page_number=9, text=page_text, char_count=len(page_text)),
+            PdfPageArtifact(page_number=10, text="During the procedure details.", char_count=29),
+        ],
+        root=PdfTreeNode(
+            id="root",
+            title="guide-pacemaker-implantation",
+            level=0,
+            page_start=9,
+            page_end=10,
+            children=[
+                PdfTreeNode(id="p9-h1", title="Preparing for a Pacemaker Implant", level=1, page_start=9, page_end=9, text_preview=page_text),
+                PdfTreeNode(id="p9-h2", title="What are the risks of a pacemaker implant?", level=1, page_start=9, page_end=9, text_preview=page_text),
+                PdfTreeNode(id="p10-h1", title="In the Electrophysiology Lab", level=1, page_start=10, page_end=10, text_preview="During the procedure details."),
+            ],
+        ),
+    )
+    retriever = PdfTreeRetriever(store, max_evidence=3)
+
+    evidence = retriever._nodes_to_evidence(
+        "What should patients expect before and during pacemaker implantation?",
+        index,
+        index.root.children,
+    )
+
+    assert [item.page_start for item in evidence] == [9, 10]
+    assert len(evidence) == 2
+
+
 async def test_pdf_tree_retriever_uses_provider_selection(tmp_path):
     store = PdfTreeStore(tmp_path / "index")
     source = tmp_path / "Yescarta.pdf"
@@ -199,3 +237,47 @@ async def test_pdf_tree_retriever_preserves_adjacent_nodes_after_provider_select
     )
 
     assert [item.metadata["tree_node_id"] for item in evidence] == ["before", "during", "after"]
+
+
+async def test_pdf_tree_retriever_adds_adjacent_pages_beyond_shortlist_for_sequence_queries(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source = tmp_path / "guide-pacemaker-implantation.pdf"
+    source.write_bytes(b"sample pdf")
+    index = PdfTreeIndex(
+        document_id=store.document_id_for_path(source),
+        source_path=source.as_posix(),
+        title="guide-pacemaker-implantation",
+        pages=[
+            PdfPageArtifact(page_number=9, text="Before your procedure patients prepare for admission.", char_count=54),
+            PdfPageArtifact(page_number=10, text="During the procedure the implant occurs in the electrophysiology lab.", char_count=70),
+            PdfPageArtifact(page_number=11, text="After your procedure discharge and follow-up care are reviewed.", char_count=62),
+            PdfPageArtifact(page_number=14, text="The pacemaker clinic cares for patients with pacemakers.", char_count=58),
+        ],
+        root=PdfTreeNode(
+            id="root",
+            title="guide-pacemaker-implantation",
+            level=0,
+            page_start=9,
+            page_end=14,
+            children=[
+                PdfTreeNode(id="before", title="Preparing for a Pacemaker Implant", level=1, page_start=9, page_end=9, text_preview="Before your procedure patients prepare."),
+                PdfTreeNode(id="clinic", title="About the Pacemaker Clinic", level=1, page_start=14, page_end=14, text_preview="The pacemaker clinic cares for patients with pacemakers."),
+                PdfTreeNode(id="during", title="In the Electrophysiology Lab", level=1, page_start=10, page_end=10, text_preview="During the procedure."),
+                PdfTreeNode(id="after", title="After Your Procedure", level=1, page_start=11, page_end=11, text_preview="After your procedure discharge care."),
+            ],
+        ),
+    )
+    store.write_index(index, source_file=source)
+    retriever = PdfTreeRetriever(
+        store,
+        max_documents=1,
+        max_nodes_inspected=2,
+        max_evidence=3,
+    )
+
+    evidence = await retriever.retrieve(
+        "What should patients expect before, during, and after pacemaker implantation?",
+        source_paths=[source.as_posix()],
+    )
+
+    assert [item.page_start for item in evidence] == [9, 10, 11]
