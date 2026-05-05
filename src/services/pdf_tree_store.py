@@ -167,10 +167,21 @@ class PdfTreeStore:
                         pages.append(PdfPageArtifact.from_dict(json.loads(line)))
         return PdfTreeIndex.from_tree_dict(tree_data, pages=pages)
 
+    def _source_path_keys(self, source_path: str | Path) -> set[str]:
+        normalized = Path(source_path).expanduser().as_posix()
+        keys = {normalized, normalized.lstrip("/")}
+        for root in {"/app/vault", os.getenv("OBSIDIAN_VAULT_PATH", "/app/vault")}:
+            root_path = Path(root).expanduser().as_posix().rstrip("/")
+            if normalized == root_path:
+                keys.add("")
+            elif normalized.startswith(f"{root_path}/"):
+                keys.add(normalized[len(root_path) + 1 :])
+        return keys
+
     def find_by_source_path(self, source_path: str | Path) -> PdfTreeManifestEntry | None:
-        normalized = Path(source_path).as_posix()
+        requested_keys = self._source_path_keys(source_path)
         for entry in self.load_manifest().values():
-            if entry.source_path == normalized:
+            if requested_keys & self._source_path_keys(entry.source_path):
                 return entry
         return None
 

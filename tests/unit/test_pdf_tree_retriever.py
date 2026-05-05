@@ -54,6 +54,69 @@ def test_pdf_tree_retriever_caps_loaded_documents(tmp_path):
     assert len(indexes) == 1
 
 
+def test_pdf_tree_retriever_matches_relative_candidate_to_app_vault_manifest_path(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source_file = tmp_path / "Notes-Algebraic-expressions.pdf"
+    source_file.write_bytes(b"sample pdf")
+    index = PdfTreeIndex(
+        document_id=store.document_id_for_path("/app/vault/Math/media/Notes-Algebraic-expressions.pdf"),
+        source_path="/app/vault/Math/media/Notes-Algebraic-expressions.pdf",
+        title="Notes-Algebraic-expressions",
+        pages=[
+            PdfPageArtifact(
+                page_number=1,
+                text="Algebraic expressions use variables, constants, operations, and like terms.",
+                char_count=77,
+            ),
+        ],
+        root=PdfTreeNode(
+            id="root",
+            title="Notes-Algebraic-expressions",
+            level=0,
+            page_start=1,
+            page_end=1,
+            children=[
+                PdfTreeNode(
+                    id="main-ideas",
+                    title="Main Ideas",
+                    level=1,
+                    page_start=1,
+                    page_end=1,
+                    text_preview="Algebraic expressions use variables, constants, operations, and like terms.",
+                ),
+            ],
+        ),
+    )
+    store.write_index(index, source_file=source_file)
+    retriever = PdfTreeRetriever(store, max_evidence=1)
+
+    evidence = asyncio.run(
+        retriever.retrieve(
+            "What are the main ideas in these algebraic expressions notes?",
+            source_paths=["Math/media/Notes-Algebraic-expressions.pdf"],
+        )
+    )
+
+    assert len(evidence) == 1
+    assert evidence[0].path == "/app/vault/Math/media/Notes-Algebraic-expressions.pdf"
+
+
+def test_pdf_tree_retriever_explicit_missing_source_path_does_not_fallback(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source = tmp_path / "guide-pacemaker-implantation.pdf"
+    _write_sample(store, source)
+    retriever = PdfTreeRetriever(store)
+
+    evidence = asyncio.run(
+        retriever.retrieve(
+            "What are the main ideas in these algebraic expressions notes?",
+            source_paths=["Math/media/Notes-Algebraic-expressions.pdf"],
+        )
+    )
+
+    assert evidence == []
+
+
 def test_pdf_tree_retriever_lexical_fallback_returns_page_evidence(tmp_path):
     store = PdfTreeStore(tmp_path / "index")
     source = tmp_path / "Yescarta.pdf"

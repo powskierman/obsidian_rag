@@ -144,6 +144,7 @@ class PdfTreeRetriever:
         source_paths: Sequence[str] | None,
     ) -> list[PdfTreeIndex]:
         ids: list[str] = []
+        has_explicit_candidates = bool(document_ids) or bool(source_paths)
         if document_ids:
             ids.extend(str(document_id) for document_id in document_ids)
         if source_paths:
@@ -152,6 +153,8 @@ class PdfTreeRetriever:
                 if entry:
                     ids.append(entry.document_id)
         if not ids:
+            if has_explicit_candidates:
+                return []
             ids.extend(self.store.load_manifest().keys())
 
         seen: set[str] = set()
