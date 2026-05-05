@@ -75,6 +75,8 @@ def _needs_adjacent_context(query: str) -> bool:
         "before",
         "during",
         "after",
+        "install",
+        "installation",
         "procedure",
         "process",
         "steps",
@@ -84,6 +86,15 @@ def _needs_adjacent_context(query: str) -> bool:
         "follow-up",
         "follow up",
         "discharge",
+        "connect",
+        "connection",
+        "harness",
+        "route",
+        "routing",
+        "mount",
+        "mounting",
+        "test",
+        "testing",
     )
     return sum(1 for marker in sequence_markers if marker in lowered) >= 2
 
@@ -97,6 +108,15 @@ def _prefers_forward_sequence_context(query: str) -> bool:
         or "follow up" in lowered
         or "discharge" in lowered
     ) and ("before" in lowered or "during" in lowered or "procedure" in lowered)
+
+
+def _is_navigation_node(node: PdfTreeNode, text: str | None = None) -> bool:
+    haystack = f"{node.title}\n{node.text_preview}\n{text or ''}".lower()
+    if re.search(r"\b(contents|table of contents|index)\b", haystack):
+        return True
+    dot_leader_lines = sum(1 for line in haystack.splitlines() if "..." in line and re.search(r"\d\s*$", line))
+    numbered_heading_lines = sum(1 for line in haystack.splitlines() if re.match(r"\s*\d+(?:\.\d+)+\s+\S+", line))
+    return dot_leader_lines >= 3 or (dot_leader_lines >= 1 and numbered_heading_lines >= 3)
 
 
 class PdfTreeRetriever:
@@ -266,6 +286,7 @@ class PdfTreeRetriever:
                 node for node in ranked_nodes
                 if node.id not in seen_ids
                 and (node.page_start, node.page_end) not in seen_page_ranges
+                and not (_needs_adjacent_context(query) and _is_navigation_node(node))
                 and any(
                     abs(page - selected_page) <= 2
                     for page in range(node.page_start, node.page_end + 1)
@@ -279,6 +300,8 @@ class PdfTreeRetriever:
             add(node)
 
         for score, node in ranked:
+            if _needs_adjacent_context(query) and _is_navigation_node(node) and expanded:
+                continue
             if score >= min_score:
                 add(node)
             if len(expanded) >= self.max_evidence:
@@ -324,6 +347,8 @@ class PdfTreeRetriever:
                 + content_bonus
                 - short_cover_penalty
             )
+            if _is_navigation_node(node, full_text):
+                score *= 0.2
             ranked.append((score, node))
         ranked.sort(key=lambda item: (item[0], -item[1].page_start), reverse=True)
         return ranked

@@ -396,3 +396,68 @@ def test_pdf_tree_retriever_prefers_forward_pages_for_before_during_after_querie
     )
 
     assert [item.page_start for item in evidence] == [9, 10, 11]
+
+
+def test_pdf_tree_retriever_downranks_contents_for_installation_steps(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source = tmp_path / "installation_lex5.pdf"
+    source.write_bytes(b"sample pdf")
+    index = PdfTreeIndex(
+        document_id=store.document_id_for_path(source),
+        source_path=source.as_posix(),
+        title="installation_lex5",
+        pages=[
+            PdfPageArtifact(
+                page_number=2,
+                text=(
+                    "CONTENTS\n"
+                    "Connect supplied display harness cable to factory display........5\n"
+                    "Connect VLine Interface cable to factory head unit..............6\n"
+                    "Routing the GPS Antenna.........................................7\n"
+                    "Routing the microphone..........................................8\n"
+                    "Testing the VLine operation.....................................9\n"
+                    "Mounting the VLine module.......................................9"
+                ),
+                char_count=330,
+            ),
+            PdfPageArtifact(page_number=3, text="Before installation disconnect the battery and prepare tools.", char_count=60),
+            PdfPageArtifact(page_number=5, text="Connect supplied display harness cable to the factory display.", char_count=62),
+            PdfPageArtifact(page_number=7, text="Route the GPS antenna and plug it into the VLine unit.", char_count=54),
+            PdfPageArtifact(page_number=9, text="Test VLine operation and mount the VLine module.", char_count=48),
+        ],
+        root=PdfTreeNode(
+            id="root",
+            title="installation_lex5",
+            level=0,
+            page_start=2,
+            page_end=9,
+            children=[
+                PdfTreeNode(
+                    id="contents",
+                    title="CONTENTS",
+                    level=1,
+                    page_start=2,
+                    page_end=2,
+                    text_preview="Connect display harness...5\nRouting GPS Antenna...7\nTesting VLine operation...9",
+                ),
+                PdfTreeNode(id="before", title="Before Installation", level=1, page_start=3, page_end=3, text_preview="Before installation disconnect the battery."),
+                PdfTreeNode(id="display", title="Connect supplied display harness cable", level=1, page_start=5, page_end=5, text_preview="Connect supplied display harness cable to the factory display."),
+                PdfTreeNode(id="gps", title="Routing the GPS Antenna", level=1, page_start=7, page_end=7, text_preview="Route the GPS antenna and plug it into the VLine unit."),
+                PdfTreeNode(id="test-mount", title="Testing and Mounting", level=1, page_start=9, page_end=9, text_preview="Test VLine operation and mount the VLine module."),
+            ],
+        ),
+    )
+    store.write_index(index, source_file=source)
+    retriever = PdfTreeRetriever(store, max_documents=1, max_nodes_inspected=5, max_evidence=4)
+
+    evidence = asyncio.run(
+        retriever.retrieve(
+            "What are the practical steps to install the VLine LEX5 module, including harness connections, GPS antenna, microphone routing, testing, and mounting?",
+            source_paths=[source.as_posix()],
+        )
+    )
+
+    pages = [item.page_start for item in evidence]
+    assert 2 not in pages
+    assert pages[0] != 2
+    assert {5, 7, 9} <= set(pages)
