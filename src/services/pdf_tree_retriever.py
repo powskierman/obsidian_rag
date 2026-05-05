@@ -5,11 +5,13 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass, field
-from typing import Any, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
 from src.models.pdf_tree import PdfTreeIndex, PdfTreeNode
-from src.services.pdf_tree_chat_providers import ChatProvider
 from src.services.pdf_tree_store import PdfTreeStore
+
+if TYPE_CHECKING:
+    from src.services.pdf_tree_chat_providers import ChatProvider
 
 
 @dataclass
@@ -48,13 +50,15 @@ def _terms(value: str) -> set[str]:
     }
 
 
-def _node_text(index: PdfTreeIndex, node: PdfTreeNode, *, max_chars: int) -> str:
+def _node_text(index: PdfTreeIndex, node: PdfTreeNode, *, max_chars: int | None = None) -> str:
     chunks = [
         page.text
         for page in index.pages
         if node.page_start <= page.page_number <= node.page_end and page.text.strip()
     ]
     text = "\n\n".join(chunks).strip() or node.text_preview
+    if max_chars is None:
+        return text.rstrip()
     return text[:max_chars].rstrip()
 
 
@@ -133,7 +137,7 @@ class PdfTreeRetriever:
 
     async def _select_nodes(self, query: str, index: PdfTreeIndex) -> list[PdfTreeNode]:
         nodes = [node for node in _walk_nodes(index.root) if node.id != "root"]
-        ranked = self._rank_nodes(query, nodes)
+        ranked = self._rank_nodes(query, index, nodes)
         shortlist = [node for _, node in ranked[: self.max_nodes_inspected]]
         if not self.provider or not shortlist:
             return shortlist[: self.max_evidence]
@@ -170,19 +174,44 @@ class PdfTreeRetriever:
         selected = [by_id[node_id] for node_id in selected_ids if node_id in by_id]
         return selected[: self.max_evidence] or shortlist[: self.max_evidence]
 
-    def _rank_nodes(self, query: str, nodes: list[PdfTreeNode]) -> list[tuple[float, PdfTreeNode]]:
+    def _rank_nodes(self, query: str, index: PdfTreeIndex, nodes: list[PdfTreeNode]) -> list[tuple[float, PdfTreeNode]]:
         query_terms = _terms(query)
         ranked: list[tuple[float, PdfTreeNode]] = []
         for node in nodes:
-            haystack = f"{node.title} {node.text_preview}"
-            node_terms = _terms(haystack)
-            overlap = len(query_terms & node_terms)
+            full_text = _node_text(index, node, max_chars=None)
+            haystack = f"{node.title} {node.text_preview} {full_text}"
+            title_terms = _terms(node.title)
+            preview_terms = _terms(node.text_preview)
+            full_terms = _terms(full_text)
+            node_terms = title_terms | preview_terms | full_terms
+            title_overlap = len(query_terms & title_terms)
+            preview_overlap = len(query_terms & preview_terms)
+            full_overlap = len(query_terms & full_terms)
+            coverage = (len(query_terms & node_terms) / len(query_terms)) if query_terms else 0.0
             phrase_bonus = 0.0
             lowered = haystack.lower()
             for term in query_terms:
                 if term in lowered:
-                    phrase_bonus += 0.05
-            score = overlap + phrase_bonus
+                    phrase_bonus += 0.04
+            for phrase in re.findall(r"[A-Za-z0-9][A-Za-z0-9_-]*(?:\s+[A-Za-z0-9][A-Za-z0-9_-]*)+", query.lower()):
+                if len(phrase.split()) >= 2 and phrase in lowered:
+                    phrase_bonus += 0.25
+
+            text_len = len(full_text.strip())
+            content_bonus = min(1.25, text_len / 900.0)
+            short_cover_penalty = 0.0
+            if text_len < 180 and node.page_start <= 2:
+                short_cover_penalty = 1.25
+
+            score = (
+                full_overlap * 1.25
+                + preview_overlap * 0.45
+                + title_overlap * 0.25
+                + coverage * 1.5
+                + phrase_bonus
+                + content_bonus
+                - short_cover_penalty
+            )
             ranked.append((score, node))
         ranked.sort(key=lambda item: (item[0], -item[1].page_start), reverse=True)
         return ranked
@@ -193,7 +222,7 @@ class PdfTreeRetriever:
         index: PdfTreeIndex,
         nodes: list[PdfTreeNode],
     ) -> list[PdfTreeEvidence]:
-        ranked = self._rank_nodes(query, nodes)
+        ranked = self._rank_nodes(query, index, nodes)
         max_score = max((score for score, _ in ranked), default=1.0) or 1.0
         evidence: list[PdfTreeEvidence] = []
         for raw_score, node in ranked[: self.max_evidence]:
