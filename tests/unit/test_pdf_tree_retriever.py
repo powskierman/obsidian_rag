@@ -474,3 +474,70 @@ def test_pdf_tree_retriever_downranks_contents_for_installation_steps(tmp_path):
     assert pages[0] != 2
     assert {7, 8, 9, 10} <= set(pages)
     assert len(pages) < 8
+
+
+def test_pdf_tree_retriever_does_not_pad_broad_summary_with_cover_or_toc(tmp_path):
+    store = PdfTreeStore(tmp_path / "index")
+    source = tmp_path / "rogers-terms.pdf"
+    source.write_bytes(b"sample pdf")
+    index = PdfTreeIndex(
+        document_id=store.document_id_for_path(source),
+        source_path=source.as_posix(),
+        title="Rogers Terms of Service and Other Important Information",
+        pages=[
+            PdfPageArtifact(page_number=1, text="Rogers Terms of Service and Other Important Information", char_count=56),
+            PdfPageArtifact(
+                page_number=2,
+                text=(
+                    "ROGERS TERMS OF SERVICE\n"
+                    "1. Introductory Information 2\n"
+                    "2. Service Term, Changes and Cancellation 3\n"
+                    "3. Account, Charges and Billing Information 7\n"
+                    "4. Deposit and Credit Requirements 9\n"
+                    "5. Your Use of the Services 10\n"
+                    "6. Equipment 11\n"
+                    "7. Your Privacy 13\n"
+                    "8. Warranties and Limitation of Liability 13"
+                ),
+                char_count=330,
+            ),
+            PdfPageArtifact(page_number=3, text="These terms govern your use of Rogers services, agreements, equipment, acceptable use, and privacy policies.", char_count=112),
+            PdfPageArtifact(page_number=4, text="Rogers may change services and customers may cancel affected services after notice of changes.", char_count=91),
+            PdfPageArtifact(page_number=5, text="Rogers may suspend or cancel services for non-payment, fraud, misuse, or breach of agreement.", char_count=95),
+            PdfPageArtifact(page_number=6, text="Administrative charges, billing disputes, promotions, and airtime charges are described.", char_count=83),
+            PdfPageArtifact(page_number=10, text="Limitations of liability, emergency service limitations, and indemnity obligations are described.", char_count=92),
+            PdfPageArtifact(page_number=11, text="Customer responsibilities include acceptable use rules prohibiting abuse, unlawful access, copyright violations, and commercial misuse.", char_count=132),
+        ],
+        root=PdfTreeNode(
+            id="root",
+            title="Rogers Terms",
+            level=0,
+            page_start=1,
+            page_end=11,
+            children=[
+                PdfTreeNode(id="cover", title="Page 1", level=1, page_start=1, page_end=1, text_preview="Rogers Terms of Service and Other Important Information"),
+                PdfTreeNode(id="toc", title="ROGERS TERMS OF SERVICE", level=1, page_start=2, page_end=2, text_preview="1. Introductory Information 2\n2. Service Term, Changes and Cancellation 3\n3. Account, Charges and Billing Information 7\n4. Deposit and Credit Requirements 9"),
+                PdfTreeNode(id="intro", title="Introductory Information", level=1, page_start=3, page_end=3, text_preview="Terms govern services, agreements, equipment, acceptable use, and privacy policies."),
+                PdfTreeNode(id="changes", title="Service Term, Changes and Cancellation", level=1, page_start=4, page_end=4, text_preview="Rogers may change services and customers may cancel after notice."),
+                PdfTreeNode(id="suspension", title="Suspension and Cancellation", level=1, page_start=5, page_end=5, text_preview="Suspend or cancel services for non-payment, fraud, misuse, or breach."),
+                PdfTreeNode(id="billing", title="Charges and Billing Information", level=1, page_start=6, page_end=6, text_preview="Administrative charges, billing disputes, promotions, and airtime charges."),
+                PdfTreeNode(id="liability", title="Warranties and Limitation of Liability", level=1, page_start=10, page_end=10, text_preview="Liability, emergency service limitations, and indemnity obligations."),
+                PdfTreeNode(id="acceptable-use", title="Acceptable Use Policy", level=1, page_start=11, page_end=11, text_preview="Customer responsibilities include acceptable use rules prohibiting abuse and unlawful access."),
+            ],
+        ),
+    )
+    store.write_index(index, source_file=source)
+    retriever = PdfTreeRetriever(store, max_documents=1, max_nodes_inspected=10, max_evidence=10)
+
+    evidence = asyncio.run(
+        retriever.retrieve(
+            "What are the main terms, service limitations, customer responsibilities, fees, cancellation rules, and important legal conditions in this Rogers document?",
+            source_paths=[source.as_posix()],
+        )
+    )
+
+    pages = [item.page_start for item in evidence]
+    assert 1 not in pages
+    assert 2 not in pages
+    assert {3, 4, 5, 6, 10, 11} <= set(pages)
+    assert len(pages) < 10

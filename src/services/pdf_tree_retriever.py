@@ -110,13 +110,37 @@ def _prefers_forward_sequence_context(query: str) -> bool:
     ) and ("before" in lowered or "during" in lowered or "procedure" in lowered)
 
 
+def _is_broad_summary_query(query: str) -> bool:
+    lowered = str(query or "").lower()
+    summary_markers = ("main", "summary", "overview", "important", "key")
+    breadth_markers = ("terms", "limitations", "responsibilities", "fees", "charges", "cancellation", "legal", "conditions")
+    return any(marker in lowered for marker in summary_markers) and sum(
+        1 for marker in breadth_markers if marker in lowered
+    ) >= 2
+
+
 def _is_navigation_node(node: PdfTreeNode, text: str | None = None) -> bool:
     haystack = f"{node.title}\n{node.text_preview}\n{text or ''}".lower()
     if re.search(r"\b(contents|table of contents|index)\b", haystack):
         return True
     dot_leader_lines = sum(1 for line in haystack.splitlines() if "..." in line and re.search(r"\d\s*$", line))
     numbered_heading_lines = sum(1 for line in haystack.splitlines() if re.match(r"\s*\d+(?:\.\d+)+\s+\S+", line))
-    return dot_leader_lines >= 3 or (dot_leader_lines >= 1 and numbered_heading_lines >= 3)
+    numbered_toc_lines = sum(1 for line in haystack.splitlines() if re.match(r"\s*\d+\.\s+\S+.*\s+\d+\s*$", line))
+    return dot_leader_lines >= 3 or (dot_leader_lines >= 1 and numbered_heading_lines >= 3) or numbered_toc_lines >= 4
+
+
+def _is_cover_node(node: PdfTreeNode, text: str | None = None) -> bool:
+    haystack = f"{node.title}\n{node.text_preview}\n{text or ''}".strip()
+    if node.page_start > 1 or node.page_end > 1:
+        return False
+    if len(_terms(haystack)) > 14:
+        return False
+    lowered = haystack.lower()
+    return any(marker in lowered for marker in ("terms of service", "manual", "guide", "important information"))
+
+
+def _is_low_value_node(node: PdfTreeNode, text: str | None = None) -> bool:
+    return _is_navigation_node(node, text) or _is_cover_node(node, text)
 
 
 class PdfTreeRetriever:
@@ -237,6 +261,9 @@ class PdfTreeRetriever:
 
     def _lexical_seed_nodes(self, query: str, ranked: list[tuple[float, PdfTreeNode]]) -> list[PdfTreeNode]:
         if not _needs_adjacent_context(query):
+            for _, node in ranked:
+                if not _is_low_value_node(node):
+                    return [node]
             return [ranked[0][1]] if ranked else []
         top_score = max((score for score, _ in ranked), default=0.0)
         min_seed_score = top_score * 0.35 if top_score > 0 else 0.0
@@ -246,7 +273,7 @@ class PdfTreeRetriever:
             if len(seeds) >= min(3, self.max_evidence):
                 break
             page_range = (node.page_start, node.page_end)
-            if score < min_seed_score or page_range in seen_page_ranges or _is_navigation_node(node):
+            if score < min_seed_score or page_range in seen_page_ranges or _is_low_value_node(node):
                 continue
             if seeds:
                 seed_pages = {
@@ -294,7 +321,10 @@ class PdfTreeRetriever:
             for page in range(node.page_start, node.page_end + 1)
         }
         top_score = max((score for score, _ in ranked), default=0.0)
-        min_score = top_score * 0.35 if top_score > 0 else 0.0
+        if top_score > 0:
+            min_score = top_score * (0.2 if _is_broad_summary_query(query) else 0.35)
+        else:
+            min_score = 0.0
         include_low_scoring_adjacent = _needs_adjacent_context(query)
         prefer_forward_adjacent = _prefers_forward_sequence_context(query)
         ranked_by_id = {node.id: score for score, node in ranked}
@@ -316,7 +346,7 @@ class PdfTreeRetriever:
                 node for node in ranked_nodes
                 if node.id not in seen_ids
                 and (node.page_start, node.page_end) not in seen_page_ranges
-                and not (_needs_adjacent_context(query) and _is_navigation_node(node))
+                and not _is_low_value_node(node)
                 and any(
                     abs(page - selected_page) <= 2
                     for page in range(node.page_start, node.page_end + 1)
@@ -330,14 +360,14 @@ class PdfTreeRetriever:
             add(node)
 
         for score, node in ranked:
+            if expanded and _is_low_value_node(node):
+                continue
             if _needs_adjacent_context(query) and expanded:
                 expanded_pages = {
                     page
                     for expanded_node in expanded
                     for page in range(expanded_node.page_start, expanded_node.page_end + 1)
                 }
-                if _is_navigation_node(node):
-                    continue
                 if not any(
                     abs(page - expanded_page) <= 2
                     for page in range(node.page_start, node.page_end + 1)
@@ -389,7 +419,7 @@ class PdfTreeRetriever:
                 + content_bonus
                 - short_cover_penalty
             )
-            if _is_navigation_node(node, full_text):
+            if _is_low_value_node(node, full_text):
                 score *= 0.2
             ranked.append((score, node))
         ranked.sort(key=lambda item: (item[0], -item[1].page_start), reverse=True)
