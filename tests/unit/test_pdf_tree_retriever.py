@@ -422,8 +422,13 @@ def test_pdf_tree_retriever_downranks_contents_for_installation_steps(tmp_path):
             ),
             PdfPageArtifact(page_number=3, text="Before installation disconnect the battery and prepare tools.", char_count=60),
             PdfPageArtifact(page_number=5, text="Connect supplied display harness cable to the factory display.", char_count=62),
+            PdfPageArtifact(page_number=6, text="Connect the VLine power cable to the factory head unit.", char_count=58),
             PdfPageArtifact(page_number=7, text="Route the GPS antenna and plug it into the VLine unit.", char_count=54),
+            PdfPageArtifact(page_number=8, text="Route the microphone and adjust the microphone gain.", char_count=53),
             PdfPageArtifact(page_number=9, text="Test VLine operation and mount the VLine module.", char_count=48),
+            PdfPageArtifact(page_number=10, text="Understand the VLine ports for USB, microphone, GPS, and HDMI connections.", char_count=75),
+            PdfPageArtifact(page_number=13, text="Warranty does not cover improper installation or alteration of this product.", char_count=76),
+            PdfPageArtifact(page_number=19, text="Legal terms govern claims, compatibility, and product availability.", char_count=67),
         ],
         root=PdfTreeNode(
             id="root",
@@ -442,13 +447,18 @@ def test_pdf_tree_retriever_downranks_contents_for_installation_steps(tmp_path):
                 ),
                 PdfTreeNode(id="before", title="Before Installation", level=1, page_start=3, page_end=3, text_preview="Before installation disconnect the battery."),
                 PdfTreeNode(id="display", title="Connect supplied display harness cable", level=1, page_start=5, page_end=5, text_preview="Connect supplied display harness cable to the factory display."),
+                PdfTreeNode(id="power", title="Connect VLine power cable", level=1, page_start=6, page_end=6, text_preview="Connect the VLine power cable to the factory head unit."),
                 PdfTreeNode(id="gps", title="Routing the GPS Antenna", level=1, page_start=7, page_end=7, text_preview="Route the GPS antenna and plug it into the VLine unit."),
+                PdfTreeNode(id="microphone", title="Routing the microphone", level=1, page_start=8, page_end=8, text_preview="Route the microphone and adjust the microphone gain."),
                 PdfTreeNode(id="test-mount", title="Testing and Mounting", level=1, page_start=9, page_end=9, text_preview="Test VLine operation and mount the VLine module."),
+                PdfTreeNode(id="ports", title="Understanding the VLine ports", level=1, page_start=10, page_end=10, text_preview="USB, microphone, GPS, and HDMI connections."),
+                PdfTreeNode(id="warranty", title="Warranty", level=1, page_start=13, page_end=13, text_preview="Warranty does not cover improper installation."),
+                PdfTreeNode(id="legal", title="Legal agreement", level=1, page_start=19, page_end=19, text_preview="Legal terms govern claims and compatibility."),
             ],
         ),
     )
     store.write_index(index, source_file=source)
-    retriever = PdfTreeRetriever(store, max_documents=1, max_nodes_inspected=5, max_evidence=4)
+    retriever = PdfTreeRetriever(store, max_documents=1, max_nodes_inspected=8, max_evidence=8)
 
     evidence = asyncio.run(
         retriever.retrieve(
@@ -459,5 +469,8 @@ def test_pdf_tree_retriever_downranks_contents_for_installation_steps(tmp_path):
 
     pages = [item.page_start for item in evidence]
     assert 2 not in pages
+    assert 13 not in pages
+    assert 19 not in pages
     assert pages[0] != 2
-    assert {5, 7, 9} <= set(pages)
+    assert {7, 8, 9, 10} <= set(pages)
+    assert len(pages) < 8

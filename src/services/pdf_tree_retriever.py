@@ -195,10 +195,11 @@ class PdfTreeRetriever:
         nodes = [node for node in _walk_nodes(index.root) if node.id != "root"]
         ranked = self._rank_nodes(query, index, nodes)
         shortlist = [node for _, node in ranked[: self.max_nodes_inspected]]
+        lexical_seeds = self._lexical_seed_nodes(query, ranked)
         if not self.provider or not shortlist:
             if not shortlist:
                 return []
-            return self._expand_with_adjacent_ranked_nodes(query, [shortlist[0]], ranked)
+            return self._expand_with_adjacent_ranked_nodes(query, lexical_seeds or [shortlist[0]], ranked)
 
         prompt = {
             "query": query,
@@ -227,12 +228,41 @@ class PdfTreeRetriever:
         except Exception:
             selected_ids = []
         if not selected_ids:
-            return self._expand_with_adjacent_ranked_nodes(query, [shortlist[0]], ranked)
+            return self._expand_with_adjacent_ranked_nodes(query, lexical_seeds or [shortlist[0]], ranked)
         by_id = {node.id: node for node in shortlist}
         selected = [by_id[node_id] for node_id in selected_ids if node_id in by_id]
         if not selected:
-            return self._expand_with_adjacent_ranked_nodes(query, [shortlist[0]], ranked)
+            return self._expand_with_adjacent_ranked_nodes(query, lexical_seeds or [shortlist[0]], ranked)
         return self._expand_with_adjacent_ranked_nodes(query, selected, ranked)
+
+    def _lexical_seed_nodes(self, query: str, ranked: list[tuple[float, PdfTreeNode]]) -> list[PdfTreeNode]:
+        if not _needs_adjacent_context(query):
+            return [ranked[0][1]] if ranked else []
+        top_score = max((score for score, _ in ranked), default=0.0)
+        min_seed_score = top_score * 0.35 if top_score > 0 else 0.0
+        seeds: list[PdfTreeNode] = []
+        seen_page_ranges: set[tuple[int, int]] = set()
+        for score, node in ranked:
+            if len(seeds) >= min(3, self.max_evidence):
+                break
+            page_range = (node.page_start, node.page_end)
+            if score < min_seed_score or page_range in seen_page_ranges or _is_navigation_node(node):
+                continue
+            if seeds:
+                seed_pages = {
+                    page
+                    for seed in seeds
+                    for page in range(seed.page_start, seed.page_end + 1)
+                }
+                if not any(
+                    abs(page - seed_page) <= 2
+                    for page in range(node.page_start, node.page_end + 1)
+                    for seed_page in seed_pages
+                ):
+                    continue
+            seeds.append(node)
+            seen_page_ranges.add(page_range)
+        return seeds
 
     def _expand_with_adjacent_ranked_nodes(
         self,
@@ -300,8 +330,20 @@ class PdfTreeRetriever:
             add(node)
 
         for score, node in ranked:
-            if _needs_adjacent_context(query) and _is_navigation_node(node) and expanded:
-                continue
+            if _needs_adjacent_context(query) and expanded:
+                expanded_pages = {
+                    page
+                    for expanded_node in expanded
+                    for page in range(expanded_node.page_start, expanded_node.page_end + 1)
+                }
+                if _is_navigation_node(node):
+                    continue
+                if not any(
+                    abs(page - expanded_page) <= 2
+                    for page in range(node.page_start, node.page_end + 1)
+                    for expanded_page in expanded_pages
+                ):
+                    continue
             if score >= min_score:
                 add(node)
             if len(expanded) >= self.max_evidence:
