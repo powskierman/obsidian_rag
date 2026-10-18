@@ -5,6 +5,12 @@
 >
 > If you are looking for what the system does today, start with `Documentation/USER_MANUAL.md` and `Documentation/reference/architecture/CAPTURE_AND_INBOX.md`.
 
+## Proposed Next Phase: Maintained Knowledge Wiki
+
+The [next-phase proposal](KNOWLEDGE_WIKI_NEXT_PHASE.md), recorded on 2026-10-18, recommends a bounded pilot of maintained synthesis pages over the existing vault. It combines Karpathy's wiki workflow with OKF metadata and the current retrieval engine.
+
+This pilot starts with explicit ingestion. It preserves source notes and attachments. It does not depend on the background inbox processor described below. The proposal defines the scope, implementation gaps, and evaluation criteria. It is not implemented.
+
 ## Overview
 This document outlines the architecture for a "Second Brain" system within the Obsidian RAG environment, inspired by Nate Jones's "Active vs. Passive Systems" concept. The goal is to move from a passive storage system to an active "AI Loop" that processes frictionless inputs into structured, valuable knowledge.
 

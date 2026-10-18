@@ -1,5 +1,15 @@
 # Quickstart
 
+## Project folder
+
+Use the current local project folder:
+
+```bash
+cd /Users/michel/dev/obsidian_rag
+```
+
+Run the commands below from this folder. The vault and database paths are configured separately. See the [documentation index](../README.md#project-folder).
+
 ## 1) Configure
 
 Create or update `.env` in the repo root:

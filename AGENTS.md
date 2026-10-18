@@ -4,6 +4,10 @@ This file is mirrored across `CLAUDE.md`, `AGENTS.md`, and `GEMINI.md` so the sa
 
 This project uses GitHub Spec Kit and the Specify CLI to implement Spec‑Driven Development (SDD). AI agents (Gemini CLI, Codex, Antigravity, and others) use the conventions here to read specs, plans, and tasks and to execute project workflows in a consistent way.
 
+## Project folder
+
+The current local project folder is `/Users/michel/dev/obsidian_rag`. Run project commands from this folder. Use Git to synchronize source code. Keep the vault and database paths separate from the project path. See `Documentation/README.md` for the current folder reference.
+
 ## Machine roles
 
 These roles are shared across all agents and should be treated as the source of truth for where services live and where to run commands.

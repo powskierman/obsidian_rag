@@ -2,10 +2,19 @@
 
 ## Overview
 
-We have migrated to a **Snapshot Sync Architecture** to avoid iCloud database corruption.
-- **Mac Mini (Indexer)**: Indexes data locally, then pushes a snapshot to iCloud.
-- **MacBook (Consumer)**: Pulls the snapshot from iCloud to local storage for querying.
-- **Safe & Fast**: Databases run on local SSDs. iCloud is only used for transfer.
+The current local project folder is `/Users/michel/dev/obsidian_rag`. Run this guide's commands from that folder:
+
+```bash
+cd /Users/michel/dev/obsidian_rag
+```
+
+Use Git to synchronize source code. Keep database snapshot transfer separate from source-code synchronization.
+
+- **Mac Mini (Indexer)**: Builds the indexes in local storage and exports a snapshot to a local staging folder.
+- **MacBook (Consumer)**: Imports a transferred snapshot into local storage when this optional workflow is used.
+- **Staging folder**: `push.sh` and `pull.sh` use `./data/export_stage` relative to the current working directory. From the current project folder, this is `/Users/michel/dev/obsidian_rag/data/export_stage`.
+
+The staging folder is not automatically synchronized through iCloud at the current project location. Transfer it separately before importing it on another machine. See the [documentation index](../../README.md#project-folder) for the project folder reference.
 
 Canonical datastore root (from `.env`):
 - `OBSIDIAN_RAG_DATA_DIR=/Users/michel/obsidian_rag_local_data`
@@ -41,8 +50,8 @@ This unified script performs a complete re-index of your vault into all three da
 
 **Script:** `Scripts/sync/push.sh`
 
-After indexing is complete, push the fresh data to the iCloud staging area.
-This creates a stable snapshot in `~/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag/data/export_stage`.
+After indexing is complete, export the data to the local staging folder.
+When run from the project folder, this writes to `/Users/michel/dev/obsidian_rag/data/export_stage`. The script does not transfer this folder to another Mac.
 
 **Usage:**
 ```bash
@@ -55,8 +64,8 @@ This creates a stable snapshot in `~/Library/Mobile Documents/com~apple~CloudDoc
 
 **Script:** `Scripts/sync/pull.sh`
 
-To update your MacBook with the latest SOTA data from the Mini, run the pull script.
-This stops your local services, pulls the data from iCloud to your local SSD (`$OBSIDIAN_RAG_DATA_DIR`), and restarts services.
+First place the exported snapshot in `data/export_stage` under the consumer checkout. Then run the pull script from that checkout.
+The script stops local services, copies the staged data into `$OBSIDIAN_RAG_DATA_DIR`, and restarts services.
 
 **Usage:**
 ```bash
@@ -192,12 +201,13 @@ flowchart TD
         LocalData --> PushScript(["sync/push.sh"])
     end
 
-    subgraph Cloud [iCloud Drive]
-        PushScript -->|Snapshot Sync| CloudStore[("data/export_stage")]
+    subgraph Transfer [Snapshot Transfer]
+        PushScript --> ExportStage[("Indexer checkout<br>data/export_stage")]
+        ExportStage -->|Separate transfer| ImportStage[("Consumer checkout<br>data/export_stage")]
     end
 
     subgraph MB [MacBook Consumer]
-        CloudStore -->|Pull Snapshot| PullScript(["sync/pull.sh"])
+        ImportStage -->|Import Snapshot| PullScript(["sync/pull.sh"])
         PullScript --> MBLocal[("Local DataDir<br>~/obsidian_rag_local_data")]
         MBLocal --> Streamlit["Streamlit UI<br>Port 8501"]
         MBLocal --> WebApp["Next.js WebApp<br>Host port 3030"]

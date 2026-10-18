@@ -17,9 +17,9 @@ This guide documents the "State of the Art" (SOTA) retrieval upgrade applied to 
 Since your Mac Mini is the primary Indexer, execute these steps directly on the Mini's terminal to perform a high-performance re-indexing.
 
 ### 1. Preparation
-Ensure your code is synced from iCloud.
+Use the local Git checkout at `/Users/michel/dev/obsidian_rag`. Synchronize source code with Git. Confirm the checkout path on the indexing machine before use.
 ```bash
-cd /path/to/your/obsidian_rag
+cd /Users/michel/dev/obsidian_rag
 ls -l src/services/embedding_service.py # Verify recent timestamp
 ```
 

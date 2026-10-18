@@ -7,14 +7,14 @@ It assumes you want all three databases current:
 - NetworkX graph (graph_data/knowledge_graph_full.pkl)
 - LightRAG entity graph (lightrag_db)
 
-Adjust paths as needed for your machine.
+The current local project folder is `/Users/michel/dev/obsidian_rag`. The vault and database paths below are separate machine settings. Adjust those settings for the indexing machine. See the [documentation index](../../README.md#project-folder).
 
 ## 1) Paths and environment
 
 Set these once in your shell:
 
 ```bash
-export RAG_REPO="/Users/michel/Library/Mobile Documents/com~apple~CloudDocs/ai/RAG/obsidian_rag"
+export RAG_REPO="/Users/michel/dev/obsidian_rag"
 export OBSIDIAN_VAULT_PATH="/Users/michel/Library/Mobile Documents/iCloud~md~obsidian/Documents/Michel"
 export OPENROUTER_API_KEY="your-openrouter-key"
 ```

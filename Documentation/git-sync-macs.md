@@ -2,11 +2,17 @@
 
 Working from different Macs on a project stored directly in iCloud is unsafe. This document defines a Git-based sync method between Canmore and the MacBook.
 
+## Current local project folder
+
+Use `/Users/michel/dev/obsidian_rag` for the current local working copy. The equivalent home-relative path is `~/dev/obsidian_rag`.
+
+Keep source-code synchronization separate from vault synchronization and database snapshot transfer. A command under a named machine heading applies on that machine. Confirm its checkout path before use. See the [documentation index](README.md#project-folder).
+
 ## Setup: Canmore bare repo
 
 ### On Canmore, confirm existing working copy:
 
-cd ~/dev/obsidian_rag
+cd /Users/michel/dev/obsidian_rag
 
 ### Initialize repo if needed:
 
@@ -44,7 +50,7 @@ git push -u origin main
 
 ### On MacBook, go to existing project dir:
 
-cd ~/obsidian_rag  # or actual path
+cd /Users/michel/dev/obsidian_rag
 
 ### Point remote origin to Canmore:
 

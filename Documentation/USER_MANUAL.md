@@ -4,6 +4,17 @@ This manual is the practical, end-to-end guide for using `obsidian_rag` as a dai
 
 Use this document as the primary entry point. Use the linked docs for deeper reference.
 
+## Project folder
+
+The current local project folder is `/Users/michel/dev/obsidian_rag`.
+Run the commands in this manual from this folder unless a procedure gives another location:
+
+```bash
+cd /Users/michel/dev/obsidian_rag
+```
+
+The project folder, Obsidian vault, and generated databases are separate locations. Use `OBSIDIAN_VAULT_PATH` for the vault and `OBSIDIAN_RAG_DATA_DIR` for the databases. See the [documentation index](README.md#project-folder) for the folder reference.
+
 ## 1. What This System Does
 
 `obsidian_rag` turns an Obsidian vault into a queryable knowledge system with four main access paths:
@@ -498,7 +509,9 @@ The project documentation describes a snapshot-sync architecture:
 
 - **Indexer machine** builds the indexes locally
 - **Consumer machine** pulls a stable snapshot
-- iCloud is used for transfer, not live database reads
+- Source code is synchronized with Git from the local project folder
+- Snapshot scripts use `./data/export_stage` relative to the current working directory
+- Transfer of that staging folder between machines must be configured separately
 
 Canonical data roots are documented in:
 

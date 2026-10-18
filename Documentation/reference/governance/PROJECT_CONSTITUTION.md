@@ -1,6 +1,10 @@
 # Obsidian RAG Constitution
 
-This document is the authoritative copy. It is also mirrored in `.specify/memory/constitution.md` — both files must remain aligned.
+The authoritative copy is `Documentation/reference/governance/PROJECT_CONSTITUTION.md`. It is mirrored in `.specify/memory/constitution.md`. Both files must remain aligned.
+
+## Project folder
+
+The current local project folder is `/Users/michel/dev/obsidian_rag`. Run project commands from this folder. Use Git to synchronize source code. The vault path (`OBSIDIAN_VAULT_PATH`) and database path (`OBSIDIAN_RAG_DATA_DIR`) are separate settings. See `Documentation/README.md` for the current folder reference.
 
 ## Purpose
 Obsidian RAG is a local-first retrieval system for a personal Obsidian vault. It combines vector search, staged cascading retrieval, and deep thinking behind a unified API gateway, with repeatable indexing workflows and strong privacy defaults.
@@ -102,6 +106,6 @@ This constitution supersedes ad-hoc practices. Changes must update both mirrored
 - `Documentation/operations/indexing/REINDEXING_PROCEDURE.md`
 - `Documentation/operations/setup/INDEXING_SCRIPTS_GUIDE.md`
 
-**Version**: 2.2.0
+**Version**: 2.2.1
 **Ratified**: 2025-01-01
-**Last Amended**: 2026-04-26
+**Last Amended**: 2026-10-18

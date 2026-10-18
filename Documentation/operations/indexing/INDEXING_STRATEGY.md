@@ -54,7 +54,7 @@ See `Documentation/operations/setup/LIGHTRAG_PARTIAL_INDEXING_GUIDE.md` for the 
 
 ## 5. Cross-Machine Snapshot Sync
 
-Editing on the MacBook and serving on the Mac Mini is handled via snapshot push/pull (`Scripts/sync/push.sh` on the indexer, `Scripts/sync/pull.sh` on the consumer) — this avoids running indexing twice. See `Documentation/operations/setup/INDEXING_SCRIPTS_GUIDE.md` for the full procedure.
+The current local project folder is `/Users/michel/dev/obsidian_rag`. Use Git to synchronize source code. Database snapshots use `Scripts/sync/push.sh` on the indexer and `Scripts/sync/pull.sh` on an optional consumer. Both scripts use `./data/export_stage` relative to the current working directory. Transfer that staging folder between machines separately. See the [Indexing & Data Sync Guide](../setup/INDEXING_SCRIPTS_GUIDE.md) for the procedure.
 
 ## 6. Verifying Freshness
 

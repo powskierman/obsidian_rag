@@ -2,6 +2,19 @@
 
 Use this file as the canonical index for active documentation. Files not listed here are either intentionally archived under `archive/` or are scaffolding for upstream projects (e.g. `SSD_RAG/`, `git-sync-macs.md`).
 
+## Project folder
+
+The current local project folder is `/Users/michel/dev/obsidian_rag`.
+Run project commands from this folder:
+
+```bash
+cd /Users/michel/dev/obsidian_rag
+```
+
+Use Git to synchronize source code. The iCloud workspace and the project snapshots under `/Volumes/work` are not the current working copy.
+
+The vault path (`OBSIDIAN_VAULT_PATH`) and database path (`OBSIDIAN_RAG_DATA_DIR`) are separate settings. This project folder reference does not change either setting. See [Git sync between Macs](git-sync-macs.md) for the source-code workflow.
+
 ## Primary Manual
 - `USER_MANUAL.md`
 
@@ -30,6 +43,7 @@ Use this file as the canonical index for active documentation. Files not listed 
 - `reference/architecture/DEEP_THINKING_FLOW.md` — `investigate` agent loop
 - `reference/architecture/GRAPH_STACK_RETIREMENT_MAP.md` — what blocks retiring NetworkX/LightRAG
 - `reference/architecture/SECOND_BRAIN_ARCHITECTURE.md` — proposal/aspirational design (not yet implemented)
+- [Next Phase: Maintained Knowledge Wiki](reference/architecture/KNOWLEDGE_WIKI_NEXT_PHASE.md) — proposed wiki layer, OKF metadata, bounded pilot, and evaluation criteria (not implemented)
 - `reference/spec.md`
 
 ## Operations
